@@ -45,15 +45,15 @@ provider/    ← ContentProvider implementation (exposes files to other apps)
 worker/      ← WorkManager workers (background sync)
 
 ## File Structure
-app/src/main/java/com/iant/gallerysync/
+app/src/main/java/com/gallery/sync/
   ui/
   domain/
   data/
   util/
   provider/
   worker/
-app/src/test/java/com/iant/gallerysync/       ← JUnit + Mockito unit tests
-app/src/androidTest/java/com/iant/gallerysync/ ← Espresso instrumented tests
+app/src/test/java/com/gallery/sync/       ← JUnit + Mockito unit tests
+app/src/androidTest/java/com/gallery/sync/ ← Espresso instrumented tests
 .claude/
   agents/      ← Agent definition files (auto-loaded by Claude Code)
   tasks/       ← Active task specs (TASK-NNN.md) and fix specs (FIX-NNN.md)
