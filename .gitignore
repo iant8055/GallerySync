@@ -1,36 +1,32 @@
-# Dependencies
-node_modules/
-
-# Build output
-dist/
-out/
+# Android build
+*.iml
+.gradle/
+local.properties
+.idea/
+.DS_Store
 build/
-release/
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
 
-# TypeScript
-*.tsbuildinfo
+# Keys and secrets
+*.jks
+*.keystore
+*.p12
+google-services.json
+local.secrets.properties
 
-# Logs
-*.log
-logs/
-
-# Environment / secrets
-.env
-.env.local
-.env.*.local
+# Test coverage
+*.exec
+reports/
 
 # OS
-.DS_Store
 Thumbs.db
 desktop.ini
 
-# Editors
-.vscode/settings.json
-.idea/
-*.swp
-
-# Test coverage
-coverage/
-
-# Electron
-.webpack/
+# Node (if companion tools added later)
+node_modules/

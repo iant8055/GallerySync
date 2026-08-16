@@ -1,21 +1,26 @@
 # GallerySync Milestones
 
-## v0.1.0 — Sync Engine Foundation
-- [ ] Local folder watcher (add / modify / delete events, debounced)
-- [ ] SQLite metadata store (file hashes, paths, timestamps)
-- [ ] One-way sync: source → destination
-- [ ] Duplicate detection via SHA-256 hash
+## v0.1.0 — Foundation (must ship before Samsung sunset)
+- [ ] Android project scaffold (Kotlin, Compose, Hilt, Room, Retrofit)
+- [ ] Logger utility
+- [ ] Room database schema for cached media index
+- [ ] OneDrive adapter (Microsoft Graph API — browse folder structure)
+- [ ] ContentProvider skeleton (registers with Android, returns empty cursor)
 
-## v0.2.0 — Usable Desktop App
-- [ ] Conflict resolution: newer-wins and manual modes
-- [ ] Electron tray app with sync status indicator
-- [ ] Real-time sync log UI panel
+## v0.2.0 — Core Sync (must ship before Samsung sunset)
+- [ ] On-demand download: file fetched from cloud when accessed via ContentProvider
+- [ ] Media index sync: background WorkManager job updates Room from cloud
+- [ ] ContentProvider serves real media to third-party apps (CapCut test)
+- [ ] Local cache management (size limit, LRU eviction)
 
-## v0.3.0 — Organization & Cloud
-- [ ] EXIF-based auto-organization by date and camera model
-- [ ] OneDrive source adapter (via local sync folder)
+## v0.3.0 — Google Photos + UI
+- [ ] Google Photos adapter (Google Photos Library API — requires OAuth)
+- [ ] Unified media browser UI (Compose) showing both sources
+- [ ] Folder structure preserved and browsable in-app
+- [ ] Settings screen (cache size, sync frequency, account management)
 
-## v0.4.0 — Full Cloud Support
-- [ ] Google Drive source adapter (OAuth — requires Ian approval)
-- [ ] Scheduled sync jobs with configurable intervals
-- [ ] Preview thumbnail generation
+## v0.4.0 — Samsung Galaxy Polish
+- [ ] Samsung Gallery integration (appears as album source)
+- [ ] Notification for sync status
+- [ ] Offline mode (graceful degradation when no network)
+- [ ] Widget (optional)

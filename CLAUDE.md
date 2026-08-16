@@ -1,40 +1,60 @@
 # GallerySync — Agent Rules
 
 ## Project
-Cross-source photo/media sync app.
-Stack: TypeScript, Electron, SQLite (better-sqlite3), React (renderer), Vitest (tests).
+Android app that makes cloud-hosted photos and videos (OneDrive, Google Photos)
+accessible to any third-party app (e.g. CapCut) without requiring local storage.
+Core mechanism: Android ContentProvider + on-demand download from cloud APIs.
+
+Built for Samsung Galaxy primarily; tested on LG and Moto as well.
+
+Stack: Kotlin, Jetpack Compose, Room (SQLite), Hilt (DI), WorkManager (background sync),
+Retrofit + OkHttp (cloud APIs), JUnit + Mockito (unit tests), Espresso (UI tests).
 
 ## Hard Rules — all agents must follow
-- Never delete user media files without an explicit UI confirmation prompt
-- All file operations are reversible until a sync commit is confirmed
-- Test files live in src/__tests__/ mirroring the src/ structure
-- Commit after every completed feature: "feat(scope): description"
-- Tag milestones: v0.1.0, v0.2.0, etc. after each major feature group
-- No console.log in production code — use Logger service (src/services/logger.ts)
-- SQLite WAL mode always on; never hold transactions across async gaps
+- Never permanently delete a user's cloud file — local cache only
+- All file operations on device are cache management, never source-of-truth writes
+- Never store OAuth tokens in SharedPreferences — use EncryptedSharedPreferences
+- Minimum Android SDK: 26 (Android 8.0). Target SDK: 35
+- Kotlin only — no Java files
+- No Log.d/Log.e in production code — use the Logger utility (app/src/main/.../util/Logger.kt)
+- Coroutines for all async work — no callbacks, no RxJava
+- All network calls go through the repository layer — never call APIs from ViewModels directly
+- Unit tests live in app/src/test/, instrumented tests in app/src/androidTest/
 
 ## Escalate to Ian — Lead Agent only, when:
-- A new sync source requires registering an OAuth app or API credentials
-- A database schema change requires migrating existing user data
-- A dependency has a license conflict with the distribution plan
+- OAuth app registration is needed (Google Cloud Console or Azure app registration)
+- A new Android permission is required that affects the Play Store listing
+- A breaking change to the Room database schema requires a migration
 - Feature scope has two architecturally distinct paths with long-term implications
-- A security issue is found in existing code
+- A security issue is found (token storage, data exposure, permission misuse)
 - The debug loop has cycled 3+ times without resolving a test failure
 
 ## Autonomous — no escalation needed for:
-- Utility functions, helpers, service methods
-- Writing or updating tests
+- Adding repository methods, use cases, utility functions
+- Writing or updating unit tests
 - Bug fixes with clear root cause
-- UI layout and styling changes
-- Refactoring within a single module
+- UI layout and composable changes
+- Refactoring within a single module or layer
+
+## Architecture — Clean Architecture layers
+ui/          ← Jetpack Compose screens and ViewModels
+domain/      ← Use cases and domain models (no Android dependencies)
+data/        ← Repositories, Room DAOs, API services, cloud adapters
+util/        ← Logger, extensions, helpers
+provider/    ← ContentProvider implementation (exposes files to other apps)
+worker/      ← WorkManager workers (background sync)
 
 ## File Structure
-src/
-  main/        <- Electron main process
-  renderer/    <- React UI
-  services/    <- Sync engine, file watchers, DB access
-  __tests__/   <- Vitest test files (mirror src/ structure)
+app/src/main/java/com/iant/gallerysync/
+  ui/
+  domain/
+  data/
+  util/
+  provider/
+  worker/
+app/src/test/java/com/iant/gallerysync/       ← JUnit + Mockito unit tests
+app/src/androidTest/java/com/iant/gallerysync/ ← Espresso instrumented tests
 .claude/
-  agents/      <- Agent prompt files (version-controlled)
-  tasks/       <- Active task specs (TASK-NNN.md, FIX-NNN.md)
+  agents/      ← Agent definition files (auto-loaded by Claude Code)
+  tasks/       ← Active task specs (TASK-NNN.md) and fix specs (FIX-NNN.md)
   MILESTONES.md
