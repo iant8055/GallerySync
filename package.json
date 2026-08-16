@@ -1,0 +1,39 @@
+{
+  "name": "gallerysync",
+  "version": "1.0.0",
+  "description": "To restore the Sync Feature Samsung will be stopping in Sept",
+  "main": "dist/main/index.js",
+  "scripts": {
+    "dev": "electron .",
+    "build": "tsc --noEmit && electron-builder",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iant8055/GallerySync.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/iant8055/GallerySync/issues"
+  },
+  "homepage": "https://github.com/iant8055/GallerySync#readme",
+  "devDependencies": {
+    "@types/node": "^26.2.0",
+    "@vitest/coverage-v8": "^4.1.10",
+    "electron": "^43.4.0",
+    "electron-builder": "^26.15.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
+  },
+  "dependencies": {
+    "@types/better-sqlite3": "^9.6.0",
+    "better-sqlite3": "^13.0.3"
+  }
+}
