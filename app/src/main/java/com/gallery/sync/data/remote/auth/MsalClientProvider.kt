@@ -68,10 +68,16 @@ class MsalClientProvider @Inject constructor(
         private const val TAG = "MsalClient"
 
         /**
-         * Read-only access plus `offline_access`, so MSAL is issued a refresh token and can keep
-         * renewing without prompting. Must stay in step with the delegated permissions granted on
-         * the Azure app registration.
+         * Read-only Graph access, and **only** that.
+         *
+         * `offline_access`, `openid` and `profile` are reserved: MSAL appends them to the
+         * authorization request itself and does not expect them echoed back in the response's
+         * granted-scope list. Naming one here makes MSAL's own request-vs-granted comparison
+         * fail and the sign-in aborts with `declined_scope_error` — even though the user
+         * accepted the consent prompt. The refresh token still arrives without asking.
+         *
+         * Keep this in step with the delegated permissions on the Azure app registration.
          */
-        val SCOPES = listOf("https://graph.microsoft.com/Files.Read", "offline_access")
+        val SCOPES = listOf("https://graph.microsoft.com/Files.Read")
     }
 }
