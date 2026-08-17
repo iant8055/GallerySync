@@ -87,6 +87,9 @@ dependencies {
     // Security
     implementation(libs.androidx.security.crypto)
 
+    // Microsoft identity (MSAL) — interactive sign-in + silent refresh for Graph
+    implementation(libs.msal)
+
     testImplementation(libs.junit)
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)

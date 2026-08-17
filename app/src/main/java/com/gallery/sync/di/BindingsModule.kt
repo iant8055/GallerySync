@@ -1,5 +1,6 @@
 package com.gallery.sync.di
 
+import com.gallery.sync.data.remote.auth.MsalOneDriveTokenProvider
 import com.gallery.sync.data.remote.auth.OneDriveTokenProvider
 import com.gallery.sync.data.remote.auth.StoredOneDriveTokenProvider
 import com.gallery.sync.data.repository.OneDriveRepositoryImpl
@@ -25,10 +26,13 @@ interface BindingsModule {
     fun bindOneDriveRepository(impl: OneDriveRepositoryImpl): OneDriveRepository
 
     /**
-     * The single line that changes when the Azure app registration lands: swap
-     * [StoredOneDriveTokenProvider] for a provider that can actually acquire a token.
+     * The Azure app registration has landed, so this now binds the MSAL-backed provider.
+     *
+     * [StoredOneDriveTokenProvider] is deliberately kept rather than deleted: it is the only
+     * implementation that unit tests can construct without an Android context, and it documents
+     * the null-token contract that [MsalOneDriveTokenProvider] still honours.
      */
     @Binds
     @Singleton
-    fun bindOneDriveTokenProvider(impl: StoredOneDriveTokenProvider): OneDriveTokenProvider
+    fun bindOneDriveTokenProvider(impl: MsalOneDriveTokenProvider): OneDriveTokenProvider
 }

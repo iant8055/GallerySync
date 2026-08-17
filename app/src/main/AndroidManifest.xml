@@ -33,6 +33,30 @@
             android:authorities="com.gallery.sync.provider"
             android:exported="false"
             android:grantUriPermissions="true" />
+
+        <!--
+            MSAL's redirect target. The sign-in browser tab hands the authorization code back
+            here, and MSAL takes it from there.
+
+            The path below is the RAW signature hash, while msal_config.json carries the
+            URL-encoded form of the same value ("+" as %2B, "=" as %3D). That asymmetry is
+            required — encoding this one, or decoding that one, breaks the redirect.
+        -->
+        <activity
+            android:name="com.microsoft.identity.client.BrowserTabActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="msauth"
+                    android:host="com.gallery.sync"
+                    android:path="/E7ZHhkRNGcbq5T+gUNCTkroYYMo=" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

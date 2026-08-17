@@ -1,0 +1,16 @@
+{
+  "client_id": "24aab7d7-5b63-405c-affe-d119137a7488",
+  "authorization_user_agent": "DEFAULT",
+  "redirect_uri": "msauth://com.gallery.sync/E7ZHhkRNGcbq5T%2BgUNCTkroYYMo%3D",
+  "account_mode": "SINGLE",
+  "broker_redirect_uri_registered": false,
+  "authorities": [
+    {
+      "type": "AAD",
+      "audience": {
+        "type": "AzureADandPersonalMicrosoftAccount",
+        "tenant_id": "common"
+      }
+    }
+  ]
+}

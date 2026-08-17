@@ -17,6 +17,7 @@ okhttp = "5.2.1"
 kotlinxSerializationJson = "1.9.0"
 coroutines = "1.10.2"
 securityCrypto = "1.1.0"
+msal = "6.0.1"
 mockito = "5.20.0"
 mockitoKotlin = "6.1.0"
 turbine = "1.2.1"
@@ -64,6 +65,9 @@ kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 
 # Security
 androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCrypto" }
+
+# Microsoft identity — interactive sign-in and silent token refresh for Graph
+msal = { group = "com.microsoft.identity.client", name = "msal", version.ref = "msal" }
 
 # Testing
 mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
