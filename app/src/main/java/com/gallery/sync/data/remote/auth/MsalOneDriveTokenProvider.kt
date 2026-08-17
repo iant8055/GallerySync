@@ -2,6 +2,7 @@ package com.gallery.sync.data.remote.auth
 
 import com.gallery.sync.util.Logger
 import com.microsoft.identity.client.AcquireTokenSilentParameters
+import com.microsoft.identity.client.IAccount
 import com.microsoft.identity.client.IAuthenticationResult
 import com.microsoft.identity.client.ISingleAccountPublicClientApplication
 import com.microsoft.identity.client.SilentAuthenticationCallback
@@ -50,7 +51,7 @@ class MsalOneDriveTokenProvider @Inject constructor(
         }
 
         val shouldForce = forceRefresh
-        val result = acquireSilently(app, account.authority, shouldForce)
+        val result = acquireSilently(app, account, shouldForce)
         if (shouldForce) forceRefresh = false
 
         return result?.accessToken
@@ -85,11 +86,15 @@ class MsalOneDriveTokenProvider @Inject constructor(
 
     private suspend fun acquireSilently(
         app: ISingleAccountPublicClientApplication,
-        authority: String,
+        account: IAccount,
         force: Boolean
     ): IAuthenticationResult? = suspendCancellableCoroutine { continuation ->
         val parameters = AcquireTokenSilentParameters.Builder()
-            .fromAuthority(authority)
+            // forAccount is not optional in single-account mode. Without it MSAL has no account
+            // to match the cached token against and fails with `current_account_mismatch`, even
+            // though exactly one account is signed in.
+            .forAccount(account)
+            .fromAuthority(account.authority)
             .withScopes(MsalClientProvider.SCOPES)
             .forceRefresh(force)
             .withCallback(object : SilentAuthenticationCallback {
