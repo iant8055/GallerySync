@@ -6,7 +6,9 @@ import com.gallery.sync.data.remote.auth.OneDriveSignIn
 import com.gallery.sync.data.remote.auth.OneDriveTokenProvider
 import com.gallery.sync.data.remote.auth.StoredOneDriveTokenProvider
 import com.gallery.sync.data.repository.OneDriveRepositoryImpl
+import com.gallery.sync.data.repository.OneDriveUploadRepositoryImpl
 import com.gallery.sync.domain.repository.OneDriveRepository
+import com.gallery.sync.domain.repository.OneDriveUploadRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -26,6 +28,12 @@ interface BindingsModule {
     @Binds
     @Singleton
     fun bindOneDriveRepository(impl: OneDriveRepositoryImpl): OneDriveRepository
+
+    @Binds
+    @Singleton
+    fun bindOneDriveUploadRepository(
+        impl: OneDriveUploadRepositoryImpl
+    ): OneDriveUploadRepository
 
     /**
      * The Azure app registration has landed, so this now binds the MSAL-backed provider.

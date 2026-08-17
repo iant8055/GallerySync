@@ -1,0 +1,103 @@
+package com.gallery.sync.data.repository
+
+import com.gallery.sync.data.remote.auth.OneDriveTokenProvider
+import com.gallery.sync.data.remote.onedrive.ChunkedUploader
+import com.gallery.sync.data.remote.onedrive.UploadOutcome
+import com.gallery.sync.di.IoDispatcher
+import com.gallery.sync.domain.model.DataResult
+import com.gallery.sync.domain.model.RemoteError
+import com.gallery.sync.domain.model.UploadedItem
+import com.gallery.sync.domain.repository.OneDriveUploadRepository
+import com.gallery.sync.util.Logger
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.IOException
+import javax.inject.Inject
+import javax.inject.Singleton
+
+/**
+ * Microsoft Graph implementation of [OneDriveUploadRepository].
+ *
+ * Mirrors [OneDriveRepositoryImpl]: the network boundary lives here, and no Retrofit or OkHttp
+ * type escapes the data layer. Nothing in this file logs a token.
+ */
+@Singleton
+class OneDriveUploadRepositoryImpl @Inject constructor(
+    private val uploader: ChunkedUploader,
+    private val tokenProvider: OneDriveTokenProvider,
+    @param:IoDispatcher private val dispatcher: CoroutineDispatcher
+) : OneDriveUploadRepository {
+
+    override suspend fun upload(
+        localFile: File,
+        remoteFolderPath: String,
+        onProgress: (bytesSent: Long, total: Long) -> Unit
+    ): DataResult<UploadedItem> = withContext(dispatcher) {
+
+        if (!localFile.exists()) {
+            // The scanner can hand us a file the user deleted moments ago. That is expected
+            // churn, not an error worth retrying forever.
+            Logger.w(TAG, "upload: file no longer exists, skipping")
+            return@withContext DataResult.Failure(RemoteError.Unknown(IOException("file missing")))
+        }
+
+        if (tokenProvider.getAccessToken() == null) {
+            Logger.w(TAG, "upload: no access token, skipping network call")
+            return@withContext DataResult.Failure(RemoteError.NoToken)
+        }
+
+        try {
+            when (val outcome = uploader.upload(localFile, remoteFolderPath, onProgress)) {
+                is UploadOutcome.Success -> {
+                    val item = outcome.item
+                    Logger.i(TAG, "upload: stored ${localFile.name} (${item.size ?: -1} bytes)")
+                    DataResult.Success(
+                        UploadedItem(
+                            id = item.id.orEmpty(),
+                            name = item.name ?: localFile.name,
+                            sizeBytes = item.size ?: 0L,
+                            eTag = item.eTag
+                        )
+                    )
+                }
+
+                is UploadOutcome.HttpFailure -> mapFailure(outcome)
+            }
+        } catch (e: IOException) {
+            Logger.w(TAG, "upload: network failure", e)
+            DataResult.Failure(RemoteError.Network)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Throwable) {
+            Logger.e(TAG, "upload: unexpected failure", e)
+            DataResult.Failure(RemoteError.Unknown(e))
+        }
+    }
+
+    private suspend fun mapFailure(failure: UploadOutcome.HttpFailure): DataResult<UploadedItem> =
+        when (failure.code) {
+            HTTP_UNAUTHORIZED -> {
+                Logger.w(TAG, "upload: Graph returned 401, invalidating stored token")
+                tokenProvider.invalidateAccessToken()
+                DataResult.Failure(RemoteError.Unauthorized)
+            }
+
+            HTTP_INSUFFICIENT_STORAGE -> {
+                Logger.w(TAG, "upload: drive is full")
+                DataResult.Failure(RemoteError.InsufficientStorage)
+            }
+
+            else -> {
+                Logger.w(TAG, "upload: Graph returned HTTP ${failure.code}")
+                DataResult.Failure(RemoteError.Http(failure.code, failure.body))
+            }
+        }
+
+    private companion object {
+        const val TAG = "OneDriveUpload"
+        const val HTTP_UNAUTHORIZED = 401
+        const val HTTP_INSUFFICIENT_STORAGE = 507
+    }
+}

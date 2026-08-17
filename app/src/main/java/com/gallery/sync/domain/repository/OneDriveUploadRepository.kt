@@ -1,0 +1,31 @@
+package com.gallery.sync.domain.repository
+
+import com.gallery.sync.domain.model.DataResult
+import com.gallery.sync.domain.model.UploadedItem
+import java.io.File
+
+/**
+ * Writes local media into the user's OneDrive.
+ *
+ * Deliberately separate from [OneDriveRepository], which is documented as read-only. Keeping the
+ * write capability behind its own interface means a caller that only browses cannot accidentally
+ * be handed the ability to upload.
+ *
+ * Nothing here deletes, moves, or overwrites: uploads use `conflictBehavior = rename`, so an
+ * existing cloud file is never replaced.
+ */
+interface OneDriveUploadRepository {
+
+    /**
+     * Uploads [localFile] into the drive folder at [remoteFolderPath], e.g.
+     * `Samsung Gallery/DCIM/Camera`. Creates the folder path if it does not exist.
+     *
+     * [onProgress] reports bytes the server has confirmed, so it can drive a truthful progress bar
+     * rather than one that races ahead of the network.
+     */
+    suspend fun upload(
+        localFile: File,
+        remoteFolderPath: String,
+        onProgress: (bytesSent: Long, total: Long) -> Unit = { _, _ -> }
+    ): DataResult<UploadedItem>
+}

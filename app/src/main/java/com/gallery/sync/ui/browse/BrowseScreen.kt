@@ -180,6 +180,7 @@ private fun RemoteError.readable(): String = when (this) {
     RemoteError.NoToken -> "Not signed in."
     RemoteError.Unauthorized -> "OneDrive rejected the sign-in. Try signing out and back in."
     RemoteError.Network -> "Can't reach OneDrive. Check your connection."
+    RemoteError.InsufficientStorage -> "Your OneDrive is full. Free up space to continue."
     is RemoteError.Http -> "OneDrive returned an error ($code)."
     is RemoteError.Unknown -> "Something went wrong: ${cause.javaClass.simpleName}"
 }

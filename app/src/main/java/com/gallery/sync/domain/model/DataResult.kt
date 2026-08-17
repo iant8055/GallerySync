@@ -25,6 +25,14 @@ sealed interface RemoteError {
     /** Transport-level failure — offline, DNS, timeout, socket reset. */
     data object Network : RemoteError
 
+    /**
+     * The drive is full, so the write could not be stored.
+     *
+     * Separated from [Http] because it is the one remote failure the user can actually fix, and
+     * "your OneDrive is full" is a far better message than "error 507".
+     */
+    data object InsufficientStorage : RemoteError
+
     /** Any other non-2xx response. [body] is the raw error payload, when the provider sent one. */
     data class Http(val code: Int, val body: String?) : RemoteError
 
