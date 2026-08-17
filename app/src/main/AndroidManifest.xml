@@ -6,6 +6,25 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <!--
+        Reading the user's photos and videos is unavoidable for a backup app: it has to find new
+        media on its own, which rules out the Photo Picker (a manual choice every time) and
+        Selected Photos Access (cannot discover anything new). This is the same access Samsung's
+        own gallery sync uses. The app only ever READS this media — it never deletes or modifies it.
+
+        READ_MEDIA_VISUAL_USER_SELECTED is declared deliberately. On Android 14+ the user can grant
+        access to only some photos, and a backup app must notice that and say so, rather than
+        quietly backing up a fraction of someone's library and reporting success.
+    -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
+
+    <!-- Android 12 and below predate the granular media permissions above. -->
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
+    <!--
         usesCleartextTraffic is already false by default at targetSdk 28+, but stating it is worth
         the line: it survives a future targetSdk change, and it makes the intent explicit for
         anyone reading the manifest. Every endpoint this app touches is HTTPS, and a plain-http

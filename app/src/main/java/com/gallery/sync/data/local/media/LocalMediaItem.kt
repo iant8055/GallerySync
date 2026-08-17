@@ -1,0 +1,49 @@
+package com.gallery.sync.data.local.media
+
+import android.net.Uri
+
+/**
+ * One photo or video on the device, as MediaStore describes it.
+ *
+ * Lives in `data/` rather than `domain/` because it carries a [Uri]: CLAUDE.md requires the domain
+ * layer to stay free of Android types.
+ *
+ * [contentUri] is the only supported way to read the bytes. The `DATA` column — the raw filesystem
+ * path — is deliberately absent: direct path access to media is restricted under scoped storage and
+ * behaves differently across API 26 to 37, whereas the content URI works on every version.
+ */
+data class LocalMediaItem(
+    val mediaStoreId: Long,
+    val contentUri: Uri,
+    val displayName: String,
+    /** Folder the user thinks of this as living in, e.g. `Camera`. */
+    val album: String,
+    val sizeBytes: Long,
+    val dateModifiedEpochSeconds: Long,
+    val mimeType: String,
+    val isVideo: Boolean
+)
+
+/** An album on the device, as the user would recognise it in Gallery. */
+data class MediaAlbum(
+    val name: String,
+    val itemCount: Int,
+    val totalBytes: Long
+)
+
+/** How much of the user's media the app is currently allowed to see. */
+enum class MediaAccess {
+
+    /** Everything. The only state in which a backup can be described as complete. */
+    FULL,
+
+    /**
+     * Android 14+ and the user granted access to *selected* photos only.
+     *
+     * Must never be treated as [FULL]. A backup app that reports success while it can only see a
+     * handful of hand-picked photos leaves the user believing a library is safe when it is not.
+     */
+    PARTIAL,
+
+    NONE
+}
