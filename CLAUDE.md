@@ -27,7 +27,26 @@ Rules:
 - Test with Google Play test accounts and test product IDs during development
 
 ## Hard Rules — all agents must follow
-- Never permanently delete a user's cloud file — local cache only
+
+### Deletion — GallerySync never permanently deletes anything
+This is absolute and applies to every file, in every location, without exception.
+
+- A deletion **always** moves the item to a trash the user can recover from: OneDrive's
+  recycle bin remotely, and Android's media trash locally.
+- **Emptying trash is never done by this app.** The user empties it themselves, in OneDrive
+  or in their gallery app. GallerySync must never call an empty-trash or permanent-delete
+  API, and must never offer a control that does.
+- Locally this means `MediaStore.createTrashRequest()` (API 30+), never a plain delete.
+  Below API 30 Android has no media trash, so local deletion is **not offered at all** on
+  those versions rather than silently deleting permanently.
+- Remotely this means Graph `DELETE /me/drive/items/{id}`, which moves to the recycle bin.
+  Never anything that bypasses it.
+- Removing a row from the local ledger or index is bookkeeping and is not a deletion — but
+  it must never cause a file to be removed anywhere.
+- Deleting a photo from the phone does not delete its backup unless the user explicitly
+  confirms that specific action.
+
+### Other hard rules
 - All file operations on device are cache management, never source-of-truth writes
 - Never store OAuth tokens in SharedPreferences — use EncryptedSharedPreferences
 - Minimum Android SDK: 26 (Android 8.0). Target SDK: 35

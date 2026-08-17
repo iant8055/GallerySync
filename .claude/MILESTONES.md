@@ -33,7 +33,29 @@ Rule for cutover: run GallerySync and Samsung's sync **in parallel for at least 
 weeks** before trusting GallerySync alone. Duplicate uploads are harmless. A silent
 backup failure while GallerySync is the only thing running is not recoverable.
 
-## v0.3.0 — Access bridge
+## v0.3.0 — Deletion sync (opt-in) and access bridge
+
+### Deletion sync
+Deliberately not in v0.2.0. It is the highest-risk feature in the product — the one where a
+bug destroys data rather than merely failing to save it — so it is built only on top of a
+backup engine that has been watched working for weeks.
+
+Nothing here ever deletes permanently; see the deletion rule in CLAUDE.md.
+
+- [ ] Detect locally-deleted files (the ledger already knows which rows vanished)
+- [ ] Prompt in **batches**, never per file: "47 photos were removed from your phone.
+      Remove them from OneDrive too?", with the list reviewable before confirming
+- [ ] Prompt on next app open, not the instant a deletion lands — deletions come in bursts
+      while the app is backgrounded
+- [ ] **Off by default, explicit opt-in**
+- [ ] Never infer deletion from absence alone. A file can vanish from MediaStore because a
+      card was unmounted, a permission was revoked, or scoped storage hid it. If a large
+      fraction disappears at once, treat it as a fault and prompt nothing — that pattern is
+      how a sync tool destroys a library
+- [ ] Remote deletion goes to OneDrive's recycle bin; local deletion uses
+      `MediaStore.createTrashRequest()` and is not offered below API 30
+
+### Access bridge
 The differentiating feature: cloud media usable by any third-party app.
 
 Established by experiment on 2026-08-17: Samsung Gallery renders cloud albums from a
