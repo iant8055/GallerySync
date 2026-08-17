@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Delete your account and data — Gallery Sync</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --ink: #1a1a1a;
+    --ink2: #4a4a4a;
+    --rule: #e2e2e2;
+    --accent: #2b5fd9;
+    --note-bg: #f4f6fb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161a;
+      --ink: #ececec;
+      --ink2: #b3b3b3;
+      --rule: #2c2f36;
+      --accent: #7ba3ff;
+      --note-bg: #1c1f26;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 40px 20px 80px;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+  main { max-width: 680px; margin: 0 auto; }
+  h1 { font-size: 28px; line-height: 1.25; margin: 0 0 8px; }
+  .sub { color: var(--ink2); margin: 0 0 32px; }
+  h2 { font-size: 19px; margin: 36px 0 12px; padding-top: 20px; border-top: 1px solid var(--rule); }
+  p, li { color: var(--ink2); }
+  strong { color: var(--ink); }
+  ol, ul { padding-left: 22px; }
+  li { margin-bottom: 8px; }
+  a { color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 15px; }
+  th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th { color: var(--ink); font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .note {
+    background: var(--note-bg);
+    border-left: 3px solid var(--accent);
+    padding: 14px 16px;
+    margin: 20px 0;
+    border-radius: 0 6px 6px 0;
+  }
+  .note p { margin: 0; }
+  footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--rule); font-size: 14px; color: var(--ink2); }
+</style>
+</head>
+<body>
+<main>
+
+  <h1>Delete your account and data</h1>
+  <p class="sub">Gallery Sync</p>
+
+  <div class="note">
+    <p><strong>Gallery Sync does not create an account for you.</strong> You sign in with your
+    existing Microsoft account, and Gallery Sync only holds a sign-in token on your own device.
+    There is no Gallery Sync server, and no copy of your data is stored anywhere by us.</p>
+  </div>
+
+  <h2>How to remove your data</h2>
+  <ol>
+    <li>
+      <strong>Sign out in the app.</strong> Open Gallery Sync and tap <strong>Sign out</strong>.
+      This immediately deletes the stored sign-in token and the local index of your files.
+    </li>
+    <li>
+      <strong>Revoke Gallery Sync's access to your Microsoft account.</strong> Go to
+      <a href="https://account.live.com/consent/Manage">account.live.com/consent/Manage</a>,
+      find <strong>Gallery Sync</strong> in the list, and choose <strong>Remove these
+      permissions</strong>. Gallery Sync can no longer reach your OneDrive after this.
+    </li>
+    <li>
+      <strong>Uninstall the app.</strong> Uninstalling removes every remaining file Gallery Sync
+      created on your device, including its local database and any cached media.
+    </li>
+  </ol>
+
+  <p>Completing step 1 or step 2 alone is enough to cut off access. Step 3 clears the last of the
+  local data.</p>
+
+  <h2>What is deleted, and what is kept</h2>
+  <table>
+    <thead>
+      <tr><th>Data</th><th>Where it lives</th><th>What happens</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Microsoft sign-in token</td>
+        <td>Encrypted storage on your device</td>
+        <td>Deleted when you sign out or uninstall. Retention period: none.</td>
+      </tr>
+      <tr>
+        <td>Index of your OneDrive file names and folders</td>
+        <td>A database on your device</td>
+        <td>Deleted when you sign out or uninstall. Retention period: none.</td>
+      </tr>
+      <tr>
+        <td>Cached photos and videos</td>
+        <td>Gallery Sync's private storage on your device</td>
+        <td>Deleted when you uninstall. Retention period: none.</td>
+      </tr>
+      <tr>
+        <td>Your photos and videos in OneDrive</td>
+        <td>Your Microsoft account</td>
+        <td><strong>Kept.</strong> They belong to you. Gallery Sync never deletes them.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <p><strong>Gallery Sync never deletes anything from your OneDrive.</strong> Removing the app
+    does not remove your photos. To delete files stored in OneDrive, use OneDrive itself, or close
+    your Microsoft account at
+    <a href="https://account.microsoft.com/">account.microsoft.com</a>.</p>
+  </div>
+
+  <h2>Data held on our servers</h2>
+  <p><strong>None.</strong> Gallery Sync has no server or backend. It talks only to Microsoft's
+  OneDrive service using your own account. We do not receive, store, or process your photos,
+  your file names, or your account details, so there is nothing on our side to delete and no
+  retention period to report.</p>
+
+  <h2>Need help?</h2>
+  <p>If you cannot complete these steps or want to confirm your data has been removed, open an
+  issue at <a href="https://github.com/iant8055/GallerySync/issues">github.com/iant8055/GallerySync/issues</a>.</p>
+
+  <footer>
+    Gallery Sync — account and data deletion. Last updated 17 August 2026.
+  </footer>
+
+</main>
+</body>
+</html>
