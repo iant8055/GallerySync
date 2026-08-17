@@ -19,11 +19,11 @@ returns the real drive.
 ## v0.2.0 — Backup (MUST SHIP BEFORE SEPT 30)
 Replaces what Samsung is switching off. Phone → OneDrive.
 
-- [ ] `Files.ReadWrite` scope (needs the Azure permission added — Ian)
-- [ ] Upload ledger in Room: local path, size, mtime, state, remote id
-- [ ] Local media scanner: enumerate DCIM albums, diff against the ledger
-- [ ] Graph upload — resumable upload sessions, since large videos on mobile data
-      will be interrupted and a failed 100 MB upload must not restart from zero
+- [x] `Files.ReadWrite` scope (granted in Azure, requested by the app)
+- [x] Upload ledger in Room: content-derived key, size, mtime, state, remote id
+- [x] Local media scanner: enumerate albums via MediaStore, partial-access aware
+- [x] Graph upload — resumable upload sessions, verified on hardware against the
+      real account: 12 MB chunked upload stored byte-identical
 - [ ] WorkManager backup worker: network + battery constraints, retry with backoff
 - [ ] Per-album include/exclude (mirrors the model Samsung already taught users)
 - [ ] Backup status UI: what is pending, what failed, manual "back up now"

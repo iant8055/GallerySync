@@ -3,6 +3,9 @@ package com.gallery.sync.di
 import android.content.Context
 import androidx.room.Room
 import com.gallery.sync.data.local.GallerySyncDatabase
+import com.gallery.sync.data.local.Migrations
+import com.gallery.sync.data.local.dao.AlbumPreferenceDao
+import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.dao.MediaFolderDao
 import com.gallery.sync.data.local.dao.MediaItemDao
 import dagger.Module
@@ -28,7 +31,9 @@ object DatabaseModule {
         context,
         GallerySyncDatabase::class.java,
         GallerySyncDatabase.DATABASE_NAME
-    ).build()
+    )
+        .addMigrations(*Migrations.ALL)
+        .build()
 
     @Provides
     @Singleton
@@ -38,4 +43,14 @@ object DatabaseModule {
     @Singleton
     fun provideMediaFolderDao(database: GallerySyncDatabase): MediaFolderDao =
         database.mediaFolderDao()
+
+    @Provides
+    @Singleton
+    fun provideBackupEntryDao(database: GallerySyncDatabase): BackupEntryDao =
+        database.backupEntryDao()
+
+    @Provides
+    @Singleton
+    fun provideAlbumPreferenceDao(database: GallerySyncDatabase): AlbumPreferenceDao =
+        database.albumPreferenceDao()
 }

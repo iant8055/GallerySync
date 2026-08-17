@@ -42,6 +42,14 @@ android {
             isReturnDefaultValues = true
         }
     }
+
+    // Room's MigrationTestHelper reads the exported schemas at runtime, so they have to ship as
+    // assets in the instrumented test APK.
+    sourceSets {
+        getByName("androidTest") {
+            assets.srcDirs("$projectDir/schemas")
+        }
+    }
 }
 
 // Room exports the schema of every database version to app/schemas/. These files are committed:
@@ -107,6 +115,7 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(libs.androidx.room.testing)
 
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)

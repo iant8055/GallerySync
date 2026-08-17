@@ -3,29 +3,47 @@ package com.gallery.sync.data.local
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.gallery.sync.data.local.converter.BackupStateConverter
 import com.gallery.sync.data.local.converter.MediaSourceConverter
+import com.gallery.sync.data.local.dao.AlbumPreferenceDao
+import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.dao.MediaFolderDao
 import com.gallery.sync.data.local.dao.MediaItemDao
+import com.gallery.sync.data.local.entity.AlbumPreferenceEntity
+import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.entity.MediaFolderEntity
 import com.gallery.sync.data.local.entity.MediaItemEntity
 
 /**
- * The local index of cloud-hosted media — a cache, never the source of truth.
+ * The local index of cloud-hosted media, and the backup ledger.
  *
- * Version 1, initial creation, so no migration exists yet. Any later change to a shipped schema
- * requires a written migration and is an escalation, not a destructive rebuild.
+ * The media index is a cache and never the source of truth. The **ledger is different**: it is the
+ * only record of which local files have reached OneDrive. Losing it does not just cost a rebuild —
+ * it would make the app re-upload an entire library, or believe files are safe that were never
+ * sent. Schema changes ship a real migration; see [Migrations].
+ *
+ * Version 2 adds `backup_entries` and `album_preferences`, purely additively.
  */
 @Database(
-    entities = [MediaItemEntity::class, MediaFolderEntity::class],
-    version = 1,
+    entities = [
+        MediaItemEntity::class,
+        MediaFolderEntity::class,
+        BackupEntryEntity::class,
+        AlbumPreferenceEntity::class
+    ],
+    version = 2,
     exportSchema = true
 )
-@TypeConverters(MediaSourceConverter::class)
+@TypeConverters(MediaSourceConverter::class, BackupStateConverter::class)
 abstract class GallerySyncDatabase : RoomDatabase() {
 
     abstract fun mediaItemDao(): MediaItemDao
 
     abstract fun mediaFolderDao(): MediaFolderDao
+
+    abstract fun backupEntryDao(): BackupEntryDao
+
+    abstract fun albumPreferenceDao(): AlbumPreferenceDao
 
     companion object {
         const val DATABASE_NAME = "gallery_sync.db"
