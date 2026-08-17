@@ -1,11 +1,19 @@
 # GallerySync Milestones
 
 ## v0.1.0 — Foundation (must ship before Samsung sunset)
-- [ ] Android project scaffold (Kotlin, Compose, Hilt, Room, Retrofit)
-- [ ] Logger utility
-- [ ] Room database schema for cached media index
-- [ ] OneDrive adapter (Microsoft Graph API — browse folder structure)
-- [ ] ContentProvider skeleton (registers with Android, returns empty cursor)
+- [x] Android project scaffold (Kotlin, Compose, Hilt, Room, Retrofit)
+- [x] Logger utility
+- [x] Room database schema for cached media index
+- [x] OneDrive adapter (Microsoft Graph API — browse folder structure)
+- [x] ContentProvider skeleton (registers with Android, returns empty cursor)
+
+Not tagged v0.1.0 yet. Two items are open and both belong to Ian:
+- **Sign-in is not implemented.** The Graph API, repository, mapper and auth interceptor are
+  all built and tested, but `StoredOneDriveTokenProvider` returns null because nothing writes
+  a token yet. Acquiring one needs the Azure app registration (public client + PKCE, no secret).
+  Until then the adapter cannot fetch anything from a real account.
+- **The provider ships `exported="false"`.** Nothing outside the app can see it, so CapCut
+  cannot yet either. Flipping that is a security-relevant decision and is deliberately Ian's.
 
 ## v0.2.0 — Core Sync (must ship before Samsung sunset)
 - [ ] On-demand download: file fetched from cloud when accessed via ContentProvider
