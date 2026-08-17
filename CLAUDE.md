@@ -46,6 +46,19 @@ This is absolute and applies to every file, in every location, without exception
 - Deleting a photo from the phone does not delete its backup unless the user explicitly
   confirms that specific action.
 
+### UI must be readable in dark mode
+Learned the hard way on the Teleprompter app, where dark-mode users could not read the
+text at all. That is a shipped-to-users bug, not a cosmetic one.
+
+- **Never hardcode a colour in UI code.** No `Color(0xFF…)`, no `Color.Black`, no
+  `Color.White` outside `ui/theme/`. Take colours from `MaterialTheme.colorScheme`, and let
+  text inherit `LocalContentColor` rather than setting it.
+- A colour that reads correctly on a white background is exactly the kind that vanishes on
+  a dark one. If a composable needs to set a colour explicitly, it needs a theme token.
+- Check both themes on a device before calling UI work done:
+  `adb shell "cmd uimode night yes"` and `… night no`. Compiling proves nothing here.
+- The same applies to anything drawn rather than composed — icons, custom canvas, overlays.
+
 ### Other hard rules
 - All file operations on device are cache management, never source-of-truth writes
 - Never store OAuth tokens in SharedPreferences — use EncryptedSharedPreferences
