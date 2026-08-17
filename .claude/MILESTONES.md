@@ -9,14 +9,19 @@
 
 - [x] MSAL sign-in (Azure registration landed; public client + PKCE, no secret)
 
-Not tagged v0.1.0 yet. Two items are open:
-- **Sign-in has never run on a real device.** It builds and the ViewModel is unit tested against
-  a fake, but MSAL's own types cannot be exercised off-device. Until an actual Microsoft account
-  signs in on hardware, "the OneDrive stack works" is unverified.
-- **The provider ships `exported="false"`.** Nothing outside the app can see it, so CapCut
-  cannot yet either. Flipping that is a security-relevant decision and is deliberately Ian's —
-  and it is gated behind the open question of whether a plain ContentProvider is the right
-  mechanism at all, versus a DocumentsProvider.
+- [x] Browse UI proving the stack end to end
+
+**Tagged v0.1.0.** Verified on a Galaxy Z Fold 4 (Android 16): interactive sign-in completes,
+and the root listing returns the real drive — 13 items received, 12 mapped, the unmapped one
+being a Graph package item the mapper drops by design.
+
+Carried into v0.2.0 as the blocking question:
+- **The provider ships `exported="false"`, and that is not the real problem.** A plain
+  ContentProvider on a custom authority is invisible to CapCut no matter what `exported` says,
+  because no third-party app knows to query `com.gallery.sync.provider`. The supported mechanism
+  is a DocumentsProvider (Storage Access Framework) — and that only helps if the target app uses
+  `ACTION_OPEN_DOCUMENT` rather than its own MediaStore-backed gallery. Settle this before
+  building anything further on the provider.
 
 ## v0.2.0 — Core Sync (must ship before Samsung sunset)
 - [ ] On-demand download: file fetched from cloud when accessed via ContentProvider
