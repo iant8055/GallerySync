@@ -113,12 +113,18 @@ private fun AlbumList(state: BackupUiState, viewModel: BackupViewModel) {
             ),
             style = MaterialTheme.typography.titleSmall
         )
+        // Says what is true of the current selection. A whole-library "8,484 outstanding" beside
+        // a run that correctly does nothing reads as a broken app.
         Text(
-            text = stringResource(
-                R.string.backup_progress_summary,
-                state.uploadedCount,
-                state.pendingCount
-            ),
+            text = when {
+                state.enabledItemCount == 0 -> stringResource(R.string.backup_nothing_selected)
+                state.isSelectionFullyBackedUp -> stringResource(R.string.backup_all_done)
+                else -> stringResource(R.string.backup_progress_summary, state.pendingCount)
+            },
+            style = MaterialTheme.typography.bodySmall
+        )
+        Text(
+            text = stringResource(R.string.backup_total_stored, state.uploadedCount),
             style = MaterialTheme.typography.bodySmall
         )
 
@@ -134,9 +140,11 @@ private fun AlbumList(state: BackupUiState, viewModel: BackupViewModel) {
             }
         }
 
+        // Disabled when a run would transfer nothing. A button that can be pressed and then
+        // visibly does nothing is worse than one that is plainly unavailable.
         Button(
             onClick = viewModel::runBackupNow,
-            enabled = !state.isRunning && state.enabledItemCount > 0
+            enabled = state.canRunBackup
         ) {
             Text(
                 stringResource(

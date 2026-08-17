@@ -91,6 +91,24 @@ interface BackupEntryDao {
     @Query("SELECT COUNT(*) FROM backup_entries WHERE state != :state")
     suspend fun countNotInState(state: BackupState): Int
 
+    /**
+     * Outstanding files in albums the user actually selected.
+     *
+     * The whole-table count is misleading in the UI: someone backing up one album does not care
+     * that 8,000 files sit in albums they deliberately switched off, and showing that number
+     * alongside a run that correctly does nothing makes the app look broken.
+     */
+    @Query(
+        """
+        SELECT COUNT(*) FROM backup_entries
+        WHERE state != :uploaded
+          AND album NOT IN (
+              SELECT albumName FROM album_preferences WHERE isEnabled = 0
+          )
+        """
+    )
+    suspend fun countPendingInSelectedAlbums(uploaded: BackupState = BackupState.UPLOADED): Int
+
     @Query("SELECT COUNT(*) FROM backup_entries")
     fun observeTotal(): Flow<Int>
 

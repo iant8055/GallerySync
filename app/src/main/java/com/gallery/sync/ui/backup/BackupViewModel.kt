@@ -56,12 +56,19 @@ data class BackupUiState(
     val isRunning: Boolean = false,
     val status: BackupStatus? = null,
     val uploadedCount: Int = 0,
+    /** Outstanding files **within the selected albums** — not the whole library. */
     val pendingCount: Int = 0
 ) {
     /** Files that would be sent if a run started now. */
     val enabledItemCount: Int get() = albums.filter { it.isEnabled }.sumOf { it.itemCount }
 
     val enabledBytes: Long get() = albums.filter { it.isEnabled }.sumOf { it.totalBytes }
+
+    /** Something selected, and all of it already in OneDrive. */
+    val isSelectionFullyBackedUp: Boolean get() = enabledItemCount > 0 && pendingCount == 0
+
+    /** A run would do something. Drives whether the button is worth pressing. */
+    val canRunBackup: Boolean get() = !isRunning && pendingCount > 0
 }
 
 @HiltViewModel
@@ -92,6 +99,11 @@ class BackupViewModel @Inject constructor(
 
             _state.value = _state.value.copy(isScanning = true)
 
+            // Bring the ledger up to date before counting. Without this the counts describe
+            // whatever the last run happened to see, and the screen would claim there is nothing
+            // to do simply because nothing has scanned yet.
+            engine.refreshLedger()
+
             val disabled = albumDao.disabledAlbums().toSet()
             val albums = scanner.scanAlbums().map { album ->
                 AlbumRow(
@@ -102,12 +114,8 @@ class BackupViewModel @Inject constructor(
                 )
             }
 
-            _state.value = _state.value.copy(
-                albums = albums,
-                isScanning = false,
-                uploadedCount = entryDao.countInState(BackupState.UPLOADED),
-                pendingCount = entryDao.countNotInState(BackupState.UPLOADED)
-            )
+            _state.value = _state.value.copy(albums = albums, isScanning = false)
+            refreshCounts()
         }
     }
 
@@ -119,6 +127,8 @@ class BackupViewModel @Inject constructor(
                     if (it.name == album) it.copy(isEnabled = enabled) else it
                 }
             )
+            // Changing the selection changes what is outstanding, so the counts must follow.
+            refreshCounts()
         }
     }
 
@@ -130,7 +140,15 @@ class BackupViewModel @Inject constructor(
             _state.value = _state.value.copy(
                 albums = albums.map { it.copy(isEnabled = enabled) }
             )
+            refreshCounts()
         }
+    }
+
+    private suspend fun refreshCounts() {
+        _state.value = _state.value.copy(
+            uploadedCount = entryDao.countInState(BackupState.UPLOADED),
+            pendingCount = entryDao.countPendingInSelectedAlbums()
+        )
     }
 
     /**
@@ -165,10 +183,9 @@ class BackupViewModel @Inject constructor(
                     failed = result.failed,
                     remaining = result.remaining,
                     stoppedBecause = result.stoppedBecause
-                ),
-                uploadedCount = entryDao.countInState(BackupState.UPLOADED),
-                pendingCount = entryDao.countNotInState(BackupState.UPLOADED)
+                )
             )
+            refreshCounts()
         }
     }
 }
