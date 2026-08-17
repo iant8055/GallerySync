@@ -13,8 +13,10 @@
 - [ ] ContentProvider serves real media to third-party apps (CapCut test)
 - [ ] Local cache management (size limit, LRU eviction)
 
-## v0.3.0 — Google Photos + UI
-- [ ] Google Photos adapter (Google Photos Library API — requires OAuth)
+## v0.3.0 — Google Photos + Billing + UI
+- [ ] Google Play Billing integration (BillingRepository, pro_unlock IAP)
+- [ ] Pro upgrade screen (Compose)
+- [ ] Google Photos adapter (Google Photos Library API — requires OAuth, Pro only)
 - [ ] Unified media browser UI (Compose) showing both sources
 - [ ] Folder structure preserved and browsable in-app
 - [ ] Settings screen (cache size, sync frequency, account management)

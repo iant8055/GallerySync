@@ -10,6 +10,22 @@ Built for Samsung Galaxy primarily; tested on LG and Moto as well.
 Stack: Kotlin, Jetpack Compose, Room (SQLite), Hilt (DI), WorkManager (background sync),
 Retrofit + OkHttp (cloud APIs), JUnit + Mockito (unit tests), Espresso (UI tests).
 
+## Monetization
+Free app on Google Play with a single one-time in-app purchase to unlock Pro.
+
+Free tier:  OneDrive sync, ContentProvider access, core sync engine
+Pro tier:   Google Photos sync (unlocked by IAP)
+
+IAP product ID: pro_unlock
+Billing library: com.android.billingclient:billing-ktx (latest stable)
+
+Rules:
+- Gate Google Photos features behind a BillingRepository.isPurchased() check
+- Never gate OneDrive or the ContentProvider — those are always free
+- BillingRepository is the single source of truth for purchase state
+- Never hardcode purchase state — always query BillingRepository
+- Test with Google Play test accounts and test product IDs during development
+
 ## Hard Rules — all agents must follow
 - Never permanently delete a user's cloud file — local cache only
 - All file operations on device are cache management, never source-of-truth writes
