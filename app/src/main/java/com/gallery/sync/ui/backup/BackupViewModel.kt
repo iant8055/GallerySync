@@ -136,6 +136,7 @@ class BackupViewModel @Inject constructor(
                 isRunning = false,
                 status = buildString {
                     append("${result.uploaded} uploaded")
+                    if (result.skipped > 0) append(", ${result.skipped} already in OneDrive")
                     if (result.failed > 0) append(", ${result.failed} failed")
                     if (result.remaining > 0) append(", ${result.remaining} still to go")
                     result.stoppedBecause?.let { append(" — stopped: $it") }

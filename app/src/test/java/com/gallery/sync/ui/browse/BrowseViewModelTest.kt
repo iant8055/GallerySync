@@ -155,6 +155,9 @@ class BrowseViewModelTest {
                 ?.let { DataResult.Success(it) }
                 ?: DataResult.Failure(RemoteError.Http(404, null))
 
+        override suspend fun listFolderByPath(path: String): DataResult<FolderPage> =
+            DataResult.Success(FolderPage(emptyList(), null))
+
         override suspend fun listNextPage(nextPageToken: String): DataResult<FolderPage> =
             DataResult.Success(FolderPage(emptyList(), null))
     }

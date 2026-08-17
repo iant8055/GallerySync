@@ -42,6 +42,23 @@ class OneDriveRepositoryImpl @Inject constructor(
             request(operation = "listFolder") { api.listChildren(folderId) }
         }
 
+    override suspend fun listFolderByPath(path: String): DataResult<FolderPage> =
+        withContext(dispatcher) {
+            when (val result = request(operation = "listFolderByPath") { api.listChildrenByPath(path) }) {
+                // A folder that has never been created is simply empty as far as the backup is
+                // concerned — treating it as a failure would stop the first upload to every new
+                // album, which is exactly when the folder cannot exist yet.
+                is DataResult.Failure ->
+                    if ((result.error as? RemoteError.Http)?.code == HTTP_NOT_FOUND) {
+                        DataResult.Success(FolderPage(nodes = emptyList(), nextPageToken = null))
+                    } else {
+                        result
+                    }
+
+                is DataResult.Success -> result
+            }
+        }
+
     override suspend fun listNextPage(nextPageToken: String): DataResult<FolderPage> =
         withContext(dispatcher) {
             request(operation = "listNextPage") { api.listNextPage(nextPageToken) }
@@ -106,5 +123,6 @@ class OneDriveRepositoryImpl @Inject constructor(
     private companion object {
         const val TAG = "OneDriveRepo"
         const val HTTP_UNAUTHORIZED = 401
+        const val HTTP_NOT_FOUND = 404
     }
 }

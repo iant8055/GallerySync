@@ -34,6 +34,23 @@ interface GraphApiService {
     ): Response<GraphChildrenResponseDto>
 
     /**
+     * Lists a folder addressed by path rather than id, e.g. `Samsung Gallery/DCIM/Camera`.
+     *
+     * The backup needs this to ask "is this file already here?" before uploading, and it only ever
+     * knows the destination as a path. A 404 is the normal answer for a folder that does not exist
+     * yet, not an error.
+     *
+     * `encoded = true` because the slashes are structural; escaping them to `%2F` would address one
+     * absurdly-named file instead of a folder tree.
+     */
+    @GET("me/drive/root:/{path}:/children")
+    suspend fun listChildrenByPath(
+        @Path(value = "path", encoded = true) path: String,
+        @Query("\$top") top: Int = DEFAULT_PAGE_SIZE,
+        @Query("\$select") select: String = DEFAULT_SELECT
+    ): Response<GraphChildrenResponseDto>
+
+    /**
      * Follows an `@odata.nextLink` verbatim.
      *
      * Graph's continuation links are absolute and opaque — they already carry `$skiptoken` and the

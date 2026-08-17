@@ -11,6 +11,8 @@ import com.gallery.sync.data.remote.onedrive.ContentUriUploadSource
 import com.gallery.sync.di.IoDispatcher
 import com.gallery.sync.domain.model.DataResult
 import com.gallery.sync.domain.model.RemoteError
+import com.gallery.sync.domain.model.RemoteMediaNode
+import com.gallery.sync.domain.repository.OneDriveRepository
 import com.gallery.sync.domain.repository.OneDriveUploadRepository
 import com.gallery.sync.util.Logger
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -42,6 +44,8 @@ data class BackupRunResult(
     val uploaded: Int,
     val failed: Int,
     val remaining: Int,
+    /** Already present in OneDrive, so recorded as backed up without being sent again. */
+    val skipped: Int = 0,
     val stoppedBecause: StopReason? = null
 ) {
     val isComplete: Boolean get() = stoppedBecause == null && remaining == 0
@@ -58,6 +62,7 @@ data class BackupRunResult(
 class BackupEngine @Inject constructor(
     private val scanner: MediaScanner,
     private val entryDao: BackupEntryDao,
+    private val repository: OneDriveRepository,
     private val uploadRepository: OneDriveUploadRepository,
     @ApplicationContext private val context: Context,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
@@ -112,14 +117,44 @@ class BackupEngine @Inject constructor(
     suspend fun uploadPending(limit: Int = DEFAULT_BATCH): BackupRunResult =
         withContext(dispatcher) {
             if (scanner.access() == MediaAccess.NONE) {
-                return@withContext BackupRunResult(0, 0, 0, StopReason.NO_MEDIA_ACCESS)
+                return@withContext BackupRunResult(
+                    uploaded = 0,
+                    failed = 0,
+                    remaining = 0,
+                    stoppedBecause = StopReason.NO_MEDIA_ACCESS
+                )
             }
 
             val pending = entryDao.nextPending(limit = limit, maxAttempts = MAX_ATTEMPTS)
             var uploaded = 0
             var failed = 0
+            var skipped = 0
+
+            // One remote listing per album, reused across every file in it. Asking per file would
+            // cost a request each; asking once costs one and answers for all of them.
+            val remoteByAlbum = mutableMapOf<String, Map<String, Long>>()
 
             for (entry in pending) {
+                val alreadyThere = remoteByAlbum.getOrPut(entry.album) {
+                    remoteIndexFor(entry.album)
+                }
+
+                // Same name and same size means the file is already backed up — by Samsung's own
+                // sync while both run in parallel, or by this app before a reinstall lost the
+                // ledger. Uploading anyway produces a renamed duplicate, which is what the user
+                // saw before this check existed.
+                if (alreadyThere[entry.displayName] == entry.sizeBytes) {
+                    Logger.d(TAG, "already in OneDrive, not re-uploading: ${entry.displayName}")
+                    entryDao.markUploaded(
+                        id = entry.id,
+                        remoteItemId = "",
+                        remoteSizeBytes = entry.sizeBytes,
+                        uploadedAt = System.currentTimeMillis()
+                    )
+                    skipped++
+                    continue
+                }
+
                 val source = ContentUriUploadSource(
                     resolver = context.contentResolver,
                     uri = android.net.Uri.parse(entry.contentUri),
@@ -157,6 +192,7 @@ class BackupEngine @Inject constructor(
                                 uploaded = uploaded,
                                 failed = failed,
                                 remaining = entryDao.nextPending(1, MAX_ATTEMPTS).size,
+                                skipped = skipped,
                                 stoppedBecause = stop
                             )
                         }
@@ -169,8 +205,32 @@ class BackupEngine @Inject constructor(
             BackupRunResult(
                 uploaded = uploaded,
                 failed = failed,
-                remaining = entryDao.nextPending(1, MAX_ATTEMPTS).size
+                remaining = entryDao.nextPending(1, MAX_ATTEMPTS).size,
+                skipped = skipped
             )
+        }
+
+    /**
+     * What is already in an album's OneDrive folder, as name to size.
+     *
+     * Name **and** size together: a same-named file of a different size is genuinely different
+     * content — an edited photo, or a different shot that happened to reuse a camera filename —
+     * and skipping it would silently leave the newer version unbacked.
+     *
+     * A folder that does not exist yet, or a listing that fails, yields an empty map. Erring
+     * towards uploading is right: a duplicate is untidy, a missing backup is a lost photo.
+     */
+    private suspend fun remoteIndexFor(album: String): Map<String, Long> =
+        when (val result = repository.listFolderByPath(remotePathFor(album))) {
+            is DataResult.Success ->
+                result.value.nodes
+                    .filterIsInstance<RemoteMediaNode.File>()
+                    .associate { it.name to it.sizeBytes }
+
+            is DataResult.Failure -> {
+                Logger.w(TAG, "could not list $album remotely (${result.error}); will upload")
+                emptyMap()
+            }
         }
 
     /**

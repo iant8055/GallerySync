@@ -19,6 +19,14 @@ interface OneDriveRepository {
     /** Lists the immediate children of [folderId]. */
     suspend fun listFolder(folderId: String): DataResult<FolderPage>
 
+    /**
+     * Lists a folder by path, e.g. `Samsung Gallery/DCIM/Camera`.
+     *
+     * A folder that does not exist yet returns an empty page rather than a failure — for the
+     * backup, "nothing is there" and "the folder has not been created" mean the same thing.
+     */
+    suspend fun listFolderByPath(path: String): DataResult<FolderPage>
+
     /** Fetches the page identified by a [FolderPage.nextPageToken] from a previous call. */
     suspend fun listNextPage(nextPageToken: String): DataResult<FolderPage>
 }
