@@ -68,7 +68,11 @@ class MsalClientProvider @Inject constructor(
         private const val TAG = "MsalClient"
 
         /**
-         * Read-only Graph access, and **only** that.
+         * Read and write access to the user's own drive.
+         *
+         * `Files.ReadWrite` supersedes `Files.Read`, so only the one scope is requested.
+         * Deliberately **not** `Files.ReadWrite.All`, which would additionally reach files
+         * shared with the user — backing up this device's photos never needs that.
          *
          * `offline_access`, `openid` and `profile` are reserved: MSAL appends them to the
          * authorization request itself and does not expect them echoed back in the response's
@@ -78,6 +82,6 @@ class MsalClientProvider @Inject constructor(
          *
          * Keep this in step with the delegated permissions on the Azure app registration.
          */
-        val SCOPES = listOf("https://graph.microsoft.com/Files.Read")
+        val SCOPES = listOf("https://graph.microsoft.com/Files.ReadWrite")
     }
 }
