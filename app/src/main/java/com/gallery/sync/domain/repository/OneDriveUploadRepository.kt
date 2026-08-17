@@ -1,5 +1,6 @@
 package com.gallery.sync.domain.repository
 
+import com.gallery.sync.data.remote.onedrive.UploadSource
 import com.gallery.sync.domain.model.DataResult
 import com.gallery.sync.domain.model.UploadedItem
 import java.io.File
@@ -25,6 +26,16 @@ interface OneDriveUploadRepository {
      */
     suspend fun upload(
         localFile: File,
+        remoteFolderPath: String,
+        onProgress: (bytesSent: Long, total: Long) -> Unit = { _, _ -> }
+    ): DataResult<UploadedItem>
+
+    /**
+     * Uploads an arbitrary [UploadSource] — in practice a MediaStore content URI, which is how the
+     * backup reads media under scoped storage.
+     */
+    suspend fun upload(
+        source: UploadSource,
         remoteFolderPath: String,
         onProgress: (bytesSent: Long, total: Long) -> Unit = { _, _ -> }
     ): DataResult<UploadedItem>

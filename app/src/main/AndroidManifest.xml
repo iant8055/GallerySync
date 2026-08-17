@@ -54,6 +54,23 @@
             </intent-filter>
         </activity>
 
+        <!--
+            WorkManager initialises itself through App Startup by default, which happens before
+            Hilt is ready and leaves it holding the default worker factory. BackupWorker takes
+            constructor-injected dependencies, so it would fail to construct at the moment it runs.
+            Removing this initializer hands configuration to GallerySyncApplication instead.
+        -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
+
         <provider
             android:name=".provider.MediaContentProvider"
             android:authorities="com.gallery.sync.provider"

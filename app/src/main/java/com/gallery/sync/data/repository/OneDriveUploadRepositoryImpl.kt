@@ -2,7 +2,9 @@ package com.gallery.sync.data.repository
 
 import com.gallery.sync.data.remote.auth.OneDriveTokenProvider
 import com.gallery.sync.data.remote.onedrive.ChunkedUploader
+import com.gallery.sync.data.remote.onedrive.FileUploadSource
 import com.gallery.sync.data.remote.onedrive.UploadOutcome
+import com.gallery.sync.data.remote.onedrive.UploadSource
 import com.gallery.sync.di.IoDispatcher
 import com.gallery.sync.domain.model.DataResult
 import com.gallery.sync.domain.model.RemoteError
@@ -34,14 +36,21 @@ class OneDriveUploadRepositoryImpl @Inject constructor(
         localFile: File,
         remoteFolderPath: String,
         onProgress: (bytesSent: Long, total: Long) -> Unit
-    ): DataResult<UploadedItem> = withContext(dispatcher) {
-
+    ): DataResult<UploadedItem> {
         if (!localFile.exists()) {
             // The scanner can hand us a file the user deleted moments ago. That is expected
             // churn, not an error worth retrying forever.
             Logger.w(TAG, "upload: file no longer exists, skipping")
-            return@withContext DataResult.Failure(RemoteError.Unknown(IOException("file missing")))
+            return DataResult.Failure(RemoteError.Unknown(IOException("file missing")))
         }
+        return upload(FileUploadSource(localFile), remoteFolderPath, onProgress)
+    }
+
+    override suspend fun upload(
+        source: UploadSource,
+        remoteFolderPath: String,
+        onProgress: (bytesSent: Long, total: Long) -> Unit
+    ): DataResult<UploadedItem> = withContext(dispatcher) {
 
         if (tokenProvider.getAccessToken() == null) {
             Logger.w(TAG, "upload: no access token, skipping network call")
@@ -49,14 +58,14 @@ class OneDriveUploadRepositoryImpl @Inject constructor(
         }
 
         try {
-            when (val outcome = uploader.upload(localFile, remoteFolderPath, onProgress)) {
+            when (val outcome = uploader.upload(source, remoteFolderPath, onProgress)) {
                 is UploadOutcome.Success -> {
                     val item = outcome.item
-                    Logger.i(TAG, "upload: stored ${localFile.name} (${item.size ?: -1} bytes)")
+                    Logger.i(TAG, "upload: stored ${source.displayName} (${item.size ?: -1} bytes)")
                     DataResult.Success(
                         UploadedItem(
                             id = item.id.orEmpty(),
-                            name = item.name ?: localFile.name,
+                            name = item.name ?: source.displayName,
                             sizeBytes = item.size ?: 0L,
                             eTag = item.eTag
                         )

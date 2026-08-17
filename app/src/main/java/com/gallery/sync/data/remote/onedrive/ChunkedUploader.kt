@@ -6,12 +6,10 @@ import com.gallery.sync.util.Logger
 import kotlinx.coroutines.ensureActive
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.ResponseBody
 import retrofit2.Response
 import java.io.File
-import java.io.RandomAccessFile
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.coroutineContext
@@ -45,28 +43,39 @@ class ChunkedUploader @Inject constructor(
      * [onProgress] reports bytes confirmed by the server, not bytes handed to the socket.
      */
     suspend fun upload(
-        file: File,
+        source: UploadSource,
         remoteFolderPath: String,
         onProgress: (bytesSent: Long, total: Long) -> Unit = { _, _ -> }
     ): UploadOutcome {
-        val total = file.length()
-        val remotePath = buildRemotePath(remoteFolderPath, file.name)
+        val total = source.sizeBytes
+        val remotePath = buildRemotePath(remoteFolderPath, source.displayName)
 
         return if (total < SMALL_FILE_THRESHOLD_BYTES) {
-            uploadSmall(file, remotePath, total, onProgress)
+            uploadSmall(source, remotePath, total, onProgress)
         } else {
-            uploadChunked(file, remotePath, total, onProgress)
+            uploadChunked(source, remotePath, total, onProgress)
         }
     }
 
-    private suspend fun uploadSmall(
+    /** Convenience for callers already holding a [File], such as the debug upload test. */
+    suspend fun upload(
         file: File,
+        remoteFolderPath: String,
+        onProgress: (bytesSent: Long, total: Long) -> Unit = { _, _ -> }
+    ): UploadOutcome = upload(FileUploadSource(file), remoteFolderPath, onProgress)
+
+    private suspend fun uploadSmall(
+        source: UploadSource,
         remotePath: String,
         total: Long,
         onProgress: (Long, Long) -> Unit
     ): UploadOutcome {
-        Logger.d(TAG, "uploading ${file.name} as a single request ($total bytes)")
-        val response = uploadApi.uploadSmallFile(remotePath, file.asRequestBody(OCTET_STREAM))
+        Logger.d(TAG, "uploading ${source.displayName} as a single request ($total bytes)")
+
+        val bytes = ByteArray(total.toInt())
+        if (total > 0) source.open().use { it.readFully(0, bytes, total.toInt()) }
+
+        val response = uploadApi.uploadSmallFile(remotePath, bytes.toRequestBody(OCTET_STREAM))
 
         return if (response.isSuccessful) {
             onProgress(total, total)
@@ -77,7 +86,7 @@ class ChunkedUploader @Inject constructor(
     }
 
     private suspend fun uploadChunked(
-        file: File,
+        source: UploadSource,
         remotePath: String,
         total: Long,
         onProgress: (Long, Long) -> Unit
@@ -92,18 +101,17 @@ class ChunkedUploader @Inject constructor(
         val uploadUrl = sessionResponse.body()?.uploadUrl
             ?: return UploadOutcome.HttpFailure(sessionResponse.code(), "no uploadUrl in session")
 
-        Logger.d(TAG, "uploading ${file.name} in chunks ($total bytes)")
+        Logger.d(TAG, "uploading ${source.displayName} in chunks ($total bytes)")
 
         var offset = 0L
-        RandomAccessFile(file, "r").use { raf ->
+        source.open().use { reader ->
             while (offset < total) {
                 // Cooperative cancellation: a stopped worker must not keep pushing bytes.
                 coroutineContext.ensureActive()
 
                 val size = minOf(CHUNK_SIZE_BYTES.toLong(), total - offset).toInt()
                 val buffer = ByteArray(size)
-                raf.seek(offset)
-                raf.readFully(buffer)
+                reader.readFully(offset, buffer, size)
 
                 val range = contentRange(offset, offset + size - 1, total)
                 val response = chunkApi.uploadChunk(

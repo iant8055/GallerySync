@@ -74,7 +74,12 @@ dependencies {
     // Dependency injection
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
+    implementation(libs.androidx.hilt.work)
     ksp(libs.hilt.android.compiler)
+    ksp(libs.androidx.hilt.compiler)
+
+    // Background work
+    implementation(libs.androidx.work.runtime.ktx)
 
     // Persistence
     implementation(libs.androidx.room.runtime)

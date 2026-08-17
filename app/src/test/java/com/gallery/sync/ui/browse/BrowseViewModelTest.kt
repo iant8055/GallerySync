@@ -4,6 +4,7 @@ import com.gallery.sync.domain.model.DataResult
 import com.gallery.sync.domain.model.FolderPage
 import com.gallery.sync.domain.model.RemoteError
 import com.gallery.sync.domain.model.RemoteMediaNode
+import com.gallery.sync.data.remote.onedrive.UploadSource
 import com.gallery.sync.domain.model.UploadedItem
 import com.gallery.sync.domain.repository.OneDriveRepository
 import com.gallery.sync.domain.repository.OneDriveUploadRepository
@@ -132,6 +133,12 @@ class BrowseViewModelTest {
     private object NoOpUploadRepository : OneDriveUploadRepository {
         override suspend fun upload(
             localFile: File,
+            remoteFolderPath: String,
+            onProgress: (Long, Long) -> Unit
+        ): DataResult<UploadedItem> = DataResult.Failure(RemoteError.NoToken)
+
+        override suspend fun upload(
+            source: UploadSource,
             remoteFolderPath: String,
             onProgress: (Long, Long) -> Unit
         ): DataResult<UploadedItem> = DataResult.Failure(RemoteError.NoToken)

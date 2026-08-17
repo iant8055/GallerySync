@@ -27,10 +27,20 @@ class MediaContractTest {
     @Test
     fun `authority is byte-identical to the manifest declaration`() {
         val manifest = locateManifest()
-        val declared = AUTHORITIES_PATTERN.find(manifest.readText())?.groupValues?.get(1)
+        val manifestText = manifest.readText()
 
+        // Target MediaContentProvider's own element. The manifest declares other providers —
+        // androidx.startup's, for one — and matching the first android:authorities in the file
+        // would compare against whichever happened to be written earliest.
+        val block = MEDIA_PROVIDER_PATTERN.find(manifestText)?.value
         assertNotNull(
-            "no android:authorities found in ${manifest.absolutePath}",
+            "no MediaContentProvider <provider> element found in ${manifest.absolutePath}",
+            block
+        )
+
+        val declared = AUTHORITIES_PATTERN.find(block!!)?.groupValues?.get(1)
+        assertNotNull(
+            "MediaContentProvider is declared without android:authorities",
             declared
         )
         assertEquals(
@@ -102,6 +112,10 @@ class MediaContractTest {
     private companion object {
 
         val AUTHORITIES_PATTERN = Regex("""android:authorities\s*=\s*"([^"]*)"""")
+
+        /** The single `<provider …/>` element that declares MediaContentProvider. */
+        val MEDIA_PROVIDER_PATTERN =
+            Regex("""<provider\b[^>]*?MediaContentProvider[^>]*?>""", RegexOption.DOT_MATCHES_ALL)
 
         /**
          * Finds `AndroidManifest.xml` without depending on the JVM working directory, which differs
