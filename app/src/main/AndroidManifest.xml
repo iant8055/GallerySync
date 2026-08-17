@@ -5,9 +5,16 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <!--
+        usesCleartextTraffic is already false by default at targetSdk 28+, but stating it is worth
+        the line: it survives a future targetSdk change, and it makes the intent explicit for
+        anyone reading the manifest. Every endpoint this app touches is HTTPS, and a plain-http
+        URL slipping in should fail loudly rather than quietly send someone's photos in the clear.
+    -->
     <application
         android:name=".GallerySyncApplication"
         android:allowBackup="true"
+        android:usesCleartextTraffic="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
