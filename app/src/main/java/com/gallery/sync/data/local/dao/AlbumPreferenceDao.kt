@@ -14,6 +14,16 @@ interface AlbumPreferenceDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun setPreference(preference: AlbumPreferenceEntity)
 
+    /**
+     * Sets many at once, for "back up everything" / "back up nothing".
+     *
+     * The second matters more than it looks: albums default to enabled, so without a way to switch
+     * them all off, anyone wanting to back up a single album would have to toggle a hundred others
+     * by hand — and would likely just run it and upload their whole library by accident.
+     */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun setPreferences(preferences: List<AlbumPreferenceEntity>)
+
     @Query("SELECT * FROM album_preferences")
     fun observeAll(): Flow<List<AlbumPreferenceEntity>>
 

@@ -85,6 +85,12 @@ interface BackupEntryDao {
     @Query("SELECT COUNT(*) FROM backup_entries WHERE state = :state")
     fun observeCount(state: BackupState): Flow<Int>
 
+    @Query("SELECT COUNT(*) FROM backup_entries WHERE state = :state")
+    suspend fun countInState(state: BackupState): Int
+
+    @Query("SELECT COUNT(*) FROM backup_entries WHERE state != :state")
+    suspend fun countNotInState(state: BackupState): Int
+
     @Query("SELECT COUNT(*) FROM backup_entries")
     fun observeTotal(): Flow<Int>
 

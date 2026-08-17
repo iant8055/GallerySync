@@ -123,26 +123,7 @@ class BrowseViewModelTest {
 
     // ---------- helpers ----------
 
-    /**
-     * Builds the ViewModel with a no-op upload repository. These tests cover browsing only;
-     * uploading is exercised in ChunkedUploaderTest against MockWebServer.
-     */
-    private fun browseViewModel(repository: OneDriveRepository) =
-        BrowseViewModel(repository, NoOpUploadRepository)
-
-    private object NoOpUploadRepository : OneDriveUploadRepository {
-        override suspend fun upload(
-            localFile: File,
-            remoteFolderPath: String,
-            onProgress: (Long, Long) -> Unit
-        ): DataResult<UploadedItem> = DataResult.Failure(RemoteError.NoToken)
-
-        override suspend fun upload(
-            source: UploadSource,
-            remoteFolderPath: String,
-            onProgress: (Long, Long) -> Unit
-        ): DataResult<UploadedItem> = DataResult.Failure(RemoteError.NoToken)
-    }
+    private fun browseViewModel(repository: OneDriveRepository) = BrowseViewModel(repository)
 
     private fun page(vararg nodes: RemoteMediaNode) = FolderPage(nodes.toList(), nextPageToken = null)
 
