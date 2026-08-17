@@ -7,13 +7,16 @@
 - [x] OneDrive adapter (Microsoft Graph API — browse folder structure)
 - [x] ContentProvider skeleton (registers with Android, returns empty cursor)
 
-Not tagged v0.1.0 yet. Two items are open and both belong to Ian:
-- **Sign-in is not implemented.** The Graph API, repository, mapper and auth interceptor are
-  all built and tested, but `StoredOneDriveTokenProvider` returns null because nothing writes
-  a token yet. Acquiring one needs the Azure app registration (public client + PKCE, no secret).
-  Until then the adapter cannot fetch anything from a real account.
+- [x] MSAL sign-in (Azure registration landed; public client + PKCE, no secret)
+
+Not tagged v0.1.0 yet. Two items are open:
+- **Sign-in has never run on a real device.** It builds and the ViewModel is unit tested against
+  a fake, but MSAL's own types cannot be exercised off-device. Until an actual Microsoft account
+  signs in on hardware, "the OneDrive stack works" is unverified.
 - **The provider ships `exported="false"`.** Nothing outside the app can see it, so CapCut
-  cannot yet either. Flipping that is a security-relevant decision and is deliberately Ian's.
+  cannot yet either. Flipping that is a security-relevant decision and is deliberately Ian's —
+  and it is gated behind the open question of whether a plain ContentProvider is the right
+  mechanism at all, versus a DocumentsProvider.
 
 ## v0.2.0 — Core Sync (must ship before Samsung sunset)
 - [ ] On-demand download: file fetched from cloud when accessed via ContentProvider

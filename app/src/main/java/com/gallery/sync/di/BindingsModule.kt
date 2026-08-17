@@ -1,6 +1,8 @@
 package com.gallery.sync.di
 
+import com.gallery.sync.data.remote.auth.MsalOneDriveSignIn
 import com.gallery.sync.data.remote.auth.MsalOneDriveTokenProvider
+import com.gallery.sync.data.remote.auth.OneDriveSignIn
 import com.gallery.sync.data.remote.auth.OneDriveTokenProvider
 import com.gallery.sync.data.remote.auth.StoredOneDriveTokenProvider
 import com.gallery.sync.data.repository.OneDriveRepositoryImpl
@@ -35,4 +37,8 @@ interface BindingsModule {
     @Binds
     @Singleton
     fun bindOneDriveTokenProvider(impl: MsalOneDriveTokenProvider): OneDriveTokenProvider
+
+    @Binds
+    @Singleton
+    fun bindOneDriveSignIn(impl: MsalOneDriveSignIn): OneDriveSignIn
 }
