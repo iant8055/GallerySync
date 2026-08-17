@@ -4,7 +4,10 @@ import com.gallery.sync.domain.model.DataResult
 import com.gallery.sync.domain.model.FolderPage
 import com.gallery.sync.domain.model.RemoteError
 import com.gallery.sync.domain.model.RemoteMediaNode
+import com.gallery.sync.domain.model.UploadedItem
 import com.gallery.sync.domain.repository.OneDriveRepository
+import com.gallery.sync.domain.repository.OneDriveUploadRepository
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -33,7 +36,7 @@ class BrowseViewModelTest {
 
     @Test
     fun `lists the root on creation`() = runTest {
-        val viewModel = BrowseViewModel(FakeRepository(root = page(folder("1", "Pictures"))))
+        val viewModel = browseViewModel(FakeRepository(root = page(folder("1", "Pictures"))))
 
         val content = viewModel.state.value as BrowseUiState.Content
         assertEquals("OneDrive", content.location)
@@ -43,7 +46,7 @@ class BrowseViewModelTest {
 
     @Test
     fun `folders sort before files and each group sorts alphabetically`() = runTest {
-        val viewModel = BrowseViewModel(
+        val viewModel = browseViewModel(
             FakeRepository(
                 root = page(
                     file("f1", "zebra.jpg"),
@@ -67,7 +70,7 @@ class BrowseViewModelTest {
             root = page(folder("1", "Pictures")),
             folders = mapOf("1" to page(file("9", "IMG_1.jpg")))
         )
-        val viewModel = BrowseViewModel(repository)
+        val viewModel = browseViewModel(repository)
 
         viewModel.open(folder("1", "Pictures"))
 
@@ -83,7 +86,7 @@ class BrowseViewModelTest {
             root = page(folder("1", "Pictures")),
             folders = mapOf("1" to page(file("9", "IMG_1.jpg")))
         )
-        val viewModel = BrowseViewModel(repository)
+        val viewModel = browseViewModel(repository)
         viewModel.open(folder("1", "Pictures"))
 
         val handled = viewModel.back()
@@ -96,14 +99,14 @@ class BrowseViewModelTest {
 
     @Test
     fun `back at the root is not handled so the system can close the screen`() = runTest {
-        val viewModel = BrowseViewModel(FakeRepository(root = page()))
+        val viewModel = browseViewModel(FakeRepository(root = page()))
 
         assertFalse(viewModel.back())
     }
 
     @Test
     fun `a failed listing surfaces the error`() = runTest {
-        val viewModel = BrowseViewModel(FakeRepository(rootFailure = RemoteError.Unauthorized))
+        val viewModel = browseViewModel(FakeRepository(rootFailure = RemoteError.Unauthorized))
 
         val error = viewModel.state.value as BrowseUiState.Error
         assertEquals(RemoteError.Unauthorized, error.error)
@@ -118,6 +121,21 @@ class BrowseViewModelTest {
     }
 
     // ---------- helpers ----------
+
+    /**
+     * Builds the ViewModel with a no-op upload repository. These tests cover browsing only;
+     * uploading is exercised in ChunkedUploaderTest against MockWebServer.
+     */
+    private fun browseViewModel(repository: OneDriveRepository) =
+        BrowseViewModel(repository, NoOpUploadRepository)
+
+    private object NoOpUploadRepository : OneDriveUploadRepository {
+        override suspend fun upload(
+            localFile: File,
+            remoteFolderPath: String,
+            onProgress: (Long, Long) -> Unit
+        ): DataResult<UploadedItem> = DataResult.Failure(RemoteError.NoToken)
+    }
 
     private fun page(vararg nodes: RemoteMediaNode) = FolderPage(nodes.toList(), nextPageToken = null)
 

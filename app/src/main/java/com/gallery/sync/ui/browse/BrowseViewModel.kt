@@ -6,7 +6,9 @@ import com.gallery.sync.domain.model.DataResult
 import com.gallery.sync.domain.model.RemoteError
 import com.gallery.sync.domain.model.RemoteMediaNode
 import com.gallery.sync.domain.repository.OneDriveRepository
+import com.gallery.sync.domain.repository.OneDriveUploadRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.io.File
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -40,11 +42,19 @@ sealed interface BrowseUiState {
  */
 @HiltViewModel
 class BrowseViewModel @Inject constructor(
-    private val repository: OneDriveRepository
+    private val repository: OneDriveRepository,
+    private val uploadRepository: OneDriveUploadRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<BrowseUiState>(BrowseUiState.Loading)
     val state: StateFlow<BrowseUiState> = _state.asStateFlow()
+
+    /**
+     * TEMPORARY — verification scaffolding for TASK-006, remove once the backup worker exists.
+     * Null when no test upload has run in this session.
+     */
+    private val _uploadStatus = MutableStateFlow<String?>(null)
+    val uploadStatus: StateFlow<String?> = _uploadStatus.asStateFlow()
 
     /** Folders entered so far. Empty means the drive root. */
     private val trail = mutableListOf<Crumb>()
@@ -67,6 +77,66 @@ class BrowseViewModel @Inject constructor(
     }
 
     fun retry() = load()
+
+    /**
+     * TEMPORARY — verification scaffolding for TASK-006, remove once the backup worker exists.
+     *
+     * Writes a file of [sizeBytes] into the app's own cache and uploads it to the folder currently
+     * being browsed, then reports whether OneDrive's returned size matches byte for byte. Using a
+     * generated file rather than a real photo keeps this free of any media-read permission, which
+     * would need its own decision before being added to the manifest.
+     */
+    fun uploadTestFile(cacheDir: File, sizeBytes: Long) {
+        viewModelScope.launch {
+            _uploadStatus.value = "Uploading ${sizeBytes / 1024} KB…"
+
+            val file = File(cacheDir, "gs_upload_test_${sizeBytes}.bin")
+            runCatching {
+                file.outputStream().use { out ->
+                    val block = ByteArray(64 * 1024) { (it % 251).toByte() }
+                    var remaining = sizeBytes
+                    while (remaining > 0) {
+                        val n = minOf(block.size.toLong(), remaining).toInt()
+                        out.write(block, 0, n)
+                        remaining -= n
+                    }
+                }
+            }.onFailure {
+                _uploadStatus.value = "Could not create test file: ${it.javaClass.simpleName}"
+                return@launch
+            }
+
+            val result = uploadRepository.upload(
+                localFile = file,
+                remoteFolderPath = trail.joinToString("/") { it.name },
+                onProgress = { sent, total ->
+                    _uploadStatus.value = "Uploading… ${sent * 100 / total.coerceAtLeast(1)}%"
+                }
+            )
+
+            _uploadStatus.value = when (result) {
+                is DataResult.Success -> {
+                    val item = result.value
+                    // Size equality is the actual proof. "A file appeared" would also be true of
+                    // a truncated or corrupt upload.
+                    if (item.sizeBytes == sizeBytes) {
+                        "OK — ${item.name} stored, ${item.sizeBytes} bytes, size matches"
+                    } else {
+                        "MISMATCH — sent $sizeBytes, OneDrive reports ${item.sizeBytes}"
+                    }
+                }
+
+                is DataResult.Failure -> "FAILED — ${result.error}"
+            }
+
+            file.delete()
+            load()
+        }
+    }
+
+    fun clearUploadStatus() {
+        _uploadStatus.value = null
+    }
 
     private fun load() {
         val current = trail.lastOrNull()

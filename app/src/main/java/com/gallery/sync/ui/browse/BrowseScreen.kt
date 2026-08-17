@@ -20,11 +20,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.gallery.sync.BuildConfig
 import com.gallery.sync.domain.model.RemoteError
 import com.gallery.sync.domain.model.RemoteMediaNode
 
@@ -48,6 +50,37 @@ fun BrowseScreen(
     BackHandler(enabled = canGoBack) { viewModel.back() }
 
     Column(modifier = modifier.fillMaxSize()) {
+        // TEMPORARY — verification scaffolding for TASK-006, remove once the backup worker exists.
+        if (BuildConfig.DEBUG) {
+            val uploadStatus by viewModel.uploadStatus.collectAsStateWithLifecycle()
+            val context = LocalContext.current
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                OutlinedButton(
+                    onClick = { viewModel.uploadTestFile(context.cacheDir, 512L * 1024) }
+                ) { Text("Test 512 KB") }
+
+                OutlinedButton(
+                    onClick = { viewModel.uploadTestFile(context.cacheDir, 12L * 1024 * 1024) }
+                ) { Text("Test 12 MB") }
+            }
+
+            uploadStatus?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                )
+            }
+            HorizontalDivider()
+        }
+
         when (val current = state) {
             BrowseUiState.Loading -> Box_Centered { CircularProgressIndicator() }
 
