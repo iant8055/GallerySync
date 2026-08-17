@@ -16,10 +16,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.gallery.sync.R
 
 /**
  * Sign-in screen for the OneDrive account.
@@ -51,7 +53,7 @@ fun SignInScreen(
 
             SignInUiState.SignedOut -> {
                 Text(
-                    text = "Connect your OneDrive account to browse your photos and videos.",
+                    text = stringResource(R.string.sign_in_prompt),
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center
                 )
@@ -59,13 +61,13 @@ fun SignInScreen(
                     onClick = { activity?.let(viewModel::signIn) },
                     enabled = activity != null
                 ) {
-                    Text("Sign in with Microsoft")
+                    Text(stringResource(R.string.sign_in_action))
                 }
             }
 
             is SignInUiState.SignedIn -> {
                 Text(
-                    text = "Signed in",
+                    text = stringResource(R.string.sign_in_signed_in),
                     style = MaterialTheme.typography.titleMedium
                 )
                 Text(
@@ -74,17 +76,17 @@ fun SignInScreen(
                     textAlign = TextAlign.Center
                 )
                 OutlinedButton(onClick = viewModel::signOut) {
-                    Text("Sign out")
+                    Text(stringResource(R.string.sign_out_action))
                 }
             }
 
             is SignInUiState.Error -> {
                 Text(
-                    text = "Sign-in failed",
+                    text = stringResource(R.string.sign_in_failed),
                     style = MaterialTheme.typography.titleMedium
                 )
-                // The MSAL error code is shown deliberately: this screen is currently a
-                // development tool, and the code is what makes a failure diagnosable.
+                // The MSAL error code is shown deliberately and left untranslated: it is a
+                // diagnostic identifier, and translating it would make it unsearchable.
                 Text(
                     text = current.errorCode,
                     style = MaterialTheme.typography.bodySmall,
@@ -94,7 +96,7 @@ fun SignInScreen(
                     onClick = { activity?.let(viewModel::signIn) },
                     enabled = activity != null
                 ) {
-                    Text("Try again")
+                    Text(stringResource(R.string.try_again_action))
                 }
             }
         }

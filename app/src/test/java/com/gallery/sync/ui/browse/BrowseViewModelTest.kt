@@ -40,7 +40,8 @@ class BrowseViewModelTest {
         val viewModel = browseViewModel(FakeRepository(root = page(folder("1", "Pictures"))))
 
         val content = viewModel.state.value as BrowseUiState.Content
-        assertEquals("OneDrive", content.location)
+        // Empty trail means the drive root; the screen supplies the localised root name.
+        assertEquals(emptyList<String>(), content.trail)
         assertEquals(listOf("Pictures"), content.nodes.map { it.name })
         assertFalse(content.canGoBack)
     }
@@ -76,7 +77,7 @@ class BrowseViewModelTest {
         viewModel.open(folder("1", "Pictures"))
 
         val content = viewModel.state.value as BrowseUiState.Content
-        assertEquals("OneDrive / Pictures", content.location)
+        assertEquals(listOf("Pictures"), content.trail)
         assertEquals(listOf("IMG_1.jpg"), content.nodes.map { it.name })
         assertTrue(content.canGoBack)
     }
@@ -94,7 +95,7 @@ class BrowseViewModelTest {
 
         assertTrue(handled)
         val content = viewModel.state.value as BrowseUiState.Content
-        assertEquals("OneDrive", content.location)
+        assertEquals(emptyList<String>(), content.trail)
         assertFalse(content.canGoBack)
     }
 
@@ -113,13 +114,8 @@ class BrowseViewModelTest {
         assertEquals(RemoteError.Unauthorized, error.error)
     }
 
-    @Test
-    fun `sizes render in the largest unit that fits`() {
-        assertEquals("512 B", formatBytes(512))
-        assertEquals("2 KB", formatBytes(2048))
-        assertEquals("3 MB", formatBytes(3L * 1024 * 1024))
-        assertEquals("1.5 GB", formatBytes((1.5 * 1024 * 1024 * 1024).toLong()))
-    }
+    // Size formatting moved to ui/common/Formatting.kt when it became resource- and locale-aware.
+    // It now needs a Context, so it is no longer reachable from a plain JVM test.
 
     // ---------- helpers ----------
 

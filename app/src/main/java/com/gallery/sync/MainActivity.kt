@@ -17,6 +17,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.ui.backup.BackupScreen
@@ -75,12 +76,12 @@ private fun SignedInApp(onSignOut: () -> Unit, modifier: Modifier = Modifier) {
             Tab(
                 selected = selectedTab == 0,
                 onClick = { selectedTab = 0 },
-                text = { Text("Backup") }
+                text = { Text(stringResource(R.string.tab_backup)) }
             )
             Tab(
                 selected = selectedTab == 1,
                 onClick = { selectedTab = 1 },
-                text = { Text("OneDrive") }
+                text = { Text(stringResource(R.string.tab_onedrive)) }
             )
         }
 

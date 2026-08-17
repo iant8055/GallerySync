@@ -19,8 +19,13 @@ sealed interface BrowseUiState {
     data object Loading : BrowseUiState
 
     data class Content(
-        /** Human-readable location, e.g. `OneDrive / Pictures`. */
-        val location: String,
+        /**
+         * Folders entered so far, e.g. `["Pictures", "2024"]`. Empty at the drive root.
+         *
+         * The root's own name is deliberately absent: it is display text, so the screen supplies
+         * it from string resources rather than the ViewModel hardcoding it.
+         */
+        val trail: List<String>,
         val nodes: List<RemoteMediaNode>,
         val canGoBack: Boolean
     ) : BrowseUiState
@@ -81,7 +86,7 @@ class BrowseViewModel @Inject constructor(
 
             _state.value = when (result) {
                 is DataResult.Success -> BrowseUiState.Content(
-                    location = locationLabel(),
+                    trail = trail.map { it.name },
                     // Folders first, then files, each alphabetical — a raw provider ordering is
                     // close to useless for confirming a listing looks right.
                     nodes = result.value.nodes.sortedWith(
@@ -101,12 +106,5 @@ class BrowseViewModel @Inject constructor(
         }
     }
 
-    private fun locationLabel(): String =
-        (listOf(ROOT_LABEL) + trail.map { it.name }).joinToString(" / ")
-
     private data class Crumb(val id: String, val name: String)
-
-    private companion object {
-        const val ROOT_LABEL = "OneDrive"
-    }
 }

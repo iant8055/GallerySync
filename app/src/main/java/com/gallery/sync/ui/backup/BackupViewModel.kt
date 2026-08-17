@@ -9,6 +9,7 @@ import com.gallery.sync.data.local.entity.BackupState
 import com.gallery.sync.data.local.media.MediaAccess
 import com.gallery.sync.data.local.media.MediaScanner
 import com.gallery.sync.domain.backup.BackupEngine
+import com.gallery.sync.domain.backup.StopReason
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,12 +25,36 @@ data class AlbumRow(
     val isEnabled: Boolean
 )
 
+/**
+ * What a run is doing, or what it did.
+ *
+ * Typed rather than a pre-built sentence: a ViewModel that assembles "4 uploaded, 2 failed" has
+ * baked English into logic, and no amount of translation can reach it. The screen turns this into
+ * words using string resources.
+ */
+sealed interface BackupStatus {
+
+    data object Scanning : BackupStatus
+
+    data object Uploading : BackupStatus
+
+    data object NoPermission : BackupStatus
+
+    data class Finished(
+        val uploaded: Int,
+        val skipped: Int,
+        val failed: Int,
+        val remaining: Int,
+        val stoppedBecause: StopReason?
+    ) : BackupStatus
+}
+
 data class BackupUiState(
     val access: MediaAccess = MediaAccess.NONE,
     val albums: List<AlbumRow> = emptyList(),
     val isScanning: Boolean = false,
     val isRunning: Boolean = false,
-    val status: String? = null,
+    val status: BackupStatus? = null,
     val uploadedCount: Int = 0,
     val pendingCount: Int = 0
 ) {
@@ -118,29 +143,29 @@ class BackupViewModel @Inject constructor(
         if (_state.value.isRunning) return
 
         viewModelScope.launch {
-            _state.value = _state.value.copy(isRunning = true, status = "Scanning…")
+            _state.value = _state.value.copy(isRunning = true, status = BackupStatus.Scanning)
 
             val seen = engine.refreshLedger()
             if (seen == null) {
                 _state.value = _state.value.copy(
                     isRunning = false,
-                    status = "No permission to read media."
+                    status = BackupStatus.NoPermission
                 )
                 return@launch
             }
 
-            _state.value = _state.value.copy(status = "Uploading…")
+            _state.value = _state.value.copy(status = BackupStatus.Uploading)
             val result = engine.uploadPending()
 
             _state.value = _state.value.copy(
                 isRunning = false,
-                status = buildString {
-                    append("${result.uploaded} uploaded")
-                    if (result.skipped > 0) append(", ${result.skipped} already in OneDrive")
-                    if (result.failed > 0) append(", ${result.failed} failed")
-                    if (result.remaining > 0) append(", ${result.remaining} still to go")
-                    result.stoppedBecause?.let { append(" — stopped: $it") }
-                },
+                status = BackupStatus.Finished(
+                    uploaded = result.uploaded,
+                    skipped = result.skipped,
+                    failed = result.failed,
+                    remaining = result.remaining,
+                    stoppedBecause = result.stoppedBecause
+                ),
                 uploadedCount = entryDao.countInState(BackupState.UPLOADED),
                 pendingCount = entryDao.countNotInState(BackupState.UPLOADED)
             )

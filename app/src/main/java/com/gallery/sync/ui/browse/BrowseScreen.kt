@@ -21,14 +21,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gallery.sync.BuildConfig
+import com.gallery.sync.R
 import com.gallery.sync.domain.model.RemoteError
 import com.gallery.sync.domain.model.RemoteMediaNode
+import com.gallery.sync.ui.common.formatBytes
 
 /**
  * Lists the signed-in account's OneDrive tree.
@@ -51,15 +54,18 @@ fun BrowseScreen(
 
     Column(modifier = modifier.fillMaxSize()) {
         when (val current = state) {
-            BrowseUiState.Loading -> Box_Centered { CircularProgressIndicator() }
+            BrowseUiState.Loading -> Centered { CircularProgressIndicator() }
 
             is BrowseUiState.Content -> {
-                Header(location = current.location, onSignOut = onSignOut)
+                Header(
+                    location = locationLabel(current.trail),
+                    onSignOut = onSignOut
+                )
 
                 if (current.nodes.isEmpty()) {
-                    Box_Centered {
+                    Centered {
                         Text(
-                            text = "This folder is empty.",
+                            text = stringResource(R.string.browse_empty_folder),
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
@@ -74,8 +80,8 @@ fun BrowseScreen(
             }
 
             is BrowseUiState.Error -> {
-                Header(location = "OneDrive", onSignOut = onSignOut)
-                Box_Centered {
+                Header(location = stringResource(R.string.browse_root), onSignOut = onSignOut)
+                Centered {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -85,13 +91,20 @@ fun BrowseScreen(
                             style = MaterialTheme.typography.bodyLarge,
                             textAlign = TextAlign.Center
                         )
-                        OutlinedButton(onClick = viewModel::retry) { Text("Retry") }
+                        OutlinedButton(onClick = viewModel::retry) {
+                            Text(stringResource(R.string.retry_action))
+                        }
                     }
                 }
             }
         }
     }
 }
+
+/** Joins the localised root with the folders entered so far. */
+@Composable
+private fun locationLabel(trail: List<String>): String =
+    (listOf(stringResource(R.string.browse_root)) + trail).joinToString(" / ")
 
 @Composable
 private fun Header(location: String, onSignOut: () -> Unit) {
@@ -109,7 +122,9 @@ private fun Header(location: String, onSignOut: () -> Unit) {
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f, fill = false)
         )
-        OutlinedButton(onClick = onSignOut) { Text("Sign out") }
+        OutlinedButton(onClick = onSignOut) {
+            Text(stringResource(R.string.sign_out_action))
+        }
     }
     HorizontalDivider()
 }
@@ -143,16 +158,13 @@ private fun NodeRow(node: RemoteMediaNode, onOpen: (RemoteMediaNode.Folder) -> U
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Text(
-                text = node.subtitle(),
-                style = MaterialTheme.typography.bodySmall
-            )
+            Text(text = node.subtitle(), style = MaterialTheme.typography.bodySmall)
         }
     }
 }
 
 @Composable
-private fun Box_Centered(content: @Composable () -> Unit) {
+private fun Centered(content: @Composable () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -162,27 +174,25 @@ private fun Box_Centered(content: @Composable () -> Unit) {
     ) { content() }
 }
 
+@Composable
 private fun RemoteMediaNode.subtitle(): String = when (this) {
     is RemoteMediaNode.Folder ->
-        if (childCount > 0) "$childCount items" else "Folder"
+        if (childCount > 0) {
+            pluralStringResource(R.plurals.item_count, childCount, childCount)
+        } else {
+            stringResource(R.string.browse_folder)
+        }
 
     is RemoteMediaNode.File ->
-        "${formatBytes(sizeBytes)} · $mimeType"
+        "${formatBytes(LocalContext.current, sizeBytes)} · $mimeType"
 }
 
-/** Compact human-readable size. Binary units, matching what file managers show. */
-internal fun formatBytes(bytes: Long): String = when {
-    bytes < 1024 -> "$bytes B"
-    bytes < 1024 * 1024 -> "${bytes / 1024} KB"
-    bytes < 1024L * 1024 * 1024 -> "${bytes / (1024 * 1024)} MB"
-    else -> String.format("%.1f GB", bytes / (1024.0 * 1024 * 1024))
-}
-
+@Composable
 private fun RemoteError.readable(): String = when (this) {
-    RemoteError.NoToken -> "Not signed in."
-    RemoteError.Unauthorized -> "OneDrive rejected the sign-in. Try signing out and back in."
-    RemoteError.Network -> "Can't reach OneDrive. Check your connection."
-    RemoteError.InsufficientStorage -> "Your OneDrive is full. Free up space to continue."
-    is RemoteError.Http -> "OneDrive returned an error ($code)."
-    is RemoteError.Unknown -> "Something went wrong: ${cause.javaClass.simpleName}"
+    RemoteError.NoToken -> stringResource(R.string.error_not_signed_in)
+    RemoteError.Unauthorized -> stringResource(R.string.error_unauthorized)
+    RemoteError.Network -> stringResource(R.string.error_network)
+    RemoteError.InsufficientStorage -> stringResource(R.string.error_drive_full)
+    is RemoteError.Http -> stringResource(R.string.error_http, code)
+    is RemoteError.Unknown -> stringResource(R.string.error_unknown, cause.javaClass.simpleName)
 }
