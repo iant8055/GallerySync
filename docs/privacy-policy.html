@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy — Gallery Sync</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --ink: #1a1a1a;
+    --ink2: #4a4a4a;
+    --rule: #e2e2e2;
+    --accent: #2b5fd9;
+    --note-bg: #f4f6fb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161a;
+      --ink: #ececec;
+      --ink2: #b3b3b3;
+      --rule: #2c2f36;
+      --accent: #7ba3ff;
+      --note-bg: #1c1f26;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 40px 20px 80px;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+  main { max-width: 680px; margin: 0 auto; }
+  h1 { font-size: 28px; line-height: 1.25; margin: 0 0 8px; }
+  .sub { color: var(--ink2); margin: 0 0 32px; }
+  h2 { font-size: 19px; margin: 36px 0 12px; padding-top: 20px; border-top: 1px solid var(--rule); }
+  p, li { color: var(--ink2); }
+  strong { color: var(--ink); }
+  ul { padding-left: 22px; }
+  li { margin-bottom: 8px; }
+  a { color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 15px; }
+  th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th { color: var(--ink); font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .note {
+    background: var(--note-bg);
+    border-left: 3px solid var(--accent);
+    padding: 14px 16px;
+    margin: 20px 0;
+    border-radius: 0 6px 6px 0;
+  }
+  .note p { margin: 0; }
+  footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--rule); font-size: 14px; color: var(--ink2); }
+</style>
+</head>
+<body>
+<main>
+
+  <h1>Privacy Policy</h1>
+  <p class="sub">Gallery Sync — last updated 17 August 2026</p>
+
+  <div class="note">
+    <p><strong>The short version.</strong> Gallery Sync sends your photos and videos to your own
+    Microsoft OneDrive account and nowhere else. The developer operates no server, receives none
+    of your data, and cannot see your photos, your file names, or your account. There is no
+    analytics, no advertising, and no tracking of any kind.</p>
+  </div>
+
+  <h2>What the app does with your data</h2>
+  <p>Gallery Sync backs up photos and videos from your device to <strong>your own</strong> OneDrive
+  account, and lets you browse what is stored there. To do that it needs to read the media on your
+  device and to sign in to your Microsoft account.</p>
+  <p>Your photos travel from your device directly to Microsoft's OneDrive service over an encrypted
+  connection. They do not pass through any server belonging to the developer, because no such
+  server exists.</p>
+
+  <h2>Data the app handles</h2>
+  <table>
+    <thead>
+      <tr><th>Data</th><th>Why</th><th>Where it goes</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Photos and videos on your device</td>
+        <td>To back them up, at your direction</td>
+        <td>Your OneDrive account. Nowhere else.</td>
+      </tr>
+      <tr>
+        <td>Names and folders of files in your OneDrive</td>
+        <td>To show you what is stored and track what still needs backing up</td>
+        <td>A database on your device only</td>
+      </tr>
+      <tr>
+        <td>Microsoft sign-in token</td>
+        <td>To access your OneDrive on your behalf</td>
+        <td>Encrypted storage on your device only</td>
+      </tr>
+      <tr>
+        <td>Your Microsoft account email</td>
+        <td>Shown in the app so you know which account is connected</td>
+        <td>Displayed on your device only</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>What the developer collects</h2>
+  <p><strong>Nothing.</strong> Gallery Sync has no backend service. The developer does not receive,
+  store, or process your photos, your file names, your email address, your device identifiers, or
+  any usage information. There is no account to register with the developer and no data held about
+  you anywhere.</p>
+
+  <h2>Third parties</h2>
+  <p>Gallery Sync communicates with <strong>Microsoft OneDrive</strong>, using the Microsoft account
+  you sign in with. Microsoft's handling of the data you store with them is governed by the
+  <a href="https://privacy.microsoft.com/privacystatement">Microsoft Privacy Statement</a>.</p>
+  <p>Signing in uses Microsoft's official authentication library. Your password is never seen by
+  Gallery Sync — you enter it on Microsoft's own sign-in page, and the app only ever receives a
+  token that grants access to your files.</p>
+  <p>The app contains <strong>no analytics, no crash reporting, no advertising SDKs</strong>, and no
+  other third-party service that collects or transmits your data.</p>
+
+  <h2>Permissions</h2>
+  <ul>
+    <li><strong>Photos and videos</strong> — to read the media you have chosen to back up. The app
+    only reads files; it never deletes them.</li>
+    <li><strong>Internet and network state</strong> — to upload to OneDrive, and to wait for a
+    suitable connection before doing so.</li>
+  </ul>
+  <p>You choose which albums are backed up. Albums you exclude are never read or uploaded.</p>
+
+  <h2>Storage on your device</h2>
+  <p>Gallery Sync keeps a local database describing your OneDrive contents, and may cache copies of
+  files you open so they can be used by other apps. This data lives in the app's private storage,
+  is not readable by other apps, and is protected by your device's encryption.</p>
+
+  <h2>Your photos are never deleted</h2>
+  <p>Gallery Sync does not delete anything from your OneDrive, and does not delete the original
+  photos on your device. It only ever adds copies to your cloud storage and manages its own local
+  cache.</p>
+
+  <h2>Deleting your data</h2>
+  <p>You can sign out at any time, which removes the stored token and local index. Uninstalling
+  removes everything else the app created. Full instructions, including how to revoke the app's
+  access to your Microsoft account, are on the
+  <a href="delete-account.html">account and data deletion page</a>.</p>
+
+  <h2>Children</h2>
+  <p>Gallery Sync is not directed at children under 13 and does not knowingly collect information
+  from them. As stated above, the developer collects no information from any user.</p>
+
+  <h2>Changes to this policy</h2>
+  <p>If the app's handling of data changes, this policy will be updated and the date at the top
+  revised. Material changes will be noted in the app's release notes.</p>
+
+  <h2>Contact</h2>
+  <p>Questions about this policy, or about how Gallery Sync handles your data, can be raised at
+  <a href="https://github.com/iant8055/GallerySync/issues">github.com/iant8055/GallerySync/issues</a>.</p>
+
+  <footer>
+    Gallery Sync — Privacy Policy. Last updated 17 August 2026.
+  </footer>
+
+</main>
+</body>
+</html>
