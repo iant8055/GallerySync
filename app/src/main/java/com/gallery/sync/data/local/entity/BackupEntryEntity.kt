@@ -69,7 +69,20 @@ data class BackupEntryEntity(
     val attemptCount: Int = 0,
 
     /** Last failure, for display and diagnosis. Never contains a token or a URL with one. */
-    val lastError: String? = null
+    val lastError: String? = null,
+
+    /**
+     * The local file has been replaced by a downscaled proxy; the original lives only in OneDrive.
+     *
+     * Load-bearing for correctness, not just display. Proxying changes the local file's size, so
+     * a rescan computes a different [id] and would treat the proxy as a new file to upload. The
+     * scan skips any local item whose [mediaStoreId] matches a proxied row — which is why that id
+     * is kept even though it is unfit for identity.
+     */
+    val isProxied: Boolean = false,
+
+    /** What the local file occupies now. [sizeBytes] still means the original, which is in the cloud. */
+    val localProxySizeBytes: Long? = null
 )
 
 /**

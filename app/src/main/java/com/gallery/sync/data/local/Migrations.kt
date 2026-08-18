@@ -60,6 +60,23 @@ object Migrations {
         }
     }
 
+    /**
+     * 2 → 3: records that a local file has been replaced by a downscaled proxy.
+     *
+     * Additive. `sizeBytes` keeps meaning the original's size, because that is what is in the
+     * cloud; `localProxySizeBytes` is what the phone now holds.
+     */
+    val MIGRATION_2_3 = object : Migration(2, 3) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "ALTER TABLE `backup_entries` ADD COLUMN `isProxied` INTEGER NOT NULL DEFAULT 0"
+            )
+            db.execSQL(
+                "ALTER TABLE `backup_entries` ADD COLUMN `localProxySizeBytes` INTEGER"
+            )
+        }
+    }
+
     /** Every migration, in order, for the database builder. */
-    val ALL = arrayOf(MIGRATION_1_2)
+    val ALL = arrayOf(MIGRATION_1_2, MIGRATION_2_3)
 }

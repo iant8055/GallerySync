@@ -140,6 +140,38 @@ interface BackupEntryDao {
     @Query("SELECT * FROM backup_entries WHERE id = :id")
     suspend fun find(id: String): BackupEntryEntity?
 
+    /**
+     * MediaStore ids of files replaced by a local proxy.
+     *
+     * By id, not by the content key: proxying changes the file's size, so the key no longer
+     * matches. Without this the scanner sees each proxy as a brand-new file and uploads it beside
+     * the original it was made from.
+     */
+    @Query("SELECT mediaStoreId FROM backup_entries WHERE isProxied = 1")
+    suspend fun proxiedMediaStoreIds(): List<Long>
+
+    @Query(
+        """
+        UPDATE backup_entries
+        SET isProxied = 1, localProxySizeBytes = :proxySizeBytes
+        WHERE id = :id
+        """
+    )
+    suspend fun markProxied(id: String, proxySizeBytes: Long)
+
+    /** Verified in the cloud, still whole on the phone — the candidates for proxying. */
+    @Query(
+        """
+        SELECT * FROM backup_entries
+        WHERE state = :uploaded
+          AND isProxied = 0
+          AND isVideo = 0
+          AND remoteSizeBytes IS NOT NULL
+          AND remoteSizeBytes = sizeBytes
+        """
+    )
+    suspend fun proxyCandidates(uploaded: BackupState = BackupState.UPLOADED): List<BackupEntryEntity>
+
     /** Per-album totals, so each row can say whether it is completely safe. */
     @Query(
         """

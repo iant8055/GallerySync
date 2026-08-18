@@ -81,7 +81,12 @@ class BackupEngine @Inject constructor(
             return@withContext null
         }
 
-        val items = scanner.scanAll()
+        // Proxied files are skipped by MediaStore id, because proxying changed their size and so
+        // their content key. Without this every proxy is seen as a new file and uploaded beside
+        // the original it replaced — the single most important line in this method.
+        val proxied = entryDao.proxiedMediaStoreIds().toSet()
+
+        val items = scanner.scanAll().filterNot { it.mediaStoreId in proxied }
         val entries = items.map { item ->
             BackupEntryEntity(
                 id = backupKeyOf(

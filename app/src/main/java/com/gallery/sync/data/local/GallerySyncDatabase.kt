@@ -31,7 +31,7 @@ import com.gallery.sync.data.local.entity.MediaItemEntity
         BackupEntryEntity::class,
         AlbumPreferenceEntity::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = true
 )
 @TypeConverters(MediaSourceConverter::class, BackupStateConverter::class)

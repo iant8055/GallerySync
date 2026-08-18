@@ -81,6 +81,7 @@ dependencies {
     // Background work
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.exifinterface)
 
     // Persistence
     implementation(libs.androidx.room.runtime)

@@ -1,0 +1,199 @@
+package com.gallery.sync.data.local.media
+
+import android.content.ContentResolver
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
+import androidx.exifinterface.media.ExifInterface
+import com.gallery.sync.di.IoDispatcher
+import com.gallery.sync.util.Logger
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
+import java.io.File
+import javax.inject.Inject
+import javax.inject.Singleton
+
+/** A downscaled stand-in for a photo whose original is safely in OneDrive. */
+data class GeneratedProxy(
+    val file: File,
+    val sizeBytes: Long,
+    val widthPx: Int,
+    val heightPx: Int
+)
+
+/**
+ * Produces the downscaled image that will replace a photo locally.
+ *
+ * Deliberately does not touch MediaStore or overwrite anything — it only writes into app cache.
+ * The destructive half lives in `ProxyApplier`, so the risky code stays small and this part stays
+ * testable.
+ */
+@Singleton
+class ProxyGenerator @Inject constructor(
+    @ApplicationContext private val context: Context,
+    @param:IoDispatcher private val dispatcher: CoroutineDispatcher
+) {
+
+    private val resolver: ContentResolver get() = context.contentResolver
+
+    /**
+     * Builds a proxy for [uri], or null when one is not worth making — the image is already small,
+     * or it could not be decoded at all.
+     *
+     * Null is a normal outcome. A photo that cannot be decoded must be left completely alone: it
+     * is the case where overwriting would destroy something we do not understand.
+     */
+    suspend fun generate(uri: Uri, displayName: String): GeneratedProxy? = withContext(dispatcher) {
+        val bounds = readBounds(uri) ?: run {
+            Logger.w(TAG, "could not read bounds for $displayName; leaving it alone")
+            return@withContext null
+        }
+
+        val longEdge = maxOf(bounds.outWidth, bounds.outHeight)
+        if (longEdge <= 0) return@withContext null
+
+        // Already small enough. Never upscale — that costs space and adds nothing.
+        if (longEdge <= TARGET_LONG_EDGE_PX) {
+            Logger.d(TAG, "$displayName is already ${longEdge}px; no proxy needed")
+            return@withContext null
+        }
+
+        val decoded = decodeScaled(uri, longEdge) ?: run {
+            Logger.w(TAG, "could not decode $displayName; leaving it alone")
+            return@withContext null
+        }
+
+        val scaled = scaleToTarget(decoded)
+        if (scaled !== decoded) decoded.recycle()
+
+        val output = File(context.cacheDir, "proxy_${displayName.substringBeforeLast('.')}.jpg")
+        val written = runCatching {
+            output.outputStream().use { out ->
+                scaled.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, out)
+            }
+        }.isSuccess
+
+        val width = scaled.width
+        val height = scaled.height
+        scaled.recycle()
+
+        if (!written || !output.exists() || output.length() == 0L) {
+            output.delete()
+            Logger.w(TAG, "proxy for $displayName was not written; leaving the original alone")
+            return@withContext null
+        }
+
+        // Without EXIF the gallery loses date grouping and map placement, and — most visibly —
+        // orientation, which turns portraits sideways. Copy it before the proxy is usable.
+        if (!copyExif(uri, output)) {
+            output.delete()
+            Logger.w(TAG, "EXIF could not be copied for $displayName; not proxying it")
+            return@withContext null
+        }
+
+        GeneratedProxy(
+            file = output,
+            sizeBytes = output.length(),
+            widthPx = width,
+            heightPx = height
+        )
+    }
+
+    private fun readBounds(uri: Uri): BitmapFactory.Options? = runCatching {
+        val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, options) }
+        options.takeIf { it.outWidth > 0 && it.outHeight > 0 }
+    }.getOrNull()
+
+    /**
+     * Decodes at a reduced sample size.
+     *
+     * A 50 MP image decoded whole is roughly 200 MB in memory and will kill the process on many
+     * phones. `inSampleSize` keeps the decode near the size actually needed.
+     */
+    private fun decodeScaled(uri: Uri, longEdge: Int): Bitmap? = runCatching {
+        val options = BitmapFactory.Options().apply {
+            inSampleSize = sampleSizeFor(longEdge, TARGET_LONG_EDGE_PX)
+        }
+        resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, options) }
+    }.getOrNull()
+
+    private fun scaleToTarget(source: Bitmap): Bitmap {
+        val longEdge = maxOf(source.width, source.height)
+        if (longEdge <= TARGET_LONG_EDGE_PX) return source
+
+        val ratio = TARGET_LONG_EDGE_PX.toFloat() / longEdge
+        return Bitmap.createScaledBitmap(
+            source,
+            (source.width * ratio).toInt().coerceAtLeast(1),
+            (source.height * ratio).toInt().coerceAtLeast(1),
+            true
+        )
+    }
+
+    private fun copyExif(source: Uri, destination: File): Boolean = runCatching {
+        val from = resolver.openInputStream(source)?.use { ExifInterface(it) } ?: return false
+        val to = ExifInterface(destination.absolutePath)
+
+        PRESERVED_EXIF_TAGS.forEach { tag ->
+            from.getAttribute(tag)?.let { to.setAttribute(tag, it) }
+        }
+        to.saveAttributes()
+        true
+    }.getOrDefault(false)
+
+    companion object {
+
+        private const val TAG = "ProxyGenerator"
+
+        /** Long edge of the proxy. Roughly a tenth the bytes, still good for viewing and sharing. */
+        const val TARGET_LONG_EDGE_PX = 2048
+
+        const val JPEG_QUALITY = 90
+
+        /**
+         * Largest power-of-two sample size that still leaves the image at or above [target].
+         *
+         * Pure, and public so it is unit tested — an off-by-one here means either an out-of-memory
+         * crash or a proxy blurrier than intended.
+         */
+        fun sampleSizeFor(longEdge: Int, target: Int): Int {
+            if (longEdge <= target || target <= 0) return 1
+            var sample = 1
+            while (longEdge / (sample * 2) >= target) {
+                sample *= 2
+            }
+            return sample
+        }
+
+        /**
+         * What the gallery actually uses. Orientation and date matter most: without orientation
+         * portraits display sideways, and without date the gallery cannot group by day.
+         */
+        val PRESERVED_EXIF_TAGS = listOf(
+            ExifInterface.TAG_DATETIME,
+            ExifInterface.TAG_DATETIME_ORIGINAL,
+            ExifInterface.TAG_DATETIME_DIGITIZED,
+            ExifInterface.TAG_OFFSET_TIME,
+            ExifInterface.TAG_OFFSET_TIME_ORIGINAL,
+            ExifInterface.TAG_ORIENTATION,
+            ExifInterface.TAG_GPS_LATITUDE,
+            ExifInterface.TAG_GPS_LATITUDE_REF,
+            ExifInterface.TAG_GPS_LONGITUDE,
+            ExifInterface.TAG_GPS_LONGITUDE_REF,
+            ExifInterface.TAG_GPS_ALTITUDE,
+            ExifInterface.TAG_GPS_ALTITUDE_REF,
+            ExifInterface.TAG_GPS_TIMESTAMP,
+            ExifInterface.TAG_GPS_DATESTAMP,
+            ExifInterface.TAG_MAKE,
+            ExifInterface.TAG_MODEL,
+            ExifInterface.TAG_F_NUMBER,
+            ExifInterface.TAG_EXPOSURE_TIME,
+            ExifInterface.TAG_FOCAL_LENGTH,
+            ExifInterface.TAG_PHOTOGRAPHIC_SENSITIVITY,
+            ExifInterface.TAG_WHITE_BALANCE
+        )
+    }
+}
