@@ -225,7 +225,14 @@ private fun AlbumList(state: BackupUiState, viewModel: BackupViewModel) {
 @Composable
 private fun BackupStatus.readable(): String = when (this) {
     BackupStatus.Scanning -> stringResource(R.string.backup_status_scanning)
-    BackupStatus.Uploading -> stringResource(R.string.backup_status_uploading)
+    is BackupStatus.Uploading -> stringResource(
+        R.string.backup_status_uploading_progress,
+        // One-based: the file being sent is the (completed + 1)th of the run.
+        (completed + 1).coerceAtMost(total),
+        total,
+        currentFile,
+        percentOfCurrent
+    )
     BackupStatus.NoPermission -> stringResource(R.string.backup_status_no_permission)
 
     is BackupStatus.Finished -> {

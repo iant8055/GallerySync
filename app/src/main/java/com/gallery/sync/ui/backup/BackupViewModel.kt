@@ -73,7 +73,13 @@ sealed interface BackupStatus {
 
     data object Scanning : BackupStatus
 
-    data object Uploading : BackupStatus
+    /** Mid-run, with live position so a long upload does not look like a hang. */
+    data class Uploading(
+        val completed: Int,
+        val total: Int,
+        val currentFile: String,
+        val percentOfCurrent: Int
+    ) : BackupStatus
 
     data object NoPermission : BackupStatus
 
@@ -352,8 +358,22 @@ class BackupViewModel @Inject constructor(
                 return@launch
             }
 
-            _state.value = _state.value.copy(status = BackupStatus.Uploading)
-            val result = engine.uploadPending()
+            val result = engine.uploadPending { progress ->
+                _state.value = _state.value.copy(
+                    status = BackupStatus.Uploading(
+                        completed = progress.completed,
+                        total = progress.total,
+                        currentFile = progress.currentFile,
+                        percentOfCurrent = if (progress.currentBytesTotal > 0) {
+                            ((progress.currentBytesSent * 100) / progress.currentBytesTotal)
+                                .toInt()
+                                .coerceIn(0, 100)
+                        } else {
+                            0
+                        }
+                    )
+                )
+            }
 
             _state.value = _state.value.copy(
                 isRunning = false,

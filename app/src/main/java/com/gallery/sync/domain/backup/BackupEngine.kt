@@ -41,6 +41,21 @@ enum class StopReason {
     NO_MEDIA_ACCESS
 }
 
+/**
+ * Live position within a run.
+ *
+ * Emitted as each file starts and as its bytes go out, so a long run says what it is doing. A
+ * three-minute upload with no feedback reads as a hang, and the biggest files are exactly the ones
+ * that take longest.
+ */
+data class BackupProgress(
+    val completed: Int,
+    val total: Int,
+    val currentFile: String,
+    val currentBytesSent: Long,
+    val currentBytesTotal: Long
+)
+
 data class BackupRunResult(
     val uploaded: Int,
     val failed: Int,
@@ -149,7 +164,10 @@ class BackupEngine @Inject constructor(
      * rejected token, a full drive, a dropped network. Continuing would waste the user's battery
      * and data to collect an identical error on each of a thousand photos.
      */
-    suspend fun uploadPending(limit: Int = DEFAULT_BATCH): BackupRunResult =
+    suspend fun uploadPending(
+        limit: Int = DEFAULT_BATCH,
+        onProgress: (BackupProgress) -> Unit = {}
+    ): BackupRunResult =
         withContext(dispatcher) {
             if (scanner.access() == MediaAccess.NONE) {
                 return@withContext BackupRunResult(
@@ -198,7 +216,34 @@ class BackupEngine @Inject constructor(
                     sizeBytes = entry.sizeBytes
                 )
 
-                when (val result = uploadRepository.upload(source, remotePathFor(entry.album))) {
+                // Announce the file before sending a byte, so a large video shows its name
+                // immediately rather than after the first chunk lands.
+                onProgress(
+                    BackupProgress(
+                        completed = uploaded + skipped + pruned,
+                        total = pending.size,
+                        currentFile = entry.displayName,
+                        currentBytesSent = 0,
+                        currentBytesTotal = entry.sizeBytes
+                    )
+                )
+
+                val result = uploadRepository.upload(
+                    source = source,
+                    remoteFolderPath = remotePathFor(entry.album)
+                ) { sent, total ->
+                    onProgress(
+                        BackupProgress(
+                            completed = uploaded + skipped + pruned,
+                            total = pending.size,
+                            currentFile = entry.displayName,
+                            currentBytesSent = sent,
+                            currentBytesTotal = total
+                        )
+                    )
+                }
+
+                when (result) {
                     is DataResult.Success -> {
                         val item = result.value
                         // Size equality is the proof. "A file appeared" is also true of a

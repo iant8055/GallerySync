@@ -129,6 +129,8 @@
     <!-- Backup status -->
     <string name="backup_status_scanning">Scanning…</string>
     <string name="backup_status_uploading">Uploading…</string>
+    <!-- Names the file and its own progress: on a 178 MB video, "3 of 12" alone looks stuck. -->
+    <string name="backup_status_uploading_progress">Uploading %1$d of %2$d · %3$s · %4$d%%</string>
     <string name="backup_status_no_permission">No permission to read media.</string>
     <string name="backup_status_uploaded">%1$d uploaded</string>
     <string name="backup_status_skipped">%1$d already in OneDrive</string>
