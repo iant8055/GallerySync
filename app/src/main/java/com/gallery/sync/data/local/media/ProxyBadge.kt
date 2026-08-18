@@ -52,11 +52,51 @@ object ProxyBadge {
         return BadgeBounds(right - size, bottom - size, right, bottom)
     }
 
-    /** Draws onto [bitmap] in place. The bitmap must be mutable. */
-    fun drawOn(bitmap: Bitmap) {
-        val b = boundsFor(bitmap.width, bitmap.height)
+    /**
+     * The size the photo appears at once EXIF rotation is applied. A quarter turn swaps the axes.
+     */
+    fun displaySizeFor(width: Int, height: Int, rotationDegrees: Int): Pair<Int, Int> =
+        if (normalise(rotationDegrees) % 180 == 90) height to width else width to height
+
+    /**
+     * Draws onto [bitmap] in place. The bitmap must be mutable.
+     *
+     * [rotationDegrees] is the photo's EXIF rotation — what every gallery applies before showing
+     * it. Without accounting for it the badge is drawn into the stored buffer and then rotated
+     * along with the photo, so it lands on its side in a corner nobody chose. Everything below is
+     * therefore positioned in *display* space and mapped back onto the stored pixels.
+     */
+    fun drawOn(bitmap: Bitmap, rotationDegrees: Int = 0) {
+        val rotation = normalise(rotationDegrees)
+        val (displayWidth, displayHeight) =
+            displaySizeFor(bitmap.width, bitmap.height, rotation)
+
+        val b = boundsFor(displayWidth, displayHeight)
         val rect = RectF(b.left, b.top, b.right, b.bottom)
+
+        val w = bitmap.width.toFloat()
+        val h = bitmap.height.toFloat()
         val canvas = Canvas(bitmap)
+
+        canvas.save()
+        // The inverse of the rotation the gallery is about to apply, so the two cancel out and the
+        // cloud ends up upright in the bottom-right of what the user actually sees.
+        when (rotation) {
+            90 -> {
+                canvas.translate(0f, h)
+                canvas.rotate(-90f)
+            }
+
+            180 -> {
+                canvas.translate(w, h)
+                canvas.rotate(180f)
+            }
+
+            270 -> {
+                canvas.translate(w, 0f)
+                canvas.rotate(90f)
+            }
+        }
 
         val scrim = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = SCRIM_COLOR }
         val corner = b.size * CORNER_FRACTION
@@ -64,7 +104,12 @@ object ProxyBadge {
 
         val glyph = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = GLYPH_COLOR }
         canvas.drawPath(cloudPath(rect), glyph)
+
+        canvas.restore()
     }
+
+    /** Folds any reported rotation onto one of 0, 90, 180, 270. */
+    private fun normalise(degrees: Int): Int = ((degrees % 360) + 360) % 360
 
     /**
      * The familiar cloud: a wide rounded base, one large dome left of centre, a small bump to its

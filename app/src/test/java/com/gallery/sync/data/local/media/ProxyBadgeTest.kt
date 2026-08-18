@@ -47,6 +47,25 @@ class ProxyBadgeTest {
     }
 
     @Test
+    fun `a quarter turn swaps the display axes`() {
+        assertEquals(1152 to 2048, ProxyBadge.displaySizeFor(2048, 1152, 90))
+        assertEquals(1152 to 2048, ProxyBadge.displaySizeFor(2048, 1152, 270))
+    }
+
+    @Test
+    fun `a half turn leaves the display axes alone`() {
+        assertEquals(2048 to 1152, ProxyBadge.displaySizeFor(2048, 1152, 0))
+        assertEquals(2048 to 1152, ProxyBadge.displaySizeFor(2048, 1152, 180))
+    }
+
+    @Test
+    fun `rotations outside zero to 360 still land on a quarter turn`() {
+        assertEquals(1152 to 2048, ProxyBadge.displaySizeFor(2048, 1152, -270))
+        assertEquals(1152 to 2048, ProxyBadge.displaySizeFor(2048, 1152, 450))
+        assertEquals(2048 to 1152, ProxyBadge.displaySizeFor(2048, 1152, 360))
+    }
+
+    @Test
     fun `badge is square`() {
         val bounds = ProxyBadge.boundsFor(2048, 1152)
 

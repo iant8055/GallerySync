@@ -79,7 +79,9 @@ class ProxyGenerator @Inject constructor(
         val canvasReady = ensureMutable(scaled)
         if (canvasReady !== scaled) scaled.recycle()
 
-        ProxyBadge.drawOn(canvasReady)
+        // The gallery rotates the photo by its EXIF orientation before showing it, so the badge has
+        // to be placed against that rotation or it appears sideways in the wrong corner.
+        ProxyBadge.drawOn(canvasReady, readRotationDegrees(uri))
 
         val output = File(context.cacheDir, "proxy_${displayName.substringBeforeLast('.')}.jpg")
         val written = runCatching {
@@ -141,6 +143,11 @@ class ProxyGenerator @Inject constructor(
         } else {
             source.copy(source.config ?: Bitmap.Config.ARGB_8888, true) ?: source
         }
+
+    /** The photo's EXIF rotation, which is what a gallery applies before displaying it. */
+    private fun readRotationDegrees(uri: Uri): Int = runCatching {
+        resolver.openInputStream(uri)?.use { ExifInterface(it).rotationDegrees } ?: 0
+    }.getOrDefault(0)
 
     /**
      * Whether this file already carries GallerySync's proxy marker.

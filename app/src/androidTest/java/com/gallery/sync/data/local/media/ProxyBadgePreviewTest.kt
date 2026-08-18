@@ -27,16 +27,20 @@ class ProxyBadgePreviewTest {
         // can reach app-private storage.
         val dir = context.cacheDir
 
+        // Rotation 90 is the common case on a Samsung camera: the photo is stored landscape with an
+        // EXIF flag, so the badge must be drawn against that turn to display upright.
         val cases = mapOf(
-            "badge_on_white.png" to Color.WHITE,
-            "badge_on_black.png" to Color.BLACK,
-            "badge_on_grey.png" to Color.rgb(128, 128, 128)
+            "badge_on_white.png" to (Color.WHITE to 0),
+            "badge_on_black.png" to (Color.BLACK to 0),
+            "badge_rotated_90.png" to (Color.rgb(128, 128, 128) to 90),
+            "badge_rotated_270.png" to (Color.rgb(128, 128, 128) to 270)
         )
 
-        cases.forEach { (name, background) ->
-            val bitmap = Bitmap.createBitmap(2048, 1536, Bitmap.Config.ARGB_8888)
+        cases.forEach { (name, case) ->
+            val (background, rotation) = case
+            val bitmap = Bitmap.createBitmap(2048, 1152, Bitmap.Config.ARGB_8888)
             Canvas(bitmap).drawColor(background)
-            ProxyBadge.drawOn(bitmap)
+            ProxyBadge.drawOn(bitmap, rotation)
 
             val file = File(dir, name)
             file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
