@@ -17,6 +17,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -64,6 +65,12 @@ fun BrowseScreen(
                     trail = current.trail,
                     onNavigateTo = viewModel::navigateTo,
                     onSignOut = onSignOut
+                )
+
+                SortBar(
+                    field = current.sortField,
+                    ascending = current.sortAscending,
+                    onSelect = viewModel::setSort
                 )
 
                 if (current.nodes.isEmpty()) {
@@ -163,6 +170,54 @@ private fun Header(
 
         OutlinedButton(onClick = onSignOut) {
             Text(stringResource(R.string.sign_out_action))
+        }
+    }
+    HorizontalDivider()
+}
+
+/**
+ * Sort controls, for verifying a backup rather than browsing.
+ *
+ * Tapping the active field flips direction, as a column header does everywhere else.
+ */
+@Composable
+private fun SortBar(
+    field: SortField,
+    ascending: Boolean,
+    onSelect: (SortField) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        SortField.entries.forEach { option ->
+            val selected = option == field
+
+            // Resolved out here: stringResource needs a composable context and cannot be called
+            // from inside a buildString lambda.
+            val label = when (option) {
+                SortField.NAME -> stringResource(R.string.sort_name)
+                SortField.DATE -> stringResource(R.string.sort_date)
+                SortField.SIZE -> stringResource(R.string.sort_size)
+            }
+            val arrow = stringResource(
+                if (ascending) R.string.sort_ascending else R.string.sort_descending
+            )
+
+            TextButton(onClick = { onSelect(option) }) {
+                Text(
+                    text = if (selected) "$label $arrow" else label,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = if (selected) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    }
+                )
+            }
         }
     }
     HorizontalDivider()

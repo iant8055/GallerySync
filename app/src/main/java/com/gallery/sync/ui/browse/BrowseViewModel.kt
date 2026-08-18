@@ -13,6 +13,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * How to order a listing.
+ *
+ * Exists for verification, not browsing: the question being answered is "did this file arrive, and
+ * is it the right size?" — which is why size is a first-class option alongside name and date.
+ */
+enum class SortField { NAME, DATE, SIZE }
+
 /** What the browse screen is showing. */
 sealed interface BrowseUiState {
 
@@ -27,7 +35,9 @@ sealed interface BrowseUiState {
          */
         val trail: List<String>,
         val nodes: List<RemoteMediaNode>,
-        val canGoBack: Boolean
+        val canGoBack: Boolean,
+        val sortField: SortField = SortField.NAME,
+        val sortAscending: Boolean = true
     ) : BrowseUiState
 
     data class Error(
@@ -53,6 +63,9 @@ class BrowseViewModel @Inject constructor(
 
     /** Folders entered so far. Empty means the drive root. */
     private val trail = mutableListOf<Crumb>()
+
+    private var sortField = SortField.NAME
+    private var sortAscending = true
 
     init {
         load()
@@ -88,6 +101,53 @@ class BrowseViewModel @Inject constructor(
 
     fun retry() = load()
 
+    /**
+     * Chooses the sort. Tapping the field already in use flips the direction, which is what a
+     * column header does everywhere else.
+     */
+    fun setSort(field: SortField) {
+        if (field == sortField) {
+            sortAscending = !sortAscending
+        } else {
+            sortField = field
+            // Names read naturally A-Z; dates and sizes are almost always wanted largest and
+            // newest first, which is where an unfamiliar or oversized file will be.
+            sortAscending = field == SortField.NAME
+        }
+        resort()
+    }
+
+    /** Re-orders what is already loaded. No network call — the listing has not changed. */
+    private fun resort() {
+        val current = _state.value as? BrowseUiState.Content ?: return
+        _state.value = current.copy(
+            nodes = sortNodes(current.nodes),
+            sortField = sortField,
+            sortAscending = sortAscending
+        )
+    }
+
+    /**
+     * Folders always come first, whatever the sort.
+     *
+     * Interleaving them by size or date scatters the structure through the list and makes a folder
+     * easy to miss, which defeats the point of drilling down to check something.
+     */
+    private fun sortNodes(nodes: List<RemoteMediaNode>): List<RemoteMediaNode> {
+        val comparator: Comparator<RemoteMediaNode> = when (sortField) {
+            SortField.NAME -> compareBy { it.name.lowercase() }
+            SortField.DATE -> compareBy { it.modifiedAtUtc }
+            // Folders report no size; keeping them at 0 leaves them together at one end rather
+            // than interleaved arbitrarily.
+            SortField.SIZE -> compareBy { (it as? RemoteMediaNode.File)?.sizeBytes ?: 0L }
+        }
+
+        return nodes.sortedWith(
+            compareBy<RemoteMediaNode> { it !is RemoteMediaNode.Folder }
+                .then(if (sortAscending) comparator else comparator.reversed())
+        )
+    }
+
     private fun load() {
         val current = trail.lastOrNull()
         viewModelScope.launch {
@@ -102,15 +162,10 @@ class BrowseViewModel @Inject constructor(
             _state.value = when (result) {
                 is DataResult.Success -> BrowseUiState.Content(
                     trail = trail.map { it.name },
-                    // Folders first, then files, each alphabetical — a raw provider ordering is
-                    // close to useless for confirming a listing looks right.
-                    nodes = result.value.nodes.sortedWith(
-                        compareBy(
-                            { it !is RemoteMediaNode.Folder },
-                            { it.name.lowercase() }
-                        )
-                    ),
-                    canGoBack = trail.isNotEmpty()
+                    nodes = sortNodes(result.value.nodes),
+                    canGoBack = trail.isNotEmpty(),
+                    sortField = sortField,
+                    sortAscending = sortAscending
                 )
 
                 is DataResult.Failure -> BrowseUiState.Error(
