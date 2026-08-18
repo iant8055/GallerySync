@@ -13,14 +13,22 @@ import javax.inject.Singleton
 /**
  * Removes the phone's copy of files that are already safely in OneDrive.
  *
- * Uses [MediaStore.createTrashRequest], never a delete. Trashed media stays recoverable in the
- * user's gallery for 30 days, and only the user ever empties it — CLAUDE.md forbids this app from
- * permanently destroying anything.
+ * Uses [MediaStore.createTrashRequest], never a delete — this app never issues a permanent-delete
+ * call.
  *
- * Two consequences that the UI has to be honest about:
- *  - Space is not reclaimed until the trash is emptied. Trashed files still occupy storage.
- *  - Android shows its own confirmation dialog listing the files, so the user always sees exactly
- *    what is about to happen and can refuse.
+ * ### Recoverability is NOT guaranteed, and the UI must not claim it is
+ *
+ * Observed on a Galaxy Z Fold 4: the request removed the files outright rather than leaving them
+ * recoverable. On Samsung the request is routed through Samsung Gallery's Recycle Bin, and when
+ * that setting is off there is nothing to route into — the trash request becomes a delete. The
+ * platform offers no way to detect this beforehand.
+ *
+ * So the guarantee this feature actually rests on is **not** the trash. It is that nothing is ever
+ * eligible unless OneDrive has confirmed the file and reported a matching byte size. The cloud copy
+ * is the safety net; the trash is a bonus that may or may not exist on a given device.
+ *
+ * Android shows its own confirmation listing the files, so the user always sees what is about to
+ * happen and can refuse.
  */
 @Singleton
 class LocalCopyRemover @Inject constructor(

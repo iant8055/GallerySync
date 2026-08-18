@@ -53,7 +53,7 @@
     -->
     <string name="backup_move_to_backup">Move %1$s to backup</string>
     <string name="backup_move_explainer">%1$s on this phone is already safely in OneDrive. Moving it to your backup frees that space.</string>
-    <string name="backup_move_trash_note">Files go to your gallery\'s Recently deleted first, so you can get them back for 30 days. The space is freed once you empty it.</string>
+    <string name="backup_move_trash_note">Your OneDrive copy is checked first and is never touched. On some phones the local copy goes to your gallery\'s Recently deleted; on others it is removed straight away, so treat this as permanent on the phone.</string>
     <string name="backup_move_unsupported">Moving files to backup needs Android 11 or newer.</string>
     <string name="backup_nothing_redundant">Nothing to move yet — files move to your backup once they are safely in OneDrive.</string>
     <string name="backup_deselect_all">Deselect all</string>

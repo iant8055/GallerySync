@@ -39,6 +39,13 @@ This is absolute and applies to every file, in every location, without exception
 - Locally this means `MediaStore.createTrashRequest()` (API 30+), never a plain delete.
   Below API 30 Android has no media trash, so local deletion is **not offered at all** on
   those versions rather than silently deleting permanently.
+- **A trash request is not a guarantee of recoverability.** Observed on a Galaxy Z Fold 4:
+  the files were removed outright. Samsung routes the request through Gallery's Recycle Bin,
+  and with that setting off the request becomes a delete. The platform gives no way to
+  detect this in advance.
+  Therefore: **never tell the user a local removal is recoverable.** The guarantee that
+  actually holds is the verified cloud copy — remote confirmation plus a matching byte size —
+  and that is what the UI may promise. Nothing else.
 - Remotely this means Graph `DELETE /me/drive/items/{id}`, which moves to the recycle bin.
   Never anything that bypasses it.
 - Removing a row from the local ledger or index is bookkeeping and is not a deletion — but
