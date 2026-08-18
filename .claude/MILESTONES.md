@@ -1,6 +1,28 @@
 # GallerySync Milestones
 
-**Hard deadline: 30 September 2026.** Samsung turns off Gallery Sync that day.
+**Samsung turns off Gallery Sync on 30 September 2026.**
+
+## Release gate — decided by Ian
+
+**Nothing is published to Google Play until v0.3.0 and v0.4.0 are built and tested.**
+
+Shipping v0.2.0 alone would deliver "back up your photos, and they disappear from your
+gallery" — the space is freed but nothing keeps the photos visible, because that is what
+v0.3 (photo proxies) and v0.4 (retrieval) are for. That is a broken product no matter how
+well the backup works.
+
+Two consequences:
+
+- **The Sept 30 date is a personal deadline, not a release deadline.** Ian's own library
+  still needs protecting when Samsung's sync stops. Backup alone covers that: run it, and
+  simply do not use Move to backup until the gallery side exists. OneDrive's own camera
+  backup is a reasonable second net in the meantime.
+- **v0.3 can be built properly rather than rushed**, since no store listing depends on it.
+
+## Naming
+Do not call anything "Sync" in the UI until v0.3 and v0.4 land. Samsung's Gallery Sync kept
+photos visible while freeing space; ours does not yet. Using the word early promises the
+behaviour users are migrating from and would be wrong. "Move to backup" until then.
 
 ## Design principle — GallerySync is invisible
 
