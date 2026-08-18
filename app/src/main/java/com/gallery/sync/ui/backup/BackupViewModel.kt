@@ -1,9 +1,14 @@
 package com.gallery.sync.ui.backup
 
+import android.content.Context
 import android.content.IntentSender
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.WorkManager
 import com.gallery.sync.data.local.media.LocalCopyRemover
+import com.gallery.sync.data.local.settings.BackupSettings
+import com.gallery.sync.worker.BackupScheduling
+import dagger.hilt.android.qualifiers.ApplicationContext
 import com.gallery.sync.data.local.dao.AlbumPreferenceDao
 import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.entity.AlbumPreferenceEntity
@@ -91,7 +96,11 @@ data class BackupUiState(
     val redundantCount: Int = 0,
     val redundantBytes: Long = 0L,
     /** False below API 30, where Android has no media trash and removal could only be permanent. */
-    val canRemoveLocalCopies: Boolean = false
+    val canRemoveLocalCopies: Boolean = false,
+    /** Back up on its own when new photos appear. */
+    val isAutomaticEnabled: Boolean = false,
+    /** Allow automatic runs on mobile data, not just Wi-Fi. */
+    val allowMeteredNetwork: Boolean = false
 ) {
     /** Files that would be sent if a run started now. */
     val enabledItemCount: Int get() = albums.filter { it.isEnabled }.sumOf { it.itemCount }
@@ -111,7 +120,9 @@ class BackupViewModel @Inject constructor(
     private val albumDao: AlbumPreferenceDao,
     private val entryDao: BackupEntryDao,
     private val engine: BackupEngine,
-    private val localCopyRemover: LocalCopyRemover
+    private val localCopyRemover: LocalCopyRemover,
+    private val settings: BackupSettings,
+    @param:ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(BackupUiState())
@@ -119,6 +130,43 @@ class BackupViewModel @Inject constructor(
 
     init {
         refresh()
+        viewModelScope.launch {
+            settings.preferences.collect { prefs ->
+                _state.value = _state.value.copy(
+                    isAutomaticEnabled = prefs.isAutomaticEnabled,
+                    allowMeteredNetwork = prefs.allowMeteredNetwork
+                )
+            }
+        }
+    }
+
+    /**
+     * Turns automatic backup on or off.
+     *
+     * Off by default and never enabled implicitly — installing a build must not start uploading
+     * someone's library on its own.
+     */
+    fun setAutomaticEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            settings.setAutomaticEnabled(enabled)
+            val workManager = WorkManager.getInstance(context)
+            if (enabled) {
+                BackupScheduling.enable(workManager, settings.current().allowMeteredNetwork)
+            } else {
+                BackupScheduling.disable(workManager)
+            }
+        }
+    }
+
+    fun setAllowMeteredNetwork(allowed: Boolean) {
+        viewModelScope.launch {
+            settings.setAllowMeteredNetwork(allowed)
+            // Constraints are fixed when work is enqueued, so a live schedule has to be rebuilt
+            // or the change would not take effect until something else happened to reschedule it.
+            if (settings.current().isAutomaticEnabled) {
+                BackupScheduling.enable(WorkManager.getInstance(context), allowed)
+            }
+        }
     }
 
     /** Re-reads permission state and the album list. Cheap enough to call on every resume. */

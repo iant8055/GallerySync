@@ -135,6 +135,34 @@ private fun AlbumList(state: BackupUiState, viewModel: BackupViewModel) {
             style = MaterialTheme.typography.bodySmall
         )
 
+        SettingSwitch(
+            label = stringResource(R.string.backup_automatic),
+            detail = stringResource(
+                if (state.isAutomaticEnabled) {
+                    R.string.backup_automatic_on
+                } else {
+                    R.string.backup_automatic_off
+                }
+            ),
+            checked = state.isAutomaticEnabled,
+            onCheckedChange = viewModel::setAutomaticEnabled
+        )
+
+        if (state.isAutomaticEnabled) {
+            SettingSwitch(
+                label = stringResource(R.string.backup_allow_metered),
+                detail = stringResource(
+                    if (state.allowMeteredNetwork) {
+                        R.string.backup_allow_metered_on
+                    } else {
+                        R.string.backup_allow_metered_off
+                    }
+                ),
+                checked = state.allowMeteredNetwork,
+                onCheckedChange = viewModel::setAllowMeteredNetwork
+            )
+        }
+
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(onClick = { viewModel.setAllAlbums(false) }) {
                 Text(stringResource(R.string.backup_deselect_all))
@@ -229,6 +257,26 @@ private fun AlbumList(state: BackupUiState, viewModel: BackupViewModel) {
             }
             HorizontalDivider()
         }
+    }
+}
+
+@Composable
+private fun SettingSwitch(
+    label: String,
+    detail: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(label, style = MaterialTheme.typography.bodyLarge)
+            Text(detail, style = MaterialTheme.typography.bodySmall)
+        }
+        Switch(checked = checked, onCheckedChange = onCheckedChange)
     }
 }
 

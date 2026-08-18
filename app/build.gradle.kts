@@ -80,6 +80,7 @@ dependencies {
 
     // Background work
     implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.datastore.preferences)
 
     // Persistence
     implementation(libs.androidx.room.runtime)

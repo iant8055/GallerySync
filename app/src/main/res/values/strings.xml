@@ -73,6 +73,13 @@
     <string name="backup_move_trash_note">Your OneDrive copy is checked first and is never touched. On some phones the local copy goes to your gallery\'s Recently deleted; on others it is removed straight away, so treat this as permanent on the phone.</string>
     <string name="backup_move_unsupported">Moving files to backup needs Android 11 or newer.</string>
     <string name="backup_nothing_redundant">Nothing to move yet — files move to your backup once they are safely in OneDrive.</string>
+    <string name="backup_automatic">Back up automatically</string>
+    <string name="backup_automatic_on">New photos back up shortly after you take them.</string>
+    <string name="backup_automatic_off">Nothing is backed up unless you tap Back up now.</string>
+    <string name="backup_allow_metered">Use mobile data</string>
+    <string name="backup_allow_metered_on">Backs up on Wi-Fi and mobile data.</string>
+    <string name="backup_allow_metered_off">Wi-Fi only.</string>
+
     <string name="backup_deselect_all">Deselect all</string>
     <string name="backup_select_all">Select all</string>
     <string name="backup_rescan">Rescan</string>
