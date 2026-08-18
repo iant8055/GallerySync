@@ -188,6 +188,40 @@ interface BackupEntryDao {
     suspend fun markProxied(id: String, proxySizeBytes: Long)
 
     /**
+     * Records a file that was already backed up and already proxied, when the ledger had no memory
+     * of either — after an uninstall, or on a new phone.
+     *
+     * `sizeBytes` is rewritten to the original's size rather than the proxy's. Every other query
+     * treats `sizeBytes` as "how big this photo really is", with `localProxySizeBytes` holding what
+     * it currently occupies; leaving the proxy's size there would make the row claim the original
+     * was tiny, and `remoteSizeBytes = sizeBytes` — the test for "verified in the cloud" — would
+     * never hold again for this file.
+     */
+    @Query(
+        """
+        UPDATE backup_entries
+        SET state = :state,
+            sizeBytes = :originalSizeBytes,
+            remoteSizeBytes = :originalSizeBytes,
+            remoteItemId = :remoteItemId,
+            uploadedAtEpochMillis = :uploadedAt,
+            isProxied = 1,
+            localProxySizeBytes = :proxySizeBytes,
+            attemptCount = 0,
+            lastError = NULL
+        WHERE id = :id
+        """
+    )
+    suspend fun markRecoveredAsProxied(
+        id: String,
+        originalSizeBytes: Long,
+        proxySizeBytes: Long,
+        remoteItemId: String,
+        uploadedAt: Long,
+        state: BackupState = BackupState.UPLOADED
+    )
+
+    /**
      * Photos whose local copy can safely be replaced by a proxy.
      *
      * Verified in the cloud, not already proxied, and **never video** — a degraded clip fails

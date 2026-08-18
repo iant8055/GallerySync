@@ -33,6 +33,7 @@ data class GeneratedProxy(
 @Singleton
 class ProxyGenerator @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val marker: ProxyMarker,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
 ) {
 
@@ -56,7 +57,7 @@ class ProxyGenerator @Inject constructor(
 
         // Asked of the file itself, not the ledger. A second pass would burn a second badge into
         // the same photo, and the ledger is exactly the thing that has been observed going stale.
-        if (isProxy(uri)) {
+        if (marker.isProxy(uri)) {
             Logger.d(TAG, "$displayName is already a proxy; leaving it alone")
             return@withContext null
         }
@@ -149,17 +150,6 @@ class ProxyGenerator @Inject constructor(
         resolver.openInputStream(uri)?.use { ExifInterface(it).rotationDegrees } ?: 0
     }.getOrDefault(0)
 
-    /**
-     * Whether this file already carries GallerySync's proxy marker.
-     *
-     * Reads only the EXIF header, not the pixels, so it is cheap enough to ask of every candidate.
-     */
-    private fun isProxy(uri: Uri): Boolean = runCatching {
-        resolver.openInputStream(uri)?.use {
-            ExifInterface(it).getAttribute(ExifInterface.TAG_SOFTWARE) == PROXY_MARKER
-        } ?: false
-    }.getOrDefault(false)
-
     private fun scaleToTarget(source: Bitmap): Bitmap {
         val longEdge = maxOf(source.width, source.height)
         if (longEdge <= TARGET_LONG_EDGE_PX) return source
@@ -183,7 +173,7 @@ class ProxyGenerator @Inject constructor(
 
         // Written last so nothing copied from the source can overwrite it. This is what makes a
         // proxy self-describing: recognisable from the file alone, with no ledger to go stale.
-        to.setAttribute(ExifInterface.TAG_SOFTWARE, PROXY_MARKER)
+        marker.stamp(to)
 
         to.saveAttributes()
         true
@@ -197,14 +187,6 @@ class ProxyGenerator @Inject constructor(
         const val TARGET_LONG_EDGE_PX = 2048
 
         const val JPEG_QUALITY = 90
-
-        /**
-         * Stamped into `Software` so a proxy can be identified from the file itself.
-         *
-         * Survives copying and sharing, unlike a database row, and `Software` is the tag that
-         * honestly describes what wrote the file.
-         */
-        const val PROXY_MARKER = "GallerySync proxy"
 
         /**
          * Largest power-of-two sample size that still leaves the image at or above [target].

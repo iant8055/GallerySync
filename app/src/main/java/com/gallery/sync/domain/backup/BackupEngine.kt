@@ -8,6 +8,7 @@ import com.gallery.sync.data.local.entity.backupKeyOf
 import com.gallery.sync.data.local.media.LocalMediaItem
 import com.gallery.sync.data.local.media.MediaAccess
 import com.gallery.sync.data.local.media.MediaScanner
+import com.gallery.sync.data.local.media.ProxyMarker
 import com.gallery.sync.data.remote.onedrive.ContentUriUploadSource
 import com.gallery.sync.di.IoDispatcher
 import com.gallery.sync.domain.model.DataResult
@@ -82,6 +83,7 @@ class BackupEngine @Inject constructor(
     private val entryDao: BackupEntryDao,
     private val repository: OneDriveRepository,
     private val uploadRepository: OneDriveUploadRepository,
+    private val proxyMarker: ProxyMarker,
     @ApplicationContext private val context: Context,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
 ) {
@@ -203,6 +205,32 @@ class BackupEngine @Inject constructor(
                         id = entry.id,
                         remoteItemId = "",
                         remoteSizeBytes = entry.sizeBytes,
+                        uploadedAt = System.currentTimeMillis()
+                    )
+                    skipped++
+                    continue
+                }
+
+                // A proxy is smaller than the original it came from, so the size test above cannot
+                // see that it is already backed up. Ask the file instead: if it carries the proxy
+                // marker and OneDrive holds a larger file of the same name, that larger file is
+                // the original. Uploading would file a 2048px copy beside it.
+                val remoteSize = alreadyThere[entry.displayName]
+                if (
+                    LedgerRecovery.isBackedUpProxy(
+                        localSizeBytes = entry.sizeBytes,
+                        remoteSizeBytes = remoteSize,
+                        carriesProxyMarker = proxyMarker.isProxy(
+                            android.net.Uri.parse(entry.contentUri)
+                        )
+                    )
+                ) {
+                    Logger.i(TAG, "recovered proxy record for ${entry.displayName}")
+                    entryDao.markRecoveredAsProxied(
+                        id = entry.id,
+                        originalSizeBytes = remoteSize!!,
+                        proxySizeBytes = entry.sizeBytes,
+                        remoteItemId = "",
                         uploadedAt = System.currentTimeMillis()
                     )
                     skipped++
