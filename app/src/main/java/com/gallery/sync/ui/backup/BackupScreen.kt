@@ -116,16 +116,17 @@ private fun AlbumList(state: BackupUiState, viewModel: BackupViewModel) {
             ),
             style = MaterialTheme.typography.titleSmall
         )
-        // Says what is true of the current selection. A whole-library "8,484 outstanding" beside
-        // a run that correctly does nothing reads as a broken app.
-        Text(
-            text = when {
-                state.enabledItemCount == 0 -> stringResource(R.string.backup_nothing_selected)
-                state.isSelectionFullyBackedUp -> stringResource(R.string.backup_all_done)
-                else -> stringResource(R.string.backup_progress_summary, state.pendingCount)
-            },
-            style = MaterialTheme.typography.bodySmall
-        )
+        // Only the two states the file count cannot already convey: nothing chosen, and nothing
+        // left to do. The outstanding count used to sit here too, but the run status below now
+        // reports progress file by file, and saying it twice just competes with itself.
+        val selectionNote = when {
+            state.enabledItemCount == 0 -> stringResource(R.string.backup_nothing_selected)
+            state.isSelectionFullyBackedUp -> stringResource(R.string.backup_all_done)
+            else -> null
+        }
+        selectionNote?.let {
+            Text(text = it, style = MaterialTheme.typography.bodySmall)
+        }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(onClick = { viewModel.setAllAlbums(false) }) {
                 Text(stringResource(R.string.backup_deselect_all))

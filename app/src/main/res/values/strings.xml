@@ -72,7 +72,6 @@
 
     <!-- Backup -->
     <string name="backup_selection_summary">%1$s selected · %2$s</string>
-    <string name="backup_progress_summary">%1$d still to back up</string>
     <string name="backup_all_done">Everything selected is backed up</string>
     <string name="backup_nothing_selected">Choose an album to back up</string>
     <!--
