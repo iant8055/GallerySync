@@ -203,6 +203,20 @@ private fun AlbumList(state: BackupUiState, viewModel: BackupViewModel) {
                         ),
                         style = MaterialTheme.typography.bodySmall
                     )
+                    // Whether the album is safe, said separately from whether it is watched.
+                    Text(
+                        text = when (album.status) {
+                            AlbumStatus.COMPLETE -> stringResource(R.string.album_status_complete)
+                            AlbumStatus.PARTIAL ->
+                                stringResource(R.string.album_status_partial, album.outstanding)
+                            AlbumStatus.NOT_BACKED_UP -> stringResource(R.string.album_status_none)
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = when (album.status) {
+                            AlbumStatus.COMPLETE -> MaterialTheme.colorScheme.primary
+                            else -> MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                    )
                 }
                 Switch(
                     checked = album.isEnabled,

@@ -62,6 +62,16 @@
     <string name="backup_run_now">Back up now</string>
     <string name="backup_running">Backing up…</string>
     <string name="backup_album_summary">%1$s · %2$s</string>
+
+    <!--
+        Album status is separate from the toggle on purpose. An archived album that will never
+        gain another photo is finished, not unprotected — and "off" must not read as "at risk".
+    -->
+    <string name="album_status_complete">All backed up</string>
+    <string name="album_status_partial">%1$d still to back up</string>
+    <string name="album_status_none">Not backed up yet</string>
+    <string name="album_watching">Watching for new files</string>
+    <string name="album_not_watching">Not watched — nothing new expected</string>
     <plurals name="file_count">
         <item quantity="one">%d file</item>
         <item quantity="other">%d files</item>

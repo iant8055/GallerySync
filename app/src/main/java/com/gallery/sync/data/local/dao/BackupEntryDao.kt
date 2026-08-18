@@ -8,6 +8,18 @@ import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.entity.BackupState
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * How much of one album has reached OneDrive.
+ *
+ * Lets the UI distinguish "switched off because it is finished and safe" from "switched off and
+ * not backed up" — two very different situations that a bare toggle renders identically.
+ */
+data class AlbumBackupCount(
+    val album: String,
+    val total: Int,
+    val backedUp: Int
+)
+
 @Dao
 interface BackupEntryDao {
 
@@ -127,6 +139,18 @@ interface BackupEntryDao {
 
     @Query("SELECT * FROM backup_entries WHERE id = :id")
     suspend fun find(id: String): BackupEntryEntity?
+
+    /** Per-album totals, so each row can say whether it is completely safe. */
+    @Query(
+        """
+        SELECT album AS album,
+               COUNT(*) AS total,
+               SUM(CASE WHEN state = :uploaded THEN 1 ELSE 0 END) AS backedUp
+        FROM backup_entries
+        GROUP BY album
+        """
+    )
+    suspend fun albumCounts(uploaded: BackupState = BackupState.UPLOADED): List<AlbumBackupCount>
 
     /**
      * Entries safe to remove the local copy of.

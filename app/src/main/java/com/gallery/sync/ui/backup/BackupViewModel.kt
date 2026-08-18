@@ -19,13 +19,40 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-/** One album, and whether the user wants it backed up. */
+/**
+ * One album: how much of it is safe, and whether it is still being watched.
+ *
+ * [isEnabled] and [backedUpCount] are deliberately independent. An archived album that will
+ * never gain another photo is *finished*, not *unprotected* — switching it off means "stop
+ * spending time on this", and rendering that the same as "not backed up" is alarming and wrong.
+ */
 data class AlbumRow(
     val name: String,
     val itemCount: Int,
     val totalBytes: Long,
-    val isEnabled: Boolean
-)
+    /** Watched for new files. Off means finished or ignored — [status] says which. */
+    val isEnabled: Boolean,
+    val backedUpCount: Int = 0
+) {
+    val status: AlbumStatus
+        get() = when {
+            itemCount > 0 && backedUpCount >= itemCount -> AlbumStatus.COMPLETE
+            backedUpCount > 0 -> AlbumStatus.PARTIAL
+            else -> AlbumStatus.NOT_BACKED_UP
+        }
+
+    val outstanding: Int get() = (itemCount - backedUpCount).coerceAtLeast(0)
+}
+
+enum class AlbumStatus {
+
+    /** Every file is in OneDrive. Safe whether or not it is still being watched. */
+    COMPLETE,
+
+    PARTIAL,
+
+    NOT_BACKED_UP
+}
 
 /**
  * What a run is doing, or what it did.
@@ -113,12 +140,15 @@ class BackupViewModel @Inject constructor(
             engine.refreshLedger()
 
             val disabled = albumDao.disabledAlbums().toSet()
+            val backedUpByAlbum = entryDao.albumCounts().associate { it.album to it.backedUp }
+
             val albums = scanner.scanAlbums().map { album ->
                 AlbumRow(
                     name = album.name,
                     itemCount = album.itemCount,
                     totalBytes = album.totalBytes,
-                    isEnabled = album.name !in disabled
+                    isEnabled = album.name !in disabled,
+                    backedUpCount = backedUpByAlbum[album.name] ?: 0
                 )
             }
 
