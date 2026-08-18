@@ -109,6 +109,18 @@ already small rather than needlessly rewritten.
 exports from it are capped at that resolution. Retrieval is therefore load-bearing, not a nicety —
 it is the only route back to a full-quality edit.
 
+### Open at the end of 18 Aug 2026
+- **Next task is TASK-011, the storage budget.** Photos only in the first pass; video eviction
+  belongs with the rolling window. Needs Ian's call on ceiling-versus-floor — see the spec.
+- **Proxy recovery is untested on hardware.** `LedgerRecovery` guards the upload path against
+  re-uploading proxies once the ledger is lost, but reproducing that means destroying a real
+  ledger. Wants an in-memory Room test seeding a pending proxy row.
+- **Album selections are still device-only.** They are the one part of the ledger that cannot be
+  rebuilt from OneDrive or from the files, so a phone move loses them. Deliberately not built yet:
+  it needs a new remote write path.
+- **Six photos in `AaSync` carry the pre-fix sideways badge.** Harmless, marked as proxies so
+  nothing will touch them again. Delete locally and re-fetch from OneDrive to tidy.
+
 ## v0.4.0 — Retrieval and deletion sync
 - [ ] Fetch a cloud-only item back on demand, registering it in MediaStore so every app sees it
 - [ ] Plain retrieval list — **not** a photo browser
