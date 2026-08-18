@@ -91,7 +91,8 @@ gallery keeps working.
       evicted, nothing evicted until its cloud copy is verified.
 - [ ] **Rolling window for video**, so recent clips stay usable in the gallery.
 - [ ] Per-album "keep originals on device" for albums actively edited from.
-- [ ] Clear marker showing which items are optimised versus whole.
+- [x] Clear marker showing which items are optimised versus whole. Cloud badge burned into the
+      proxy plus an EXIF marker, verified on a Fold 4 across square and 16:9 at orientation=90.
 
 ### Proxying verified on hardware — 18 Aug 2026, Galaxy Z Fold 4
 No longer theoretical. 11 photos optimised, 40,283,338 bytes reclaimed; five correctly skipped as
