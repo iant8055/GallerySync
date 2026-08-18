@@ -126,43 +126,6 @@ private fun AlbumList(state: BackupUiState, viewModel: BackupViewModel) {
             },
             style = MaterialTheme.typography.bodySmall
         )
-        Text(
-            text = pluralStringResource(
-                R.plurals.backup_total_stored,
-                state.uploadedCount,
-                state.uploadedCount
-            ),
-            style = MaterialTheme.typography.bodySmall
-        )
-
-        SettingSwitch(
-            label = stringResource(R.string.backup_automatic),
-            detail = stringResource(
-                if (state.isAutomaticEnabled) {
-                    R.string.backup_automatic_on
-                } else {
-                    R.string.backup_automatic_off
-                }
-            ),
-            checked = state.isAutomaticEnabled,
-            onCheckedChange = viewModel::setAutomaticEnabled
-        )
-
-        if (state.isAutomaticEnabled) {
-            SettingSwitch(
-                label = stringResource(R.string.backup_allow_metered),
-                detail = stringResource(
-                    if (state.allowMeteredNetwork) {
-                        R.string.backup_allow_metered_on
-                    } else {
-                        R.string.backup_allow_metered_off
-                    }
-                ),
-                checked = state.allowMeteredNetwork,
-                onCheckedChange = viewModel::setAllowMeteredNetwork
-            )
-        }
-
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             OutlinedButton(onClick = { viewModel.setAllAlbums(false) }) {
                 Text(stringResource(R.string.backup_deselect_all))
@@ -191,8 +154,6 @@ private fun AlbumList(state: BackupUiState, viewModel: BackupViewModel) {
         state.status?.let {
             Text(it.readable(), style = MaterialTheme.typography.bodyMedium)
         }
-
-        MoveToBackupSection(state = state, viewModel = viewModel)
     }
 
     HorizontalDivider()
@@ -256,84 +217,6 @@ private fun AlbumList(state: BackupUiState, viewModel: BackupViewModel) {
                 )
             }
             HorizontalDivider()
-        }
-    }
-}
-
-@Composable
-private fun SettingSwitch(
-    label: String,
-    detail: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(label, style = MaterialTheme.typography.bodyLarge)
-            Text(detail, style = MaterialTheme.typography.bodySmall)
-        }
-        Switch(checked = checked, onCheckedChange = onCheckedChange)
-    }
-}
-
-/**
- * Offers to reclaim the space taken by files already safely in OneDrive.
- *
- * Android shows its own confirmation listing the files, so this app never removes anything on its
- * own say-so — the user sees exactly what is going and can refuse.
- */
-@Composable
-private fun MoveToBackupSection(state: BackupUiState, viewModel: BackupViewModel) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-
-    val launcher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartIntentSenderForResult()
-    ) { viewModel.onMoveToBackupFinished() }
-
-    when {
-        !state.canRemoveLocalCopies -> Text(
-            text = stringResource(R.string.backup_move_unsupported),
-            style = MaterialTheme.typography.bodySmall
-        )
-
-        state.redundantCount == 0 -> Text(
-            text = stringResource(R.string.backup_nothing_redundant),
-            style = MaterialTheme.typography.bodySmall
-        )
-
-        else -> {
-            val size = formatBytes(context, state.redundantBytes)
-
-            Text(
-                text = pluralStringResource(
-                    R.plurals.backup_move_explainer,
-                    state.redundantCount,
-                    state.redundantCount
-                ),
-                style = MaterialTheme.typography.bodySmall
-            )
-            OutlinedButton(
-                onClick = {
-                    scope.launch {
-                        viewModel.buildMoveToBackupRequest()?.let {
-                            launcher.launch(IntentSenderRequest.Builder(it).build())
-                        }
-                    }
-                }
-            ) {
-                Text(stringResource(R.string.backup_move_to_backup, size))
-            }
-            // Not softening: the space genuinely is not reclaimed until the trash is emptied, and
-            // discovering that later would feel like the app had lied.
-            Text(
-                text = stringResource(R.string.backup_move_trash_note),
-                style = MaterialTheme.typography.bodySmall
-            )
         }
     }
 }

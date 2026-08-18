@@ -22,6 +22,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.ui.backup.BackupScreen
 import com.gallery.sync.ui.browse.BrowseScreen
+import com.gallery.sync.ui.settings.SettingsScreen
 import com.gallery.sync.ui.signin.SignInScreen
 import com.gallery.sync.ui.signin.SignInUiState
 import com.gallery.sync.ui.signin.SignInViewModel
@@ -54,8 +55,9 @@ private fun GallerySyncApp(modifier: Modifier = Modifier) {
     val signInViewModel: SignInViewModel = hiltViewModel()
     val signInState by signInViewModel.state.collectAsStateWithLifecycle()
 
-    when (signInState) {
+    when (val current = signInState) {
         is SignInUiState.SignedIn -> SignedInApp(
+            accountName = current.accountName,
             onSignOut = signInViewModel::signOut,
             modifier = modifier
         )
@@ -67,8 +69,17 @@ private fun GallerySyncApp(modifier: Modifier = Modifier) {
     }
 }
 
+/**
+ * Backup is first because it is the screen actually used day to day. Settings holds the things
+ * set once — which is why they were moved off Backup, where they had crowded the album list
+ * down the screen.
+ */
 @Composable
-private fun SignedInApp(onSignOut: () -> Unit, modifier: Modifier = Modifier) {
+private fun SignedInApp(
+    accountName: String,
+    onSignOut: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     var selectedTab by remember { mutableIntStateOf(0) }
 
     Column(modifier = modifier.fillMaxSize()) {
@@ -83,11 +94,17 @@ private fun SignedInApp(onSignOut: () -> Unit, modifier: Modifier = Modifier) {
                 onClick = { selectedTab = 1 },
                 text = { Text(stringResource(R.string.tab_onedrive)) }
             )
+            Tab(
+                selected = selectedTab == 2,
+                onClick = { selectedTab = 2 },
+                text = { Text(stringResource(R.string.tab_settings)) }
+            )
         }
 
         when (selectedTab) {
             0 -> BackupScreen()
-            else -> BrowseScreen(onSignOut = onSignOut)
+            1 -> BrowseScreen(onSignOut = onSignOut)
+            else -> SettingsScreen(accountName = accountName, onSignOut = onSignOut)
         }
     }
 }

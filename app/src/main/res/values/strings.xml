@@ -4,6 +4,12 @@
     <!-- Tabs -->
     <string name="tab_backup">Backup</string>
     <string name="tab_onedrive">OneDrive</string>
+    <string name="tab_settings">Settings</string>
+
+    <!-- Settings sections -->
+    <string name="settings_account">Account</string>
+    <string name="settings_automatic">Automatic backup</string>
+    <string name="settings_storage">Storage</string>
 
     <!-- Sign in -->
     <string name="sign_in_prompt">Connect your OneDrive account to browse your photos and videos.</string>
