@@ -54,6 +54,13 @@ class ProxyGenerator @Inject constructor(
         val longEdge = maxOf(bounds.outWidth, bounds.outHeight)
         if (longEdge <= 0) return@withContext null
 
+        // Asked of the file itself, not the ledger. A second pass would burn a second badge into
+        // the same photo, and the ledger is exactly the thing that has been observed going stale.
+        if (isProxy(uri)) {
+            Logger.d(TAG, "$displayName is already a proxy; leaving it alone")
+            return@withContext null
+        }
+
         // Already small enough. Never upscale — that costs space and adds nothing.
         if (longEdge <= TARGET_LONG_EDGE_PX) {
             Logger.d(TAG, "$displayName is already ${longEdge}px; no proxy needed")
@@ -68,16 +75,22 @@ class ProxyGenerator @Inject constructor(
         val scaled = scaleToTarget(decoded)
         if (scaled !== decoded) decoded.recycle()
 
+        // Drawing needs a mutable target; a decode can hand back an immutable one.
+        val canvasReady = ensureMutable(scaled)
+        if (canvasReady !== scaled) scaled.recycle()
+
+        ProxyBadge.drawOn(canvasReady)
+
         val output = File(context.cacheDir, "proxy_${displayName.substringBeforeLast('.')}.jpg")
         val written = runCatching {
             output.outputStream().use { out ->
-                scaled.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, out)
+                canvasReady.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, out)
             }
         }.isSuccess
 
-        val width = scaled.width
-        val height = scaled.height
-        scaled.recycle()
+        val width = canvasReady.width
+        val height = canvasReady.height
+        canvasReady.recycle()
 
         if (!written || !output.exists() || output.length() == 0L) {
             output.delete()
@@ -116,9 +129,29 @@ class ProxyGenerator @Inject constructor(
     private fun decodeScaled(uri: Uri, longEdge: Int): Bitmap? = runCatching {
         val options = BitmapFactory.Options().apply {
             inSampleSize = sampleSizeFor(longEdge, TARGET_LONG_EDGE_PX)
+            // Asked for up front so the badge can usually be drawn without copying the bitmap.
+            inMutable = true
         }
         resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, options) }
     }.getOrNull()
+
+    private fun ensureMutable(source: Bitmap): Bitmap =
+        if (source.isMutable) {
+            source
+        } else {
+            source.copy(source.config ?: Bitmap.Config.ARGB_8888, true) ?: source
+        }
+
+    /**
+     * Whether this file already carries GallerySync's proxy marker.
+     *
+     * Reads only the EXIF header, not the pixels, so it is cheap enough to ask of every candidate.
+     */
+    private fun isProxy(uri: Uri): Boolean = runCatching {
+        resolver.openInputStream(uri)?.use {
+            ExifInterface(it).getAttribute(ExifInterface.TAG_SOFTWARE) == PROXY_MARKER
+        } ?: false
+    }.getOrDefault(false)
 
     private fun scaleToTarget(source: Bitmap): Bitmap {
         val longEdge = maxOf(source.width, source.height)
@@ -140,6 +173,11 @@ class ProxyGenerator @Inject constructor(
         PRESERVED_EXIF_TAGS.forEach { tag ->
             from.getAttribute(tag)?.let { to.setAttribute(tag, it) }
         }
+
+        // Written last so nothing copied from the source can overwrite it. This is what makes a
+        // proxy self-describing: recognisable from the file alone, with no ledger to go stale.
+        to.setAttribute(ExifInterface.TAG_SOFTWARE, PROXY_MARKER)
+
         to.saveAttributes()
         true
     }.getOrDefault(false)
@@ -152,6 +190,14 @@ class ProxyGenerator @Inject constructor(
         const val TARGET_LONG_EDGE_PX = 2048
 
         const val JPEG_QUALITY = 90
+
+        /**
+         * Stamped into `Software` so a proxy can be identified from the file itself.
+         *
+         * Survives copying and sharing, unlike a database row, and `Software` is the tag that
+         * honestly describes what wrote the file.
+         */
+        const val PROXY_MARKER = "GallerySync proxy"
 
         /**
          * Largest power-of-two sample size that still leaves the image at or above [target].
