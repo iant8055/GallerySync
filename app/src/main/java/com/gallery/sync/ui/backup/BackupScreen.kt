@@ -127,7 +127,11 @@ private fun AlbumList(state: BackupUiState, viewModel: BackupViewModel) {
             style = MaterialTheme.typography.bodySmall
         )
         Text(
-            text = stringResource(R.string.backup_total_stored, state.uploadedCount),
+            text = pluralStringResource(
+                R.plurals.backup_total_stored,
+                state.uploadedCount,
+                state.uploadedCount
+            ),
             style = MaterialTheme.typography.bodySmall
         )
 
@@ -258,13 +262,10 @@ private fun MoveToBackupSection(state: BackupUiState, viewModel: BackupViewModel
             val size = formatBytes(context, state.redundantBytes)
 
             Text(
-                text = stringResource(
-                    R.string.backup_move_explainer,
-                    pluralStringResource(
-                        R.plurals.file_count,
-                        state.redundantCount,
-                        state.redundantCount
-                    )
+                text = pluralStringResource(
+                    R.plurals.backup_move_explainer,
+                    state.redundantCount,
+                    state.redundantCount
                 ),
                 style = MaterialTheme.typography.bodySmall
             )

@@ -43,7 +43,15 @@
     <string name="backup_progress_summary">%1$d still to back up</string>
     <string name="backup_all_done">Everything selected is backed up</string>
     <string name="backup_nothing_selected">Choose an album to back up</string>
-    <string name="backup_total_stored">%1$d files in OneDrive</string>
+    <!--
+        "verified" matters: this is what Gallery Sync has confirmed, not what OneDrive contains.
+        After a reinstall the ledger is empty and this reads 0, which would otherwise look like
+        the user's whole backup had disappeared.
+    -->
+    <plurals name="backup_total_stored">
+        <item quantity="one">%1$d file verified in OneDrive</item>
+        <item quantity="other">%1$d files verified in OneDrive</item>
+    </plurals>
 
     <!--
         Moving local copies out. Deliberately framed as moving to the backup rather than deleting:
@@ -52,7 +60,16 @@
         user empties it, and saying otherwise would be a lie they discover later.
     -->
     <string name="backup_move_to_backup">Move %1$s to backup</string>
-    <string name="backup_move_explainer">%1$s on this phone is already safely in OneDrive. Moving it to your backup frees that space.</string>
+
+    <!--
+        The whole sentence is a plural, not a plural noun dropped into a fixed template — the verb
+        and pronoun have to agree too ("1 file … is … it" vs "8 files … are … them"). Languages
+        with more than two plural forms, or with gendered pronouns, break even harder on that.
+    -->
+    <plurals name="backup_move_explainer">
+        <item quantity="one">%1$d file on this phone is already safely in OneDrive. Moving it to your backup frees that space.</item>
+        <item quantity="other">%1$d files on this phone are already safely in OneDrive. Moving them to your backup frees that space.</item>
+    </plurals>
     <string name="backup_move_trash_note">Your OneDrive copy is checked first and is never touched. On some phones the local copy goes to your gallery\'s Recently deleted; on others it is removed straight away, so treat this as permanent on the phone.</string>
     <string name="backup_move_unsupported">Moving files to backup needs Android 11 or newer.</string>
     <string name="backup_nothing_redundant">Nothing to move yet — files move to your backup once they are safely in OneDrive.</string>
