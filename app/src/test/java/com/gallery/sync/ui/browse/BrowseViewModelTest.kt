@@ -100,6 +100,64 @@ class BrowseViewModelTest {
     }
 
     @Test
+    fun `tapping a breadcrumb jumps straight back to that level`() = runTest {
+        val repository = FakeRepository(
+            root = page(folder("1", "Pictures")),
+            folders = mapOf(
+                "1" to page(folder("2", "2024")),
+                "2" to page(file("9", "IMG_1.jpg"))
+            )
+        )
+        val viewModel = browseViewModel(repository)
+        viewModel.open(folder("1", "Pictures"))
+        viewModel.open(folder("2", "2024"))
+
+        // Two levels deep; tap the root crumb.
+        viewModel.navigateTo(0)
+
+        val content = viewModel.state.value as BrowseUiState.Content
+        assertEquals(emptyList<String>(), content.trail)
+        assertFalse(content.canGoBack)
+    }
+
+    @Test
+    fun `tapping a middle breadcrumb keeps the levels above it`() = runTest {
+        val repository = FakeRepository(
+            root = page(folder("1", "Pictures")),
+            folders = mapOf(
+                "1" to page(folder("2", "2024")),
+                "2" to page(file("9", "IMG_1.jpg"))
+            )
+        )
+        val viewModel = browseViewModel(repository)
+        viewModel.open(folder("1", "Pictures"))
+        viewModel.open(folder("2", "2024"))
+
+        // depth 1 keeps one folder: Pictures.
+        viewModel.navigateTo(1)
+
+        val content = viewModel.state.value as BrowseUiState.Content
+        assertEquals(listOf("Pictures"), content.trail)
+        assertTrue(content.canGoBack)
+    }
+
+    @Test
+    fun `tapping the current folder does nothing rather than reloading it`() = runTest {
+        val repository = FakeRepository(
+            root = page(folder("1", "Pictures")),
+            folders = mapOf("1" to page(file("9", "IMG_1.jpg")))
+        )
+        val viewModel = browseViewModel(repository)
+        viewModel.open(folder("1", "Pictures"))
+
+        // depth 1 is the level already shown — a wasted round trip and a visible flicker.
+        viewModel.navigateTo(1)
+
+        val content = viewModel.state.value as BrowseUiState.Content
+        assertEquals(listOf("Pictures"), content.trail)
+    }
+
+    @Test
     fun `back at the root is not handled so the system can close the screen`() = runTest {
         val viewModel = browseViewModel(FakeRepository(root = page()))
 

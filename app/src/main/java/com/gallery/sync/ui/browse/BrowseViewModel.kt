@@ -71,6 +71,21 @@ class BrowseViewModel @Inject constructor(
         return true
     }
 
+    /**
+     * Jumps straight to a level in the breadcrumb.
+     *
+     * [depth] is how many folders to keep: 0 is the drive root, 1 the first folder entered, and so
+     * on. Tapping the level already shown does nothing rather than reloading it — a wasted network
+     * round trip and a visible flicker for a tap that asked for no change.
+     */
+    fun navigateTo(depth: Int) {
+        if (depth < 0 || depth >= trail.size) return
+        while (trail.size > depth) {
+            trail.removeAt(trail.lastIndex)
+        }
+        load()
+    }
+
     fun retry() = load()
 
     private fun load() {

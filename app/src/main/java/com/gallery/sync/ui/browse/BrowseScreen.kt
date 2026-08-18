@@ -2,6 +2,7 @@ package com.gallery.sync.ui.browse
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,7 +17,9 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -58,7 +61,8 @@ fun BrowseScreen(
 
             is BrowseUiState.Content -> {
                 Header(
-                    location = locationLabel(current.trail),
+                    trail = current.trail,
+                    onNavigateTo = viewModel::navigateTo,
                     onSignOut = onSignOut
                 )
 
@@ -80,7 +84,11 @@ fun BrowseScreen(
             }
 
             is BrowseUiState.Error -> {
-                Header(location = stringResource(R.string.browse_root), onSignOut = onSignOut)
+                Header(
+                    trail = emptyList(),
+                    onNavigateTo = viewModel::navigateTo,
+                    onSignOut = onSignOut
+                )
                 Centered {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -101,32 +109,81 @@ fun BrowseScreen(
     }
 }
 
-/** Joins the localised root with the folders entered so far. */
+/**
+ * Breadcrumbs, with every ancestor tappable.
+ *
+ * Scrolls horizontally rather than ellipsising: a truncated path hides exactly the levels someone
+ * would want to jump back to, and the deeper the folder the more useful those levels become. The
+ * scroll is anchored so the current folder stays visible as the path grows.
+ */
 @Composable
-private fun locationLabel(trail: List<String>): String =
-    (listOf(stringResource(R.string.browse_root)) + trail).joinToString(" / ")
+private fun Header(
+    trail: List<String>,
+    onNavigateTo: (Int) -> Unit,
+    onSignOut: () -> Unit
+) {
+    val scrollState = rememberScrollState()
 
-@Composable
-private fun Header(location: String, onSignOut: () -> Unit) {
+    // Keep the deepest crumb in view when descending, which is where attention is.
+    LaunchedEffect(trail.size) { scrollState.animateScrollTo(scrollState.maxValue) }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(
-            text = location,
-            style = MaterialTheme.typography.titleMedium,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f, fill = false)
-        )
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .horizontalScroll(scrollState),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Crumb(
+                label = stringResource(R.string.browse_root),
+                isCurrent = trail.isEmpty(),
+                onClick = { onNavigateTo(0) }
+            )
+
+            trail.forEachIndexed { index, name ->
+                Text(
+                    text = " / ",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Crumb(
+                    label = name,
+                    isCurrent = index == trail.lastIndex,
+                    // depth is how many folders to keep, so this crumb's own level is index + 1.
+                    onClick = { onNavigateTo(index + 1) }
+                )
+            }
+        }
+
         OutlinedButton(onClick = onSignOut) {
             Text(stringResource(R.string.sign_out_action))
         }
     }
     HorizontalDivider()
+}
+
+@Composable
+private fun Crumb(label: String, isCurrent: Boolean, onClick: () -> Unit) {
+    Text(
+        text = label,
+        style = MaterialTheme.typography.titleMedium,
+        maxLines = 1,
+        // The current folder is where you already are, so it is not offered as a destination.
+        color = if (isCurrent) {
+            MaterialTheme.colorScheme.onSurface
+        } else {
+            MaterialTheme.colorScheme.primary
+        },
+        modifier = Modifier
+            .then(if (isCurrent) Modifier else Modifier.clickable(onClick = onClick))
+            .padding(vertical = 8.dp, horizontal = 2.dp)
+    )
 }
 
 @Composable
