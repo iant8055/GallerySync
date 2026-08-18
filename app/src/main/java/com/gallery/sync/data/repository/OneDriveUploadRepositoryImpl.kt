@@ -15,6 +15,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -74,6 +75,12 @@ class OneDriveUploadRepositoryImpl @Inject constructor(
 
                 is UploadOutcome.HttpFailure -> mapFailure(outcome)
             }
+        } catch (e: FileNotFoundException) {
+            // Must be caught before IOException, which it extends. A ledger row can outlive the
+            // file it describes, and treating that as a lost connection stops the entire run over
+            // one deleted photo.
+            Logger.w(TAG, "upload: local file is gone, skipping this one")
+            DataResult.Failure(RemoteError.LocalFileMissing)
         } catch (e: IOException) {
             Logger.w(TAG, "upload: network failure", e)
             DataResult.Failure(RemoteError.Network)

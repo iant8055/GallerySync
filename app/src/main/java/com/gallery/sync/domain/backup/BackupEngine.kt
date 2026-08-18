@@ -197,7 +197,7 @@ class BackupEngine @Inject constructor(
                             return@withContext BackupRunResult(
                                 uploaded = uploaded,
                                 failed = failed,
-                                remaining = entryDao.nextPending(1, MAX_ATTEMPTS).size,
+                                remaining = entryDao.countPendingInSelectedAlbums(),
                                 skipped = skipped,
                                 stoppedBecause = stop
                             )
@@ -211,7 +211,9 @@ class BackupEngine @Inject constructor(
             BackupRunResult(
                 uploaded = uploaded,
                 failed = failed,
-                remaining = entryDao.nextPending(1, MAX_ATTEMPTS).size,
+                // A real count. This previously reused nextPending with a limit of 1, so it could
+                // only ever report 0 or 1 — "1 still to go" actually meant "at least one".
+                remaining = entryDao.countPendingInSelectedAlbums(),
                 skipped = skipped
             )
         }
@@ -276,8 +278,13 @@ class BackupEngine @Inject constructor(
         RemoteError.Unauthorized -> StopReason.UNAUTHORIZED
         RemoteError.InsufficientStorage -> StopReason.DRIVE_FULL
         RemoteError.Network -> StopReason.NETWORK
-        // A single file failing (an odd 4xx, a missing local file) should not stop the others.
-        is RemoteError.Http, is RemoteError.Unknown -> null
+
+        // These affect one file, not the run. A missing local file especially: a ledger row can
+        // outlive the file it describes, and letting that halt everything means one deleted photo
+        // silently stops the rest of a library being backed up.
+        RemoteError.LocalFileMissing,
+        is RemoteError.Http,
+        is RemoteError.Unknown -> null
     }
 
     companion object {

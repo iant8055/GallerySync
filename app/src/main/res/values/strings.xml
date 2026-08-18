@@ -51,6 +51,7 @@
     <string name="error_not_signed_in">Not signed in.</string>
     <string name="error_unauthorized">OneDrive rejected the sign-in. Try signing out and back in.</string>
     <string name="error_network">Can\'t reach OneDrive. Check your connection.</string>
+    <string name="error_local_file_missing">That file is no longer on this phone.</string>
     <string name="error_drive_full">Your OneDrive is full. Free up space to continue.</string>
     <string name="error_http">OneDrive returned an error (%1$d).</string>
     <string name="error_unknown">Something went wrong: %1$s</string>

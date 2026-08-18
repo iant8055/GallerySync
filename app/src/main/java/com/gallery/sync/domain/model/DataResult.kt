@@ -26,6 +26,15 @@ sealed interface RemoteError {
     data object Network : RemoteError
 
     /**
+     * The local file is gone: deleted, moved, or on a card that was unmounted.
+     *
+     * Kept apart from [Network] because both arrive as an `IOException` and the difference
+     * decides whether a whole run should stop. A missing file affects exactly one item and the
+     * run should continue; reporting it as a lost connection is both wrong and alarming.
+     */
+    data object LocalFileMissing : RemoteError
+
+    /**
      * The drive is full, so the write could not be stored.
      *
      * Separated from [Http] because it is the one remote failure the user can actually fix, and

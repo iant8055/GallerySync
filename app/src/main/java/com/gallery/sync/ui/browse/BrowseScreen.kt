@@ -249,6 +249,7 @@ private fun RemoteError.readable(): String = when (this) {
     RemoteError.NoToken -> stringResource(R.string.error_not_signed_in)
     RemoteError.Unauthorized -> stringResource(R.string.error_unauthorized)
     RemoteError.Network -> stringResource(R.string.error_network)
+    RemoteError.LocalFileMissing -> stringResource(R.string.error_local_file_missing)
     RemoteError.InsufficientStorage -> stringResource(R.string.error_drive_full)
     is RemoteError.Http -> stringResource(R.string.error_http, code)
     is RemoteError.Unknown -> stringResource(R.string.error_unknown, cause.javaClass.simpleName)
