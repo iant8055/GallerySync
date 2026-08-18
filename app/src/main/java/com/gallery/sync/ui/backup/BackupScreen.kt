@@ -233,6 +233,7 @@ private fun BackupStatus.readable(): String = when (this) {
         val parts = buildList {
             add(stringResource(R.string.backup_status_uploaded, uploaded))
             if (skipped > 0) add(stringResource(R.string.backup_status_skipped, skipped))
+            if (pruned > 0) add(stringResource(R.string.backup_status_pruned, pruned))
             if (failed > 0) add(stringResource(R.string.backup_status_failed, failed))
             if (remaining > 0) add(stringResource(R.string.backup_status_remaining, remaining))
             stoppedBecause?.let { add(it.readable()) }

@@ -141,6 +141,34 @@ interface BackupEntryDao {
     suspend fun find(id: String): BackupEntryEntity?
 
     /**
+     * Forgets one entry, for a file that is no longer on the device.
+     *
+     * Bookkeeping, not deletion: it removes our record and never touches the copy in OneDrive.
+     * Keeping the row instead would retry a file that cannot come back, then leave it as a
+     * permanent failure inflating the count for good.
+     */
+    @Query("DELETE FROM backup_entries WHERE id = :id")
+    suspend fun forget(id: String)
+
+    /**
+     * Forgets rows belonging to albums that are no longer on the device.
+     *
+     * The album list in the UI comes from the device; the ledger does not. A deleted album leaves
+     * rows behind that still count as work — invisible, because there is no album to render, and
+     * so impossible to deselect. That is how "0 files selected" and "147 still to go" appeared on
+     * the same screen.
+     *
+     * Matched on album name rather than file id deliberately: there are tens of albums and
+     * thousands of files, and binding thousands of parameters exceeds SQLite's limit.
+     *
+     * **Only ever call this with a trustworthy scan.** An empty or partial list — revoked
+     * permission, unmounted card — would otherwise read as "every album vanished" and wipe the
+     * record of what is already backed up.
+     */
+    @Query("DELETE FROM backup_entries WHERE album NOT IN (:albumsOnDevice)")
+    suspend fun forgetAlbumsNotOnDevice(albumsOnDevice: List<String>): Int
+
+    /**
      * MediaStore ids of files replaced by a local proxy.
      *
      * By id, not by the content key: proxying changes the file's size, so the key no longer

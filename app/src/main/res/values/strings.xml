@@ -133,6 +133,8 @@
     <string name="backup_status_uploaded">%1$d uploaded</string>
     <string name="backup_status_skipped">%1$d already in OneDrive</string>
     <string name="backup_status_failed">%1$d failed</string>
+    <!-- Files that left the phone. Not failures — the record is simply no longer about anything. -->
+    <string name="backup_status_pruned">%1$d no longer on this phone</string>
     <string name="backup_status_remaining">%1$d still to go</string>
     <string name="backup_status_separator">, </string>
 

@@ -47,6 +47,8 @@ data class BackupRunResult(
     val remaining: Int,
     /** Already present in OneDrive, so recorded as backed up without being sent again. */
     val skipped: Int = 0,
+    /** Ledger rows forgotten because the file is no longer on the device. Not a failure. */
+    val pruned: Int = 0,
     val stoppedBecause: StopReason? = null
 ) {
     val isComplete: Boolean get() = stoppedBecause == null && remaining == 0
@@ -109,8 +111,35 @@ class BackupEngine @Inject constructor(
 
         // IGNORE on conflict, so a rescan never resets an uploaded row back to pending.
         entryDao.insertIfNew(entries)
+
+        pruneAlbumsNoLongerOnDevice(items.map { it.album }.distinct())
+
         Logger.i(TAG, "refreshLedger: ${entries.size} files seen")
         entries.size
+    }
+
+    /**
+     * Forgets rows for albums the device no longer has.
+     *
+     * Guarded hard. An empty or partial scan must never reach the delete: a revoked permission or
+     * an unmounted card would look identical to "the user deleted everything", and acting on that
+     * wipes the record of what is already safely backed up. When in doubt this does nothing, which
+     * costs only a stale row.
+     */
+    private suspend fun pruneAlbumsNoLongerOnDevice(albumsOnDevice: List<String>) {
+        if (scanner.access() != MediaAccess.FULL) {
+            Logger.d(TAG, "not pruning: media access is not full")
+            return
+        }
+        if (albumsOnDevice.isEmpty()) {
+            Logger.w(TAG, "not pruning: the scan returned no albums at all")
+            return
+        }
+
+        val removed = entryDao.forgetAlbumsNotOnDevice(albumsOnDevice)
+        if (removed > 0) {
+            Logger.i(TAG, "forgot $removed rows for albums no longer on the device")
+        }
     }
 
     /**
@@ -135,6 +164,7 @@ class BackupEngine @Inject constructor(
             var uploaded = 0
             var failed = 0
             var skipped = 0
+            var pruned = 0
 
             // One remote listing per album, reused across every file in it. Asking per file would
             // cost a request each; asking once costs one and answers for all of them.
@@ -191,6 +221,16 @@ class BackupEngine @Inject constructor(
                     }
 
                     is DataResult.Failure -> {
+                        // The file is gone — deleted, moved, or on an unmounted card. Forget the
+                        // row rather than failing it: retrying cannot bring the file back, and a
+                        // kept row would exhaust its attempts and then sit as a permanent failure
+                        // inflating the count for good.
+                        if (result.error == RemoteError.LocalFileMissing) {
+                            entryDao.forget(entry.id)
+                            pruned++
+                            continue
+                        }
+
                         val stop = stopReasonFor(result.error)
                         if (stop != null) {
                             Logger.w(TAG, "uploadPending: stopping run — $stop")
@@ -199,6 +239,7 @@ class BackupEngine @Inject constructor(
                                 failed = failed,
                                 remaining = entryDao.countPendingInSelectedAlbums(),
                                 skipped = skipped,
+                                pruned = pruned,
                                 stoppedBecause = stop
                             )
                         }
@@ -214,7 +255,8 @@ class BackupEngine @Inject constructor(
                 // A real count. This previously reused nextPending with a limit of 1, so it could
                 // only ever report 0 or 1 — "1 still to go" actually meant "at least one".
                 remaining = entryDao.countPendingInSelectedAlbums(),
-                skipped = skipped
+                skipped = skipped,
+                pruned = pruned
             )
         }
 

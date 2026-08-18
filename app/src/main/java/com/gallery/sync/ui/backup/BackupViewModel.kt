@@ -81,6 +81,7 @@ sealed interface BackupStatus {
         val uploaded: Int,
         val skipped: Int,
         val failed: Int,
+        val pruned: Int,
         val remaining: Int,
         val stoppedBecause: StopReason?
     ) : BackupStatus
@@ -360,6 +361,7 @@ class BackupViewModel @Inject constructor(
                     uploaded = result.uploaded,
                     skipped = result.skipped,
                     failed = result.failed,
+                    pruned = result.pruned,
                     remaining = result.remaining,
                     stoppedBecause = result.stoppedBecause
                 )
