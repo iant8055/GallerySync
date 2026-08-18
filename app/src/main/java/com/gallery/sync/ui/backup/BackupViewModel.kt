@@ -143,6 +143,14 @@ sealed interface ProxyStatus {
         val failedFile: String,
         val reason: String
     ) : ProxyStatus
+
+    /**
+     * Android refused to produce the consent dialog, so nothing was even asked.
+     *
+     * Worth its own state: without it the button is pressed, no dialog appears, no message
+     * appears, and the app looks broken with nothing to act on.
+     */
+    data object CouldNotAsk : ProxyStatus
 }
 
 @HiltViewModel
@@ -290,7 +298,18 @@ class BackupViewModel @Inject constructor(
      */
     suspend fun buildProxyWriteRequest(): IntentSender? {
         pendingProxyCandidates = proxyApplier.candidates()
-        return proxyApplier.createWriteRequest(pendingProxyCandidates)
+        val sender = proxyApplier.createWriteRequest(pendingProxyCandidates)
+
+        // Clears any earlier result on success, so the dialog is not shown over a stale message.
+        _state.value = _state.value.copy(
+            proxyStatus = if (sender == null) ProxyStatus.CouldNotAsk else null
+        )
+
+        // The count shown may have been built before files moved underneath it; put the screen
+        // back in step with what is actually eligible now.
+        if (sender == null) refreshCounts()
+
+        return sender
     }
 
     fun onProxyConsentGranted() {

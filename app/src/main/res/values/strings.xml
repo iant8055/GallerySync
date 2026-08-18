@@ -28,6 +28,8 @@
     <string name="proxy_working">Optimising…</string>
     <string name="proxy_done">Optimised %1$d photos and freed %2$s.</string>
     <string name="proxy_stopped">Stopped after %1$d photos. %2$s could not be replaced (%3$s). Nothing after it was changed.</string>
+    <!-- Says plainly that nothing happened. Silence here is what made this look broken. -->
+    <string name="proxy_could_not_ask">Android wouldn\'t show the permission prompt, so no photos were changed. The list has been refreshed — try again.</string>
 
     <!-- Sign in -->
     <string name="sign_in_prompt">Connect your OneDrive account to browse your photos and videos.</string>

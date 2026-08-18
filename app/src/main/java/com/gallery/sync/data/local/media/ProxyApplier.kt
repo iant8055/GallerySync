@@ -69,10 +69,48 @@ class ProxyApplier @Inject constructor(
 
     fun isSupported(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.R
 
-    /** Photos eligible right now, largest first — the biggest wins for the least risk. */
+    /**
+     * Photos eligible right now, largest first — the biggest wins for the least risk.
+     *
+     * The ledger on its own is not enough. It records what was uploaded, not what is still on the
+     * phone, so a photo since deleted from the gallery leaves a row pointing at nothing. Those rows
+     * have to be dropped before the list is used anywhere: they inflate the megabytes offered, and
+     * a URI that no longer resolves makes [MediaStore.createWriteRequest] reject the entire batch
+     * rather than just that item — one dead row silently disables optimising altogether.
+     *
+     * The rows are left in place rather than deleted. A file that is gone locally but present in
+     * OneDrive is still genuinely backed up, and forgetting it would understate what is verified.
+     */
     suspend fun candidates(): List<BackupEntryEntity> = withContext(dispatcher) {
-        if (!isSupported()) emptyList() else entryDao.proxyCandidates()
+        if (!isSupported()) return@withContext emptyList()
+
+        val recorded = entryDao.proxyCandidates()
+        val live = recorded.filter { stillOnDevice(Uri.parse(it.contentUri)) }
+
+        val missing = recorded.size - live.size
+        if (missing > 0) {
+            Logger.i(TAG, "ignoring $missing candidates whose local file is gone")
+        }
+
+        // Largest-first ordering means a capped run still reclaims the most it can, and whatever
+        // is trimmed here stays eligible for the next one.
+        if (live.size > MAX_URIS_PER_REQUEST) {
+            Logger.i(TAG, "capping ${live.size} candidates to $MAX_URIS_PER_REQUEST")
+        }
+        live.take(MAX_URIS_PER_REQUEST)
     }
+
+    /**
+     * Whether the URI still resolves to a row in MediaStore.
+     *
+     * Opening the file would be a stronger check, but this runs over every candidate each time the
+     * settings screen refreshes; asking for a single column is the cheapest question that answers
+     * it.
+     */
+    private fun stillOnDevice(uri: Uri): Boolean = runCatching {
+        resolver.query(uri, arrayOf(MediaStore.MediaColumns._ID), null, null, null)
+            ?.use { it.moveToFirst() } ?: false
+    }.getOrDefault(false)
 
     /**
      * Asks Android for permission to modify [entries].
@@ -87,7 +125,14 @@ class ProxyApplier @Inject constructor(
         return runCatching {
             MediaStore.createWriteRequest(resolver, uris).intentSender
         }.onFailure {
-            Logger.e(TAG, "could not build write request: ${it.javaClass.simpleName}")
+            // The message is what identifies a bad URI; the class name alone says nothing.
+            Logger.e(TAG, "could not build write request: ${it.javaClass.simpleName}: ${it.message}")
+            Logger.e(TAG, "uris: ${uris.size}, first: ${uris.firstOrNull()}")
+            Logger.e(TAG, "distinct authorities: ${uris.mapNotNull { u -> u.authority }.distinct()}")
+            Logger.e(
+                TAG,
+                "distinct paths: ${uris.map { u -> u.pathSegments.dropLast(1).joinToString("/") }.distinct()}"
+            )
         }.getOrNull()
     }
 
@@ -210,5 +255,13 @@ class ProxyApplier @Inject constructor(
         /** Enough to ride out a locked file or a transient IO error, not enough to hide a real one. */
         const val MAX_ATTEMPTS = 3
         const val RETRY_DELAY_MILLIS = 500L
+
+        /**
+         * MediaStore's own limit on a single write request, above which it throws.
+         *
+         * A full library easily exceeds this — the point at which optimising matters most is
+         * exactly the point at which an uncapped request would fail.
+         */
+        const val MAX_URIS_PER_REQUEST = 2000
     }
 }

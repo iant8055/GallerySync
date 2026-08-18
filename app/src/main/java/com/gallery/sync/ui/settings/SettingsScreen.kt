@@ -176,6 +176,8 @@ fun SettingsScreen(
                             status.failedFile,
                             status.reason
                         )
+
+                        ProxyStatus.CouldNotAsk -> stringResource(R.string.proxy_could_not_ask)
                     },
                     style = MaterialTheme.typography.bodyMedium
                 )

@@ -81,17 +81,32 @@ Cutover rule: run alongside Samsung's sync for at least two weeks before trustin
 The milestone that delivers the actual product: the phone stops filling up, and the existing
 gallery keeps working.
 
-- [ ] **Photo proxies.** Downscale photos (~2048px, EXIF preserved) and keep the proxy in
+- [x] **Photo proxies.** Downscale photos (~2048px, EXIF preserved) and keep the proxy in
       MediaStore permanently. Roughly 10x smaller, and every photo stays visible, searchable and
       editable in the phone's own gallery. This is not a storage trick — it is what keeps the
       existing gallery whole.
-- [ ] **Never proxy video silently.** A degraded clip handed to an editor fails quietly, and the
+- [x] **Never proxy video silently.** A degraded clip handed to an editor fails quietly, and the
       user only discovers it in the exported result. Videos are kept whole or kept in the cloud.
 - [ ] **Storage budget.** User sets a ceiling; the worker maintains it — newest kept, oldest
       evicted, nothing evicted until its cloud copy is verified.
 - [ ] **Rolling window for video**, so recent clips stay usable in the gallery.
 - [ ] Per-album "keep originals on device" for albums actively edited from.
 - [ ] Clear marker showing which items are optimised versus whole.
+
+### Proxying verified on hardware — 18 Aug 2026, Galaxy Z Fold 4
+No longer theoretical. 11 photos optimised, 40,283,338 bytes reclaimed; five correctly skipped as
+already small rather than needlessly rewritten.
+
+- EXIF orientation and dates carried across. A NULL `datetaken` on one file was pre-existing —
+  2,069 of 6,289 images on the device have none, mostly WhatsApp, which strips EXIF.
+- Videos untouched: still 8K at 103 / 163 / 178 MB.
+- OneDrive originals intact at full size (4 MB) beside a 348 KB local proxy.
+- **CapCut can see the backed-up folder and its files.** This is the problem the project exists to
+  solve, confirmed against the app that motivated it.
+
+**Consequence for v0.4:** what an editor imports for an optimised photo is the 2048px proxy, so
+exports from it are capped at that resolution. Retrieval is therefore load-bearing, not a nicety —
+it is the only route back to a full-quality edit.
 
 ## v0.4.0 — Retrieval and deletion sync
 - [ ] Fetch a cloud-only item back on demand, registering it in MediaStore so every app sees it
