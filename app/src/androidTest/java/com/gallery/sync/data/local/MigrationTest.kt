@@ -34,6 +34,52 @@ class MigrationTest {
     }
 
     @Test
+    fun migrate2To3_producesTheSchemaRoomExpects() {
+        helper.createDatabase(TEST_DB, 2).close()
+
+        helper.runMigrationsAndValidate(TEST_DB, 3, true, Migrations.MIGRATION_2_3).close()
+    }
+
+    @Test
+    fun migrate2To3_defaultsExistingRowsToNotProxied() {
+        // An existing backed-up file must not be mistaken for a proxy after upgrading, or the
+        // scanner would skip it forever and it would never be backed up again.
+        helper.createDatabase(TEST_DB, 2).apply {
+            execSQL(
+                """
+                INSERT INTO backup_entries
+                    (id, mediaStoreId, contentUri, displayName, album, sizeBytes,
+                     dateModifiedEpochSeconds, mimeType, isVideo, state, attemptCount)
+                VALUES
+                    ('k1', 42, 'content://media/external/images/media/42', 'IMG_1.jpg',
+                     'Camera', 1024, 1700000000, 'image/jpeg', 0, 'UPLOADED', 0)
+                """.trimIndent()
+            )
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(TEST_DB, 3, true, Migrations.MIGRATION_2_3)
+
+        db.query("SELECT isProxied, localProxySizeBytes, sizeBytes FROM backup_entries WHERE id = 'k1'")
+            .use { cursor ->
+                cursor.moveToFirst()
+                assertEquals("existing rows must not read as proxied", 0, cursor.getInt(0))
+                assertEquals("no proxy size yet", true, cursor.isNull(1))
+                // The original's size must survive: it is what the cloud copy is checked against.
+                assertEquals(1024, cursor.getLong(2))
+            }
+        db.close()
+    }
+
+    @Test
+    fun migrateAllTheWayFrom1To3() {
+        // Someone upgrading from the first build skips version 2 entirely.
+        helper.createDatabase(TEST_DB, 1).close()
+
+        helper.runMigrationsAndValidate(TEST_DB, 3, true, *Migrations.ALL).close()
+    }
+
+    @Test
     fun migrate1To2_leavesTheNewTablesUsable() {
         helper.createDatabase(TEST_DB, 1).close()
 
