@@ -1,5 +1,6 @@
 package com.gallery.sync.ui.settings
 
+import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -29,6 +30,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
 import com.gallery.sync.ui.backup.BackupViewModel
+import com.gallery.sync.ui.backup.ProxyStatus
 import com.gallery.sync.ui.common.formatBytes
 import kotlinx.coroutines.launch
 
@@ -52,6 +54,14 @@ fun SettingsScreen(
     val moveLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult()
     ) { viewModel.onMoveToBackupFinished() }
+
+    val proxyLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        // Only rewrite anything if Android reports the user actually granted it. Treating a
+        // dismissed dialog as consent would overwrite photos nobody agreed to.
+        if (result.resultCode == Activity.RESULT_OK) viewModel.onProxyConsentGranted()
+    }
 
     Column(
         modifier = modifier
@@ -98,6 +108,76 @@ fun SettingsScreen(
                     ),
                     checked = state.allowMeteredNetwork,
                     onCheckedChange = viewModel::setAllowMeteredNetwork
+                )
+            }
+        }
+
+        HorizontalDivider()
+
+        Section(stringResource(R.string.settings_optimise)) {
+            when {
+                !state.canProxy -> Text(
+                    text = stringResource(R.string.proxy_unsupported),
+                    style = MaterialTheme.typography.bodySmall
+                )
+
+                state.proxyCandidateCount == 0 -> Text(
+                    text = stringResource(R.string.proxy_none),
+                    style = MaterialTheme.typography.bodySmall
+                )
+
+                else -> {
+                    Text(
+                        text = pluralStringResource(
+                            R.plurals.proxy_explainer,
+                            state.proxyCandidateCount,
+                            state.proxyCandidateCount
+                        ),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    OutlinedButton(
+                        onClick = {
+                            scope.launch {
+                                viewModel.buildProxyWriteRequest()?.let {
+                                    proxyLauncher.launch(IntentSenderRequest.Builder(it).build())
+                                }
+                            }
+                        }
+                    ) {
+                        Text(
+                            stringResource(
+                                R.string.proxy_action,
+                                formatBytes(context, state.proxyCandidateBytes)
+                            )
+                        )
+                    }
+                    // Said out loud because their absence would otherwise read as a bug.
+                    Text(
+                        text = stringResource(R.string.proxy_videos_excluded),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+
+            state.proxyStatus?.let { status ->
+                Text(
+                    text = when (status) {
+                        ProxyStatus.Working -> stringResource(R.string.proxy_working)
+
+                        is ProxyStatus.Done -> stringResource(
+                            R.string.proxy_done,
+                            status.proxiedCount,
+                            formatBytes(context, status.bytesReclaimed)
+                        )
+
+                        is ProxyStatus.Stopped -> stringResource(
+                            R.string.proxy_stopped,
+                            status.proxiedCount,
+                            status.failedFile,
+                            status.reason
+                        )
+                    },
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
         }

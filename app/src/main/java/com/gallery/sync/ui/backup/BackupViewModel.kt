@@ -5,7 +5,10 @@ import android.content.IntentSender
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.WorkManager
+import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.media.LocalCopyRemover
+import com.gallery.sync.data.local.media.ProxyApplier
+import com.gallery.sync.data.local.media.ProxyOutcome
 import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.worker.BackupScheduling
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -100,7 +103,12 @@ data class BackupUiState(
     /** Back up on its own when new photos appear. */
     val isAutomaticEnabled: Boolean = false,
     /** Allow automatic runs on mobile data, not just Wi-Fi. */
-    val allowMeteredNetwork: Boolean = false
+    val allowMeteredNetwork: Boolean = false,
+    /** Photos whose local copy could be replaced by a proxy, and what they occupy now. */
+    val proxyCandidateCount: Int = 0,
+    val proxyCandidateBytes: Long = 0L,
+    val canProxy: Boolean = false,
+    val proxyStatus: ProxyStatus? = null
 ) {
     /** Files that would be sent if a run started now. */
     val enabledItemCount: Int get() = albums.filter { it.isEnabled }.sumOf { it.itemCount }
@@ -114,6 +122,22 @@ data class BackupUiState(
     val canRunBackup: Boolean get() = !isRunning && pendingCount > 0
 }
 
+/** What optimising photos is doing, or what it did. */
+sealed interface ProxyStatus {
+
+    data object Working : ProxyStatus
+
+    data class Done(val proxiedCount: Int, val bytesReclaimed: Long) : ProxyStatus
+
+    /** Stopped at a file that would not replace even after retries. */
+    data class Stopped(
+        val proxiedCount: Int,
+        val bytesReclaimed: Long,
+        val failedFile: String,
+        val reason: String
+    ) : ProxyStatus
+}
+
 @HiltViewModel
 class BackupViewModel @Inject constructor(
     private val scanner: MediaScanner,
@@ -121,9 +145,13 @@ class BackupViewModel @Inject constructor(
     private val entryDao: BackupEntryDao,
     private val engine: BackupEngine,
     private val localCopyRemover: LocalCopyRemover,
+    private val proxyApplier: ProxyApplier,
     private val settings: BackupSettings,
     @param:ApplicationContext private val context: Context
 ) : ViewModel() {
+
+    /** Captured when consent is requested, so exactly that set is what gets rewritten. */
+    private var pendingProxyCandidates: List<BackupEntryEntity> = emptyList()
 
     private val _state = MutableStateFlow(BackupUiState())
     val state: StateFlow<BackupUiState> = _state.asStateFlow()
@@ -232,13 +260,58 @@ class BackupViewModel @Inject constructor(
 
     private suspend fun refreshCounts() {
         val redundant = engine.redundantLocalCopies()
+        val proxyCandidates = proxyApplier.candidates()
+
         _state.value = _state.value.copy(
             uploadedCount = entryDao.countInState(BackupState.UPLOADED),
             pendingCount = entryDao.countPendingInSelectedAlbums(),
             redundantCount = redundant.size,
             redundantBytes = redundant.sumOf { it.sizeBytes },
-            canRemoveLocalCopies = localCopyRemover.isSupported()
+            canRemoveLocalCopies = localCopyRemover.isSupported(),
+            proxyCandidateCount = proxyCandidates.size,
+            proxyCandidateBytes = proxyCandidates.sumOf { it.sizeBytes },
+            canProxy = proxyApplier.isSupported()
         )
+    }
+
+    /**
+     * Asks Android for permission to rewrite the photos that would be optimised.
+     *
+     * The candidates are captured here and reused by [onProxyConsentGranted], so the set that was
+     * consented to is exactly the set that gets rewritten — re-querying afterwards could act on
+     * files the user never saw in the dialog.
+     */
+    suspend fun buildProxyWriteRequest(): IntentSender? {
+        pendingProxyCandidates = proxyApplier.candidates()
+        return proxyApplier.createWriteRequest(pendingProxyCandidates)
+    }
+
+    fun onProxyConsentGranted() {
+        val candidates = pendingProxyCandidates
+        if (candidates.isEmpty()) return
+
+        viewModelScope.launch {
+            _state.value = _state.value.copy(proxyStatus = ProxyStatus.Working)
+
+            val status = when (val outcome = proxyApplier.apply(candidates)) {
+                is ProxyOutcome.Completed ->
+                    ProxyStatus.Done(outcome.proxiedCount, outcome.bytesReclaimed)
+
+                is ProxyOutcome.Stopped -> ProxyStatus.Stopped(
+                    proxiedCount = outcome.proxiedCount,
+                    bytesReclaimed = outcome.bytesReclaimed,
+                    failedFile = outcome.failedFile,
+                    reason = outcome.reason
+                )
+
+                ProxyOutcome.NothingToDo, ProxyOutcome.NotSupported ->
+                    ProxyStatus.Done(0, 0L)
+            }
+
+            pendingProxyCandidates = emptyList()
+            _state.value = _state.value.copy(proxyStatus = status)
+            refresh()
+        }
     }
 
     /**

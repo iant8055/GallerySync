@@ -10,6 +10,24 @@
     <string name="settings_account">Account</string>
     <string name="settings_automatic">Automatic backup</string>
     <string name="settings_storage">Storage</string>
+    <string name="settings_optimise">Optimise photos</string>
+
+    <!--
+        "Optimise" rather than "compress" or "shrink": the photo stays in the gallery and stays
+        usable, which is the point. Videos are named as excluded because their absence would
+        otherwise look like a bug.
+    -->
+    <plurals name="proxy_explainer">
+        <item quantity="one">%1$d photo can be optimised. A smaller copy stays on the phone and the full-size original stays in OneDrive.</item>
+        <item quantity="other">%1$d photos can be optimised. Smaller copies stay on the phone and the full-size originals stay in OneDrive.</item>
+    </plurals>
+    <string name="proxy_action">Optimise %1$s of photos</string>
+    <string name="proxy_videos_excluded">Videos are never optimised — a lower-quality clip would fail quietly inside an editor.</string>
+    <string name="proxy_none">Nothing to optimise. Photos become eligible once they are verified in OneDrive.</string>
+    <string name="proxy_unsupported">Optimising photos needs Android 11 or newer.</string>
+    <string name="proxy_working">Optimising…</string>
+    <string name="proxy_done">Optimised %1$d photos and freed %2$s.</string>
+    <string name="proxy_stopped">Stopped after %1$d photos. %2$s could not be replaced (%3$s). Nothing after it was changed.</string>
 
     <!-- Sign in -->
     <string name="sign_in_prompt">Connect your OneDrive account to browse your photos and videos.</string>
