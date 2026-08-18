@@ -159,15 +159,21 @@ interface BackupEntryDao {
     )
     suspend fun markProxied(id: String, proxySizeBytes: Long)
 
-    /** Verified in the cloud, still whole on the phone — the candidates for proxying. */
+    /**
+     * Photos whose local copy can safely be replaced by a proxy.
+     *
+     * Verified in the cloud, not already proxied, and **never video** — a degraded clip fails
+     * silently inside an editor and is only discovered in the exported result.
+     */
     @Query(
         """
         SELECT * FROM backup_entries
         WHERE state = :uploaded
-          AND isProxied = 0
-          AND isVideo = 0
           AND remoteSizeBytes IS NOT NULL
           AND remoteSizeBytes = sizeBytes
+          AND isProxied = 0
+          AND isVideo = 0
+        ORDER BY sizeBytes DESC
         """
     )
     suspend fun proxyCandidates(uploaded: BackupState = BackupState.UPLOADED): List<BackupEntryEntity>
