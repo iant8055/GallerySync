@@ -127,4 +127,21 @@ interface BackupEntryDao {
 
     @Query("SELECT * FROM backup_entries WHERE id = :id")
     suspend fun find(id: String): BackupEntryEntity?
+
+    /**
+     * Entries safe to remove the local copy of.
+     *
+     * Requires both that OneDrive confirmed the file **and** that the size it reported equals the
+     * local size. "We think we uploaded it" is not a good enough basis for deleting someone's only
+     * other copy — the size check is the evidence the bytes actually arrived whole.
+     */
+    @Query(
+        """
+        SELECT * FROM backup_entries
+        WHERE state = :uploaded
+          AND remoteSizeBytes IS NOT NULL
+          AND remoteSizeBytes = sizeBytes
+        """
+    )
+    suspend fun verifiedInCloud(uploaded: BackupState = BackupState.UPLOADED): List<BackupEntryEntity>
 }

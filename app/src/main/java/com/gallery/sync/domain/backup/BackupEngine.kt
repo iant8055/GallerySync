@@ -5,6 +5,7 @@ import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.entity.BackupState
 import com.gallery.sync.data.local.entity.backupKeyOf
+import com.gallery.sync.data.local.media.LocalMediaItem
 import com.gallery.sync.data.local.media.MediaAccess
 import com.gallery.sync.data.local.media.MediaScanner
 import com.gallery.sync.data.remote.onedrive.ContentUriUploadSource
@@ -209,6 +210,29 @@ class BackupEngine @Inject constructor(
                 skipped = skipped
             )
         }
+
+    /**
+     * Local files whose cloud copy is confirmed, so the phone's copy is redundant.
+     *
+     * Matched against a fresh scan rather than trusted from the ledger alone: a ledger row can
+     * outlive the file it describes, and building a delete request from stale rows is how a backup
+     * tool removes the wrong thing.
+     */
+    suspend fun redundantLocalCopies(): List<LocalMediaItem> = withContext(dispatcher) {
+        if (scanner.access() == MediaAccess.NONE) return@withContext emptyList()
+
+        val verified = entryDao.verifiedInCloud().map { it.id }.toSet()
+
+        scanner.scanAll().filter { item ->
+            val key = backupKeyOf(
+                album = item.album,
+                displayName = item.displayName,
+                sizeBytes = item.sizeBytes,
+                dateModifiedEpochSeconds = item.dateModifiedEpochSeconds
+            )
+            key in verified
+        }.also { Logger.d(TAG, "redundantLocalCopies: ${it.size} files are safely in OneDrive") }
+    }
 
     /**
      * What is already in an album's OneDrive folder, as name to size.

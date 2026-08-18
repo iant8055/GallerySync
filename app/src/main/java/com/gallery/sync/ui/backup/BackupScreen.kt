@@ -3,6 +3,7 @@ package com.gallery.sync.ui.backup
 import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,6 +22,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -34,6 +36,7 @@ import com.gallery.sync.R
 import com.gallery.sync.data.local.media.MediaAccess
 import com.gallery.sync.domain.backup.StopReason
 import com.gallery.sync.ui.common.formatBytes
+import kotlinx.coroutines.launch
 
 /**
  * Backup control: which albums, and a manual run.
@@ -156,6 +159,8 @@ private fun AlbumList(state: BackupUiState, viewModel: BackupViewModel) {
         state.status?.let {
             Text(it.readable(), style = MaterialTheme.typography.bodyMedium)
         }
+
+        MoveToBackupSection(state = state, viewModel = viewModel)
     }
 
     HorizontalDivider()
@@ -205,6 +210,67 @@ private fun AlbumList(state: BackupUiState, viewModel: BackupViewModel) {
                 )
             }
             HorizontalDivider()
+        }
+    }
+}
+
+/**
+ * Offers to reclaim the space taken by files already safely in OneDrive.
+ *
+ * Android shows its own confirmation listing the files, so this app never removes anything on its
+ * own say-so — the user sees exactly what is going and can refuse.
+ */
+@Composable
+private fun MoveToBackupSection(state: BackupUiState, viewModel: BackupViewModel) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    val launcher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { viewModel.onMoveToBackupFinished() }
+
+    when {
+        !state.canRemoveLocalCopies -> Text(
+            text = stringResource(R.string.backup_move_unsupported),
+            style = MaterialTheme.typography.bodySmall
+        )
+
+        state.redundantCount == 0 -> Text(
+            text = stringResource(R.string.backup_nothing_redundant),
+            style = MaterialTheme.typography.bodySmall
+        )
+
+        else -> {
+            val size = formatBytes(context, state.redundantBytes)
+
+            Text(
+                text = stringResource(
+                    R.string.backup_move_explainer,
+                    pluralStringResource(
+                        R.plurals.file_count,
+                        state.redundantCount,
+                        state.redundantCount
+                    )
+                ),
+                style = MaterialTheme.typography.bodySmall
+            )
+            OutlinedButton(
+                onClick = {
+                    scope.launch {
+                        viewModel.buildMoveToBackupRequest()?.let {
+                            launcher.launch(IntentSenderRequest.Builder(it).build())
+                        }
+                    }
+                }
+            ) {
+                Text(stringResource(R.string.backup_move_to_backup, size))
+            }
+            // Not softening: the space genuinely is not reclaimed until the trash is emptied, and
+            // discovering that later would feel like the app had lied.
+            Text(
+                text = stringResource(R.string.backup_move_trash_note),
+                style = MaterialTheme.typography.bodySmall
+            )
         }
     }
 }

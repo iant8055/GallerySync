@@ -1,7 +1,9 @@
 package com.gallery.sync.ui.backup
 
+import android.content.IntentSender
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gallery.sync.data.local.media.LocalCopyRemover
 import com.gallery.sync.data.local.dao.AlbumPreferenceDao
 import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.entity.AlbumPreferenceEntity
@@ -57,7 +59,12 @@ data class BackupUiState(
     val status: BackupStatus? = null,
     val uploadedCount: Int = 0,
     /** Outstanding files **within the selected albums** — not the whole library. */
-    val pendingCount: Int = 0
+    val pendingCount: Int = 0,
+    /** Local copies made redundant by a confirmed cloud copy, and what they occupy. */
+    val redundantCount: Int = 0,
+    val redundantBytes: Long = 0L,
+    /** False below API 30, where Android has no media trash and removal could only be permanent. */
+    val canRemoveLocalCopies: Boolean = false
 ) {
     /** Files that would be sent if a run started now. */
     val enabledItemCount: Int get() = albums.filter { it.isEnabled }.sumOf { it.itemCount }
@@ -76,7 +83,8 @@ class BackupViewModel @Inject constructor(
     private val scanner: MediaScanner,
     private val albumDao: AlbumPreferenceDao,
     private val entryDao: BackupEntryDao,
-    private val engine: BackupEngine
+    private val engine: BackupEngine,
+    private val localCopyRemover: LocalCopyRemover
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(BackupUiState())
@@ -145,10 +153,30 @@ class BackupViewModel @Inject constructor(
     }
 
     private suspend fun refreshCounts() {
+        val redundant = engine.redundantLocalCopies()
         _state.value = _state.value.copy(
             uploadedCount = entryDao.countInState(BackupState.UPLOADED),
-            pendingCount = entryDao.countPendingInSelectedAlbums()
+            pendingCount = entryDao.countPendingInSelectedAlbums(),
+            redundantCount = redundant.size,
+            redundantBytes = redundant.sumOf { it.sizeBytes },
+            canRemoveLocalCopies = localCopyRemover.isSupported()
         )
+    }
+
+    /**
+     * Builds the system request to move redundant local copies into the gallery's trash.
+     *
+     * Returns null when there is nothing to move. The caller launches it, and Android asks the
+     * user to confirm — this app never removes anything silently.
+     */
+    suspend fun buildMoveToBackupRequest(): IntentSender? {
+        val redundant = engine.redundantLocalCopies()
+        return localCopyRemover.createMoveToBackupRequest(redundant.map { it.contentUri })
+    }
+
+    /** Called after the system dialog closes, to reflect whatever the user allowed. */
+    fun onMoveToBackupFinished() {
+        viewModelScope.launch { refresh() }
     }
 
     /**

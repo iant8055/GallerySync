@@ -44,6 +44,18 @@
     <string name="backup_all_done">Everything selected is backed up</string>
     <string name="backup_nothing_selected">Choose an album to back up</string>
     <string name="backup_total_stored">%1$d files in OneDrive</string>
+
+    <!--
+        Moving local copies out. Deliberately framed as moving to the backup rather than deleting:
+        the file is not being discarded, it is being reduced from two copies to one, and that one
+        is the backup. The trash note is not softening — space genuinely is not reclaimed until the
+        user empties it, and saying otherwise would be a lie they discover later.
+    -->
+    <string name="backup_move_to_backup">Move %1$s to backup</string>
+    <string name="backup_move_explainer">%1$s on this phone is already safely in OneDrive. Moving it to your backup frees that space.</string>
+    <string name="backup_move_trash_note">Files go to your gallery\'s Recently deleted first, so you can get them back for 30 days. The space is freed once you empty it.</string>
+    <string name="backup_move_unsupported">Moving files to backup needs Android 11 or newer.</string>
+    <string name="backup_nothing_redundant">Nothing to move yet — files move to your backup once they are safely in OneDrive.</string>
     <string name="backup_deselect_all">Deselect all</string>
     <string name="backup_select_all">Select all</string>
     <string name="backup_rescan">Rescan</string>
