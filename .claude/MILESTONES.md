@@ -1,74 +1,84 @@
 # GallerySync Milestones
 
-**Hard deadline: 30 September 2026.** Samsung turns off Gallery Sync that day. From
-1 October, if GallerySync is not backing up, new photos on the phone are unprotected.
-Backup is therefore the critical path and everything else yields to it.
+**Hard deadline: 30 September 2026.** Samsung turns off Gallery Sync that day.
+
+## Design principle — GallerySync is invisible
+
+**It is not a gallery app and must never become one.**
+
+Its only job is making files *present*. Everything a person actually does with photos —
+viewing, search, face grouping, editing, sharing, albums, stories — the phone's existing
+gallery already does, with years of work behind it. Rebuilding any of that would produce
+something worse than what the user already has.
+
+Consequences that bind every future task:
+
+- **Feed the existing gallery, do not replace it.** A file with local bytes appears in Samsung
+  Gallery, CapCut and everything else automatically, because it is an ordinary file. No
+  integration is needed or possible.
+- **GallerySync's own UI stays minimal**: setup, album selection, a storage budget, and a plain
+  list for retrieving something that is not on the phone. No photo grid, no thumbnails
+  browser, no search, no editing. If a task starts to look like building a gallery, it is the
+  wrong task.
+- **Set up and forget.** The user sets a budget once. The background worker maintains it.
+
+## Platform constraints — established by experiment, do not re-litigate
+
+Verified on a Galaxy Z Fold 4 (Android 16) on 2026-08-17:
+
+- **A file with no local bytes cannot appear in any gallery app.** MediaStore rows must point
+  at a real file, and the system opens that file directly — there is no hydration hook. Android
+  has no placeholder-that-downloads-on-open mechanism for third-party apps.
+- **Samsung Gallery's cloud albums came from Samsung's own private index**, not MediaStore.
+  That is why third-party apps could never see them, and it is exactly what is being switched
+  off. It cannot be replicated by a third-party app.
+- **A trash request is not a guarantee of recoverability.** See the deletion rule in CLAUDE.md.
+- Therefore: **storage can be reduced, never eliminated.** Any plan that plans on zero local
+  storage while remaining visible in the gallery is impossible, not merely hard.
 
 ## v0.1.0 — Foundation ✅ TAGGED
-- [x] Android project scaffold (Kotlin, Compose, Hilt, Room, Retrofit)
-- [x] Logger utility
-- [x] Room database schema for cached media index
-- [x] OneDrive adapter (Microsoft Graph API — browse folder structure)
-- [x] ContentProvider skeleton (registers with Android, returns empty cursor)
-- [x] MSAL sign-in (public client + PKCE, no secret)
-- [x] Browse UI proving the stack end to end
+Scaffold, Logger, Room, OneDrive Graph adapter, MSAL sign-in, browse UI.
+Verified on hardware: sign-in completes and the real drive lists.
 
-Verified on a Galaxy Z Fold 4 (Android 16): sign-in completes and the root listing
-returns the real drive.
+## v0.2.0 — Backup ✅ WORKING (not yet tagged)
+- [x] `Files.ReadWrite` scope
+- [x] Upload ledger keyed on content, not MediaStore ids
+- [x] Media scanner, partial-access aware
+- [x] Resumable Graph upload — verified byte-identical on hardware
+- [x] Per-album include/exclude
+- [x] Skip files already present in OneDrive
+- [x] Backup UI with a manual run
+- [x] Move redundant local copies out, once the cloud copy is verified
+- [ ] Schedule the periodic worker (currently manual only, deliberately)
+- [ ] Metered-network preference (currently unmetered-only, hardcoded)
+- [ ] Retry failed items from the UI
 
-## v0.2.0 — Backup (MUST SHIP BEFORE SEPT 30)
-Replaces what Samsung is switching off. Phone → OneDrive.
+Cutover rule: run alongside Samsung's sync for at least two weeks before trusting this alone.
 
-- [x] `Files.ReadWrite` scope (granted in Azure, requested by the app)
-- [x] Upload ledger in Room: content-derived key, size, mtime, state, remote id
-- [x] Local media scanner: enumerate albums via MediaStore, partial-access aware
-- [x] Graph upload — resumable upload sessions, verified on hardware against the
-      real account: 12 MB chunked upload stored byte-identical
-- [ ] WorkManager backup worker: network + battery constraints, retry with backoff
-- [ ] Per-album include/exclude (mirrors the model Samsung already taught users)
-- [ ] Backup status UI: what is pending, what failed, manual "back up now"
-- [ ] **Verification**: prove a file actually landed, rather than assuming it did
+## v0.3.0 — Space management
+The milestone that delivers the actual product: the phone stops filling up, and the existing
+gallery keeps working.
 
-Rule for cutover: run GallerySync and Samsung's sync **in parallel for at least two
-weeks** before trusting GallerySync alone. Duplicate uploads are harmless. A silent
-backup failure while GallerySync is the only thing running is not recoverable.
+- [ ] **Photo proxies.** Downscale photos (~2048px, EXIF preserved) and keep the proxy in
+      MediaStore permanently. Roughly 10x smaller, and every photo stays visible, searchable and
+      editable in the phone's own gallery. This is not a storage trick — it is what keeps the
+      existing gallery whole.
+- [ ] **Never proxy video silently.** A degraded clip handed to an editor fails quietly, and the
+      user only discovers it in the exported result. Videos are kept whole or kept in the cloud.
+- [ ] **Storage budget.** User sets a ceiling; the worker maintains it — newest kept, oldest
+      evicted, nothing evicted until its cloud copy is verified.
+- [ ] **Rolling window for video**, so recent clips stay usable in the gallery.
+- [ ] Per-album "keep originals on device" for albums actively edited from.
+- [ ] Clear marker showing which items are optimised versus whole.
 
-## v0.3.0 — Deletion sync (opt-in) and access bridge
+## v0.4.0 — Retrieval and deletion sync
+- [ ] Fetch a cloud-only item back on demand, registering it in MediaStore so every app sees it
+- [ ] Plain retrieval list — **not** a photo browser
+- [ ] Deletion sync, opt-in and batched. Highest-risk feature in the product; it only follows a
+      backup engine that has been watched working. Never infers deletion from absence alone —
+      a card unmounting or a permission being revoked must not be read as intent.
 
-### Deletion sync
-Deliberately not in v0.2.0. It is the highest-risk feature in the product — the one where a
-bug destroys data rather than merely failing to save it — so it is built only on top of a
-backup engine that has been watched working for weeks.
-
-Nothing here ever deletes permanently; see the deletion rule in CLAUDE.md.
-
-- [ ] Detect locally-deleted files (the ledger already knows which rows vanished)
-- [ ] Prompt in **batches**, never per file: "47 photos were removed from your phone.
-      Remove them from OneDrive too?", with the list reviewable before confirming
-- [ ] Prompt on next app open, not the instant a deletion lands — deletions come in bursts
-      while the app is backgrounded
-- [ ] **Off by default, explicit opt-in**
-- [ ] Never infer deletion from absence alone. A file can vanish from MediaStore because a
-      card was unmounted, a permission was revoked, or scoped storage hid it. If a large
-      fraction disappears at once, treat it as a fault and prompt nothing — that pattern is
-      how a sync tool destroys a library
-- [ ] Remote deletion goes to OneDrive's recycle bin; local deletion uses
-      `MediaStore.createTrashRequest()` and is not offered below API 30
-
-### Access bridge
-The differentiating feature: cloud media usable by any third-party app.
-
-Established by experiment on 2026-08-17: Samsung Gallery renders cloud albums from a
-private index with no local files and no MediaStore rows, which is exactly why CapCut
-cannot see them. Bridging cloud media into MediaStore requires real bytes on disk.
-
-- [ ] On-demand download when an item is requested
-- [ ] MediaStore registration so every app sees the file normally
-- [ ] Cache manager: size ceiling, LRU eviction
-- [ ] CapCut verification on hardware
-
-## v0.4.0 — Google Photos + Billing
-- [ ] Google Play Billing (BillingRepository, pro_unlock IAP)
-- [ ] Pro upgrade screen
+## v0.5.0 — Google Photos + Billing
+- [ ] Google Play Billing (`pro_unlock`)
 - [ ] Google Photos adapter (requires OAuth — Ian)
-- [ ] Settings: cache size, sync frequency, account management
+- [ ] Settings: sync frequency, account management

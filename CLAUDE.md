@@ -10,6 +10,24 @@ Built for Samsung Galaxy primarily; tested on LG and Moto as well.
 Stack: Kotlin, Jetpack Compose, Room (SQLite), Hilt (DI), WorkManager (background sync),
 Retrofit + OkHttp (cloud APIs), JUnit + Mockito (unit tests), Espresso (UI tests).
 
+## Design principle — GallerySync is invisible
+**It is not a gallery app and must never become one.**
+
+Its only job is making files present. Viewing, search, face grouping, editing, sharing,
+albums — the phone's existing gallery already does all of that, and rebuilding any of it
+would be worse than what the user already has.
+
+- Feed the existing gallery, do not replace it. A file with local bytes shows up in Samsung
+  Gallery and every other app automatically, because it is an ordinary file.
+- GallerySync's own UI stays minimal: setup, album selection, storage budget, and a plain
+  list for retrieving what is not on the phone. No photo grid, no thumbnail browser, no
+  search, no editing.
+- If a task starts to look like building a gallery, it is the wrong task.
+
+See `.claude/MILESTONES.md` for the platform constraints this rests on — chiefly that a file
+with no local bytes cannot appear in any gallery app, which is a platform limit rather than a
+design choice.
+
 ## Monetization
 Free app on Google Play with a single one-time in-app purchase to unlock Pro.
 
