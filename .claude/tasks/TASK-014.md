@@ -29,14 +29,11 @@ user chooses to pull *from* are exactly the folders the app later needs to write
 both purposes: it scopes the scan and it carries the write access.
 
 **The constraint that follows is load-bearing:** every album that can ever be set to **Sync** must
-sit under a granted tree, or proxying silently cannot touch it. A user who grants DCIM and then sets
-a Pictures album to Sync gets an album that never optimises and no explanation why. Either
-
-- the album list is restricted to what was granted, or
-- selecting Sync on an ungranted album prompts for that tree there and then.
-
-The second is friendlier and is recommended. Whichever, **the failure must never be silent** — a
-mode that quietly does nothing is worse than a mode that cannot be selected.
+sit under a granted tree, or proxying silently cannot touch it. Ian settled this on 19 Aug 2026 by
+scoping the scan to the grants — an ungranted album is never listed, so it can never be given a mode
+the app cannot carry out. Assert the invariant anyway; a mode that quietly does nothing is worse
+than a mode that cannot be selected, and this is the kind of guarantee that erodes when someone
+later adds a second way to reach the album list.
 
 *Note on naming:* "Camera Roll" is not an Android folder. Real candidates are `DCIM/Camera`,
 `Pictures`, `Downloads`, and per-app folders. Present what the device actually has rather than a
@@ -197,12 +194,71 @@ nothing to notify about, and Android only prompts once.
 - Consequential bubbles advance only on an explicit acknowledgement; informational ones use Next
 - Acknowledgement buttons name the consequence rather than reading a bare "I understand"
 - Skip and back-out stay available at every step — acknowledgement gates forward, never exit
-- Re-running setup is possible from Settings without reinstalling
+- Removing a directory from the scope hides its albums and deletes no ledger or preference rows;
+  re-adding it restores them with modes and history intact, and re-uploads nothing
+- Adding a directory says how many albums it brings and that they begin backing up
+- Re-running setup opens on current values and does not clear acknowledgements
 - Verified on hardware in both themes, per CLAUDE.md
 
-## Open
-- **Does the scan scope follow the granted trees, or stay MediaStore-wide with the trees only used
-  for writing?** Following the grants is simpler to explain and matches what the user picked;
-  MediaStore-wide keeps albums visible that the user could still choose to back up. Recommended:
-  follow the grants, since an album the app cannot write to cannot be fully managed anyway.
-- **Whether the wizard can be re-entered per gate**, or only as a whole.
+## Scope follows the grants — decided
+
+Ian, 19 Aug 2026: the scan follows the granted trees. An album outside them is not scanned, not
+listed, and not offered.
+
+That simplifies the constraint recorded under Gate 1. The earlier draft offered two ways to stop a
+Sync album sitting outside a granted tree — restrict the list, or prompt for the grant on selection.
+**Restricting is now automatic**: an ungranted album never appears, so the case cannot arise and the
+prompt is not needed. The rule survives as an invariant to assert rather than a flow to build.
+
+### Narrowing the scope hides albums; it must never forget them
+
+The important consequence, and it reaches existing code.
+
+`BackupEntryDao.forgetAlbumsNotOnDevice` deletes ledger rows for albums the scan did not return. Its
+own documentation already warns that a partial scan — revoked permission, unmounted card — would
+read as "every album vanished" and wipe the record of what is backed up. **Grant-scoped scanning
+adds a routine, intentional way for the scan to return fewer albums**, which is exactly the input
+that function must never be handed.
+
+So:
+
+- **A scope change is a preference change, not evidence a file is gone.** Removing a directory from
+  the scope must not call `forgetAlbumsNotOnDevice`, must not delete ledger rows, and must not
+  delete `album_preferences` rows.
+- **`album_preferences` especially.** CLAUDE.md records it as the one table that cannot be rebuilt
+  from OneDrive or from the files. Losing a mode because a directory was briefly de-scoped is
+  unrecoverable in a way nothing else here is.
+- **Re-adding a directory restores its albums with their modes and their backup history intact**,
+  and nothing re-uploads. That is the test that proves the rule held.
+
+Only a genuine disappearance — the album gone from a directory that *is* still in scope — should
+ever reach the forget path.
+
+### Adding a directory later starts backing it up
+
+A new tree brings new albums, and a new album takes `AlbumMode.DEFAULT`, which is `BACKUP`. So
+widening the scope begins uploading, without a further prompt.
+
+That is the right default for the reason the enum already gives — the failure mode should be
+"uploaded something you did not need", never "lost something you did" — but it should be **stated in
+the wizard at the moment the directory is added**, with the album count, rather than discovered from
+a running upload.
+
+## Re-running setup — decided
+
+Ian, 19 Aug 2026: an option in Settings, or in the Help menu.
+
+Three requirements on it, all of which follow from what setup can change:
+
+- **It opens on current values, not defaults.** A wizard that resets the configuration it is meant
+  to let you adjust is a trap, and the destructive settings are the ones it would reset.
+- **It never re-applies a bulk mode change silently.** Gate 2's "back up everything" is a one-time
+  choice; re-running setup offers it again but must not re-run the last answer just because the
+  user walked through the flow.
+- **Acknowledgements are not cleared by re-running it.** The record is per topic and already
+  answered; making someone re-acknowledge Archive to change a directory devalues the
+  acknowledgement, which is the whole point of keeping it rare.
+
+Whether it lives in Settings or in Help is presentation. Help is the better home if the wizard is
+mostly explanatory on a second run; Settings is better if it is mostly configuration. Both is fine
+— one entry point, linked from two places.
