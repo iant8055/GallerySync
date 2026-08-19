@@ -119,8 +119,12 @@ Decided by Ian, 19 Aug 2026, resolving the open question this section used to ho
 archiving is the right default and the wrong mandate: someone who wants an album off the phone now
 should be able to say so.
 
-> **Immediately · At the next archiving pass · 30 days · 90 days · 6 months · 1 year**,
-> defaulting to 30 days. See the scheduling section below for what the first two mean in practice.
+> **Immediately · 1 week · 1 month · 1 year**, defaulting to **1 month**.
+
+Set by Ian, 19 Aug 2026, and shared with the Sync age in TASK-011 so there is one vocabulary of
+ages across the app rather than two. Whether removal waits for the nightly pass is a **separate**
+choice, not an entry in this list — see the scheduling section below. Age answers which files; the
+pass answers when.
 
 
 **There is no enforced minimum any more, and that is the actual change.** Guard 2 previously worked
@@ -187,13 +191,20 @@ they already take the cutoff as a parameter. Resist branching on the age value i
 code; a second path through the one operation that cannot be undone is how it acquires an untested
 variant. The difference belongs in the scheduler.
 
-### It does not transfer to the video downscale age
+### The Sync age uses the same four values — revised 19 Aug 2026
 
-TASK-011's video age keeps its 30-day minimum and gains no Immediate option. The two look alike and
-are not: Archive **removes** a file the user consented to remove, and v0.4 retrieval is the route
-back. Downscaling **degrades** a clip in place, silently, and *recent video is never touched* is a
-stated requirement rather than a default. Do not harmonise these two settings on the grounds that
-they both measure age.
+An earlier draft here argued that **Immediately** must not transfer to TASK-011's video downscale
+age, on the grounds that Archive removes a file the user consented to remove while downscaling
+degrades a clip in place. Ian's call is that both settings offer the same four values, so the app
+has one vocabulary of ages rather than two.
+
+The distinction the earlier draft was protecting has not gone away; it has moved to where the user
+can see it. TASK-011 carries the flag: *recent video is never touched* is recorded in MILESTONES as
+a requirement, and Immediately reaches exactly the clip that requirement was written for. The clip
+stays in the gallery and stays playable, which the founding failure did not — but an export from it
+is capped until the original is fetched back.
+
+So: same values in both, and the Sync age carries a warning the Archive age does not need.
 
 ### When the archiving happens — a nightly pass, and two ways to opt out of waiting for it
 
@@ -209,9 +220,8 @@ deciding and acting is what actually helps, and it helps at every age.
 So archive removal becomes a **scheduled nightly pass**: nothing goes at the moment it qualifies, it
 goes at the next pass. And the option list carries the escape from that wait at the top:
 
-> **Immediately · At the next archiving pass · 30 days · 90 days · 6 months · 1 year**
->
-> defaulting to **30 days**.
+> **Immediately · 1 week · 1 month · 1 year**, defaulting to **1 month** — plus a separate
+> "wait for the nightly pass" choice, since when work happens is not an age.
 
 An earlier draft here proposed renaming Immediate to "No age limit" because one word was carrying
 both *which files* and *when*. Ian's version solves it better and with fewer concepts: the two
@@ -571,7 +581,8 @@ this way.
 - That confirmation never claims a local removal is recoverable
 - Switching an album away from Archive raises nothing
 - Nothing in the app asks for Archive approval a second time once the mode is set
-- The archive age persists, defaults to 30 days, and Immediate is never reached without choosing it
+- The archive age offers Immediately / 1 week / 1 month / 1 year, persists, defaults to 1 month,
+  and Immediately is never reached without choosing it
 - **Under Immediate, nothing is removed until it is verified in OneDrive** — the option removes the
   age wait and nothing else, verified by observation on a file mid-upload
 - Selecting Immediate changes what the confirmation says, naming that media taken today will leave

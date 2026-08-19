@@ -93,7 +93,9 @@ the same question: how much of this phone is in use, and what is safe to reclaim
 - Choosing Photos only states how many videos it leaves unprotected before it is applied, and the
   affected albums keep saying so afterwards
 - Video only yields a zero projection on every Sync album and proxies nothing
-- The video age threshold persists, defaults to 1 year, and cannot be set below 30 days by any path
+- The video age offers Immediately / 1 week / 1 month / 1 year, persists, and defaults to 1 year
+- Choosing Immediately states what it costs — clips downscaled as soon as they are backed up,
+  including ones shot today, and full-quality editing means fetching the original back
 - **Uploading is never delayed by the threshold** — a clip shot minutes ago is uploaded on the next
   run whatever the age setting says, verified by observation rather than by reading code
 - Changing the threshold moves the Sync projection on the album rows, before anything is applied
@@ -698,25 +700,49 @@ mode is set, per CLAUDE.md.
 | | Governed by the age setting? | Waits on the user? |
 |---|---|---|
 | Video uploaded to OneDrive | **no** — always immediate | **no** — no dialog exists on this path |
-| Video downscaled in place | **yes** — only once older than the threshold | yes, per batch, unavoidably |
+| Video downscaled in place | **yes** — only once older than the threshold | **no** — SAF tree grant, verified 19 Aug 2026 |
 | Video's local copy removed | no — that is Archive, and its own explicit choice | yes, per batch, unavoidably |
 
 ### The shape of the setting
 
-Presets rather than a free-text number of days, so the value is always sane and always legible:
+Presets rather than a free-text number of days, so the value is always sane and always legible, and
+the **same four the Archive age uses** — one vocabulary of ages across the app rather than two:
 
-> **Never · 30 days · 90 days · 6 months · 1 year**
+> **Immediately · 1 week · 1 month · 1 year**
+
+Set by Ian, 19 Aug 2026, replacing an earlier `Never / 30 days / 90 days / 6 months / 1 year` with a
+30-day floor.
 
 - **Default: 1 year.** Deliberately conservative, matching every other default in this app —
   automatic optimising off, metered off, `ARCHIVE` never a default. The cost of a cautious default
   is that the feature does little until the user lowers it, which is recoverable in one tap. The
   cost of an eager one is a degraded clip somebody still wanted.
-- **Never** is a real option and is not the same as `SyncScope.PHOTOS_ONLY`. Never means the video
-  is uploaded and kept whole forever; Photos only means it is not uploaded at all. Both are
-  reasonable and they are not substitutes.
-- **Enforce the minimum.** 30 days is the floor, and no path may set it lower — the same reasoning
-  as the storage floor's minimum. A threshold of hours or days rebuilds the exact failure the
-  project exists to prevent, and it would arrive looking like a setting the user chose.
+- **"Never" is gone, and nothing is lost.** `SyncScope.PHOTOS_ONLY` already expresses "leave my
+  video alone" and expresses it better, since it also keeps the clips out of OneDrive.
+- **There is no enforced minimum any more.** Immediately is below any floor by definition. The
+  protection is the same one the Archive age relies on: a named option the user picks deliberately,
+  not a limit the app imposes.
+
+### Immediately, for video, contradicts a stated requirement — flagged, not resolved
+
+**Worth a moment before it is built.** MILESTONES records *recent video is never touched* as the
+requirement rather than a default, and it comes from the founding use case: a clip shot ten minutes
+ago that could not be edited. Setting this to **Immediately** downscales exactly that clip.
+
+Two things are genuinely different from the original failure, and one is not:
+
+- The clip **does not disappear.** It stays in the gallery, playable, at 1080p. Nothing vanishes,
+  which was the actual harm.
+- The user **chose it**, in a named option, on an album they set to Sync. That is the same standard
+  CLAUDE.md's consent rule applies everywhere else.
+- But a CapCut export from it **is capped at the transcoded resolution**, and that is precisely the
+  complaint recorded against full-length downscale in the first place. Retrieval (v0.4) is the way
+  back, and it is a deliberate fetch rather than something an editor does for you.
+
+So the option is built as instructed, and the UI has to say plainly what it costs: *clips are
+downscaled as soon as they are backed up, including ones you shoot today; editing at full quality
+means fetching the original back.* If that reads as too sharp an edge once it is on screen, the
+answer is to change the default or drop the option — not to soften the wording.
 
 ### What "old" is measured against
 
@@ -847,7 +873,7 @@ Ian, 19 Aug 2026. There are two ages in the app and they are not variants of eac
 
 | Setting | Reads as | Governs | Immediate? | Minimum |
 |---|---|---|---|---|
-| **Sync age** — this task | *Downscale videos older than…* | a clip shrunk in place, still in the gallery | no | 30 days |
+| **Sync age** — this task | *Downscale videos older than…* | a clip shrunk in place, still in the gallery | yes | none |
 | **Archive age** — TASK-012 | *Remove files older than…* | photos and video leaving the phone | **yes** | none |
 
 Both live in Settings. An earlier draft of this section proposed hiding the Archive one inside its
@@ -856,13 +882,14 @@ the two apart, so that is withdrawn. The real requirement is that each label nam
 **consequence** rather than its mode — two fields both called "age" would be the confusing thing,
 two settings are not.
 
-The asymmetries in that table are deliberate and must not be tidied away:
+Both take the same four values and neither has a floor — Ian, 19 Aug 2026. One difference survives
+and must not be tidied away: **only the Sync age is limited to video.** Photos are proxied whatever
+their age, because a 2048px proxy leaves the photo in the gallery and costs an edit nothing until
+the export. There is no photo age setting and none is wanted.
 
-- **Only Archive offers Immediate.** It removes a file the user consented to remove, with v0.4
-  retrieval as the route back. Downscaling degrades a clip in place and *recent video is never
-  touched* is a stated requirement, not a default, so this task keeps its floor.
-- **Only Sync's age is limited to video.** Photos are proxied whatever their age, because a proxy
-  leaves the photo in the gallery and costs an edit nothing until the export.
+The Sync age gaining **Immediately** is a real change of stance, not a harmonisation — see the flag
+under "The shape of the setting" above. It puts downscaling a clip shot this morning within reach of
+a user who asks for it.
 
 
 ## Notes for whoever picks this up

@@ -168,14 +168,16 @@ problem, and it must survive every future change.
   people *watch* rather than edit, a downscaled clip is fine, and retrieval covers the rare edit —
   exactly as for photos. Needs Media3 Transformer and a transcode cost measured on real 8K footage
   before committing.
-- **"Old" is a user setting, decided by Ian 19 Aug 2026.** Never / 30 days / 90 days / 6 months /
-  1 year, defaulting to 1 year, with 30 days enforced as the minimum. "Old" is not a fact about
-  anyone's footage — client work gets edited for months, family video never gets opened again — so
-  the same reasoning that made the storage floor a setting applies. **It gates downscaling only and
-  never uploading**: a clip is uploaded immediately whatever its age, because a threshold that held
-  new video out of OneDrive would rebuild the founding failure while wearing the name of the fix.
-  Measured against `dateModifiedEpochSeconds`, which needs no schema change and errs toward leaving
-  video alone. See TASK-011.
+- **"Old" is a user setting, decided by Ian 19 Aug 2026.** **Immediately · 1 week · 1 month ·
+  1 year**, defaulting to 1 year — the same four values the Archive age uses, so the app has one
+  vocabulary of ages. "Old" is not a fact about anyone's footage: client work gets edited for
+  months, family video never gets opened again. **It gates downscaling only and never uploading** —
+  a clip is uploaded immediately whatever its age, because a threshold that held new video out of
+  OneDrive would rebuild the founding failure while wearing the name of the fix. Measured against
+  `dateModifiedEpochSeconds`, which needs no schema change and errs toward leaving video alone.
+  **Immediately reaches a clip shot this morning**, which is in tension with *recent video is never
+  touched* above; the clip stays in the gallery and stays playable, but an export from it is capped
+  until the original is fetched back. Flagged in TASK-011 rather than silently reconciled.
 - **Truncating to a stub is rejected.** It destroys the one thing old video is for.
 - **Writing our own thumbnail into Samsung Gallery is impossible** — private index, another app's
   sandbox, and the whole mechanism is being switched off anyway.
@@ -241,8 +243,9 @@ keeps working.
 - [ ] **Sync scope — Photos only / Video only / Both.** One universal setting applying to every Sync
       album. Default Both, which is today's behaviour. Photos only leaves video in Sync albums
       unuploaded, so it has to say what it is excluding. Added by Ian 19 Aug 2026. See TASK-011.
-- [ ] **Video proxies for old clips**, with the age threshold a user setting — see the video
-      section above. Gated on v0.4 retrieval and on a transcode cost measured against real 8K footage.
+- [ ] **Video transcode for old clips**, age a user setting — see TASK-013. The write needs no tap
+      (SAF, verified 19 Aug 2026); the blocker is a transcode cost measured on real 8K footage, and
+      it is gated on v0.4 retrieval.
 - [ ] **Move to backup should distinguish photo from video**, or be replaced by Archive mode.
 
 ## v0.4.0 — Retrieval and deletion sync
