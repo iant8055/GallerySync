@@ -150,26 +150,54 @@ halfway through building. It changes three things:
 - **The pool goes stale.** Largest-first is computed at grant time, and new photos arrive after it.
   Re-asking periodically is the design, so build for it rather than treating it as an edge case.
 
-### Open — WorkManager cannot carry the grant
+### Where the applying step runs — still open
+
+Ian, 18 Aug 2026: *"applying steps should be running in the background."* Taken as read. It does
+not settle the question on its own, because **every option below runs in the background.** None
+requires the app to be open or the user to be watching.
+
+"Foreground service" is Android's own misleading name. A foreground service has no UI and runs
+while the app is closed; "foreground" refers to its scheduling priority and the persistent
+notification it must show, not to the user being present. What genuinely cannot be backgrounded is
+the **consent dialog** — that is the platform constraint recorded above, and it holds whichever
+option is chosen.
+
 `BackupWorker` is a `CoroutineWorker` scheduled through WorkManager, and **WorkManager exposes no
 way to attach `ClipData` to the underlying `JobInfo`.** The two documented carriers are
-`Context#startService` and `JobInfo.Builder#setClipData`, and neither is reachable through the
-WorkManager API. So the *applying* step probably cannot live in a WorkManager worker at all.
+`Context#startService` and `JobInfo.Builder#setClipData`, neither reachable through WorkManager.
+So the applying step cannot simply live in the existing worker.
 
-Two architecturally distinct paths, with long-term consequences either way — **needs Ian's call
-before building**, per the escalation rule in CLAUDE.md:
+1. **WorkManager decides, a foreground service applies.** Keeps scheduling where the rest of the
+   app has it. But **Android 12+ forbids starting a foreground service from the background**
+   (`ForegroundServiceStartNotAllowedException`), which is exactly the situation here — a worker
+   waking on its own and starting the service. `WorkManager.setForeground()` is the sanctioned way
+   around that restriction, but it promotes execution priority; it still does not let the job carry
+   a `ClipData` grant. This path looks blocked on both counts and should be confirmed dead before
+   anything is built on it.
+2. **Raw JobScheduler for this job only.** `JobInfo.Builder#setClipData` is the documented carrier
+   and needs no service or notification. The genuine background path. Costs: it sits outside
+   WorkManager, so this job does not share the app's constraints, backoff and observability, and
+   Hilt injection into a `JobService` has to be wired by hand rather than via `@HiltWorker`.
+   Unverified: whether a `ClipData` URI grant survives a reboot on a persisted job. If it does not,
+   every restart empties the pool and re-prompts the user.
+3. **Background detection, user-initiated applying.** The worker does what it can already do
+   without consent — watch free space, compare against the floor, fire the notification. Applying
+   happens when the user taps through, in the Activity that already has the grant. No pool, no
+   `ClipData`, no second execution mechanism, no reboot question.
 
-1. **WorkManager decides, a foreground service applies.** Keep scheduling where the rest of the
-   app already has it; when a run is warranted, start a foreground service with an Intent carrying
-   the ClipData grant. Consistent with existing scheduling, but adds a second execution mechanism
-   and a user-visible notification while it runs.
-2. **Raw JobScheduler for this job only.** `JobInfo.Builder#setClipData` is the documented path and
-   needs no service or notification. But it sits outside WorkManager, so this one job does not
-   share the app's existing constraints, backoff and observability.
+**Recommendation: option 3**, and it is worth weighing against the instruction rather than around
+it. The pool-and-`ClipData` machinery exists solely to apply a batch the user approved *earlier*.
+But the 2000-URI cap and the staleness of a largest-first ordering mean a stored grant cannot cover
+future runs anyway — the user has to be asked again regardless. So the machinery buys deferral of
+work by minutes, in exchange for the one genuinely uncertain mechanism in the whole design.
 
-Verify the grant actually survives on hardware before committing to either. The documentation says
-it should; the Samsung trash behaviour is a standing reminder that the documentation and a Galaxy
-device do not always agree.
+Under option 3 the part Ian asked for is still background: noticing the phone is filling up and
+saying so happens with the app closed. Only the rewriting waits for the tap that was always going
+to be required.
+
+If background applying is wanted anyway, **option 2 is the path** — but verify the reboot
+behaviour on hardware first. The documentation says the grant should carry; the Samsung trash
+behaviour is a standing reminder that the documentation and a Galaxy device do not always agree.
 
 ## Notes for whoever picks this up
 - `ProxyApplier.candidates()` returns eligible photos largest-first and already filters rows whose
