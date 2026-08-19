@@ -53,16 +53,54 @@ enum class AlbumMode {
     companion object {
 
         /**
-         * What a newly-discovered album gets.
+         * The factory value of the "default mode for new albums" setting: **nothing happens**.
          *
-         * [BACKUP] rather than [OFF] for the reason the old boolean default carried: someone
-         * creates an album, assumes an app whose purpose is keeping files safe is keeping it safe,
-         * and silently loses it. The failure mode should be "uploaded something you did not need",
-         * never "lost something you did".
+         * Changed from [BACKUP] to [OFF] by Ian, 19 Aug 2026, and it is the *initial* value of a
+         * preference the user can change — see [canBeDefault] for what they may change it to.
          *
-         * [BACKUP] rather than [SYNC] or [ARCHIVE] because neither should ever begin without being
-         * chosen — one rewrites photos, the other empties the gallery.
+         * The previous reasoning was that someone creates an album, assumes an app whose purpose is
+         * keeping files safe is keeping it safe, and silently loses it — so the failure mode should
+         * be "uploaded something you did not need" rather than "lost something you did".
+         *
+         * Two things since made [OFF] the better starting point:
+         *
+         * - **The scan follows the granted directory trees** (TASK-014). An album appears only
+         *   because the user picked the directory it lives in, and first run asks outright what
+         *   should happen to what it found. A default that starts uploading overrides an answer the
+         *   user has already given.
+         * - **Adding a directory later would otherwise begin an upload with no further prompt.**
+         *   [OFF] removes that edge: widening the scope shows new albums instead of sending them.
+         *
+         * The old failure mode is now the UI's job rather than the default's — an app with nothing
+         * selected must say so plainly instead of sitting idle looking like it works.
          */
-        val DEFAULT = BACKUP
+        val DEFAULT = OFF
+
+        /**
+         * What an album becomes when the user switches it **on**.
+         *
+         * **Transitional — delete this with the toggle.** TASK-012 replaces the per-album switch
+         * with a four-item dropdown, at which point there is no "on" to map: the user picks a mode
+         * directly and nothing needs to guess which one they meant. Remove this constant and its
+         * call sites in `BackupViewModel` in the same change that removes the `Switch`.
+         *
+         * It exists because [DEFAULT] became [OFF] on 19 Aug 2026 while the toggle was still in the
+         * build, and one constant was serving both jobs — so the default change alone would have
+         * made switching an album on set it to [OFF]. Turning an album on would have turned it off.
+         *
+         * [BACKUP] because switching an album on is a request to keep it safe, not a request to
+         * start rewriting or removing its files.
+         */
+        val WHEN_ENABLED = BACKUP
+
+        /**
+         * The modes the user may choose as the default for new albums.
+         *
+         * Everything except [ARCHIVE], per Ian 19 Aug 2026 and TASK-012. A default that empties the
+         * gallery would apply to albums the user has not seen yet, which is the one place the
+         * per-album confirmation cannot reach — the mode would be set by a rule rather than by a
+         * choice about that album.
+         */
+        val canBeDefault: List<AlbumMode> get() = entries.filter { it != ARCHIVE }
     }
 }

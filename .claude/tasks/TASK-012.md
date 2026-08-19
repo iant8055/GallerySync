@@ -46,6 +46,31 @@ freed, and what the selected mode could still free, updating as the dropdown cha
 never merged. Note the hazard it introduces on this screen in particular — Archive's number is the
 largest one in every row, and the layout must not let the biggest number read as the best choice.
 
+### The labels, and one ordering question
+
+Ian, 19 Aug 2026, naming the dropdown items: **None · Sync · Backup · Archive**.
+
+**"None" is the label; `OFF` stays the enum value.** They are different things and the difference is
+load-bearing — the stored string is what `AlbumModeConverter` reads back, and its own comment
+explains why a value change there could reinterpret existing rows. Rename freely in `strings.xml`;
+never rename the constant.
+
+**The order is worth a decision rather than an accident.** The enum is a ladder, ordered by how much
+of the album stays on the phone:
+
+| | Off | Backup | Sync | Archive |
+|---|---|---|---|---|
+| stays on the phone | all | all | shrunk | none |
+
+Listing them **None · Sync · Backup · Archive** breaks that progression by putting the mode that
+shrinks files above the one that leaves them alone. Ladder order makes the list readable as a single
+axis — *how much of this album do I want to keep on my phone* — with the destructive end furthest
+from the safe one, which is also where you want it in a dropdown someone is scrolling quickly.
+
+Recommended: **None · Backup · Sync · Archive**, matching the enum. If Ian's order was deliberate —
+Sync first because it is the mode most people should pick — then a "recommended" marker on Sync does
+that job without scrambling the axis. Worth confirming before it is built.
+
 ### Archive is the dangerous one, and it is the failure Ian lived through
 Under Archive the files leave the gallery entirely. Photos get no proxy — unlike Sync there is no
 stand-in. This is what Samsung did to him: *"I couldn't find the video I had just shot because

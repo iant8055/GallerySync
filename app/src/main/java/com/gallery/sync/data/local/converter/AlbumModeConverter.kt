@@ -10,7 +10,8 @@ import com.gallery.sync.data.local.entity.AlbumMode
  * reinterpret every existing row, and here that could turn a `BACKUP` album into an `ARCHIVE` one —
  * which removes files from the phone.
  *
- * An unreadable value falls back to [AlbumMode.DEFAULT], the mode that touches nothing locally.
+ * An unreadable value falls back to [AlbumMode.DEFAULT], which is [AlbumMode.OFF] — a corrupt row
+ * stops the album being acted on rather than guessing at an intent.
  * Falling back rather than throwing keeps a single corrupt row from breaking the album list, and
  * the direction of the fallback is what matters: the safe end of the ladder, never the destructive
  * one.

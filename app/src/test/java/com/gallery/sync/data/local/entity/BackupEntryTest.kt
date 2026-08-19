@@ -68,9 +68,24 @@ class BackupEntryTest {
     }
 
     @Test
-    fun `new albums default to being backed up`() {
-        // The safer default: uploading something unneeded beats silently losing something needed.
-        assertEquals(AlbumMode.BACKUP, AlbumMode.DEFAULT)
+    fun `new albums do nothing until the user chooses`() {
+        // Changed 19 Aug 2026. The scan follows granted directories and first run asks outright, so
+        // a default that uploaded would override an answer already given.
+        assertEquals(AlbumMode.OFF, AlbumMode.DEFAULT)
+    }
+
+    @Test
+    fun `switching an album on backs it up rather than doing nothing`() {
+        // The trap this guards: one constant used to serve both, so making the default OFF would
+        // have made the toggle set OFF when switched on.
+        assertEquals(AlbumMode.BACKUP, AlbumMode.WHEN_ENABLED)
+    }
+
+    @Test
+    fun `archive can never be the default for new albums`() {
+        // It would apply to albums the user has not seen, which is where the per-album confirmation
+        // cannot reach.
+        assertEquals(listOf(AlbumMode.OFF, AlbumMode.BACKUP, AlbumMode.SYNC), AlbumMode.canBeDefault)
     }
 
     @Test

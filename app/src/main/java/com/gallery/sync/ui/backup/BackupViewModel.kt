@@ -240,7 +240,10 @@ class BackupViewModel @Inject constructor(
             // to do simply because nothing has scanned yet.
             engine.refreshLedger()
 
-            val disabled = albumDao.disabledAlbums().toSet()
+            // Every stored mode, not just which albums are off: the OFF/not-OFF shape predates album
+            // modes and cannot render SYNC or ARCHIVE at all. An album with no row takes the
+            // factory default until TASK-012 makes that a user setting.
+            val storedModes = albumDao.all().associate { it.albumName to it.mode }
             val backedUpByAlbum = entryDao.albumCounts().associate { it.album to it.backedUp }
 
             val albums = scanner.scanAlbums().map { album ->
@@ -248,7 +251,7 @@ class BackupViewModel @Inject constructor(
                     name = album.name,
                     itemCount = album.itemCount,
                     totalBytes = album.totalBytes,
-                    mode = if (album.name in disabled) AlbumMode.OFF else AlbumMode.DEFAULT,
+                    mode = storedModes[album.name] ?: AlbumMode.DEFAULT,
                     backedUpCount = backedUpByAlbum[album.name] ?: 0
                 )
             }
@@ -260,7 +263,7 @@ class BackupViewModel @Inject constructor(
 
     fun setAlbumEnabled(album: String, enabled: Boolean) {
         viewModelScope.launch {
-            val mode = if (enabled) AlbumMode.DEFAULT else AlbumMode.OFF
+            val mode = if (enabled) AlbumMode.WHEN_ENABLED else AlbumMode.OFF
             albumDao.setPreference(AlbumPreferenceEntity(album, mode))
             _state.value = _state.value.copy(
                 albums = _state.value.albums.map {
@@ -287,7 +290,7 @@ class BackupViewModel @Inject constructor(
     fun setAllAlbums(enabled: Boolean) {
         viewModelScope.launch {
             val albums = _state.value.albums
-            val mode = if (enabled) AlbumMode.DEFAULT else AlbumMode.OFF
+            val mode = if (enabled) AlbumMode.WHEN_ENABLED else AlbumMode.OFF
             albumDao.setPreferences(albums.map { AlbumPreferenceEntity(it.name, mode) })
             _state.value = _state.value.copy(
                 albums = albums.map { it.copy(mode = mode) }
