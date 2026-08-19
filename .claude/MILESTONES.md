@@ -86,6 +86,9 @@ Verified on hardware: sign-in completes and the real drive lists.
 - [x] Metered-network preference — a real setting in `BackupSettings`, exposed as a toggle in
       Settings, defaulting to unmetered-only.
 - [ ] Retry failed items from the UI
+- [ ] **Verify a large video actually uploads.** Coded but never watched working. The session URL is
+      not persisted, so a file too big to finish inside one worker window restarts from zero every
+      run; and DEFAULT_BATCH is 25 files regardless of size. See the video section below.
 - [ ] **Start time for the first backup.** The initial whole-gallery upload is the heaviest thing
       the app ever does. Let the user pick when it starts, default overnight, and require charging
       for that first run. Asked for by Ian 18 Aug 2026; see TASK-011 for why it needs no consent
@@ -151,6 +154,37 @@ it is the only route back to a full-quality edit.
 - **Six photos in `AaSync` carry the pre-fix sideways badge.** Harmless, marked as proxies so
   nothing will touch them again. Delete locally and re-fetch from OneDrive to tidy.
 
+### Video upload is coded but never verified — and two things suggest it will struggle
+
+Ian, 18 Aug 2026: "the Video Sync hasn't been built as far as I am aware."
+
+There is no separate video sync to build — video rides the same path as photos and has since v0.2.
+But nothing has ever confirmed it *works*, and the hardware note above only evidences a 4 MB photo.
+No commit records a video reaching OneDrive. So the instinct is right even though the code is there.
+
+Two structural reasons it is likely to struggle on large files, both found by reading rather than
+by running, and both wanting hardware confirmation:
+
+- **The upload session is not persisted.** `ChunkedUploader` holds `uploadUrl` as a local variable,
+  and `BackupEntryEntity` has no column for it. Resume works *within* one call — the
+  `nextExpectedRanges` handling recovers a failed chunk — but if the worker is stopped, the session
+  is lost and the next run calls `createUploadSession` again from byte zero. Any single file too
+  large to finish inside one worker window can therefore **never complete**, however many times it
+  is retried.
+- **`DEFAULT_BATCH = 25` is a file count, not a byte budget.** Sized for photos: 25 × 4 MB is about
+  100 MB. Twenty-five videos at Ian's sizes is roughly 3.75 GB queued into a worker WorkManager
+  stops after about ten minutes. The run dies mid-batch and the in-flight file's progress is thrown
+  away — the batch still advances each run, so it grinds forward, but it wastes a partial upload
+  every time.
+
+Ian's clips are 103–178 MB, which at ordinary home upstream fit inside a single window comfortably;
+it is longer 8K footage and slow connections where the first point bites. Worth a deliberate test:
+back up one large video, confirm it lands byte-identical, then confirm a run killed mid-upload
+resumes rather than restarting.
+
+Fixing the first probably means persisting the session URL and its expiry on the ledger row. Fixing
+the second means bounding the batch by bytes as well as by count.
+
 ### Move to backup does not distinguish video — and that is where it matters most
 
 Raised by Ian, 18 Aug 2026: is sync deleting video, and should it not be a move that leaves a
@@ -203,7 +237,7 @@ So the four things "video" can mean, and where each actually sits:
 
 | | Status |
 |---|---|
-| **Backed up to OneDrive** | ✅ Done in v0.2, verified on hardware |
+| **Backed up to OneDrive** | ⚠️ Coded since v0.2, never verified on hardware — see above |
 | **Proxied / downscaled** | ❌ Never — deliberate, a degraded clip fails silently in an editor |
 | **Local copy reclaimed to free space** | ⬜ v0.3, rolling window — the only lever is removing the file, which is a deletion decision |
 | **Retrieved back on demand** | ⬜ v0.4, same path as photos |
