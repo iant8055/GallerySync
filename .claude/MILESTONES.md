@@ -206,9 +206,11 @@ degraded — and not something a later milestone fixes.
 
 **Consequence for the migration.** Samsung Gallery Sync *did* show cloud-only videos, through its
 own private index, and that cannot be replicated. A user moving across who kept videos in the cloud
-will find them absent from the gallery until fetched, where before they appeared. That is the one
-place this app is genuinely a step down from what it replaces, and the store listing must not imply
-otherwise.
+will find them absent from the gallery until fetched, where before they appeared.
+
+That is a real loss of browsing convenience and the store listing must not imply otherwise — but it
+is narrower than it sounds. Those cloud-only videos were visible in Samsung Gallery **and nowhere
+else**: no editor could open one. See the comparison above.
 
 ### Video upload is coded but never verified — and two things suggest it will struggle
 
@@ -281,6 +283,45 @@ optimised instead, and that video will disappear from the gallery until it is fe
 
 Not a shipped bug: the release gate already holds everything until v0.3 and v0.4 are built and
 tested, and this is an instance of the exact breakage that gate exists for.
+
+## How Samsung actually did it — checked against vendor docs, 18 Aug 2026
+
+Worth having on record, because the whole project is a replacement for it and the mechanism was
+being described from memory.
+
+1. **Bidirectional sync of photos *and* videos** to OneDrive's Samsung Gallery folder. Microsoft's
+   own documentation: files modified or deleted in Samsung Gallery are reflected in the cloud, and
+   deleting from either side deletes from the other.
+2. **"Free up phone space"** removes the local originals of synced media. It is **all-or-nothing** —
+   Samsung gives no way to pick which items become cloud-only.
+3. **Samsung Gallery keeps a cached thumbnail and its own index entry**, so a cloud-only item still
+   appears in the grid. Tapping it fetches the original from OneDrive on demand.
+4. This applied to video exactly as to photos. A cloud-only 8K clip still showed in Samsung Gallery.
+
+### Why none of steps 2–4 can be copied
+They work because Samsung owns both the index and the viewer. The thumbnail lives inside Samsung
+Gallery, not in MediaStore as a real file, so **no third-party app ever saw those cloud-only items**
+— which is the constraint already recorded above, now confirmed from the vendor side rather than
+inferred. It is also precisely why CapCut could not see them, which is the reason this project
+exists.
+
+### The trade, stated honestly
+| | Samsung Gallery Sync | GallerySync |
+|---|---|---|
+| Cloud-only item visible in the phone's gallery | yes, photos and video | **no** — platform limit |
+| Cloud-only item visible to CapCut and other apps | **no, ever** | n/a — our files are real |
+| Choosing what to free | all-or-nothing | selective, largest-first, to a floor |
+| Photo kept usable while space is freed | no — original removed | **yes** — 2048px proxy stays |
+| Local delete removes the cloud copy | **yes, silently** | no — opt-in, batched, never inferred |
+
+So "a step down for video" needs qualifying. Samsung showed cloud-only video **in Samsung Gallery
+alone**, where it was useless to every editor. We cannot show it there at all, but everything we do
+leave on the phone is a real file that every app can open. The browsing convenience is genuinely
+lost; the usability is not.
+
+Row five is the one to keep in view while designing v0.4 deletion sync: Samsung's bidirectional
+delete is the behaviour a migrating user has been trained on, and it is the behaviour this project
+deliberately refuses.
 
 ## Where video stands — it spans three milestones, so it is easy to lose track
 
