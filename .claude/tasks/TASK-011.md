@@ -132,7 +132,7 @@ cannot obtain consent on its own.** The platform's documented way through is to 
 URIs to background work via `ClipData`, carrying `FLAG_GRANT_WRITE_URI_PERMISSION`, so the grant
 outlives the Activity that obtained it.
 
-That works, but the 2000-URI cap means a single grant cannot cover a large library forever. The
+That works, but the 2000-URI cap means a single grant cannot cover a whole library in one go. The
 honest description of the feature is therefore:
 
 > **"Approve a batch occasionally", not "never asked again".**
@@ -149,6 +149,37 @@ halfway through building. It changes three things:
   and from "cannot reach the target".
 - **The pool goes stale.** Largest-first is computed at grant time, and new photos arrive after it.
   Re-asking periodically is the design, so build for it rather than treating it as an edge case.
+
+### What the 2000 cap actually is — checked 18 Aug 2026
+
+Verified against the platform docs rather than assumed. An earlier commit message called it
+"MediaStore's documented limit", which was right but incomplete in a way that matters:
+
+- The cap is **2000 URIs per request**, and exceeding it throws `IllegalArgumentException`. The
+  same cap applies to `createDeleteRequest`, `createTrashRequest` and `createFavoriteRequest`.
+- It applies to **apps targeting Android 15 (API 35) and above**. This app targets 37, so it
+  applies. It is not a limit older targets hit.
+- No official statement of intent is published. The forces behind it are legible, though: the URIs
+  cross a Binder boundary inside a `ClipData`, and the shared transaction buffer is about 1 MB, so
+  an oversized list used to fail as `TransactionTooLargeException` — an obscure, size-dependent
+  crash. A round number well inside the buffer turns that into a documented, deterministic error.
+  The consent dialog also has to render and count the affected items, and "modify 47,000 photos?"
+  is not informed consent in any case.
+
+**It is a cap per request, not a lifetime quota and not a ceiling on how much can be optimised.**
+Nothing limits how many grants are requested over time.
+
+### Consequence: this is a first-run problem, not a steady-state one
+The device holds 6,289 images, and only a subset is eligible — verified in OneDrive, over 2048px,
+not already proxied, not video. So a full catch-up is **at most four dialogs, once**.
+
+After that, the batch is however many new eligible photos accumulate between runs. Nobody takes
+2000 photos between passes over a storage budget. The steady state is one prompt, rarely, covering
+a handful of files — or no prompt at all.
+
+This materially weakens the case for a grant pool. The pool exists to avoid re-prompting, but the
+re-prompting it avoids is a few dialogs during initial catch-up and almost nothing thereafter. It
+is not the recurring nag it looked like when the cap was first written down.
 
 ### Where the applying step runs — still open
 
