@@ -154,6 +154,38 @@ it is the only route back to a full-quality edit.
 - **Six photos in `AaSync` carry the pre-fix sideways badge.** Harmless, marked as proxies so
   nothing will touch them again. Delete locally and re-fetch from OneDrive to tidy.
 
+### "Sync" and "backup" are different words here, and video sits differently under each
+
+Ian, 18 Aug 2026, recalled video sync being a v0.4 item. That is right, and the apparent
+contradiction with "video is already backed up" is the naming rule above doing its job.
+
+- **Backup** = the bytes are safely in OneDrive. Video: coded since v0.2, not yet verified.
+- **Sync** = the Samsung behaviour — the file stays visible in the gallery while its space is
+  freed. Reserved deliberately until v0.3 and v0.4 both land.
+
+So video *backup* is v0.2 and video *sync* needs v0.4. Both statements are true and they are about
+different things.
+
+### The part that does not resolve: video can never fully sync
+Sync means visible while remote. A photo achieves that through its proxy — a real local file, ~10x
+smaller, that every gallery and editor opens normally. **Video has no equivalent and is not allowed
+one**, because a degraded clip fails silently in an editor.
+
+So even after v0.4 retrieval lands, the best available state for a video is one of:
+
+- whole on the device, occupying its full size, or
+- **not in the gallery at all**, retrievable on demand from the retrieval list.
+
+There is no middle state for video, ever. This is a consequence of two constraints already
+established — a file with no local bytes cannot appear in a gallery, and video must not be
+degraded — and not something a later milestone fixes.
+
+**Consequence for the migration.** Samsung Gallery Sync *did* show cloud-only videos, through its
+own private index, and that cannot be replicated. A user moving across who kept videos in the cloud
+will find them absent from the gallery until fetched, where before they appeared. That is the one
+place this app is genuinely a step down from what it replaces, and the store listing must not imply
+otherwise.
+
 ### Video upload is coded but never verified — and two things suggest it will struggle
 
 Ian, 18 Aug 2026: "the Video Sync hasn't been built as far as I am aware."
@@ -240,7 +272,7 @@ So the four things "video" can mean, and where each actually sits:
 | **Backed up to OneDrive** | ⚠️ Coded since v0.2, never verified on hardware — see above |
 | **Proxied / downscaled** | ❌ Never — deliberate, a degraded clip fails silently in an editor |
 | **Local copy reclaimed to free space** | ⬜ v0.3, rolling window — the only lever is removing the file, which is a deletion decision |
-| **Retrieved back on demand** | ⬜ v0.4, same path as photos |
+| **Retrieved back on demand** | ⬜ v0.4, same path as photos — and the only route to a full-quality video |
 
 The one that carries real risk is reclaiming space. A video cannot be shrunk, so freeing its space
 means removing the local file, which makes it vanish from the gallery and runs straight into the
