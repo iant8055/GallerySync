@@ -65,6 +65,11 @@ Verified on a Galaxy Z Fold 4 (Android 16), 17–19 August 2026.
   do, generating the proxy, updating the ledger. Only the write needs a tap. Samsung did it silently
   because Samsung Gallery **is** the system gallery.
 
+  **Narrowed 19 Aug 2026 — this describes the MediaStore path, not the whole app.** A persisted
+  SAF tree grant writes to media this app does not own with no dialog, verified on hardware; see the
+  SAF entry in the verification log below. Delete and the truncating write are still untested, so
+  the MediaStore facts above remain what the app relies on today.
+
 - **A trash request is not a guarantee of recoverability.** See the deletion rule in CLAUDE.md.
 
 - **Therefore: storage can be reduced, never eliminated.** Any plan that assumes zero local storage
@@ -294,6 +299,151 @@ install without expecting to lose its data.
 
 ---
 
+### 19 Aug 2026 — the SAF tree grant, and a platform constraint that turns out to be narrower
+
+Probed with `ui/debug/StorageAccessProbe.kt` on the Fold 4, device API 36, app targetSdk 37.
+
+**A persisted SAF tree grant writes to media this app does not own, with no consent dialog.**
+Confirmed twice, and the second version of the probe performs a real write rather than only opening
+a descriptor — the first version proved less than it appeared to.
+
+```
+Picked: content://com.android.externalstorage.documents/tree/primary%3ADCIM
+Persisted read+write on the tree.
+Write target: Screenshot_20260720_223735_Gallery.jpg (image/jpeg)
+Owner per MediaStore: com.android.systemui
+OPEN OK — rw descriptor granted, no consent dialog. Size 80329.
+WRITE OK — wrote 1 identical byte to a file we do not own. Size unchanged.
+```
+
+- **DCIM is selectable**, and so is DCIM/Camera. Android 11's directory restrictions do not cover
+  them at this API level.
+- `takePersistableUriPermission` succeeded for read and write.
+- The target was owned by `com.android.systemui`, so this is not the "app may modify what it
+  created" exemption.
+- The write was byte-identical by construction — first byte read, seek 0, same byte written — with
+  `fstat` size checked before and after. Nothing was altered.
+
+**The truncating write works too — this is the proxy operation, on a real camera photo.**
+
+```
+Truncate target: 20260819_132753.jpg
+Owner per MediaStore: com.sec.android.app.camera
+MediaStore size before: 4420894
+TRUNCATING WRITE — 4420894 -> 4096 bytes on disk.
+SHORTEN OK — ftruncate through the tree grant works, no dialog.
+MediaStore size immediately after: 4420894
+Rescan completed for /storage/emulated/0/DCIM/Camera/20260819_132753.jpg
+MediaStore size after rescan: 4096
+```
+
+A 4.4 MB photo owned by Samsung's camera app, shortened to 4 KB through the tree grant, with no
+consent dialog at any point. That is proxying, minus the part that makes a good proxy.
+
+**MediaStore does not notice on its own, and that is now a build requirement.** The index still
+reported 4,420,894 bytes immediately after the file on disk became 4,096.
+`MediaScannerConnection.scanFile` reconciled it. So **every write through this route must be
+followed by a rescan of that path** — without it the gallery shows stale sizes and dimensions, and
+the ledger's `album + name + size + mtime` key is computed against a size that is no longer true.
+
+| | Status |
+|---|---|
+| Write to a file owned by another app, no dialog | ✅ verified twice |
+| **Truncating write** — the proxy case | ✅ verified, `com.sec.android.app.camera` photo, 4.4 MB → 4 KB |
+| MediaStore consistency after a size change | ✅ answered: **stale until rescanned**, rescan fixes it |
+| **Delete** via `DocumentsContract.deleteDocument` | ⚠️ works, and is a **permanent delete** — forbidden by CLAUDE.md, see below |
+| **Grant surviving a reboot** | ✅ verified — survived reboot *and* an app reinstall, and still wrote |
+
+**Delete works, and it is the wrong kind of delete.**
+
+```
+DELETE OK — removed via SAF with no consent dialog.
+MediaStore row after delete: gone
+$ ls /sdcard/DCIM/Camera/20260819_132753.jpg
+ls: No such file or directory
+```
+
+`DocumentsContract.deleteDocument` removed the file outright, with no dialog, and MediaStore
+reconciled itself without needing a rescan — unlike the write case.
+
+
+**Ian checked the Recycle Bin: empty.** So this is observed, not inferred from the API name — the
+file did not go anywhere recoverable. `deleteDocument` is now named as forbidden in CLAUDE.md.
+
+**It is a permanent delete, and CLAUDE.md forbids it.** The deletion rule is absolute: a removal
+always goes to a trash the user can recover from, and the app must never call a permanent-delete
+API. `deleteDocument` bypasses Android's media trash entirely — nothing lands in the Gallery's
+recycle bin, and there is no undo. That it happens to work is not permission to use it.
+
+So the SAF route splits cleanly by operation, and the split is not a compromise but a rule:
+
+| Operation | Route | Tap? |
+|---|---|---|
+| **Proxying** — write and shorten in place | ✅ SAF tree grant | none |
+| **Archive** — remove the local file | ❌ SAF is a hard delete; use `createTrashRequest` | one per batch, unavoidably |
+
+Archive therefore keeps everything already designed for it in TASK-012: the nightly pass that
+prepares a batch, the approval the user taps, and the 2000-URI cap on each request. Nothing there is
+wasted. Proxying is the half that gets simpler.
+
+Worth stating because "DELETE OK" in a log is exactly the sort of line that gets acted on later
+without the rule being reread. **The finding is that SAF can delete, not that it may.**
+
+### What this collapses
+
+If the grant survives a reboot, the whole consent apparatus in TASK-011 is unnecessary for
+proxying: no `createWriteRequest`, no 2000-URI cap, no grant pool, no `ClipData`, no second
+execution mechanism, and no fork between WorkManager and raw JobScheduler. The storage-budget worker
+becomes ordinary background work, and "set up and mostly forget" stops needing its caveat for
+photos.
+
+The reboot question is therefore the one left worth answering, and it is cheap: restart the phone,
+open the app, run the write probe without re-picking the folder.
+
+
+### Conclusion — the SAF route is proven for proxying
+
+Every question this probe was built to answer is closed, on hardware, in one session.
+
+```
+[after reboot and an app reinstall, with no folder re-picked]
+Persisted: …/tree/primary%3ADCIM read=true write=true
+Restored tree without re-picking: …/tree/primary%3ADCIM
+OPEN OK — rw descriptor granted, no consent dialog. Size 80329.
+WRITE OK — wrote 1 identical byte to a file we do not own. Size unchanged.
+```
+
+**Proxying needs no tap, no cap, and no user present.** One folder pick at setup, and the storage
+budget worker becomes ordinary background work. What TASK-011 spent most of its length designing
+around — the grant pool, the `ClipData` hand-off, the WorkManager-versus-JobScheduler fork, options
+1/2/3 for where the applying step runs — is not needed for photos.
+
+**Two things carry over regardless:**
+
+1. **A MediaStore rescan must follow every write.** The index does not notice a size change on its
+   own. Not optional: the ledger keys on size, and the gallery shows stale dimensions without it.
+2. **Archive still needs `createTrashRequest` and its tap**, because SAF's delete is permanent and
+   CLAUDE.md forbids it. Everything designed for Archive in TASK-012 stands unchanged.
+
+**Not yet built, only proven.** The probe writes one byte; the real path generates a validated
+proxy, checks it decodes with EXIF intact, then writes it — TASK-010's rules are untouched by this
+and still apply. What changed is how the bytes get written, not what is written or how carefully.
+
+**`MANAGE_EXTERNAL_STORAGE` is off the table** unless something later forces it. The cheaper route
+works, and the Play-listing scrutiny does not have to be spent.
+
+### The constraint this narrows
+
+The platform-constraints section says rewriting a photo always needs the user and cannot be granted
+once and for all. **That is true of the MediaStore path and not of the app as a whole.**
+`createWriteRequest` does need an Activity, and its 2000-URI cap is real — but it is not the only
+route to the bytes. A tree grant taken once at setup is exactly the "granted once and for all" that
+section rules out.
+
+Recorded rather than rewritten there, because the MediaStore facts in it are still correct and are
+still what the app does today. Until delete and the truncating write are also verified, the SAF
+route is a strong candidate and not yet a decision.
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have
@@ -368,6 +518,15 @@ uploaded.
 - **Where TASK-011's applying step runs.** WorkManager cannot attach the `ClipData` that carries the
   write grant, and Android 12+ blocks starting a foreground service from the background. Recommended:
   background detection and notification, applying on the tap. See TASK-011.
+- **Whether the tap can be removed entirely.** Two routes: `MANAGE_EXTERNAL_STORAGE`, which works
+  and spends Play-listing scrutiny, and a persisted SAF tree grant, which is cheaper and unverified.
+  Recommended: test the SAF route on hardware first. A new Play-visible permission and a fork in the
+  architecture are both escalations. See TASK-011.
+
+  **Answered 19 Aug 2026 — the SAF route works, and it is neither.** A persisted tree grant does
+  the proxy write with no dialog and survives reboot; `MANAGE_EXTERNAL_STORAGE` is not needed and
+  the Play listing is untouched. Archive still needs `createTrashRequest`, because SAF deletes
+  permanently. See the SAF entry in the hardware log.
 - **`POST_NOTIFICATIONS`** — needed for the floor notification, and it appears on the Play listing.
 - **Language dropdown** — wire the per-app locale mechanism now and ship English only, or defer.
 

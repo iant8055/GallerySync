@@ -23,7 +23,7 @@ Four modes, forming a ladder: how much of the album stays on the phone.
 | **Off** | no | untouched, full size | none | yes |
 | **Backup** | yes | untouched, full size | none | yes |
 | **Sync** | yes | photos proxied | ~90% of photos | yes |
-| **Archive** | yes | **removed** | all of it | **no** |
+| **Archive** | yes | **removed** once older than *N* | all of it, as files age in | **no**, once they go |
 
 Off/Backup/Sync map onto the wording test adopted today. Archive is Ian's fourth, added 18 Aug 2026:
 *"moves the album off the local Gallery into OneDrive — not making a copy but moving it to a secure
@@ -58,9 +58,9 @@ archive is a different act from a policy that quietly reaches everything.
 Four guards, none optional:
 
 1. **Never a default**, and not offered as the Settings default for new albums.
-2. **A minimum age before anything is archived.** Nothing recent is swept up, so a clip shot this
-   morning stays put even inside an archived album. This is the guard that makes the mode safe
-   against the exact experience that started the project. Suggested 30 days, and user-visible.
+2. **An archive age the user sets**, decided by Ian 19 Aug 2026. Nothing recent is swept up unless
+   the user has asked for exactly that. Immediate / 30 days / 90 days / 6 months / 1 year,
+   defaulting to **30 days**. Immediate is never a default and never reached by accident.
 3. **Verified in OneDrive first** — Graph confirmed, byte size matched — the same bar as every other
    removal, and `createTrashRequest` rather than a delete, per the deletion policy.
 4. **An explicit confirmation when the mode is set.** Requested by Ian, 19 Aug 2026, and it is *the*
@@ -80,6 +80,298 @@ Four guards, none optional:
    After it is accepted the app does not ask again. Android's own trash dialog still appears per
    batch; it is neither a substitute for this confirmation nor a reason to skip it, because it says
    nothing about what the mode means.
+
+### Archive is set per album but evaluated per file
+
+Asked by Ian, 19 Aug 2026, and the answer follows from guard 2 rather than adding to it: **yes**. The
+mode is a property of the album; what it does is decided file by file. A file leaves when it is
+verified in OneDrive *and* older than the minimum age. Everything newer stays in the gallery, inside
+an album that is set to Archive, until it reaches that age and is taken on a later run.
+
+So an archived album **drains gradually — it does not empty at once.** Three consequences, and each
+one has to be visible in the UI or the mode will read as broken:
+
+- **The name promises something the mode does not do.** "Archive" sounds like a one-time move, and
+  Ian's own description was *"moves the album off the local Gallery into OneDrive"*. The age guard
+  makes it a standing filter instead. The confirmation and the mode's description have to say that
+  files older than *N* leave and newer ones stay until they reach that age — otherwise the user
+  archives an album, watches it visibly fail to empty, and concludes the app is not working.
+- **A photo added later stays, and then goes.** It is present for the whole age window and then
+  disappears with no further prompt, covered by the standing consent given when the mode was set.
+  This is the sharpest edge in the mode, and the confirmation dialog is the only place it can
+  honestly be explained.
+- **The count of what Archive would free grows on its own**, as files age past the threshold. That
+  is correct behaviour, and TASK-011's projection filters on the same age so the number does not
+  promise to remove recent files it will leave alone.
+
+The guard is **media-agnostic**: photos and video alike. Guard 2's wording — "a clip shot this
+morning" — is illustrative, not a scoping.
+
+**Which date.** The ledger holds `dateModifiedEpochSeconds`, not creation time. MediaStore's
+`DATE_TAKEN` is the better semantic and is not on `backup_entries`, so using it means a nullable
+column, schema 6 and a migration. The same reasoning as TASK-011's video age applies, including the
+direction the mtime proxy errs in: a file copied onto the phone looks new, so it is *not* removed,
+which is the safe way to be wrong.
+
+### The archive age is the user's, and Immediate is one of the choices
+
+Decided by Ian, 19 Aug 2026, resolving the open question this section used to hold. Trickle
+archiving is the right default and the wrong mandate: someone who wants an album off the phone now
+should be able to say so.
+
+> **Immediately · At the next archiving pass · 30 days · 90 days · 6 months · 1 year**,
+> defaulting to 30 days. See the scheduling section below for what the first two mean in practice.
+
+
+**There is no enforced minimum any more, and that is the actual change.** Guard 2 previously worked
+as a floor the user could not go under. It now works as a default they must deliberately leave. The
+protection moves from *the app refuses* to *the user chose, in a named option, behind a
+confirmation* — which is the same trade the consent rule in CLAUDE.md already makes everywhere else.
+
+### What Immediate means, and what it still does not bypass
+
+Immediate means **no age wait**. It does not mean no wait.
+
+- **Verified in OneDrive is untouched by it.** Graph confirmed *and* the byte size matched, before
+  anything local goes. This is CLAUDE.md's rule and no setting reaches it. A file that has not
+  finished uploading stays exactly where it is, however the age is set.
+- `createTrashRequest` rather than a delete, per the deletion policy, exactly as at every other age.
+- The mode confirmation still gates the whole thing.
+
+So the sequence under either zero-age option is: file appears -> backed up -> verified -> **ready to
+remove** -> the user approves the batch. The upload has to finish, and the trash dialog has to be
+tapped; the setting removes the age wait and neither of those.
+
+### It reproduces one third of the founding failure, deliberately
+
+Worth stating plainly rather than discovering later. Camera set to Archive with Immediate will take
+a clip shot this morning, once it is safely uploaded. That is the shape of the thing that started
+this project.
+
+What made Samsung's version a failure was three properties, and Immediate restores only one:
+
+| | Samsung | Archive + Immediate |
+|---|---|---|
+| Silent, never announced | yes | **no** — a confirmation names it before it applies |
+| All-or-nothing, no per-folder control | yes | **no** — one album, chosen |
+| Removal coupled to backup | yes | **yes** — this is what the user asked for |
+
+The coupling was never the harm on its own; being surprised by it was. A user who picks Archive,
+confirms a dialog saying the files leave the gallery, and then picks Immediate has said the same
+thing three times.
+
+### The confirmation says more when Immediate is chosen
+
+Guard 4's dialog covers the mode. Immediate is the most destructive configuration available in the
+app, so selecting it changes what that dialog says: name it, and say that photos and videos taken
+**today** will leave this phone as soon as they finish backing up. Not a second dialog — the same
+one, telling the truth about the setting actually selected.
+
+Changing an existing Archive album *to* Immediate re-raises the confirmation. It widens what was
+consented to, so the previous consent does not cover it.
+
+### It needs no special-casing anywhere
+
+Neither zero-age option is a separate code path. Both set the cutoff at the present moment; what
+differs between them is when the pass runs, not which files it finds:
+
+```kotlin
+val archiveCutoffEpochSeconds = when (age) {
+    Immediately, AtNextPass -> nowEpochSeconds
+    else -> nowEpochSeconds - age.seconds
+}
+```
+
+The eligibility query, the worker and TASK-011's `archivableBytes` projection are all unchanged —
+they already take the cutoff as a parameter. Resist branching on the age value inside the removal
+code; a second path through the one operation that cannot be undone is how it acquires an untested
+variant. The difference belongs in the scheduler.
+
+### It does not transfer to the video downscale age
+
+TASK-011's video age keeps its 30-day minimum and gains no Immediate option. The two look alike and
+are not: Archive **removes** a file the user consented to remove, and v0.4 retrieval is the route
+back. Downscaling **degrades** a clip in place, silently, and *recent video is never touched* is a
+stated requirement rather than a default. Do not harmonise these two settings on the grounds that
+they both measure age.
+
+### When the archiving happens — a nightly pass, and two ways to opt out of waiting for it
+
+Asked by Ian, 19 Aug 2026: can archiving run only at night, so a mistake has time to be caught? And
+then refined — rather than redefining Immediate, offer **both** an immediate option and an "at the
+next archiving pass" one.
+
+Yes, and the refinement is the better shape. **An age minimum guards against the choice; a delay
+guards against the mistake.** Setting the wrong album to Archive is a mistake, and no age setting
+catches it — a 30-day floor still removes the wrong album's files, just later. A window between
+deciding and acting is what actually helps, and it helps at every age.
+
+So archive removal becomes a **scheduled nightly pass**: nothing goes at the moment it qualifies, it
+goes at the next pass. And the option list carries the escape from that wait at the top:
+
+> **Immediately · At the next archiving pass · 30 days · 90 days · 6 months · 1 year**
+>
+> defaulting to **30 days**.
+
+An earlier draft here proposed renaming Immediate to "No age limit" because one word was carrying
+both *which files* and *when*. Ian's version solves it better and with fewer concepts: the two
+timing answers become two entries, and the aged options do not need the distinction at all. A file
+that has sat for ninety days does not care whether it goes now or at 3am, so only the zero-age end
+has a real choice to make. One dropdown, no second control.
+
+### Neither option removes anything without a tap
+
+This is the part the schedule does not get to decide. `LocalCopyRemover` uses
+`MediaStore.createTrashRequest(...).intentSender`, which **launches only from an Activity** — the
+same constraint TASK-011 records for `createWriteRequest`, with the same 2000-URI cap. No background
+worker trashes files at 3am, and none trashes them the instant an upload verifies either.
+
+So both options mean *becomes ready for removal*, not *is removed*:
+
+| Setting | A photo taken today becomes ready | It actually goes |
+|---|---|---|
+| **Immediately** | as soon as it is verified in OneDrive | next time the user is in the app |
+| **At the next archiving pass** | at the next nightly pass | next time the user is in the app after that |
+
+If the user is rarely in the app the two converge. If they look daily, Immediately clears today's
+photos today and the pass option clears them tomorrow. That is a smaller difference than the names
+suggest, and the UI should not oversell it.
+
+**The dialog is never raised unprompted.** Not while the user is doing something else, and not
+because a background pass finished. The app surfaces a pending batch — "12 files ready to archive
+from Camera" — and the user taps it. An unrequested system trash dialog interrupting someone in
+Settings is both alarming and the wrong moment to be making that decision. This matches TASK-011's
+recommendation for the proxy grants; there is one mechanism here, not two.
+
+**Consequence for the mode's description:** Archive cannot promise that an album empties on its own.
+It empties as batches are approved. Say that where the mode is chosen, next to the fact that it
+drains by age rather than all at once.
+
+### The app does run continuously — the tap is a separate thing
+
+Ian, 19 Aug 2026, on an earlier draft's phrase "next time the app is opened": the app should be
+running 24/7 unless the phone is off or offline. That is correct, and the wording was wrong. Worth
+writing down precisely, because the distinction decides how this feature behaves.
+
+**Everything except the approval already runs with the app closed.** Scanning, uploading, verifying
+against Graph, working out what is eligible, the nightly pass itself — all of it is WorkManager,
+content-triggered on `MediaStore` plus the periodic net, exactly as backup works today. The app does
+not need to be open, and it does not need a foreground service either; a persistent service would
+burn battery and add a permanent notification for nothing, since WorkManager already wakes the app.
+
+**What cannot be background is not the app, it is the tap.** `createTrashRequest` returns an
+`IntentSender` that must be launched from an Activity, and the dialog it raises is drawn by
+MediaProvider for a human to answer. A live process does not help: at 3am nobody is looking at the
+screen, so nothing gets approved and nothing moves. "App running" and "user present" are different
+conditions, and this one requires the second.
+
+So the accurate phrasing is **next time the user is in the app**, not next time it is opened — and
+the reason is the human, not the process.
+
+### The tap does not have to happen at removal time
+
+This is the part that makes overnight application possible, and it is TASK-011's option 2 rather
+than a new idea. `JobInfo.Builder#setClipData` carries granted URI permissions into background work,
+so a grant obtained while the user *is* present outlives the Activity that obtained it. The user
+approves a batch at 2pm; the pass at 3am applies it with no dialog, because consent already
+travelled with the job.
+
+That would deliver what was asked for — archiving that happens overnight — at the cost TASK-011
+records: it sits outside WorkManager, Hilt injection into a `JobService` is manual, and **whether a
+`ClipData` URI grant survives a reboot is unverified**. If it does not, every restart empties the
+pool and re-prompts. Worth testing on hardware before building on it.
+
+Without that path, the shape is: the pass prepares the batch overnight, and it is applied the next
+time the user is in the app, in one tap.
+
+### How often that tap actually happens
+
+Once per batch, and a batch is up to **2000 URIs** — the same cap as everywhere else in this app.
+
+- **First archive of a large album:** a few taps, once. 6,000 files is three dialogs.
+- **Steady state:** whatever accumulates between passes, which for one album is a handful of files.
+  Nobody adds 2000 photos to an archived album overnight.
+
+So the honest description is not "the app waits for you to open it" but "the work happens
+continuously and you confirm a batch occasionally" — which is the same sentence TASK-011 arrives at
+for proxy grants, for the same platform reason.
+
+### What the grace window is actually worth
+
+Under **At the next archiving pass** there are two catches: overnight before anything is queued, and
+the approval prompt afterwards. Under **Immediately** there is one — the prompt. That is the whole
+trade, and it is a fair one to offer, because the prompt names the album and the count before
+anything moves.
+
+It is also why the default stays at 30 days rather than at either of the new options. The default
+should be the setting that is hardest to regret.
+
+### Backup should not be night-only, and this is the one part to push back on
+
+The same restriction applied to uploading would be a mistake, and it runs against the decision made
+earlier the same day.
+
+- **There is nothing to undo.** A backup that should not have happened leaves a file in OneDrive
+  that can be removed there. Nothing local is lost, nothing leaves the gallery. The grace window
+  protects against destruction, and uploading destroys nothing.
+- **It costs real protection.** Holding uploads until night means a clip shot at 9am has one copy
+  for fourteen hours. The founding failure of this project was a video that went missing; a phone
+  lost or broken during that window loses the footage outright.
+- **It contradicts the property just established** — auto-syncing an album is unattended and
+  immediate, and it is the one thing the platform lets the app do without asking.
+
+The overnight case that *is* worth building already exists as a milestone item: a start time for the
+**first** whole-library backup, where the cost is hours of transfer and battery rather than a delay
+to safety. That one is scheduled; steady-state backup is not.
+
+Proxying sits in between and is not settled here. It rewrites files, so a window has some value, but
+it never removes anything from the gallery — worth deciding with TASK-011's worker rather than
+assumed either way.
+
+### How the pass gets scheduled
+
+The mechanism already has a precedent in this codebase and in the milestones: WorkManager
+`setInitialDelay` to the next occurrence of the chosen hour, then periodic daily —
+`BackupScheduling.enable` already builds a periodic request with constraints and can carry a second
+unique job. Add `setRequiresCharging(true)`; the phone is usually on a charger overnight, and it
+sidesteps Doze deferring work on an unplugged idle device.
+
+The hour should be the same user setting as the first-backup start time rather than a second one.
+One "overnight" hour that both use is easier to explain than two, and nobody wants them different.
+
+### Open — should the window be guaranteed rather than incidental?
+
+An album set to Archive at 2am gets an hour before the 3am pass. Set at 2pm it gets thirteen. If the
+window is the safety mechanism, it should not depend on when the user happened to tap.
+
+The fix is to record when the mode was set and require the pass to be at least *N* hours later —
+twelve, say — so the first pass after a change is skipped when it falls too close. It costs a column
+on `album_preferences` recording the timestamp, which is a schema change and therefore an escalation
+per CLAUDE.md. The cheaper alternative is to keep the timestamps in `BackupSettings` keyed by album
+name, avoiding the migration at the cost of splitting album state across two stores.
+
+Recommended: build the nightly pass first without it. The approval prompt is already a second
+catch, and a guaranteed window can be added later without changing anything else. Ian's call.
+
+### Two age settings, both visible
+
+Decided by Ian, 19 Aug 2026: the user can tell a syncing age from an archiving age. So they are two
+separate controls, both live in Settings, and neither is hidden inside a dialog to spare the user
+the distinction. The earlier recommendation here — keep Archive's age inside the confirmation — is
+withdrawn.
+
+What the concern actually reduces to is **labelling**. Two fields both called "age" would be the
+confusing thing; two settings are not. Name each by its consequence rather than by its mode:
+
+| Setting | Reads as | Governs |
+|---|---|---|
+| Sync | *Downscale videos older than…* | a clip shrunk in place, still in the gallery |
+| Archive | *Remove files older than…* | photos and video leaving the phone |
+
+Written that way they are plainly two different actions that happen to take a duration each, rather
+than two flavours of one idea. The other differences fall out of the same labels: only Archive
+offers **Immediate**, and only Sync is limited to video. If a label needs a sentence underneath to
+explain which is which, the label is wrong.
 
 ### Archive should not ship before v0.4
 Once an album is archived the only route back is retrieval. Without it, Archive means "gone until you
@@ -267,7 +559,7 @@ this way.
 - An album can be set to Off, Backup, Sync or Archive, and the choice persists
 - Backup mode never optimises or removes a local file, verified by observation not by reading code
 - Existing enabled albums land in Backup after migration — never Sync, never Archive
-- Archive removes nothing until the item is verified in OneDrive and older than the minimum age
+- Archive removes nothing until the item is verified in OneDrive and older than the archive age
 - Archive is unavailable as the default for new albums
 - The default for new albums is configurable and starts at Backup
 - Auto-optimise is a Settings toggle governing TASK-011's worker
@@ -279,6 +571,20 @@ this way.
 - That confirmation never claims a local removal is recoverable
 - Switching an album away from Archive raises nothing
 - Nothing in the app asks for Archive approval a second time once the mode is set
+- The archive age persists, defaults to 30 days, and Immediate is never reached without choosing it
+- **Under Immediate, nothing is removed until it is verified in OneDrive** — the option removes the
+  age wait and nothing else, verified by observation on a file mid-upload
+- Selecting Immediate changes what the confirmation says, naming that media taken today will leave
+  the phone once backed up
+- Switching an existing Archive album to Immediate re-raises the confirmation
+- The Sync age and the Archive age are separate controls, each labelled by what it does
+- Under an aged setting or "At the next archiving pass", nothing becomes ready for removal until
+  the pass runs; under Immediately it becomes ready as soon as the file is verified
+- Neither zero-age option removes anything without the user approving the batch, and the trash
+  dialog is never raised unprompted
+- Backup is **not** restricted to that pass; uploading stays continuous and content-triggered
+- The pass prepares a batch unattended and applies it when the user approves, naming the album and
+  the file count before anything goes
 
 ## Notes
 - Tabs are wired in `MainActivity.kt` around lines 88-106; the browse screen is `ui/browse/`.

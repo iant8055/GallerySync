@@ -83,6 +83,17 @@ This is absolute and applies to every file, in every location, without exception
 - **Emptying trash is never done by this app.** The user empties it themselves, in OneDrive
   or in their gallery app. GallerySync must never call an empty-trash or permanent-delete
   API, and must never offer a control that does.
+- **`DocumentsContract.deleteDocument` is a permanent delete and is forbidden**, along with any
+  other SAF removal. Observed on the Fold 4, 19 Aug 2026: a file removed through a persisted SAF
+  tree grant left **nothing in Samsung Gallery's Recycle Bin**. Ian checked; it is not an inference
+  from the API name.
+  It is tempting precisely because it needs no consent dialog, which makes it the shortest path to
+  unattended archiving. Take the tap instead: local removal uses `MediaStore.createTrashRequest`.
+  The difference is not that the trash request is safe — the entry below records it deleting
+  outright on this same device — but that it *can* reach the recycle bin depending on a setting the
+  user controls, where `deleteDocument` never can. A chance of recovery against none.
+  **The SAF tree grant is still the right route for proxying**, which shortens a file and removes
+  nothing. The prohibition is on deleting through it, not on using it.
 - Locally this means `MediaStore.createTrashRequest()` (API 30+), never a plain delete.
   Below API 30 Android has no media trash, so local deletion is **not offered at all** on
   those versions rather than silently deleting permanently.

@@ -148,6 +148,16 @@ applying step below, shows a notification while it runs.
 
 ## Consent — settled shape, and the constraint it puts on everything else
 
+> **Superseded in part, 19 Aug 2026 — verified on hardware.** A persisted SAF tree grant performs
+> the proxy write (4.4 MB photo owned by `com.sec.android.app.camera`, shortened to 4 KB) with no
+> consent dialog and no URI cap. If the grant survives a reboot, everything below — the grant pool,
+> the `ClipData` hand-off, the WorkManager-versus-JobScheduler fork, options 1/2/3 — is unnecessary
+> for proxying, and the applying step becomes ordinary background work. It is kept because it is
+> still the design if the SAF route fails the reboot test, and because Archive still needs a delete
+> path that is not yet verified. One requirement carries over regardless: **a MediaStore rescan must
+> follow every write**, since the index stays stale until it happens. See the SAF entry in the
+> hardware log in MILESTONES.
+
 `MediaStore.createWriteRequest` can only be launched from an Activity, so **a background worker
 cannot obtain consent on its own.** The platform's documented way through is to hand the granted
 URIs to background work via `ClipData`, carrying `FLAG_GRANT_WRITE_URI_PERMISSION`, so the grant
@@ -275,6 +285,81 @@ answering it on the user's behalf removes the only thing it is for.
 
 It is also not needed. The first optimise pass over 6,289 images is **at most four dialogs, once**
 — fewer in practice, since anything already under 2048px is skipped.
+
+### Is there a way around the tap at all? — asked by Ian, 19 Aug 2026
+
+The paragraph above answers a narrower question: whether the dialog can be *answered* for the user.
+It cannot. This one is different — whether the dialog has to *exist*. There are two routes that
+avoid raising it, and one of them is real.
+
+**Note first that removing the dialog does not break this project's consent rule.** Per CLAUDE.md
+the consent is the album mode, given once and confirmed when it is set. The platform dialog was
+never where the authorisation came from; it is Android's own check, layered on top. So eliminating
+it is consistent with the design rather than a way round it — which is exactly why it is worth
+evaluating rather than dismissing.
+
+#### 1. `MANAGE_EXTERNAL_STORAGE` — works, and costs the most
+
+All files access lets an app modify and delete media in shared storage without per-batch MediaStore
+consent. It is the mechanism file managers use, and it would remove the tap entirely — proxying and
+archiving alike, at any hour, with no Activity involved.
+
+The cost is the Play listing:
+
+- It is a **high-scrutiny permission** requiring a declaration and review, and Play restricts it to
+  apps whose core purpose genuinely needs broad file access. **Backup apps and file managers are
+  among the permitted categories**, and GallerySync is defensibly the former — but "defensibly" is
+  doing real work in that sentence, and the reviewer decides, not us.
+- It appears prominently to the user at install and in the listing.
+- A rejected declaration can hold up a submission, and the release gate already puts the first
+  submission after v0.3 and v0.4.
+
+Per CLAUDE.md this is an escalation twice over: a new permission that affects the Play listing, and
+two architecturally distinct paths with long-term implications. **Ian's call, and not a decision to
+drift into.** Worth noting the asymmetry: adopting it later is easy, while removing it after launch
+means users who granted it and a listing that changes.
+
+#### 2. A persisted SAF tree grant — cheaper, and unverified
+
+`ACTION_OPEN_DOCUMENT_TREE` plus `takePersistableUriPermission` gives durable write access to
+everything under a chosen directory, with no per-file dialog afterwards. One folder pick at setup,
+covering DCIM or Pictures, would in principle let a background pass modify and trash files under it
+indefinitely.
+
+Unverified, and the parts to establish on hardware before believing it:
+
+- **Whether the directories that matter can still be picked.** Android 11 blocked selecting the
+  external storage root and `Download`, and blocks `Android/data` and `Android/obb`. DCIM is
+  believed selectable; confirm it on the Fold 4 at targetSdk 37 rather than trusting that.
+- **Whether writing through the tree grant actually bypasses the MediaStore consent** for media the
+  app does not own, on this API level, rather than throwing `RecoverableSecurityException` anyway.
+- **Whether MediaStore stays consistent** afterwards, since a SAF write does not itself update the
+  index.
+
+If it holds it is much the cheaper option: no Play declaration, no listing change, one folder
+picker at setup. If it does not, route 1 is the only one left.
+
+#### 3. What definitely does not work
+
+- **Input injection** — `INJECT_EVENTS` is signature-level and system-only.
+- **AccessibilityService** — Play policy violation, gets apps removed, and the user must enable it
+  by hand anyway.
+- **Being the system gallery** — how Samsung did it, unavailable to a third-party app, and the
+  mechanism is being switched off regardless.
+- **Owning the files instead.** An app may modify media it created without consent, but ownership
+  sits with whatever wrote the file and does not transfer. Deleting the user's original to
+  re-create it under this app's ownership needs the same consent first, and destroys the original
+  to save a dialog. Not a route.
+
+#### Recommendation
+
+**Verify route 2 before considering route 1.** It costs an afternoon on the Fold 4 and, if it
+works, removes the tap without touching the Play listing at all. Route 1 works but spends listing
+scrutiny that this project has not had to spend yet, and it is easier to add later than to withdraw.
+
+Either way the tap is not needed *often* — 2000 URIs per batch means the first pass over a large
+library is a few dialogs once, and steady state is a handful of files. The case for removing it is
+about unattended overnight operation, not about volume.
 
 ### The two halves fit together
 This is the natural shape of first run, and it happens to be exactly option 3:
@@ -405,7 +490,8 @@ bytes that will never arrive. Schema 5 exists precisely so this figure can be ho
 
 Mode-independent by design. The dropdown selection is applied in the ViewModel, not in SQL —
 otherwise every flick of a dropdown re-queries the database, and a list of forty albums becomes
-forty round trips.
+forty round trips. It does take the archive age as a parameter, which is a setting rather than a
+mode: it changes rarely, so re-querying when it moves is fine.
 
 ```sql
 SELECT album,
@@ -417,22 +503,34 @@ SELECT album,
        SUM(CASE WHEN state = :uploaded
                      AND remoteSizeBytes IS NOT NULL
                      AND remoteSizeBytes = sizeBytes
+                     AND dateModifiedEpochSeconds < :archiveCutoffEpochSeconds
                 THEN COALESCE(localProxySizeBytes, sizeBytes)
-                ELSE 0 END)                                    AS verifiedLocalBytes
+                ELSE 0 END)                                    AS archivableBytes
 FROM backup_entries
 GROUP BY album
 ```
 
 - `freedBytes` → **Freed**, for every mode.
 - `proxyableBytes` → **Sync**'s projection, times `(1 - ratio)`.
-- `verifiedLocalBytes` → **Archive**'s projection, and note the `COALESCE`: an already-proxied photo
-  now occupies only its proxy, so archiving it frees the proxy's bytes and not the original's. The
+- `archivableBytes` → **Archive**'s projection. Note the `COALESCE`: an already-proxied photo now
+  occupies only its proxy, so archiving it frees the proxy's bytes and not the original's. The
   consequence is worth surfacing — **once Sync has run, Archive's additional gain is small**, which
   is exactly the argument the UI should be making.
 
-`verifiedLocalBytes` counts only files verified in the cloud, per hard rule 1. An album whose backup
-is half finished must not advertise the whole album's bytes as available; that number would be a
-promise to remove files that have nowhere to go back to.
+Two filters on `archivableBytes`, and dropping either one turns the figure into a promise the app
+will not keep:
+
+- **Verified in the cloud**, per hard rule 1. An album whose backup is half finished must not
+  advertise the whole album's bytes as available; that would be a promise to remove files that have
+  nowhere to go back to.
+- **Older than the archive age.** Archive is evaluated per file, not per album — recent files stay
+  put inside an archived album (TASK-012 guard 2). An unfiltered total would count every recent
+  photo as space about to be freed, and then not free it. Ian, 19 Aug 2026: this filter was missing
+  from the first draft of this section.
+
+A consequence worth expecting rather than debugging: **Archive's projection grows on its own** as
+files age past the threshold, with nobody touching anything. That is correct, and it is another
+reason the number needs the word "could" rather than a promise attached to it.
 
 ### The hazard this introduces, and it is not small
 
@@ -664,6 +762,108 @@ place.
 So the setting may be built and shown, but the transcode that consumes it waits on v0.4 — and on
 the transcode cost measured against real 8K footage, which is still the thing standing between this
 being decided and being buildable.
+
+### How the age limit and the album mode combine
+
+Asked by Ian, 19 Aug 2026. The short answer is that nothing checks videos one at a time, and no
+state is written to a row when it crosses the threshold.
+
+**Eligibility is a query, never a stamp.** A video may be downscaled when all of these hold, and
+they are evaluated together at the moment the worker asks:
+
+1. its album's mode is `SYNC` — not Off, not Backup, and not Archive, which removes rather than
+   shrinks;
+2. the sync scope includes video (`VIDEO_ONLY` or `BOTH`);
+3. it is verified in OneDrive — Graph confirmed and the byte size matches;
+4. it is older than the age threshold;
+5. it has not already been downscaled or examined and declined.
+
+```sql
+SELECT * FROM backup_entries
+WHERE isVideo = 1
+  AND dateModifiedEpochSeconds < :cutoffEpochSeconds
+  AND album IN (SELECT albumName FROM album_preferences WHERE mode = 'SYNC')
+  AND state = :uploaded
+  AND remoteSizeBytes IS NOT NULL
+  AND remoteSizeBytes = sizeBytes
+  AND isProxied = 0
+  AND isProxySkipped = 0
+ORDER BY sizeBytes DESC
+```
+
+Scope is applied before the query runs rather than inside it: under `PHOTOS_ONLY` this query is not
+issued at all.
+
+Note `album IN (… mode = 'SYNC')` rather than the `NOT IN (… mode = 'OFF')` form used by
+`nextPending`. An album with no preference row takes `AlbumMode.DEFAULT`, which is `BACKUP`, so
+absent rows are correctly excluded by the positive test. Copying the negative form would sweep in
+every album the user has never touched.
+
+### No, it does not check every video
+
+The threshold is not compared against each file. **One cutoff timestamp is computed in Kotlin** —
+`now - threshold` — and the database does a single range comparison. The cost is one query over a
+few thousand rows with no file I/O, no decode and no MediaStore round trip, which SQLite answers in
+low single-digit milliseconds. There is no per-video work until a file is actually chosen to be
+transcoded.
+
+`backup_entries` carries indices on `state`, `album` and `(album, state)`, and none on
+`dateModifiedEpochSeconds` or `isVideo`. That is fine at this table's size — adding one is a schema
+change, so measure before paying for it rather than adding it speculatively.
+
+### Nothing has to run at the moment a video ages
+
+A video becomes eligible by the passage of time, which sounds like it needs a timer and does not.
+Eligibility only matters when the worker next asks, and the existing schedule already asks often
+enough: content-triggered on `MediaStore.Video`, plus the 6-hourly safety net in
+`BackupScheduling`. A clip that crosses the threshold at 3am is simply included in the next run. No
+alarms, no per-file scheduling, nothing to reconcile after a reboot.
+
+### Why this shape matters — the settings stay free to change
+
+Because eligibility is computed rather than stored, **changing a setting costs nothing**. Switch an
+album from Sync to Backup and its videos stop being eligible on the next query, with no sweep and
+no per-file state to unwind. Raise the age threshold and clips that were eligible quietly are not.
+Change the scope and a whole media type drops out.
+
+The alternative — writing an `isEligible` flag onto each row — is precisely what would create the
+problem this question is about: every settings change would then need a pass over the whole table
+to recompute it, and any missed pass would leave rows lying about their own status. Do not
+materialise eligibility.
+
+The same property is what lets the running count above update live as a dropdown moves: the
+projection and the worker's queue are the same query with a different aggregate over it.
+
+### Created versus modified
+
+The threshold reads `dateModifiedEpochSeconds`, which the ledger already holds. Creation time —
+MediaStore's `DATE_TAKEN` — is the better semantic and is not on the table, so it would mean a
+nullable column, schema 6 and a migration. See the section above for why the mtime proxy is
+acceptable and which direction its error runs in.
+
+### Two age settings — decided, they stay separate and both are visible
+
+Ian, 19 Aug 2026. There are two ages in the app and they are not variants of each other:
+
+| Setting | Reads as | Governs | Immediate? | Minimum |
+|---|---|---|---|---|
+| **Sync age** — this task | *Downscale videos older than…* | a clip shrunk in place, still in the gallery | no | 30 days |
+| **Archive age** — TASK-012 | *Remove files older than…* | photos and video leaving the phone | **yes** | none |
+
+Both live in Settings. An earlier draft of this section proposed hiding the Archive one inside its
+confirmation dialog to avoid two age fields sitting together; Ian's call is that the user can tell
+the two apart, so that is withdrawn. The real requirement is that each label names its
+**consequence** rather than its mode — two fields both called "age" would be the confusing thing,
+two settings are not.
+
+The asymmetries in that table are deliberate and must not be tidied away:
+
+- **Only Archive offers Immediate.** It removes a file the user consented to remove, with v0.4
+  retrieval as the route back. Downscaling degrades a clip in place and *recent video is never
+  touched* is a stated requirement, not a default, so this task keeps its floor.
+- **Only Sync's age is limited to video.** Photos are proxied whatever their age, because a proxy
+  leaves the photo in the gallery and costs an edit nothing until the export.
+
 
 ## Notes for whoever picks this up
 - `ProxyApplier.candidates()` returns eligible photos largest-first and already filters rows whose
