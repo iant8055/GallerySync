@@ -97,13 +97,14 @@ The second was never in question. The first is the new requirement, and it is mo
 
 ### What "verify they have seen it" means in build terms
 
-A shown-explanations set, keyed per topic, in `BackupSettings` alongside the other preferences. No
+An acknowledged-explanations set, keyed per topic, in `BackupSettings` alongside the other
+preferences. No
 schema change — this is DataStore, not Room.
 
 What it buys, in order of usefulness:
 
-- **A destructive mode cannot be chosen before its explanation has been displayed.** Selecting
-  Archive with no record of the Archive explanation shows the explanation first, then the
+- **A destructive mode cannot be chosen before its explanation has been acknowledged.** Selecting
+  Archive with no acknowledgement on file shows the explanation first, then the
   confirmation. Not a second consent step — the sequence a careful person would want anyway.
 - **The tour becomes skippable without losing anything.** Skipping is fine, because the explanation
   reappears at the point of first use. Just-in-time is better teaching than a wizard nobody
@@ -111,13 +112,53 @@ What it buys, in order of usefulness:
 - **The record is per topic, not per tour**, so adding a fifth mode later does not require re-running
   setup, and a user who saw the Archive explanation in the wizard is not shown it again.
 
-### One honest limit on the record
+### Advancing requires an explicit acknowledgement
 
-It proves the text was **displayed**, never that it was read or understood. Worth stating because a
-record like this invites being treated as proof of comprehension, and it is not — it should not
-appear in any wording that implies the user agreed to something by having seen a screen. Its value
-is that the app can never take a destructive action the user was given no opportunity to understand,
-which is a real guarantee and a narrower one.
+Ian, 19 Aug 2026: a bubble is not dismissed by tapping Next — the user clicks **"I understand"** to
+move on.
+
+This upgrades what the record means. It stops being *displayed* and becomes *acknowledged*, which is
+a materially stronger signal: a screen can be rendered and swiped past without a decision, but a
+deliberately-placed button cannot be pressed by accident. Every use of the record below should read
+"acknowledged" rather than "shown".
+
+**Two things about how it is built, both of which protect the signal rather than the user:**
+
+**1. Do not put it on every bubble.** A nine-step wizard where every step demands "I understand"
+teaches people to click it without reading by about step four, and the ones that matter arrive after
+that. Uniformity is what destroys the signal. So:
+
+| Bubble | Advance control |
+|---|---|
+| Purely informational — what a storage floor is, where Settings moved | plain **Next** |
+| The four album modes, and Archive above all | **"I understand"** |
+| Anything describing a file leaving the phone or being rewritten | **"I understand"** |
+
+The rest of this app already works this way: the Archive confirmation carries weight *because* it is
+rare. A button that appears everywhere carries none.
+
+**2. Name what is being understood.** A generic "I understand" is the fatigue pattern in miniature —
+it can be pressed without the sentence above it entering the decision at all. Restate the
+consequence in the button:
+
+> **I understand — Archive takes these files off my phone**
+> **I understand — optimised photos are smaller until I fetch the original**
+
+Longer, harder to press reflexively, and it survives being the only thing the user actually reads.
+
+**What it does not change:** the Archive confirmation in TASK-012 guard 4 still happens, separately,
+at the moment the mode is set. Acknowledging an explanation during setup is not choosing Archive for
+an album, and the two must never be collapsed — one is *I know what this does*, the other is *do it
+to this album*.
+
+**And the honest limit stands, slightly narrowed.** An acknowledgement proves a deliberate press,
+not comprehension. It is a much better record than a render, and it is still not proof the user
+understood — so no wording anywhere may imply they accepted a consequence by having pressed a
+button in a tutorial.
+
+**Leaving is not gated.** "I understand" gates moving *forward* through the tour, never exiting it.
+Skip stays available at every step, and any topic left unacknowledged is presented again at the
+point of first use — which is where the record earns its keep.
 
 ### Wording, shared not duplicated
 
@@ -150,9 +191,12 @@ nothing to notify about, and Android only prompts once.
 - Archive is not offered as a bulk choice anywhere in the flow
 - Skipping the tour leaves a safe, working configuration
 - The mode explanations here and in Help come from the same strings
-- A destructive mode cannot be selected before its explanation has been displayed, by either route
+- A destructive mode cannot be selected before its explanation has been acknowledged, by either route
 - Skipping the tour is allowed and loses nothing — explanations reappear at first use
-- The shown-explanations record is per topic and survives a restart
+- The acknowledgement record is per topic and survives a restart
+- Consequential bubbles advance only on an explicit acknowledgement; informational ones use Next
+- Acknowledgement buttons name the consequence rather than reading a bare "I understand"
+- Skip and back-out stay available at every step — acknowledgement gates forward, never exit
 - Re-running setup is possible from Settings without reinstalling
 - Verified on hardware in both themes, per CLAUDE.md
 
