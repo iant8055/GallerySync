@@ -144,6 +144,9 @@ gallery keeps working.
       nothing is deleted — proxying is the only lever. If proxying alone cannot reach the floor it
       stops and says so. Notifies when free space drops below the floor — which is also how it asks
       for the next batch of write consent. Decided 18 Aug 2026; see TASK-011.
+- [ ] **Video proxies for old clips.** Full-length downscale, marked, on charge, Sync albums only —
+      the honest analogue of the photo proxy. Recent video stays untouched. Needs Media3 Transformer
+      and a transcode cost measured on real 8K footage first. See the reconsideration below.
 - [ ] **Rolling window for video — reconsidered, and probably wrong as specified.** Ian lost access
       to a just-shot video because Samsung moved it to the cloud; a window reproduces that failure
       on a longer fuse. Video has no proxy, so a removed clip disappears rather than degrading.
@@ -209,9 +212,10 @@ So even after v0.4 retrieval lands, the best available state for a video is one 
 - whole on the device, occupying its full size, or
 - **not in the gallery at all**, retrievable on demand from the retrieval list.
 
-There is no middle state for video, ever. This is a consequence of two constraints already
-established — a file with no local bytes cannot appear in a gallery, and video must not be
-degraded — and not something a later milestone fixes.
+There is no **free** middle state for video, and none that is safe to edit from. That is narrower
+than what this file said until 18 Aug 2026 — "no middle state for video, ever" — which was an
+overstatement. A downscaled full-length proxy is a real option; it was dismissed too quickly. See
+the reconsideration below.
 
 **Consequence for the migration.** Samsung Gallery Sync *did* show cloud-only videos, through its
 own private index, and that cannot be replicated. A user moving across who kept videos in the cloud
@@ -548,6 +552,62 @@ Recommendation: full-length downscale, with the badge and metadata marker the ph
 uses, and retrieval as the documented route to a full-quality edit. It keeps the gallery whole,
 which is the stated purpose, and makes video consistent with photos rather than a special case.
 The transcode cost is real and would need measuring on an 8K clip before committing.
+
+## Video proxies, reconsidered — Ian, 18 Aug 2026
+
+> *"I am still thinking about truncating video files. It seems like a defeat not to have video files
+> also sync'd."*
+
+Two things to separate first. **Video is already synced** — it uploads to OneDrive with photos and
+has since v0.2. What video lacks is the *middle state*: photos can shrink and stay visible, video
+cannot. That gap is the defeat, and it is a fair thing to be unwilling to accept.
+
+### Where the earlier reasoning went wrong
+The argument against a video proxy was that a degraded clip fails quietly inside an editor. That
+holds — but it silently assumed **editing is what the file is for.** Apply the actual timeline:
+
+- **Recent video** is what gets edited, and it is never proxied. The founding use case — record now,
+  edit in CapCut later today — is protected by leaving recent clips alone, which is settled.
+- **Old video** is what occupies space. And what people do with two-year-old footage is *watch* it,
+  scrolling back through it in the gallery. Editing it is rare, and retrieval covers that rare case
+  exactly as it does for photos.
+
+So the quiet-failure objection was weighed against the wrong use. For old video the priority is
+viewing, and a downscaled clip serves viewing perfectly.
+
+### What that makes of the two candidates
+- **Truncation** destroys the main thing old video is for. A two-second stub cannot be watched, and
+  the gallery stops holding memories. Its one virtue — failing loudly — matters most for editing,
+  which is the rare case here. **Not recommended.**
+- **Full-length downscale** is the honest analogue of the photo proxy. An 8K clip at 1080p is
+  roughly a tenth the size, watchable, scrubbable, correct duration, and appears in every gallery
+  and every app because it is an ordinary file. Retrieval remains the route to a full-quality edit,
+  which is already true for photos and already documented as why retrieval is load-bearing.
+
+### The real costs, which are not the rule
+1. **Transcoding is genuinely expensive.** A JPEG downscale is milliseconds; re-encoding an 8K clip
+   is minutes of sustained CPU, with heat and battery to match. This has to be background work
+   gated on charging, not something that runs while the phone is in a pocket.
+2. **It needs Media3 Transformer**, a dependency the project does not have yet.
+3. **Re-encoding loses quality** in a way a JPEG downscale does not, so the target resolution and
+   bitrate need choosing deliberately, then checking on real footage.
+4. **Marking it is nearly free here.** The photo path burns a badge into the proxy; since video is
+   being re-encoded anyway, a corner badge or a metadata atom costs almost nothing extra. Worth
+   deciding whether a permanent burned-in badge on something you watch is as acceptable as it is on
+   a still — it is more intrusive in motion.
+
+### Recommendation
+Build it, for **old video only**, as a mode rather than a default — and after the photo budget, not
+instead of it. The sequence that keeps every commitment intact:
+
+1. Recent video: untouched. Non-negotiable, and already the position.
+2. Old video in a Sync album: downscaled full-length proxy, marked, on charge.
+3. Any video: retrievable at full quality from v0.4.
+
+That closes the gap Ian is unwilling to accept, without touching the clip he shot this morning, and
+it makes video consistent with photos instead of a permanent exception. It needs measuring on one of
+his 8K clips before committing — if a three-minute clip takes fifteen minutes and cooks the phone,
+the economics change and truncation deserves another look.
 
 ## Where video stands — it spans three milestones, so it is easy to lose track
 
