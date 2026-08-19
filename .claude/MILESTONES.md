@@ -99,7 +99,8 @@ gallery keeps working.
 - [ ] **Storage budget.** User sets a free-space floor, default 20 GB; the worker keeps the phone
       above it by proxying the largest verified photos, largest first. Nothing is evicted and
       nothing is deleted — proxying is the only lever. If proxying alone cannot reach the floor it
-      stops and says so. Decided 18 Aug 2026; see TASK-011.
+      stops and says so. Notifies when free space drops below the floor — which is also how it asks
+      for the next batch of write consent. Decided 18 Aug 2026; see TASK-011.
 - [ ] **Rolling window for video**, so recent clips stay usable in the gallery.
 - [ ] Per-album "keep originals on device" for albums actively edited from.
 - [x] Clear marker showing which items are optimised versus whole. Cloud badge burned into the
@@ -125,7 +126,8 @@ it is the only route back to a full-quality edit.
   belongs with the rolling window. Ceiling-versus-floor is decided: a user-set free-space floor,
   default 20 GB. **Still needs Ian's call on where the applying step runs** — WorkManager cannot
   attach the `ClipData` that carries the write grant, so it is a foreground service or raw
-  JobScheduler. See TASK-011.
+  JobScheduler. **And on `POST_NOTIFICATIONS`** — Ian asked for a notification when free space
+  drops below the floor, which adds a permission to the Play listing. See TASK-011.
 - **Proxy recovery is untested on hardware.** `LedgerRecovery` guards the upload path against
   re-uploading proxies once the ledger is lost, but reproducing that means destroying a real
   ledger. Wants an in-memory Room test seeding a pending proxy row.
@@ -135,8 +137,31 @@ it is the only route back to a full-quality edit.
 - **Six photos in `AaSync` carry the pre-fix sideways badge.** Harmless, marked as proxies so
   nothing will touch them again. Delete locally and re-fetch from OneDrive to tidy.
 
+## Where video stands — it spans three milestones, so it is easy to lose track
+
+Video is **already backed up**, and has been since v0.2. `MediaScanner` queries the images and the
+video collections both, `BackupEngine` records `isVideo` on every row, and nothing in the upload
+path filters on it. The only place video is excluded is `BackupEntryDao.proxyCandidates()`, which
+is about local proxying, not about syncing.
+
+So the four things "video" can mean, and where each actually sits:
+
+| | Status |
+|---|---|
+| **Backed up to OneDrive** | ✅ Done in v0.2, verified on hardware |
+| **Proxied / downscaled** | ❌ Never — deliberate, a degraded clip fails silently in an editor |
+| **Local copy reclaimed to free space** | ⬜ v0.3, rolling window — the only lever is removing the file, which is a deletion decision |
+| **Retrieved back on demand** | ⬜ v0.4, same path as photos |
+
+The one that carries real risk is reclaiming space. A video cannot be shrunk, so freeing its space
+means removing the local file, which makes it vanish from the gallery and runs straight into the
+deletion rules in CLAUDE.md and the Samsung trash behaviour. That is why TASK-011 covers photos
+only and the rolling window is a separate task with a separate decision.
+
 ## v0.4.0 — Retrieval and deletion sync
-- [ ] Fetch a cloud-only item back on demand, registering it in MediaStore so every app sees it
+- [ ] Fetch a cloud-only item back on demand, registering it in MediaStore so every app sees it.
+      Photos and video both — video is already backed up, so retrieval is the same path, and it is
+      the only route back to a full-quality edit from a 2048px proxy.
 - [ ] Plain retrieval list — **not** a photo browser
 - [ ] Deletion sync, opt-in and batched. Highest-risk feature in the product; it only follows a
       backup engine that has been watched working. Never infers deletion from absence alone —

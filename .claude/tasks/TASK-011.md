@@ -68,11 +68,62 @@ Settings → Storage, beneath the existing verified count and "Move to backup". 
 the same question: how much of this phone is in use, and what is safe to reclaim.
 
 ## Acceptance
-- A ceiling can be set and persists across restarts
-- The worker runs on its own and brings usage under the ceiling using proxies only
+- A floor can be set and persists across restarts; the default is 20 GB free
+- The worker runs on its own and brings free space back above the floor using proxies only
 - It reports what it did, and says plainly when it cannot reach the target
 - Nothing unverified is ever touched; no file is ever deleted
+- The user is notified when free space drops below the floor, in each of the three states below
+- Repeated runs finding the same situation do not re-notify
+- With notifications denied, Settings still shows the same state and the feature remains usable
 - Verified on hardware in both themes, per CLAUDE.md
+
+## Notification — required, and it is also the consent mechanism
+
+The user is told when free space drops below their floor. Requested by Ian, 18 Aug 2026.
+
+This is not a separate feature bolted on. Because a background worker **cannot obtain write
+consent by itself** (see below), the notification is the only way the app can ask for the next
+batch. Design them as one thing, not two.
+
+### Three states, three different messages
+The worker checks free space against the floor and lands in exactly one of these:
+
+1. **Below the floor, grants in hand.** It proxies until back above the floor, then reports what
+   it did — how many photos, how much reclaimed. Low priority: this is the case where the feature
+   worked, and it should not interrupt anyone.
+2. **Below the floor, grant pool empty.** The actionable one. "Your phone is below *N* GB free.
+   Approve the next batch of photos to optimise." Tapping opens the Activity and launches
+   `createWriteRequest`. Without this the feature simply stops, silently, the moment the pool runs
+   dry — which on a large library is soon.
+3. **Below the floor, nothing left to proxy.** Everything eligible is already optimised and the
+   floor is still unmet. Say so plainly, and say what is holding it — on a video-heavy phone that
+   is video, which this task deliberately will not touch. **Expect this state on Ian's own device.**
+
+### Do not nag
+Free space hovers around a threshold; a naive check notifies every run.
+
+- Re-notify only when the situation *changes* state, not on every pass that finds the same thing.
+- Apply hysteresis: having crossed below the floor, do not re-notify until free space has risen
+  meaningfully above it and fallen again. A single margin constant, not a second user setting.
+- State 3 must not repeat until something could plausibly have changed — new photos backed up, or
+  the floor itself edited.
+
+### The notification cannot be the only channel
+`POST_NOTIFICATIONS` is a runtime permission on API 33+, and the user can refuse it or turn the
+channel off later. If that happens, and the grant pool empties, **automatic space management dies
+silently** — the app would be waiting on an approval it has no way to ask for.
+
+So the same three states must be visible in Settings → Storage as ordinary UI. The notification is
+a prompt for something already legible in the app, never the sole carrier of it. Check what the
+screen says with notifications disabled, not only with them working.
+
+### Permission — flagged for Ian
+`POST_NOTIFICATIONS` is a new manifest permission and appears on the Play listing, which CLAUDE.md
+lists as an escalation. Raised here rather than assumed: the request implies it, but adding a
+permission to the listing is Ian's call to make explicitly.
+
+Note it is likely needed either way — a foreground service, which is one of the two paths for the
+applying step below, shows a notification while it runs.
 
 ## Consent — settled shape, and the constraint it puts on everything else
 
