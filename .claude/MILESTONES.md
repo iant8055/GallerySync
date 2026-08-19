@@ -42,7 +42,9 @@ Consequences that bind every future task:
   list for retrieving something that is not on the phone. No photo grid, no thumbnails
   browser, no search, no editing. If a task starts to look like building a gallery, it is the
   wrong task.
-- **Set up and forget.** The user sets a budget once. The background worker maintains it.
+- **Set up and mostly forget.** The user sets a budget once and the background worker maintains it —
+  but Android will ask them to approve each batch of photos it rewrites. See the consent constraint
+  below: unattended-forever is not available to a third-party app, so the UI must not promise it.
 
 ## Platform constraints — established by experiment, do not re-litigate
 
@@ -55,6 +57,13 @@ Verified on a Galaxy Z Fold 4 (Android 16) on 2026-08-17:
   That is why third-party apps could never see them, and it is exactly what is being switched
   off. It cannot be replicated by a third-party app.
 - **A trash request is not a guarantee of recoverability.** See the deletion rule in CLAUDE.md.
+- **Rewriting a photo always needs the user, and cannot be granted once and for all.**
+  `MediaStore.createWriteRequest` launches only from an Activity, so no background worker can
+  obtain consent by itself. A grant can be carried into background work via `ClipData`, but a
+  single request is capped at 2000 URIs, so a large library needs repeated approvals as it grows.
+  Automatic space management therefore means **"approve a batch occasionally", never "never asked
+  again"**. From the platform docs rather than experiment — the ClipData hand-off is still to be
+  confirmed on a Galaxy device.
 - Therefore: **storage can be reduced, never eliminated.** Any plan that plans on zero local
   storage while remaining visible in the gallery is impossible, not merely hard.
 
@@ -87,8 +96,10 @@ gallery keeps working.
       existing gallery whole.
 - [x] **Never proxy video silently.** A degraded clip handed to an editor fails quietly, and the
       user only discovers it in the exported result. Videos are kept whole or kept in the cloud.
-- [ ] **Storage budget.** User sets a ceiling; the worker maintains it — newest kept, oldest
-      evicted, nothing evicted until its cloud copy is verified.
+- [ ] **Storage budget.** User sets a free-space floor, default 20 GB; the worker keeps the phone
+      above it by proxying the largest verified photos, largest first. Nothing is evicted and
+      nothing is deleted — proxying is the only lever. If proxying alone cannot reach the floor it
+      stops and says so. Decided 18 Aug 2026; see TASK-011.
 - [ ] **Rolling window for video**, so recent clips stay usable in the gallery.
 - [ ] Per-album "keep originals on device" for albums actively edited from.
 - [x] Clear marker showing which items are optimised versus whole. Cloud badge burned into the
@@ -111,7 +122,10 @@ it is the only route back to a full-quality edit.
 
 ### Open at the end of 18 Aug 2026
 - **Next task is TASK-011, the storage budget.** Photos only in the first pass; video eviction
-  belongs with the rolling window. Needs Ian's call on ceiling-versus-floor — see the spec.
+  belongs with the rolling window. Ceiling-versus-floor is decided: a user-set free-space floor,
+  default 20 GB. **Still needs Ian's call on where the applying step runs** — WorkManager cannot
+  attach the `ClipData` that carries the write grant, so it is a foreground service or raw
+  JobScheduler. See TASK-011.
 - **Proxy recovery is untested on hardware.** `LedgerRecovery` guards the upload path against
   re-uploading proxies once the ledger is lost, but reproducing that means destroying a real
   ledger. Wants an in-memory Room test seeding a pending proxy row.
