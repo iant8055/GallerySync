@@ -264,6 +264,59 @@ install without expecting to lose its data.
 
 ---
 
+## targetSdk — researched 19 Aug 2026, resolved in favour of 37
+
+CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have
+blocked the first Play submission.
+
+### The Play deadline decides it
+| | Requirement |
+|---|---|
+| **New apps and updates, from 31 Aug 2026** | must target **API 36** (Android 16) or higher |
+| Existing published apps | must target API 35 to stay available on newer devices |
+| API 37 | no Play deadline until roughly Aug 2027 |
+
+GallerySync will be a **new submission**, and the release gate puts that after v0.3 and v0.4 — well
+past 31 August. So 35 is not merely conservative, it is non-compliant. 36 is the floor; 37 is valid
+and buys a year.
+
+**API 37 is Android 17, released 16 June 2026** — a stable version, not a preview, so there is no
+risk of targeting something Play will not accept.
+
+### What targeting 37 pulls in, checked against this app
+| Change at targetSdk 37 | Affects GallerySync? |
+|---|---|
+| **Large screens ignore orientation, resizability and aspect-ratio limits** (`sw>=600dp`) | **Yes** — see below |
+| `ACCESS_LOCAL_NETWORK` now required for LAN access | No. Graph and MSAL are ordinary internet hosts; the permission covers local addresses, mDNS and SSDP |
+| Background audio hardening | No audio |
+| Contacts Provider PII columns restricted | No contacts |
+| Bluetooth RFCOMM `read()` returns -1 | No Bluetooth |
+| SMS OTP three-hour delay | No SMS |
+| Reflection on static final fields throws | Not our code; a dependency risk to watch |
+| Encrypted Client Hello | OkHttp handles TLS; worth watching, nothing to do |
+
+Nothing in MediaStore, the media permissions or `createWriteRequest` changes at 37, so the whole
+consent design above is unaffected.
+
+### The one change that does apply, and one real defect it exposes
+The large-screen adaptation has **no opt-out at 37** — the Android 16 escape hatch was removed. On
+any display wider than 600dp, `screenOrientation`, `resizableActivity` and the aspect-ratio
+attributes are ignored and the app fills the window.
+
+Structurally this app is already fine: the manifest sets none of those attributes, and it is being
+developed on a Fold's large inner screen. But the compatibility requirement includes *properly
+saving and restoring UI state across configuration changes*, and it does not:
+
+- `MainActivity` holds the selected tab in `remember`, not `rememberSaveable`
+- there are **zero** uses of `rememberSaveable` in the app
+
+So folding, unfolding, rotating or entering split-screen throws the user back to the first tab. On a
+foldable that is a routine gesture, not an edge case. Observed during theme testing and misread at
+the time as a side effect of relaunching.
+
+**Not fixed here** — it is a UI behaviour change and wants both-theme device verification, so it is
+Ian's to schedule. It is small: `rememberSaveable` for the tab index.
+
 ## Versioning — decided 19 Aug 2026
 
 **`versionName` tracks the milestone being built.** Currently `0.3.0`. A crash report or a Play
@@ -287,8 +340,6 @@ uploaded.
   background detection and notification, applying on the tap. See TASK-011.
 - **`POST_NOTIFICATIONS`** — needed for the floor notification, and it appears on the Play listing.
 - **Language dropdown** — wire the per-app locale mechanism now and ship English only, or defer.
-- **`targetSdk = 37` versus CLAUDE.md, which specifies 35.** One of the two is stale. It matters
-  because target level gates real behaviour — the 2000-URI cap above binds only at 35+.
 
 **Known and unbuilt**
 - **Album selections are device-only.** The one part of the ledger that cannot be rebuilt from
@@ -296,6 +347,10 @@ uploaded.
 - **Proxy recovery is untested on hardware.** `LedgerRecovery` guards against re-uploading proxies
   once the ledger is lost, but reproducing it means destroying a real ledger. Wants an in-memory Room
   test seeding a pending proxy row.
+- **UI state does not survive configuration changes.** No `rememberSaveable` anywhere, so folding,
+  rotating or entering split-screen resets the selected tab. Routine on a foldable, and an explicit
+  compatibility requirement of the large-screen change at targetSdk 37. Small fix; wants both-theme
+  device verification.
 - **The XML theme is hardcoded Light** with no `values-night` variant, so a cold launch in dark mode
   starts light. Deferred to the visual refresh, which touches that file anyway. See TASK-012.
 - **Six photos in `AaSync` carry the pre-fix sideways badge.** Harmless and marked as proxies. Delete

@@ -87,7 +87,10 @@ text at all. That is a shipped-to-users bug, not a cosmetic one.
 ### Other hard rules
 - All file operations on device are cache management, never source-of-truth writes
 - Never store OAuth tokens in SharedPreferences — use EncryptedSharedPreferences
-- Minimum Android SDK: 26 (Android 8.0). Target SDK: 35
+- Minimum Android SDK: 26 (Android 8.0). Target SDK: 37 (Android 17)
+  Was 35 here while the build file said 37. 35 is the stale one: from 31 Aug 2026 Google Play
+  requires **new apps to target API 36 or higher**, and GallerySync will be a new submission. See
+  the targetSdk section in `.claude/MILESTONES.md` for what 37 pulls in.
 - Kotlin only — no Java files
 - No Log.d/Log.e in production code — use the Logger utility (app/src/main/.../util/Logger.kt)
 - Coroutines for all async work — no callbacks, no RxJava
