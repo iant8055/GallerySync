@@ -72,11 +72,64 @@ class MigrationTest {
     }
 
     @Test
-    fun migrateAllTheWayFrom1To3() {
-        // Someone upgrading from the first build skips version 2 entirely.
+    fun migrate3To4_producesTheSchemaRoomExpects() {
+        helper.createDatabase(TEST_DB, 3).close()
+
+        helper.runMigrationsAndValidate(TEST_DB, 4, true, Migrations.MIGRATION_3_4).close()
+    }
+
+    @Test
+    fun migrate3To4_mapsEnabledToBackupAndDisabledToOff() {
+        // The whole risk of this migration. BACKUP uploads and touches nothing locally, which is
+        // exactly what an enabled album does today. SYNC would start rewriting photos nobody chose
+        // to optimise, and ARCHIVE would remove them from the phone altogether.
+        helper.createDatabase(TEST_DB, 3).apply {
+            execSQL("INSERT INTO album_preferences (albumName, isEnabled) VALUES ('Camera', 1)")
+            execSQL("INSERT INTO album_preferences (albumName, isEnabled) VALUES ('Screenshots', 0)")
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(TEST_DB, 4, true, Migrations.MIGRATION_3_4)
+
+        db.query("SELECT mode FROM album_preferences WHERE albumName = 'Camera'").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals("an enabled album must not start optimising", "BACKUP", cursor.getString(0))
+        }
+        db.query("SELECT mode FROM album_preferences WHERE albumName = 'Screenshots'").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals("OFF", cursor.getString(0))
+        }
+        db.close()
+    }
+
+    @Test
+    fun migrate3To4_archivesNothing() {
+        // ARCHIVE removes files from the phone. No upgrade path may ever produce it, and the only
+        // way to be sure is to assert on the whole table rather than on the rows we happened to
+        // think about.
+        helper.createDatabase(TEST_DB, 3).apply {
+            execSQL("INSERT INTO album_preferences (albumName, isEnabled) VALUES ('Camera', 1)")
+            execSQL("INSERT INTO album_preferences (albumName, isEnabled) VALUES ('WhatsApp', 1)")
+            execSQL("INSERT INTO album_preferences (albumName, isEnabled) VALUES ('Downloads', 0)")
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(TEST_DB, 4, true, Migrations.MIGRATION_3_4)
+
+        db.query("SELECT COUNT(*) FROM album_preferences WHERE mode NOT IN ('OFF', 'BACKUP')")
+            .use { cursor ->
+                cursor.moveToFirst()
+                assertEquals("no upgrade may produce SYNC or ARCHIVE", 0, cursor.getInt(0))
+            }
+        db.close()
+    }
+
+    @Test
+    fun migrateAllTheWayFrom1To4() {
+        // Someone upgrading from the first build skips every version in between.
         helper.createDatabase(TEST_DB, 1).close()
 
-        helper.runMigrationsAndValidate(TEST_DB, 3, true, *Migrations.ALL).close()
+        helper.runMigrationsAndValidate(TEST_DB, 4, true, *Migrations.ALL).close()
     }
 
     @Test

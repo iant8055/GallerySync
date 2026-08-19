@@ -70,6 +70,15 @@ class BackupEntryTest {
     @Test
     fun `new albums default to being backed up`() {
         // The safer default: uploading something unneeded beats silently losing something needed.
-        assertEquals(true, AlbumPreferenceEntity.DEFAULT_ENABLED)
+        assertEquals(AlbumMode.BACKUP, AlbumMode.DEFAULT)
+    }
+
+    @Test
+    fun `only sync proxies photos, and only archive removes them`() {
+        // The two modes that touch local files must never be reachable by accident. Asserting the
+        // whole enum means a mode added later has to make a deliberate choice here.
+        assertEquals(listOf(AlbumMode.SYNC), AlbumMode.entries.filter { it.proxiesPhotos })
+        assertEquals(listOf(AlbumMode.ARCHIVE), AlbumMode.entries.filter { it.removesLocal })
+        assertEquals(false, AlbumMode.OFF.uploads)
     }
 }

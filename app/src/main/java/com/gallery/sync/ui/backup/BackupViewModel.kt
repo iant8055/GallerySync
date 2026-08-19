@@ -14,6 +14,7 @@ import com.gallery.sync.worker.BackupScheduling
 import dagger.hilt.android.qualifiers.ApplicationContext
 import com.gallery.sync.data.local.dao.AlbumPreferenceDao
 import com.gallery.sync.data.local.dao.BackupEntryDao
+import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.entity.AlbumPreferenceEntity
 import com.gallery.sync.data.local.entity.BackupState
 import com.gallery.sync.data.local.media.MediaAccess
@@ -30,18 +31,25 @@ import javax.inject.Inject
 /**
  * One album: how much of it is safe, and whether it is still being watched.
  *
- * [isEnabled] and [backedUpCount] are deliberately independent. An archived album that will
- * never gain another photo is *finished*, not *unprotected* — switching it off means "stop
- * spending time on this", and rendering that the same as "not backed up" is alarming and wrong.
+ * [mode] and [backedUpCount] are deliberately independent. An album that will never gain another
+ * photo is *finished*, not *unprotected* — switching it off means "stop spending time on this", and
+ * rendering that the same as "not backed up" is alarming and wrong.
  */
 data class AlbumRow(
     val name: String,
     val itemCount: Int,
     val totalBytes: Long,
-    /** Watched for new files. Off means finished or ignored — [status] says which. */
-    val isEnabled: Boolean,
+    /** What the user chose for this album. [AlbumMode.OFF] means finished or ignored. */
+    val mode: AlbumMode,
     val backedUpCount: Int = 0
 ) {
+    /**
+     * Whether new files here are sent to the cloud.
+     *
+     * The UI is still a switch while the mode dropdown is unbuilt, so this is what it binds to.
+     */
+    val isEnabled: Boolean get() = mode.uploads
+
     val status: AlbumStatus
         get() = when {
             itemCount > 0 && backedUpCount >= itemCount -> AlbumStatus.COMPLETE
@@ -238,7 +246,7 @@ class BackupViewModel @Inject constructor(
                     name = album.name,
                     itemCount = album.itemCount,
                     totalBytes = album.totalBytes,
-                    isEnabled = album.name !in disabled,
+                    mode = if (album.name in disabled) AlbumMode.OFF else AlbumMode.DEFAULT,
                     backedUpCount = backedUpByAlbum[album.name] ?: 0
                 )
             }
@@ -250,10 +258,11 @@ class BackupViewModel @Inject constructor(
 
     fun setAlbumEnabled(album: String, enabled: Boolean) {
         viewModelScope.launch {
-            albumDao.setPreference(AlbumPreferenceEntity(album, enabled))
+            val mode = if (enabled) AlbumMode.DEFAULT else AlbumMode.OFF
+            albumDao.setPreference(AlbumPreferenceEntity(album, mode))
             _state.value = _state.value.copy(
                 albums = _state.value.albums.map {
-                    if (it.name == album) it.copy(isEnabled = enabled) else it
+                    if (it.name == album) it.copy(mode = mode) else it
                 }
             )
             // Changing the selection changes what is outstanding, so the counts must follow.
@@ -265,9 +274,10 @@ class BackupViewModel @Inject constructor(
     fun setAllAlbums(enabled: Boolean) {
         viewModelScope.launch {
             val albums = _state.value.albums
-            albumDao.setPreferences(albums.map { AlbumPreferenceEntity(it.name, enabled) })
+            val mode = if (enabled) AlbumMode.DEFAULT else AlbumMode.OFF
+            albumDao.setPreferences(albums.map { AlbumPreferenceEntity(it.name, mode) })
             _state.value = _state.value.copy(
-                albums = albums.map { it.copy(isEnabled = enabled) }
+                albums = albums.map { it.copy(mode = mode) }
             )
             refreshCounts()
         }

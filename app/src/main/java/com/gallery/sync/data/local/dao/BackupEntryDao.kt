@@ -44,7 +44,7 @@ interface BackupEntryDao {
         SELECT * FROM backup_entries
         WHERE state != :uploaded
           AND album NOT IN (
-              SELECT albumName FROM album_preferences WHERE isEnabled = 0
+              SELECT albumName FROM album_preferences WHERE mode = 'OFF'
           )
           AND attemptCount < :maxAttempts
         ORDER BY dateModifiedEpochSeconds DESC
@@ -115,7 +115,7 @@ interface BackupEntryDao {
         SELECT COUNT(*) FROM backup_entries
         WHERE state != :uploaded
           AND album NOT IN (
-              SELECT albumName FROM album_preferences WHERE isEnabled = 0
+              SELECT albumName FROM album_preferences WHERE mode = 'OFF'
           )
         """
     )

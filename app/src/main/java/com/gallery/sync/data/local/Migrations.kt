@@ -77,6 +77,47 @@ object Migrations {
         }
     }
 
+    /**
+     * 3 → 4: `album_preferences.isEnabled` becomes a four-valued `mode`.
+     *
+     * The only migration so far that reinterprets existing data rather than adding to it, and the
+     * table it touches is the one that cannot be rebuilt from OneDrive or from the files. So the
+     * mapping is the whole risk, not the SQL:
+     *
+     *  - `isEnabled = 1` → `BACKUP`, **not** `SYNC`. An enabled album today is uploaded and nothing
+     *    local is touched; optimising has always needed a deliberate tap. Mapping to `SYNC` would
+     *    switch on space management nobody chose, and the first the user would know is their photos
+     *    being rewritten.
+     *  - `isEnabled = 0` → `OFF`.
+     *  - Nothing maps to `ARCHIVE`, ever. It removes files from the phone.
+     *
+     * SQLite cannot drop a column, so the table is recreated. The copy runs before the drop and the
+     * rename runs last, so an interrupted migration leaves either the old table or the new one —
+     * never a half-populated replacement.
+     */
+    val MIGRATION_3_4 = object : Migration(3, 4) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS `album_preferences_new` (
+                    `albumName` TEXT NOT NULL,
+                    `mode` TEXT NOT NULL,
+                    PRIMARY KEY(`albumName`)
+                )
+                """.trimIndent()
+            )
+            db.execSQL(
+                """
+                INSERT INTO `album_preferences_new` (`albumName`, `mode`)
+                SELECT `albumName`, CASE WHEN `isEnabled` = 0 THEN 'OFF' ELSE 'BACKUP' END
+                FROM `album_preferences`
+                """.trimIndent()
+            )
+            db.execSQL("DROP TABLE `album_preferences`")
+            db.execSQL("ALTER TABLE `album_preferences_new` RENAME TO `album_preferences`")
+        }
+    }
+
     /** Every migration, in order, for the database builder. */
-    val ALL = arrayOf(MIGRATION_1_2, MIGRATION_2_3)
+    val ALL = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
 }

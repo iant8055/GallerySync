@@ -4,28 +4,20 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 /**
- * Whether an album is backed up, as the user chose.
+ * What the user chose for an album.
  *
  * Only albums the user has explicitly touched get a row. An album with no row takes
- * [DEFAULT_ENABLED].
+ * [AlbumMode.DEFAULT].
+ *
+ * **This table is the one part of the database that cannot be rebuilt.** Everything else — what has
+ * been uploaded, byte sizes, remote ids — can be reconstructed by rescanning the phone and asking
+ * OneDrive. These rows are pure user intent and exist nowhere else, which is why schema changes
+ * here are handled more carefully than elsewhere.
  */
 @Entity(tableName = "album_preferences")
 data class AlbumPreferenceEntity(
 
     @PrimaryKey val albumName: String,
 
-    val isEnabled: Boolean
-) {
-    companion object {
-
-        /**
-         * A newly-discovered album is backed up unless the user says otherwise.
-         *
-         * The opposite default would be worse: someone creates an album, assumes an app whose whole
-         * purpose is backup is backing it up, and silently loses it. Making the failure mode
-         * "uploaded something you didn't need" rather than "lost something you did" is the right
-         * way round. Every album is listed with a toggle, so nothing is hidden.
-         */
-        const val DEFAULT_ENABLED = true
-    }
-}
+    val mode: AlbumMode
+)

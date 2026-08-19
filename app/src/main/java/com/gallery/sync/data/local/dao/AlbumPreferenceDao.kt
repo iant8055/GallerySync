@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.entity.AlbumPreferenceEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -30,10 +31,15 @@ interface AlbumPreferenceDao {
     @Query("SELECT * FROM album_preferences")
     suspend fun all(): List<AlbumPreferenceEntity>
 
-    /** Albums the user switched off. Absence from this list means enabled. */
-    @Query("SELECT albumName FROM album_preferences WHERE isEnabled = 0")
+    /** Albums the user switched off. Absence from this list means the album is uploaded. */
+    @Query("SELECT albumName FROM album_preferences WHERE mode = 'OFF'")
     suspend fun disabledAlbums(): List<String>
 
-    @Query("SELECT isEnabled FROM album_preferences WHERE albumName = :albumName")
-    suspend fun isEnabledOrNull(albumName: String): Boolean?
+    /** Albums in a given mode, for the space-management work that only applies to some of them. */
+    @Query("SELECT albumName FROM album_preferences WHERE mode = :mode")
+    suspend fun albumsInMode(mode: AlbumMode): List<String>
+
+    /** The album's chosen mode, or null when the user has never touched it. */
+    @Query("SELECT mode FROM album_preferences WHERE albumName = :albumName")
+    suspend fun modeOrNull(albumName: String): AlbumMode?
 }

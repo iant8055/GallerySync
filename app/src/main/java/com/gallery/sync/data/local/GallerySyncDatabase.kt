@@ -3,6 +3,7 @@ package com.gallery.sync.data.local
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.gallery.sync.data.local.converter.AlbumModeConverter
 import com.gallery.sync.data.local.converter.BackupStateConverter
 import com.gallery.sync.data.local.converter.MediaSourceConverter
 import com.gallery.sync.data.local.dao.AlbumPreferenceDao
@@ -22,7 +23,8 @@ import com.gallery.sync.data.local.entity.MediaItemEntity
  * it would make the app re-upload an entire library, or believe files are safe that were never
  * sent. Schema changes ship a real migration; see [Migrations].
  *
- * Version 2 adds `backup_entries` and `album_preferences`, purely additively.
+ * Version 2 adds `backup_entries` and `album_preferences`. Version 3 records photo proxies.
+ * Version 4 replaces the album on/off flag with a four-valued mode.
  */
 @Database(
     entities = [
@@ -31,10 +33,10 @@ import com.gallery.sync.data.local.entity.MediaItemEntity
         BackupEntryEntity::class,
         AlbumPreferenceEntity::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = true
 )
-@TypeConverters(MediaSourceConverter::class, BackupStateConverter::class)
+@TypeConverters(MediaSourceConverter::class, BackupStateConverter::class, AlbumModeConverter::class)
 abstract class GallerySyncDatabase : RoomDatabase() {
 
     abstract fun mediaItemDao(): MediaItemDao
