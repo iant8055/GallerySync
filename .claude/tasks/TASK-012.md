@@ -35,6 +35,17 @@ actively edited from" *is* Backup mode. Close that row rather than building it s
 **Mixed albums resolve themselves under Sync.** Camera holds photos and video together; photos are
 proxied and video is left alone, because video is never proxied. No special casing.
 
+**Mixed albums are also where the sync scope setting bites.** Ian added a universal Photos / Video /
+Both scope on 19 Aug 2026, specified in TASK-011. Under **Photos only** the video in a Sync album is
+not uploaded at all, so Camera set to Sync stops protecting the clips in it. The mode dropdown is
+where that has to be visible — TASK-011 requires the affected rows to say so — because the mode is
+what the user thinks they are choosing.
+
+**Each row carries what its mode is worth in bytes**, also specified in TASK-011: space already
+freed, and what the selected mode could still free, updating as the dropdown changes. Two figures,
+never merged. Note the hazard it introduces on this screen in particular — Archive's number is the
+largest one in every row, and the layout must not let the biggest number read as the best choice.
+
 ### Archive is the dangerous one, and it is the failure Ian lived through
 Under Archive the files leave the gallery entirely. Photos get no proxy — unlike Sync there is no
 stand-in. This is what Samsung did to him: *"I couldn't find the video I had just shot because
@@ -52,7 +63,23 @@ Four guards, none optional:
    against the exact experience that started the project. Suggested 30 days, and user-visible.
 3. **Verified in OneDrive first** — Graph confirmed, byte size matched — the same bar as every other
    removal, and `createTrashRequest` rather than a delete, per the deletion policy.
-4. **The UI says the files leave the gallery**, in those words, before the mode is applied.
+4. **An explicit confirmation when the mode is set.** Requested by Ian, 19 Aug 2026, and it is *the*
+   consent moment for everything the mode goes on to do — per CLAUDE.md there is no second one.
+   - It says the files **leave the gallery** and move to OneDrive, in those words.
+   - It says that files added to the album later are covered by the same choice. The mode is a
+     standing instruction, and this is the only place that is ever made plain.
+   - It states what has to be true before anything moves: verified in OneDrive, and older than the
+     minimum age.
+   - **It must not promise recoverability.** CLAUDE.md's rule holds — a local trash request is not a
+     guarantee, as the Fold 4 demonstrated. The verified cloud copy is the only guarantee on offer,
+     and the only one the dialog may state.
+   - Cancel is the default action.
+   - It appears when switching **to** Archive, never when switching away — un-consenting is safe and
+     should be frictionless.
+
+   After it is accepted the app does not ask again. Android's own trash dialog still appears per
+   batch; it is neither a substitute for this confirmation nor a reason to skip it, because it says
+   nothing about what the mode means.
 
 ### Archive should not ship before v0.4
 Once an album is archived the only route back is retrieval. Without it, Archive means "gone until you
@@ -247,6 +274,11 @@ this way.
 - Scheduling lives in Storage with the other space controls
 - The OneDrive tab either fetches things back or is gone; it does not grow thumbnails
 - Verified on hardware in both themes, per CLAUDE.md
+- Switching an album to Archive raises a confirmation that names what leaves the gallery; cancelling
+  leaves the mode unchanged, and cancel is the default
+- That confirmation never claims a local removal is recoverable
+- Switching an album away from Archive raises nothing
+- Nothing in the app asks for Archive approval a second time once the mode is set
 
 ## Notes
 - Tabs are wired in `MainActivity.kt` around lines 88-106; the browse screen is `ui/browse/`.

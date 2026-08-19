@@ -49,6 +49,35 @@ Rules:
 ### Deletion — GallerySync never permanently deletes anything
 This is absolute and applies to every file, in every location, without exception.
 
+- **Nothing leaves the gallery unless the user chose that for that album.** Stated by Ian,
+  19 Aug 2026. This governs *whether* a removal happens; every rule below governs *how* one must
+  happen once it does.
+
+  **The album mode is the consent, confirmed once when the mode is set.** Setting an album to
+  Archive *is* the user saying "take this album off the phone once it is safely in OneDrive".
+  Switching an album to Archive must raise an explicit confirmation before it takes effect, saying
+  that the files leave the gallery and that files added to that album later are covered by the same
+  choice. After that the mode stands until it is changed: no per-file approval and no repeat
+  prompting, which would make the mode unbuildable and is not what this rule says.
+
+  **"Safely" is not a judgement call.** Graph confirmed the file *and* the byte size it reported
+  equals the local size — `BackupEntryDao.verifiedInCloud()`, the same bar as every other removal.
+  Nothing weaker qualifies. This is the check that has to hold, because it is the only guarantee the
+  UI is allowed to make.
+
+  What the rule forbids is removal the user did not choose: uploading, backing up, syncing,
+  proxying, a storage budget, or any worker deciding on its own that a file should go. Removal
+  follows from a mode the user set, and from nothing else. Note the standing-instruction property —
+  a file added to an Archive album later is covered by the mode already set, so the mode's wording
+  has to make that plain before it is applied.
+
+  Android shows its own dialog for a trash request, per batch, capped at 2000 URIs. That is the
+  platform's and not ours: it is not where the consent comes from, and it is not to be mirrored by
+  an app-level prompt.
+
+  Do not restate this rule as "uploading must never remove anything". That was the mechanism of the
+  original failure, not the rule, and scoping it to the upload path leaves every other trigger out.
+
 - A deletion **always** moves the item to a trash the user can recover from: OneDrive's
   recycle bin remotely, and Android's media trash locally.
 - **Emptying trash is never done by this app.** The user empties it themselves, in OneDrive

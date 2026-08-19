@@ -26,8 +26,15 @@ Every rule below exists because of that.
 2. **Generate and validate the proxy before touching the original.** Write it to app cache, decode
    it back, confirm dimensions and that EXIF survived. Only then overwrite. A half-written proxy
    must never replace a real photo.
-3. **Videos are never proxied.** A degraded clip fails silently inside an editor and is discovered
-   in the exported result. Out of scope, permanently.
+3. **Videos are never proxied by this task.** A degraded clip fails silently inside an editor and is
+   discovered in the exported result, so nothing on the proxy path here touches video.
+
+   *Amended 19 Aug 2026.* This rule originally ended "out of scope, permanently". That was this
+   spec's word rather than Ian's, and MILESTONES has since decided the opposite for one case:
+   **old** clips may be downscaled full-length, marked, on charge, in Sync albums only, pending a
+   transcode cost measured on real 8K footage. **Recent video is never touched** — that half is the
+   requirement and it stands. Nothing changes for TASK-010 itself, whose proxy path stays photos
+   only; the word "permanently" was the part that was wrong.
 4. **The user consents.** Modifying media this app did not create requires
    `MediaStore.createWriteRequest()` on API 30+, which shows a system dialog. That is a feature,
    not an obstacle: the user sees what is about to change.

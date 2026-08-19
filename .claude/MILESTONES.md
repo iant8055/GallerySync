@@ -32,9 +32,12 @@ of it would produce something worse than what the user already has.
   Gallery, CapCut and everything else automatically, because it is an ordinary file.
 - **The UI stays minimal**: setup, album modes, a storage budget, and a plain list for retrieving
   what is not on the phone. No photo grid, no thumbnail browser, no search, no editing.
-- **Set up and mostly forget.** The user chooses once and the worker maintains it — but Android will
-  ask them to approve each batch of photos it rewrites. Unattended-forever is not available to a
-  third-party app, so the UI must not promise it.
+- **Set up and mostly forget.** The user chooses once and the worker maintains it. **Backing up is
+  fully unattended** — auto-syncing an album never asks the user to approve anything, and that is
+  the point of it. What Android insists on approving is each batch of photos the app *rewrites*, and
+  each removal. Unattended-forever is not available to a third-party app for those two, so the UI
+  must not promise it — but it must not undersell the upload path either, which genuinely is
+  set-and-forget.
 
 ---
 
@@ -128,16 +131,27 @@ hard action, and the softening was the actual risk.
 The problem was never that old video is inaccessible. It was that **backing up was coupled to
 removing**, and the coupling was fast enough to catch a clip ten minutes old.
 
-**So uploading must never remove anything.** GallerySync already works this way — the engine uploads
-and touches nothing local; removal sits behind its own explicitly-tapped control. That separation is
-the entire difference between this app and the thing that caused the problem, and it must survive
-every future change.
+**The rule this produced: nothing leaves the gallery unless the user chose that for that album.**
+Ian, 19 Aug 2026, in two clarifications on the same day, each narrowing a reading that had drifted:
+
+- **It is about consent, not about upload.** Phrasing it as "uploading must never remove anything"
+  describes the *mechanism* of the original failure rather than the rule, and scopes it to the
+  upload path — leaving a background worker or a storage budget outside a rule that should cover
+  them. It holds whatever the trigger.
+- **The consent is the album mode**, given once per album. Setting an album to Archive *is* the
+  authorisation to take it off the phone once it is verified in OneDrive. It is not a per-file
+  approval, and reading it that way would make the mode unbuildable.
+
+It now lives as a hard rule in CLAUDE.md rather than only here. GallerySync already works this way:
+the engine uploads and touches nothing local, and removal sits behind its own explicitly-tapped
+control. That separation is the entire difference between this app and the thing that caused the
+problem, and it must survive every future change.
 
 ### Where video stands
 | | Status |
 |---|---|
 | Backed up to OneDrive | ✅ Verified 19 Aug 2026 — a 164 MB clip, byte-identical |
-| Proxied / downscaled | ⬜ Recommended for **old** clips only; recent video never touched |
+| Proxied / downscaled | ⬜ **Old** clips only, and how old is the user's setting; recent video never touched |
 | Local copy removed | ⬜ Explicit per-file or per-album choice, never a background policy |
 | Retrieved on demand | ⬜ v0.4, same path as photos |
 
@@ -149,6 +163,14 @@ every future change.
   people *watch* rather than edit, a downscaled clip is fine, and retrieval covers the rare edit —
   exactly as for photos. Needs Media3 Transformer and a transcode cost measured on real 8K footage
   before committing.
+- **"Old" is a user setting, decided by Ian 19 Aug 2026.** Never / 30 days / 90 days / 6 months /
+  1 year, defaulting to 1 year, with 30 days enforced as the minimum. "Old" is not a fact about
+  anyone's footage — client work gets edited for months, family video never gets opened again — so
+  the same reasoning that made the storage floor a setting applies. **It gates downscaling only and
+  never uploading**: a clip is uploaded immediately whatever its age, because a threshold that held
+  new video out of OneDrive would rebuild the founding failure while wearing the name of the fix.
+  Measured against `dateModifiedEpochSeconds`, which needs no schema change and errs toward leaving
+  video alone. See TASK-011.
 - **Truncating to a stub is rejected.** It destroys the one thing old video is for.
 - **Writing our own thumbnail into Samsung Gallery is impossible** — private index, another app's
   sandbox, and the whole mechanism is being switched off anyway.
@@ -207,7 +229,15 @@ keeps working.
       also how it asks for the next batch of write consent. See TASK-011.
 - [ ] **Album modes in the UI.** Schema 4 carries Off/Backup/Sync/Archive; the screen is still a
       switch. See TASK-012.
-- [ ] **Video proxies for old clips** — see the video section above.
+- [ ] **Running count of space saved, per album and in total.** Each album row says what has already
+      been freed and what its selected mode could free, updating as the mode changes. Same
+      aggregates the floor uses, so the two screens cannot disagree. Added by Ian 19 Aug 2026. See
+      TASK-011.
+- [ ] **Sync scope — Photos only / Video only / Both.** One universal setting applying to every Sync
+      album. Default Both, which is today's behaviour. Photos only leaves video in Sync albums
+      unuploaded, so it has to say what it is excluding. Added by Ian 19 Aug 2026. See TASK-011.
+- [ ] **Video proxies for old clips**, with the age threshold a user setting — see the video
+      section above. Gated on v0.4 retrieval and on a transcode cost measured against real 8K footage.
 - [ ] **Move to backup should distinguish photo from video**, or be replaced by Archive mode.
 
 ## v0.4.0 — Retrieval and deletion sync

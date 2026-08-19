@@ -27,7 +27,8 @@ enum class AlbumMode {
      * Uploaded; space is managed while the file stays visible.
      *
      * Photos are replaced by proxies, so the gallery keeps working and the phone stops filling up.
-     * Video is left whole, because it cannot be proxied without failing inside an editor.
+     * Video is left whole today. Downscaling **old** clips in Sync albums is a decided v0.3 item
+     * that is not built yet; recent video is never touched either way.
      */
     SYNC,
 

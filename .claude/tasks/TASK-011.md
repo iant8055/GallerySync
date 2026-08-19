@@ -17,10 +17,16 @@ Reclaiming space for a photo is **entirely local work**: the original is already
 the worker downscales the local copy and nothing leaves the device. No network, no deletion, and
 the photo stays in the gallery. That makes this a safe feature to run unattended.
 
-**Video eviction is explicitly out of scope**, and belongs with the rolling-window item. A video
-cannot be proxied, so the only lever is removing the local file — which makes it disappear from
-the gallery, and runs straight into the trash rules in CLAUDE.md and the Samsung behaviour that
-deleted files outright. Different risk, different task, different decision.
+**Video eviction is explicitly out of scope**, and belongs with the rolling-window item. Removing a
+video's local file makes it disappear from the gallery, and runs straight into the trash rules in
+CLAUDE.md and the Samsung behaviour that deleted files outright. Different risk, different task,
+different decision.
+
+That is eviction, and it is not the only lever. **Downscaling old video is a decided v0.3 item**,
+not a rejected one — see the video section of MILESTONES. When it lands it frees space without
+removing anything, which makes it the safer of the two rather than a variant of eviction. It is out
+of *this pass* because it needs Media3 Transformer and a transcode cost measured on real 8K footage,
+not because video cannot be shrunk.
 
 ## Decision — made by Ian, 18 Aug 2026
 
@@ -76,6 +82,21 @@ the same question: how much of this phone is in use, and what is safe to reclaim
 - Repeated runs finding the same situation do not re-notify
 - With notifications denied, Settings still shows the same state and the feature remains usable
 - Verified on hardware in both themes, per CLAUDE.md
+- Each album row shows space already freed and what its selected mode could free, and the two are
+  never merged into one figure
+- The projection changes as a mode is picked, before anything is applied
+- Off and Backup read "no space freed" rather than showing a blank
+- Sync's estimate uses the ratio measured from this device's own proxies once enough exist, and a
+  documented fallback before that; rows that can never shrink are excluded
+- The list total and the Settings → Storage total are the same number
+- Sync scope persists, defaults to Both, and applies to every album marked Sync and to no other
+- Choosing Photos only states how many videos it leaves unprotected before it is applied, and the
+  affected albums keep saying so afterwards
+- Video only yields a zero projection on every Sync album and proxies nothing
+- The video age threshold persists, defaults to 1 year, and cannot be set below 30 days by any path
+- **Uploading is never delayed by the threshold** — a clip shot minutes ago is uploaded on the next
+  run whatever the age setting says, verified by observation rather than by reading code
+- Changing the threshold moves the Sync projection on the album rows, before anything is applied
 
 ## Notification — required, and it is also the consent mechanism
 
@@ -324,6 +345,325 @@ to be required.
 If background applying is wanted anyway, **option 2 is the path** — but verify the reboot
 behaviour on hardware first. The documentation says the grant should carry; the Samsung trash
 behaviour is a standing reminder that the documentation and a Galaxy device do not always agree.
+
+## Space saved — a running count per album
+
+Requested by Ian, 19 Aug 2026. The mode dropdown asks the user to choose between four options whose
+whole point is space, and then tells them nothing about space. Each album row carries the number its
+choice is worth, and the list carries the total.
+
+This belongs here rather than in TASK-012 because it is the **same arithmetic the floor needs**. The
+budget worker asks "how many bytes can I still reclaim, and from where"; the album list asks "what
+is this choice worth". One set of aggregates answers both, and building them twice would let the
+screen and the worker disagree about the same phone.
+
+### Two numbers, and they must never be confused
+
+- **Freed** — what has actually been reclaimed. Exact, already true, and does not change when the
+  user touches a dropdown. `sizeBytes - localProxySizeBytes` over proxied rows.
+- **Could free** — what the currently-selected mode would reclaim if fully applied. An estimate, and
+  must be rendered as one.
+
+A single blended figure would be the wrong call: the user is making a decision about the future
+while looking at a record of the past, and a number that silently mixes the two reads as the app
+losing count.
+
+### What each mode is worth
+
+| Mode | Could free | Exact? |
+|---|---|---|
+| **Off** | nothing | yes |
+| **Backup** | nothing | yes |
+| **Sync** | proxyable photo bytes, less what the proxies will occupy | estimated |
+| **Archive** | every local byte the album currently occupies | yes |
+
+**Backup showing zero is the honest answer, and it is worth showing rather than blanking.** Backup's
+value is that the photos are safe, not that the phone is emptier; a blank cell invites the reading
+that the number is missing. Say "no space freed" beside "every file copied to OneDrive" and the
+trade is legible.
+
+### The estimate
+
+A photo that has not been proxied yet has no known proxy size — the ledger records
+`localProxySizeBytes` only after the fact. So Sync's projection needs a ratio, and there is a real
+one available: measure it from this device's own proxied rows rather than asserting 10x.
+
+```sql
+SELECT COALESCE(SUM(localProxySizeBytes), 0), COALESCE(SUM(sizeBytes), 0)
+FROM backup_entries WHERE isProxied = 1 AND localProxySizeBytes IS NOT NULL
+```
+
+Fall back to 0.1 until enough rows exist to measure — say 20 — because a ratio taken from two photos
+is noise. The 18 Aug hardware run is the sanity check: 11 photos, 40,283,338 bytes reclaimed, a
+348 KB proxy against a multi-megabyte original.
+
+**Exclude `isProxySkipped = 1`.** This is the same trap the notes below already record for the
+deficit: a photo already under 2048px can never shrink, and counting it inflates the projection with
+bytes that will never arrive. Schema 5 exists precisely so this figure can be honest.
+
+### The aggregate
+
+Mode-independent by design. The dropdown selection is applied in the ViewModel, not in SQL —
+otherwise every flick of a dropdown re-queries the database, and a list of forty albums becomes
+forty round trips.
+
+```sql
+SELECT album,
+       SUM(CASE WHEN isProxied = 1
+                THEN sizeBytes - COALESCE(localProxySizeBytes, sizeBytes)
+                ELSE 0 END)                                    AS freedBytes,
+       SUM(CASE WHEN isProxied = 0 AND isProxySkipped = 0 AND isVideo = 0
+                THEN sizeBytes ELSE 0 END)                     AS proxyableBytes,
+       SUM(CASE WHEN state = :uploaded
+                     AND remoteSizeBytes IS NOT NULL
+                     AND remoteSizeBytes = sizeBytes
+                THEN COALESCE(localProxySizeBytes, sizeBytes)
+                ELSE 0 END)                                    AS verifiedLocalBytes
+FROM backup_entries
+GROUP BY album
+```
+
+- `freedBytes` → **Freed**, for every mode.
+- `proxyableBytes` → **Sync**'s projection, times `(1 - ratio)`.
+- `verifiedLocalBytes` → **Archive**'s projection, and note the `COALESCE`: an already-proxied photo
+  now occupies only its proxy, so archiving it frees the proxy's bytes and not the original's. The
+  consequence is worth surfacing — **once Sync has run, Archive's additional gain is small**, which
+  is exactly the argument the UI should be making.
+
+`verifiedLocalBytes` counts only files verified in the cloud, per hard rule 1. An album whose backup
+is half finished must not advertise the whole album's bytes as available; that number would be a
+promise to remove files that have nowhere to go back to.
+
+### The hazard this introduces, and it is not small
+
+**Archive will always show the biggest number.** It is exact, it includes video, and it is several
+times whatever Sync can claim. A column of numbers with the largest one beside the only mode that
+empties the gallery is an argument for the mode that caused Ian's original problem.
+
+So the count is never presented as a ranking, and Archive's figure never appears without its cost in
+the same breath — the files leave the gallery, and getting one back is a deliberate fetch that v0.4
+has not built yet. Per TASK-012, Archive must not ship before retrieval exists; until then its
+projection may be shown greyed with the reason, but the mode cannot be selected.
+
+### Where it goes
+
+Per-album, on the row itself in the Album Modes list — TASK-012 owns that screen. A total across all
+albums at the top of that list, and the same total in Settings → Storage beside the floor, so the
+budget screen and the album screen never quote different figures.
+
+## Sync scope — photos, video, or both
+
+Requested by Ian, 19 Aug 2026: a single setting deciding what Sync acts on, applying universally to
+every album marked Sync rather than per album.
+
+Universal is the right shape. Per-album it would be a second dropdown beside the first, multiplying
+four modes by three scopes into twelve states to reason about, for a preference nobody holds
+differently for one album than another.
+
+### What it does
+
+| Setting | Photos in a Sync album | Video in a Sync album |
+|---|---|---|
+| **Photos only** | uploaded, then proxied | not uploaded, untouched |
+| **Video only** | not uploaded, untouched | uploaded, untouched |
+| **Both** *(default)* | uploaded, then proxied | uploaded, untouched |
+
+Only `SYNC` albums are affected — Ian's wording, and it is also the coherent line. `BACKUP` means
+"copy everything and change nothing", and a type filter silently narrowing it would make the safe
+mode not-quite-safe.
+
+### The reading this assumes, stated plainly
+
+The setting scopes **what Sync includes at all**, not merely what it optimises. That is the only
+reading that produces three distinct buildable behaviours: Sync's space-saving mechanism is the
+photo proxy, video is never proxied, so a setting that scoped only the optimising step would make
+"Photos only" identical to today's behaviour and leave the other two waiting on video proxies that
+do not exist. If the narrower reading was intended, this section is wrong and the feature waits on
+the video-proxy item — worth a word before it is built.
+
+### Video only — what it saves depends on a feature that is decided but not built
+
+**Today it saves nothing.** Video is uploaded and left whole, so Sync does exactly what Backup does,
+at the cost of excluding the photos.
+
+That is a statement about the current build, not about video. **Old-video downscaling is a decided
+v0.3 item, not a rejected one**: MILESTONES has it as a full-length transcode, marked, on charge,
+**Sync albums only** — pending Media3 Transformer and a transcode cost measured on real 8K footage.
+"Sync albums only" is this setting's territory exactly, so the two features are coupled rather than
+adjacent.
+
+| | Today | Once old-video downscale lands |
+|---|---|---|
+| **Photos only** | photos proxied, video excluded | unchanged |
+| **Video only** | video uploaded, nothing freed | old clips downscaled, recent clips untouched |
+| **Both** | photos proxied, video whole | photos proxied, old video downscaled |
+
+Two things follow, and both are cheaper to build now than to retrofit:
+
+- **Do not hardcode Video only's projection to zero.** It is zero because no video is currently
+  proxyable, which the aggregate already expresses through `isVideo = 0` on `proxyableBytes`. Leave
+  the arithmetic general so video bytes can enter it when they become eligible, rather than writing
+  a special case that has to be found and removed later.
+- **"Old" has no definition anywhere yet.** *Recent video is never touched* is the load-bearing half
+  of the requirement and is settled; the age boundary that separates recent from old is not, and it
+  is Ian's to set. Under **Video only** that boundary is effectively the entire feature — it decides
+  whether the setting frees a lot or nothing at all. Flagged rather than assumed.
+
+The running count still earns its place either way: with **Video only** selected today, every Sync
+album's projection reads zero on the same screen where the choice was made, which is the honest
+answer until the transcode exists.
+
+### The trap: a mixed album with photos-only
+
+Camera holds photos and video together. Set Camera to **Sync** with **Photos only**, and the videos
+in it are not backed up at all — the founding failure of this project wearing a different hat.
+
+It stays possible, because someone who does not want 8K clips consuming their OneDrive quota is
+making a legitimate choice. But it is never silent:
+
+- Changing the scope shows what it will exclude, counted from the ledger — "this leaves 212 videos
+  in Sync albums unprotected" — before it is applied, not after.
+- The affected albums say so on their own row, permanently, not only at the moment of the change.
+- Setting those albums to **Backup** is offered as the fix in the same place, since Backup covers
+  everything regardless of scope.
+
+`AlbumMode.DEFAULT`'s reasoning is the standard here: the failure mode should be "uploaded something
+you did not need", never "lost something you did".
+
+### Where it lives
+
+`BackupSettings`, beside the existing preferences, per the note below — not a new store.
+
+```kotlin
+enum class SyncScope { PHOTOS_ONLY, VIDEO_ONLY, BOTH }
+```
+
+Default `BOTH`, matching what the app does today, so an upgrade changes nothing until the user
+chooses otherwise. `BackupPreferences` gains the field; the stored key is a string, and an
+unrecognised value falls back to `BOTH` rather than throwing — a future rename must not brick the
+setting.
+
+### What it changes in the queries
+
+`nextPending` currently excludes only `mode = 'OFF'` albums. It has to become mode-aware for
+TASK-012 regardless, so scope rides along on the same change:
+
+> exclude a row when its album's mode is `SYNC` and `isVideo` does not match the scope.
+
+`proxyCandidates` needs `VIDEO_ONLY` to return nothing for Sync albums; it already filters
+`isVideo = 0`, so the scope check is the only addition. Getting this wrong in the permissive
+direction proxies photos the user asked the app to leave alone — an overwrite of an original — so it
+wants a unit test per scope value rather than a glance.
+
+## Video age — the user sets it
+
+Decided by Ian, 19 Aug 2026, closing the boundary this spec had flagged as open. *Recent video is
+never touched* stays the requirement; **how recent is a user setting**, not a constant chosen here.
+
+That is the right call for the same reason the storage floor is a setting rather than 20 GB hard-
+coded: "old" is not a fact about anyone's footage. Someone shooting client work edits clips for
+months; someone filming their kids will never open most of it again.
+
+### It gates downscaling, never uploading
+
+**Read this before building anything.** The setting decides when a video becomes eligible to be
+**shrunk**. It must never delay, gate or defer the *upload*.
+
+Uploading stays immediate for every video regardless of age, and it stays **unattended**. Two
+separate properties, and this task may spend neither:
+
+- **It is never delayed.** A clip that has not been uploaded is a clip with one copy, and the window
+  in which it has only one copy should be as short as the network allows. The founding failure was a
+  clip going missing ten minutes after it was shot, so a threshold that held new video out of
+  OneDrive would reproduce the original problem while wearing the name of the fix. This is a
+  backup-coverage argument and nothing to do with consent.
+- **It never asks the user to approve anything.** Ian, 19 Aug 2026: the point of auto-syncing albums
+  is that the user does not have to intervene. Uploading needs no consent dialog at all — reading
+  local files runs on `READ_MEDIA_*`, granted once at setup — so unattended upload is a property the
+  platform genuinely allows, unlike unattended rewriting.
+
+That asymmetry is the shape of the whole app, and it lines up exactly with the consent rule in
+CLAUDE.md:
+
+> **Uploads never wait for the user. Anything that removes or rewrites always does.**
+
+Consent attaches precisely where a file leaves or changes the gallery, and nowhere else — and per
+CLAUDE.md it is the **album mode** that carries it, not a per-file prompt. It is also why the age
+threshold gates only the downscale: that is the half that changes the file, and the half where the
+platform will interpose regardless.
+
+The "waits on the user" column below is Android's own dialog, not the app's consent model. It
+appears per batch whether or not the mode already authorised the work, and the app neither supplies
+it nor adds a per-batch confirmation of its own — the app's single confirmation happens when the
+mode is set, per CLAUDE.md.
+
+| | Governed by the age setting? | Waits on the user? |
+|---|---|---|
+| Video uploaded to OneDrive | **no** — always immediate | **no** — no dialog exists on this path |
+| Video downscaled in place | **yes** — only once older than the threshold | yes, per batch, unavoidably |
+| Video's local copy removed | no — that is Archive, and its own explicit choice | yes, per batch, unavoidably |
+
+### The shape of the setting
+
+Presets rather than a free-text number of days, so the value is always sane and always legible:
+
+> **Never · 30 days · 90 days · 6 months · 1 year**
+
+- **Default: 1 year.** Deliberately conservative, matching every other default in this app —
+  automatic optimising off, metered off, `ARCHIVE` never a default. The cost of a cautious default
+  is that the feature does little until the user lowers it, which is recoverable in one tap. The
+  cost of an eager one is a degraded clip somebody still wanted.
+- **Never** is a real option and is not the same as `SyncScope.PHOTOS_ONLY`. Never means the video
+  is uploaded and kept whole forever; Photos only means it is not uploaded at all. Both are
+  reasonable and they are not substitutes.
+- **Enforce the minimum.** 30 days is the floor, and no path may set it lower — the same reasoning
+  as the storage floor's minimum. A threshold of hours or days rebuilds the exact failure the
+  project exists to prevent, and it would arrive looking like a setting the user chose.
+
+### What "old" is measured against
+
+Use `dateModifiedEpochSeconds`, which the ledger already carries. **No schema change, so no
+migration and no escalation** — worth stating, because the obvious alternative does need one.
+
+The obvious alternative is MediaStore's `DATE_TAKEN`, which is the better semantic: it is when the
+footage was shot, not when the file last changed. It is not on `backup_entries`, so using it means a
+nullable column, schema 6 and a migration — and CLAUDE.md makes that an escalation. Not worth it
+here, because the error `dateModified` introduces runs in the safe direction:
+
+- A clip copied onto the phone gets a fresh mtime, so genuinely old footage looks new. It is
+  therefore **not** downscaled. Erring toward leaving video alone is the failure this feature can
+  afford.
+- Re-saving or trimming an old clip resets its mtime, so a video the user is actively working on
+  stops being eligible. That is not a defect of the proxy for date-taken; it is the behaviour you
+  would want anyway.
+
+If date-taken is wanted later it is an additive migration, and the fallback rule should be
+`max(dateTaken, dateModified)` rather than date-taken alone — otherwise the second property above
+is lost and a 2019 clip edited yesterday becomes eligible again.
+
+### It changes the projection, which is the point
+
+The Sync projection for video is a function of this threshold: lower it and more clips become
+eligible, so the number on each album row moves as the setting moves. That closes the loop the
+running count was built for — the user sees what the choice is worth **before** committing to it,
+on the same screen.
+
+It also gives the notification's third state something to say. "Below the floor, nothing left to
+proxy" currently ends at *video is holding it and this app will not touch video*. Once downscaling
+exists, that message can name the setting and the number: lowering the video age to 90 days would
+free a further *N* GB. A dead end becomes an action, without the app deciding anything on its own.
+
+### It does not ship before retrieval
+
+Same gate as `ARCHIVE`, for the same reason. Downscaling a video means the full-quality original
+exists only in OneDrive, and until v0.4 there is no route back to it from inside the app. Photos
+survived this gap because a 2048px proxy is still a usable photo; a downscaled clip handed to CapCut
+caps the export, which is the whole objection recorded against full-length downscale in the first
+place.
+
+So the setting may be built and shown, but the transcode that consumes it waits on v0.4 — and on
+the transcode cost measured against real 8K footage, which is still the thing standing between this
+being decided and being buildable.
 
 ## Notes for whoever picks this up
 - `ProxyApplier.candidates()` returns eligible photos largest-first and already filters rows whose
