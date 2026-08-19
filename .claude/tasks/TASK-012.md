@@ -46,35 +46,28 @@ freed, and what the selected mode could still free, updating as the dropdown cha
 never merged. Note the hazard it introduces on this screen in particular — Archive's number is the
 largest one in every row, and the layout must not let the biggest number read as the best choice.
 
-### The labels, and one ordering question
+### The labels and the order — settled
 
-Ian, 19 Aug 2026, naming the dropdown items: **Off · Sync · Backup · Archive**. He considered "None"
-for the first and chose **Off**, so the label and the stored value read the same.
+Ian, 19 Aug 2026, naming the dropdown items and choosing **Off** over "None", so the label and the
+stored value read the same. Order left to the build: **Off · Backup · Sync · Archive**, matching the
+enum.
 
-That is worth having deliberately rather than by accident. `AlbumModeConverter` stores the enum by
-name, and its own comment explains why: a value change there could reinterpret existing rows as a
-different mode, and one of the modes removes files from the phone. Keeping the label identical to
-the constant means nobody reading the database or a log has to translate between two vocabularies.
-
-It does not make them the same thing. The label lives in `strings.xml` and gets translated — the
-German dropdown will not say "Off" — while the stored value must stay `OFF` in every locale. Change
-one freely; never the other.
-
-**Still open: the order.** The enum is a ladder, ordered by how much of the album stays on the phone:
+That is ladder order — how much of the album stays on the phone:
 
 | | Off | Backup | Sync | Archive |
 |---|---|---|---|---|
 | stays on the phone | all | all | shrunk | none |
 
-Listing them **Off · Sync · Backup · Archive** breaks that progression by putting the mode that
-shrinks files above the one that leaves them alone. Ladder order makes the list read as a single
-axis — *how much of this album do I want to keep on my phone* — and keeps the destructive end
-furthest from the safe one, which is where it wants to be in a dropdown someone is scrolling
-quickly.
+So the list reads as one axis, *how much of this album do I want to keep on my phone*, with the
+destructive end furthest from the safe one. Worth keeping that way if the list is ever rebuilt: the
+ordering is doing quiet work in a control someone scrolls quickly, and an alphabetical or
+frequency-based sort would undo it without looking like a change.
 
-Recommended: **Off · Backup · Sync · Archive**, matching the enum. If Sync-first was deliberate,
-because it is the mode most people should pick, a "recommended" marker on Sync does that job without
-scrambling the axis.
+**Label and value are the same word, not the same thing.** `AlbumModeConverter` stores the mode by
+name, and its own comment explains why a value change there could reinterpret existing rows as a
+different mode — one of which removes files from the phone. The label lives in `strings.xml` and
+gets translated; the German dropdown will not say "Off", while the stored value stays `OFF` in every
+locale. Change one freely, never the other.
 
 ### Archive is the dangerous one, and it is the failure Ian lived through
 Under Archive the files leave the gallery entirely. Photos get no proxy — unlike Sync there is no
@@ -661,6 +654,7 @@ this way.
 
 ## Acceptance
 - An album can be set to Off, Backup, Sync or Archive, and the choice persists
+- The mode dropdown lists Off, Backup, Sync, Archive in that order
 - Backup mode never optimises or removes a local file, verified by observation not by reading code
 - Existing enabled albums land in Backup after migration — never Sync, never Archive
 - Archive removes nothing until the item is verified in OneDrive and older than the archive age
