@@ -110,7 +110,12 @@ gallery keeps working.
       nothing is deleted — proxying is the only lever. If proxying alone cannot reach the floor it
       stops and says so. Notifies when free space drops below the floor — which is also how it asks
       for the next batch of write consent. Decided 18 Aug 2026; see TASK-011.
-- [ ] **Rolling window for video**, so recent clips stay usable in the gallery.
+- [ ] **Rolling window for video**, so recent clips stay usable in the gallery. Video has no proxy
+      path and cannot have one, so the only lever is removing the local file — which is why this is
+      a separate decision from the photo budget.
+- [ ] **Move to backup should distinguish photo from video.** It currently trashes both. A photo has
+      a better option now (optimise, and stay visible); a video has none, and vanishes from the
+      gallery until v0.4 retrieval. Same button, very different consequence.
 - [ ] Per-album "keep originals on device" for albums actively edited from.
 - [x] Clear marker showing which items are optimised versus whole. Cloud badge burned into the
       proxy plus an EXIF marker, verified on a Fold 4 across square and 16:9 at orientation=90.
@@ -145,6 +150,47 @@ it is the only route back to a full-quality edit.
   it needs a new remote write path.
 - **Six photos in `AaSync` carry the pre-fix sideways badge.** Harmless, marked as proxies so
   nothing will touch them again. Delete locally and re-fetch from OneDrive to tidy.
+
+### Move to backup does not distinguish video — and that is where it matters most
+
+Raised by Ian, 18 Aug 2026: is sync deleting video, and should it not be a move that leaves a
+thumbnail placeholder?
+
+**Nothing automatic removes video.** There is no worker that evicts anything. The only thing that
+removes a local file is the manual **Move to backup** button, and `BackupEngine.redundantLocalCopies()`
+matches every verified file — it has no `isVideo` filter, unlike `proxyCandidates()`. So that button
+does trash video, alongside photos.
+
+**It is a move.** Nothing is eligible until Graph has confirmed the file and reported a matching
+byte size, and only then is the local copy trashed. What makes it a move is that verified cloud
+copy — not the trash, which the Fold 4 showed can be an outright delete on Samsung.
+
+**A thumbnail placeholder cannot work.** Three variants, all dead ends:
+
+- *A JPEG left at the video's path.* The MediaStore row still declares `video/*`, and the system
+  opens the file directly — there is no hydration hook. Gallery and CapCut both read the real bytes
+  and fail.
+- *Swap the video row for an image row.* Now the gallery holds a fake photo where a video was. It
+  sorts oddly, it misrepresents what is on the device, and the video is gone from the gallery
+  regardless.
+- *A transcoded low-resolution video.* The only technically working version, and the one CLAUDE.md
+  rules out: a degraded clip fails quietly inside an editor and is discovered in the export. That is
+  precisely the CapCut case this project exists for.
+
+### The finding: the two features have inverted
+Optimise now gives photos a graceful path — keep the file, keep it visible, reclaim ~90%. Video has
+no equivalent and cannot have one.
+
+So **Move to backup is at its most drastic exactly where it is the only option.** For a photo it is
+now the worse of two available choices; for a video it is the sole lever, and it removes the file
+from the gallery entirely with no stand-in until retrieval lands in v0.4.
+
+The current copy is honest about permanence but says nothing about either asymmetry. Before v0.3 is
+called done, that button should at minimum separate the two — or say plainly that photos could be
+optimised instead, and that video will disappear from the gallery until it is fetched back.
+
+Not a shipped bug: the release gate already holds everything until v0.3 and v0.4 are built and
+tested, and this is an instance of the exact breakage that gate exists for.
 
 ## Where video stands — it spans three milestones, so it is easy to lose track
 
