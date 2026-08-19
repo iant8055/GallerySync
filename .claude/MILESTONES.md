@@ -77,6 +77,13 @@ Verified on a Galaxy Z Fold 4 (Android 16) on 2026-08-17:
 - **A file with no local bytes cannot appear in any gallery app.** MediaStore rows must point
   at a real file, and the system opens that file directly — there is no hydration hook. Android
   has no placeholder-that-downloads-on-open mechanism for third-party apps.
+
+  *Hydration hook* is the term for what Windows calls Files On-Demand: the OS lets an app intercept
+  the moment a file is opened, fetch the real bytes, and hand them over, so a zero-byte placeholder
+  behaves like a real file to every program. Windows has it (the Cloud Files API, which is how
+  OneDrive shows files it has not downloaded) and macOS has it (File Provider extensions).
+  **Android has no equivalent for media files.** That single absence is why this project cannot
+  simply show everything and download on demand, and it is the root of most constraints below.
 - **Samsung Gallery's cloud albums came from Samsung's own private index**, not MediaStore.
   That is why third-party apps could never see them, and it is exactly what is being switched
   off. It cannot be replicated by a third-party app.
@@ -356,7 +363,7 @@ being clear about, because "embed a link in the video" can sound like it makes t
 elsewhere. It does not.
 
 ### The rule this runs into is less settled than it looks
-CLAUDE.md says: *never proxy video **silently** — a degraded clip fails quietly, and the user only
+The note says: *never proxy video **silently** — a degraded clip fails quietly, and the user only
 discovers it in the exported result.* The operative word is silently, and the two candidate
 mechanisms fail in opposite directions:
 
@@ -393,6 +400,24 @@ normal video and gives the user no reason to go looking, whereas a clip that vis
 them immediately. Whatever is chosen has to answer "how does the user know to come to us", and the
 stub is the only place that message can live.
 
+### Samsung's own retrieval is a deliberate tap too
+Ian, 18 Aug 2026, from using it: in Samsung Gallery you must deliberately click **download** to pull
+a video back from OneDrive. It does not stream or fetch on its own.
+
+That narrows the gap considerably. Samsung is not doing hydration-on-open either — it is showing an
+item and offering a button. The difference between the two products is therefore not *automatic
+versus manual*, which would be damning, but **where the button lives**:
+
+| | Samsung Gallery | GallerySync |
+|---|---|---|
+| How a cloud-only item is retrieved | deliberate tap | deliberate tap |
+| Where that tap happens | on the item, in the gallery | in GallerySync's retrieval list |
+| Wait for the download | yes | yes |
+
+So the honest description of the loss is one app switch, not a lost capability. Worth keeping in
+proportion — earlier notes in this file framed cloud-only visibility as the thing users would miss
+most, and the actual daily experience being replaced is "find the video, press download, wait".
+
 ### Writing the original back needs consent too
 Step 3 overwrites a MediaStore file the camera created, not one we own, so it needs
 `createWriteRequest` exactly as proxying does. Retrieval is not a quiet background restore; it is
@@ -407,6 +432,23 @@ MediaStore id, losing anything keyed to the old one.
 
 Not resolved here, but it applies to photo proxies as much as video stubs, and it is the only
 route seen so far that reduces the consent burden rather than working around it.
+
+### Provenance correction — this was never a rule of Ian's
+Ian, 18 Aug 2026: *"this was a Claude added rule."* Checked, and he is right.
+
+- **"Never proxy video silently" does not appear in CLAUDE.md.** The only mention of video there is
+  the one-line project description. It has been cited repeatedly in this conversation as a hard
+  rule from CLAUDE.md, and that was wrong.
+- It entered **this file** in `fc603ab`, as an unchecked item in the v0.3 planning list, alongside
+  work that had not been done yet. That commit's body attributes the design principle to Ian and
+  the platform constraints to experiment. It claims no origin for the video line.
+- So it is an agent's reasoning written down in a planning list and later ticked, not a decision
+  Ian made and not a constraint anything was verified against.
+
+The argument in it still has force — a degraded clip really can fail quietly in an editor. But it
+carries the weight of an opinion, not of the deletion policy or the dark-mode rule, both of which
+came from Ian and from shipped bugs. **Revising it is a normal design decision, not an amendment to
+a hard rule**, and the earlier framing of it as one overstated what stands in the way.
 
 ### What this needs from Ian
 Amending a hard rule in CLAUDE.md, which is his call, not an agent's. The options are not
