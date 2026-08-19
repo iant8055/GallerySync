@@ -144,9 +144,10 @@ gallery keeps working.
       nothing is deleted — proxying is the only lever. If proxying alone cannot reach the floor it
       stops and says so. Notifies when free space drops below the floor — which is also how it asks
       for the next batch of write consent. Decided 18 Aug 2026; see TASK-011.
-- [ ] **Rolling window for video**, so recent clips stay usable in the gallery. Video has no proxy
-      path and cannot have one, so the only lever is removing the local file — which is why this is
-      a separate decision from the photo budget.
+- [ ] **Rolling window for video**, so recent clips stay usable in the gallery. The only lever is
+      removing the local file, so this is a separate decision from the photo budget. Its acceptance
+      criterion is the founding use case: record a video now, edit it in CapCut later today, and
+      never find it degraded or gone.
 - [ ] **Move to backup should distinguish photo from video.** It currently trashes both. A photo has
       a better option now (optimise, and stay visible); a video has none, and vanishes from the
       gallery until v0.4 retrieval. Same button, very different consequence.
@@ -329,6 +330,49 @@ lost; the usability is not.
 Row five is the one to keep in view while designing v0.4 deletion sync: Samsung's bidirectional
 delete is the behaviour a migrating user has been trained on, and it is the behaviour this project
 deliberately refuses.
+
+## The founding use case, stated plainly — Ian, 18 Aug 2026
+
+> *"I would record a video, then (say 10 minutes later) want to edit that video in CapCut or Canva."*
+
+This is why the project exists, and it settles the video middle-state question rather than adding to
+it. **A video recorded ten minutes ago is still on the phone.** It is an ordinary file in DCIM,
+indexed in MediaStore, and every app can already open it. Nothing in this design would touch it:
+TASK-011 is photos only, and any future rolling window keeps recent clips whole by definition.
+
+So the workflow works today, with no proxy, no stub and no retrieval involved.
+
+### What actually broke, and what fixes it
+The thing Samsung broke was not recording-then-editing. It was that videos **Samsung had moved to
+the cloud** became invisible to every third-party app, because they lived in Samsung's private index
+rather than as files. GallerySync's answer is that a file on the phone is a real file — which is the
+whole mechanism — plus a retrieval list for whatever is no longer local.
+
+### Consequence: video proxying would attack the use case, not serve it
+Every middle-state option discussed above degrades the local video. Against this use case they are
+not neutral trade-offs, they are regressions:
+
+- **Truncate to a stub.** CapCut imports two seconds. The workflow is destroyed outright.
+- **Downscale full length.** CapCut imports 480p and the export is capped there. The workflow is
+  silently degraded — the exact failure the old note warned about, aimed squarely at the one
+  workflow the project was started for.
+
+Keeping recent video **whole** is not a compromise forced by platform limits. It is the requirement.
+The middle state was being designed for a problem — old video occupying space — that the rolling
+window already addresses without touching anything recent.
+
+### What this leaves to build for video
+Nothing that needs a new mechanism, and nothing that needs the note about silent proxying revisited:
+
+1. **Verify video upload works.** Coded since v0.2, never watched. Plus the two structural fixes:
+   persist the upload session URL, and bound the batch by bytes rather than file count.
+2. **Rolling window**, keeping recent clips whole. The window has to be generous enough that
+   "record now, edit later today" is never in question — that is its acceptance criterion.
+3. **Retrieval** in v0.4, for clips old enough to have left the phone.
+
+Recorded because the middle-state discussion ran a long way on the assumption that video needed a
+local stand-in. It does not. It needs to be left alone while it is recent, and fetchable once it is
+not.
 
 ## Video middle-state — two proposals from Ian, 18 Aug 2026
 
