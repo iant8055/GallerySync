@@ -30,7 +30,9 @@
     </plurals>
     <string name="proxy_action">Optimise %1$s of photos</string>
     <string name="proxy_videos_excluded">Videos are never optimised — a lower-quality clip would fail quietly inside an editor.</string>
-    <string name="proxy_none">Nothing to optimise. Photos become eligible once they are verified in OneDrive.</string>
+    <string name="settings_optimise_explainer">Optimising replaces the copy on this phone with a smaller version — about 2048 pixels on the long edge, roughly a tenth of the size. The photo stays in your gallery and opens normally in every app, and carries a small cloud badge so you can tell which are optimised. The full-quality original stays in OneDrive, untouched.</string>
+    <string name="proxy_none_nothing_synced">Nothing to optimise yet. A photo can only be optimised once it is verified in OneDrive — set an album to Sync in Album Modes, then run a sync.</string>
+    <string name="proxy_none_all_done">Every eligible photo is already optimised.</string>
     <string name="proxy_unsupported">Optimising photos needs Android 11 or newer.</string>
     <string name="proxy_working">Optimising…</string>
     <string name="proxy_done">Optimised %1$d photos and freed %2$s.</string>

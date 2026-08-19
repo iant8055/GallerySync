@@ -162,14 +162,30 @@ fun SettingsScreen(
                 )
             }
 
+            // What optimising actually does, said before any of the state messages. Without it the
+            // section is a switch and a status line for a word nobody has defined.
+            Text(
+                text = stringResource(R.string.settings_optimise_explainer),
+                style = MaterialTheme.typography.bodySmall
+            )
+
             when {
                 !state.canProxy -> Text(
                     text = stringResource(R.string.proxy_unsupported),
                     style = MaterialTheme.typography.bodySmall
                 )
 
+                // Two very different reasons for having nothing to do, and the difference is the
+                // only actionable thing on this screen: one needs a sync run first, the other is
+                // finished. "Nothing to optimise" alone reads as a broken button.
                 state.proxyCandidateCount == 0 -> Text(
-                    text = stringResource(R.string.proxy_none),
+                    text = stringResource(
+                        if (state.uploadedCount == 0) {
+                            R.string.proxy_none_nothing_synced
+                        } else {
+                            R.string.proxy_none_all_done
+                        }
+                    ),
                     style = MaterialTheme.typography.bodySmall
                 )
 
