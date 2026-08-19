@@ -6,6 +6,7 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -126,7 +127,10 @@ fun SettingsScreen(
             accountName?.let {
                 Text(it, style = MaterialTheme.typography.bodyLarge)
             }
-            OutlinedButton(onClick = onSignOut) {
+            OutlinedButton(
+                onClick = onSignOut,
+                modifier = Modifier.align(Alignment.End)
+            ) {
                 Text(stringResource(R.string.sign_out_action))
             }
         }
@@ -138,7 +142,10 @@ fun SettingsScreen(
                 text = stringResource(R.string.settings_open_onedrive_detail),
                 style = MaterialTheme.typography.bodySmall
             )
-            OutlinedButton(onClick = { OneDriveLauncher.open(context) }) {
+            OutlinedButton(
+                onClick = { OneDriveLauncher.open(context) },
+                modifier = Modifier.align(Alignment.End)
+            ) {
                 Text(stringResource(R.string.settings_open_onedrive))
             }
         }
@@ -337,8 +344,14 @@ fun SettingsScreen(
 }
 
 @Composable
-private fun Section(title: String, content: @Composable () -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+private fun Section(title: String, content: @Composable ColumnScope.() -> Unit) {
+    // Full width so a child asking for Alignment.End lands at the edge of the screen. Without it
+    // the column is only as wide as its widest child, and "end" means the end of whatever text
+    // happens to be longest — which put Sign out under the email rather than against the margin.
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
         Text(title, style = MaterialTheme.typography.titleSmall)
         content()
     }
