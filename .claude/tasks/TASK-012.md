@@ -140,8 +140,51 @@ Without the floor, an "on" toggle would proxy every eligible photo the moment it
 images on a phone with plenty of space for no benefit. That is what TASK-011's hard rule 4 forbids.
 Keep both, and put them together so the relationship is visible.
 
+## Target Settings screen, once modes ship
+
+Ian, 19 Aug 2026, asking whether Storage and Optimise photos both disappear. Optimise photos does.
+Storage does not — but **nothing currently in it survives**, which the spec had not followed through.
+
+| Section | Fate |
+|---|---|
+| Appearance | stays as built |
+| Account | stays as built |
+| Your cloud files | stays as built |
+| Automatic sync | stays; still sync-on-change plus the metered choice |
+| **Optimise photos** | **gone.** Becomes per-album Sync mode, plus a default-mode selector |
+| **Storage** | stays as a section; every control in it is replaced |
+
+### Why Optimise photos goes entirely
+Setting an album to Sync *is* asking for its photos to be optimised. A global switch beside it would
+contradict a per-album choice with no good answer for which wins. What is genuinely left over is
+"what should new albums do?", so that is what the section becomes — and it is a default-mode
+selector, not a switch, which means it belongs beside the mode UI rather than under a heading named
+after one mode's side effect.
+
+### Why Storage stays but empties out
+It holds two things today. The verified count is informational and survives. **The "Remove from this
+phone" button does not**: removing local copies becomes Archive mode, per album, with a minimum age.
+
+That is not merely a relocation. The current button removes across every album at once with no way
+to choose — which is precisely the all-or-nothing behaviour criticised in Samsung's "free up phone
+space" in MILESTONES. Keeping it beside a per-album Archive mode would leave the app offering both
+the careful version and the blunt one.
+
+What Storage gains instead:
+
+- the **free-space floor** from TASK-011
+- the **sync schedule**, including the overnight start time for the first run
+- the space figures — verified count, what is reclaimable, what has been reclaimed
+
+Leaving it as "how much of this phone is in use, and when does anything change".
+
+**Open, minor:** whether the schedule truly belongs here or under Automatic sync, which is otherwise
+where "when does syncing happen" lives. Ian asked for Storage; recorded as his call, worth a second
+look when the screen is actually rebuilt.
+
 ## 3. Storage section — where scheduling lives
-Absorbs the start-time item added to v0.2 today: when the first whole-library upload runs, defaulting
+See the target-state table above for what this section keeps and loses. Absorbs the start-time item
+added to v0.2 today: when the first whole-library upload runs, defaulting
 to overnight and requiring charging. Storage already holds the verified count, the floor, and the
 optimise controls, so scheduling belongs beside them — all four answer "how much of this phone is in
 use, and when does anything change".
