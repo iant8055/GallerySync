@@ -85,8 +85,52 @@ nobody chose; mapping to Archive would empty their gallery. `false` maps to Off.
 than "lost something you did". The equivalent under four modes is **Backup**. Configurable in
 Settings, offering Off, Backup and Sync — **Archive is not selectable as a default.**
 
-## 2. Auto Optimise Photos — toggle in Settings
-This is the on/off for TASK-011's worker. It does not replace the free-space floor; the two answer
+## Optimise is not a feature — it is what Sync mode does
+
+Ian, 19 Aug 2026: *"The Optimise is the actual SYNC function that needs to happen automatically
+behind the scenes."*
+
+Correct, and it collapses two things this spec was treating separately. In the mode ladder, **SYNC
+already means upload and optimise** — that is the whole difference between it and BACKUP. So
+"Optimise" should stop being a user-facing concept with its own section and its own switch; setting
+an album to Sync *is* asking for its photos to be optimised.
+
+### What that changes
+- **The Settings "Optimise automatically" toggle is a stopgap.** It exists because the mode dropdown
+  is not built yet and a global switch was the only place to put the preference. Once modes ship it
+  is redundant, and worse than redundant — a global "off" and a per-album "Sync" would contradict
+  each other, and there is no good answer for which wins.
+- **That section should become the default-mode selector** described above, not a switch. "What
+  should new albums do?" is the question actually left over once modes exist.
+- **The word "Optimise" survives only as an explanation**, in the copy that says what Sync does to a
+  photo. Not as a button, not as a section, not as a setting.
+
+### How automatic it can actually be
+Everything except the last step already runs without the user:
+
+| Step | Needs the user? |
+|---|---|
+| Notice a photo is verified and eligible | no |
+| Choose what to optimise, largest first | no |
+| Generate the proxy — decode, downscale, badge, copy EXIF | no, it writes to app cache |
+| **Write the proxy over the original** | **yes — one dialog per batch, from an Activity** |
+| Update the ledger | no |
+
+Only the write needs a tap, because `MediaStore.createWriteRequest` is how Android lets one app
+modify another's media and it cannot be raised from the background. Samsung did it silently because
+Samsung Gallery *is* the system gallery — the same privilege that let it keep a private cloud index,
+and equally unavailable here.
+
+**With sync running automatically the batches are small**, a handful of new photos between runs, so
+the realistic shape is: a notification when there is something to do, one tap, done. That is as
+close to behind-the-scenes as the platform allows a third-party app, and the UI should describe it
+that way rather than promising invisibility it cannot deliver.
+
+
+## 2. Auto Optimise Photos — a stopgap, superseded by Sync mode
+Built 19 Aug 2026 as a Settings toggle, because the mode dropdown does not exist yet. See above:
+once modes ship this becomes the default-mode selector rather than a switch. While it exists it is
+the on/off for TASK-011's worker, and it does not replace the free-space floor — the two answer
 different questions:
 
 - **The toggle** — may the app optimise photos without being asked each time?
