@@ -140,13 +140,42 @@ So the same three states must be visible in Settings → Storage as ordinary UI.
 a prompt for something already legible in the app, never the sole carrier of it. Check what the
 screen says with notifications disabled, not only with them working.
 
-### Permission — flagged for Ian
-`POST_NOTIFICATIONS` is a new manifest permission and appears on the Play listing, which CLAUDE.md
-lists as an escalation. Raised here rather than assumed: the request implies it, but adding a
-permission to the listing is Ian's call to make explicitly.
+### Permission — what is actually being decided, revised 19 Aug 2026
 
-Note it is likely needed either way — a foreground service, which is one of the two paths for the
-applying step below, shows a notification while it runs.
+**The SAF finding demoted this.** Before it, the notification was load-bearing: a background worker
+could not obtain write consent, so the notification was the only way to ask for the next batch, and
+without it automatic space management died silently. That is no longer true for photos — proxying
+now runs unattended through the tree grant and never needs to ask.
+
+So what the permission is worth now:
+
+| Use | Still needed? |
+|---|---|
+| Asking for the next proxy-consent batch | **gone** — SAF needs no batch |
+| Telling the user a batch is ready to **archive** | yes — Archive keeps its tap |
+| Saying the floor was breached and could not be met | yes, informational |
+| Reporting what a run did | yes, informational |
+
+**Nothing breaks if it is denied.** TASK-011 already requires the same states to be visible in
+Settings as ordinary UI, precisely so the notification is never the sole carrier. Denied, Archive
+batches accumulate until the user next opens the app, and the floor state is a screen they have to
+go and look at. Worse, not broken.
+
+**The Play cost is close to zero.** `POST_NOTIFICATIONS` is the most common runtime permission on
+Android, needs no declaration form and no review, and attracts none of the scrutiny
+`MANAGE_EXTERNAL_STORAGE` would have. It appears in the listing's permission list and nowhere
+prominent. It is flagged here only because CLAUDE.md makes any listing-visible permission an
+escalation, not because it is a close call.
+
+**So the decision is one thing: when to ask.** Ian's first-run design (19 Aug 2026) puts permissions
+approval in the launch wizard alongside language and cloud choice. That is right for the media
+permissions, which gate everything — but asking for notifications before the user has a storage
+floor or an Archive album is asking before there is anything to notify about, and a permission the
+user cannot see the point of is the one they deny permanently. Android only ever prompts once.
+
+Recommended split: **media permissions and cloud choice at first run; notifications at the moment
+the user first sets a floor or sets an album to Archive**, where the prompt explains itself. Ian's
+call, and either way the feature works.
 
 ## Consent — settled shape, and the constraint it puts on everything else
 

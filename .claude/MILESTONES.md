@@ -530,8 +530,12 @@ uploaded.
   the proxy write with no dialog and survives reboot; `MANAGE_EXTERNAL_STORAGE` is not needed and
   the Play listing is untouched. Archive still needs `createTrashRequest`, because SAF deletes
   permanently. See the SAF entry in the hardware log.
-- **`POST_NOTIFICATIONS`** — needed for the floor notification, and it appears on the Play listing.
-- **Language dropdown** — wire the per-app locale mechanism now and ship English only, or defer.
+- **`POST_NOTIFICATIONS`** — the only live question is **when to ask**, not whether. The SAF finding
+  removed its consent role for photos, so it is now informational plus the Archive batch prompt, and
+  nothing breaks if denied. Play cost is negligible. Recommended: media permissions at first run,
+  notifications when the user first sets a floor or an Archive album. See TASK-011.
+- **Language dropdown** — **answered 19 Aug 2026:** it belongs in a first-run wizard alongside
+  permissions, cloud choice and defaults. Ship English only behind it. See TASK-012.
 
 **Known and unbuilt**
 - **Album selections are device-only.** The one part of the ledger that cannot be rebuilt from

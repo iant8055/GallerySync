@@ -541,6 +541,73 @@ means doing the work twice and verifying neither properly.
 Direction, once the structure settles: Material 3 with dynamic colour from the wallpaper, a more
 generous type scale, and fewer boxed rows in favour of grouped list sections.
 
+### What Ian asked for, 19 Aug 2026
+
+Stated after the SAF session, with the explicit framing that it comes **after the functionality
+works** — recorded here so it is not lost, not scheduled here.
+
+> *"The entire UI needs an overhaul — it looks very dated. But I figured we could tackle that after
+> all the functionality is working."*
+
+1. **Settings moves off the tab bar into a hamburger drawer.** The tab row is carrying navigation it
+   was never suited to, and it gets worse as Album Modes and Storage grow. A drawer also gives the
+   Help menu somewhere to live.
+2. **A robust Help menu**, with clickable links from key terms, and **plain-language explanations of
+   exactly what each of the four album settings does**. Ian, 19 Aug 2026.
+
+   An earlier draft of this section claimed the app invents vocabulary the user has never met. Ian's
+   correction: most people know what archive, optimise, sync and verified mean. That is right, and it
+   sharpens what Help is actually for.
+
+   **The risk is not an unknown word, it is a wrong assumption about the mechanism.** Someone who
+   knows perfectly well what "archive" means may still assume it is reversible from the gallery, or
+   that it behaves the way Samsung's did — where deleting on the phone deleted the cloud copy too.
+   Those are expectations, not definitions, and a glossary would not touch them. Per-mode
+   explanations would.
+
+   So the four mode entries are the centre of Help, not an appendix to it. Each says what happens to
+   the cloud copy, what happens to the file on the phone, whether space is freed, and how to get back
+   to the original. The sentences that carry the most weight are the counter-intuitive ones:
+
+   | Mode | The sentence that has to land |
+   |---|---|
+   | **Off** | nothing is copied and nothing on the phone changes |
+   | **Backup** | your files are copied and **no space is freed** — backup is safety, not space |
+   | **Sync** | the photo stays in your gallery and still opens everywhere, but it is now a smaller version; editing at full quality means fetching the original back |
+   | **Archive** | the files **leave your gallery**; the only way back is fetching them in this app, not from your gallery app |
+
+   Two rules on the wording, both from CLAUDE.md:
+
+   - **Never say a local removal is recoverable.** The guarantee available is the verified cloud
+     copy — remote confirmation plus a matching byte size — and that is the only one Help may state.
+   - **Help and the Archive confirmation must not drift.** They describe the same operation in two
+     places, so the dialog should draw on the same strings rather than paraphrasing them, or the two
+     will disagree after some later edit and the disagreement will be invisible.
+
+   **These are the strings that must be translated well.** Ian's first-run flow lets the user pick a
+   language, and a mistranslated mode explanation is the one that costs somebody their photos. If
+   translation quality is ever uncertain for a locale, this is the text to be conservative with —
+   not the button labels.
+3. **A first-run flow**, covering language, permissions, cloud service (OneDrive / Google Photos /
+   Amazon Photos), and default settings. See below.
+
+### First run — the shape Ian described
+
+A wizard on first launch: **language → permissions → cloud service → defaults.**
+
+Two things about it that affect work already specced:
+
+- **Cloud service as a first-run choice implies more than two adapters.** Google Photos is already
+  the Pro tier in CLAUDE.md; Amazon Photos is new and has no adapter, no research and no milestone.
+  Treat the picker as designed for extension but shipping with what exists, rather than as a
+  commitment to three back ends.
+- **Notification permission probably does not belong in the wizard** — see TASK-011's revised
+  permission section. Media permissions gate everything and belong at first run; notifications ask
+  about something that does not exist yet on a fresh install, and Android only prompts once.
+
+**None of this is scheduled.** It wants its own task once v0.3 and v0.4 functionality is done, and
+it should be written then rather than now, when the screens it restyles are still moving.
+
 ### Known: the XML theme is hardcoded Light
 Found 19 Aug 2026, deferred by Ian to this task rather than fixed then.
 
