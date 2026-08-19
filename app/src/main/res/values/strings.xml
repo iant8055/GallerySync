@@ -2,7 +2,7 @@
     <string name="app_name">Gallery Sync</string>
 
     <!-- Tabs -->
-    <string name="tab_backup">Sync</string>
+    <string name="tab_backup">Album Modes</string>
     <string name="tab_onedrive">OneDrive</string>
     <string name="tab_settings">Settings</string>
 
