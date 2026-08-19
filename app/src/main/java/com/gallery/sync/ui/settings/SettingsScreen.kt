@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -123,30 +125,40 @@ fun SettingsScreen(
 
         HorizontalDivider()
 
+        // Text left, action right, on one row — the same shape as the switches below, and it
+            // keeps the button level with what it acts on instead of stranded beneath it.
         Section(stringResource(R.string.settings_account)) {
-            accountName?.let {
-                Text(it, style = MaterialTheme.typography.bodyLarge)
-            }
-            OutlinedButton(
-                onClick = onSignOut,
-                modifier = Modifier.align(Alignment.End)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(stringResource(R.string.sign_out_action))
+                Column(modifier = Modifier.weight(1f)) {
+                    accountName?.let {
+                        Text(it, style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+                OutlinedButton(onClick = onSignOut) {
+                    Text(stringResource(R.string.sign_out_action))
+                }
             }
         }
 
         HorizontalDivider()
 
         Section(stringResource(R.string.settings_cloud_files)) {
-            Text(
-                text = stringResource(R.string.settings_open_onedrive_detail),
-                style = MaterialTheme.typography.bodySmall
-            )
-            OutlinedButton(
-                onClick = { OneDriveLauncher.open(context) },
-                modifier = Modifier.align(Alignment.End)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(stringResource(R.string.settings_open_onedrive))
+                Text(
+                    text = stringResource(R.string.settings_open_onedrive_detail),
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(Modifier.width(12.dp))
+                OutlinedButton(onClick = { OneDriveLauncher.open(context) }) {
+                    Text(stringResource(R.string.settings_open_onedrive))
+                }
             }
         }
 

@@ -15,7 +15,7 @@
     <string name="settings_account">Account</string>
     <string name="settings_cloud_files">Your cloud files</string>
     <string name="settings_open_onedrive">Open OneDrive</string>
-    <string name="settings_open_onedrive_detail">GallerySync does not browse your cloud files — OneDrive already does that well. Open it to find anything that is not on this phone.</string>
+    <string name="settings_open_onedrive_detail">GallerySync does not browse cloud files — open OneDrive to find anything that is not on this phone.</string>
     <string name="settings_automatic">Automatic sync</string>
     <string name="settings_storage">Storage</string>
     <string name="settings_optimise">Optimise photos</string>
