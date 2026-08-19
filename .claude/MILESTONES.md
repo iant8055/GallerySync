@@ -117,9 +117,13 @@ Verified on hardware: sign-in completes and the real drive lists.
 - [x] Metered-network preference — a real setting in `BackupSettings`, exposed as a toggle in
       Settings, defaulting to unmetered-only.
 - [ ] Retry failed items from the UI
-- [ ] **Verify a large video actually uploads.** Coded but never watched working. The session URL is
-      not persisted, so a file too big to finish inside one worker window restarts from zero every
-      run; and DEFAULT_BATCH is 25 files regardless of size. See the video section below.
+- [x] **Verify a large video actually uploads** — done 19 Aug 2026: a 164 MB clip byte-identical in
+      OneDrive, first attempt, no retries.
+- [ ] **Persist the upload session URL and its expiry on the ledger row.** Confirmed on hardware: a
+      run killed at 96% of that video restarted from byte zero. Any file too large to finish inside
+      one run can never complete, and the threshold scales with upstream rather than with the file.
+- [ ] **Bound the upload batch by bytes, not just file count.** DEFAULT_BATCH is 25 regardless of
+      size — 100 MB of photos, or nearly 4 GB of video.
 - [ ] **Start time for the first backup.** The initial whole-gallery upload is the heaviest thing
       the app ever does. Let the user pick when it starts, default overnight, and require charging
       for that first run. Asked for by Ian 18 Aug 2026; see TASK-011 for why it needs no consent
@@ -257,6 +261,41 @@ will find them absent from the gallery until fetched, where before they appeared
 That is a real loss of browsing convenience and the store listing must not imply otherwise — but it
 is narrower than it sounds. Those cloud-only videos were visible in Samsung Gallery **and nowhere
 else**: no editor could open one. See the comparison above.
+
+### Video upload verified on hardware — 19 Aug 2026, Galaxy Z Fold 4
+No longer "coded but never watched". Ian created an `AbcSync` album with four photos and two videos
+and ran a sync.
+
+| File | Local | In OneDrive | |
+|---|---|---|---|
+| 20260819_005046.mp4 | 163,846,425 | 163,846,425 | byte-identical |
+| 20260819_005024.mp4 | 34,801,586 | 34,801,586 | byte-identical |
+| four JPEGs, 2.4–5.8 MB | — | — | all byte-identical |
+
+**198,648,011 bytes of video verified in the cloud**, first attempt, no retries. The resumable
+upload session, the 5 MiB chunking and the byte-size verification all work on a real 164 MB file.
+The happy path for video is done.
+
+### Resume across runs does NOT work — confirmed, not inferred
+Deliberately tested by force-stopping the app mid-upload. It was killed at **157,286,400 of
+163,846,425 bytes — 96% through**.
+
+On the next run the log shows a brand-new session: `"nextExpectedRanges":["0-"]`, then
+`Content-Range: bytes 0-5242879`. **All 157 MB was discarded and the file restarted from zero.**
+The ledger row was still `PENDING` with `attemptCount = 0`, so nothing recorded that the work had
+ever happened.
+
+This is the structural gap predicted from reading `ChunkedUploader`: `uploadUrl` is a local variable
+and `BackupEntryEntity` has no column for it, so resume works *within* a call and not across one.
+
+**The consequence, quantified.** The observed rate was roughly 3 MB/s, so a ten-minute background
+run tops out near 1.8 GB on this connection — comfortably enough here. But the limit scales with
+upstream, not with the file: at 2 Mbps a ten-minute window covers only about 150 MB, and *this very
+video* would then never complete, restarting from zero on every attempt forever.
+
+Fix is to persist the session URL and its expiry on the ledger row. The expiry matters — Graph
+returned `expirationDateTime` about five hours out, so a stored session is worth resuming only
+inside that window.
 
 ### Video upload is coded but never verified — and two things suggest it will struggle
 
@@ -653,7 +692,7 @@ So the four things "video" can mean, and where each actually sits:
 
 | | Status |
 |---|---|
-| **Backed up to OneDrive** | ⚠️ Coded since v0.2, never verified on hardware — see above |
+| **Backed up to OneDrive** | ✅ Verified on hardware 19 Aug 2026 — a 164 MB clip, byte-identical |
 | **Proxied / downscaled** | ❌ Never — deliberate, a degraded clip fails silently in an editor |
 | **Local copy reclaimed to free space** | ⬜ v0.3, rolling window — the only lever is removing the file, which is a deletion decision |
 | **Retrieved back on demand** | ⬜ v0.4, same path as photos — and the only route to a full-quality video |
