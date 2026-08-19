@@ -169,6 +169,24 @@ means doing the work twice and verifying neither properly.
 Direction, once the structure settles: Material 3 with dynamic colour from the wallpaper, a more
 generous type scale, and fewer boxed rows in favour of grouped list sections.
 
+### Known: the XML theme is hardcoded Light
+Found 19 Aug 2026, deferred by Ian to this task rather than fixed then.
+
+`res/values/themes.xml` sets `android:Theme.Material.Light.NoActionBar` unconditionally, and there
+is no `values-night` variant. Compose is unaffected — its colours come from `MaterialTheme.colorScheme`
+and dark mode renders correctly — but `android:windowBackground` comes from this theme and paints
+before Compose draws its first frame, so a cold launch in dark mode starts light.
+
+It also interacts with the Appearance setting: the `-night` resource qualifier follows the *system*
+setting, not the app's own choice, so forcing Dark on a light phone leaves the launch background
+light every time. Not observed misbehaving — a screenshot cannot reliably catch a flash — so this
+is a mechanism worth closing rather than a reported defect.
+
+Fix is either a `values-night/themes.xml` with a dark parent, or `android:windowBackground` pointing
+at a colour resource that has a night variant. Worth doing here because this file gets touched
+anyway, and because it is the hardcoded-colour rule showing up somewhere that is not Kotlin and is
+therefore easy to miss.
+
 **This is the highest-risk change in the app for the dark-mode rule.** A restyle is exactly when
 someone reaches for a specific colour, and CLAUDE.md is absolute: nothing hardcoded outside
 `ui/theme/`, colours from `MaterialTheme.colorScheme`, text inheriting `LocalContentColor`, and both
