@@ -181,6 +181,47 @@ This materially weakens the case for a grant pool. The pool exists to avoid re-p
 re-prompting it avoids is a few dialogs during initial catch-up and almost nothing thereafter. It
 is not the recurring nag it looked like when the cap was first written down.
 
+### The backup schedule keeps batches small — with three conditions
+
+Ian, 18 Aug 2026: with sync running automatically, few eligible photos accumulate between runs.
+Confirmed against the scheduling code, and it is a stronger claim than it first appears: backup is
+**content-triggered** on `MediaStore.Images` and `MediaStore.Video`, plus a 6-hourly safety net. So
+a photo is verified in OneDrive shortly after it is taken, and eligibility accrues at roughly the
+rate photos are taken. In steady state that is a handful of files per run, not thousands.
+
+Three things gate it, and each is worth knowing before relying on the claim.
+
+**1. Automatic backup is off by default.** `BackupPreferences.isAutomaticEnabled` defaults to
+`false`, deliberately, so installing a build never starts uploading a library on its own. Until the
+user turns it on there is no steady state at all — only the catch-up case. The budget feature
+should not assume automatic backup is running; it should notice when it is not, because a floor
+that can never be met because nothing is being backed up is a confusing thing to stare at.
+
+**2. Unmetered-only by default.** Two weeks off Wi-Fi is exactly when a lot of photos get taken and
+none of them get verified. They arrive as one batch on returning home. Still comfortably inside a
+single 2000-URI grant, but it is the one realistic case where the batch is large — and it coincides
+with the phone being fullest.
+
+**3. `setRequiresStorageNotLow(true)` — the one with teeth.** The backup worker will not run when
+Android considers storage low. Backup is what makes a photo eligible for proxying, so if that
+constraint ever bites, new photos stop becoming eligible precisely when space is most needed.
+
+The floor is what keeps this safe. Android's low-storage threshold is on the order of a few hundred
+megabytes, so a 20 GB floor trips long before the constraint does — the budget worker acts while
+backup is still running normally. That is a real argument for the default, not just a comfortable
+number.
+
+But it means **the floor must stay well clear of the system threshold**, and a floor set very low
+would converge on it: backup stalls, nothing new is verified, the worker exhausts the already-
+verified backlog, and the phone stays full with no way out. Enforce a sensible minimum on the
+setting rather than accepting any number the user types.
+
+### What this does to the applying-step decision
+If a steady-state batch is a handful of photos, applying it takes seconds. Backgrounding a
+two-second job — at the cost of a grant pool, a `ClipData` hand-off and a second execution
+mechanism — is most of the complexity in this task for none of the benefit. Option 3 gets stronger
+the more closely the two schedules are examined.
+
 ### Where the applying step runs — still open
 
 Ian, 18 Aug 2026: *"applying steps should be running in the background."* Taken as read. It does

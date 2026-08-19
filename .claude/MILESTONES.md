@@ -80,8 +80,11 @@ Verified on hardware: sign-in completes and the real drive lists.
 - [x] Skip files already present in OneDrive
 - [x] Backup UI with a manual run
 - [x] Move redundant local copies out, once the cloud copy is verified
-- [ ] Schedule the periodic worker (currently manual only, deliberately)
-- [ ] Metered-network preference (currently unmetered-only, hardcoded)
+- [x] Schedule the periodic worker — content-triggered on new media plus a 6-hourly safety net.
+      Off by default; the user turns it on. Both were still listed as outstanding here long after
+      222ba17 shipped them.
+- [x] Metered-network preference — a real setting in `BackupSettings`, exposed as a toggle in
+      Settings, defaulting to unmetered-only.
 - [ ] Retry failed items from the UI
 
 Cutover rule: run alongside Samsung's sync for at least two weeks before trusting this alone.
@@ -96,7 +99,9 @@ gallery keeps working.
       existing gallery whole.
 - [x] **Never proxy video silently.** A degraded clip handed to an editor fails quietly, and the
       user only discovers it in the exported result. Videos are kept whole or kept in the cloud.
-- [ ] **Storage budget.** User sets a free-space floor, default 20 GB; the worker keeps the phone
+- [ ] **Storage budget.** User sets a free-space floor, default 20 GB, with an enforced minimum so
+      it stays clear of Android's low-storage threshold — below that the backup worker stops
+      running and nothing new becomes eligible to proxy; the worker keeps the phone
       above it by proxying the largest verified photos, largest first. Nothing is evicted and
       nothing is deleted — proxying is the only lever. If proxying alone cannot reach the floor it
       stops and says so. Notifies when free space drops below the floor — which is also how it asks
