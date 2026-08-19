@@ -1,6 +1,6 @@
 package com.gallery.sync.ui.signin
 
-import android.app.Activity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,7 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -36,8 +35,10 @@ fun SignInScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    // MSAL needs a foreground Activity to host the sign-in browser tab.
-    val activity = LocalContext.current as? Activity
+    // MSAL needs a foreground Activity to host the sign-in browser tab. LocalActivity finds it
+    // through the context wrappers Compose may sit behind; casting LocalContext assumes it is the
+    // Activity itself, which is not guaranteed and is what lint flags.
+    val activity = LocalActivity.current
 
     Column(
         modifier = modifier
