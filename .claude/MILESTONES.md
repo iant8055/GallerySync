@@ -2,101 +2,166 @@
 
 **Samsung turns off Gallery Sync on 30 September 2026.**
 
+---
+
 ## Release gate — decided by Ian
 
 **Nothing is published to Google Play until v0.3.0 and v0.4.0 are built and tested.**
 
-Shipping v0.2.0 alone would deliver "back up your photos, and they disappear from your
-gallery" — the space is freed but nothing keeps the photos visible, because that is what
-v0.3 (photo proxies) and v0.4 (retrieval) are for. That is a broken product no matter how
-well the backup works.
+Shipping v0.2.0 alone would deliver "back up your photos, and they disappear from your gallery" —
+the space is freed but nothing keeps the photos visible, because that is what v0.3 (photo proxies)
+and v0.4 (retrieval) are for. That is a broken product no matter how well the backup works.
 
-Two consequences:
-
-- **The Sept 30 date is a personal deadline, not a release deadline.** Ian's own library
-  still needs protecting when Samsung's sync stops. Backup alone covers that: run it, and
-  simply do not use Move to backup until the gallery side exists. OneDrive's own camera
-  backup is a reasonable second net in the meantime.
+- **The Sept 30 date is a personal deadline, not a release deadline.** Ian's own library still needs
+  protecting when Samsung's sync stops. Backup alone covers that.
 - **v0.3 can be built properly rather than rushed**, since no store listing depends on it.
 
-## Naming — retired 18 Aug 2026, replaced by a per-screen test
+Cutover rule: run alongside Samsung's sync for at least two weeks before trusting this alone.
 
-The old rule banned the word "Sync" in the UI until v0.3 and v0.4 both landed. **v0.3's photo
-proxies landed and were verified on hardware on 18 Aug 2026**, and that is precisely the Samsung
-behaviour the ban was waiting for: the photo stays in the gallery, the space is freed. The word is
-earned for photos now, so a blanket ban has outlived its reason. Ian retired it the same day.
+---
 
-What replaces it is a test applied per screen, not a list of allowed words:
-
-> **Say "sync" where the file ends up in the cloud *and* stays in the gallery.
-> Where the file leaves the gallery, say that plainly instead.**
-
-That is the whole promise users are migrating from, and it is the only thing the word has to carry.
-
-| Operation | Local outcome | Wording |
-|---|---|---|
-| Upload, local copy kept | unchanged, still visible | **sync** — true for photos and video alike |
-| Optimise, photo proxied | ~10x smaller, still visible | **sync** — this is the flagship case |
-| Remove local copy | **gone from the gallery** | never "sync" — "Remove from this phone" |
-
-The third row is the one the old rule was really protecting, and it stays protected. "Move to
-backup" was a soft name for a hard action, and softening it was the actual risk — not the word
-"sync" as such. The copy now says the file will no longer appear in the gallery, which it had never
-said before.
-
-### Consequence for video
-Video satisfies row one and can never satisfy row two, so a video is synced right up until its
-local copy is removed — at which point it leaves the gallery with no stand-in. See the video
-section below; that limit is unchanged by any of this, and no wording can paper over it.
 ## Design principle — GallerySync is invisible
 
 **It is not a gallery app and must never become one.**
 
-Its only job is making files *present*. Everything a person actually does with photos —
-viewing, search, face grouping, editing, sharing, albums, stories — the phone's existing
-gallery already does, with years of work behind it. Rebuilding any of that would produce
-something worse than what the user already has.
-
-Consequences that bind every future task:
+Its only job is making files *present*. Viewing, search, face grouping, editing, sharing, albums —
+the phone's existing gallery already does all of that, with years of work behind it. Rebuilding any
+of it would produce something worse than what the user already has.
 
 - **Feed the existing gallery, do not replace it.** A file with local bytes appears in Samsung
-  Gallery, CapCut and everything else automatically, because it is an ordinary file. No
-  integration is needed or possible.
-- **GallerySync's own UI stays minimal**: setup, album selection, a storage budget, and a plain
-  list for retrieving something that is not on the phone. No photo grid, no thumbnails
-  browser, no search, no editing. If a task starts to look like building a gallery, it is the
-  wrong task.
-- **Set up and mostly forget.** The user sets a budget once and the background worker maintains it —
-  but Android will ask them to approve each batch of photos it rewrites. See the consent constraint
-  below: unattended-forever is not available to a third-party app, so the UI must not promise it.
+  Gallery, CapCut and everything else automatically, because it is an ordinary file.
+- **The UI stays minimal**: setup, album modes, a storage budget, and a plain list for retrieving
+  what is not on the phone. No photo grid, no thumbnail browser, no search, no editing.
+- **Set up and mostly forget.** The user chooses once and the worker maintains it — but Android will
+  ask them to approve each batch of photos it rewrites. Unattended-forever is not available to a
+  third-party app, so the UI must not promise it.
+
+---
 
 ## Platform constraints — established by experiment, do not re-litigate
 
-Verified on a Galaxy Z Fold 4 (Android 16) on 2026-08-17:
+Verified on a Galaxy Z Fold 4 (Android 16), 17–19 August 2026.
 
-- **A file with no local bytes cannot appear in any gallery app.** MediaStore rows must point
-  at a real file, and the system opens that file directly — there is no hydration hook. Android
-  has no placeholder-that-downloads-on-open mechanism for third-party apps.
+- **A file with no local bytes cannot appear in any gallery app.** MediaStore rows must point at a
+  real file, and the system opens that file directly.
 
   *Hydration hook* is the term for what Windows calls Files On-Demand: the OS lets an app intercept
   the moment a file is opened, fetch the real bytes, and hand them over, so a zero-byte placeholder
   behaves like a real file to every program. Windows has it (the Cloud Files API, which is how
-  OneDrive shows files it has not downloaded) and macOS has it (File Provider extensions).
-  **Android has no equivalent for media files.** That single absence is why this project cannot
-  simply show everything and download on demand, and it is the root of most constraints below.
-- **Samsung Gallery's cloud albums came from Samsung's own private index**, not MediaStore.
-  That is why third-party apps could never see them, and it is exactly what is being switched
-  off. It cannot be replicated by a third-party app.
-- **A trash request is not a guarantee of recoverability.** See the deletion rule in CLAUDE.md.
+  OneDrive shows files it has not downloaded); macOS has it (File Provider extensions).
+  **Android has no equivalent for media files.** That single absence is the root of most of what
+  follows.
+
 - **Rewriting a photo always needs the user, and cannot be granted once and for all.**
-  `MediaStore.createWriteRequest` launches only from an Activity, so no background worker can
-  obtain consent by itself. A grant can be carried into background work via `ClipData`, but a
-  single request is capped at 2000 URIs, so a large library needs repeated approvals as it grows.
-  Automatic space management therefore means **"approve a batch occasionally", never "never asked
-  again"**. From the platform docs rather than experiment — the ClipData hand-off is still to be
-  confirmed on a Galaxy device.
-- Therefore: **storage can be reduced, never eliminated.** Any plan that plans on zero local
-  storage while remaining visible in the gallery is impossible, not merely hard.
+  `MediaStore.createWriteRequest` launches only from an Activity, so no background worker can obtain
+  consent by itself. A single request is capped at **2000 URIs** — apps targeting Android 15+;
+  exceeding it throws `IllegalArgumentException`, and the same cap applies to `createDeleteRequest`,
+  `createTrashRequest` and `createFavoriteRequest`. It is a cap per request, not a lifetime quota.
+
+  Everything except the final write already runs unattended — noticing eligibility, choosing what to
+  do, generating the proxy, updating the ledger. Only the write needs a tap. Samsung did it silently
+  because Samsung Gallery **is** the system gallery.
+
+- **A trash request is not a guarantee of recoverability.** See the deletion rule in CLAUDE.md.
+
+- **Therefore: storage can be reduced, never eliminated.** Any plan that assumes zero local storage
+  while remaining visible in the gallery is impossible, not merely hard.
+
+---
+
+## How Samsung actually did it — checked against vendor docs, 18 Aug 2026
+
+The project replaces this, so the mechanism is recorded rather than recalled.
+
+1. **Bidirectional sync of photos *and* videos** to OneDrive. Deleting on either side deletes on the
+   other.
+2. **"Free up phone space"** removes local originals of synced media — **all-or-nothing**, with no
+   way to pick.
+3. **Samsung Gallery keeps a cached thumbnail and its own index entry**, so a cloud-only item still
+   appears in the grid. Tapping it downloads the original on demand — a deliberate tap, not
+   streaming.
+4. This applied to video exactly as to photos.
+
+Steps 2–4 work only because Samsung owns both the index and the viewer. The thumbnail lives inside
+Samsung Gallery, not in MediaStore, which is why **no third-party app ever saw those cloud-only
+items** — and why CapCut could not. That is the reason this project exists.
+
+| | Samsung Gallery Sync | GallerySync |
+|---|---|---|
+| Cloud-only item visible in the phone's gallery | yes | **no** — platform limit |
+| Cloud-only item visible to CapCut | **no, ever** | n/a — our files are real |
+| Choosing what to free | all-or-nothing | per album |
+| Photo kept usable while space is freed | no | **yes** — 2048px proxy |
+| Local delete removes the cloud copy | **yes, silently** | no — opt-in, never inferred |
+| Retrieving a cloud-only item | deliberate tap, in the gallery | deliberate tap, in our list |
+
+Row five is the one to keep in view while designing v0.4: bidirectional delete is what a migrating
+user has been trained on, and it is what this project deliberately refuses.
+
+---
+
+## Naming — retired 18 Aug 2026, replaced by a per-screen test
+
+The old rule banned "Sync" in the UI until v0.3 and v0.4 landed. v0.3's photo proxies landed and
+were verified, which is exactly the behaviour the ban was waiting for. What replaces it:
+
+> **Say "sync" where the file ends up in the cloud *and* stays in the gallery.
+> Where the file leaves the gallery, say that plainly instead.**
+
+| Operation | Local outcome | Wording |
+|---|---|---|
+| Upload, local copy kept | unchanged, visible | **sync** — photos and video alike |
+| Optimise, photo proxied | ~10x smaller, visible | **sync** — the flagship case |
+| Remove local copy | **gone from the gallery** | never "sync" — "Remove from this phone" |
+
+The third row is what the old rule was really protecting. "Move to backup" was a soft name for a
+hard action, and the softening was the actual risk.
+
+---
+
+## Video — one place, because it spans three milestones
+
+### The founding use case
+> *"I would record a video, then ten minutes later want to edit it in CapCut or Canva. I couldn't
+> find the video I had just shot because Gallery had moved it to OneDrive."* — Ian
+
+The problem was never that old video is inaccessible. It was that **backing up was coupled to
+removing**, and the coupling was fast enough to catch a clip ten minutes old.
+
+**So uploading must never remove anything.** GallerySync already works this way — the engine uploads
+and touches nothing local; removal sits behind its own explicitly-tapped control. That separation is
+the entire difference between this app and the thing that caused the problem, and it must survive
+every future change.
+
+### Where video stands
+| | Status |
+|---|---|
+| Backed up to OneDrive | ✅ Verified 19 Aug 2026 — a 164 MB clip, byte-identical |
+| Proxied / downscaled | ⬜ Recommended for **old** clips only; recent video never touched |
+| Local copy removed | ⬜ Explicit per-file or per-album choice, never a background policy |
+| Retrieved on demand | ⬜ v0.4, same path as photos |
+
+### Decisions
+- **Recent video is never touched.** Not a compromise forced by the platform — it is the
+  requirement, and both middle-state options would attack it. Truncation hands CapCut two seconds;
+  full-length downscale hands it 480p and caps the export.
+- **Old video may be downscaled full-length**, marked, on charge, Sync albums only. For footage
+  people *watch* rather than edit, a downscaled clip is fine, and retrieval covers the rare edit —
+  exactly as for photos. Needs Media3 Transformer and a transcode cost measured on real 8K footage
+  before committing.
+- **Truncating to a stub is rejected.** It destroys the one thing old video is for.
+- **Writing our own thumbnail into Samsung Gallery is impossible** — private index, another app's
+  sandbox, and the whole mechanism is being switched off anyway.
+- **"Never proxy video silently" was an agent's note, not Ian's rule.** It is not in CLAUDE.md.
+  Revising it is a normal design decision, not an amendment to a hard rule.
+
+### The limit no milestone resolves
+Sync means visible while remote. A photo gets there through its proxy; video cannot without being
+degraded. So a video is either whole on the device, or absent from the gallery until fetched. There
+is no middle state that is both free and safe to edit from — and the store listing must not imply
+otherwise.
+
+---
 
 ## v0.1.0 — Foundation ✅ TAGGED
 Scaffold, Logger, Room, OneDrive Graph adapter, MSAL sign-in, browse UI.
@@ -111,608 +176,117 @@ Verified on hardware: sign-in completes and the real drive lists.
 - [x] Skip files already present in OneDrive
 - [x] Backup UI with a manual run
 - [x] Move redundant local copies out, once the cloud copy is verified
-- [x] Schedule the periodic worker — content-triggered on new media plus a 6-hourly safety net.
-      Off by default; the user turns it on. Both were still listed as outstanding here long after
-      222ba17 shipped them.
-- [x] Metered-network preference — a real setting in `BackupSettings`, exposed as a toggle in
-      Settings, defaulting to unmetered-only.
-- [ ] Retry failed items from the UI
-- [x] **Verify a large video actually uploads** — done 19 Aug 2026: a 164 MB clip byte-identical in
-      OneDrive, first attempt, no retries.
+- [x] Schedule the periodic worker — content-triggered on new media plus a 6-hourly safety net
+- [x] Metered-network preference, defaulting to unmetered-only
+- [x] **Verify a large video actually uploads** — 19 Aug 2026, 164 MB byte-identical
+- [x] **Bound the upload batch by bytes, not just file count** — 512 MB cap, a lone oversized file
+      still attempted
+- [x] **Automatic sync on by default**, armed at application start rather than only by the toggle
 - [ ] **Persist the upload session URL and its expiry on the ledger row.** Confirmed on hardware: a
-      run killed at 96% of that video restarted from byte zero. Any file too large to finish inside
-      one run can never complete, and the threshold scales with upstream rather than with the file.
-- [ ] **Bound the upload batch by bytes, not just file count.** DEFAULT_BATCH is 25 regardless of
-      size — 100 MB of photos, or nearly 4 GB of video.
-- [ ] **Start time for the first backup.** The initial whole-gallery upload is the heaviest thing
-      the app ever does. Let the user pick when it starts, default overnight, and require charging
-      for that first run. Asked for by Ian 18 Aug 2026; see TASK-011 for why it needs no consent
-      dialogs and the optimise pass does.
-
-Cutover rule: run alongside Samsung's sync for at least two weeks before trusting this alone.
+      run killed at 96% of a 164 MB video restarted from byte zero. Any file too large to finish
+      inside one run can never complete, and the threshold scales with upstream, not file size.
+- [ ] Retry failed items from the UI
+- [ ] **Start time for the first backup.** The initial whole-library upload is the heaviest thing the
+      app ever does. User-set, default overnight, charging required for that first run.
 
 ## v0.3.0 — Space management
-The milestone that delivers the actual product: the phone stops filling up, and the existing
-gallery keeps working.
-
-- [x] **Photo proxies.** Downscale photos (~2048px, EXIF preserved) and keep the proxy in
-      MediaStore permanently. Roughly 10x smaller, and every photo stays visible, searchable and
-      editable in the phone's own gallery. This is not a storage trick — it is what keeps the
-      existing gallery whole.
-- [x] **Never proxy video silently.** A degraded clip handed to an editor fails quietly, and the
-      user only discovers it in the exported result. Videos are kept whole or kept in the cloud.
-- [ ] **Storage budget.** User sets a free-space floor, default 20 GB, with an enforced minimum so
-      it stays clear of Android's low-storage threshold — below that the backup worker stops
-      running and nothing new becomes eligible to proxy; the worker keeps the phone
-      above it by proxying the largest verified photos, largest first. Nothing is evicted and
-      nothing is deleted — proxying is the only lever. If proxying alone cannot reach the floor it
-      stops and says so. Notifies when free space drops below the floor — which is also how it asks
-      for the next batch of write consent. Decided 18 Aug 2026; see TASK-011.
-- [ ] **Video proxies for old clips.** Full-length downscale, marked, on charge, Sync albums only —
-      the honest analogue of the photo proxy. Recent video stays untouched. Needs Media3 Transformer
-      and a transcode cost measured on real 8K footage first. See the reconsideration below.
-- [ ] **Rolling window for video — reconsidered, and probably wrong as specified.** Ian lost access
-      to a just-shot video because Samsung moved it to the cloud; a window reproduces that failure
-      on a longer fuse. Video has no proxy, so a removed clip disappears rather than degrading.
-      Default should be uploaded and left alone; freeing video space is an explicit per-file choice.
-      If offered at all, opt-in and off by default.
-- [ ] **Move to backup should distinguish photo from video.** It currently trashes both. A photo has
-      a better option now (optimise, and stay visible); a video has none, and vanishes from the
-      gallery until v0.4 retrieval. Same button, very different consequence.
-- [ ] Per-album "keep originals on device" for albums actively edited from.
-- [x] Clear marker showing which items are optimised versus whole. Cloud badge burned into the
-      proxy plus an EXIF marker, verified on a Fold 4 across square and 16:9 at orientation=90.
-
-### Verified on hardware — 19 Aug 2026, Galaxy Z Fold 4 (SM-F936U)
-Schema 4 and the day's UI changes, on the device rather than in an emulator.
-
-- **23 instrumented tests pass**, including all eight migration tests. The three new ones cover
-  3 → 4: that the schema matches what Room generates, that `isEnabled` maps to `BACKUP`/`OFF`, and
-  that no upgrade path can produce `SYNC` or `ARCHIVE`.
-- **The live database migrated cleanly.** `PRAGMA user_version` is 4, and `backup_entries` still
-  holds 8,505 rows — the ledger survived the one migration so far that reinterprets data rather
-  than adding to it.
-- **Both themes check out.** Album Modes and Settings read correctly in dark and in light; nothing
-  vanished, nothing lost contrast. The longer strings — "Open OneDrive", "Nothing to remove yet" —
-  wrap rather than truncate.
-- The OneDrive tab is gone and the tab row is two tabs wide.
-
-### The ledger is empty of progress, and it is not from this work
-Worth recording so it is not mistaken for a regression later. On the device right now:
-
-| | |
-|---|---|
-| `backup_entries` | 8,505 rows, **every one `PENDING`** |
-| uploaded / proxied / attempted | 0 / 0 / 0 |
-| `album_preferences` | 91 rows, **every one `OFF`** |
-
-All 91 albums being `OFF` explains the rest: nothing is selected, so nothing uploads, so every row
-stays pending and nothing becomes eligible to optimise. The migration maps only an exact `0` to
-`OFF`, so all 91 were already disabled before it ran — consistent with "Deselect all" having been
-tapped, and it cannot have been produced by `MIGRATION_3_4`, which touches `album_preferences`
-alone and cannot empty `backup_entries`.
-
-The 11 proxied photos from 18 Aug are therefore gone from the ledger, which means app data was
-cleared at some point between the two sessions. **Nothing is currently syncing, and will not until
-an album is switched on.**
-
-### Proxying verified on hardware — 18 Aug 2026, Galaxy Z Fold 4
-No longer theoretical. 11 photos optimised, 40,283,338 bytes reclaimed; five correctly skipped as
-already small rather than needlessly rewritten.
-
-- EXIF orientation and dates carried across. A NULL `datetaken` on one file was pre-existing —
-  2,069 of 6,289 images on the device have none, mostly WhatsApp, which strips EXIF.
-- Videos untouched: still 8K at 103 / 163 / 178 MB.
-- OneDrive originals intact at full size (4 MB) beside a 348 KB local proxy.
-- **CapCut can see the backed-up folder and its files.** This is the problem the project exists to
-  solve, confirmed against the app that motivated it.
-
-**Consequence for v0.4:** what an editor imports for an optimised photo is the 2048px proxy, so
-exports from it are capped at that resolution. Retrieval is therefore load-bearing, not a nicety —
-it is the only route back to a full-quality edit.
-
-### Open at the end of 18 Aug 2026
-- **Next task is TASK-011, the storage budget.** Photos only in the first pass; video eviction
-  belongs with the rolling window. Ceiling-versus-floor is decided: a user-set free-space floor,
-  default 20 GB. **Still needs Ian's call on where the applying step runs** — WorkManager cannot
-  attach the `ClipData` that carries the write grant, so it is a foreground service or raw
-  JobScheduler. **And on `POST_NOTIFICATIONS`** — Ian asked for a notification when free space
-  drops below the floor, which adds a permission to the Play listing. See TASK-011.
-- **Proxy recovery is untested on hardware.** `LedgerRecovery` guards the upload path against
-  re-uploading proxies once the ledger is lost, but reproducing that means destroying a real
-  ledger. Wants an in-memory Room test seeding a pending proxy row.
-- **Album selections are still device-only.** They are the one part of the ledger that cannot be
-  rebuilt from OneDrive or from the files, so a phone move loses them. Deliberately not built yet:
-  it needs a new remote write path.
-- **Six photos in `AaSync` carry the pre-fix sideways badge.** Harmless, marked as proxies so
-  nothing will touch them again. Delete locally and re-fetch from OneDrive to tidy.
-
-### "Sync" and "backup" are different words here, and video sits differently under each
-
-Ian, 18 Aug 2026, recalled video sync being a v0.4 item. That is right, and the apparent
-contradiction with "video is already backed up" is the naming rule above doing its job.
-
-- **Backup** = the bytes are safely in OneDrive. Video: coded since v0.2, not yet verified.
-- **Sync** = the Samsung behaviour — the file stays visible in the gallery while its space is
-  freed. Reserved deliberately until v0.3 and v0.4 both land.
-
-So video *backup* is v0.2 and video *sync* needs v0.4. Both statements are true and they are about
-different things.
-
-### The part that does not resolve: video can never fully sync
-Sync means visible while remote. A photo achieves that through its proxy — a real local file, ~10x
-smaller, that every gallery and editor opens normally. **Video has no equivalent and is not allowed
-one**, because a degraded clip fails silently in an editor.
-
-So even after v0.4 retrieval lands, the best available state for a video is one of:
-
-- whole on the device, occupying its full size, or
-- **not in the gallery at all**, retrievable on demand from the retrieval list.
-
-There is no **free** middle state for video, and none that is safe to edit from. That is narrower
-than what this file said until 18 Aug 2026 — "no middle state for video, ever" — which was an
-overstatement. A downscaled full-length proxy is a real option; it was dismissed too quickly. See
-the reconsideration below.
-
-**Consequence for the migration.** Samsung Gallery Sync *did* show cloud-only videos, through its
-own private index, and that cannot be replicated. A user moving across who kept videos in the cloud
-will find them absent from the gallery until fetched, where before they appeared.
-
-That is a real loss of browsing convenience and the store listing must not imply otherwise — but it
-is narrower than it sounds. Those cloud-only videos were visible in Samsung Gallery **and nowhere
-else**: no editor could open one. See the comparison above.
-
-### Video upload verified on hardware — 19 Aug 2026, Galaxy Z Fold 4
-No longer "coded but never watched". Ian created an `AbcSync` album with four photos and two videos
-and ran a sync.
-
-| File | Local | In OneDrive | |
-|---|---|---|---|
-| 20260819_005046.mp4 | 163,846,425 | 163,846,425 | byte-identical |
-| 20260819_005024.mp4 | 34,801,586 | 34,801,586 | byte-identical |
-| four JPEGs, 2.4–5.8 MB | — | — | all byte-identical |
-
-**198,648,011 bytes of video verified in the cloud**, first attempt, no retries. The resumable
-upload session, the 5 MiB chunking and the byte-size verification all work on a real 164 MB file.
-The happy path for video is done.
-
-### Resume across runs does NOT work — confirmed, not inferred
-Deliberately tested by force-stopping the app mid-upload. It was killed at **157,286,400 of
-163,846,425 bytes — 96% through**.
-
-On the next run the log shows a brand-new session: `"nextExpectedRanges":["0-"]`, then
-`Content-Range: bytes 0-5242879`. **All 157 MB was discarded and the file restarted from zero.**
-The ledger row was still `PENDING` with `attemptCount = 0`, so nothing recorded that the work had
-ever happened.
-
-This is the structural gap predicted from reading `ChunkedUploader`: `uploadUrl` is a local variable
-and `BackupEntryEntity` has no column for it, so resume works *within* a call and not across one.
-
-**The consequence, quantified.** The observed rate was roughly 3 MB/s, so a ten-minute background
-run tops out near 1.8 GB on this connection — comfortably enough here. But the limit scales with
-upstream, not with the file: at 2 Mbps a ten-minute window covers only about 150 MB, and *this very
-video* would then never complete, restarting from zero on every attempt forever.
-
-Fix is to persist the session URL and its expiry on the ledger row. The expiry matters — Graph
-returned `expirationDateTime` about five hours out, so a stored session is worth resuming only
-inside that window.
-
-### Video upload is coded but never verified — and two things suggest it will struggle
-
-Ian, 18 Aug 2026: "the Video Sync hasn't been built as far as I am aware."
-
-There is no separate video sync to build — video rides the same path as photos and has since v0.2.
-But nothing has ever confirmed it *works*, and the hardware note above only evidences a 4 MB photo.
-No commit records a video reaching OneDrive. So the instinct is right even though the code is there.
-
-Two structural reasons it is likely to struggle on large files, both found by reading rather than
-by running, and both wanting hardware confirmation:
-
-- **The upload session is not persisted.** `ChunkedUploader` holds `uploadUrl` as a local variable,
-  and `BackupEntryEntity` has no column for it. Resume works *within* one call — the
-  `nextExpectedRanges` handling recovers a failed chunk — but if the worker is stopped, the session
-  is lost and the next run calls `createUploadSession` again from byte zero. Any single file too
-  large to finish inside one worker window can therefore **never complete**, however many times it
-  is retried.
-- **`DEFAULT_BATCH = 25` is a file count, not a byte budget.** Sized for photos: 25 × 4 MB is about
-  100 MB. Twenty-five videos at Ian's sizes is roughly 3.75 GB queued into a worker WorkManager
-  stops after about ten minutes. The run dies mid-batch and the in-flight file's progress is thrown
-  away — the batch still advances each run, so it grinds forward, but it wastes a partial upload
-  every time.
-
-Ian's clips are 103–178 MB, which at ordinary home upstream fit inside a single window comfortably;
-it is longer 8K footage and slow connections where the first point bites. Worth a deliberate test:
-back up one large video, confirm it lands byte-identical, then confirm a run killed mid-upload
-resumes rather than restarting.
-
-Fixing the first probably means persisting the session URL and its expiry on the ledger row. Fixing
-the second means bounding the batch by bytes as well as by count.
-
-### Move to backup does not distinguish video — and that is where it matters most
-
-Raised by Ian, 18 Aug 2026: is sync deleting video, and should it not be a move that leaves a
-thumbnail placeholder?
-
-**Nothing automatic removes video.** There is no worker that evicts anything. The only thing that
-removes a local file is the manual **Move to backup** button, and `BackupEngine.redundantLocalCopies()`
-matches every verified file — it has no `isVideo` filter, unlike `proxyCandidates()`. So that button
-does trash video, alongside photos.
-
-**It is a move.** Nothing is eligible until Graph has confirmed the file and reported a matching
-byte size, and only then is the local copy trashed. What makes it a move is that verified cloud
-copy — not the trash, which the Fold 4 showed can be an outright delete on Samsung.
-
-**A thumbnail placeholder cannot work.** Three variants, all dead ends:
-
-- *A JPEG left at the video's path.* The MediaStore row still declares `video/*`, and the system
-  opens the file directly — there is no hydration hook. Gallery and CapCut both read the real bytes
-  and fail.
-- *Swap the video row for an image row.* Now the gallery holds a fake photo where a video was. It
-  sorts oddly, it misrepresents what is on the device, and the video is gone from the gallery
-  regardless.
-- *A transcoded low-resolution video.* The only technically working version, and the one CLAUDE.md
-  rules out: a degraded clip fails quietly inside an editor and is discovered in the export. That is
-  precisely the CapCut case this project exists for.
-
-### The finding: the two features have inverted
-Optimise now gives photos a graceful path — keep the file, keep it visible, reclaim ~90%. Video has
-no equivalent and cannot have one.
-
-So **Move to backup is at its most drastic exactly where it is the only option.** For a photo it is
-now the worse of two available choices; for a video it is the sole lever, and it removes the file
-from the gallery entirely with no stand-in until retrieval lands in v0.4.
-
-The current copy is honest about permanence but says nothing about either asymmetry. Before v0.3 is
-called done, that button should at minimum separate the two — or say plainly that photos could be
-optimised instead, and that video will disappear from the gallery until it is fetched back.
-
-Not a shipped bug: the release gate already holds everything until v0.3 and v0.4 are built and
-tested, and this is an instance of the exact breakage that gate exists for.
-
-## How Samsung actually did it — checked against vendor docs, 18 Aug 2026
-
-Worth having on record, because the whole project is a replacement for it and the mechanism was
-being described from memory.
-
-1. **Bidirectional sync of photos *and* videos** to OneDrive's Samsung Gallery folder. Microsoft's
-   own documentation: files modified or deleted in Samsung Gallery are reflected in the cloud, and
-   deleting from either side deletes from the other.
-2. **"Free up phone space"** removes the local originals of synced media. It is **all-or-nothing** —
-   Samsung gives no way to pick which items become cloud-only.
-3. **Samsung Gallery keeps a cached thumbnail and its own index entry**, so a cloud-only item still
-   appears in the grid. Tapping it fetches the original from OneDrive on demand.
-4. This applied to video exactly as to photos. A cloud-only 8K clip still showed in Samsung Gallery.
-
-### Why none of steps 2–4 can be copied
-They work because Samsung owns both the index and the viewer. The thumbnail lives inside Samsung
-Gallery, not in MediaStore as a real file, so **no third-party app ever saw those cloud-only items**
-— which is the constraint already recorded above, now confirmed from the vendor side rather than
-inferred. It is also precisely why CapCut could not see them, which is the reason this project
-exists.
-
-### The trade, stated honestly
-| | Samsung Gallery Sync | GallerySync |
-|---|---|---|
-| Cloud-only item visible in the phone's gallery | yes, photos and video | **no** — platform limit |
-| Cloud-only item visible to CapCut and other apps | **no, ever** | n/a — our files are real |
-| Choosing what to free | all-or-nothing | selective, largest-first, to a floor |
-| Photo kept usable while space is freed | no — original removed | **yes** — 2048px proxy stays |
-| Local delete removes the cloud copy | **yes, silently** | no — opt-in, batched, never inferred |
-
-So "a step down for video" needs qualifying. Samsung showed cloud-only video **in Samsung Gallery
-alone**, where it was useless to every editor. We cannot show it there at all, but everything we do
-leave on the phone is a real file that every app can open. The browsing convenience is genuinely
-lost; the usability is not.
-
-Row five is the one to keep in view while designing v0.4 deletion sync: Samsung's bidirectional
-delete is the behaviour a migrating user has been trained on, and it is the behaviour this project
-deliberately refuses.
-
-## The founding use case, stated plainly — Ian, 18 Aug 2026
-
-> *"I would record a video, then (say 10 minutes later) want to edit that video in CapCut or Canva."*
-
-This is why the project exists, and it settles the video middle-state question rather than adding to
-it. **A video recorded ten minutes ago is still on the phone.** It is an ordinary file in DCIM,
-indexed in MediaStore, and every app can already open it. Nothing in this design would touch it:
-TASK-011 is photos only, and any future rolling window keeps recent clips whole by definition.
-
-So the workflow works today, with no proxy, no stub and no retrieval involved.
-
-### The actual failure, in Ian's words
-> *"I couldn't find the video I had just shot because Gallery had moved it to OneDrive."*
-
-Samsung moved a **just-shot** video to the cloud within minutes, and at that moment it stopped
-existing as far as CapCut was concerned. This is the origin of the project and it is worth being
-exact about, because it points somewhere different from where the discussion above was heading.
-
-The problem was never that old video is inaccessible. It was that **backing up was coupled to
-removing**, and the coupling ran fast enough to catch a video ten minutes old.
-
-### What that makes non-negotiable
-**Uploading must never remove anything.** In GallerySync it already does not — `BackupEngine`
-uploads and touches nothing local; removal lives behind a separate, explicitly-tapped button. That
-separation is not an implementation detail, it is the entire difference between this app and the
-thing that caused the problem. It must survive every future change.
-
-### It also changes the rolling window from a feature into a risk
-A rolling window still removes video automatically — just on a longer fuse. The failure Ian hit was
-*going to look for a video and not finding it*, and a window reproduces that exactly, only later and
-with the user having forgotten there was a rule. Video has no proxy, so a removed clip does not
-degrade, it disappears.
-
-So the default for video should be: **uploaded, and left alone indefinitely.** Freeing video space
-is an explicit choice on specific files, not a background policy. If a window is offered at all it
-is opt-in, off by default, and its purpose is to be told "no" by anyone who edits video — which is
-this app's founding user.
-
-That is a change from the v0.3 checklist item above, which assumed a window was wanted. It was
-specified before this experience was written down.
-
-### Photos are genuinely different, and the difference is the proxy
-Nothing here weakens the photo budget. An optimised photo stays in the gallery, opens in every app
-and looks correct — the user never goes looking and finds nothing. That is precisely why proxying is
-safe to run automatically and removing video is not, and it is why TASK-011 was scoped to photos
-before any of this came up.
-
-### What actually broke, and what fixes it
-The thing Samsung broke was not recording-then-editing. It was that videos **Samsung had moved to
-the cloud** became invisible to every third-party app, because they lived in Samsung's private index
-rather than as files. GallerySync's answer is that a file on the phone is a real file — which is the
-whole mechanism — plus a retrieval list for whatever is no longer local.
-
-### Consequence: video proxying would attack the use case, not serve it
-Every middle-state option discussed above degrades the local video. Against this use case they are
-not neutral trade-offs, they are regressions:
-
-- **Truncate to a stub.** CapCut imports two seconds. The workflow is destroyed outright.
-- **Downscale full length.** CapCut imports 480p and the export is capped there. The workflow is
-  silently degraded — the exact failure the old note warned about, aimed squarely at the one
-  workflow the project was started for.
-
-Keeping recent video **whole** is not a compromise forced by platform limits. It is the requirement.
-The middle state was being designed for a problem — old video occupying space — that the rolling
-window already addresses without touching anything recent.
-
-### What this leaves to build for video
-Nothing that needs a new mechanism, and nothing that needs the note about silent proxying revisited:
-
-1. **Verify video upload works.** Coded since v0.2, never watched. Plus the two structural fixes:
-   persist the upload session URL, and bound the batch by bytes rather than file count.
-2. **Rolling window**, keeping recent clips whole. The window has to be generous enough that
-   "record now, edit later today" is never in question — that is its acceptance criterion.
-3. **Retrieval** in v0.4, for clips old enough to have left the phone.
-
-Recorded because the middle-state discussion ran a long way on the assumption that video needed a
-local stand-in. It does not. It needs to be left alone while it is recent, and fetchable once it is
-not.
-
-## Video middle-state — two proposals from Ian, 18 Aug 2026
-
-### Proposal 1: write our own thumbnail and index for Samsung Gallery to read — not possible
-Three independent reasons, any one fatal:
-
-- Samsung Gallery's cloud index is a private database inside its own app sandbox. There is no
-  public API to write to it, and no third-party app can reach another app's private storage.
-- The cached thumbnail lives inside Samsung Gallery, not in MediaStore. Making it visible is not a
-  matter of producing the right file — nothing we write anywhere is read by that code path.
-- **Samsung is switching this off on 30 September 2026.** Even a working exploit would target a
-  mechanism that is being removed, and would break every other phone. This project is explicitly
-  built for LG and Moto as well.
-
-Recorded so it is not revisited. The constraint above already said this; this is the same wall from
-a different angle.
-
-### Proposal 2: truncate the video to a short clip — viable, and it inverts our own rule
-Replace the local video with a genuine short clip, marked, with the original in OneDrive. This is
-the video analogue of the photo proxy and it deserves proper evaluation rather than a reflex no.
-
-**What is right about it.** It produces a real, valid, playable video file. It appears in MediaStore,
-in Samsung Gallery and in CapCut, because it is an ordinary file — which is the entire mechanism
-this project rests on. It is also cheap: cutting at a keyframe boundary with `MediaExtractor` and
-`MediaMuxer` is a container-level stream copy, no re-encode, so it is fast and lossless on the
-retained portion. Embedding the OneDrive reference in an MP4 metadata atom is the direct analogue
-of what `ProxyMarker` already does with EXIF, and keeps the file self-describing.
-
-**The link only helps us.** CapCut will not read a custom atom and fetch from OneDrive. It is a
-marker for our retrieval path, exactly like the EXIF marker — not a hydration mechanism. Worth
-being clear about, because "embed a link in the video" can sound like it makes the file work
-elsewhere. It does not.
-
-### The rule this runs into is less settled than it looks
-The note says: *never proxy video **silently** — a degraded clip fails quietly, and the user only
-discovers it in the exported result.* The operative word is silently, and the two candidate
-mechanisms fail in opposite directions:
-
-| | Truncate to a short clip | Downscale, full length |
-|---|---|---|
-| Cost to produce | cheap — stream copy, no re-encode | expensive — full transcode, adds Media3 Transformer |
-| Gallery viewing | **destroyed** — you cannot rewatch anything | **preserved** — 480p is fine on a phone |
-| Failure in an editor | **loud** — 2 seconds on the timeline, seen instantly | **quiet** — looks fine, discovered in the export |
-| Content preserved | no — most of it is gone | yes — all of it, at lower quality |
-
-So truncation is arguably *more* compliant with the rule as written, because its failure is
-impossible to miss. The safer-sounding option is the one the rule actually describes.
-
-**And the project already accepted quiet editor degradation — for photos.** A 2048px proxy exports
-at 2048px, which the milestone notes above call out as the reason retrieval is load-bearing. The
-video rule was written before proxies existed and has not been reconciled with that decision. The
-asymmetry is worth examining rather than assumed.
-
-### The reverse direction — Ian, 18 Aug 2026: selecting it pulls the original back
-Right, and that is already the v0.4 retrieval item rather than something new. But **"selecting the
-file" cannot mean selecting it in Samsung Gallery.**
-
-There is no hydration hook — the constraint above, again. When the user taps that clip in Samsung
-Gallery, the system opens the file directly and our app is never told. We cannot intercept it,
-delay it, or substitute anything. So the round trip is necessarily a two-app flow:
-
-1. The user meets the stub in their gallery and sees it is a stub.
-2. They open GallerySync and fetch it from the retrieval list.
-3. We download the original and put it back where the stub was.
-
-The stub is therefore a **signpost, not a button**, and its job is to make step 2 obvious. That is a
-point in truncation's favour that downscaling does not have: a full-length 480p copy looks like a
-normal video and gives the user no reason to go looking, whereas a clip that visibly stops tells
-them immediately. Whatever is chosen has to answer "how does the user know to come to us", and the
-stub is the only place that message can live.
-
-### Samsung's own retrieval is a deliberate tap too
-Ian, 18 Aug 2026, from using it: in Samsung Gallery you must deliberately click **download** to pull
-a video back from OneDrive. It does not stream or fetch on its own.
-
-That narrows the gap considerably. Samsung is not doing hydration-on-open either — it is showing an
-item and offering a button. The difference between the two products is therefore not *automatic
-versus manual*, which would be damning, but **where the button lives**:
-
-| | Samsung Gallery | GallerySync |
-|---|---|---|
-| How a cloud-only item is retrieved | deliberate tap | deliberate tap |
-| Where that tap happens | on the item, in the gallery | in GallerySync's retrieval list |
-| Wait for the download | yes | yes |
-
-So the honest description of the loss is one app switch, not a lost capability. Worth keeping in
-proportion — earlier notes in this file framed cloud-only visibility as the thing users would miss
-most, and the actual daily experience being replaced is "find the video, press download, wait".
-
-### Writing the original back needs consent too
-Step 3 overwrites a MediaStore file the camera created, not one we own, so it needs
-`createWriteRequest` exactly as proxying does. Retrieval is not a quiet background restore; it is
-another dialog.
-
-There is a way around it worth considering for both paths: **a file this app creates through
-MediaStore is owned by this app, and we can modify our own files without asking.** If the stub were
-inserted as a new entry we own rather than an overwrite of the original, hydrating it later would
-need no dialog at all. The cost is that the original then has to be removed, which is the
-destructive path with the Samsung trash behaviour attached — and the new entry would carry a new
-MediaStore id, losing anything keyed to the old one.
-
-Not resolved here, but it applies to photo proxies as much as video stubs, and it is the only
-route seen so far that reduces the consent burden rather than working around it.
-
-### Provenance correction — this was never a rule of Ian's
-Ian, 18 Aug 2026: *"this was a Claude added rule."* Checked, and he is right.
-
-- **"Never proxy video silently" does not appear in CLAUDE.md.** The only mention of video there is
-  the one-line project description. It has been cited repeatedly in this conversation as a hard
-  rule from CLAUDE.md, and that was wrong.
-- It entered **this file** in `fc603ab`, as an unchecked item in the v0.3 planning list, alongside
-  work that had not been done yet. That commit's body attributes the design principle to Ian and
-  the platform constraints to experiment. It claims no origin for the video line.
-- So it is an agent's reasoning written down in a planning list and later ticked, not a decision
-  Ian made and not a constraint anything was verified against.
-
-The argument in it still has force — a degraded clip really can fail quietly in an editor. But it
-carries the weight of an opinion, not of the deletion policy or the dark-mode rule, both of which
-came from Ian and from shipped bugs. **Revising it is a normal design decision, not an amendment to
-a hard rule**, and the earlier framing of it as one overstated what stands in the way.
-
-### What this needs from Ian
-Amending a hard rule in CLAUDE.md, which is his call, not an agent's. The options are not
-truncate-versus-downscale so much as **what a video proxy is for**:
-
-- If it is for *viewing* — keeping the gallery whole, which is the design principle — then
-  full-length downscale is the only candidate, and editing goes through retrieval exactly as it
-  does for photos.
-- If it is for *marking a placeholder* — a visible stub saying "this exists, fetch it" — then
-  truncation is cheaper, louder, and honest, but the gallery stops being a place you can watch
-  anything.
-- If neither is acceptable, the position stands: video is whole on the device or absent from the
-  gallery, and the rolling window decides which.
-
-Recommendation: full-length downscale, with the badge and metadata marker the photo path already
-uses, and retrieval as the documented route to a full-quality edit. It keeps the gallery whole,
-which is the stated purpose, and makes video consistent with photos rather than a special case.
-The transcode cost is real and would need measuring on an 8K clip before committing.
-
-## Video proxies, reconsidered — Ian, 18 Aug 2026
-
-> *"I am still thinking about truncating video files. It seems like a defeat not to have video files
-> also sync'd."*
-
-Two things to separate first. **Video is already synced** — it uploads to OneDrive with photos and
-has since v0.2. What video lacks is the *middle state*: photos can shrink and stay visible, video
-cannot. That gap is the defeat, and it is a fair thing to be unwilling to accept.
-
-### Where the earlier reasoning went wrong
-The argument against a video proxy was that a degraded clip fails quietly inside an editor. That
-holds — but it silently assumed **editing is what the file is for.** Apply the actual timeline:
-
-- **Recent video** is what gets edited, and it is never proxied. The founding use case — record now,
-  edit in CapCut later today — is protected by leaving recent clips alone, which is settled.
-- **Old video** is what occupies space. And what people do with two-year-old footage is *watch* it,
-  scrolling back through it in the gallery. Editing it is rare, and retrieval covers that rare case
-  exactly as it does for photos.
-
-So the quiet-failure objection was weighed against the wrong use. For old video the priority is
-viewing, and a downscaled clip serves viewing perfectly.
-
-### What that makes of the two candidates
-- **Truncation** destroys the main thing old video is for. A two-second stub cannot be watched, and
-  the gallery stops holding memories. Its one virtue — failing loudly — matters most for editing,
-  which is the rare case here. **Not recommended.**
-- **Full-length downscale** is the honest analogue of the photo proxy. An 8K clip at 1080p is
-  roughly a tenth the size, watchable, scrubbable, correct duration, and appears in every gallery
-  and every app because it is an ordinary file. Retrieval remains the route to a full-quality edit,
-  which is already true for photos and already documented as why retrieval is load-bearing.
-
-### The real costs, which are not the rule
-1. **Transcoding is genuinely expensive.** A JPEG downscale is milliseconds; re-encoding an 8K clip
-   is minutes of sustained CPU, with heat and battery to match. This has to be background work
-   gated on charging, not something that runs while the phone is in a pocket.
-2. **It needs Media3 Transformer**, a dependency the project does not have yet.
-3. **Re-encoding loses quality** in a way a JPEG downscale does not, so the target resolution and
-   bitrate need choosing deliberately, then checking on real footage.
-4. **Marking it is nearly free here.** The photo path burns a badge into the proxy; since video is
-   being re-encoded anyway, a corner badge or a metadata atom costs almost nothing extra. Worth
-   deciding whether a permanent burned-in badge on something you watch is as acceptable as it is on
-   a still — it is more intrusive in motion.
-
-### Recommendation
-Build it, for **old video only**, as a mode rather than a default — and after the photo budget, not
-instead of it. The sequence that keeps every commitment intact:
-
-1. Recent video: untouched. Non-negotiable, and already the position.
-2. Old video in a Sync album: downscaled full-length proxy, marked, on charge.
-3. Any video: retrievable at full quality from v0.4.
-
-That closes the gap Ian is unwilling to accept, without touching the clip he shot this morning, and
-it makes video consistent with photos instead of a permanent exception. It needs measuring on one of
-his 8K clips before committing — if a three-minute clip takes fifteen minutes and cooks the phone,
-the economics change and truncation deserves another look.
-
-## Where video stands — it spans three milestones, so it is easy to lose track
-
-Video is **already backed up**, and has been since v0.2. `MediaScanner` queries the images and the
-video collections both, `BackupEngine` records `isVideo` on every row, and nothing in the upload
-path filters on it. The only place video is excluded is `BackupEntryDao.proxyCandidates()`, which
-is about local proxying, not about syncing.
-
-So the four things "video" can mean, and where each actually sits:
-
-| | Status |
-|---|---|
-| **Backed up to OneDrive** | ✅ Verified on hardware 19 Aug 2026 — a 164 MB clip, byte-identical |
-| **Proxied / downscaled** | ❌ Never — deliberate, a degraded clip fails silently in an editor |
-| **Local copy reclaimed to free space** | ⬜ v0.3, rolling window — the only lever is removing the file, which is a deletion decision |
-| **Retrieved back on demand** | ⬜ v0.4, same path as photos — and the only route to a full-quality video |
-
-The one that carries real risk is reclaiming space. A video cannot be shrunk, so freeing its space
-means removing the local file, which makes it vanish from the gallery and runs straight into the
-deletion rules in CLAUDE.md and the Samsung trash behaviour. That is why TASK-011 covers photos
-only and the rolling window is a separate task with a separate decision.
+The milestone that delivers the actual product: the phone stops filling up, and the existing gallery
+keeps working.
+
+- [x] **Photo proxies.** Downscale to ~2048px, EXIF preserved, proxy kept in MediaStore permanently.
+      Roughly 10x smaller, and every photo stays visible and editable in the phone's own gallery.
+- [x] **Never proxy video silently** — kept as guidance, not as a hard rule; see the video section.
+- [x] **Clear marker showing which items are optimised.** Cloud badge burned into the proxy plus an
+      EXIF marker, verified across square and 16:9 at orientation=90.
+- [x] **Stop offering photos that can never shrink.** Schema 5 records a file examined and found
+      already small enough, so the candidate count reaches zero instead of sticking.
+- [ ] **Storage budget.** User sets a free-space floor, default 20 GB, with an enforced minimum so it
+      stays clear of Android's low-storage threshold — below that the backup worker stops running and
+      nothing new becomes eligible. Proxying is the only lever; nothing is deleted. If it cannot
+      reach the floor it stops and says so. Notifies when free space drops below the floor, which is
+      also how it asks for the next batch of write consent. See TASK-011.
+- [ ] **Album modes in the UI.** Schema 4 carries Off/Backup/Sync/Archive; the screen is still a
+      switch. See TASK-012.
+- [ ] **Video proxies for old clips** — see the video section above.
+- [ ] **Move to backup should distinguish photo from video**, or be replaced by Archive mode.
 
 ## v0.4.0 — Retrieval and deletion sync
 - [ ] Fetch a cloud-only item back on demand, registering it in MediaStore so every app sees it.
-      Photos and video both — video is already backed up, so retrieval is the same path, and it is
-      the only route back to a full-quality edit from a 2048px proxy.
-- [ ] Plain retrieval list — **not** a photo browser. It is also the only place a fetch can be
-      triggered: there is no hydration hook, so tapping an item in Samsung Gallery cannot reach us.
+      Photos and video both — it is the only route back to a full-quality edit from a proxy.
+- [ ] Plain retrieval list — **not** a photo browser. Also the only place a fetch can be triggered:
+      there is no hydration hook, so tapping an item in Samsung Gallery cannot reach us.
 - [ ] Deletion sync, opt-in and batched. Highest-risk feature in the product; it only follows a
-      backup engine that has been watched working. Never infers deletion from absence alone —
-      a card unmounting or a permission being revoked must not be read as intent.
+      backup engine that has been watched working. Never infers deletion from absence alone.
 
 ## v0.5.0 — Google Photos + Billing
 - [ ] Google Play Billing (`pro_unlock`)
 - [ ] Google Photos adapter (requires OAuth — Ian)
 - [ ] Settings: sync frequency, account management
+
+---
+
+## Hardware verification log — Galaxy Z Fold 4 (SM-F936U)
+
+### 18 Aug 2026 — proxying
+11 photos optimised, 40,283,338 bytes reclaimed; five correctly skipped as already small. EXIF
+orientation and dates carried across. Videos untouched at 103 / 163 / 178 MB. OneDrive originals
+intact at full size beside a 348 KB local proxy.
+
+**CapCut can see the backed-up folder and its files** — the problem the project exists to solve,
+confirmed against the app that motivated it.
+
+*Consequence:* what an editor imports for an optimised photo is the 2048px proxy, so exports from it
+are capped at that resolution. Retrieval is therefore load-bearing, not a nicety.
+
+### 19 Aug 2026 — schema 4 and 5, the UI, and video upload
+- **25 instrumented tests pass**, including every migration test. Schema 3 → 4 and 4 → 5 verified on
+  a real database, with the 3 → 4 mapping asserted: an enabled album becomes `BACKUP`, never `SYNC`
+  or `ARCHIVE`.
+- **Both themes check out** for the rebuilt Settings screen and Album Modes.
+- **Video upload works.** A 164 MB clip and a 35 MB clip both byte-identical in OneDrive —
+  198,648,011 bytes of video verified, first attempt, no retries.
+- **Resume across runs does not.** Force-stopped at 157,286,400 of 163,846,425 bytes (96%), the next
+  run opened a fresh session (`nextExpectedRanges: ["0-"]`) and restarted from byte zero. The ledger
+  row was still `PENDING` with `attemptCount = 0`.
+
+  Quantified: at the ~3 MB/s observed, a ten-minute background run reaches about 1.8 GB. But the
+  ceiling scales with upstream — at 2 Mbps that window covers ~150 MB, and this same video would
+  then never complete. Graph returns an `expirationDateTime` about five hours out, so the fix stores
+  the session URL with its expiry.
+- **The skip-existing check works on real data.** With the ledger empty, a run marked 15 files as
+  already in OneDrive instead of re-uploading them — and recorded `remoteSizeBytes` for each, so
+  they are verified to the same bar as files actually uploaded.
+
+**Note on the empty ledger:** it was emptied by `./gradlew connectedDebugAndroidTest`, which
+uninstalls the app after running. An earlier version of this file recorded it as an unexplained
+clearing between sessions; that was wrong. Do not run the full instrumented suite against a working
+install without expecting to lose its data.
+
+---
+
+## Open questions
+
+**Needs Ian's decision**
+- **Where TASK-011's applying step runs.** WorkManager cannot attach the `ClipData` that carries the
+  write grant, and Android 12+ blocks starting a foreground service from the background. Recommended:
+  background detection and notification, applying on the tap. See TASK-011.
+- **`POST_NOTIFICATIONS`** — needed for the floor notification, and it appears on the Play listing.
+- **Language dropdown** — wire the per-app locale mechanism now and ship English only, or defer.
+- **Version numbering.** `app/build.gradle.kts` still carries `versionCode = 1` and
+  `versionName = "1.0"`, which track nothing: this file is on v0.2/v0.3 and the release gate says
+  neither ships yet. A `versionName` of "1.0" on the first Play upload would also claim a maturity
+  the app will not have. Wants deciding before anything is uploaded — most likely `versionName`
+  following these milestones ("0.3.0") with `versionCode` a plain incrementing integer.
+- **`targetSdk = 37` versus CLAUDE.md, which specifies 35.** One of the two is stale. It matters
+  because target level gates real behaviour — the 2000-URI cap above binds only at 35+.
+
+**Known and unbuilt**
+- **Album selections are device-only.** The one part of the ledger that cannot be rebuilt from
+  OneDrive or from the files, so a phone move loses them. Needs a new remote write path.
+- **Proxy recovery is untested on hardware.** `LedgerRecovery` guards against re-uploading proxies
+  once the ledger is lost, but reproducing it means destroying a real ledger. Wants an in-memory Room
+  test seeding a pending proxy row.
+- **The XML theme is hardcoded Light** with no `values-night` variant, so a cold launch in dark mode
+  starts light. Deferred to the visual refresh, which touches that file anyway. See TASK-012.
+- **Six photos in `AaSync` carry the pre-fix sideways badge.** Harmless and marked as proxies. Delete
+  locally and re-fetch to tidy.
