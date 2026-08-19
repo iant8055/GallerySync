@@ -246,6 +246,9 @@ keeps working.
 - [ ] **Video transcode for old clips**, age a user setting — see TASK-013. The write needs no tap
       (SAF, verified 19 Aug 2026); the blocker is a transcode cost measured on real 8K footage, and
       it is gated on v0.4 retrieval.
+- [ ] **Guided first run** — language, cloud, sign-in, permissions, then two gates the engine cannot
+      start without: which directories to pull from, and what to do with the existing library. The
+      directory picker is also the SAF write grant. See TASK-014.
 - [ ] **Move to backup should distinguish photo from video**, or be replaced by Archive mode.
 
 ## v0.4.0 — Retrieval and deletion sync

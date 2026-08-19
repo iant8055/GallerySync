@@ -591,22 +591,19 @@ works** — recorded here so it is not lost, not scheduled here.
 3. **A first-run flow**, covering language, permissions, cloud service (OneDrive / Google Photos /
    Amazon Photos), and default settings. See below.
 
-### First run — the shape Ian described
+### First run — moved to TASK-014
 
-A wizard on first launch: **language → permissions → cloud service → defaults.**
+Ian expanded this on 19 Aug 2026 into a guided setup with conversation-bubble explanations, plus two
+gates the engine cannot start without: **which directories to pull from**, and **what to do with the
+library already on the phone**. It outgrew a bullet here and now has its own spec.
 
-Two things about it that affect work already specced:
+Two things from it that reach back into this task:
 
-- **Cloud service as a first-run choice implies more than two adapters.** Google Photos is already
-  the Pro tier in CLAUDE.md; Amazon Photos is new and has no adapter, no research and no milestone.
-  Treat the picker as designed for extension but shipping with what exists, rather than as a
-  commitment to three back ends.
-- **Notification permission probably does not belong in the wizard** — see TASK-011's revised
-  permission section. Media permissions gate everything and belong at first run; notifications ask
-  about something that does not exist yet on a fresh install, and Android only prompts once.
-
-**None of this is scheduled.** It wants its own task once v0.3 and v0.4 functionality is done, and
-it should be written then rather than now, when the screens it restyles are still moving.
+- **Archive is never a bulk first-run choice.** TASK-012 already gates Archive behind v0.4
+  retrieval; TASK-014 adds that it is not offered across every album in a wizard either. It stays a
+  per-album decision with its own confirmation.
+- **The mode explanations are shared strings**, not two descriptions of the same operation. The
+  bubbles in the wizard and the Help entries above draw on one set, or they drift.
 
 ### Known: the XML theme is hardcoded Light
 Found 19 Aug 2026, deferred by Ian to this task rather than fixed then.
