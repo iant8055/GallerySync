@@ -159,6 +159,39 @@ gallery keeps working.
 - [x] Clear marker showing which items are optimised versus whole. Cloud badge burned into the
       proxy plus an EXIF marker, verified on a Fold 4 across square and 16:9 at orientation=90.
 
+### Verified on hardware — 19 Aug 2026, Galaxy Z Fold 4 (SM-F936U)
+Schema 4 and the day's UI changes, on the device rather than in an emulator.
+
+- **23 instrumented tests pass**, including all eight migration tests. The three new ones cover
+  3 → 4: that the schema matches what Room generates, that `isEnabled` maps to `BACKUP`/`OFF`, and
+  that no upgrade path can produce `SYNC` or `ARCHIVE`.
+- **The live database migrated cleanly.** `PRAGMA user_version` is 4, and `backup_entries` still
+  holds 8,505 rows — the ledger survived the one migration so far that reinterprets data rather
+  than adding to it.
+- **Both themes check out.** Album Modes and Settings read correctly in dark and in light; nothing
+  vanished, nothing lost contrast. The longer strings — "Open OneDrive", "Nothing to remove yet" —
+  wrap rather than truncate.
+- The OneDrive tab is gone and the tab row is two tabs wide.
+
+### The ledger is empty of progress, and it is not from this work
+Worth recording so it is not mistaken for a regression later. On the device right now:
+
+| | |
+|---|---|
+| `backup_entries` | 8,505 rows, **every one `PENDING`** |
+| uploaded / proxied / attempted | 0 / 0 / 0 |
+| `album_preferences` | 91 rows, **every one `OFF`** |
+
+All 91 albums being `OFF` explains the rest: nothing is selected, so nothing uploads, so every row
+stays pending and nothing becomes eligible to optimise. The migration maps only an exact `0` to
+`OFF`, so all 91 were already disabled before it ran — consistent with "Deselect all" having been
+tapped, and it cannot have been produced by `MIGRATION_3_4`, which touches `album_preferences`
+alone and cannot empty `backup_entries`.
+
+The 11 proxied photos from 18 Aug are therefore gone from the ledger, which means app data was
+cleared at some point between the two sessions. **Nothing is currently syncing, and will not until
+an album is switched on.**
+
 ### Proxying verified on hardware — 18 Aug 2026, Galaxy Z Fold 4
 No longer theoretical. 11 photos optimised, 40,283,338 bytes reclaimed; five correctly skipped as
 already small rather than needlessly rewritten.
