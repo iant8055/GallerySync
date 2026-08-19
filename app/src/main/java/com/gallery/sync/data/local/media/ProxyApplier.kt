@@ -144,6 +144,7 @@ class ProxyApplier @Inject constructor(
         if (entries.isEmpty()) return@withContext ProxyOutcome.NothingToDo
 
         var proxied = 0
+        var skipped = 0
         var reclaimed = 0L
 
         for (entry in entries) {
@@ -153,9 +154,13 @@ class ProxyApplier @Inject constructor(
                     reclaimed += entry.sizeBytes - result.newSizeBytes
                 }
 
-                // Not a failure: an image already small enough, or one we could not read well
-                // enough to be confident about. Leaving it whole is always safe.
-                FileResult.Skipped -> Unit
+                // Not a failure: an image already at or under the target size, or already a proxy.
+                // Recorded rather than merely tolerated — otherwise it is offered again on every
+                // run, the count never reaches zero, and the button becomes a no-op.
+                FileResult.NotWorthwhile -> {
+                    entryDao.markProxySkipped(entry.id)
+                    skipped++
+                }
 
                 is FileResult.Failed -> {
                     Logger.e(TAG, "stopping: ${entry.displayName} — ${result.reason}")
@@ -169,7 +174,7 @@ class ProxyApplier @Inject constructor(
             }
         }
 
-        Logger.i(TAG, "proxied $proxied files, reclaimed $reclaimed bytes")
+        Logger.i(TAG, "proxied $proxied files, reclaimed $reclaimed bytes, $skipped not worth proxying")
         ProxyOutcome.Completed(proxied, reclaimed)
     }
 
@@ -184,7 +189,7 @@ class ProxyApplier @Inject constructor(
 
         repeat(MAX_ATTEMPTS) { attempt ->
             when (val result = proxyOnce(entry)) {
-                is FileResult.Replaced, FileResult.Skipped -> return result
+                is FileResult.Replaced, FileResult.NotWorthwhile -> return result
                 is FileResult.Failed -> {
                     lastReason = result.reason
                     Logger.w(
@@ -201,8 +206,11 @@ class ProxyApplier @Inject constructor(
     private suspend fun proxyOnce(entry: BackupEntryEntity): FileResult {
         val uri = Uri.parse(entry.contentUri)
 
-        val proxy = generator.generate(uri, entry.displayName)
-            ?: return FileResult.Skipped
+        val proxy = when (val result = generator.generate(uri, entry.displayName)) {
+            is ProxyResult.Created -> result.proxy
+            ProxyResult.NotWorthwhile -> return FileResult.NotWorthwhile
+            is ProxyResult.Failed -> return FileResult.Failed(result.reason)
+        }
 
         try {
             // Decode the proxy back before trusting it. A proxy that will not open is one that
@@ -245,7 +253,10 @@ class ProxyApplier @Inject constructor(
 
     private sealed interface FileResult {
         data class Replaced(val newSizeBytes: Long) : FileResult
-        data object Skipped : FileResult
+
+        /** Examined and permanently not worth proxying. Recorded so it stops being offered. */
+        data object NotWorthwhile : FileResult
+
         data class Failed(val reason: String) : FileResult
     }
 

@@ -24,7 +24,8 @@ import com.gallery.sync.data.local.entity.MediaItemEntity
  * sent. Schema changes ship a real migration; see [Migrations].
  *
  * Version 2 adds `backup_entries` and `album_preferences`. Version 3 records photo proxies.
- * Version 4 replaces the album on/off flag with a four-valued mode.
+ * Version 4 replaces the album on/off flag with a four-valued mode. Version 5 records files that
+ * were examined and found not worth proxying.
  */
 @Database(
     entities = [
@@ -33,7 +34,7 @@ import com.gallery.sync.data.local.entity.MediaItemEntity
         BackupEntryEntity::class,
         AlbumPreferenceEntity::class
     ],
-    version = 4,
+    version = 5,
     exportSchema = true
 )
 @TypeConverters(MediaSourceConverter::class, BackupStateConverter::class, AlbumModeConverter::class)

@@ -160,7 +160,15 @@ class BackupEngine @Inject constructor(
     }
 
     /**
-     * Uploads up to [limit] outstanding files.
+     * Uploads up to [limit] outstanding files, and no more than roughly [maxBytes] of them.
+     *
+     * The byte bound matters more than the count. Twenty-five photos is about 100 MB; twenty-five
+     * videos can be four gigabytes, and a run that long is stopped by WorkManager partway — losing
+     * whatever file was in flight, because the upload session is not persisted across runs. Sizing
+     * by bytes keeps a run to something it can finish.
+     *
+     * A single file larger than the cap is still attempted on its own. Refusing it would mean the
+     * largest files never upload at all, which is worse than a long run.
      *
      * Stops the whole run on a failure that will repeat for every remaining file — no token, a
      * rejected token, a full drive, a dropped network. Continuing would waste the user's battery
@@ -168,6 +176,7 @@ class BackupEngine @Inject constructor(
      */
     suspend fun uploadPending(
         limit: Int = DEFAULT_BATCH,
+        maxBytes: Long = DEFAULT_BATCH_BYTES,
         onProgress: (BackupProgress) -> Unit = {}
     ): BackupRunResult =
         withContext(dispatcher) {
@@ -181,6 +190,7 @@ class BackupEngine @Inject constructor(
             }
 
             val pending = entryDao.nextPending(limit = limit, maxAttempts = MAX_ATTEMPTS)
+                .let { candidates -> withinByteBudget(candidates, maxBytes) }
             var uploaded = 0
             var failed = 0
             var skipped = 0
@@ -333,6 +343,7 @@ class BackupEngine @Inject constructor(
             )
         }
 
+
     /**
      * Local files whose cloud copy is confirmed, so the phone's copy is redundant.
      *
@@ -409,6 +420,48 @@ class BackupEngine @Inject constructor(
 
         /** Files per run. Small enough that a cancelled worker loses little work. */
         const val DEFAULT_BATCH = 25
+
+        /**
+         * Roughly how much one run should move.
+         *
+         * Chosen against the window a background run actually gets, not against a connection
+         * speed: at 1 MB/s this is about nine minutes, which fits inside WorkManager's limit, and
+         * on a fast connection it is a couple of minutes. Lower would mean more runs; higher
+         * would mean runs that get killed, and a killed run throws away the file in flight.
+         */
+        const val DEFAULT_BATCH_BYTES = 512L * 1024 * 1024
+
+        /**
+         * Trims a batch to a byte budget, keeping order.
+         *
+         * Always keeps the first file however large it is: a file bigger than the whole budget
+         * would otherwise be skipped on every run and never upload at all. Everything after it
+         * has to fit.
+         *
+         * Pure, and in the companion so it can be tested without building an engine. The case that
+         * matters is a lone oversized file being dropped, which stays invisible until someone owns
+         * a big video.
+         */
+        fun withinByteBudget(
+            candidates: List<BackupEntryEntity>,
+            maxBytes: Long
+        ): List<BackupEntryEntity> {
+            if (candidates.isEmpty()) return candidates
+
+            val kept = mutableListOf(candidates.first())
+            var total = candidates.first().sizeBytes
+
+            for (entry in candidates.drop(1)) {
+                if (total + entry.sizeBytes > maxBytes) break
+                kept += entry
+                total += entry.sizeBytes
+            }
+
+            if (kept.size < candidates.size) {
+                Logger.d(TAG, "byte budget trimmed ${candidates.size} candidates to ${kept.size}")
+            }
+            return kept
+        }
 
         /** Give up on a file after this many failures rather than retrying it forever. */
         const val MAX_ATTEMPTS = 5

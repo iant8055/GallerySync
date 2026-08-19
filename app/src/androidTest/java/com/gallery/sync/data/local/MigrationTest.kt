@@ -125,11 +125,45 @@ class MigrationTest {
     }
 
     @Test
-    fun migrateAllTheWayFrom1To4() {
+    fun migrate4To5_producesTheSchemaRoomExpects() {
+        helper.createDatabase(TEST_DB, 4).close()
+
+        helper.runMigrationsAndValidate(TEST_DB, 5, true, Migrations.MIGRATION_4_5).close()
+    }
+
+    @Test
+    fun migrate4To5_leavesExistingRowsStillEligibleToProxy() {
+        // Defaulting existing rows to "skipped" would silently exclude every photo that has not
+        // been examined yet — they would stop being offered and nobody would know why.
+        helper.createDatabase(TEST_DB, 4).apply {
+            execSQL(
+                """
+                INSERT INTO backup_entries
+                    (id, mediaStoreId, contentUri, displayName, album, sizeBytes,
+                     dateModifiedEpochSeconds, mimeType, isVideo, state, attemptCount, isProxied)
+                VALUES
+                    ('k1', 42, 'content://media/external/images/media/42', 'IMG_1.jpg',
+                     'Camera', 8000000, 1700000000, 'image/jpeg', 0, 'UPLOADED', 0, 0)
+                """.trimIndent()
+            )
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(TEST_DB, 5, true, Migrations.MIGRATION_4_5)
+
+        db.query("SELECT isProxySkipped FROM backup_entries WHERE id = 'k1'").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals("an unexamined photo must stay a candidate", 0, cursor.getInt(0))
+        }
+        db.close()
+    }
+
+    @Test
+    fun migrateAllTheWayFrom1To5() {
         // Someone upgrading from the first build skips every version in between.
         helper.createDatabase(TEST_DB, 1).close()
 
-        helper.runMigrationsAndValidate(TEST_DB, 4, true, *Migrations.ALL).close()
+        helper.runMigrationsAndValidate(TEST_DB, 5, true, *Migrations.ALL).close()
     }
 
     @Test

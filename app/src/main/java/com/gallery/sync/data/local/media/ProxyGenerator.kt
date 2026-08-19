@@ -15,6 +15,25 @@ import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Why no proxy came back.
+ *
+ * The distinction is load-bearing rather than cosmetic. [NotWorthwhile] is permanent — the file can
+ * never shrink, so it should stop being offered. [Failed] may be transient, so the file stays a
+ * candidate and gets another chance. Collapsing the two, as a bare null did, meant either offering
+ * work that can never happen or excluding photos on one bad decode.
+ */
+sealed interface ProxyResult {
+
+    data class Created(val proxy: GeneratedProxy) : ProxyResult
+
+    /** Already at or under the target size, or already a proxy. Nothing to gain, ever. */
+    data object NotWorthwhile : ProxyResult
+
+    /** Could not be read, decoded or written this time. Worth trying again. */
+    data class Failed(val reason: String) : ProxyResult
+}
+
 /** A downscaled stand-in for a photo whose original is safely in OneDrive. */
 data class GeneratedProxy(
     val file: File,
@@ -46,31 +65,31 @@ class ProxyGenerator @Inject constructor(
      * Null is a normal outcome. A photo that cannot be decoded must be left completely alone: it
      * is the case where overwriting would destroy something we do not understand.
      */
-    suspend fun generate(uri: Uri, displayName: String): GeneratedProxy? = withContext(dispatcher) {
+    suspend fun generate(uri: Uri, displayName: String): ProxyResult = withContext(dispatcher) {
         val bounds = readBounds(uri) ?: run {
             Logger.w(TAG, "could not read bounds for $displayName; leaving it alone")
-            return@withContext null
+            return@withContext ProxyResult.Failed("could not read bounds")
         }
 
         val longEdge = maxOf(bounds.outWidth, bounds.outHeight)
-        if (longEdge <= 0) return@withContext null
+        if (longEdge <= 0) return@withContext ProxyResult.Failed("no usable dimensions")
 
         // Asked of the file itself, not the ledger. A second pass would burn a second badge into
         // the same photo, and the ledger is exactly the thing that has been observed going stale.
         if (marker.isProxy(uri)) {
             Logger.d(TAG, "$displayName is already a proxy; leaving it alone")
-            return@withContext null
+            return@withContext ProxyResult.NotWorthwhile
         }
 
         // Already small enough. Never upscale — that costs space and adds nothing.
         if (longEdge <= TARGET_LONG_EDGE_PX) {
             Logger.d(TAG, "$displayName is already ${longEdge}px; no proxy needed")
-            return@withContext null
+            return@withContext ProxyResult.NotWorthwhile
         }
 
         val decoded = decodeScaled(uri, longEdge) ?: run {
             Logger.w(TAG, "could not decode $displayName; leaving it alone")
-            return@withContext null
+            return@withContext ProxyResult.Failed("could not decode")
         }
 
         val scaled = scaleToTarget(decoded)
@@ -98,7 +117,7 @@ class ProxyGenerator @Inject constructor(
         if (!written || !output.exists() || output.length() == 0L) {
             output.delete()
             Logger.w(TAG, "proxy for $displayName was not written; leaving the original alone")
-            return@withContext null
+            return@withContext ProxyResult.Failed("proxy was not written")
         }
 
         // Without EXIF the gallery loses date grouping and map placement, and — most visibly —
@@ -106,14 +125,16 @@ class ProxyGenerator @Inject constructor(
         if (!copyExif(uri, output)) {
             output.delete()
             Logger.w(TAG, "EXIF could not be copied for $displayName; not proxying it")
-            return@withContext null
+            return@withContext ProxyResult.Failed("EXIF could not be copied")
         }
 
-        GeneratedProxy(
-            file = output,
-            sizeBytes = output.length(),
-            widthPx = width,
-            heightPx = height
+        ProxyResult.Created(
+            GeneratedProxy(
+                file = output,
+                sizeBytes = output.length(),
+                widthPx = width,
+                heightPx = height
+            )
         )
     }
 

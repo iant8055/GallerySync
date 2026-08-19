@@ -81,6 +81,19 @@ data class BackupEntryEntity(
      */
     val isProxied: Boolean = false,
 
+    /**
+     * The generator looked at this file and decided no proxy is worth making — it is already at or
+     * under the target size, or it is already a proxy.
+     *
+     * Distinct from [isProxied]: nothing was rewritten and nothing was reclaimed. It exists so a
+     * file that can never shrink stops being offered. Without it the candidate count never reaches
+     * zero and the button becomes a no-op the user keeps pressing.
+     *
+     * Only set for permanent reasons. A file that failed to decode or write is left alone and stays
+     * a candidate, because that may have been transient.
+     */
+    val isProxySkipped: Boolean = false,
+
     /** What the local file occupies now. [sizeBytes] still means the original, which is in the cloud. */
     val localProxySizeBytes: Long? = null
 )

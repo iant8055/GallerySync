@@ -188,6 +188,15 @@ interface BackupEntryDao {
     suspend fun markProxied(id: String, proxySizeBytes: Long)
 
     /**
+     * Records that a file was examined and no proxy is worth making.
+     *
+     * Only for permanent reasons — already small enough, or already a proxy. A transient failure
+     * must not land here, or one bad decode would exclude a photo forever.
+     */
+    @Query("UPDATE backup_entries SET isProxySkipped = 1 WHERE id = :id")
+    suspend fun markProxySkipped(id: String)
+
+    /**
      * Records a file that was already backed up and already proxied, when the ledger had no memory
      * of either — after an uninstall, or on a new phone.
      *
@@ -224,8 +233,13 @@ interface BackupEntryDao {
     /**
      * Photos whose local copy can safely be replaced by a proxy.
      *
-     * Verified in the cloud, not already proxied, and **never video** — a degraded clip fails
-     * silently inside an editor and is only discovered in the exported result.
+     * Verified in the cloud, not already proxied, not already examined and declined, and **never
+     * video** — a degraded clip fails silently inside an editor and is only discovered in the
+     * exported result.
+     *
+     * The declined ones matter as much as the proxied ones here. A file already under the target
+     * size can never shrink, so leaving it in this list means the count never reaches zero and the
+     * user keeps consenting to work that cannot happen.
      */
     @Query(
         """
@@ -234,6 +248,7 @@ interface BackupEntryDao {
           AND remoteSizeBytes IS NOT NULL
           AND remoteSizeBytes = sizeBytes
           AND isProxied = 0
+          AND isProxySkipped = 0
           AND isVideo = 0
         ORDER BY sizeBytes DESC
         """

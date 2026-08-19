@@ -17,7 +17,7 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 
 /** How the user wants automatic backup to behave. */
 data class BackupPreferences(
-    val isAutomaticEnabled: Boolean = false,
+    val isAutomaticEnabled: Boolean = true,
     val allowMeteredNetwork: Boolean = false,
     val isAutoOptimiseEnabled: Boolean = false
 )
@@ -25,10 +25,13 @@ data class BackupPreferences(
 /**
  * Persisted backup preferences.
  *
- * Every default is deliberately the cautious one. Automatic sync stays off until the user turns it
- * on, so installing a build never starts uploading a library on its own. Mobile data stays off
- * because uploading gigabytes over a metered connection is an expensive surprise unless it was
- * chosen on purpose. Automatic optimising stays off because it rewrites photos.
+ * Automatic sync is **on** by default, changed 19 Aug 2026. Nothing can be uploaded before the user
+ * signs in, so signing in is the consent moment rather than a separate switch — and an app whose
+ * purpose is keeping files safe should not sit idle waiting to be told to start.
+ *
+ * The other two stay cautious, and for different reasons. Mobile data stays off because uploading
+ * gigabytes over a metered connection is an expensive surprise unless it was chosen on purpose.
+ * Automatic optimising stays off because it rewrites photos, which is not undoable from the phone.
  */
 @Singleton
 class BackupSettings @Inject constructor(
@@ -37,7 +40,7 @@ class BackupSettings @Inject constructor(
 
     val preferences: Flow<BackupPreferences> = context.dataStore.data.map { stored ->
         BackupPreferences(
-            isAutomaticEnabled = stored[KEY_AUTOMATIC] ?: false,
+            isAutomaticEnabled = stored[KEY_AUTOMATIC] ?: true,
             allowMeteredNetwork = stored[KEY_ALLOW_METERED] ?: false,
             isAutoOptimiseEnabled = stored[KEY_AUTO_OPTIMISE] ?: false
         )

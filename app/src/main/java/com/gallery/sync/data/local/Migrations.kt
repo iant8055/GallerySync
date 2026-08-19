@@ -118,6 +118,21 @@ object Migrations {
         }
     }
 
+    /**
+     * 4 → 5: records that a file was examined and found not worth proxying.
+     *
+     * Additive, and defaulting to 0 is right for every existing row: a file that has never been
+     * examined must stay a candidate. Marking them skipped instead would silently exclude photos
+     * that genuinely could shrink.
+     */
+    val MIGRATION_4_5 = object : Migration(4, 5) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "ALTER TABLE `backup_entries` ADD COLUMN `isProxySkipped` INTEGER NOT NULL DEFAULT 0"
+            )
+        }
+    }
+
     /** Every migration, in order, for the database builder. */
-    val ALL = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+    val ALL = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
 }
