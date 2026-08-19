@@ -48,28 +48,33 @@ largest one in every row, and the layout must not let the biggest number read as
 
 ### The labels, and one ordering question
 
-Ian, 19 Aug 2026, naming the dropdown items: **None · Sync · Backup · Archive**.
+Ian, 19 Aug 2026, naming the dropdown items: **Off · Sync · Backup · Archive**. He considered "None"
+for the first and chose **Off**, so the label and the stored value read the same.
 
-**"None" is the label; `OFF` stays the enum value.** They are different things and the difference is
-load-bearing — the stored string is what `AlbumModeConverter` reads back, and its own comment
-explains why a value change there could reinterpret existing rows. Rename freely in `strings.xml`;
-never rename the constant.
+That is worth having deliberately rather than by accident. `AlbumModeConverter` stores the enum by
+name, and its own comment explains why: a value change there could reinterpret existing rows as a
+different mode, and one of the modes removes files from the phone. Keeping the label identical to
+the constant means nobody reading the database or a log has to translate between two vocabularies.
 
-**The order is worth a decision rather than an accident.** The enum is a ladder, ordered by how much
-of the album stays on the phone:
+It does not make them the same thing. The label lives in `strings.xml` and gets translated — the
+German dropdown will not say "Off" — while the stored value must stay `OFF` in every locale. Change
+one freely; never the other.
+
+**Still open: the order.** The enum is a ladder, ordered by how much of the album stays on the phone:
 
 | | Off | Backup | Sync | Archive |
 |---|---|---|---|---|
 | stays on the phone | all | all | shrunk | none |
 
-Listing them **None · Sync · Backup · Archive** breaks that progression by putting the mode that
-shrinks files above the one that leaves them alone. Ladder order makes the list readable as a single
-axis — *how much of this album do I want to keep on my phone* — with the destructive end furthest
-from the safe one, which is also where you want it in a dropdown someone is scrolling quickly.
+Listing them **Off · Sync · Backup · Archive** breaks that progression by putting the mode that
+shrinks files above the one that leaves them alone. Ladder order makes the list read as a single
+axis — *how much of this album do I want to keep on my phone* — and keeps the destructive end
+furthest from the safe one, which is where it wants to be in a dropdown someone is scrolling
+quickly.
 
-Recommended: **None · Backup · Sync · Archive**, matching the enum. If Ian's order was deliberate —
-Sync first because it is the mode most people should pick — then a "recommended" marker on Sync does
-that job without scrambling the axis. Worth confirming before it is built.
+Recommended: **Off · Backup · Sync · Archive**, matching the enum. If Sync-first was deliberate,
+because it is the mode most people should pick, a "recommended" marker on Sync does that job without
+scrambling the axis.
 
 ### Archive is the dangerous one, and it is the failure Ian lived through
 Under Archive the files leave the gallery entirely. Photos get no proxy — unlike Sync there is no
