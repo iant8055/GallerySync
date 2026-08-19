@@ -323,6 +323,109 @@ Row five is the one to keep in view while designing v0.4 deletion sync: Samsung'
 delete is the behaviour a migrating user has been trained on, and it is the behaviour this project
 deliberately refuses.
 
+## Video middle-state — two proposals from Ian, 18 Aug 2026
+
+### Proposal 1: write our own thumbnail and index for Samsung Gallery to read — not possible
+Three independent reasons, any one fatal:
+
+- Samsung Gallery's cloud index is a private database inside its own app sandbox. There is no
+  public API to write to it, and no third-party app can reach another app's private storage.
+- The cached thumbnail lives inside Samsung Gallery, not in MediaStore. Making it visible is not a
+  matter of producing the right file — nothing we write anywhere is read by that code path.
+- **Samsung is switching this off on 30 September 2026.** Even a working exploit would target a
+  mechanism that is being removed, and would break every other phone. This project is explicitly
+  built for LG and Moto as well.
+
+Recorded so it is not revisited. The constraint above already said this; this is the same wall from
+a different angle.
+
+### Proposal 2: truncate the video to a short clip — viable, and it inverts our own rule
+Replace the local video with a genuine short clip, marked, with the original in OneDrive. This is
+the video analogue of the photo proxy and it deserves proper evaluation rather than a reflex no.
+
+**What is right about it.** It produces a real, valid, playable video file. It appears in MediaStore,
+in Samsung Gallery and in CapCut, because it is an ordinary file — which is the entire mechanism
+this project rests on. It is also cheap: cutting at a keyframe boundary with `MediaExtractor` and
+`MediaMuxer` is a container-level stream copy, no re-encode, so it is fast and lossless on the
+retained portion. Embedding the OneDrive reference in an MP4 metadata atom is the direct analogue
+of what `ProxyMarker` already does with EXIF, and keeps the file self-describing.
+
+**The link only helps us.** CapCut will not read a custom atom and fetch from OneDrive. It is a
+marker for our retrieval path, exactly like the EXIF marker — not a hydration mechanism. Worth
+being clear about, because "embed a link in the video" can sound like it makes the file work
+elsewhere. It does not.
+
+### The rule this runs into is less settled than it looks
+CLAUDE.md says: *never proxy video **silently** — a degraded clip fails quietly, and the user only
+discovers it in the exported result.* The operative word is silently, and the two candidate
+mechanisms fail in opposite directions:
+
+| | Truncate to a short clip | Downscale, full length |
+|---|---|---|
+| Cost to produce | cheap — stream copy, no re-encode | expensive — full transcode, adds Media3 Transformer |
+| Gallery viewing | **destroyed** — you cannot rewatch anything | **preserved** — 480p is fine on a phone |
+| Failure in an editor | **loud** — 2 seconds on the timeline, seen instantly | **quiet** — looks fine, discovered in the export |
+| Content preserved | no — most of it is gone | yes — all of it, at lower quality |
+
+So truncation is arguably *more* compliant with the rule as written, because its failure is
+impossible to miss. The safer-sounding option is the one the rule actually describes.
+
+**And the project already accepted quiet editor degradation — for photos.** A 2048px proxy exports
+at 2048px, which the milestone notes above call out as the reason retrieval is load-bearing. The
+video rule was written before proxies existed and has not been reconciled with that decision. The
+asymmetry is worth examining rather than assumed.
+
+### The reverse direction — Ian, 18 Aug 2026: selecting it pulls the original back
+Right, and that is already the v0.4 retrieval item rather than something new. But **"selecting the
+file" cannot mean selecting it in Samsung Gallery.**
+
+There is no hydration hook — the constraint above, again. When the user taps that clip in Samsung
+Gallery, the system opens the file directly and our app is never told. We cannot intercept it,
+delay it, or substitute anything. So the round trip is necessarily a two-app flow:
+
+1. The user meets the stub in their gallery and sees it is a stub.
+2. They open GallerySync and fetch it from the retrieval list.
+3. We download the original and put it back where the stub was.
+
+The stub is therefore a **signpost, not a button**, and its job is to make step 2 obvious. That is a
+point in truncation's favour that downscaling does not have: a full-length 480p copy looks like a
+normal video and gives the user no reason to go looking, whereas a clip that visibly stops tells
+them immediately. Whatever is chosen has to answer "how does the user know to come to us", and the
+stub is the only place that message can live.
+
+### Writing the original back needs consent too
+Step 3 overwrites a MediaStore file the camera created, not one we own, so it needs
+`createWriteRequest` exactly as proxying does. Retrieval is not a quiet background restore; it is
+another dialog.
+
+There is a way around it worth considering for both paths: **a file this app creates through
+MediaStore is owned by this app, and we can modify our own files without asking.** If the stub were
+inserted as a new entry we own rather than an overwrite of the original, hydrating it later would
+need no dialog at all. The cost is that the original then has to be removed, which is the
+destructive path with the Samsung trash behaviour attached — and the new entry would carry a new
+MediaStore id, losing anything keyed to the old one.
+
+Not resolved here, but it applies to photo proxies as much as video stubs, and it is the only
+route seen so far that reduces the consent burden rather than working around it.
+
+### What this needs from Ian
+Amending a hard rule in CLAUDE.md, which is his call, not an agent's. The options are not
+truncate-versus-downscale so much as **what a video proxy is for**:
+
+- If it is for *viewing* — keeping the gallery whole, which is the design principle — then
+  full-length downscale is the only candidate, and editing goes through retrieval exactly as it
+  does for photos.
+- If it is for *marking a placeholder* — a visible stub saying "this exists, fetch it" — then
+  truncation is cheaper, louder, and honest, but the gallery stops being a place you can watch
+  anything.
+- If neither is acceptable, the position stands: video is whole on the device or absent from the
+  gallery, and the rolling window decides which.
+
+Recommendation: full-length downscale, with the badge and metadata marker the photo path already
+uses, and retrieval as the documented route to a full-quality edit. It keeps the gallery whole,
+which is the stated purpose, and makes video consistent with photos rather than a special case.
+The transcode cost is real and would need measuring on an 8K clip before committing.
+
 ## Where video stands — it spans three milestones, so it is easy to lose track
 
 Video is **already backed up**, and has been since v0.2. `MediaScanner` queries the images and the
@@ -348,7 +451,8 @@ only and the rolling window is a separate task with a separate decision.
 - [ ] Fetch a cloud-only item back on demand, registering it in MediaStore so every app sees it.
       Photos and video both — video is already backed up, so retrieval is the same path, and it is
       the only route back to a full-quality edit from a 2048px proxy.
-- [ ] Plain retrieval list — **not** a photo browser
+- [ ] Plain retrieval list — **not** a photo browser. It is also the only place a fetch can be
+      triggered: there is no hydration hook, so tapping an item in Samsung Gallery cannot reach us.
 - [ ] Deletion sync, opt-in and batched. Highest-risk feature in the product; it only follows a
       backup engine that has been watched working. Never infers deletion from absence alone —
       a card unmounting or a permission being revoked must not be read as intent.
