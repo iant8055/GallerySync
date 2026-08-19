@@ -2,13 +2,13 @@
     <string name="app_name">Gallery Sync</string>
 
     <!-- Tabs -->
-    <string name="tab_backup">Backup</string>
+    <string name="tab_backup">Sync</string>
     <string name="tab_onedrive">OneDrive</string>
     <string name="tab_settings">Settings</string>
 
     <!-- Settings sections -->
     <string name="settings_account">Account</string>
-    <string name="settings_automatic">Automatic backup</string>
+    <string name="settings_automatic">Automatic sync</string>
     <string name="settings_storage">Storage</string>
     <string name="settings_optimise">Optimise photos</string>
 
@@ -65,15 +65,15 @@
 
     <!-- Media permission -->
     <string name="permission_needed_title">Gallery Sync needs access to your photos</string>
-    <string name="permission_needed_detail">It reads the albums you choose so it can back them up to OneDrive. It never deletes anything.</string>
+    <string name="permission_needed_detail">It reads the albums you choose so it can sync them to OneDrive. It never deletes anything.</string>
     <string name="permission_partial_title">Only some photos are shared</string>
-    <string name="permission_partial_detail">Gallery Sync can currently see just the photos you picked, so a backup would be incomplete. Grant access to all photos to back up whole albums.</string>
+    <string name="permission_partial_detail">Gallery Sync can currently see just the photos you picked, so a sync would be incomplete. Grant access to all photos to sync whole albums.</string>
     <string name="permission_grant_action">Grant access</string>
 
     <!-- Backup -->
     <string name="backup_selection_summary">%1$s selected · %2$s</string>
-    <string name="backup_all_done">Everything selected is backed up</string>
-    <string name="backup_nothing_selected">Choose an album to back up</string>
+    <string name="backup_all_done">Everything selected is synced</string>
+    <string name="backup_nothing_selected">Choose an album to sync</string>
     <!--
         "verified" matters: this is what Gallery Sync has confirmed, not what OneDrive contains.
         After a reinstall the ledger is empty and this reads 0, which would otherwise look like
@@ -85,12 +85,14 @@
     </plurals>
 
     <!--
-        Moving local copies out. Deliberately framed as moving to the backup rather than deleting:
-        the file is not being discarded, it is being reduced from two copies to one, and that one
-        is the backup. The trash note is not softening — space genuinely is not reclaimed until the
-        user empties it, and saying otherwise would be a lie they discover later.
+        Removing local copies. Deliberately NOT called sync: sync means the file stays in the
+        gallery, and this is the one operation where it does not. The file is not discarded — it
+        goes from two copies to one, and that one is verified in OneDrive — but from the user's
+        side it leaves the gallery, so the wording says so rather than implying a tidy move.
+        The trash note is not softening: space is genuinely not reclaimed until the user empties
+        it, and saying otherwise would be a lie they discover later.
     -->
-    <string name="backup_move_to_backup">Move %1$s to backup</string>
+    <string name="backup_move_to_backup">Remove %1$s from this phone</string>
 
     <!--
         The whole sentence is a plural, not a plural noun dropped into a fixed template — the verb
@@ -98,33 +100,33 @@
         with more than two plural forms, or with gendered pronouns, break even harder on that.
     -->
     <plurals name="backup_move_explainer">
-        <item quantity="one">%1$d file on this phone is already safely in OneDrive. Moving it to your backup frees that space.</item>
-        <item quantity="other">%1$d files on this phone are already safely in OneDrive. Moving them to your backup frees that space.</item>
+        <item quantity="one">%1$d file on this phone is already verified in OneDrive. Removing it frees that space, but it will no longer appear in your gallery.</item>
+        <item quantity="other">%1$d files on this phone are already verified in OneDrive. Removing them frees that space, but they will no longer appear in your gallery.</item>
     </plurals>
     <string name="backup_move_trash_note">Your OneDrive copy is checked first and is never touched. On some phones the local copy goes to your gallery\'s Recently deleted; on others it is removed straight away, so treat this as permanent on the phone.</string>
-    <string name="backup_move_unsupported">Moving files to backup needs Android 11 or newer.</string>
-    <string name="backup_nothing_redundant">Nothing to move yet — files move to your backup once they are safely in OneDrive.</string>
-    <string name="backup_automatic">Back up automatically</string>
-    <string name="backup_automatic_on">New photos back up shortly after you take them.</string>
-    <string name="backup_automatic_off">Nothing is backed up unless you tap Back up now.</string>
+    <string name="backup_move_unsupported">Removing local copies needs Android 11 or newer.</string>
+    <string name="backup_nothing_redundant">Nothing to remove yet — a file can be removed once it is verified in OneDrive.</string>
+    <string name="backup_automatic">Sync automatically</string>
+    <string name="backup_automatic_on">New photos sync shortly after you take them.</string>
+    <string name="backup_automatic_off">Nothing syncs unless you tap Sync now.</string>
     <string name="backup_allow_metered">Use mobile data</string>
-    <string name="backup_allow_metered_on">Backs up on Wi-Fi and mobile data.</string>
+    <string name="backup_allow_metered_on">Syncs on Wi-Fi and mobile data.</string>
     <string name="backup_allow_metered_off">Wi-Fi only.</string>
 
     <string name="backup_deselect_all">Deselect all</string>
     <string name="backup_select_all">Select all</string>
     <string name="backup_rescan">Rescan</string>
-    <string name="backup_run_now">Back up now</string>
-    <string name="backup_running">Backing up…</string>
+    <string name="backup_run_now">Sync now</string>
+    <string name="backup_running">Syncing…</string>
     <string name="backup_album_summary">%1$s · %2$s</string>
 
     <!--
         Album status is separate from the toggle on purpose. An archived album that will never
         gain another photo is finished, not unprotected — and "off" must not read as "at risk".
     -->
-    <string name="album_status_complete">All backed up</string>
-    <string name="album_status_partial">%1$d still to back up</string>
-    <string name="album_status_none">Not backed up yet</string>
+    <string name="album_status_complete">All synced</string>
+    <string name="album_status_partial">%1$d still to sync</string>
+    <string name="album_status_none">Not synced yet</string>
     <string name="album_watching">Watching for new files</string>
     <string name="album_not_watching">Not watched — nothing new expected</string>
     <plurals name="file_count">

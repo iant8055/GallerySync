@@ -19,11 +19,35 @@ Two consequences:
   backup is a reasonable second net in the meantime.
 - **v0.3 can be built properly rather than rushed**, since no store listing depends on it.
 
-## Naming
-Do not call anything "Sync" in the UI until v0.3 and v0.4 land. Samsung's Gallery Sync kept
-photos visible while freeing space; ours does not yet. Using the word early promises the
-behaviour users are migrating from and would be wrong. "Move to backup" until then.
+## Naming — retired 18 Aug 2026, replaced by a per-screen test
 
+The old rule banned the word "Sync" in the UI until v0.3 and v0.4 both landed. **v0.3's photo
+proxies landed and were verified on hardware on 18 Aug 2026**, and that is precisely the Samsung
+behaviour the ban was waiting for: the photo stays in the gallery, the space is freed. The word is
+earned for photos now, so a blanket ban has outlived its reason. Ian retired it the same day.
+
+What replaces it is a test applied per screen, not a list of allowed words:
+
+> **Say "sync" where the file ends up in the cloud *and* stays in the gallery.
+> Where the file leaves the gallery, say that plainly instead.**
+
+That is the whole promise users are migrating from, and it is the only thing the word has to carry.
+
+| Operation | Local outcome | Wording |
+|---|---|---|
+| Upload, local copy kept | unchanged, still visible | **sync** — true for photos and video alike |
+| Optimise, photo proxied | ~10x smaller, still visible | **sync** — this is the flagship case |
+| Remove local copy | **gone from the gallery** | never "sync" — "Remove from this phone" |
+
+The third row is the one the old rule was really protecting, and it stays protected. "Move to
+backup" was a soft name for a hard action, and softening it was the actual risk — not the word
+"sync" as such. The copy now says the file will no longer appear in the gallery, which it had never
+said before.
+
+### Consequence for video
+Video satisfies row one and can never satisfy row two, so a video is synced right up until its
+local copy is removed — at which point it leaves the gallery with no stand-in. See the video
+section below; that limit is unchanged by any of this, and no wording can paper over it.
 ## Design principle — GallerySync is invisible
 
 **It is not a gallery app and must never become one.**
