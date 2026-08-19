@@ -144,10 +144,11 @@ gallery keeps working.
       nothing is deleted — proxying is the only lever. If proxying alone cannot reach the floor it
       stops and says so. Notifies when free space drops below the floor — which is also how it asks
       for the next batch of write consent. Decided 18 Aug 2026; see TASK-011.
-- [ ] **Rolling window for video**, so recent clips stay usable in the gallery. The only lever is
-      removing the local file, so this is a separate decision from the photo budget. Its acceptance
-      criterion is the founding use case: record a video now, edit it in CapCut later today, and
-      never find it degraded or gone.
+- [ ] **Rolling window for video — reconsidered, and probably wrong as specified.** Ian lost access
+      to a just-shot video because Samsung moved it to the cloud; a window reproduces that failure
+      on a longer fuse. Video has no proxy, so a removed clip disappears rather than degrading.
+      Default should be uploaded and left alone; freeing video space is an explicit per-file choice.
+      If offered at all, opt-in and off by default.
 - [ ] **Move to backup should distinguish photo from video.** It currently trashes both. A photo has
       a better option now (optimise, and stay visible); a video has none, and vanishes from the
       gallery until v0.4 retrieval. Same button, very different consequence.
@@ -341,6 +342,42 @@ indexed in MediaStore, and every app can already open it. Nothing in this design
 TASK-011 is photos only, and any future rolling window keeps recent clips whole by definition.
 
 So the workflow works today, with no proxy, no stub and no retrieval involved.
+
+### The actual failure, in Ian's words
+> *"I couldn't find the video I had just shot because Gallery had moved it to OneDrive."*
+
+Samsung moved a **just-shot** video to the cloud within minutes, and at that moment it stopped
+existing as far as CapCut was concerned. This is the origin of the project and it is worth being
+exact about, because it points somewhere different from where the discussion above was heading.
+
+The problem was never that old video is inaccessible. It was that **backing up was coupled to
+removing**, and the coupling ran fast enough to catch a video ten minutes old.
+
+### What that makes non-negotiable
+**Uploading must never remove anything.** In GallerySync it already does not — `BackupEngine`
+uploads and touches nothing local; removal lives behind a separate, explicitly-tapped button. That
+separation is not an implementation detail, it is the entire difference between this app and the
+thing that caused the problem. It must survive every future change.
+
+### It also changes the rolling window from a feature into a risk
+A rolling window still removes video automatically — just on a longer fuse. The failure Ian hit was
+*going to look for a video and not finding it*, and a window reproduces that exactly, only later and
+with the user having forgotten there was a rule. Video has no proxy, so a removed clip does not
+degrade, it disappears.
+
+So the default for video should be: **uploaded, and left alone indefinitely.** Freeing video space
+is an explicit choice on specific files, not a background policy. If a window is offered at all it
+is opt-in, off by default, and its purpose is to be told "no" by anyone who edits video — which is
+this app's founding user.
+
+That is a change from the v0.3 checklist item above, which assumed a window was wanted. It was
+specified before this experience was written down.
+
+### Photos are genuinely different, and the difference is the proxy
+Nothing here weakens the photo budget. An optimised photo stays in the gallery, opens in every app
+and looks correct — the user never goes looking and finds nothing. That is precisely why proxying is
+safe to run automatically and removing video is not, and it is why TASK-011 was scoped to photos
+before any of this came up.
 
 ### What actually broke, and what fixes it
 The thing Samsung broke was not recording-then-editing. It was that videos **Samsung had moved to
