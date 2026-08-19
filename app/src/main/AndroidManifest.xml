@@ -2,6 +2,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!--
+        Package visibility for the "Open OneDrive" button. A targeted <queries> entry rather than
+        QUERY_ALL_PACKAGES: it is the narrowest declaration that works on API 30+, and it needs no
+        Play Store justification because it names one app instead of asking to see them all.
+    -->
+    <queries>
+        <package android:name="com.microsoft.skydrive" />
+    </queries>
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 

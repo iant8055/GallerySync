@@ -31,6 +31,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
 import com.gallery.sync.ui.backup.BackupViewModel
 import com.gallery.sync.ui.backup.ProxyStatus
+import com.gallery.sync.ui.common.OneDriveLauncher
 import com.gallery.sync.ui.common.formatBytes
 import kotlinx.coroutines.launch
 
@@ -74,6 +75,13 @@ fun SettingsScreen(
         Section(stringResource(R.string.settings_account)) {
             accountName?.let {
                 Text(it, style = MaterialTheme.typography.bodyLarge)
+            }
+            Text(
+                text = stringResource(R.string.settings_open_onedrive_detail),
+                style = MaterialTheme.typography.bodySmall
+            )
+            OutlinedButton(onClick = { OneDriveLauncher.open(context) }) {
+                Text(stringResource(R.string.settings_open_onedrive))
             }
             OutlinedButton(onClick = onSignOut) {
                 Text(stringResource(R.string.sign_out_action))

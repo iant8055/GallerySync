@@ -21,7 +21,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.ui.backup.BackupScreen
-import com.gallery.sync.ui.browse.BrowseScreen
 import com.gallery.sync.ui.settings.SettingsScreen
 import com.gallery.sync.ui.signin.SignInScreen
 import com.gallery.sync.ui.signin.SignInUiState
@@ -89,21 +88,20 @@ private fun SignedInApp(
                 onClick = { selectedTab = 0 },
                 text = { Text(stringResource(R.string.tab_backup)) }
             )
+            // The OneDrive browser is hidden, not deleted. Browsing cloud files is the thumbnail
+            // browser the design principle rules out, and v0.4 needs this screen repurposed as the
+            // retrieval list — a plain list of what is not on the phone. Settings offers a "Open
+            // OneDrive" button meanwhile, which is a better answer than a browser we should not
+            // be building. See .claude/tasks/TASK-012.md.
             Tab(
                 selected = selectedTab == 1,
                 onClick = { selectedTab = 1 },
-                text = { Text(stringResource(R.string.tab_onedrive)) }
-            )
-            Tab(
-                selected = selectedTab == 2,
-                onClick = { selectedTab = 2 },
                 text = { Text(stringResource(R.string.tab_settings)) }
             )
         }
 
         when (selectedTab) {
             0 -> BackupScreen()
-            1 -> BrowseScreen(onSignOut = onSignOut)
             else -> SettingsScreen(accountName = accountName, onSignOut = onSignOut)
         }
     }

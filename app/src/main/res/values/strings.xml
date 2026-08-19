@@ -3,11 +3,14 @@
 
     <!-- Tabs -->
     <string name="tab_backup">Album Modes</string>
+    <!-- Unused while the OneDrive browser tab is hidden; v0.4 repurposes that screen. -->
     <string name="tab_onedrive">OneDrive</string>
     <string name="tab_settings">Settings</string>
 
     <!-- Settings sections -->
     <string name="settings_account">Account</string>
+    <string name="settings_open_onedrive">Open OneDrive</string>
+    <string name="settings_open_onedrive_detail">GallerySync does not browse your cloud files — OneDrive already does that well. Open it to find anything that is not on this phone.</string>
     <string name="settings_automatic">Automatic sync</string>
     <string name="settings_storage">Storage</string>
     <string name="settings_optimise">Optimise photos</string>
