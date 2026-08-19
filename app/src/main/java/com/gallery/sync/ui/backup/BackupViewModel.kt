@@ -117,6 +117,7 @@ data class BackupUiState(
     val canRemoveLocalCopies: Boolean = false,
     /** Back up on its own when new photos appear. */
     val isAutomaticEnabled: Boolean = false,
+    val isAutoOptimiseEnabled: Boolean = false,
     /** Allow automatic runs on mobile data, not just Wi-Fi. */
     val allowMeteredNetwork: Boolean = false,
     /** Photos whose local copy could be replaced by a proxy, and what they occupy now. */
@@ -185,6 +186,7 @@ class BackupViewModel @Inject constructor(
             settings.preferences.collect { prefs ->
                 _state.value = _state.value.copy(
                     isAutomaticEnabled = prefs.isAutomaticEnabled,
+                    isAutoOptimiseEnabled = prefs.isAutoOptimiseEnabled,
                     allowMeteredNetwork = prefs.allowMeteredNetwork
                 )
             }
@@ -268,6 +270,17 @@ class BackupViewModel @Inject constructor(
             // Changing the selection changes what is outstanding, so the counts must follow.
             refreshCounts()
         }
+    }
+
+    /**
+     * Turns automatic optimising on or off.
+     *
+     * Cannot make optimising unattended — Android raises a confirmation dialog for every batch and
+     * only an Activity can show it. What this changes is that the app offers when there is
+     * something to optimise, instead of waiting to be found in Settings.
+     */
+    fun setAutoOptimiseEnabled(enabled: Boolean) {
+        viewModelScope.launch { settings.setAutoOptimiseEnabled(enabled) }
     }
 
     /** Switches every discovered album on or off at once. */

@@ -18,8 +18,12 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -64,6 +68,21 @@ fun SettingsScreen(
         if (result.resultCode == Activity.RESULT_OK) viewModel.onProxyConsentGranted()
     }
 
+    // With automatic optimising on, offer the consent dialog when there is something to do rather
+    // than waiting to be found in Settings. Once per visit: Android needs a tap for every batch, so
+    // re-raising a dialog the user dismissed would be nagging rather than helping.
+    var hasOfferedAutoProxy by remember { mutableStateOf(false) }
+    LaunchedEffect(state.isAutoOptimiseEnabled, state.proxyCandidateCount, state.canProxy) {
+        if (state.isAutoOptimiseEnabled && state.canProxy &&
+            state.proxyCandidateCount > 0 && !hasOfferedAutoProxy
+        ) {
+            hasOfferedAutoProxy = true
+            viewModel.buildProxyWriteRequest()?.let {
+                proxyLauncher.launch(IntentSenderRequest.Builder(it).build())
+            }
+        }
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -76,15 +95,20 @@ fun SettingsScreen(
             accountName?.let {
                 Text(it, style = MaterialTheme.typography.bodyLarge)
             }
+            OutlinedButton(onClick = onSignOut) {
+                Text(stringResource(R.string.sign_out_action))
+            }
+        }
+
+        HorizontalDivider()
+
+        Section(stringResource(R.string.settings_cloud_files)) {
             Text(
                 text = stringResource(R.string.settings_open_onedrive_detail),
                 style = MaterialTheme.typography.bodySmall
             )
             OutlinedButton(onClick = { OneDriveLauncher.open(context) }) {
                 Text(stringResource(R.string.settings_open_onedrive))
-            }
-            OutlinedButton(onClick = onSignOut) {
-                Text(stringResource(R.string.sign_out_action))
             }
         }
 
@@ -123,6 +147,21 @@ fun SettingsScreen(
         HorizontalDivider()
 
         Section(stringResource(R.string.settings_optimise)) {
+            if (state.canProxy) {
+                SettingSwitch(
+                    label = stringResource(R.string.settings_auto_optimise),
+                    detail = stringResource(
+                        if (state.isAutoOptimiseEnabled) {
+                            R.string.settings_auto_optimise_on
+                        } else {
+                            R.string.settings_auto_optimise_off
+                        }
+                    ),
+                    checked = state.isAutoOptimiseEnabled,
+                    onCheckedChange = viewModel::setAutoOptimiseEnabled
+                )
+            }
+
             when {
                 !state.canProxy -> Text(
                     text = stringResource(R.string.proxy_unsupported),
