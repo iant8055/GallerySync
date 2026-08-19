@@ -86,6 +86,10 @@ Verified on hardware: sign-in completes and the real drive lists.
 - [x] Metered-network preference — a real setting in `BackupSettings`, exposed as a toggle in
       Settings, defaulting to unmetered-only.
 - [ ] Retry failed items from the UI
+- [ ] **Start time for the first backup.** The initial whole-gallery upload is the heaviest thing
+      the app ever does. Let the user pick when it starts, default overnight, and require charging
+      for that first run. Asked for by Ian 18 Aug 2026; see TASK-011 for why it needs no consent
+      dialogs and the optimise pass does.
 
 Cutover rule: run alongside Samsung's sync for at least two weeks before trusting this alone.
 

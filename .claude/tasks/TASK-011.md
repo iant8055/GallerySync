@@ -222,6 +222,60 @@ two-second job — at the cost of a grant pool, a `ClipData` hand-off and a seco
 mechanism — is most of the complexity in this task for none of the benefit. Option 3 gets stronger
 the more closely the two schedules are examined.
 
+### First run — scheduling it, and why no dialogs are involved
+
+Ian, 18 Aug 2026, raised the first activation backing up the entire gallery, and asked whether it
+could run overnight and have the consent dialogs answered by a script.
+
+**Backing up needs no consent dialogs at all.** Uploading reads local files and POSTs them to
+Graph. Reading needs `READ_MEDIA_IMAGES` / `READ_MEDIA_VIDEO`, granted once at setup — there is no
+per-file or per-batch dialog on the read path. The first whole-gallery backup is a long transfer,
+not a sequence of prompts.
+
+Dialogs appear in exactly two places, both of which *modify* local files, and both user-initiated:
+
+| Operation | Dialog | When |
+|---|---|---|
+| Backup / upload | none | — |
+| Move redundant local copies (`createTrashRequest`) | yes, 2000 cap | user taps "Move to backup" |
+| Optimise (`createWriteRequest`) | yes, 2000 cap | user taps "Optimise" |
+
+So the thing worth scheduling overnight and the thing that needs the user present are different
+operations, and they separate cleanly.
+
+**Answering the dialogs programmatically is not available, and is not a gap to engineer around.**
+The dialog is drawn by MediaProvider in another process; cross-app input injection needs
+`INJECT_EVENTS`, which is signature-level and system-only. The one mechanism that could reach it is
+an `AccessibilityService`, which the user must enable by hand and which Play policy restricts to
+genuine accessibility use — auto-confirming permission dialogs is an explicit violation and gets
+apps removed. It also runs directly against this project's own rule that nothing is rewritten or
+trashed without the user confirming that specific action. The dialog is the refusal opportunity;
+answering it on the user's behalf removes the only thing it is for.
+
+It is also not needed. The first optimise pass over 6,289 images is **at most four dialogs, once**
+— fewer in practice, since anything already under 2048px is skipped.
+
+### The two halves fit together
+This is the natural shape of first run, and it happens to be exactly option 3:
+
+- **Overnight, unattended:** the whole-gallery upload. Hours of transfer, battery and heat, and no
+  user input possible or required. Schedule it.
+- **Next time the app is opened:** the optimise pass, where the user taps through a few grants with
+  a progress indicator between them. They are present because the platform requires it, and the
+  work is fast because the uploads already happened.
+
+### Scheduling the first backup — worth building
+Not for the dialogs, but because a whole-library upload is the one genuinely heavy thing this app
+ever does.
+
+- WorkManager `setInitialDelay` to the next occurrence of a user-chosen time; the existing
+  `BackupScheduling.enable` already takes the constraints.
+- Add `setRequiresCharging(true)` for this first run. Overnight and charging also sidesteps Doze,
+  which defers work on an unplugged idle device.
+- Keep the existing unmetered constraint.
+- Generalises later into a backup window preference, but the narrow version — a start time for the
+  first run — is what is being asked for and is enough.
+
 ### Where the applying step runs — still open
 
 Ian, 18 Aug 2026: *"applying steps should be running in the background."* Taken as read. It does
