@@ -264,6 +264,21 @@ install without expecting to lose its data.
 
 ---
 
+## Versioning — decided 19 Aug 2026
+
+**`versionName` tracks the milestone being built.** Currently `0.3.0`. A crash report or a Play
+console entry then says which milestone it came from, and the number means the same thing in the
+build file as it does in this document.
+
+Not `1.0`: that would claim a maturity the app does not have, and the release gate means nothing
+ships before v0.4 regardless.
+
+**`versionCode` is a plain incrementing integer** with no relationship to the name. Play only ever
+accepts a higher one, so it is bumped per upload and never reset. Still `1`, because nothing has been
+uploaded.
+
+---
+
 ## Open questions
 
 **Needs Ian's decision**
@@ -272,11 +287,6 @@ install without expecting to lose its data.
   background detection and notification, applying on the tap. See TASK-011.
 - **`POST_NOTIFICATIONS`** — needed for the floor notification, and it appears on the Play listing.
 - **Language dropdown** — wire the per-app locale mechanism now and ship English only, or defer.
-- **Version numbering.** `app/build.gradle.kts` still carries `versionCode = 1` and
-  `versionName = "1.0"`, which track nothing: this file is on v0.2/v0.3 and the release gate says
-  neither ships yet. A `versionName` of "1.0" on the first Play upload would also claim a maturity
-  the app will not have. Wants deciding before anything is uploaded — most likely `versionName`
-  following these milestones ("0.3.0") with `versionCode` a plain incrementing integer.
 - **`targetSdk = 37` versus CLAUDE.md, which specifies 35.** One of the two is stale. It matters
   because target level gates real behaviour — the 2000-URI cap above binds only at 35+.
 

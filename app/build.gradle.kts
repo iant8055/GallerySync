@@ -16,8 +16,16 @@ android {
         applicationId = "com.gallery.sync"
         minSdk = 26
         targetSdk = 37
+        // versionName tracks the milestone in .claude/MILESTONES.md that is being built, so a crash
+        // report or a Play console entry says which one it came from. "1.0" would have claimed a
+        // maturity the app does not have, and the release gate means nothing ships before v0.4
+        // anyway.
+        //
+        // versionCode is a plain incrementing integer with no relationship to the name. Google Play
+        // only ever accepts a higher one, so it is bumped per upload and never reset. Still 1
+        // because nothing has been uploaded.
         versionCode = 1
-        versionName = "1.0"
+        versionName = "0.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
