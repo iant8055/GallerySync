@@ -1,7 +1,7 @@
 package com.gallery.sync.ui.theme
 
-import android.app.Activity
 import android.os.Build
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -9,7 +9,10 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -48,6 +51,19 @@ fun GallerySyncTheme(
 
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
+    }
+
+    // The status bar icons follow the *system* theme, not ours. Override the app to Dark while the
+    // phone is in Light and the clock and battery go dark-on-dark — unreadable, and exactly the
+    // class of bug the dark-mode rule in CLAUDE.md exists to prevent. Telling the window which way
+    // round we are drawing is what keeps them legible.
+    val view = LocalView.current
+    val activity = LocalActivity.current
+    if (!view.isInEditMode && activity != null) {
+        SideEffect {
+            WindowCompat.getInsetsController(activity.window, view)
+                .isAppearanceLightStatusBars = !darkTheme
+        }
     }
 
     MaterialTheme(

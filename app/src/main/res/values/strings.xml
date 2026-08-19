@@ -8,6 +8,10 @@
     <string name="tab_settings">Settings</string>
 
     <!-- Settings sections -->
+    <string name="settings_appearance">Appearance</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
     <string name="settings_account">Account</string>
     <string name="settings_cloud_files">Your cloud files</string>
     <string name="settings_open_onedrive">Open OneDrive</string>

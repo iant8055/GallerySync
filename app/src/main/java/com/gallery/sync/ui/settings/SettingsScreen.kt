@@ -15,6 +15,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,7 +38,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
 import com.gallery.sync.ui.backup.BackupViewModel
 import com.gallery.sync.ui.backup.ProxyStatus
+import com.gallery.sync.data.local.settings.ThemeMode
 import com.gallery.sync.ui.common.OneDriveLauncher
+import com.gallery.sync.ui.theme.ThemeViewModel
 import com.gallery.sync.ui.common.formatBytes
 import kotlinx.coroutines.launch
 
@@ -50,7 +55,8 @@ fun SettingsScreen(
     accountName: String?,
     onSignOut: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: BackupViewModel = hiltViewModel()
+    viewModel: BackupViewModel = hiltViewModel(),
+    themeViewModel: ThemeViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -90,6 +96,31 @@ fun SettingsScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
+
+        Section(stringResource(R.string.settings_appearance)) {
+            val themeMode by themeViewModel.themeMode.collectAsStateWithLifecycle()
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                ThemeMode.entries.forEachIndexed { index, mode ->
+                    SegmentedButton(
+                        selected = themeMode == mode,
+                        onClick = { themeViewModel.setThemeMode(mode) },
+                        shape = SegmentedButtonDefaults.itemShape(index, ThemeMode.entries.size)
+                    ) {
+                        Text(
+                            stringResource(
+                                when (mode) {
+                                    ThemeMode.SYSTEM -> R.string.theme_system
+                                    ThemeMode.LIGHT -> R.string.theme_light
+                                    ThemeMode.DARK -> R.string.theme_dark
+                                }
+                            )
+                        )
+                    }
+                }
+            }
+        }
+
+        HorizontalDivider()
 
         Section(stringResource(R.string.settings_account)) {
             accountName?.let {

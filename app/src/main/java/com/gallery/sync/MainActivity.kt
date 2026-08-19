@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -25,7 +26,9 @@ import com.gallery.sync.ui.settings.SettingsScreen
 import com.gallery.sync.ui.signin.SignInScreen
 import com.gallery.sync.ui.signin.SignInUiState
 import com.gallery.sync.ui.signin.SignInViewModel
+import com.gallery.sync.data.local.settings.ThemeMode
 import com.gallery.sync.ui.theme.GallerySyncTheme
+import com.gallery.sync.ui.theme.ThemeViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -34,7 +37,18 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            GallerySyncTheme {
+            // Read before anything is drawn, so the app opens in the theme the user chose rather
+            // than flashing the system one and correcting itself a frame later.
+            val themeViewModel: ThemeViewModel = hiltViewModel()
+            val themeMode by themeViewModel.themeMode.collectAsStateWithLifecycle()
+
+            GallerySyncTheme(
+                darkTheme = when (themeMode) {
+                    ThemeMode.SYSTEM -> isSystemInDarkTheme()
+                    ThemeMode.LIGHT -> false
+                    ThemeMode.DARK -> true
+                }
+            ) {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     GallerySyncApp(modifier = Modifier.padding(innerPadding))
                 }
