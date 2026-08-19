@@ -76,21 +76,55 @@ the Album Modes screen does one row at a time, so "what happens to existing phot
 happens to new ones" have the same answer. The alternative — a separate notion of pre-existing files
 — means new state, a new migration and two rules where users expect one. Not worth it.
 
-## Conversation bubbles teach; they never consent
+## The bubbles are the *presentation* half of informed consent
 
-Coach-mark tours have one well-known failure: people tap through them. That is tolerable for a
-tutorial and unacceptable for consent.
+Clarified by Ian, 19 Aug 2026, correcting an earlier draft of this section that argued against a
+position he had not taken:
 
-- The bubbles explain what the modes do and what the defaults are.
-- **They never stand in for the Archive confirmation** in TASK-012 guard 4, which keeps its own
-  dialog with Cancel as the default action.
-- Nothing destructive is reachable by tapping "Next" repeatedly.
-- The tour is skippable, and skipping it leaves the safe defaults in place rather than an
-  unconfigured app.
+> *"I do not mean that the bubbles replace consent notifications. Just so that we can control
+> (verify) that the user has seen the necessary information. They are not meant to replace Archiving
+> approvals, just to explain step by step what each setting does."*
 
-The bubbles are also where the plain-language mode explanations first appear. Same strings as the
-Help entries in TASK-012, not a paraphrase — two descriptions of one irreversible operation will
-drift, and the drift is invisible.
+That splits informed consent into its two real parts, and the app should hold both:
+
+| Part | Carried by |
+|---|---|
+| The information **was presented** | the bubbles, and a record that they were shown |
+| The decision **was taken** | the Archive confirmation in TASK-012 guard 4, unchanged |
+
+The second was never in question. The first is the new requirement, and it is more than a tutorial:
+**the app keeps a record of which explanations have been displayed.**
+
+### What "verify they have seen it" means in build terms
+
+A shown-explanations set, keyed per topic, in `BackupSettings` alongside the other preferences. No
+schema change — this is DataStore, not Room.
+
+What it buys, in order of usefulness:
+
+- **A destructive mode cannot be chosen before its explanation has been displayed.** Selecting
+  Archive with no record of the Archive explanation shows the explanation first, then the
+  confirmation. Not a second consent step — the sequence a careful person would want anyway.
+- **The tour becomes skippable without losing anything.** Skipping is fine, because the explanation
+  reappears at the point of first use. Just-in-time is better teaching than a wizard nobody
+  remembers, and the record makes the two routes equivalent.
+- **The record is per topic, not per tour**, so adding a fifth mode later does not require re-running
+  setup, and a user who saw the Archive explanation in the wizard is not shown it again.
+
+### One honest limit on the record
+
+It proves the text was **displayed**, never that it was read or understood. Worth stating because a
+record like this invites being treated as proof of comprehension, and it is not — it should not
+appear in any wording that implies the user agreed to something by having seen a screen. Its value
+is that the app can never take a destructive action the user was given no opportunity to understand,
+which is a real guarantee and a narrower one.
+
+### Wording, shared not duplicated
+
+The bubbles are where the plain-language mode explanations first appear, and they use the **same
+strings** as the Help entries in TASK-012 and the Archive confirmation. Three descriptions of one
+irreversible operation will drift apart, and the drift is invisible until someone reads two of them
+side by side.
 
 ## Order of the flow
 
@@ -116,6 +150,9 @@ nothing to notify about, and Android only prompts once.
 - Archive is not offered as a bulk choice anywhere in the flow
 - Skipping the tour leaves a safe, working configuration
 - The mode explanations here and in Help come from the same strings
+- A destructive mode cannot be selected before its explanation has been displayed, by either route
+- Skipping the tour is allowed and loses nothing — explanations reappear at first use
+- The shown-explanations record is per topic and survives a restart
 - Re-running setup is possible from Settings without reinstalling
 - Verified on hardware in both themes, per CLAUDE.md
 
