@@ -54,7 +54,8 @@ class BackupWorker @AssistedInject constructor(
         Logger.i(
             TAG,
             "backup run finished: ${result.uploaded} uploaded, ${result.skipped} already there, " +
-                "${result.failed} failed, ${result.remaining} remaining, " +
+                "${result.failed} failed, ${result.deferred} deferred (album not listable), " +
+                "${result.remaining} remaining, " +
                 "stopped=${result.stoppedBecause}"
         )
 

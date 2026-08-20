@@ -63,6 +63,14 @@ data class BackupRunResult(
     val remaining: Int,
     /** Already present in OneDrive, so recorded as backed up without being sent again. */
     val skipped: Int = 0,
+    /**
+     * Left for the next run because their album could not be listed remotely.
+     *
+     * Distinct from [failed]: nothing is wrong with these files and no attempt was spent on
+     * them. Surfaced so a run that could check nothing does not read as a run that found
+     * nothing to do — which is how the old behaviour hid itself.
+     */
+    val deferred: Int = 0,
     /** Ledger rows forgotten because the file is no longer on the device. Not a failure. */
     val pruned: Int = 0,
     val stoppedBecause: StopReason? = null
@@ -198,11 +206,32 @@ class BackupEngine @Inject constructor(
 
             // One remote listing per album, reused across every file in it. Asking per file would
             // cost a request each; asking once costs one and answers for all of them.
-            val remoteByAlbum = mutableMapOf<String, Map<String, Long>>()
+            //
+            // `null` means the listing failed, which is **not** the same as the album being empty.
+            // Until 19 Aug 2026 a failure returned an empty map and every file in the album was
+            // uploaded — so one bad moment on the network re-uploaded whole albums as renamed
+            // duplicates. Observed: 81 of 87 albums failed to list in a single run when
+            // connectivity dropped. Failing to ask is not evidence of absence.
+            val remoteByAlbum = mutableMapOf<String, Map<String, Long>?>()
+            var deferred = 0
 
             for (entry in pending) {
-                val alreadyThere = remoteByAlbum.getOrPut(entry.album) {
-                    remoteIndexFor(entry.album)
+                // `containsKey` rather than `getOrPut`: getOrPut re-runs its lambda whenever the
+                // stored value is null, so a failed album would be listed again for every one of
+                // its pending files — hundreds of requests in the exact network conditions that
+                // made the first one fail. A remembered failure has to stay remembered.
+                val alreadyThere = if (remoteByAlbum.containsKey(entry.album)) {
+                    remoteByAlbum[entry.album]
+                } else {
+                    remoteIndexFor(entry.album).also { remoteByAlbum[entry.album] = it }
+                }
+
+                if (alreadyThere == null) {
+                    // Leave the row PENDING and its attemptCount alone. Marking it failed would
+                    // burn an attempt on a file that is fine, and a few network-troubled runs would
+                    // then exhaust MAX_ATTEMPTS and give up on it permanently.
+                    deferred++
+                    continue
                 }
 
                 // Same name and same size means the file is already backed up — by Samsung's own
@@ -322,6 +351,7 @@ class BackupEngine @Inject constructor(
                                 failed = failed,
                                 remaining = entryDao.countPendingInSelectedAlbums(),
                                 skipped = skipped,
+                                deferred = deferred,
                                 pruned = pruned,
                                 stoppedBecause = stop
                             )
@@ -339,6 +369,7 @@ class BackupEngine @Inject constructor(
                 // only ever report 0 or 1 — "1 still to go" actually meant "at least one".
                 remaining = entryDao.countPendingInSelectedAlbums(),
                 skipped = skipped,
+                deferred = deferred,
                 pruned = pruned
             )
         }
@@ -368,27 +399,64 @@ class BackupEngine @Inject constructor(
     }
 
     /**
-     * What is already in an album's OneDrive folder, as name to size.
+     * Every file OneDrive already holds for this album, by name and size.
      *
      * Name **and** size together: a same-named file of a different size is genuinely different
      * content — an edited photo, or a different shot that happened to reuse a camera filename —
      * and skipping it would silently leave the newer version unbacked.
      *
-     * A folder that does not exist yet, or a listing that fails, yields an empty map. Erring
-     * towards uploading is right: a duplicate is untidy, a missing backup is a lost photo.
+     * `null` means the album could not be listed at all, which the caller must not read as an
+     * empty folder. A folder that genuinely does not exist yet still yields an empty map, and
+     * uploading into it is right.
+     *
+     * **Walks every page.** Graph returns 100 items at a time, and reading only the first page was
+     * the state of this function until 19 Aug 2026 — which meant that on any album larger than a
+     * page, every file past the hundredth looked absent and was uploaded again. Measured on the
+     * Fold 4 against a real library, running this function: 8,482 local files across 87 albums, of
+     * which 8,276 were already in OneDrive — but only 2,753 were visible one page at a time.
+     * **5,523 files would have been re-uploaded as renamed duplicates** — the exact failure the
+     * skip check exists to prevent, and the one the user had already seen once before it was
+     * written.
+     *
+     * The cost is one request per page per album, once per run: the caller memoises this by album,
+     * so it is not paid per file.
+     *
+     * `internal` rather than `private` so the debug coverage probe can verify *this* function
+     * rather than a copy of it. The bug it fixes was invisible to unit tests and only showed up
+     * against a real drive, so the check that catches a regression has to run the real code.
+     *
+     * A failure mid-walk returns what was gathered so far rather than nothing. A partial index can
+     * only cause a re-upload, while an empty one guarantees a whole album of them.
      */
-    private suspend fun remoteIndexFor(album: String): Map<String, Long> =
-        when (val result = repository.listFolderByPath(remotePathFor(album))) {
-            is DataResult.Success ->
-                result.value.nodes
-                    .filterIsInstance<RemoteMediaNode.File>()
-                    .associate { it.name to it.sizeBytes }
+    internal suspend fun remoteIndexFor(album: String): Map<String, Long>? {
+        val path = remotePathFor(album)
+        val index = mutableMapOf<String, Long>()
 
+        var page = when (val result = repository.listFolderByPath(path)) {
+            is DataResult.Success -> result.value
             is DataResult.Failure -> {
-                Logger.w(TAG, "could not list $album remotely (${result.error}); will upload")
-                emptyMap()
+                Logger.w(TAG, "could not list $album remotely (${result.error}); deferring")
+                return null
             }
         }
+        index += page.nodes.filterIsInstance<RemoteMediaNode.File>().associate { it.name to it.sizeBytes }
+
+        var pages = 1
+        while (page.nextPageToken != null && pages < MAX_REMOTE_PAGES) {
+            page = when (val result = repository.listNextPage(page.nextPageToken!!)) {
+                is DataResult.Success -> result.value
+                is DataResult.Failure -> {
+                    Logger.w(TAG, "page ${pages + 1} of $album failed (${result.error}); using $pages")
+                    return index
+                }
+            }
+            index += page.nodes.filterIsInstance<RemoteMediaNode.File>().associate { it.name to it.sizeBytes }
+            pages++
+        }
+
+        if (pages > 1) Logger.d(TAG, "$album: ${index.size} remote files across $pages pages")
+        return index
+    }
 
     /**
      * Maps a device album onto its place in OneDrive.
@@ -417,6 +485,13 @@ class BackupEngine @Inject constructor(
         private const val TAG = "BackupEngine"
 
         const val REMOTE_ROOT = "Samsung Gallery/DCIM"
+
+        /**
+         * Ceiling on the page walk in [remoteIndexFor], so a paging loop that never terminates
+         * cannot hang a backup run. At 100 items a page this covers 20,000 files in one album,
+         * comfortably past the 8,482 in the whole library it was measured against.
+         */
+        const val MAX_REMOTE_PAGES = 200
 
         /** Files per run. Small enough that a cancelled worker loses little work. */
         const val DEFAULT_BATCH = 25

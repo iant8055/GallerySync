@@ -40,6 +40,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.BuildConfig
 import com.gallery.sync.R
+import com.gallery.sync.ui.debug.CloudCoverageProbe
 import com.gallery.sync.ui.debug.StorageAccessProbe
 import com.gallery.sync.ui.backup.BackupViewModel
 import com.gallery.sync.ui.backup.ProxyStatus
@@ -360,6 +361,9 @@ fun SettingsScreen(
         if (BuildConfig.DEBUG) {
             Section("SAF tree probe (debug)") {
                 StorageAccessProbe()
+            }
+            Section("Cloud coverage (debug)") {
+                CloudCoverageProbe()
             }
         }
     }

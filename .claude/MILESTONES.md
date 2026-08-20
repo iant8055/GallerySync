@@ -450,6 +450,51 @@ Recorded rather than rewritten there, because the MediaStore facts in it are sti
 still what the app does today. Until delete and the truncating write are also verified, the SAF
 route is a strong candidate and not yet a decision.
 
+### 19 Aug 2026 — the skip-existing check was reading one page in a hundred-item world
+
+Measured with the debug cloud-coverage probe, which lists the whole library against OneDrive and
+uploads nothing. It calls `BackupEngine.remoteIndexFor` itself rather than a copy, so what it
+verifies is the shipping code path.
+
+**Two defects, both of which made an already-backed-up file look absent, and absent means upload.**
+
+**1 — Graph pages at 100 items and the check read only the first page.** `remoteIndexFor` called
+`listFolderByPath` once and used `result.value.nodes`. Any album larger than a page was invisible
+past its hundredth file.
+
+**2 — A failed listing returned an empty map**, which is indistinguishable from "the folder is
+empty". One bad moment on the network therefore re-uploaded an entire album. Not hypothetical: the
+19:08 run lost connectivity partway and **81 of 87 albums failed to list**, reporting 8,177 files as
+missing from a drive that held nearly all of them.
+
+Both are fixed — walk every page to `MAX_REMOTE_PAGES`, and return `null` on a failed listing so the
+caller defers the file with its attempt count untouched rather than uploading it.
+
+**Verified run, 19:15, both fixes in, no listing failures:**
+
+| | files |
+|---|---|
+| local, 87 albums | 8,482 |
+| already in OneDrive, walking every page | 8,276 (97.6%) |
+| visible one page at a time | 2,753 |
+| **duplicate uploads prevented** | **5,523** |
+| genuinely not in OneDrive | 206 |
+
+**Two things this settles beyond the bug.**
+
+**Ian's assumption holds, and it is now load-bearing.** 97.6% of the library is already in OneDrive,
+so first run is reconciliation and not a bulk upload — 206 files, not 8,482. That is what makes
+TASK-014's Gate 2 offer of "back up everything" reasonable to present at all, and it is why the
+first-run experience must be designed around checking rather than transferring.
+
+**`REMOTE_ROOT = "Samsung Gallery/DCIM"` is confirmed against a real drive.** The match rate is only
+achievable because the path deliberately mirrors the layout Samsung's own sync created. Changing it
+would strand every existing backup and re-upload the library; treat it as fixed.
+
+Neither defect was reachable by unit test — both need a real drive with more than a hundred files in
+a folder, and a real network to fail. That is the argument for keeping the probe rather than deleting
+it with `StorageAccessProbe`.
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have

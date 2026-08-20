@@ -95,6 +95,8 @@ sealed interface BackupStatus {
         val uploaded: Int,
         val skipped: Int,
         val failed: Int,
+        /** Skipped this run because their album could not be listed. Nothing is wrong with them. */
+        val deferred: Int,
         val pruned: Int,
         val remaining: Int,
         val stoppedBecause: StopReason?
@@ -426,6 +428,7 @@ class BackupViewModel @Inject constructor(
                     uploaded = result.uploaded,
                     skipped = result.skipped,
                     failed = result.failed,
+                    deferred = result.deferred,
                     pruned = result.pruned,
                     remaining = result.remaining,
                     stoppedBecause = result.stoppedBecause

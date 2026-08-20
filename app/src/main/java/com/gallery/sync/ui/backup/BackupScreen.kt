@@ -243,6 +243,7 @@ private fun BackupStatus.readable(): String = when (this) {
             if (skipped > 0) add(stringResource(R.string.backup_status_skipped, skipped))
             if (pruned > 0) add(stringResource(R.string.backup_status_pruned, pruned))
             if (failed > 0) add(stringResource(R.string.backup_status_failed, failed))
+            if (deferred > 0) add(stringResource(R.string.backup_status_deferred, deferred))
             if (remaining > 0) add(stringResource(R.string.backup_status_remaining, remaining))
             stoppedBecause?.let { add(it.readable()) }
         }
