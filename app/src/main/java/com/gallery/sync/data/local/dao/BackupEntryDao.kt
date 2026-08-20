@@ -18,7 +18,8 @@ import kotlinx.coroutines.flow.Flow
 data class AlbumBackupCount(
     val album: String,
     val total: Int,
-    val backedUp: Int
+    val backedUp: Int,
+    val proxied: Int
 )
 
 @Dao
@@ -267,12 +268,22 @@ interface BackupEntryDao {
         """
         SELECT album AS album,
                COUNT(*) AS total,
-               SUM(CASE WHEN state = :uploaded THEN 1 ELSE 0 END) AS backedUp
+               SUM(CASE WHEN state = :uploaded THEN 1 ELSE 0 END) AS backedUp,
+               SUM(CASE WHEN isProxied = 1 THEN 1 ELSE 0 END) AS proxied
         FROM backup_entries
         GROUP BY album
         """
     )
     suspend fun albumCounts(uploaded: BackupState = BackupState.UPLOADED): List<AlbumBackupCount>
+
+    @Query(
+        """
+        SELECT * FROM backup_entries
+        WHERE album = :album
+        ORDER BY displayName ASC
+        """
+    )
+    suspend fun entriesForAlbum(album: String): List<BackupEntryEntity>
 
     /**
      * Entries safe to remove the local copy of.

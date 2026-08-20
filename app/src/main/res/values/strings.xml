@@ -140,6 +140,9 @@
     <string name="album_status_complete">All synced</string>
     <string name="album_status_partial">%1$d still to sync</string>
     <string name="album_status_none">Not synced yet</string>
+    <string name="album_status_backed_up">%1$d backed up</string>
+    <string name="album_status_optimized">%1$d optimized</string>
+    <string name="album_status_pending">%1$d pending</string>
     <string name="album_watching">Watching for new files</string>
     <string name="album_not_watching">Not watched — nothing new expected</string>
     <plurals name="file_count">

@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -44,6 +45,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
 import com.gallery.sync.data.local.entity.AlbumMode
+import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.media.MediaAccess
 import com.gallery.sync.domain.backup.StopReason
 import com.gallery.sync.ui.common.formatBytes
@@ -61,6 +63,21 @@ fun BackupScreen(
     viewModel: BackupViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
+
+    var detailAlbum by remember { mutableStateOf<AlbumRow?>(null) }
+    var detailEntries by remember { mutableStateOf<List<BackupEntryEntity>>(emptyList()) }
+
+    detailAlbum?.let { album ->
+        AlbumDetailScreen(
+            albumName = album.name,
+            mode = album.mode,
+            entries = detailEntries,
+            onBack = { detailAlbum = null },
+            modifier = modifier
+        )
+        return
+    }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -75,17 +92,33 @@ fun BackupScreen(
             )
 
             MediaAccess.PARTIAL -> {
-                // Never presented as working. Someone believing their library is safe while only
-                // hand-picked photos are visible is the exact failure this app exists to prevent.
                 PermissionPrompt(
                     headline = stringResource(R.string.permission_partial_title),
                     detail = stringResource(R.string.permission_partial_detail),
                     onGrant = { permissionLauncher.launch(mediaPermissions()) }
                 )
-                AlbumList(state = state, viewModel = viewModel)
+                AlbumList(
+                    state = state,
+                    viewModel = viewModel,
+                    onAlbumTapped = { album ->
+                        scope.launch {
+                            detailEntries = viewModel.albumEntries(album.name)
+                            detailAlbum = album
+                        }
+                    }
+                )
             }
 
-            MediaAccess.FULL -> AlbumList(state = state, viewModel = viewModel)
+            MediaAccess.FULL -> AlbumList(
+                state = state,
+                viewModel = viewModel,
+                onAlbumTapped = { album ->
+                    scope.launch {
+                        detailEntries = viewModel.albumEntries(album.name)
+                        detailAlbum = album
+                    }
+                }
+            )
         }
     }
 }
@@ -106,7 +139,11 @@ private fun PermissionPrompt(headline: String, detail: String, onGrant: () -> Un
 }
 
 @Composable
-private fun AlbumList(state: BackupUiState, viewModel: BackupViewModel) {
+private fun AlbumList(
+    state: BackupUiState,
+    viewModel: BackupViewModel,
+    onAlbumTapped: (AlbumRow) -> Unit
+) {
     val context = LocalContext.current
 
     Column(
@@ -198,6 +235,7 @@ private fun AlbumList(state: BackupUiState, viewModel: BackupViewModel) {
             AlbumModeRow(
                 album = album,
                 context = context,
+                onTapped = { onAlbumTapped(album) },
                 onModeSelected = { mode ->
                     if (mode == AlbumMode.ARCHIVE) {
                         archiveConfirmAlbum = album.name
@@ -215,11 +253,13 @@ private fun AlbumList(state: BackupUiState, viewModel: BackupViewModel) {
 private fun AlbumModeRow(
     album: AlbumRow,
     context: android.content.Context,
+    onTapped: () -> Unit,
     onModeSelected: (AlbumMode) -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable(onClick = onTapped)
             .padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -244,17 +284,12 @@ private fun AlbumModeRow(
                 style = MaterialTheme.typography.bodySmall
             )
             Text(
-                text = when (album.status) {
-                    AlbumStatus.COMPLETE -> stringResource(R.string.album_status_complete)
-                    AlbumStatus.PARTIAL ->
-                        stringResource(R.string.album_status_partial, album.outstanding)
-                    AlbumStatus.NOT_BACKED_UP -> stringResource(R.string.album_status_none)
-                },
+                text = album.statusBreakdown(),
                 style = MaterialTheme.typography.bodySmall,
-                color = when (album.status) {
-                    AlbumStatus.COMPLETE -> MaterialTheme.colorScheme.primary
-                    else -> MaterialTheme.colorScheme.onSurfaceVariant
-                }
+                color = if (album.outstanding == 0 && album.backedUpCount > 0)
+                    MaterialTheme.colorScheme.primary
+                else
+                    MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
         AlbumModeDropdown(
@@ -370,6 +405,26 @@ private fun StopReason.readable(): String = when (this) {
     StopReason.DRIVE_FULL -> stringResource(R.string.backup_stopped_drive_full)
     StopReason.NETWORK -> stringResource(R.string.backup_stopped_network)
     StopReason.NO_MEDIA_ACCESS -> stringResource(R.string.backup_stopped_no_media_access)
+}
+
+@Composable
+private fun AlbumRow.statusBreakdown(): String {
+    if (backedUpCount == 0) return stringResource(R.string.album_status_none)
+
+    val separator = " · "
+    return buildString {
+        val backupOnly = backedUpOnly
+        if (backupOnly > 0) append(stringResource(R.string.album_status_backed_up, backupOnly))
+        if (proxiedCount > 0) {
+            if (isNotEmpty()) append(separator)
+            append(stringResource(R.string.album_status_optimized, proxiedCount))
+        }
+        val pending = outstanding
+        if (pending > 0) {
+            if (isNotEmpty()) append(separator)
+            append(stringResource(R.string.album_status_pending, pending))
+        }
+    }
 }
 
 /** The permissions to ask for on this Android version. */

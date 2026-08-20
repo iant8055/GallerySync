@@ -41,9 +41,12 @@ data class AlbumRow(
     val totalBytes: Long,
     /** What the user chose for this album. [AlbumMode.OFF] means finished or ignored. */
     val mode: AlbumMode,
-    val backedUpCount: Int = 0
+    val backedUpCount: Int = 0,
+    val proxiedCount: Int = 0
 ) {
     val isEnabled: Boolean get() = mode.uploads
+
+    val backedUpOnly: Int get() = (backedUpCount - proxiedCount).coerceAtLeast(0)
 
     val status: AlbumStatus
         get() = when {
@@ -241,15 +244,17 @@ class BackupViewModel @Inject constructor(
             // modes and cannot render SYNC or ARCHIVE at all. An album with no row takes the
             // factory default until TASK-012 makes that a user setting.
             val storedModes = albumDao.all().associate { it.albumName to it.mode }
-            val backedUpByAlbum = entryDao.albumCounts().associate { it.album to it.backedUp }
+            val countsByAlbum = entryDao.albumCounts().associateBy { it.album }
 
             val albums = scanner.scanAlbums().map { album ->
+                val counts = countsByAlbum[album.name]
                 AlbumRow(
                     name = album.name,
                     itemCount = album.itemCount,
                     totalBytes = album.totalBytes,
                     mode = storedModes[album.name] ?: AlbumMode.DEFAULT,
-                    backedUpCount = backedUpByAlbum[album.name] ?: 0
+                    backedUpCount = counts?.backedUp ?: 0,
+                    proxiedCount = counts?.proxied ?: 0
                 )
             }
 
@@ -257,6 +262,8 @@ class BackupViewModel @Inject constructor(
             refreshCounts()
         }
     }
+
+    suspend fun albumEntries(album: String) = entryDao.entriesForAlbum(album)
 
     fun setAlbumMode(album: String, mode: AlbumMode) {
         viewModelScope.launch {
