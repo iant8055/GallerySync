@@ -5,7 +5,9 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.gallery.sync.data.local.entity.AlbumMode
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -19,7 +21,8 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 data class BackupPreferences(
     val isAutomaticEnabled: Boolean = true,
     val allowMeteredNetwork: Boolean = false,
-    val isAutoOptimiseEnabled: Boolean = false
+    val isAutoOptimiseEnabled: Boolean = false,
+    val defaultAlbumMode: AlbumMode = AlbumMode.DEFAULT
 )
 
 /**
@@ -42,7 +45,11 @@ class BackupSettings @Inject constructor(
         BackupPreferences(
             isAutomaticEnabled = stored[KEY_AUTOMATIC] ?: true,
             allowMeteredNetwork = stored[KEY_ALLOW_METERED] ?: false,
-            isAutoOptimiseEnabled = stored[KEY_AUTO_OPTIMISE] ?: false
+            isAutoOptimiseEnabled = stored[KEY_AUTO_OPTIMISE] ?: false,
+            defaultAlbumMode = stored[KEY_DEFAULT_ALBUM_MODE]
+                ?.let { runCatching { AlbumMode.valueOf(it) }.getOrNull() }
+                ?.takeIf { it in AlbumMode.canBeDefault }
+                ?: AlbumMode.DEFAULT
         )
     }
 
@@ -68,9 +75,14 @@ class BackupSettings @Inject constructor(
         context.dataStore.edit { it[KEY_AUTO_OPTIMISE] = enabled }
     }
 
+    suspend fun setDefaultAlbumMode(mode: AlbumMode) {
+        context.dataStore.edit { it[KEY_DEFAULT_ALBUM_MODE] = mode.name }
+    }
+
     private companion object {
         val KEY_AUTOMATIC = booleanPreferencesKey("automatic_backup_enabled")
         val KEY_ALLOW_METERED = booleanPreferencesKey("allow_metered_network")
         val KEY_AUTO_OPTIMISE = booleanPreferencesKey("auto_optimise_enabled")
+        val KEY_DEFAULT_ALBUM_MODE = stringPreferencesKey("default_album_mode")
     }
 }

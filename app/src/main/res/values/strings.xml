@@ -126,6 +126,9 @@
     <string name="backup_allow_metered_on">Syncs on Wi-Fi and mobile data.</string>
     <string name="backup_allow_metered_off">Wi-Fi only.</string>
 
+    <string name="settings_default_mode">Default mode for new albums</string>
+    <string name="settings_default_mode_detail">New albums start with this mode. Existing albums are not changed.</string>
+
     <string name="backup_deselect_all">Deselect all</string>
     <string name="backup_select_all">Select all</string>
     <string name="backup_rescan">Rescan</string>

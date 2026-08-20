@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.IntentSender
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.media.LocalCopyRemover
@@ -11,6 +12,7 @@ import com.gallery.sync.data.local.media.ProxyApplier
 import com.gallery.sync.data.local.media.ProxyOutcome
 import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.worker.BackupScheduling
+import com.gallery.sync.worker.BackupWorker
 import dagger.hilt.android.qualifiers.ApplicationContext
 import com.gallery.sync.data.local.dao.AlbumPreferenceDao
 import com.gallery.sync.data.local.dao.BackupEntryDao
@@ -25,6 +27,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -124,7 +128,8 @@ data class BackupUiState(
     val proxyCandidateCount: Int = 0,
     val proxyCandidateBytes: Long = 0L,
     val canProxy: Boolean = false,
-    val proxyStatus: ProxyStatus? = null
+    val proxyStatus: ProxyStatus? = null,
+    val defaultAlbumMode: AlbumMode = AlbumMode.DEFAULT
 ) {
     /** Files that would be sent if a run started now. */
     val enabledItemCount: Int get() = albums.filter { it.isEnabled }.sumOf { it.itemCount }
@@ -187,8 +192,45 @@ class BackupViewModel @Inject constructor(
                 _state.value = _state.value.copy(
                     isAutomaticEnabled = prefs.isAutomaticEnabled,
                     isAutoOptimiseEnabled = prefs.isAutoOptimiseEnabled,
-                    allowMeteredNetwork = prefs.allowMeteredNetwork
+                    allowMeteredNetwork = prefs.allowMeteredNetwork,
+                    defaultAlbumMode = prefs.defaultAlbumMode
                 )
+            }
+        }
+        observeBackgroundWork()
+    }
+
+    private fun observeBackgroundWork() {
+        val workManager = WorkManager.getInstance(context)
+        val workNames = listOf(
+            BackupScheduling.CONTENT_TRIGGER_WORK,
+            BackupScheduling.CONTINUATION_WORK,
+            BackupScheduling.PERIODIC_WORK
+        )
+        for (name in workNames) {
+            viewModelScope.launch {
+                workManager.getWorkInfosForUniqueWorkFlow(name).collectLatest { infos ->
+                    if (_state.value.isRunning) return@collectLatest
+
+                    val running = infos.firstOrNull { it.state == WorkInfo.State.RUNNING }
+                    if (running != null) {
+                        val data = running.progress
+                        val total = data.getInt(BackupWorker.PROGRESS_TOTAL, 0)
+                        if (total > 0) {
+                            _state.value = _state.value.copy(
+                                status = BackupStatus.Uploading(
+                                    completed = data.getInt(BackupWorker.PROGRESS_COMPLETED, 0),
+                                    total = total,
+                                    currentFile = data.getString(BackupWorker.PROGRESS_FILE) ?: "",
+                                    percentOfCurrent = data.getInt(BackupWorker.PROGRESS_PERCENT, 0)
+                                )
+                            )
+                        }
+                    } else if (infos.any { it.state == WorkInfo.State.SUCCEEDED }) {
+                        _state.value = _state.value.copy(status = null)
+                        refresh()
+                    }
+                }
             }
         }
     }
@@ -245,14 +287,22 @@ class BackupViewModel @Inject constructor(
             // factory default until TASK-012 makes that a user setting.
             val storedModes = albumDao.all().associate { it.albumName to it.mode }
             val countsByAlbum = entryDao.albumCounts().associateBy { it.album }
+            val prefs = settings.current()
+            val defaultMode = prefs.defaultAlbumMode
 
+            var hasNewUploadAlbums = false
             val albums = scanner.scanAlbums().map { album ->
                 val counts = countsByAlbum[album.name]
+                val mode = storedModes[album.name] ?: run {
+                    albumDao.setPreference(AlbumPreferenceEntity(album.name, defaultMode))
+                    if (defaultMode.uploads) hasNewUploadAlbums = true
+                    defaultMode
+                }
                 AlbumRow(
                     name = album.name,
                     itemCount = album.itemCount,
                     totalBytes = album.totalBytes,
-                    mode = storedModes[album.name] ?: AlbumMode.DEFAULT,
+                    mode = mode,
                     backedUpCount = counts?.backedUp ?: 0,
                     proxiedCount = counts?.proxied ?: 0
                 )
@@ -260,6 +310,13 @@ class BackupViewModel @Inject constructor(
 
             _state.value = _state.value.copy(albums = albums, isScanning = false)
             refreshCounts()
+
+            if (hasNewUploadAlbums && prefs.isAutomaticEnabled) {
+                BackupScheduling.enqueueContinuation(
+                    WorkManager.getInstance(context),
+                    prefs.allowMeteredNetwork
+                )
+            }
         }
     }
 
@@ -274,6 +331,13 @@ class BackupViewModel @Inject constructor(
                 }
             )
             refreshCounts()
+
+            if (mode.uploads && settings.current().isAutomaticEnabled) {
+                BackupScheduling.enqueueContinuation(
+                    WorkManager.getInstance(context),
+                    settings.current().allowMeteredNetwork
+                )
+            }
         }
     }
 
@@ -286,6 +350,10 @@ class BackupViewModel @Inject constructor(
      */
     fun setAutoOptimiseEnabled(enabled: Boolean) {
         viewModelScope.launch { settings.setAutoOptimiseEnabled(enabled) }
+    }
+
+    fun setDefaultAlbumMode(mode: AlbumMode) {
+        viewModelScope.launch { settings.setDefaultAlbumMode(mode) }
     }
 
     /** Switches every discovered album on or off at once. */

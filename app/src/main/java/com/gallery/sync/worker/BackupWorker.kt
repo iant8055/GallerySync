@@ -3,6 +3,7 @@ package com.gallery.sync.worker
 import android.content.Context
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
+import androidx.work.Data
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.gallery.sync.data.local.settings.BackupSettings
@@ -50,7 +51,19 @@ class BackupWorker @AssistedInject constructor(
             return Result.failure()
         }
 
-        val result = engine.uploadPending()
+        val result = engine.uploadPending { progress ->
+            setProgressAsync(
+                Data.Builder()
+                    .putInt(PROGRESS_COMPLETED, progress.completed)
+                    .putInt(PROGRESS_TOTAL, progress.total)
+                    .putString(PROGRESS_FILE, progress.currentFile)
+                    .putInt(PROGRESS_PERCENT, if (progress.currentBytesTotal > 0) {
+                        ((progress.currentBytesSent * 100) / progress.currentBytesTotal)
+                            .toInt().coerceIn(0, 100)
+                    } else 0)
+                    .build()
+            )
+        }
         Logger.i(
             TAG,
             "backup run finished: ${result.uploaded} uploaded, ${result.skipped} already there, " +
@@ -82,7 +95,11 @@ class BackupWorker @AssistedInject constructor(
         }
     }
 
-    private companion object {
+    companion object {
         const val TAG = "BackupWorker"
+        const val PROGRESS_COMPLETED = "completed"
+        const val PROGRESS_TOTAL = "total"
+        const val PROGRESS_FILE = "file"
+        const val PROGRESS_PERCENT = "percent"
     }
 }

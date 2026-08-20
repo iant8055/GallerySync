@@ -1,6 +1,7 @@
 package com.gallery.sync.ui.backup
 
 import android.Manifest
+import android.app.Activity
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
@@ -29,6 +30,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -77,6 +79,24 @@ fun BackupScreen(
             modifier = modifier
         )
         return
+    }
+
+    val proxyLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) viewModel.onProxyConsentGranted()
+    }
+
+    var hasOfferedAutoProxy by remember { mutableStateOf(false) }
+    LaunchedEffect(state.isAutoOptimiseEnabled, state.proxyCandidateCount, state.canProxy) {
+        if (state.isAutoOptimiseEnabled && state.canProxy &&
+            state.proxyCandidateCount > 0 && !hasOfferedAutoProxy
+        ) {
+            hasOfferedAutoProxy = true
+            viewModel.buildProxyWriteRequest()?.let {
+                proxyLauncher.launch(IntentSenderRequest.Builder(it).build())
+            }
+        }
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(

@@ -42,6 +42,7 @@ import com.gallery.sync.BuildConfig
 import com.gallery.sync.R
 import com.gallery.sync.ui.debug.CloudCoverageProbe
 import com.gallery.sync.ui.debug.StorageAccessProbe
+import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.ui.backup.BackupViewModel
 import com.gallery.sync.ui.backup.ProxyStatus
 import com.gallery.sync.data.local.settings.ThemeMode
@@ -195,6 +196,19 @@ fun SettingsScreen(
                     onCheckedChange = viewModel::setAllowMeteredNetwork
                 )
             }
+        }
+
+        HorizontalDivider()
+
+        Section(stringResource(R.string.settings_default_mode)) {
+            Text(
+                text = stringResource(R.string.settings_default_mode_detail),
+                style = MaterialTheme.typography.bodySmall
+            )
+            DefaultModeSelector(
+                current = state.defaultAlbumMode,
+                onModeSelected = viewModel::setDefaultAlbumMode
+            )
         }
 
         HorizontalDivider()
@@ -381,6 +395,32 @@ private fun Section(title: String, content: @Composable ColumnScope.() -> Unit) 
         Text(title, style = MaterialTheme.typography.titleSmall)
         content()
     }
+}
+
+@Composable
+private fun DefaultModeSelector(
+    current: AlbumMode,
+    onModeSelected: (AlbumMode) -> Unit
+) {
+    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+        AlbumMode.canBeDefault.forEachIndexed { index, mode ->
+            SegmentedButton(
+                selected = current == mode,
+                onClick = { onModeSelected(mode) },
+                shape = SegmentedButtonDefaults.itemShape(index, AlbumMode.canBeDefault.size)
+            ) {
+                Text(mode.settingsLabel())
+            }
+        }
+    }
+}
+
+@Composable
+private fun AlbumMode.settingsLabel(): String = when (this) {
+    AlbumMode.OFF -> stringResource(R.string.mode_off)
+    AlbumMode.BACKUP -> stringResource(R.string.mode_backup)
+    AlbumMode.SYNC -> stringResource(R.string.mode_sync)
+    AlbumMode.ARCHIVE -> stringResource(R.string.mode_archive)
 }
 
 @Composable
