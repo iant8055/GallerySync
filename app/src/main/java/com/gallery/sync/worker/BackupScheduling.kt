@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit
 object BackupScheduling {
 
     const val CONTENT_TRIGGER_WORK = "gallery-sync-backup-on-change"
+    const val CONTINUATION_WORK = "gallery-sync-backup-continuation"
     const val PERIODIC_WORK = "gallery-sync-backup-periodic"
 
     /** Turns automatic backup on. Safe to call repeatedly. */
@@ -52,6 +53,7 @@ object BackupScheduling {
 
     fun disable(workManager: WorkManager) {
         workManager.cancelUniqueWork(CONTENT_TRIGGER_WORK)
+        workManager.cancelUniqueWork(CONTINUATION_WORK)
         workManager.cancelUniqueWork(PERIODIC_WORK)
     }
 
@@ -83,6 +85,25 @@ object BackupScheduling {
 
         workManager.enqueueUniqueWork(
             CONTENT_TRIGGER_WORK,
+            ExistingWorkPolicy.REPLACE,
+            request
+        )
+    }
+
+    /**
+     * Schedules the next batch when the current run finished with files still pending.
+     *
+     * Distinct from the content trigger (which waits for a MediaStore change) and the periodic
+     * net (which waits 6 hours). This fires as soon as constraints are met, so a library that
+     * spans multiple batches uploads continuously rather than stalling between runs.
+     */
+    fun enqueueContinuation(workManager: WorkManager, allowMeteredNetwork: Boolean) {
+        val request = OneTimeWorkRequestBuilder<BackupWorker>()
+            .setConstraints(constraints(allowMeteredNetwork))
+            .build()
+
+        workManager.enqueueUniqueWork(
+            CONTINUATION_WORK,
             ExistingWorkPolicy.REPLACE,
             request
         )

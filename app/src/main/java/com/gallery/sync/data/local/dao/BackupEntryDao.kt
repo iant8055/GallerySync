@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.entity.BackupState
 import kotlinx.coroutines.flow.Flow
@@ -250,10 +251,16 @@ interface BackupEntryDao {
           AND isProxied = 0
           AND isProxySkipped = 0
           AND isVideo = 0
+          AND album IN (
+              SELECT albumName FROM album_preferences WHERE mode = :syncMode
+          )
         ORDER BY sizeBytes DESC
         """
     )
-    suspend fun proxyCandidates(uploaded: BackupState = BackupState.UPLOADED): List<BackupEntryEntity>
+    suspend fun proxyCandidates(
+        uploaded: BackupState = BackupState.UPLOADED,
+        syncMode: AlbumMode = AlbumMode.SYNC
+    ): List<BackupEntryEntity>
 
     /** Per-album totals, so each row can say whether it is completely safe. */
     @Query(

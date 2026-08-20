@@ -77,23 +77,6 @@ enum class AlbumMode {
         val DEFAULT = OFF
 
         /**
-         * What an album becomes when the user switches it **on**.
-         *
-         * **Transitional — delete this with the toggle.** TASK-012 replaces the per-album switch
-         * with a four-item dropdown, at which point there is no "on" to map: the user picks a mode
-         * directly and nothing needs to guess which one they meant. Remove this constant and its
-         * call sites in `BackupViewModel` in the same change that removes the `Switch`.
-         *
-         * It exists because [DEFAULT] became [OFF] on 19 Aug 2026 while the toggle was still in the
-         * build, and one constant was serving both jobs — so the default change alone would have
-         * made switching an album on set it to [OFF]. Turning an album on would have turned it off.
-         *
-         * [BACKUP] because switching an album on is a request to keep it safe, not a request to
-         * start rewriting or removing its files.
-         */
-        val WHEN_ENABLED = BACKUP
-
-        /**
          * The modes the user may choose as the default for new albums.
          *
          * Everything except [ARCHIVE], per Ian 19 Aug 2026 and TASK-012. A default that empties the

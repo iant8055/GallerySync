@@ -43,11 +43,6 @@ data class AlbumRow(
     val mode: AlbumMode,
     val backedUpCount: Int = 0
 ) {
-    /**
-     * Whether new files here are sent to the cloud.
-     *
-     * The UI is still a switch while the mode dropdown is unbuilt, so this is what it binds to.
-     */
     val isEnabled: Boolean get() = mode.uploads
 
     val status: AlbumStatus
@@ -263,16 +258,14 @@ class BackupViewModel @Inject constructor(
         }
     }
 
-    fun setAlbumEnabled(album: String, enabled: Boolean) {
+    fun setAlbumMode(album: String, mode: AlbumMode) {
         viewModelScope.launch {
-            val mode = if (enabled) AlbumMode.WHEN_ENABLED else AlbumMode.OFF
             albumDao.setPreference(AlbumPreferenceEntity(album, mode))
             _state.value = _state.value.copy(
                 albums = _state.value.albums.map {
                     if (it.name == album) it.copy(mode = mode) else it
                 }
             )
-            // Changing the selection changes what is outstanding, so the counts must follow.
             refreshCounts()
         }
     }
@@ -292,7 +285,7 @@ class BackupViewModel @Inject constructor(
     fun setAllAlbums(enabled: Boolean) {
         viewModelScope.launch {
             val albums = _state.value.albums
-            val mode = if (enabled) AlbumMode.WHEN_ENABLED else AlbumMode.OFF
+            val mode = if (enabled) AlbumMode.BACKUP else AlbumMode.OFF
             albumDao.setPreferences(albums.map { AlbumPreferenceEntity(it.name, mode) })
             _state.value = _state.value.copy(
                 albums = albums.map { it.copy(mode = mode) }
@@ -434,7 +427,7 @@ class BackupViewModel @Inject constructor(
                     stoppedBecause = result.stoppedBecause
                 )
             )
-            refreshCounts()
+            refresh()
         }
     }
 }

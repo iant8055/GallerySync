@@ -75,13 +75,6 @@ class BackupEntryTest {
     }
 
     @Test
-    fun `switching an album on backs it up rather than doing nothing`() {
-        // The trap this guards: one constant used to serve both, so making the default OFF would
-        // have made the toggle set OFF when switched on.
-        assertEquals(AlbumMode.BACKUP, AlbumMode.WHEN_ENABLED)
-    }
-
-    @Test
     fun `archive can never be the default for new albums`() {
         // It would apply to albums the user has not seen, which is where the per-album confirmation
         // cannot reach.

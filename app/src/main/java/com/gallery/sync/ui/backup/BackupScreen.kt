@@ -13,16 +13,26 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Switch
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -33,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
+import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.media.MediaAccess
 import com.gallery.sync.domain.backup.StopReason
 import com.gallery.sync.ui.common.formatBytes
@@ -169,57 +180,158 @@ private fun AlbumList(state: BackupUiState, viewModel: BackupViewModel) {
         return
     }
 
+    var archiveConfirmAlbum by remember { mutableStateOf<String?>(null) }
+
+    archiveConfirmAlbum?.let { albumName ->
+        ArchiveConfirmDialog(
+            albumName = albumName,
+            onConfirm = {
+                viewModel.setAlbumMode(albumName, AlbumMode.ARCHIVE)
+                archiveConfirmAlbum = null
+            },
+            onDismiss = { archiveConfirmAlbum = null }
+        )
+    }
+
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         items(state.albums, key = { it.name }) { album ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = album.name,
-                        style = MaterialTheme.typography.bodyLarge,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = stringResource(
-                            R.string.backup_album_summary,
-                            pluralStringResource(
-                                R.plurals.file_count,
-                                album.itemCount,
-                                album.itemCount
-                            ),
-                            formatBytes(context, album.totalBytes)
-                        ),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                    // Whether the album is safe, said separately from whether it is watched.
-                    Text(
-                        text = when (album.status) {
-                            AlbumStatus.COMPLETE -> stringResource(R.string.album_status_complete)
-                            AlbumStatus.PARTIAL ->
-                                stringResource(R.string.album_status_partial, album.outstanding)
-                            AlbumStatus.NOT_BACKED_UP -> stringResource(R.string.album_status_none)
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = when (album.status) {
-                            AlbumStatus.COMPLETE -> MaterialTheme.colorScheme.primary
-                            else -> MaterialTheme.colorScheme.onSurfaceVariant
-                        }
-                    )
+            AlbumModeRow(
+                album = album,
+                context = context,
+                onModeSelected = { mode ->
+                    if (mode == AlbumMode.ARCHIVE) {
+                        archiveConfirmAlbum = album.name
+                    } else {
+                        viewModel.setAlbumMode(album.name, mode)
+                    }
                 }
-                Switch(
-                    checked = album.isEnabled,
-                    onCheckedChange = { viewModel.setAlbumEnabled(album.name, it) }
-                )
-            }
+            )
             HorizontalDivider()
         }
     }
+}
+
+@Composable
+private fun AlbumModeRow(
+    album: AlbumRow,
+    context: android.content.Context,
+    onModeSelected: (AlbumMode) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = album.name,
+                style = MaterialTheme.typography.bodyLarge,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = stringResource(
+                    R.string.backup_album_summary,
+                    pluralStringResource(
+                        R.plurals.file_count,
+                        album.itemCount,
+                        album.itemCount
+                    ),
+                    formatBytes(context, album.totalBytes)
+                ),
+                style = MaterialTheme.typography.bodySmall
+            )
+            Text(
+                text = when (album.status) {
+                    AlbumStatus.COMPLETE -> stringResource(R.string.album_status_complete)
+                    AlbumStatus.PARTIAL ->
+                        stringResource(R.string.album_status_partial, album.outstanding)
+                    AlbumStatus.NOT_BACKED_UP -> stringResource(R.string.album_status_none)
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = when (album.status) {
+                    AlbumStatus.COMPLETE -> MaterialTheme.colorScheme.primary
+                    else -> MaterialTheme.colorScheme.onSurfaceVariant
+                }
+            )
+        }
+        AlbumModeDropdown(
+            current = album.mode,
+            onModeSelected = onModeSelected
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AlbumModeDropdown(
+    current: AlbumMode,
+    onModeSelected: (AlbumMode) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = it }
+    ) {
+        OutlinedTextField(
+            value = current.label(),
+            onValueChange = {},
+            readOnly = true,
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+            textStyle = MaterialTheme.typography.bodySmall,
+            singleLine = true
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            AlbumMode.entries.forEach { mode ->
+                DropdownMenuItem(
+                    text = { Text(mode.label()) },
+                    onClick = {
+                        expanded = false
+                        if (mode != current) onModeSelected(mode)
+                    },
+                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AlbumMode.label(): String = when (this) {
+    AlbumMode.OFF -> stringResource(R.string.mode_off)
+    AlbumMode.BACKUP -> stringResource(R.string.mode_backup)
+    AlbumMode.SYNC -> stringResource(R.string.mode_sync)
+    AlbumMode.ARCHIVE -> stringResource(R.string.mode_archive)
+}
+
+@Composable
+private fun ArchiveConfirmDialog(
+    albumName: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.archive_confirm_title)) },
+        text = { Text(stringResource(R.string.archive_confirm_body, albumName)) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                Text(stringResource(R.string.archive_confirm_accept))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.archive_confirm_cancel))
+            }
+        }
+    )
 }
 
 /** Turns the typed run status into words. */

@@ -59,12 +59,20 @@ class BackupWorker @AssistedInject constructor(
                 "stopped=${result.stoppedBecause}"
         )
 
+        // More files waiting and nothing wrong — schedule the next batch immediately rather than
+        // waiting 6 hours for the periodic safety net. The byte budget splits large libraries into
+        // multiple runs, and each one should follow the last without the user pressing a button.
+        if (result.stoppedBecause == null && result.remaining > 0) {
+            Logger.i(TAG, "${result.remaining} remaining, scheduling next batch")
+            BackupScheduling.enqueueContinuation(
+                WorkManager.getInstance(applicationContext),
+                preferences.allowMeteredNetwork
+            )
+        }
+
         return when (result.stoppedBecause) {
-            // Transient: come back later with backoff.
             StopReason.NETWORK -> Result.retry()
 
-            // The user must act — sign in, or free space in OneDrive. Retrying on a timer would
-            // burn battery reproducing the same error, so stop and let the app prompt them.
             StopReason.NO_TOKEN,
             StopReason.UNAUTHORIZED,
             StopReason.DRIVE_FULL,
