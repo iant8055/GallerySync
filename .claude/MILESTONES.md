@@ -566,27 +566,34 @@ buttons, and the Appearance segmented control deforms. One mechanism explains ne
 broken spot is a `Row` of `[text] [control]` where the control takes its width first. Itemised in
 TASK-012 under "Known: the layout breaks on the folded cover screen", with a repro that needs no Fold.
 
-### 24 Aug 2026 — running instrumented tests without Gradle
+### 24 Aug 2026 — a dead network looks exactly like a broken installer
 
-**Fold 4.** `./gradlew connectedDebugAndroidTest` fails on this handset: ddmlib's split-APK installer
-hangs in `installCommit` until it times out, roughly four minutes, then cannot clean up
-(`DELETE_FAILED_INTERNAL_ERROR`). Not a code problem and not a device fault — `adb install` of the
-same APK succeeds in seconds. Storage was 125 GB free, `verifier_verify_adb_installs` was already 0,
-and `install_non_market_apps` was 1, so none of the usual causes applied.
+**Fold 4.** `./gradlew connectedDebugAndroidTest` failed twice with ddmlib hanging in
+`installCommit` for about four minutes, then `DELETE_FAILED_INTERNAL_ERROR` cleaning up. The obvious
+readings were all wrong: storage had 125 GB free, `verifier_verify_adb_installs` was already 0, and
+`install_non_market_apps` was 1.
 
-Drive the instrumentation directly instead:
+**The phone had no internet.** The install commit blocks while a verifier tries to reach a server it
+cannot, and the failure surfaces as an installer bug rather than a connectivity one. With the network
+back the same command ran 33 tests in 29 seconds, unchanged.
 
-```
-adb install -r -t app/build/outputs/apk/debug/app-debug.apk
-adb install -r -t app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
-adb shell am instrument -w com.gallery.sync.test/androidx.test.runner.AndroidJUnitRunner
-```
+Worth writing down because the diagnosis was initially recorded here as "ddmlib's split-APK installer
+is broken on this handset", which was wrong. **Check the device has a working connection before
+believing anything about a failed install.**
 
-Two seconds for the whole suite, and it prints a plain `OK (n tests)`.
+Two things that are still true and useful:
 
-**This route does not uninstall the app afterwards**, which the Gradle task does. That makes it the
-only safe way to run these tests against a device holding a real ledger — the note above about never
-running the suite against a working install applies to `connectedDebugAndroidTest`, not to this.
+- `adb install` succeeds where the split installer stalls, so it is a quick way to tell a genuine APK
+  problem from an environmental one.
+- Driving the runner directly takes about two seconds:
+
+  ```
+  adb shell am instrument -w com.gallery.sync.test/androidx.test.runner.AndroidJUnitRunner
+  ```
+
+  **and, unlike `connectedDebugAndroidTest`, it does not uninstall the app afterwards.** That makes it
+  the only safe way to run these tests against a device holding a real ledger — the warning elsewhere
+  in this file about losing app data applies to the Gradle task, not to this.
 
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
