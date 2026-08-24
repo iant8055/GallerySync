@@ -3,6 +3,7 @@ package com.gallery.sync.data.repository
 import com.gallery.sync.data.remote.auth.OneDriveTokenProvider
 import com.gallery.sync.data.remote.onedrive.ChunkedUploader
 import com.gallery.sync.data.remote.onedrive.FileUploadSource
+import com.gallery.sync.data.remote.onedrive.ResumableSession
 import com.gallery.sync.data.remote.onedrive.UploadOutcome
 import com.gallery.sync.data.remote.onedrive.UploadSource
 import com.gallery.sync.di.IoDispatcher
@@ -50,7 +51,9 @@ class OneDriveUploadRepositoryImpl @Inject constructor(
     override suspend fun upload(
         source: UploadSource,
         remoteFolderPath: String,
-        onProgress: (bytesSent: Long, total: Long) -> Unit
+        onProgress: (bytesSent: Long, total: Long) -> Unit,
+        existingSession: ResumableSession?,
+        onSessionCreated: suspend (ResumableSession) -> Unit
     ): DataResult<UploadedItem> = withContext(dispatcher) {
 
         if (tokenProvider.getAccessToken() == null) {
@@ -59,7 +62,14 @@ class OneDriveUploadRepositoryImpl @Inject constructor(
         }
 
         try {
-            when (val outcome = uploader.upload(source, remoteFolderPath, onProgress)) {
+            val outcome = uploader.upload(
+                source = source,
+                remoteFolderPath = remoteFolderPath,
+                onProgress = onProgress,
+                existingSession = existingSession,
+                onSessionCreated = onSessionCreated
+            )
+            when (outcome) {
                 is UploadOutcome.Success -> {
                     val item = outcome.item
                     Logger.i(TAG, "upload: stored ${source.displayName} (${item.size ?: -1} bytes)")

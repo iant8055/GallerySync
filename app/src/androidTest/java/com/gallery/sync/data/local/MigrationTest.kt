@@ -4,6 +4,7 @@ import androidx.room.testing.MigrationTestHelper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -159,11 +160,49 @@ class MigrationTest {
     }
 
     @Test
-    fun migrateAllTheWayFrom1To5() {
+    fun migrate5To6_producesTheSchemaRoomExpects() {
+        helper.createDatabase(TEST_DB, 5).close()
+
+        helper.runMigrationsAndValidate(TEST_DB, 6, true, Migrations.MIGRATION_5_6).close()
+    }
+
+    @Test
+    fun migrate5To6_leavesExistingRowsWithNoSessionOutstanding() {
+        // Nothing is mid-upload at the moment of an upgrade, so both columns must arrive null.
+        // A non-null default would send the next run chasing a session that never existed.
+        helper.createDatabase(TEST_DB, 5).apply {
+            execSQL(
+                """
+                INSERT INTO backup_entries
+                    (id, mediaStoreId, contentUri, displayName, album, sizeBytes,
+                     dateModifiedEpochSeconds, mimeType, isVideo, state, attemptCount,
+                     isProxied, isProxySkipped)
+                VALUES
+                    ('k1', 42, 'content://media/external/video/media/42', 'VID_1.mp4',
+                     'Camera', 163846425, 1700000000, 'video/mp4', 1, 'PENDING', 0, 0, 0)
+                """.trimIndent()
+            )
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(TEST_DB, 6, true, Migrations.MIGRATION_5_6)
+
+        db.query(
+            "SELECT uploadSessionUrl, uploadSessionExpiresAtEpochMillis FROM backup_entries WHERE id = 'k1'"
+        ).use { cursor ->
+            cursor.moveToFirst()
+            assertTrue("an upgraded row has no session in flight", cursor.isNull(0))
+            assertTrue("and therefore no expiry either", cursor.isNull(1))
+        }
+        db.close()
+    }
+
+    @Test
+    fun migrateAllTheWayFrom1To6() {
         // Someone upgrading from the first build skips every version in between.
         helper.createDatabase(TEST_DB, 1).close()
 
-        helper.runMigrationsAndValidate(TEST_DB, 5, true, *Migrations.ALL).close()
+        helper.runMigrationsAndValidate(TEST_DB, 6, true, *Migrations.ALL).close()
     }
 
     @Test

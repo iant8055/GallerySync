@@ -104,6 +104,38 @@ interface BackupEntryDao {
     )
     suspend fun markFailed(id: String, error: String, state: BackupState = BackupState.FAILED)
 
+    /**
+     * Remembers a resumable upload session so the next run can continue it.
+     *
+     * Written as soon as Graph issues the session, not when the upload finishes — the whole point
+     * is to survive a run that never reaches the end.
+     */
+    @Query(
+        """
+        UPDATE backup_entries
+        SET uploadSessionUrl = :url,
+            uploadSessionExpiresAtEpochMillis = :expiresAt
+        WHERE id = :id
+        """
+    )
+    suspend fun rememberUploadSession(id: String, url: String, expiresAt: Long?)
+
+    /**
+     * Drops a session that is finished, expired, or rejected.
+     *
+     * Leaving a dead URL behind is worse than having none: the next run would spend a request
+     * discovering it is gone before starting the upload it could have started immediately.
+     */
+    @Query(
+        """
+        UPDATE backup_entries
+        SET uploadSessionUrl = NULL,
+            uploadSessionExpiresAtEpochMillis = NULL
+        WHERE id = :id
+        """
+    )
+    suspend fun forgetUploadSession(id: String)
+
     /** Clears the failure count so the user can retry something that has given up. */
     @Query("UPDATE backup_entries SET state = :pending, attemptCount = 0, lastError = NULL WHERE state = :failed")
     suspend fun resetFailures(

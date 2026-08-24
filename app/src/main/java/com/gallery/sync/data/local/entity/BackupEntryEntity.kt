@@ -95,7 +95,29 @@ data class BackupEntryEntity(
     val isProxySkipped: Boolean = false,
 
     /** What the local file occupies now. [sizeBytes] still means the original, which is in the cloud. */
-    val localProxySizeBytes: Long? = null
+    val localProxySizeBytes: Long? = null,
+
+    /**
+     * A resumable upload session that outlived the run that created it.
+     *
+     * Graph hands back a pre-authorised URL that stays valid for roughly five hours. Without
+     * storing it, a run killed part-way starts the next attempt from byte zero: observed on the
+     * Fold 4, force-stopped at 96% of a 164 MB video, next run opened a fresh session reporting
+     * `nextExpectedRanges: ["0-"]`.
+     *
+     * That is not merely wasteful — it is a hard ceiling. A file that cannot finish inside one
+     * background window can never finish at all, and the window is measured in bytes of upstream,
+     * not in file size. Null whenever no session is outstanding.
+     */
+    val uploadSessionUrl: String? = null,
+
+    /**
+     * When [uploadSessionUrl] stops being valid, epoch millis.
+     *
+     * Stored rather than inferred: Graph decides the lifetime and says so, and a session resumed
+     * past its expiry fails in a way that looks like a network error.
+     */
+    val uploadSessionExpiresAtEpochMillis: Long? = null
 )
 
 /**

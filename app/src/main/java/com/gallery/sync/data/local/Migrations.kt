@@ -133,6 +133,21 @@ object Migrations {
         }
     }
 
+    /**
+     * 5 → 6: remembers an in-flight resumable upload session across runs.
+     *
+     * Additive, and null is right for every existing row: nothing has a session outstanding at the
+     * moment of upgrade, so every file simply starts fresh as it does today.
+     */
+    val MIGRATION_5_6 = object : Migration(5, 6) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE `backup_entries` ADD COLUMN `uploadSessionUrl` TEXT")
+            db.execSQL(
+                "ALTER TABLE `backup_entries` ADD COLUMN `uploadSessionExpiresAtEpochMillis` INTEGER"
+            )
+        }
+    }
+
     /** Every migration, in order, for the database builder. */
-    val ALL = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+    val ALL = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
 }

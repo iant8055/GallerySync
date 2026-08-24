@@ -10,6 +10,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.ResponseBody
 import retrofit2.Response
 import java.io.File
+import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.coroutineContext
@@ -45,15 +46,19 @@ class ChunkedUploader @Inject constructor(
     suspend fun upload(
         source: UploadSource,
         remoteFolderPath: String,
-        onProgress: (bytesSent: Long, total: Long) -> Unit = { _, _ -> }
+        onProgress: (bytesSent: Long, total: Long) -> Unit = { _, _ -> },
+        existingSession: ResumableSession? = null,
+        onSessionCreated: suspend (ResumableSession) -> Unit = {}
     ): UploadOutcome {
         val total = source.sizeBytes
         val remotePath = buildRemotePath(remoteFolderPath, source.displayName)
 
         return if (total < SMALL_FILE_THRESHOLD_BYTES) {
+            // Small files go in one request, so there is no session to resume and nothing an
+            // interruption could leave half-done.
             uploadSmall(source, remotePath, total, onProgress)
         } else {
-            uploadChunked(source, remotePath, total, onProgress)
+            uploadChunked(source, remotePath, total, onProgress, existingSession, onSessionCreated)
         }
     }
 
@@ -89,21 +94,50 @@ class ChunkedUploader @Inject constructor(
         source: UploadSource,
         remotePath: String,
         total: Long,
-        onProgress: (Long, Long) -> Unit
+        onProgress: (Long, Long) -> Unit,
+        existingSession: ResumableSession?,
+        onSessionCreated: suspend (ResumableSession) -> Unit
     ): UploadOutcome {
-        val sessionResponse = uploadApi.createUploadSession(remotePath)
-        if (!sessionResponse.isSuccessful) {
-            return UploadOutcome.HttpFailure(
-                sessionResponse.code(),
-                sessionResponse.errorBody()?.string()
+        // Continue a session left over from an interrupted run, when there is one and the server
+        // still recognises it. Anything unusable falls through to opening a fresh session, which is
+        // exactly the old behaviour.
+        val resumed = existingSession
+            ?.takeIf { !it.hasExpired() }
+            ?.let { session -> resumeOffsetOf(session, total)?.let { session.uploadUrl to it } }
+
+        val uploadUrl: String
+        var offset: Long
+
+        if (resumed != null) {
+            uploadUrl = resumed.first
+            offset = resumed.second
+            Logger.i(
+                TAG,
+                "resuming ${source.displayName} at $offset of $total bytes " +
+                    "(${100 * offset / total.coerceAtLeast(1)}% already accepted)"
             )
+            onProgress(offset, total)
+        } else {
+            val sessionResponse = uploadApi.createUploadSession(remotePath)
+            if (!sessionResponse.isSuccessful) {
+                return UploadOutcome.HttpFailure(
+                    sessionResponse.code(),
+                    sessionResponse.errorBody()?.string()
+                )
+            }
+            val created = sessionResponse.body()?.uploadUrl
+                ?: return UploadOutcome.HttpFailure(sessionResponse.code(), "no uploadUrl in session")
+
+            uploadUrl = created
+            offset = 0L
+
+            // Handed over before a single byte goes out. Persisting on success would be useless —
+            // the run that fails is precisely the one whose session needs to survive.
+            onSessionCreated(
+                ResumableSession(created, expiryMillisOf(sessionResponse.body()?.expirationDateTime))
+            )
+            Logger.d(TAG, "uploading ${source.displayName} in chunks ($total bytes)")
         }
-        val uploadUrl = sessionResponse.body()?.uploadUrl
-            ?: return UploadOutcome.HttpFailure(sessionResponse.code(), "no uploadUrl in session")
-
-        Logger.d(TAG, "uploading ${source.displayName} in chunks ($total bytes)")
-
-        var offset = 0L
         source.open().use { reader ->
             while (offset < total) {
                 // Cooperative cancellation: a stopped worker must not keep pushing bytes.
@@ -146,6 +180,38 @@ class ChunkedUploader @Inject constructor(
         // Every byte was accepted but Graph never returned the finished item.
         return UploadOutcome.HttpFailure(HTTP_ACCEPTED, "upload ended without a completed item")
     }
+
+    /**
+     * How many bytes Graph already holds for [session], or null if it cannot be continued.
+     *
+     * Null covers every unusable case — the session is gone, the response is unreadable, or the
+     * server claims everything has arrived while never having returned a finished item. All of them
+     * mean the same thing to the caller: open a new session and start over.
+     */
+    private suspend fun resumeOffsetOf(session: ResumableSession, total: Long): Long? {
+        val response = runCatching { chunkApi.querySession(session.uploadUrl) }.getOrNull()
+            ?: return null
+
+        if (!response.isSuccessful) {
+            Logger.d(TAG, "stored session is no longer usable (HTTP ${response.code()})")
+            return null
+        }
+
+        val offset = nextOffsetFrom(decode<ChunkAcceptedDto>(response)?.nextExpectedRanges)
+        // At or past the end there is no chunk left to send, and the loop below would exit without
+        // ever receiving the completed item. A fresh session is the only way out of that.
+        return offset?.takeIf { it in 0 until total }
+    }
+
+    /**
+     * Graph's `expirationDateTime` as epoch millis, or null when absent or unparseable.
+     *
+     * Null means "unknown", and the session is then trusted until the server says otherwise.
+     * Discarding a session because its timestamp was in an unexpected shape would reintroduce the
+     * very restart this exists to prevent.
+     */
+    private fun expiryMillisOf(expirationDateTime: String?): Long? =
+        expirationDateTime?.let { runCatching { Instant.parse(it).toEpochMilli() }.getOrNull() }
 
     private inline fun <reified T> decode(response: Response<ResponseBody>): T? =
         response.body()?.string()?.takeIf { it.isNotBlank() }?.let {

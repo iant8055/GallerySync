@@ -14,6 +14,7 @@ import com.gallery.sync.data.local.media.MediaScanner
 import com.gallery.sync.data.local.media.ProxyMarker
 import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.data.remote.onedrive.ContentUriUploadSource
+import com.gallery.sync.data.remote.onedrive.ResumableSession
 import com.gallery.sync.di.IoDispatcher
 import com.gallery.sync.domain.model.DataResult
 import com.gallery.sync.domain.model.RemoteError
@@ -320,18 +321,33 @@ class BackupEngine @Inject constructor(
 
                 val result = uploadRepository.upload(
                     source = source,
-                    remoteFolderPath = remotePathFor(entry.album)
-                ) { sent, total ->
-                    onProgress(
-                        BackupProgress(
-                            completed = uploaded + skipped + pruned,
-                            total = pending.size,
-                            currentFile = entry.displayName,
-                            currentBytesSent = sent,
-                            currentBytesTotal = total
+                    remoteFolderPath = remotePathFor(entry.album),
+                    onProgress = { sent, total ->
+                        onProgress(
+                            BackupProgress(
+                                completed = uploaded + skipped + pruned,
+                                total = pending.size,
+                                currentFile = entry.displayName,
+                                currentBytesSent = sent,
+                                currentBytesTotal = total
+                            )
                         )
-                    )
-                }
+                    },
+                    // Anything this row was part-way through last time. Expiry and whether the
+                    // server still honours it are decided further down; here it is just handed over.
+                    existingSession = entry.uploadSessionUrl?.let {
+                        ResumableSession(it, entry.uploadSessionExpiresAtEpochMillis)
+                    },
+                    // Stored before the first byte leaves. The run that dies is the one whose
+                    // session matters, so waiting for success would record nothing useful.
+                    onSessionCreated = { session ->
+                        entryDao.rememberUploadSession(
+                            id = entry.id,
+                            url = session.uploadUrl,
+                            expiresAt = session.expiresAtEpochMillis
+                        )
+                    }
+                )
 
                 when (result) {
                     is DataResult.Success -> {
@@ -345,12 +361,17 @@ class BackupEngine @Inject constructor(
                                 remoteSizeBytes = item.sizeBytes,
                                 uploadedAt = System.currentTimeMillis()
                             )
+                            entryDao.forgetUploadSession(entry.id)
                             uploaded++
                         } else {
                             entryDao.markFailed(
                                 entry.id,
                                 "size mismatch: sent ${entry.sizeBytes}, stored ${item.sizeBytes}"
                             )
+                            // The session ran to completion and produced the wrong bytes, so it is
+                            // spent. Resuming it would re-confirm the same bad file; only a fresh
+                            // session can put this right.
+                            entryDao.forgetUploadSession(entry.id)
                             failed++
                         }
                     }

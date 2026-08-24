@@ -4,6 +4,7 @@ import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.PUT
 import retrofit2.http.Url
@@ -23,6 +24,19 @@ import retrofit2.http.Url
  * created `driveItem`. [ChunkedUploader] decodes whichever applies.
  */
 interface UploadChunkService {
+
+    /**
+     * Asks Graph how much of a session it already holds.
+     *
+     * The response carries `nextExpectedRanges`, and the server's answer is the only trustworthy
+     * one — a chunk can be partially received, so a locally remembered offset would leave a hole
+     * that Graph would assemble into a corrupt file without complaint.
+     *
+     * A 404 or 410 here means the session is gone, which is ordinary rather than an error: sessions
+     * expire, and the caller simply opens a new one.
+     */
+    @GET
+    suspend fun querySession(@Url uploadUrl: String): Response<ResponseBody>
 
     @PUT
     suspend fun uploadChunk(

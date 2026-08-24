@@ -566,6 +566,28 @@ buttons, and the Appearance segmented control deforms. One mechanism explains ne
 broken spot is a `Row` of `[text] [control]` where the control takes its width first. Itemised in
 TASK-012 under "Known: the layout breaks on the folded cover screen", with a repro that needs no Fold.
 
+### 24 Aug 2026 — running instrumented tests without Gradle
+
+**Fold 4.** `./gradlew connectedDebugAndroidTest` fails on this handset: ddmlib's split-APK installer
+hangs in `installCommit` until it times out, roughly four minutes, then cannot clean up
+(`DELETE_FAILED_INTERNAL_ERROR`). Not a code problem and not a device fault — `adb install` of the
+same APK succeeds in seconds. Storage was 125 GB free, `verifier_verify_adb_installs` was already 0,
+and `install_non_market_apps` was 1, so none of the usual causes applied.
+
+Drive the instrumentation directly instead:
+
+```
+adb install -r -t app/build/outputs/apk/debug/app-debug.apk
+adb install -r -t app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+adb shell am instrument -w com.gallery.sync.test/androidx.test.runner.AndroidJUnitRunner
+```
+
+Two seconds for the whole suite, and it prints a plain `OK (n tests)`.
+
+**This route does not uninstall the app afterwards**, which the Gradle task does. That makes it the
+only safe way to run these tests against a device holding a real ledger — the note above about never
+running the suite against a working install applies to `connectedDebugAndroidTest`, not to this.
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have

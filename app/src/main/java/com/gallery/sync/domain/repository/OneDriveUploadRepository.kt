@@ -1,5 +1,6 @@
 package com.gallery.sync.domain.repository
 
+import com.gallery.sync.data.remote.onedrive.ResumableSession
 import com.gallery.sync.data.remote.onedrive.UploadSource
 import com.gallery.sync.domain.model.DataResult
 import com.gallery.sync.domain.model.UploadedItem
@@ -33,10 +34,17 @@ interface OneDriveUploadRepository {
     /**
      * Uploads an arbitrary [UploadSource] — in practice a MediaStore content URI, which is how the
      * backup reads media under scoped storage.
+     *
+     * [existingSession] continues an upload an earlier run began, and [onSessionCreated] hands back
+     * a newly opened session so the caller can store it before any bytes are sent. Together they are
+     * what stops a large file restarting from zero every time a run is cut short; omit both and the
+     * upload simply begins afresh.
      */
     suspend fun upload(
         source: UploadSource,
         remoteFolderPath: String,
-        onProgress: (bytesSent: Long, total: Long) -> Unit = { _, _ -> }
+        onProgress: (bytesSent: Long, total: Long) -> Unit = { _, _ -> },
+        existingSession: ResumableSession? = null,
+        onSessionCreated: suspend (ResumableSession) -> Unit = {}
     ): DataResult<UploadedItem>
 }
