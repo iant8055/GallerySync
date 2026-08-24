@@ -36,7 +36,22 @@ interface BackupEntryDao {
     suspend fun insertIfNew(entries: List<BackupEntryEntity>)
 
     /**
-     * The worker's queue: what still needs uploading, from albums the user kept enabled.
+     * The worker's queue: what still needs uploading, from albums the user chose to back up.
+     *
+     * **Opt-in, and the direction is the whole point.** This asks which albums are in a mode other
+     * than Off, rather than excluding the ones marked Off. The two differ only for an album with no
+     * row at all — and that is exactly the case that went wrong. Under the old
+     * `NOT IN (… mode = 'OFF')`, an album nobody had chosen was eligible, because `NOT IN` over an
+     * empty set is true for everything.
+     *
+     * Observed 24 Aug 2026 on a fresh install: a content-triggered run fired before any preference
+     * had been written and uploaded 23 files from five albums the user had never seen, one of them
+     * a 75 MB video. Nothing was deleted — local removal needs an Activity and a tap — but files
+     * left the phone that nobody had chosen to send.
+     *
+     * Consent has to be something granted, not something left un-revoked. With this direction the
+     * failure mode is "backs up too little", which is visible and recoverable; the old one was
+     * "backs up what you did not ask for", which is neither.
      *
      * Newest first, matching the scanner — an interrupted run should already have protected the
      * most recent photos.
@@ -45,8 +60,8 @@ interface BackupEntryDao {
         """
         SELECT * FROM backup_entries
         WHERE state != :uploaded
-          AND album NOT IN (
-              SELECT albumName FROM album_preferences WHERE mode = 'OFF'
+          AND album IN (
+              SELECT albumName FROM album_preferences WHERE mode != 'OFF'
           )
           AND attemptCount < :maxAttempts
         ORDER BY dateModifiedEpochSeconds DESC
@@ -111,13 +126,16 @@ interface BackupEntryDao {
      * The whole-table count is misleading in the UI: someone backing up one album does not care
      * that 8,000 files sit in albums they deliberately switched off, and showing that number
      * alongside a run that correctly does nothing makes the app look broken.
+     *
+     * Must use the same opt-in test as [nextPending] — if these two disagree the UI promises work
+     * the worker will not do, or reports nothing outstanding while it uploads.
      */
     @Query(
         """
         SELECT COUNT(*) FROM backup_entries
         WHERE state != :uploaded
-          AND album NOT IN (
-              SELECT albumName FROM album_preferences WHERE mode = 'OFF'
+          AND album IN (
+              SELECT albumName FROM album_preferences WHERE mode != 'OFF'
           )
         """
     )

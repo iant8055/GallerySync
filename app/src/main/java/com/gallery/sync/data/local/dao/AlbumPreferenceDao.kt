@@ -18,12 +18,27 @@ interface AlbumPreferenceDao {
     /**
      * Sets many at once, for "back up everything" / "back up nothing".
      *
-     * The second matters more than it looks: albums default to enabled, so without a way to switch
-     * them all off, anyone wanting to back up a single album would have to toggle a hundred others
-     * by hand — and would likely just run it and upload their whole library by accident.
+     * `REPLACE`, so this overwrites whatever the user chose before — which is right for an explicit
+     * bulk action and wrong for anything else. To record an album without touching a choice already
+     * made, use [insertIfNew].
      */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun setPreferences(preferences: List<AlbumPreferenceEntity>)
+
+    /**
+     * Records albums the scanner found, without disturbing any choice already made.
+     *
+     * `IGNORE` is the entire point: this runs on every scan, and `REPLACE` here would reset the
+     * user's modes to the default each time — silently switching off albums they had turned on, or
+     * re-arming ones they had turned off.
+     *
+     * Called by the engine rather than the UI. The upload gate is opt-in, so an album only becomes
+     * eligible once it has a row in a mode other than Off; seeding here means a headless run can
+     * tell "an album nobody has chosen" from "an album that does not exist yet" without waiting for
+     * someone to open the album screen.
+     */
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertIfNew(preferences: List<AlbumPreferenceEntity>)
 
     @Query("SELECT * FROM album_preferences")
     fun observeAll(): Flow<List<AlbumPreferenceEntity>>
@@ -31,7 +46,13 @@ interface AlbumPreferenceDao {
     @Query("SELECT * FROM album_preferences")
     suspend fun all(): List<AlbumPreferenceEntity>
 
-    /** Albums the user switched off. Absence from this list means the album is uploaded. */
+    /**
+     * Albums the user switched off.
+     *
+     * Absence from this list does **not** mean the album is backed up — an album with no row has
+     * not been chosen either way, and is not eligible. See [BackupEntryDao.nextPending] for the gate
+     * that decides.
+     */
     @Query("SELECT albumName FROM album_preferences WHERE mode = 'OFF'")
     suspend fun disabledAlbums(): List<String>
 

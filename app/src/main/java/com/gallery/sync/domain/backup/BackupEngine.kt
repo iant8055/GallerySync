@@ -1,7 +1,10 @@
 package com.gallery.sync.domain.backup
 
 import android.content.Context
+import com.gallery.sync.data.local.dao.AlbumPreferenceDao
 import com.gallery.sync.data.local.dao.BackupEntryDao
+import com.gallery.sync.data.local.entity.AlbumMode
+import com.gallery.sync.data.local.entity.AlbumPreferenceEntity
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.entity.BackupState
 import com.gallery.sync.data.local.entity.backupKeyOf
@@ -9,6 +12,7 @@ import com.gallery.sync.data.local.media.LocalMediaItem
 import com.gallery.sync.data.local.media.MediaAccess
 import com.gallery.sync.data.local.media.MediaScanner
 import com.gallery.sync.data.local.media.ProxyMarker
+import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.data.remote.onedrive.ContentUriUploadSource
 import com.gallery.sync.di.IoDispatcher
 import com.gallery.sync.domain.model.DataResult
@@ -89,6 +93,8 @@ data class BackupRunResult(
 class BackupEngine @Inject constructor(
     private val scanner: MediaScanner,
     private val entryDao: BackupEntryDao,
+    private val albumDao: AlbumPreferenceDao,
+    private val settings: BackupSettings,
     private val repository: OneDriveRepository,
     private val uploadRepository: OneDriveUploadRepository,
     private val proxyMarker: ProxyMarker,
@@ -137,7 +143,24 @@ class BackupEngine @Inject constructor(
         // IGNORE on conflict, so a rescan never resets an uploaded row back to pending.
         entryDao.insertIfNew(entries)
 
-        pruneAlbumsNoLongerOnDevice(items.map { it.album }.distinct())
+        val albumsOnDevice = items.map { it.album }.distinct()
+
+        // Give every album the scan found a row. IGNORE means a choice already made is never
+        // touched, so this is safe to run on every scan.
+        //
+        // This lives here, not in the UI, because the upload gate is opt-in and headless runs
+        // happen. Seeding from a ViewModel meant a content-triggered run before the user ever
+        // opened the album screen saw an empty preference table — which under the old opt-out gate
+        // made the whole library eligible.
+        //
+        // The mode is the user's configured default for new albums, not [AlbumMode.DEFAULT]:
+        // hardcoding it here would silently disable that setting, since the row would already exist
+        // by the time the screen looked. `canBeDefault` keeps Archive out of it, so seeding can
+        // never arm a mode that removes files.
+        val defaultMode = settings.current().defaultAlbumMode
+        albumDao.insertIfNew(albumsOnDevice.map { AlbumPreferenceEntity(it, defaultMode) })
+
+        pruneAlbumsNoLongerOnDevice(albumsOnDevice)
 
         Logger.i(TAG, "refreshLedger: ${entries.size} files seen")
         entries.size

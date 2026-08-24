@@ -277,6 +277,11 @@ class BackupViewModel @Inject constructor(
 
             _state.value = _state.value.copy(isScanning = true)
 
+            // Which albums already had a choice recorded, captured **before** the scan — which is
+            // what now seeds a row for anything newly discovered. Read this afterwards and every
+            // album looks familiar, so a genuinely new one would never arm the continuation below.
+            val knownBefore = albumDao.all().mapTo(HashSet()) { it.albumName }
+
             // Bring the ledger up to date before counting. Without this the counts describe
             // whatever the last run happened to see, and the screen would claim there is nothing
             // to do simply because nothing has scanned yet.
@@ -293,11 +298,11 @@ class BackupViewModel @Inject constructor(
             var hasNewUploadAlbums = false
             val albums = scanner.scanAlbums().map { album ->
                 val counts = countsByAlbum[album.name]
-                val mode = storedModes[album.name] ?: run {
-                    albumDao.setPreference(AlbumPreferenceEntity(album.name, defaultMode))
-                    if (defaultMode.uploads) hasNewUploadAlbums = true
-                    defaultMode
-                }
+                // No write here any more — [BackupEngine.refreshLedger] seeds the row. The fallback
+                // remains only for an album the scanner reports that the ledger has not recorded,
+                // which the screen should still render rather than skip.
+                val mode = storedModes[album.name] ?: defaultMode
+                if (album.name !in knownBefore && mode.uploads) hasNewUploadAlbums = true
                 AlbumRow(
                     name = album.name,
                     itemCount = album.itemCount,

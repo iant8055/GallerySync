@@ -266,7 +266,17 @@ keeps working.
 
 ---
 
-## Hardware verification log — Galaxy Z Fold 4 (SM-F936U)
+## Hardware verification log
+
+Two handsets from 24 Aug 2026. Every entry names the device it was taken on, because several findings
+here have turned out to be device-specific rather than platform-wide.
+
+- **Galaxy Z Fold 4 (SM-F936U)** — Android 16, API 36. Every entry before 24 Aug is this device.
+  Being returned as a trade-in in the week of 24 Aug, so it is the last disposable phone available:
+  anything destructive should be run on it while it exists.
+- **Galaxy Z Fold 8 (SM-F976U1)** — Android 17, **API 37**, One UI 9. Ian's daily driver, holding a
+  real 148 GB library. The only device that can verify targetSdk 37 behaviour, and the one place
+  where a mistake costs real photos.
 
 ### 18 Aug 2026 — proxying
 11 photos optimised, 40,283,338 bytes reclaimed; five correctly skipped as already small. EXIF
@@ -494,6 +504,67 @@ would strand every existing backup and re-upload the library; treat it as fixed.
 Neither defect was reachable by unit test — both need a real drive with more than a hundred files in
 a folder, and a real network to fail. That is the argument for keeping the probe rather than deleting
 it with `StorageAccessProbe`.
+
+### 24 Aug 2026 — the upload gate was opt-out, and a fresh install uploaded what nobody chose
+
+**Fold 8, first run after a Smart Switch migration.** 23 files went to OneDrive from five albums the
+user had never seen — `Camera`, `Messages`, `Screen recordings`, `Snapchat`, `WhatsApp Images` —
+including a 75 MB and a 48 MB video. No mode had been set on anything.
+
+The gate read:
+
+```sql
+album NOT IN (SELECT albumName FROM album_preferences WHERE mode = 'OFF')
+```
+
+`album_preferences` was empty, and `NOT IN` over an empty set is true for every row, so the whole
+library was eligible. The table was empty because **only `BackupViewModel` ever wrote to it** — the
+engine and the worker never did. A content-triggered run firing before anyone opened the album screen
+therefore saw no preferences at all and read that as universal consent.
+
+The intent had been right since `5f292c9` ("new albums do nothing until chosen"); the polarity was
+inverted, and the seeding sat in the layer that headless runs never reach.
+
+**Nothing was deleted.** Local removal goes through `MediaStore.createTrashRequest`, which needs an
+Activity and a tap, so a background worker cannot remove anything no matter what the gate says. That
+guarantee held exactly as designed. But files left the phone that the user had not chosen to send,
+and the rule is that this follows from a mode the user set and from nothing else.
+
+Fixed both halves:
+
+- The gate is now `album IN (… WHERE mode != 'OFF')`. An album with no row is never eligible, so the
+  failure mode is "backs up too little" — visible and recoverable — instead of "backs up what you did
+  not ask for", which is neither.
+- `BackupEngine.refreshLedger` seeds a row for every album it discovers, via an `IGNORE` insert so a
+  choice already made is never overwritten. It seeds with the user's configured `defaultAlbumMode`
+  rather than a hardcoded one: the engine now runs before the screen looks, so hardcoding would have
+  silently disabled that setting. `canBeDefault` keeps Archive out, so seeding can never arm a mode
+  that removes files.
+
+**Verified on the Fold 4: 31 instrumented tests pass, 0 failures** — up from 25, with six new cases in
+`UploadGateTest`. `unknownAlbumIsNotEligible` is the regression test; if it fails, the gate has been
+flipped back. All ten migration tests still pass against the changed DAO.
+
+Worth recording about *where* this showed up: the Fold 4 could never have caught it. Every album in
+its ledger already had a preference row after weeks of use, so both gate directions agreed there. The
+defect needed an empty preference table, which only a fresh install produces — the state every new
+user starts in, and the one a long-lived dev device never returns to.
+
+### 24 Aug 2026 — the layout breaks folded, and the app data exclusions hold
+
+**Fold 8.** Two findings from the same session.
+
+**The migration exclusions work.** Smart Switch carried the APK (`installer=com.sec.android.easyMover`)
+but no app data: zero ledger rows carried a `remoteItemId`, the token store was absent, and MSAL's
+credential cache was an empty stub. That is the `<device-transfer>` block in
+`data_extraction_rules.xml` doing its job, confirmed end-to-end for the first time. Re-signing in and
+rescanning is the whole recovery, as designed.
+
+**The UI is unusable on the cover screen.** At 320dp x 747dp with `font_scale` 1.7 — Ian's own
+settings, not a stress case — album rows collapse to one character per line, body text runs underneath
+buttons, and the Appearance segmented control deforms. One mechanism explains nearly all of it: every
+broken spot is a `Row` of `[text] [control]` where the control takes its width first. Itemised in
+TASK-012 under "Known: the layout breaks on the folded cover screen", with a repro that needs no Fold.
 
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 

@@ -652,6 +652,61 @@ someone reaches for a specific colour, and CLAUDE.md is absolute: nothing hardco
 themes checked on a device before it is called done. The teleprompter shipped unreadable in dark mode
 this way.
 
+### Known: the layout breaks on the folded cover screen
+Found 24 Aug 2026 on the Galaxy Z Fold 8 (SM-F976U1), Android 17 / API 37, device state `CLOSED`.
+Both tabs are affected; neither is merely ugly.
+
+Conditions: **320dp x 747dp** (1080x2520 at a forced density of 540) with **`font_scale` 1.7**. Both
+are Ian's own settings, so this is what the app normally looks like on that phone folded, not a
+synthetic stress case. Nothing in this repo has been checked below ~360dp or above the default font
+scale.
+
+**One mechanism explains almost all of it.** Every broken spot is a `Row` of `[text] [control]` where
+the control takes its width first — an intrinsic or fixed measurement — and the text is left with
+whatever remains. At 320dp with 1.7x type, what remains is narrower than a word, so the text wraps a
+word or a character at a time and the row grows vertically until it is clipped. Fix the width
+negotiation once and most of the list below goes with it.
+
+Album Modes:
+
+- **The album list collapses to one character per line.** Below the divider each row renders as a
+  vertical stack of single glyphs. The screen is unusable.
+- **"Select all" breaks mid-word**, rendered as "Selec / t all" — inside the word, not at the space.
+- **Content overflows the right edge**, leaving a clipped column of orphaned glyphs against the border.
+- **A large dead gap** sits between the button row and "Sync now", while the crushed list occupies
+  almost none of it.
+- **The bottom mode dropdown is cut off** by the screen edge.
+
+Settings:
+
+- **"Your cloud files" collapses to one word per line** — nine lines for one sentence — because the
+  "Open OneDrive" button claims its width first. Same shape as the album row.
+- **The body text runs underneath that button** and is clipped mid-word at the bottom edge.
+- **The account email breaks mid-token**: "iant8055@g / mail.com", beside a "Sign out" button that
+  took its width first.
+- **The Appearance segmented control cannot fit three segments.** "System" wraps to two lines and
+  that segment swells out of the pill, breaking the shape of the whole control.
+
+Both tabs:
+
+- **"Album Modes" wraps to two lines** while "Settings" takes one, leaving the tab row uneven and the
+  selected indicator no longer aligned beneath its label.
+
+**What this asks of the rebuild:** a compact-width path; text that wraps or ellipsizes at a word
+boundary rather than being handed a column narrower than one word; trailing controls that yield width
+instead of claiming it; and for a control that cannot fit its options side by side at 320dp, a
+different control rather than a squeezed one.
+
+It also earns a check alongside the dark-mode one, and for the same reason — a shipped-to-users class
+of bug that compiling cannot catch:
+
+```
+adb shell settings put system font_scale 1.7   # and back to 1.0
+```
+
+Fold the phone, or force the narrow viewport with `adb shell wm size 1080x2520` and `adb shell wm
+density 540`. A user who needs large text is exactly the user who hits this.
+
 ## Acceptance
 - An album can be set to Off, Backup, Sync or Archive, and the choice persists
 - The mode dropdown lists Off, Backup, Sync, Archive in that order
