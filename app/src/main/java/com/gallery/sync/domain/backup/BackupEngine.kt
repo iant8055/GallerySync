@@ -161,7 +161,11 @@ class BackupEngine @Inject constructor(
         val defaultMode = settings.current().defaultAlbumMode
         albumDao.insertIfNew(albumsOnDevice.map { AlbumPreferenceEntity(it, defaultMode) })
 
-        pruneAlbumsNoLongerOnDevice(albumsOnDevice)
+        // Unscoped, deliberately. Pruning asks "does this album still exist on the phone?", and a
+        // scoped scan answers a different question — "is it in a folder the user currently wants
+        // watched?". Driving the prune from the scoped list would forget the ledger rows and album
+        // modes of every folder someone merely narrowed away, which narrowing must never do.
+        pruneAlbumsNoLongerOnDevice(scanner.scanEverything().map { it.album }.distinct())
 
         Logger.i(TAG, "refreshLedger: ${entries.size} files seen")
         entries.size

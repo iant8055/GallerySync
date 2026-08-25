@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -23,7 +25,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
+import com.gallery.sync.data.local.media.GrantedDirectory
 import com.gallery.sync.domain.backup.FirstBackupHold
 import com.gallery.sync.domain.backup.FirstBackupWindow
 import com.gallery.sync.domain.backup.MediaTally
@@ -69,7 +71,11 @@ fun ReconcileScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    LaunchedEffect(Unit) { viewModel.start() }
+    // Gate 1's picker. OpenDocumentTree is the same grant that later lets a background worker
+    // rewrite a photo without an Activity, so one pick serves both reading and proxying.
+    val pickFolder = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocumentTree()
+    ) { uri -> uri?.let(viewModel::addSource) }
 
     Column(
         modifier = modifier
@@ -78,6 +84,20 @@ fun ReconcileScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        SourcesSection(
+            directories = state.directories,
+            refused = state.directoryRefused,
+            onAdd = { pickFolder.launch(null) },
+            onRemove = viewModel::removeSource
+        )
+
+        // Nothing below here means anything yet. With no folders granted the scan returns nothing,
+        // and a reconciliation reporting zero outstanding would announce that the whole library is
+        // already backed up — false, and false in the direction that stops someone acting.
+        if (!state.hasSources) return@Column
+
+        HorizontalDivider()
+
         Text(
             text = stringResource(R.string.reconcile_title),
             style = MaterialTheme.typography.titleMedium
@@ -446,4 +466,78 @@ private fun formatHour(hour: Int): String {
         DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(Locale.getDefault())
     }
     return remember(hour) { LocalTime.of(hour, 0).format(formatter) }
+}
+
+/**
+ * Gate 1: which folders the app looks in.
+ *
+ * The engine has nothing correct to do until this is answered, which is why it sits above everything
+ * else and why the rest of the screen is hidden while it is empty.
+ *
+ * A phone reports around ninety albums — WhatsApp thumbnails, screenshots, every app's cache. Almost
+ * none of that is what someone means by "my photos", and offering all of it makes the album list
+ * unusable and the first upload enormous.
+ */
+@Composable
+private fun SourcesSection(
+    directories: List<GrantedDirectory>,
+    refused: Boolean,
+    onAdd: () -> Unit,
+    onRemove: (String) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(
+            text = stringResource(R.string.sources_title),
+            style = MaterialTheme.typography.titleMedium
+        )
+        Text(
+            text = stringResource(R.string.sources_explain),
+            style = MaterialTheme.typography.bodySmall
+        )
+
+        if (directories.isEmpty()) {
+            Text(
+                text = stringResource(R.string.sources_empty),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        } else {
+            directories.forEach { directory ->
+                LabelWithAction(
+                    action = {
+                        TextButton(onClick = { onRemove(directory.treeUri) }) {
+                            Text(stringResource(R.string.sources_remove), maxLines = 1)
+                        }
+                    }
+                ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        Text(
+                            text = directory.displayName,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Text(
+                            text = directory.relativePath,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+            }
+            // Said where the Remove buttons are, because that is where the worry is.
+            Text(
+                text = stringResource(R.string.sources_remove_note),
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+
+        if (refused) {
+            Text(
+                text = stringResource(R.string.sources_refused),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error
+            )
+        }
+
+        OutlinedButton(onClick = onAdd) {
+            Text(stringResource(R.string.sources_add), maxLines = 1)
+        }
+    }
 }

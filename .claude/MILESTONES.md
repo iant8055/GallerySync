@@ -707,6 +707,47 @@ Verified on the Fold 4 at 320dp with `font_scale` 1.7. At 11:04 with the phone p
 "Waiting until 1:00 AM" — the clock reported ahead of charging, and the time formatted for the
 device's locale rather than hardcoded.
 
+### 25 Aug 2026 — Gate 1, and a race that quietly undid it
+
+The scan is now scoped to folders the user granted with `ACTION_OPEN_DOCUMENT_TREE`. One pick serves
+both purposes the design needs: it says where to read, and it carries the persisted write grant that
+lets a background worker proxy a photo without an Activity.
+
+**Measured on the Fold 4: 72 albums in scope against roughly 90 unscoped.** That gap is the point —
+the rest is app caches, thumbnails and screenshots that nobody means by "my photos".
+
+Three things worth keeping:
+
+- **Nothing is in scope until Gate 1 is answered.** `scanAll` returns nothing when no folder is
+  granted, so the engine has nothing correct to do — which is what the gate means.
+- **The reconciliation is hidden until then.** With an empty scope the check would report zero
+  outstanding and announce that the whole library is already backed up. False, and false in the
+  direction that stops someone acting.
+- **Pruning is driven by an unscoped scan.** `scanEverything` exists solely for that. Asking "does
+  this album still exist?" with a scoped result answers a different question, and would forget the
+  ledger rows and album modes of every folder someone merely narrowed away. Narrowing hides; it must
+  never forget.
+
+**The bug worth writing down.** Granting a folder worked at every layer — permission taken, tree
+persisted, scan rescoped, log confirming 72 albums — and the screen went on saying "No folders chosen
+yet" until the app was restarted. Removing a folder updated instantly, which is what made it
+findable.
+
+The cause was one line:
+
+```kotlin
+_state.value = _state.value.copy(directoryRefused = !sources.add(treeUri))
+```
+
+Kotlin evaluates the `.copy` receiver — `_state.value` — **before** the suspending `add()` in the
+argument. During that suspension the directories collector wrote the new folder into state; then
+`.copy` was applied to the stale snapshot and assigned back, undoing it. A read-then-suspend-then-write
+race in a single statement that looks atomic.
+
+Fixed by completing the suspending call first. Checked the rest of the UI layer for the same shape;
+nothing else puts a suspend call inside a `copy` argument. **Worth remembering as a pattern, not an
+incident:** any `_state.value = _state.value.copy(x = someSuspendCall())` is this bug.
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have

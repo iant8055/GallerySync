@@ -10,6 +10,7 @@ import android.os.Build
 import android.provider.MediaStore
 import androidx.core.content.ContextCompat
 import com.gallery.sync.di.IoDispatcher
+import com.gallery.sync.domain.backup.TreeScope
 import com.gallery.sync.util.Logger
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
@@ -29,6 +30,7 @@ import javax.inject.Singleton
 @Singleton
 class MediaScanner @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val scopedDirectories: ScopedDirectories,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
 ) {
 
@@ -39,10 +41,44 @@ class MediaScanner @Inject constructor(
         ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED
     }
 
-    /** Every readable photo and video, newest first. */
+    /**
+     * Every readable photo and video inside the granted folders, newest first.
+     *
+     * **Scoped.** Before Gate 1 has been answered nothing is granted and this returns nothing, which
+     * is deliberate: the engine must have nothing to do until the user has said where to look. See
+     * [TreeScope].
+     */
     suspend fun scanAll(): List<LocalMediaItem> = withContext(dispatcher) {
+        val granted = scopedDirectories.currentScope()
+        if (granted.isEmpty()) {
+            Logger.d(TAG, "scanAll: no folders granted yet, returning nothing")
+            return@withContext emptyList()
+        }
+
+        scanEverything().filter { TreeScope.isInScope(it.relativePath, granted) }
+            .also {
+                Logger.d(
+                    TAG,
+                    "scanAll: ${it.size} items across ${it.distinctBy { i -> i.album }.size} albums " +
+                        "within ${granted.size} granted folders"
+                )
+            }
+    }
+
+    /**
+     * Every readable photo and video on the device, ignoring the granted folders entirely.
+     *
+     * **Only for deciding what still physically exists.** `BackupEngine` prunes ledger rows for
+     * albums the device no longer has, and driving that from a scoped scan would delete the record
+     * of every album the user merely narrowed away — losing their modes and their backup history for
+     * a folder that is still sitting on the phone. Narrowing hides; it must never forget.
+     *
+     * Not for offering anything to the user: the whole point of Gate 1 is that ninety albums of app
+     * caches and thumbnails are not someone's photo library.
+     */
+    suspend fun scanEverything(): List<LocalMediaItem> = withContext(dispatcher) {
         if (access() == MediaAccess.NONE) {
-            Logger.w(TAG, "scanAll: no media permission, returning nothing")
+            Logger.w(TAG, "scan: no media permission, returning nothing")
             return@withContext emptyList()
         }
 
@@ -50,7 +86,6 @@ class MediaScanner @Inject constructor(
 
         // Newest first, so that a run cut short has already protected the most recent photos.
         items.sortedByDescending { it.dateModifiedEpochSeconds }
-            .also { Logger.d(TAG, "scanAll: ${it.size} items across ${it.distinctBy { i -> i.album }.size} albums") }
     }
 
     /** Albums with their item count and total size, for the backup selection UI. */
@@ -118,18 +153,20 @@ class MediaScanner @Inject constructor(
             if (!MediaScanRules.shouldInclude(size, pending)) continue
 
             val id = cursor.getLong(idCol)
+            val relativePath = pathCol.takeIf { it >= 0 }?.let { cursor.getString(it) }
             items += LocalMediaItem(
                 mediaStoreId = id,
                 contentUri = ContentUris.withAppendedId(collection, id),
                 displayName = cursor.getString(nameCol).orEmpty(),
                 album = MediaScanRules.albumNameOf(
                     bucketDisplayName = bucketCol.takeIf { it >= 0 }?.let { cursor.getString(it) },
-                    relativePath = pathCol.takeIf { it >= 0 }?.let { cursor.getString(it) }
+                    relativePath = relativePath
                 ),
                 sizeBytes = size,
                 dateModifiedEpochSeconds = cursor.getLong(modifiedCol),
                 mimeType = cursor.getString(mimeCol).orEmpty(),
-                isVideo = isVideo
+                isVideo = isVideo,
+                relativePath = relativePath
             )
         }
         return items

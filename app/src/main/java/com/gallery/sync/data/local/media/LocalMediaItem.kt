@@ -21,7 +21,14 @@ data class LocalMediaItem(
     val sizeBytes: Long,
     val dateModifiedEpochSeconds: Long,
     val mimeType: String,
-    val isVideo: Boolean
+    val isVideo: Boolean,
+    /**
+     * MediaStore's `RELATIVE_PATH`, e.g. `DCIM/Camera/`. Null below API 29, which has no such column.
+     *
+     * Kept rather than discarded after resolving the album name, because it is the only thing
+     * comparable to a SAF tree grant — the album name alone cannot say which folder a file lives in.
+     */
+    val relativePath: String?
 )
 
 /** An album on the device, as the user would recognise it in Gallery. */

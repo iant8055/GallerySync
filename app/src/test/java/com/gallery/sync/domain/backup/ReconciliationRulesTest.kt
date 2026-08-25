@@ -28,7 +28,8 @@ class ReconciliationRulesTest {
         sizeBytes = size,
         dateModifiedEpochSeconds = 1_700_000_000L,
         mimeType = if (isVideo) "video/mp4" else "image/jpeg",
-        isVideo = isVideo
+        isVideo = isVideo,
+        relativePath = "DCIM/Camera/"
     )
 
     @Test

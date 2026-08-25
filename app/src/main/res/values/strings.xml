@@ -204,6 +204,25 @@
     -->
     <string name="tab_setup">Cloud check</string>
 
+    <!-- Gate 1: which folders to look in. -->
+    <string name="sources_title">Folders to back up</string>
+    <string name="sources_explain">Gallery Sync only looks in the folders you choose. Most people want DCIM, where the camera saves photos.</string>
+    <!--
+        Said plainly because it is the whole reason the gate exists. A phone reports around ninety
+        albums, nearly all of them app caches and thumbnails, and offering all of them makes the
+        album list unusable and the first upload enormous.
+    -->
+    <string name="sources_empty">No folders chosen yet. Nothing is backed up, scanned or changed until you pick one.</string>
+    <string name="sources_add">Add a folder</string>
+    <string name="sources_remove">Remove</string>
+    <string name="sources_refused">That folder cannot be used. Choose a folder rather than a whole drive.</string>
+    <!--
+        The reassurance that makes removing safe. Narrowing hides albums; it never forgets what is
+        already backed up or what mode an album was set to.
+    -->
+    <string name="sources_remove_note">Removing a folder stops it being watched. Nothing already backed up is lost, and adding it again restores its settings.</string>
+    <string name="sources_count">%1$s in this folder</string>
+
     <!-- First-run reconciliation: what OneDrive already holds. -->
     <string name="reconcile_title">Checking what is already in OneDrive</string>
     <string name="reconcile_working">Checking album %1$d of %2$d…</string>
