@@ -8,7 +8,10 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.domain.backup.BackupEngine
+import com.gallery.sync.domain.backup.FirstBackupWindow
 import com.gallery.sync.domain.backup.StopReason
+import java.time.LocalTime
+import com.gallery.sync.util.ChargingState
 import com.gallery.sync.util.Logger
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -25,7 +28,8 @@ class BackupWorker @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted params: WorkerParameters,
     private val engine: BackupEngine,
-    private val settings: BackupSettings
+    private val settings: BackupSettings,
+    private val charging: ChargingState
 ) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result {
@@ -43,12 +47,37 @@ class BackupWorker @AssistedInject constructor(
             )
         }
 
+        // The first whole-library upload is the heaviest thing this app does — 148 GB and roughly
+        // fourteen hours on a real device — so it waits for a moment the user chose. Only automatic
+        // runs are held: "Sync now" goes straight to the engine and is never gated, because someone
+        // who asked has already decided this is a good moment.
+        //
+        // Refreshing the ledger still happens below either way. Knowing what is outstanding costs
+        // nothing and is what lets the screen say how much is waiting.
+        val hold = if (preferences.hasCompletedFirstBackup) {
+            null
+        } else {
+            FirstBackupWindow.heldBecause(
+                hourOfDay = LocalTime.now().hour,
+                isCharging = charging.isCharging(),
+                startHour = preferences.firstBackupStartHour,
+                requiresCharging = preferences.firstBackupRequiresCharging
+            )
+        }
+
         val seen = engine.refreshLedger()
         if (seen == null) {
             // No media permission. A timer will not obtain one — the user has to grant it, and
             // doing so schedules a fresh run.
             Logger.w(TAG, "no media access, not retrying")
             return Result.failure()
+        }
+
+        if (hold != null) {
+            // success, not retry: nothing is wrong, and a retry would burn backoff attempts waiting
+            // for a clock. The periodic pass and the content trigger both come back on their own.
+            Logger.i(TAG, "first backup held ($hold); not uploading yet")
+            return Result.success()
         }
 
         val result = engine.uploadPending { progress ->
@@ -71,6 +100,13 @@ class BackupWorker @AssistedInject constructor(
                 "${result.remaining} remaining, " +
                 "stopped=${result.stoppedBecause}"
         )
+
+        // The backlog is clear, so the overnight window has done its job and lifts for good. Every
+        // later run is incremental; keeping the gate would make a photo taken at noon wait until 1am.
+        if (result.isComplete && !preferences.hasCompletedFirstBackup) {
+            Logger.i(TAG, "backlog cleared; first-backup window no longer applies")
+            settings.markFirstBackupComplete()
+        }
 
         // More files waiting and nothing wrong — schedule the next batch immediately rather than
         // waiting 6 hours for the periodic safety net. The byte budget splits large libraries into

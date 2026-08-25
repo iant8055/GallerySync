@@ -239,4 +239,21 @@
     <string name="destination_save">Use this folder</string>
     <string name="destination_cancel">Cancel</string>
     <string name="destination_reset">Reset to default</string>
+
+    <!-- First backup window. -->
+    <string name="first_backup_title">Your first backup</string>
+    <!--
+        The honest framing. This run is hours long, so saying when it will happen is more useful
+        than a progress bar the user has to sit and watch.
+    -->
+    <string name="first_backup_explain">The first backup is the big one — everything not already in OneDrive. It starts overnight so it does not slow your phone down or eat your data during the day.</string>
+    <string name="first_backup_start_label">Starts at</string>
+    <string name="first_backup_charging">Only while charging</string>
+    <string name="first_backup_charging_detail">A long upload on battery will flatten the phone before it finishes.</string>
+    <string name="first_backup_waiting_time">Waiting until %1$s.</string>
+    <string name="first_backup_waiting_charging">Waiting for you to plug the phone in.</string>
+    <string name="first_backup_ready">Ready to start.</string>
+    <string name="first_backup_done">Your first backup is done, so this no longer applies — new photos back up as they arrive.</string>
+    <string name="first_backup_manual_note">You can always press Sync now to start immediately.</string>
+    <string name="hour_label">%1$s</string>
 </resources>

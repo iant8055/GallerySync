@@ -5,9 +5,11 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.gallery.sync.data.local.entity.AlbumMode
+import com.gallery.sync.domain.backup.FirstBackupWindow
 import com.gallery.sync.domain.backup.RemoteRoots
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -31,7 +33,19 @@ data class BackupPreferences(
      * changing it redirects new files without stranding what is already backed up — see
      * [RemoteRoots].
      */
-    val destinationRoot: String = RemoteRoots.DEFAULT_DESTINATION
+    val destinationRoot: String = RemoteRoots.DEFAULT_DESTINATION,
+    /** Hour of day the first whole-library backup may begin. */
+    val firstBackupStartHour: Int = FirstBackupWindow.DEFAULT_START_HOUR,
+    /** Whether that first run waits for the phone to be plugged in. On by default. */
+    val firstBackupRequiresCharging: Boolean = true,
+    /**
+     * Whether the backlog has been cleared once.
+     *
+     * The window gates the *first* upload, which is the only one large enough to matter. Once the
+     * queue has drained, every later run is incremental and the restriction lifts — leaving it on
+     * would mean a photo taken at noon waits until 1am for no reason.
+     */
+    val hasCompletedFirstBackup: Boolean = false
 )
 
 /**
@@ -64,7 +78,12 @@ class BackupSettings @Inject constructor(
             // will reject on every file, forever.
             destinationRoot = stored[KEY_DESTINATION_ROOT]
                 ?.takeIf { RemoteRoots.isValidDestination(it) }
-                ?: RemoteRoots.DEFAULT_DESTINATION
+                ?: RemoteRoots.DEFAULT_DESTINATION,
+            firstBackupStartHour = stored[KEY_FIRST_BACKUP_HOUR]
+                ?.takeIf { it in FirstBackupWindow.SELECTABLE_HOURS }
+                ?: FirstBackupWindow.DEFAULT_START_HOUR,
+            firstBackupRequiresCharging = stored[KEY_FIRST_BACKUP_CHARGING] ?: true,
+            hasCompletedFirstBackup = stored[KEY_FIRST_BACKUP_DONE] ?: false
         )
     }
 
@@ -94,6 +113,25 @@ class BackupSettings @Inject constructor(
         context.dataStore.edit { it[KEY_DEFAULT_ALBUM_MODE] = mode.name }
     }
 
+    suspend fun setFirstBackupStartHour(hour: Int) {
+        if (hour !in FirstBackupWindow.SELECTABLE_HOURS) return
+        context.dataStore.edit { it[KEY_FIRST_BACKUP_HOUR] = hour }
+    }
+
+    suspend fun setFirstBackupRequiresCharging(required: Boolean) {
+        context.dataStore.edit { it[KEY_FIRST_BACKUP_CHARGING] = required }
+    }
+
+    /**
+     * Records that the backlog has been cleared, lifting the overnight window for good.
+     *
+     * One-way on purpose. Flipping this back would re-impose an overnight wait on someone whose
+     * library is already safe, which is the opposite of what the window is for.
+     */
+    suspend fun markFirstBackupComplete() {
+        context.dataStore.edit { it[KEY_FIRST_BACKUP_DONE] = true }
+    }
+
     /**
      * Changes where new uploads go. Rejects a path that cannot work, leaving the old one in place.
      *
@@ -113,5 +151,8 @@ class BackupSettings @Inject constructor(
         val KEY_AUTO_OPTIMISE = booleanPreferencesKey("auto_optimise_enabled")
         val KEY_DEFAULT_ALBUM_MODE = stringPreferencesKey("default_album_mode")
         val KEY_DESTINATION_ROOT = stringPreferencesKey("destination_root")
+        val KEY_FIRST_BACKUP_HOUR = intPreferencesKey("first_backup_start_hour")
+        val KEY_FIRST_BACKUP_CHARGING = booleanPreferencesKey("first_backup_requires_charging")
+        val KEY_FIRST_BACKUP_DONE = booleanPreferencesKey("first_backup_completed")
     }
 }

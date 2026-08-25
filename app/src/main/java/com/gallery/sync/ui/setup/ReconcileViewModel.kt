@@ -4,6 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gallery.sync.domain.backup.CloudReconciliation
 import com.gallery.sync.data.local.settings.BackupSettings
+import com.gallery.sync.util.ChargingState
+import com.gallery.sync.domain.backup.FirstBackupHold
+import com.gallery.sync.domain.backup.FirstBackupWindow
 import com.gallery.sync.domain.backup.ReconcileWithCloud
 import com.gallery.sync.domain.backup.RemoteRoots
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.time.LocalTime
 import javax.inject.Inject
 
 /**
@@ -31,7 +35,13 @@ data class ReconcileUiState(
     /** True while the user is choosing a new destination. */
     val choosingDestination: Boolean = false,
     /** Set when a typed path was refused, so the dialog can say so rather than closing silently. */
-    val destinationRejected: Boolean = false
+    val destinationRejected: Boolean = false,
+    val firstBackupStartHour: Int = FirstBackupWindow.DEFAULT_START_HOUR,
+    val firstBackupRequiresCharging: Boolean = true,
+    /** Once true the window no longer applies and the section explains why it is gone. */
+    val hasCompletedFirstBackup: Boolean = false,
+    /** What is currently holding the first run, or null if nothing is. */
+    val firstBackupHold: FirstBackupHold? = null
 ) {
     /**
      * Whether changing the destination now would leave already-backed-up files behind.
@@ -45,7 +55,8 @@ data class ReconcileUiState(
 @HiltViewModel
 class ReconcileViewModel @Inject constructor(
     private val reconcile: ReconcileWithCloud,
-    private val settings: BackupSettings
+    private val settings: BackupSettings,
+    private val charging: ChargingState
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ReconcileUiState())
@@ -56,9 +67,34 @@ class ReconcileViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             settings.preferences.collect { prefs ->
-                _state.value = _state.value.copy(destinationRoot = prefs.destinationRoot)
+                _state.value = _state.value.copy(
+                    destinationRoot = prefs.destinationRoot,
+                    firstBackupStartHour = prefs.firstBackupStartHour,
+                    firstBackupRequiresCharging = prefs.firstBackupRequiresCharging,
+                    hasCompletedFirstBackup = prefs.hasCompletedFirstBackup,
+                    // Recomputed whenever a setting changes, so moving the start time updates the
+                    // "waiting until" line immediately rather than at the next run.
+                    firstBackupHold = if (prefs.hasCompletedFirstBackup) {
+                        null
+                    } else {
+                        FirstBackupWindow.heldBecause(
+                            hourOfDay = LocalTime.now().hour,
+                            isCharging = charging.isCharging(),
+                            startHour = prefs.firstBackupStartHour,
+                            requiresCharging = prefs.firstBackupRequiresCharging
+                        )
+                    }
+                )
             }
         }
+    }
+
+    fun setFirstBackupStartHour(hour: Int) {
+        viewModelScope.launch { settings.setFirstBackupStartHour(hour) }
+    }
+
+    fun setFirstBackupRequiresCharging(required: Boolean) {
+        viewModelScope.launch { settings.setFirstBackupRequiresCharging(required) }
     }
 
     fun openDestinationChooser() {

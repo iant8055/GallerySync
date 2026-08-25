@@ -215,8 +215,10 @@ Verified on hardware: sign-in completes and the real drive lists.
       run killed at 96% of a 164 MB video restarted from byte zero. Any file too large to finish
       inside one run can never complete, and the threshold scales with upstream, not file size.
 - [ ] Retry failed items from the UI
-- [ ] **Start time for the first backup.** The initial whole-library upload is the heaviest thing the
-      app ever does. User-set, default overnight, charging required for that first run.
+- [x] **Start time for the first backup.** The initial whole-library upload is the heaviest thing the
+      app ever does. User-set, default overnight (1am, six-hour window), charging required for that
+      first run. Only automatic runs are gated — "Sync now" is never held, because someone who asked
+      has already decided this is a good moment. The gate lifts for good once the backlog clears.
 
 ## v0.3.0 — Space management
 The milestone that delivers the actual product: the phone stops filling up, and the existing gallery
@@ -672,6 +674,38 @@ only true while it is.
 A text field rather than a folder browser, deliberately. Browsing OneDrive is the thumbnail browser
 the design principle rules out, and the default is right for almost everyone; the field exists for
 the few who want somewhere else, not as the main path through setup.
+
+### 25 Aug 2026 — the first backup waits for a moment the user chose
+
+The last open v0.2 item. The initial whole-library upload is the heaviest thing this app does — 148 GB
+across 8,520 files on the Fold 8, roughly fourteen hours at the ~3 MB/s measured — so it no longer
+starts at whatever moment setup happens to finish.
+
+Default 1am, six-hour window, charging required. All three are settings.
+
+Three decisions worth keeping:
+
+- **Only automatic runs are gated.** "Sync now" goes straight to the engine and is never held. The
+  window exists to stop the app choosing a bad moment on its own, not to stop the user choosing one
+  the app disagrees with — and the screen says so rather than leaving it to be discovered.
+- **The reason for waiting is named, not reduced to "waiting".** `FirstBackupHold` distinguishes
+  `OUTSIDE_WINDOW` from `NOT_CHARGING`, because "waiting until 1am" and "waiting for you to plug in"
+  ask different things of the user. A phone that appears to be doing nothing for an unexplained
+  reason is the failure this is avoiding.
+- **Charging is read by the app, not left to a WorkManager constraint.** A constraint that silently
+  never fires is indistinguishable from a broken app, and this is the run a user is most likely to be
+  watching for. `ChargingState` is shared by the worker and the screen so the two cannot disagree.
+
+**The gate lifts permanently once the backlog clears**, one-way. Every later run is incremental, and
+keeping it would make a photo taken at noon wait until 1am for no reason.
+
+The midnight wrap carries most of the test weight: an overnight window is the normal configuration
+here, not an edge case, and a window starting at 22:00 spends most of its life on the far side of
+midnight.
+
+Verified on the Fold 4 at 320dp with `font_scale` 1.7. At 11:04 with the phone plugged in it read
+"Waiting until 1:00 AM" — the clock reported ahead of charging, and the time formatted for the
+device's locale rather than hardcoded.
 
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 

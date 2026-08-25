@@ -9,6 +9,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Switch
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.HorizontalDivider
@@ -19,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -30,10 +37,16 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
+import com.gallery.sync.domain.backup.FirstBackupHold
+import com.gallery.sync.domain.backup.FirstBackupWindow
 import com.gallery.sync.domain.backup.MediaTally
 import com.gallery.sync.domain.backup.RemoteRoots
 import com.gallery.sync.ui.common.LabelWithAction
 import com.gallery.sync.ui.common.formatBytes
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import java.util.Locale
 
 /**
  * The first honest number in setup: how much of the library OneDrive already holds.
@@ -168,6 +181,17 @@ fun ReconcileScreen(
                 }
             }
         }
+
+        HorizontalDivider()
+
+        FirstBackupSection(
+            startHour = state.firstBackupStartHour,
+            requiresCharging = state.firstBackupRequiresCharging,
+            done = state.hasCompletedFirstBackup,
+            hold = state.firstBackupHold,
+            onHourSelected = viewModel::setFirstBackupStartHour,
+            onChargingChanged = viewModel::setFirstBackupRequiresCharging
+        )
     }
 
     if (state.choosingDestination) {
@@ -280,4 +304,146 @@ private fun MediaLine(label: String, backedUp: MediaTally, outstanding: MediaTal
             )
         }
     }
+}
+
+/**
+ * When the first whole-library upload will run, and what it is waiting for.
+ *
+ * The first backup is measured in hours, not seconds — 148 GB on a real device — so the useful thing
+ * to show is *when it will happen*, not a progress bar someone has to sit and watch. Once the backlog
+ * clears this section says so and stops offering settings that no longer do anything.
+ *
+ * The hold is named rather than reduced to "waiting". "Waiting until 1am" and "waiting for you to
+ * plug in" ask different things of the user, and a phone that appears to be doing nothing for an
+ * unexplained reason is the thing this is trying to avoid.
+ */
+@Composable
+private fun FirstBackupSection(
+    startHour: Int,
+    requiresCharging: Boolean,
+    done: Boolean,
+    hold: FirstBackupHold?,
+    onHourSelected: (Int) -> Unit,
+    onChargingChanged: (Boolean) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(
+            text = stringResource(R.string.first_backup_title),
+            style = MaterialTheme.typography.titleSmall
+        )
+
+        if (done) {
+            Text(
+                text = stringResource(R.string.first_backup_done),
+                style = MaterialTheme.typography.bodySmall
+            )
+            return@Column
+        }
+
+        Text(
+            text = stringResource(R.string.first_backup_explain),
+            style = MaterialTheme.typography.bodySmall
+        )
+
+        LabelWithAction(
+            action = { stacked ->
+                HourDropdown(
+                    hour = startHour,
+                    onHourSelected = onHourSelected,
+                    stacked = stacked
+                )
+            }
+        ) {
+            Text(
+                text = stringResource(R.string.first_backup_start_label),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
+        LabelWithAction(
+            action = {
+                Switch(checked = requiresCharging, onCheckedChange = onChargingChanged)
+            }
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(
+                    text = stringResource(R.string.first_backup_charging),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = stringResource(R.string.first_backup_charging_detail),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
+
+        Text(
+            text = when (hold) {
+                FirstBackupHold.OUTSIDE_WINDOW ->
+                    stringResource(R.string.first_backup_waiting_time, formatHour(startHour))
+                FirstBackupHold.NOT_CHARGING ->
+                    stringResource(R.string.first_backup_waiting_charging)
+                null -> stringResource(R.string.first_backup_ready)
+            },
+            style = MaterialTheme.typography.bodyMedium
+        )
+
+        // The escape hatch, said plainly. The window stops the app choosing a bad moment on its
+        // own; it was never meant to stop the user choosing one the app disagrees with.
+        Text(
+            text = stringResource(R.string.first_backup_manual_note),
+            style = MaterialTheme.typography.bodySmall
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun HourDropdown(hour: Int, onHourSelected: (Int) -> Unit, stacked: Boolean) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
+        OutlinedTextField(
+            value = formatHour(hour),
+            onValueChange = {},
+            readOnly = true,
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            // Same 280dp default minimum that collapsed the album rows; relaxed for the same reason.
+            modifier = Modifier
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                .then(
+                    if (stacked) Modifier.fillMaxWidth()
+                    else Modifier.widthIn(min = 0.dp, max = 150.dp)
+                ),
+            textStyle = MaterialTheme.typography.bodyMedium,
+            singleLine = true
+        )
+        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            FirstBackupWindow.SELECTABLE_HOURS.forEach { candidate ->
+                DropdownMenuItem(
+                    text = { Text(formatHour(candidate)) },
+                    onClick = {
+                        onHourSelected(candidate)
+                        expanded = false
+                    },
+                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                )
+            }
+        }
+    }
+}
+
+/**
+ * An hour as the user's own locale writes it.
+ *
+ * Formatted rather than hardcoded to "1am": half the world reads 01:00, and a setup screen that
+ * tells someone their backup starts at a time they do not recognise is worse than one that says
+ * nothing.
+ */
+@Composable
+private fun formatHour(hour: Int): String {
+    val formatter = remember {
+        DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(Locale.getDefault())
+    }
+    return remember(hour) { LocalTime.of(hour, 0).format(formatter) }
 }
