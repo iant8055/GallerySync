@@ -2,6 +2,16 @@ package com.gallery.sync.domain.backup
 
 import com.gallery.sync.data.local.media.LocalMediaItem
 
+/**
+ * One file as OneDrive reports it: what it is called is the key, this is the rest.
+ *
+ * [id] is the part that used to be thrown away. The skip-existing check matched on name and size and
+ * then recorded `remoteItemId = ""`, which is enough to say "already backed up" and not enough to
+ * ever fetch it back — and on a real library that path covers almost everything: 6,278 of 6,371
+ * files on the Fold 4. Without the id, retrieval could offer none of them.
+ */
+data class RemoteFileRef(val id: String, val sizeBytes: Long)
+
 /** A count of files and what they occupy. */
 data class MediaTally(val files: Int = 0, val bytes: Long = 0) {
 
@@ -89,7 +99,7 @@ internal object ReconciliationRules {
      */
     fun tallyAlbum(
         local: List<LocalMediaItem>,
-        remoteIndex: Map<String, Long>?
+        remoteIndex: Map<String, RemoteFileRef>?
     ): CloudReconciliation {
         if (remoteIndex == null) {
             return CloudReconciliation(
@@ -105,7 +115,7 @@ internal object ReconciliationRules {
 
         for (item in local) {
             val one = MediaTally(1, item.sizeBytes)
-            val isBackedUp = remoteIndex[item.displayName] == item.sizeBytes
+            val isBackedUp = remoteIndex[item.displayName]?.sizeBytes == item.sizeBytes
 
             when {
                 item.isVideo && isBackedUp -> videosBackedUp += one

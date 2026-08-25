@@ -810,6 +810,40 @@ exceeds SQLite's parameter limit on a real library, and it cannot be chunked —
 chunk would be marked missing by the first. The ledger's keys are loaded once and the difference
 taken in memory, with the updates chunked at 500.
 
+### 25 Aug 2026 — two defects that would have made retrieval offer almost nothing
+
+Found by trying to fetch one file back on the Fold 4. Neither was reachable by reasoning; both needed
+the round trip.
+
+**1. The prune erased the rows retrieval is built from.** Removing an album's last file makes the
+album absent from the scan, so `forgetAlbumsNotOnDevice` fired and deleted the ledger row for a file
+that had just been verified in OneDrive. That is the Archive path exactly — take the files off the
+phone, the album empties, and the app forgets everything it ever backed up from it. Rows still
+verified in the cloud are now exempt from the prune; `LedgerPruningTest` guards it.
+
+**2. The skip-existing path recorded no remote id.** When a file is found already in OneDrive by name
+and size, the engine marked it `UPLOADED` with `remoteItemId = ""` — enough to say "already backed
+up", and not enough to ever download it again. `remoteIndexFor` had the id from the listing and threw
+it away.
+
+The scale is what makes this serious: **that path covers 6,278 of 6,371 files on the Fold 4**, because
+Samsung's own sync put most of the library there first. Retrieval would have shipped able to offer
+almost nothing, while the ledger insisted everything was safe. The index now carries
+`RemoteFileRef(id, sizeBytes)` and the skip path records the real id.
+
+**Not yet verified on hardware:** that the corrected skip path writes a usable id. The code change is
+two lines and the instrumented guard is in place, but the round trip has not been watched. Worth
+doing before v0.4 is called done.
+
+**Pre-existing rows stay unretrievable.** Anything marked uploaded before this fix carries an empty
+id and, being already `UPLOADED`, is never re-checked. Deliberately not migrated: the app has no
+users, the only affected ledgers are on two phones here, and both rebuild themselves from a rescan.
+
+**A UI note that cost several cycles.** The backup header grows a line when nothing is selected
+("Choose an album to sync"), which shifts every button below it. Fixed-coordinate taps against that
+screen are unreliable, and one landed on "Deselect all" and reset every album mode. Read the screen
+before tapping it.
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have

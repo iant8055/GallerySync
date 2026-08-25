@@ -65,7 +65,7 @@ class ReconciliationRulesTest {
             item("c.mp4", 5000, isVideo = true),
             item("d.mp4", 9000, isVideo = true)
         )
-        val remote = mapOf("a.jpg" to 100L, "c.mp4" to 5000L)
+        val remote = mapOf("a.jpg" to RemoteFileRef("R1", 100L), "c.mp4" to RemoteFileRef("R2", 5000L))
 
         val result = ReconciliationRules.tallyAlbum(local, remote)
 
@@ -81,7 +81,7 @@ class ReconciliationRulesTest {
     fun aNameMatchWithTheWrongSizeIsNotBackedUp() {
         val local = listOf(item("a.jpg", 8_000_000))
 
-        val result = ReconciliationRules.tallyAlbum(local, mapOf("a.jpg" to 12_345L))
+        val result = ReconciliationRules.tallyAlbum(local, mapOf("a.jpg" to RemoteFileRef("R1", 12_345L)))
 
         assertEquals(MediaTally.EMPTY, result.photosBackedUp)
         assertEquals(MediaTally(1, 8_000_000), result.photosOutstanding)
@@ -91,7 +91,7 @@ class ReconciliationRulesTest {
     fun talliesAccumulateAcrossAlbums() {
         val checked = ReconciliationRules.tallyAlbum(
             listOf(item("a.jpg", 100)),
-            mapOf("a.jpg" to 100L)
+            mapOf("a.jpg" to RemoteFileRef("R1", 100L))
         )
         val failed = ReconciliationRules.tallyAlbum(listOf(item("b.jpg", 50)), null)
 
@@ -106,7 +106,7 @@ class ReconciliationRulesTest {
 
     @Test
     fun anAllCheckedRunReportsComplete() {
-        val a = ReconciliationRules.tallyAlbum(listOf(item("a.jpg", 100)), mapOf("a.jpg" to 100L))
+        val a = ReconciliationRules.tallyAlbum(listOf(item("a.jpg", 100)), mapOf("a.jpg" to RemoteFileRef("R1", 100L)))
         val b = ReconciliationRules.tallyAlbum(listOf(item("b.jpg", 50)), emptyMap())
 
         assertTrue((a + b).isComplete)

@@ -239,7 +239,11 @@ class BackupEngine @Inject constructor(
             return
         }
 
+        val kept = entryDao.countRetrievableOutsideDevice(albumsOnDevice)
         val removed = entryDao.forgetAlbumsNotOnDevice(albumsOnDevice)
+        if (kept > 0) {
+            Logger.i(TAG, "kept $kept rows for files still in OneDrive but not on the device")
+        }
         if (removed > 0) {
             Logger.i(TAG, "forgot $removed rows for albums no longer on the device")
         }
@@ -290,7 +294,7 @@ class BackupEngine @Inject constructor(
             // uploaded — so one bad moment on the network re-uploaded whole albums as renamed
             // duplicates. Observed: 81 of 87 albums failed to list in a single run when
             // connectivity dropped. Failing to ask is not evidence of absence.
-            val remoteByAlbum = mutableMapOf<String, Map<String, Long>?>()
+            val remoteByAlbum = mutableMapOf<String, Map<String, RemoteFileRef>?>()
             var deferred = 0
 
             for (entry in pending) {
@@ -316,11 +320,16 @@ class BackupEngine @Inject constructor(
                 // sync while both run in parallel, or by this app before a reinstall lost the
                 // ledger. Uploading anyway produces a renamed duplicate, which is what the user
                 // saw before this check existed.
-                if (alreadyThere[entry.displayName] == entry.sizeBytes) {
+                val match = alreadyThere[entry.displayName]
+                if (match?.sizeBytes == entry.sizeBytes) {
                     Logger.d(TAG, "already in OneDrive, not re-uploading: ${entry.displayName}")
                     entryDao.markUploaded(
                         id = entry.id,
-                        remoteItemId = "",
+                        // The listing's item id, not an empty string. Recording "" here said the
+                        // file was safe while making it impossible to fetch back — and this is the
+                        // path most of a real library takes, so it would have left retrieval able
+                        // to offer almost nothing.
+                        remoteItemId = match.id,
                         remoteSizeBytes = entry.sizeBytes,
                         uploadedAt = System.currentTimeMillis()
                     )
@@ -332,7 +341,8 @@ class BackupEngine @Inject constructor(
                 // see that it is already backed up. Ask the file instead: if it carries the proxy
                 // marker and OneDrive holds a larger file of the same name, that larger file is
                 // the original. Uploading would file a 2048px copy beside it.
-                val remoteSize = alreadyThere[entry.displayName]
+                val remoteMatch = alreadyThere[entry.displayName]
+                val remoteSize = remoteMatch?.sizeBytes
                 if (
                     LedgerRecovery.isBackedUpProxy(
                         localSizeBytes = entry.sizeBytes,
@@ -526,8 +536,8 @@ class BackupEngine @Inject constructor(
      * A failure mid-walk returns what was gathered so far rather than nothing. A partial index can
      * only cause a re-upload, while an empty one guarantees a whole album of them.
      */
-    internal suspend fun remoteIndexFor(album: String): Map<String, Long>? {
-        val merged = mutableMapOf<String, Long>()
+    internal suspend fun remoteIndexFor(album: String): Map<String, RemoteFileRef>? {
+        val merged = mutableMapOf<String, RemoteFileRef>()
 
         for (root in RemoteRoots.searchOrder(destinationRoot())) {
             // One unreachable root makes the whole answer unknown. Merging what did list would
@@ -536,14 +546,14 @@ class BackupEngine @Inject constructor(
             // per-album null exists for, applied across roots.
             val one = indexForPath("$root/$album", album) ?: return null
             // First root wins on a duplicate name, so the destination's copy is preferred.
-            for ((name, size) in one) merged.putIfAbsent(name, size)
+            for ((name, ref) in one) merged.putIfAbsent(name, ref)
         }
         return merged
     }
 
     /** Every file at one remote path, by name and size, or null if it could not be listed. */
-    private suspend fun indexForPath(path: String, album: String): Map<String, Long>? {
-        val index = mutableMapOf<String, Long>()
+    private suspend fun indexForPath(path: String, album: String): Map<String, RemoteFileRef>? {
+        val index = mutableMapOf<String, RemoteFileRef>()
 
         var page = when (val result = repository.listFolderByPath(path)) {
             is DataResult.Success -> result.value
@@ -552,7 +562,8 @@ class BackupEngine @Inject constructor(
                 return null
             }
         }
-        index += page.nodes.filterIsInstance<RemoteMediaNode.File>().associate { it.name to it.sizeBytes }
+        index += page.nodes.filterIsInstance<RemoteMediaNode.File>()
+            .associate { it.name to RemoteFileRef(it.id, it.sizeBytes) }
 
         var pages = 1
         while (page.nextPageToken != null && pages < MAX_REMOTE_PAGES) {
@@ -563,7 +574,8 @@ class BackupEngine @Inject constructor(
                     return index
                 }
             }
-            index += page.nodes.filterIsInstance<RemoteMediaNode.File>().associate { it.name to it.sizeBytes }
+            index += page.nodes.filterIsInstance<RemoteMediaNode.File>()
+            .associate { it.name to RemoteFileRef(it.id, it.sizeBytes) }
             pages++
         }
 

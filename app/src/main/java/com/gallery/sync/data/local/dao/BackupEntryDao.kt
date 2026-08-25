@@ -277,9 +277,52 @@ interface BackupEntryDao {
      * **Only ever call this with a trustworthy scan.** An empty or partial list — revoked
      * permission, unmounted card — would otherwise read as "every album vanished" and wipe the
      * record of what is already backed up.
+     *
+     * ### A row verified in OneDrive is never forgotten
+     *
+     * Added 25 Aug 2026, after watching this delete the only record of a file that had just been
+     * backed up. Removing an album's last file makes the whole album absent from the scan, so the
+     * prune fired and erased the row — which is precisely the row retrieval is built from.
+     *
+     * That is the Archive path exactly: take the files off the phone, the album empties, and the app
+     * forgets everything it ever backed up from it. The user cannot get any of it back, and nothing
+     * says why. Anything still verified in the cloud is therefore exempt — it is not a stale row, it
+     * is the record of a file that can still be fetched.
      */
-    @Query("DELETE FROM backup_entries WHERE album NOT IN (:albumsOnDevice)")
-    suspend fun forgetAlbumsNotOnDevice(albumsOnDevice: List<String>): Int
+    @Query(
+        """
+        DELETE FROM backup_entries
+        WHERE album NOT IN (:albumsOnDevice)
+          AND NOT (
+              state = :uploaded
+              AND remoteItemId IS NOT NULL
+              AND remoteItemId != ''
+              AND remoteSizeBytes IS NOT NULL
+              AND remoteSizeBytes = sizeBytes
+          )
+        """
+    )
+    suspend fun forgetAlbumsNotOnDevice(
+        albumsOnDevice: List<String>,
+        uploaded: BackupState = BackupState.UPLOADED
+    ): Int
+
+    /** Rows kept back from the prune because they can still be fetched. For logging the exemption. */
+    @Query(
+        """
+        SELECT COUNT(*) FROM backup_entries
+        WHERE album NOT IN (:albumsOnDevice)
+          AND state = :uploaded
+          AND remoteItemId IS NOT NULL
+          AND remoteItemId != ''
+          AND remoteSizeBytes IS NOT NULL
+          AND remoteSizeBytes = sizeBytes
+        """
+    )
+    suspend fun countRetrievableOutsideDevice(
+        albumsOnDevice: List<String>,
+        uploaded: BackupState = BackupState.UPLOADED
+    ): Int
 
     /**
      * MediaStore ids of files replaced by a local proxy.
