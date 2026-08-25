@@ -260,8 +260,10 @@ keeps working.
 - [x] Plain retrieval list — **not** a photo browser. Also the only place a fetch can be triggered:
       there is no hydration hook, so tapping an item in Samsung Gallery cannot reach us.
       Populates, fetches, and clears itself once the file is back.
-- [ ] Deletion sync, opt-in and batched. Highest-risk feature in the product; it only follows a
+- [x] Deletion sync, opt-in and batched. Highest-risk feature in the product; it only follows a
       backup engine that has been watched working. Never infers deletion from absence alone.
+      **Built 25 Aug 2026**, default Leave, no automatic option. Screens verified; a real cloud
+      deletion has not been performed, and should be watched once on a disposable file.
 
 ## v0.5.0 — Google Photos + Billing
 - [ ] Google Play Billing (`pro_unlock`)
@@ -919,6 +921,43 @@ no longer has this" and "could not check" ask different things of the user.
 This is the guarantee CLAUDE.md's deletion rule actually rests on. The rule says removal is safe
 because the cloud copy is verified; until now "verified" meant "was verified, once, possibly months
 ago".
+
+### 25 Aug 2026 — deletion sync, and the option that was not built
+
+Ian asked for three behaviours when a file leaves the phone: leave the cloud copy, ask, or delete
+automatically. **The third is not built**, and the reason lives next to the type in
+`CloudDeletionPolicy` rather than only in a conversation.
+
+The rhetorical objection is that CLAUDE.md requires confirmation of *that specific action*, and that
+MILESTONES names silent bidirectional delete as the Samsung behaviour this project exists to replace.
+The mechanical objection is stronger, and is the one that settles it: to delete automatically the app
+must *notice* a file has gone, and the only available signal is absence from a scan. An unmounted
+card, a revoked permission and a partial scan all produce that signal. An automatic mode turns one
+bad scan into cloud deletions across a library.
+
+**Four guards, none redundant:**
+
+- policy must be `ASK`; default is `LEAVE`, and an unreadable stored value falls back to `LEAVE`
+  rather than `ASK` — a corrupt preference must not be able to arm this
+- a **grace period**, default 7 days. This is the answer to "never infers deletion from absence
+  alone": what turns absence into evidence is not looking at one scan harder, it is that the absence
+  keeps being true. A card that was out at 9am is back by lunchtime
+- a **fresh scan immediately before deleting**, so a file that came back is dropped from the batch
+  however recently the list was drawn — the mirror of the removal re-check
+- an **explicit confirmation** naming the count, the size, and where the files go. `delete()` takes
+  an already-approved list rather than re-deriving one, so the consent is to those files
+
+Deletion has its own repository interface, the way uploading was split from browsing. One small class
+is the only thing in the app able to remove anything from OneDrive, and it can only soft-delete: the
+file lands in the recycle bin, which the user empties. A 404 counts as success, since already-absent
+is the state the caller wanted.
+
+**The 7 days is a guess and is labelled as one in the source.** Nothing measures it. It is offered as
+1 / 7 / 30 / 90 so being wrong is cheap.
+
+**Verified on the Fold 4:** both policy branches render, the grace control and review list appear only
+under Ask, and the empty state reads correctly. **Not verified:** an actual cloud deletion. Worth
+watching once on a disposable file before Archive ships.
 
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 

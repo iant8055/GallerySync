@@ -214,6 +214,35 @@
     <string name="removal_held_unchecked">%1$s could not be checked just now. Nothing was removed for them — being unable to ask is not the same as an answer.</string>
     <string name="removal_none_confirmed">Nothing was removed. OneDrive did not confirm a single one of these files.</string>
 
+    <!-- Deletion sync: what happens to the OneDrive copy when a file leaves the phone. -->
+    <string name="deletion_title">When you delete a photo from this phone</string>
+    <string name="deletion_leave">Leave the OneDrive copy</string>
+    <string name="deletion_leave_detail">Nothing is ever removed from OneDrive. Deleting on your phone only frees space here.</string>
+    <string name="deletion_ask">Ask me about the OneDrive copy</string>
+    <string name="deletion_ask_detail">Gallery Sync shows you what has gone from your phone and asks before removing anything from OneDrive. It never removes anything on its own.</string>
+    <string name="deletion_grace_label">Wait before asking</string>
+    <string name="deletion_grace_detail">A file has to stay missing this long before it is offered. A phone with the storage card out looks the same as a deleted photo for a while.</string>
+    <plurals name="deletion_grace_days">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
+
+    <string name="deletion_candidates_title">Gone from this phone</string>
+    <string name="deletion_candidates_none">Nothing to review. Files you delete will appear here once they have been gone for a while.</string>
+    <string name="deletion_candidates_summary">%1$s left your phone and are still in OneDrive, taking %2$s.</string>
+    <string name="deletion_review">Remove these from OneDrive</string>
+    <!-- The confirmation. Names the count and the size, and says where the files go. -->
+    <string name="deletion_confirm_title">Remove %1$s from OneDrive?</string>
+    <string name="deletion_confirm_body">These %1$s are not on your phone any more. Removing them frees %2$s in OneDrive.
+
+They go to the OneDrive recycle bin, where you can restore them yourself. Gallery Sync never empties that bin.</string>
+    <string name="deletion_confirm_action">Remove from OneDrive</string>
+    <string name="deletion_confirm_cancel">Keep them</string>
+    <string name="deletion_result">%1$s removed from OneDrive.</string>
+    <string name="deletion_result_came_back">%1$s were back on your phone, so their OneDrive copies were kept.</string>
+    <string name="deletion_result_failed">%1$s could not be removed. Nothing was lost; try again later.</string>
+    <string name="deletion_working">Removing…</string>
+
     <!-- Retrieval: files in OneDrive that are no longer on the phone. -->
     <string name="tab_retrieve">Get back</string>
     <string name="retrieve_title">Not on this phone</string>

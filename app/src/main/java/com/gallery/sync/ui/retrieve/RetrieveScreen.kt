@@ -96,6 +96,13 @@ fun RetrieveScreen(
                 )
                 HorizontalDivider()
             }
+
+            // Two halves of one question: what happened to the files that are no longer here. The
+            // list above offers them back; this offers to let them go.
+            item {
+                HorizontalDivider()
+                DeletionSection()
+            }
         }
     }
 }
