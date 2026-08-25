@@ -12,6 +12,7 @@ import com.gallery.sync.data.local.media.LocalMediaItem
 import com.gallery.sync.data.local.media.MediaAccess
 import com.gallery.sync.data.local.media.MediaScanner
 import com.gallery.sync.data.local.media.ProxyMarker
+import com.gallery.sync.data.local.media.RestoredAlbum
 import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.data.remote.onedrive.ContentUriUploadSource
 import com.gallery.sync.data.remote.onedrive.ResumableSession
@@ -209,7 +210,13 @@ class BackupEngine @Inject constructor(
         //
         // Name and size is the same bar `verifiedInCloud` uses to call a copy safe, so it is a fair
         // test of "this content is on the phone somewhere".
-        val presentContent = everything.mapTo(HashSet()) { "${it.displayName}|${it.sizeBytes}" }
+        //
+        // Built through RestoredAlbum.contentSignature, which strips the `_restored` a fetch adds.
+        // Comparing the raw name would mean a file the user has just fetched back never clears its
+        // flag, and so stays on course to have its cloud copy offered for deletion.
+        val presentContent = everything.mapTo(HashSet()) {
+            RestoredAlbum.contentSignature(it.displayName, it.sizeBytes)
+        }
 
         // Diffed here rather than in SQL. A `NOT IN` over six thousand keys binds one variable per
         // file and exceeds SQLite's parameter limit, and it cannot be chunked because a file in the
@@ -594,6 +601,90 @@ class BackupEngine @Inject constructor(
     }
 
     /**
+     * Folder names OneDrive holds under the roots this app backs up into.
+     *
+     * The entry point for retrieval: pick a folder, then see what is in it. Reads the drive rather
+     * than the album table, because the folders worth fetching from include ones this phone has
+     * never had. On a new handset the album table and the ledger are both empty and OneDrive is
+     * full, which is precisely when someone goes looking for a restore.
+     *
+     * **Confined to [RemoteRoots.searchOrder].** Ian, 25 Aug 2026: only the roots for now. That
+     * keeps this a restore screen rather than a file manager — a full drive walk would be the cloud
+     * browser the design principle rules out, and the Open OneDrive button in Settings already
+     * covers real browsing. Worth revisiting when other cloud services arrive, since a second
+     * provider will not lay its files out under a Samsung path.
+     *
+     * `null` when a root could not be listed, which the caller must not render as "you have no
+     * backups". Failing to ask is not evidence of absence.
+     */
+    suspend fun cloudFolders(): List<String>? = withContext(dispatcher) {
+        val names = sortedSetOf<String>(String.CASE_INSENSITIVE_ORDER)
+
+        for (root in RemoteRoots.searchOrder(destinationRoot())) {
+            var page = when (val result = repository.listFolderByPath(root)) {
+                is DataResult.Success -> result.value
+                is DataResult.Failure -> {
+                    Logger.w(TAG, "cloudFolders: could not list $root (${result.error})")
+                    return@withContext null
+                }
+            }
+            names += page.nodes.filterIsInstance<RemoteMediaNode.Folder>().map { it.name }
+
+            var pages = 1
+            while (page.nextPageToken != null && pages < MAX_REMOTE_PAGES) {
+                page = when (val result = repository.listNextPage(page.nextPageToken!!)) {
+                    is DataResult.Success -> result.value
+                    // A partial list of folders is still usable: every name in it is real and the
+                    // user can act on it. Unlike the index below, a short answer here cannot cause a
+                    // wrong decision, only a missing row.
+                    is DataResult.Failure -> break
+                }
+                names += page.nodes.filterIsInstance<RemoteMediaNode.Folder>().map { it.name }
+                pages++
+            }
+        }
+
+        Logger.d(TAG, "cloudFolders: ${names.size} folders across the search roots")
+        names.toList()
+    }
+
+    /**
+     * Everything OneDrive holds for one album, each marked with whether the phone still has it.
+     *
+     * Reuses [remoteIndexFor] rather than walking the pages again. That walk is the one this
+     * codebase has already paid for: reading a single page made 5,523 files look absent on a real
+     * library, and a second copy of the logic is a second chance to reintroduce it.
+     *
+     * Every file is returned, including ones already on the device — see [RestorableFile]. `null`
+     * means the folder could not be listed, which is not the same as it being empty.
+     */
+    suspend fun restorableFilesIn(album: String): List<RestorableFile>? = withContext(dispatcher) {
+        val index = remoteIndexFor(album) ?: return@withContext null
+
+        // Only a trustworthy scan may say a file is here. Without full access the honest answer is
+        // "we do not know", and the safe rendering of that is to mark nothing — an unmarked file is
+        // simply offered, which costs a duplicate at worst. Claiming a file is already on the phone
+        // when we cannot see it would talk the user out of a retrieval they need.
+        val onDevice = if (scanner.access() == MediaAccess.FULL) {
+            scanner.scanEverything().mapTo(HashSet()) {
+                RestoredAlbum.contentSignature(it.displayName, it.sizeBytes)
+            }
+        } else {
+            emptySet()
+        }
+
+        index.map { (name, ref) ->
+            RestorableFile(
+                remoteItemId = ref.id,
+                displayName = name,
+                mimeType = ref.mimeType,
+                sizeBytes = ref.sizeBytes,
+                alreadyOnDevice = RestoredAlbum.contentSignature(name, ref.sizeBytes) in onDevice
+            )
+        }.sortedBy { it.displayName.lowercase() }
+    }
+
+    /**
      * Every file OneDrive already holds for this album, by name and size.
      *
      * Name **and** size together: a same-named file of a different size is genuinely different
@@ -650,7 +741,7 @@ class BackupEngine @Inject constructor(
             }
         }
         index += page.nodes.filterIsInstance<RemoteMediaNode.File>()
-            .associate { it.name to RemoteFileRef(it.id, it.sizeBytes) }
+            .associate { it.name to RemoteFileRef(it.id, it.sizeBytes, it.mimeType) }
 
         var pages = 1
         while (page.nextPageToken != null && pages < MAX_REMOTE_PAGES) {
@@ -662,7 +753,7 @@ class BackupEngine @Inject constructor(
                 }
             }
             index += page.nodes.filterIsInstance<RemoteMediaNode.File>()
-            .associate { it.name to RemoteFileRef(it.id, it.sizeBytes) }
+            .associate { it.name to RemoteFileRef(it.id, it.sizeBytes, it.mimeType) }
             pages++
         }
 

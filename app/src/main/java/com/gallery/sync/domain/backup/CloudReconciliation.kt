@@ -10,7 +10,21 @@ import com.gallery.sync.data.local.media.LocalMediaItem
  * ever fetch it back — and on a real library that path covers almost everything: 6,278 of 6,371
  * files on the Fold 4. Without the id, retrieval could offer none of them.
  */
-data class RemoteFileRef(val id: String, val sizeBytes: Long)
+data class RemoteFileRef(
+    val id: String,
+    val sizeBytes: Long,
+    /**
+     * What the provider says this file is.
+     *
+     * Carried because retrieval cannot publish a file without it — MediaStore needs a mime type at
+     * insert. The listing always reported one and `indexForPath` discarded it, which was harmless
+     * while this index only answered "is it already backed up?" and is not once the same index
+     * decides what can be fetched back.
+     *
+     * Defaulted, so reconciliation callers that only care about id and size are untouched.
+     */
+    val mimeType: String = "application/octet-stream"
+)
 
 /**
  * The answer to "are these still in OneDrive?", asked of the drive rather than of the ledger.

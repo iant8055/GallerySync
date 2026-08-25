@@ -3,6 +3,7 @@ package com.gallery.sync.domain.backup
 import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.media.MediaAccess
+import com.gallery.sync.data.local.media.RestoredAlbum
 import com.gallery.sync.data.local.media.MediaScanner
 import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.di.IoDispatcher
@@ -98,14 +99,20 @@ class SyncDeletionsToCloud @Inject constructor(
                 Logger.w(TAG, "refusing to delete: the scan returned nothing at all")
                 return@withContext DeletionOutcome()
             }
-            val presentContent = everything.mapTo(HashSet()) { "${it.displayName}|${it.sizeBytes}" }
+            // Through RestoredAlbum.contentSignature so a file the user fetched back — which carries
+            // `_restored` in its name — is recognised as being here. This is the last check before a
+            // cloud copy goes to the recycle bin, so the rename must not blind it.
+            val presentContent = everything.mapTo(HashSet()) {
+                RestoredAlbum.contentSignature(it.displayName, it.sizeBytes)
+            }
 
             var deleted = 0
             var failed = 0
             var cameBack = 0
 
             for (entry in approved) {
-                if ("${entry.displayName}|${entry.sizeBytes}" in presentContent) {
+                val signature = RestoredAlbum.contentSignature(entry.displayName, entry.sizeBytes)
+                if (signature in presentContent) {
                     Logger.i(TAG, "not deleting ${entry.displayName}: it is back on the phone")
                     cameBack++
                     continue

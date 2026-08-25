@@ -2,8 +2,8 @@ package com.gallery.sync.ui.retrieve
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gallery.sync.data.local.dao.BackupEntryDao
-import com.gallery.sync.data.local.entity.BackupEntryEntity
+import com.gallery.sync.domain.backup.BackupEngine
+import com.gallery.sync.domain.backup.RestorableFile
 import com.gallery.sync.domain.backup.RestoreFromCloud
 import com.gallery.sync.domain.backup.RestoreResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,8 +29,20 @@ sealed interface RetrieveStatus {
 }
 
 data class RetrieveUiState(
-    val items: List<BackupEntryEntity> = emptyList(),
-    /** Keyed on ledger id, so several files can be fetched at once without confusing their rows. */
+    /** Folders OneDrive holds under the backup roots, or empty until they have been read. */
+    val folders: List<String> = emptyList(),
+    val selectedFolder: String? = null,
+    val files: List<RestorableFile> = emptyList(),
+    val loading: Boolean = false,
+    /**
+     * The listing failed, which is **not** the same as there being nothing there.
+     *
+     * Rendered as its own message rather than as an empty list. "You have no backups" is the single
+     * most alarming thing this screen could say, and saying it because the network dropped would be
+     * a lie told at the worst possible moment.
+     */
+    val couldNotList: Boolean = false,
+    /** Keyed on the remote item id, so several files can be fetched at once without confusion. */
     val statuses: Map<String, RetrieveStatus> = emptyMap(),
     /**
      * Files dropped because OneDrive no longer holds them, by name.
@@ -44,19 +56,32 @@ data class RetrieveUiState(
 )
 
 /**
- * The list of what is in OneDrive but no longer on the phone.
+ * What OneDrive holds, folder by folder, and a button to bring any of it back.
  *
- * **Not a photo browser**, and it must not become one. The design principle rules out thumbnails,
- * grids and search; this is names, sizes and a button, which is everything needed to get a file back
- * and nothing more.
+ * ### Why this reads the drive and not the ledger
  *
- * It is also the only place a fetch can be triggered. Android has no hydration hook for media, so
- * tapping a missing item in Samsung Gallery cannot reach this app — the list is not a convenience,
- * it is the whole interface.
+ * It used to read `observeRetrievable()`, which offers a file only when our ledger knows it **and**
+ * it has already left the phone. That answers "what have I lost from this device?", which is not
+ * what a restore feature promises.
+ *
+ * The case that settles it is a **new phone**: the ledger records what left *this* device, so on a
+ * fresh install it is empty by construction, and a ledger-driven list offers nothing at all while
+ * the user's entire library sits in OneDrive. Ian, 25 Aug 2026: *if we are going to offer restore
+ * then we need to be able to restore any file, not just the ones we backed up, synced or archived.*
+ *
+ * Observed on the Fold 4 the same day: `DCIM/12345clips` holds seven videos, all seven backed up,
+ * and the ledger-driven list offered exactly one — the only one that had left the device.
+ *
+ * ### Not a photo browser, and it must not become one
+ *
+ * The design principle rules out thumbnails, grids and search; this is folder names, file names,
+ * sizes and a button. A cloud folder listing is precisely the screen that grows a thumbnail grid if
+ * nobody says no, so: no. Real browsing stays with the Open OneDrive button in Settings — looking
+ * *through* your photos is a different activity from getting specific ones back.
  */
 @HiltViewModel
 class RetrieveViewModel @Inject constructor(
-    private val entryDao: BackupEntryDao,
+    private val engine: BackupEngine,
     private val restore: RestoreFromCloud
 ) : ViewModel() {
 
@@ -64,51 +89,86 @@ class RetrieveViewModel @Inject constructor(
     val state: StateFlow<RetrieveUiState> = _state.asStateFlow()
 
     init {
+        loadFolders()
+    }
+
+    fun loadFolders() {
         viewModelScope.launch {
-            entryDao.observeRetrievable().collect { rows ->
-                _state.value = _state.value.copy(items = rows)
-            }
+            _state.value = _state.value.copy(loading = true, couldNotList = false)
+            val folders = engine.cloudFolders()
+            _state.value = _state.value.copy(
+                folders = folders.orEmpty(),
+                loading = false,
+                couldNotList = folders == null
+            )
         }
+    }
+
+    fun openFolder(album: String) {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(
+                selectedFolder = album,
+                files = emptyList(),
+                loading = true,
+                couldNotList = false
+            )
+            val files = engine.restorableFilesIn(album)
+            _state.value = _state.value.copy(
+                files = files.orEmpty(),
+                loading = false,
+                couldNotList = files == null
+            )
+        }
+    }
+
+    /** Back to the folder list. Statuses are kept, so a fetch started here survives the trip. */
+    fun closeFolder() {
+        _state.value = _state.value.copy(
+            selectedFolder = null,
+            files = emptyList(),
+            couldNotList = false
+        )
     }
 
     /**
      * Fetches one file back.
      *
-     * The row stays in the list until the next scan clears its flag, which is honest: the file is
-     * not really back until MediaStore holds it and the ledger has noticed.
+     * Allowed for a file that is still on the phone. That is the point of a per-file button: the
+     * user asked for this one, and a second copy under a `_restored` name is a cost they can see.
      */
-    fun retrieve(entry: BackupEntryEntity) {
-        val remoteId = entry.remoteItemId ?: return
-        if (_state.value.statuses[entry.id] is RetrieveStatus.Working) return
+    fun retrieve(file: RestorableFile) {
+        if (_state.value.statuses[file.remoteItemId] is RetrieveStatus.Working) return
 
         viewModelScope.launch {
-            setStatus(entry.id, RetrieveStatus.Working(0, entry.sizeBytes))
+            setStatus(file.remoteItemId, RetrieveStatus.Working(0, file.sizeBytes))
 
             val result = restore.restore(
-                remoteItemId = remoteId,
-                displayName = entry.displayName,
-                mimeType = entry.mimeType,
-                isVideo = entry.isVideo,
-                sizeBytes = entry.sizeBytes,
+                remoteItemId = file.remoteItemId,
+                displayName = file.displayName,
+                mimeType = file.mimeType,
+                isVideo = file.isVideo,
+                sizeBytes = file.sizeBytes,
                 onProgress = { written, total ->
-                    setStatus(entry.id, RetrieveStatus.Working(written, total))
+                    setStatus(file.remoteItemId, RetrieveStatus.Working(written, total))
                 }
             )
 
             setStatus(
-                entry.id,
+                file.remoteItemId,
                 when (result) {
                     is RestoreResult.Restored -> RetrieveStatus.Done
                     is RestoreResult.Unsupported -> RetrieveStatus.Unsupported
                     is RestoreResult.Failed -> RetrieveStatus.Failed(result.reason)
 
-                    // Neither on the phone nor in the drive: the row describes nothing. Forgetting
-                    // it is bookkeeping — it removes our record and no file anywhere, since there
-                    // is no longer a file anywhere to remove.
+                    // The listing said it was there and the fetch says it is not, so the listing is
+                    // stale. Drop the row and say so by name — a row that simply vanished would look
+                    // like the app losing things.
                     is RestoreResult.GoneFromCloud -> {
-                        entryDao.forget(entry.id)
                         _state.value = _state.value.copy(
-                            droppedFromCloud = _state.value.droppedFromCloud + entry.displayName
+                            files = _state.value.files.filterNot {
+                                it.remoteItemId == file.remoteItemId
+                            },
+                            droppedFromCloud = _state.value.droppedFromCloud + file.displayName
                         )
                         RetrieveStatus.GoneFromCloud
                     }
@@ -117,7 +177,9 @@ class RetrieveViewModel @Inject constructor(
         }
     }
 
-    private fun setStatus(id: String, status: RetrieveStatus) {
-        _state.value = _state.value.copy(statuses = _state.value.statuses + (id to status))
+    private fun setStatus(remoteItemId: String, status: RetrieveStatus) {
+        _state.value = _state.value.copy(
+            statuses = _state.value.statuses + (remoteItemId to status)
+        )
     }
 }

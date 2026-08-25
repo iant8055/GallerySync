@@ -7,6 +7,7 @@ import androidx.room.Query
 import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.entity.BackupState
+import com.gallery.sync.data.local.media.RestoredAlbum
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -28,8 +29,8 @@ data class UploadedKey(
     val displayName: String,
     val sizeBytes: Long
 ) {
-    /** How the same content is recognised wherever it now sits. */
-    val contentSignature: String get() = "$displayName|$sizeBytes"
+    /** How the same content is recognised wherever it now sits. See [RestoredAlbum]. */
+    val contentSignature: String get() = RestoredAlbum.contentSignature(displayName, sizeBytes)
 }
 
 data class AlbumBackupCount(

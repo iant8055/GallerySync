@@ -269,19 +269,24 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
     <string name="deletion_working">Removing…</string>
 
     <!-- Retrieval: files in OneDrive that are no longer on the phone. -->
-    <string name="tab_retrieve">Get back</string>
-    <string name="retrieve_title">Not on this phone</string>
-    <string name="retrieve_explain">These are in OneDrive but not here any more. Fetching one puts it back without touching the copy in the cloud, so you can do it as often as you like.</string>
-    <string name="retrieve_empty">Everything backed up is still on this phone. Nothing to fetch.</string>
-    <string name="retrieve_where">Files come back into a folder called Restored.</string>
-    <string name="retrieve_action">Get back</string>
-    <string name="retrieve_working">Fetching…</string>
+    <string name="tab_retrieve">Restore</string>
+    <string name="retrieve_title">Restore from OneDrive</string>
+    <string name="retrieve_explain">Everything OneDrive holds in this folder. Restoring one puts it back without touching the copy in the cloud, so you can do it as often as you like.</string>
+    <string name="retrieve_empty">Nothing here to restore.</string>
+    <string name="retrieve_where">Files come back into a folder called Restored, with “_restored” added to the name.</string>
+    <string name="retrieve_action">Restore</string>
+    <string name="retrieve_pick_folder">Pick a folder to see everything OneDrive holds in it. You can restore any of it, whether this app put it there or not.</string>
+    <string name="retrieve_all_folders">All folders</string>
+    <string name="retrieve_already_here">Already on this phone — restoring makes a second copy.</string>
+    <string name="retrieve_could_not_list">Could not reach OneDrive, so this is not a list of what you have. Nothing is missing; we just could not ask.</string>
+    <string name="retrieve_try_again">Try again</string>
+    <string name="retrieve_working">Restoring…</string>
     <string name="retrieve_done">Back on your phone.</string>
-    <string name="retrieve_failed">Could not fetch this one: %1$s</string>
-    <string name="retrieve_unsupported">Fetching files back needs Android 10 or newer.</string>
-    <string name="retrieve_gone">This file is no longer in OneDrive either, so it cannot be fetched. Removed from this list.</string>
+    <string name="retrieve_failed">Could not restore this one: %1$s</string>
+    <string name="retrieve_unsupported">Restoring files needs Android 10 or newer.</string>
+    <string name="retrieve_gone">This file is no longer in OneDrive either, so it cannot be restored. Removed from this list.</string>
     <!-- Shown after the row itself has gone, so the disappearance has a reason attached to it. -->
-    <string name="retrieve_gone_named">%1$s is no longer in OneDrive either, so it could not be fetched. It has been removed from this list.</string>
+    <string name="retrieve_gone_named">%1$s is no longer in OneDrive either, so it could not be restored. It has been removed from this list.</string>
     <string name="retrieve_detail">%1$s · %2$s</string>
 
     <!-- Gate 1: which folders to look in. -->

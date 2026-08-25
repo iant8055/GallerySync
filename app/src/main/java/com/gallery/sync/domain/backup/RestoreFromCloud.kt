@@ -66,6 +66,9 @@ class RestoreFromCloud @Inject constructor(
     /**
      * Downloads [remoteItemId] and publishes it into the hidden Restored album.
      *
+     * [displayName] is the name in OneDrive; what lands on the phone carries
+     * [RestoredAlbum.SUFFIX] before the extension.
+     *
      * [sizeBytes] is what OneDrive reports, and the write is rejected unless exactly that many bytes
      * arrive. A short read leaves nothing behind: this may be the only copy coming back, and a
      * truncated photo that looks whole is worse than a failure the user can retry.
@@ -97,8 +100,13 @@ class RestoreFromCloud @Inject constructor(
             }
         }
 
+        // Published under `<name>_restored.<ext>`. Retrieval lists what OneDrive holds rather than
+        // what left the phone, so the copy can land beside a file the gallery already has.
+        // RestoredAlbum.contentSignature strips this again wherever the app asks "is this content on
+        // the phone?" — without that strip a fetched file never clears its ledger row and ends up
+        // with its cloud copy offered for deletion.
         val outcome = writer.write(
-            displayName = displayName,
+            displayName = RestoredAlbum.restoredNameOf(displayName),
             mimeType = mimeType,
             relativePath = RestoredAlbum.RELATIVE_PATH,
             isVideo = isVideo,

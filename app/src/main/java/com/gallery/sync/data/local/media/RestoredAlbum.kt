@@ -27,6 +27,61 @@ object RestoredAlbum {
     const val NAME = "Restored"
 
     /**
+     * What is added to a retrieved file name, before the extension.
+     *
+     * Ian, 25 Aug 2026. Retrieval lists what OneDrive holds rather than what our ledger remembers,
+     * so fetching a file the gallery already has is a normal case rather than an edge one, and the
+     * copy can land beside the original. The suffix is what tells them apart at a glance.
+     */
+    const val SUFFIX = "_restored"
+
+    /**
+     * The name a retrieved copy is published under.
+     *
+     * Before the extension, never after: `IMG_0042.mp4_restored` changes the mime type MediaStore
+     * infers from the name, and gallery apps stop recognising the file.
+     *
+     * Idempotent, so fetching an already-suffixed name back does not build `_restored_restored`. A
+     * second copy of the same file therefore collides, and MediaStore appends ` (1)` — which is the
+     * right outcome, and the reason we choose the first suffix ourselves rather than leaving all the
+     * naming to Android.
+     */
+    fun restoredNameOf(displayName: String): String {
+        val dot = displayName.lastIndexOf('.')
+        val stem = if (dot > 0) displayName.substring(0, dot) else displayName
+        val extension = if (dot > 0) displayName.substring(dot) else ""
+        return if (stem.endsWith(SUFFIX)) displayName else "$stem$SUFFIX$extension"
+    }
+
+    /** The name a retrieved copy was made from, or [displayName] unchanged if it is not one. */
+    fun originalNameOf(displayName: String): String {
+        val dot = displayName.lastIndexOf('.')
+        val stem = if (dot > 0) displayName.substring(0, dot) else displayName
+        val extension = if (dot > 0) displayName.substring(dot) else ""
+        return if (stem.endsWith(SUFFIX)) stem.removeSuffix(SUFFIX) + extension else displayName
+    }
+
+    /**
+     * How the app recognises the same content wherever it now sits.
+     *
+     * Name and size, with any [SUFFIX] taken off first. **The suffix is why this function exists.**
+     * Three separate places test `name|size` to answer "is this content on the phone?" — the ledger
+     * key, the pass that clears a row missing flag, and the last check before a cloud copy goes to
+     * the recycle bin. Without the strip, a file the user has just fetched back still reads as gone:
+     * its row stays flagged missing, becomes a cloud deletion candidate, and the guard that should
+     * have caught that is blinded by the same rename.
+     *
+     * Size still has to match, so a user file genuinely called `holiday_restored.mp4` would have to
+     * be byte-identical to a ledger row to collide. If it ever were, this fails in the safe
+     * direction: we read the file as back, and decline to delete anything.
+     *
+     * A *second* retrieved copy carries the MediaStore ` (1)` and will not match. That costs
+     * nothing: the first copy already cleared the flag.
+     */
+    fun contentSignature(displayName: String, sizeBytes: Long): String =
+        "${originalNameOf(displayName)}|$sizeBytes"
+
+    /**
      * Whether a scanned item belongs to this album and must therefore be left alone.
      *
      * Checks the path rather than the album name: a user with their own folder called "Restored"
