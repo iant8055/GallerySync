@@ -15,6 +15,23 @@ import kotlinx.coroutines.flow.Flow
  * Lets the UI distinguish "switched off because it is finished and safe" from "switched off and
  * not backed up" — two very different situations that a bare toggle renders identically.
  */
+/**
+ * Just enough of a backed-up row to decide whether its file is still on the phone.
+ *
+ * Carries name and size as well as the content key, because those answer different questions. The
+ * key says "this exact file, in this album, last modified then"; name and size say "this content,
+ * anywhere". A restored file matches the second and not the first — it lands in a different folder
+ * with a fresh timestamp — and it is the second that decides whether to keep offering it back.
+ */
+data class UploadedKey(
+    val id: String,
+    val displayName: String,
+    val sizeBytes: Long
+) {
+    /** How the same content is recognised wherever it now sits. */
+    val contentSignature: String get() = "$displayName|$sizeBytes"
+}
+
 data class AlbumBackupCount(
     val album: String,
     val total: Int,
@@ -144,8 +161,8 @@ interface BackupEntryDao {
      * limit on a real library — and it cannot be chunked, because a file in the second chunk would
      * be marked missing by the first.
      */
-    @Query("SELECT id FROM backup_entries WHERE state = :uploaded")
-    suspend fun uploadedIds(uploaded: BackupState = BackupState.UPLOADED): List<String>
+    @Query("SELECT id, displayName, sizeBytes FROM backup_entries WHERE state = :uploaded")
+    suspend fun uploadedKeys(uploaded: BackupState = BackupState.UPLOADED): List<UploadedKey>
 
     /**
      * Marks rows whose file has left the phone.

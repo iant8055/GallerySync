@@ -254,12 +254,12 @@ keeps working.
 - [ ] **Move to backup should distinguish photo from video**, or be replaced by Archive mode.
 
 ## v0.4.0 — Retrieval and deletion sync
-- [ ] Fetch a cloud-only item back on demand, registering it in MediaStore so every app sees it.
+- [x] Fetch a cloud-only item back on demand, registering it in MediaStore so every app sees it.
       Photos and video both — it is the only route back to a full-quality edit from a proxy.
-      **Built 25 Aug 2026, not yet verified against a real download** — see the entry below.
-- [ ] Plain retrieval list — **not** a photo browser. Also the only place a fetch can be triggered:
+      **Verified byte-identical on the Fold 4, 25 Aug 2026.** Video not yet exercised.
+- [x] Plain retrieval list — **not** a photo browser. Also the only place a fetch can be triggered:
       there is no hydration hook, so tapping an item in Samsung Gallery cannot reach us.
-      **Built 25 Aug 2026**; renders its empty state correctly, with no populated list yet to check.
+      Populates, fetches, and clears itself once the file is back.
 - [ ] Deletion sync, opt-in and batched. Highest-risk feature in the product; it only follows a
       backup engine that has been watched working. Never infers deletion from absence alone.
 
@@ -843,6 +843,35 @@ users, the only affected ledgers are on two phones here, and both rebuild themse
 ("Choose an album to sync"), which shifts every button below it. Fixed-coordinate taps against that
 screen are unreliable, and one landed on "Deselect all" and reset every album mode. Read the screen
 before tapping it.
+
+### 25 Aug 2026 — retrieval proven end to end, and a third defect on the way
+
+A file went local -> OneDrive -> deleted -> fetched back, and returned **byte-identical**:
+`d60369934efda95c...` on both sides, 126,162 bytes. Every stage watched on the Fold 4.
+
+The chain, and what each step proved:
+
+1. Backed up through the **skip-existing** path, which now records a real Graph id where it used to
+   write `""`. That is the path covering 6,278 of 6,371 files here, so it is the one that mattered.
+2. Local copy removed; the row was marked missing **and survived the prune** —
+   `kept 1 rows for files still in OneDrive but not on the device`, beside
+   `forgot 1 rows` for the older row whose id was empty and which genuinely could not be fetched.
+3. Listed in "Get back" with name, album and size.
+4. Fetched: streamed download, `IS_PENDING` write, size check, published into `DCIM/Restored`.
+5. Rescan cleared the flag and emptied the list.
+
+**The third defect, found at step 5.** The list would never clear. A restored file lands in
+`Restored` with a fresh timestamp, so its content key — `album|name|size|mtime` — can never match the
+row describing where it used to live, and the ledger went on offering a file the user was already
+looking at.
+
+Fixed by clearing on **name and size** rather than on the content key. That is the same bar
+`verifiedInCloud` uses to call a copy safe, so it is a fair test of "this content is on the phone
+somewhere", and it is deliberately a different question from the one marking asks. Where the two
+disagree — absent by key, present by content, which is exactly a restore — **back wins**.
+
+Three defects in one feature, none of them reachable by reading the code. All three needed the
+round trip.
 
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 

@@ -202,12 +202,27 @@ class BackupEngine @Inject constructor(
             )
         }
 
+        // A second index, by name and size rather than by content key. A file fetched back from
+        // OneDrive lands in the Restored folder with a fresh timestamp, so its content key can never
+        // match the row that describes where it used to live — and without this the ledger would go
+        // on offering to fetch a file the user is already looking at.
+        //
+        // Name and size is the same bar `verifiedInCloud` uses to call a copy safe, so it is a fair
+        // test of "this content is on the phone somewhere".
+        val presentContent = everything.mapTo(HashSet()) { "${it.displayName}|${it.sizeBytes}" }
+
         // Diffed here rather than in SQL. A `NOT IN` over six thousand keys binds one variable per
         // file and exceeds SQLite's parameter limit, and it cannot be chunked because a file in the
         // second chunk would be marked missing by the first.
-        val known = entryDao.uploadedIds()
-        val gone = known.filterNot { it in present }
-        val back = known.filter { it in present }
+        val known = entryDao.uploadedKeys()
+        val back = known.filter { it.contentSignature in presentContent }.map { it.id }
+        // Back wins over gone: a restored file is absent by key and present by content, and the
+        // second reading is the one the user would recognise.
+        val backIds = back.toHashSet()
+        val gone = known
+            .filterNot { it.id in backIds }
+            .filterNot { it.id in present }
+            .map { it.id }
 
         val now = System.currentTimeMillis()
         // Cleared first, so a file restored moments ago is never marked missing on the way through.
