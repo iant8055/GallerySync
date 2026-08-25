@@ -38,10 +38,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gallery.sync.BuildConfig
 import com.gallery.sync.R
-import com.gallery.sync.ui.debug.CloudCoverageProbe
-import com.gallery.sync.ui.debug.StorageAccessProbe
 import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.ui.backup.BackupViewModel
 import com.gallery.sync.ui.backup.ProxyStatus
@@ -360,17 +357,6 @@ fun SettingsScreen(
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
-            }
-        }
-
-        // Research probe, debug builds only. Remove with `ui/debug/StorageAccessProbe.kt` once the
-        // SAF question in TASK-011 is answered either way.
-        if (BuildConfig.DEBUG) {
-            Section("SAF tree probe (debug)") {
-                StorageAccessProbe()
-            }
-            Section("Cloud coverage (debug)") {
-                CloudCoverageProbe()
             }
         }
     }

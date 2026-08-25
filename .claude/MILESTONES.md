@@ -502,8 +502,12 @@ achievable because the path deliberately mirrors the layout Samsung's own sync c
 would strand every existing backup and re-upload the library; treat it as fixed.
 
 Neither defect was reachable by unit test — both need a real drive with more than a hundred files in
-a folder, and a real network to fail. That is the argument for keeping the probe rather than deleting
-it with `StorageAccessProbe`.
+a folder, and a real network to fail.
+
+*Superseded 24 Aug 2026.* The probe was kept for exactly that reason, and has now been replaced by
+`ReconcileWithCloud`, which does the same measurement on the same code path but as a real setup step
+rather than a debug screen. Both probes were removed with it — see the entry below — which also took
+the forbidden `DocumentsContract.deleteDocument` call out of the tree.
 
 ### 24 Aug 2026 — the upload gate was opt-out, and a fresh install uploaded what nobody chose
 
@@ -618,6 +622,23 @@ and `isComplete` is trivially true while nothing has failed yet. Fixed by requir
 finished. Worth recording because it is the mirror of the unchecked rule: that one stops the app
 claiming files are missing when it does not know, and this one stops it claiming they are safe when
 it does not know. Both are the same error, and only one of them was anticipated.
+
+### 24 Aug 2026 — both research probes removed
+
+`ui/debug/` is now empty. `StorageAccessProbe`, `CloudCoverageProbe` and `CloudCoverageViewModel` are
+gone, along with the two debug sections in Settings that reached them.
+
+Both existed to answer a question, and both questions are answered: the SAF tree grant on 19 Aug, and
+the cloud coverage today, at 6,278 of 6,371 files already backed up. The coverage measurement now
+lives in `ReconcileWithCloud` as a real setup step, on the same `remoteIndexFor` code path, so nothing
+was lost by deleting the screen that used to make it.
+
+**This also removes `DocumentsContract.deleteDocument` from the source tree**, which CLAUDE.md
+forbids outright. Worth being precise about what the risk actually was, because it was recorded
+loosely earlier in this session: the call sat in the `main` source set and so was compiled into
+release builds, but its only entry point was inside a `BuildConfig.DEBUG` block in Settings, so no
+user could reach it. Unreachable, not shipped-and-callable. Deleting it is still better than moving
+it to a debug source set — the API this project must never call is now simply absent.
 
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
