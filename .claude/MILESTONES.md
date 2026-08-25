@@ -873,6 +873,34 @@ disagree — absent by key, present by content, which is exactly a restore — *
 Three defects in one feature, none of them reachable by reading the code. All three needed the
 round trip.
 
+### 25 Aug 2026 — the drive is asked again before anything is removed
+
+`verifiedInCloud` reads a **remembered** byte size. It says a copy was confirmed once, which is a
+different claim from "there is a copy now" — and removal is the one operation where only the second
+will do. Nothing in the app re-checked, so a file deleted from OneDrive by hand left a row insisting
+it was safe forever.
+
+Demonstrated rather than argued, an hour ago: Ian deleted the retrieval test file from his drive and
+the ledger went on asserting it was backed up, with nothing anywhere to notice.
+
+`BackupEngine.confirmStillInCloud` now re-lists the drive at the moment of removal, one listing per
+album, and only files it confirms **right now** go into the trash request. Three outcomes:
+
+- **confirmed** — the only category that may be removed
+- **missing** — checked, and not there. The ledger was wrong and the file is not backed up at all;
+  the user is told, because that is a fact about their photos rather than an internal detail
+- **unconfirmed** — the listing failed. Not an answer, and never treated as one
+
+**If we could not ask, we do not remove.** The same rule the reconciliation follows, applied where
+being wrong costs a photo rather than a wasted upload. `CloudConfirmationTest` pins it.
+
+The two held-back categories are reported separately in Settings and deliberately not merged: "OneDrive
+no longer has this" and "could not check" ask different things of the user.
+
+This is the guarantee CLAUDE.md's deletion rule actually rests on. The rule says removal is safe
+because the cloud copy is verified; until now "verified" meant "was verified, once, possibly months
+ago".
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have

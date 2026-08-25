@@ -204,6 +204,16 @@
     -->
     <string name="tab_setup">Cloud check</string>
 
+    <!-- Live re-check before removing a local copy. -->
+    <string name="removal_checking">Checking OneDrive still has these…</string>
+    <!--
+        Says what was held back and why, in the user's terms. "Could not check" and "is not there"
+        call for different reactions, so they are never merged.
+    -->
+    <string name="removal_held_missing">%1$s could not be found in OneDrive after all, so nothing was removed for them. They will be backed up again on the next run.</string>
+    <string name="removal_held_unchecked">%1$s could not be checked just now. Nothing was removed for them — being unable to ask is not the same as an answer.</string>
+    <string name="removal_none_confirmed">Nothing was removed. OneDrive did not confirm a single one of these files.</string>
+
     <!-- Retrieval: files in OneDrive that are no longer on the phone. -->
     <string name="tab_retrieve">Get back</string>
     <string name="retrieve_title">Not on this phone</string>

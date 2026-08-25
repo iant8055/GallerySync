@@ -12,6 +12,24 @@ import com.gallery.sync.data.local.media.LocalMediaItem
  */
 data class RemoteFileRef(val id: String, val sizeBytes: Long)
 
+/**
+ * The answer to "are these still in OneDrive?", asked of the drive rather than of the ledger.
+ *
+ * Only [confirmed] may have its local copy removed. [missing] means the ledger was wrong and the
+ * file is not backed up at all — the user needs telling, not a quiet exclusion. [unconfirmed] means
+ * the question could not be asked, which is not an answer and must never be treated as one.
+ */
+data class CloudConfirmation(
+    val confirmed: List<LocalMediaItem> = emptyList(),
+    val missing: List<LocalMediaItem> = emptyList(),
+    val unconfirmed: List<LocalMediaItem> = emptyList()
+) {
+    /** True when every file asked about came back confirmed. */
+    val isComplete: Boolean get() = missing.isEmpty() && unconfirmed.isEmpty()
+
+    val heldBack: Int get() = missing.size + unconfirmed.size
+}
+
 /** A count of files and what they occupy. */
 data class MediaTally(val files: Int = 0, val bytes: Long = 0) {
 

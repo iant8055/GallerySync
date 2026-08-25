@@ -22,7 +22,9 @@ import com.gallery.sync.data.local.entity.BackupState
 import com.gallery.sync.data.local.media.MediaAccess
 import com.gallery.sync.data.local.media.MediaScanner
 import com.gallery.sync.domain.backup.BackupEngine
+import com.gallery.sync.domain.backup.CloudConfirmation
 import com.gallery.sync.domain.backup.StopReason
+import com.gallery.sync.util.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -124,6 +126,8 @@ data class BackupUiState(
     val isAutoOptimiseEnabled: Boolean = false,
     /** Allow automatic runs on mobile data, not just Wi-Fi. */
     val allowMeteredNetwork: Boolean = false,
+    /** What the last removal attempt refused to remove, and why. Null before any attempt. */
+    val removalHeldBack: CloudConfirmation? = null,
     /** Photos whose local copy could be replaced by a proxy, and what they occupy now. */
     val proxyCandidateCount: Int = 0,
     val proxyCandidateBytes: Long = 0L,
@@ -444,12 +448,35 @@ class BackupViewModel @Inject constructor(
     /**
      * Builds the system request to move redundant local copies into the gallery's trash.
      *
-     * Returns null when there is nothing to move. The caller launches it, and Android asks the
-     * user to confirm — this app never removes anything silently.
+     * ### OneDrive is asked again, here, every time
+     *
+     * `redundantLocalCopies` reads the ledger, which records that a copy was confirmed *once*. That
+     * is not the same claim as "there is a copy now", and removal is the one place where only the
+     * second will do — a file deleted from OneDrive by hand leaves a row insisting it is safe
+     * forever, with nothing anywhere to notice.
+     *
+     * So the drive is re-listed before anything is offered for removal, and only files it confirms
+     * right now are included. Files it cannot vouch for are dropped from the request and reported;
+     * **being unable to ask is never treated as a yes.**
+     *
+     * Returns null when nothing survives the check. The caller launches the request, and Android —
+     * not this app — asks the user to confirm.
      */
     suspend fun buildMoveToBackupRequest(): IntentSender? {
         val redundant = engine.redundantLocalCopies()
-        return localCopyRemover.createMoveToBackupRequest(redundant.map { it.contentUri })
+        if (redundant.isEmpty()) return null
+
+        val confirmation = engine.confirmStillInCloud(redundant)
+        _state.value = _state.value.copy(removalHeldBack = confirmation)
+
+        if (confirmation.confirmed.isEmpty()) {
+            Logger.w("BackupViewModel", "not removing: OneDrive confirmed none of ${redundant.size}")
+            return null
+        }
+
+        return localCopyRemover.createMoveToBackupRequest(
+            confirmation.confirmed.map { it.contentUri }
+        )
     }
 
     /** Called after the system dialog closes, to reflect whatever the user allowed. */

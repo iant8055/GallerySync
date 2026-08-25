@@ -522,6 +522,58 @@ class BackupEngine @Inject constructor(
     }
 
     /**
+     * Asks OneDrive, right now, whether these files are still there.
+     *
+     * ### Why the ledger is not enough
+     *
+     * `verifiedInCloud` reads a **remembered** byte size. It says a copy was confirmed once, which is
+     * a different claim from "there is a copy now" — and removal is the one operation where only the
+     * second claim will do. Nothing else in the app re-checks: a file deleted from OneDrive by hand
+     * leaves a row insisting it is safe forever. Demonstrated 25 Aug 2026 by deleting a test file
+     * from the drive and watching the ledger go on asserting it was backed up.
+     *
+     * ### Three outcomes, and only one of them permits removal
+     *
+     * [CloudConfirmation.unconfirmed] is the category that matters. An album whose listing failed is
+     * not an album whose files are gone, and it is equally not an album whose files are safe. The
+     * cautious reading is the only acceptable one here: **if we could not ask, we do not remove.**
+     * The same rule the reconciliation follows, applied where being wrong costs a photo.
+     */
+    suspend fun confirmStillInCloud(
+        items: List<LocalMediaItem>
+    ): CloudConfirmation = withContext(dispatcher) {
+        if (items.isEmpty()) return@withContext CloudConfirmation()
+
+        val confirmed = mutableListOf<LocalMediaItem>()
+        val missing = mutableListOf<LocalMediaItem>()
+        val unconfirmed = mutableListOf<LocalMediaItem>()
+
+        // One listing per album, reused across its files, exactly as the upload path does.
+        val byAlbum = mutableMapOf<String, Map<String, RemoteFileRef>?>()
+
+        for (item in items) {
+            val index = if (byAlbum.containsKey(item.album)) {
+                byAlbum[item.album]
+            } else {
+                remoteIndexFor(item.album).also { byAlbum[item.album] = it }
+            }
+
+            when {
+                index == null -> unconfirmed += item
+                index[item.displayName]?.sizeBytes == item.sizeBytes -> confirmed += item
+                else -> missing += item
+            }
+        }
+
+        Logger.i(
+            TAG,
+            "confirmStillInCloud: ${confirmed.size} confirmed, ${missing.size} no longer in " +
+                "OneDrive, ${unconfirmed.size} could not be checked"
+        )
+        CloudConfirmation(confirmed, missing, unconfirmed)
+    }
+
+    /**
      * Every file OneDrive already holds for this album, by name and size.
      *
      * Name **and** size together: a same-named file of a different size is genuinely different

@@ -356,6 +356,47 @@ fun SettingsScreen(
                         text = stringResource(R.string.backup_move_trash_note),
                         style = MaterialTheme.typography.bodySmall
                     )
+
+                    // What the live re-check refused to include, and why. Reported rather than
+                    // quietly dropped: "OneDrive no longer has this" means the file is not backed
+                    // up at all, which the user needs to know, and "could not check" means the app
+                    // declined to guess — a different thing again, and worth saying so.
+                    state.removalHeldBack?.let { held ->
+                        if (held.confirmed.isEmpty() && held.heldBack > 0) {
+                            Text(
+                                text = stringResource(R.string.removal_none_confirmed),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                        if (held.missing.isNotEmpty()) {
+                            Text(
+                                text = stringResource(
+                                    R.string.removal_held_missing,
+                                    pluralStringResource(
+                                        R.plurals.file_count,
+                                        held.missing.size,
+                                        held.missing.size
+                                    )
+                                ),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                        if (held.unconfirmed.isNotEmpty()) {
+                            Text(
+                                text = stringResource(
+                                    R.string.removal_held_unchecked,
+                                    pluralStringResource(
+                                        R.plurals.file_count,
+                                        held.unconfirmed.size,
+                                        held.unconfirmed.size
+                                    )
+                                ),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                    }
                 }
             }
         }
