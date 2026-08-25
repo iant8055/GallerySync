@@ -260,6 +260,25 @@ keeps working.
 - [x] Plain retrieval list — **not** a photo browser. Also the only place a fetch can be triggered:
       there is no hydration hook, so tapping an item in Samsung Gallery cannot reach us.
       Populates, fetches, and clears itself once the file is back.
+- [x] **Retrieval reads the drive, not the ledger.** 25 Aug 2026. `observeRetrievable()` offers a
+      file only when the ledger knows it *and* it has already left the phone, which answers "what
+      have I lost from this device?" rather than what a restore feature promises. `DCIM/12345clips`
+      showed the gap in miniature — seven videos backed up, one offered, the other six absent only
+      because they were still on the phone.
+      **The case that settles it is a new phone.** The ledger records what left *this* device, so on
+      a fresh install it is empty by construction: the user signs in, their whole library is in
+      OneDrive, and a ledger-driven list offers nothing at all. That is the moment someone most
+      wants a restore and the moment the ledger knows least. Ian, 25 Aug 2026: if we offer restore
+      then it has to restore any file, not just the ones we backed up, synced or archived.
+      Files already on the phone are listed and labelled rather than hidden — retrieving one is
+      allowed, and what lands carries `_restored` before the extension so the two are told apart.
+      That rename is why `RestoredAlbum.contentSignature` exists: three places test `name|size` to
+      decide whether content is on the phone, and one of them is the last check before a cloud copy
+      goes to the recycle bin.
+      **Confined to the backup roots**, and no thumbnails, grid, search or sort. Ian: only the roots
+      for now — likely to need revisiting once other cloud services arrive, since a second provider
+      will not lay its files out under a Samsung path. Real browsing stays with the Open OneDrive
+      button; looking *through* photos is a different activity from getting specific ones back.
 - [x] Deletion sync, opt-in and batched. Highest-risk feature in the product; it only follows a
       backup engine that has been watched working. Never infers deletion from absence alone.
       **Built 25 Aug 2026**, default Leave, no automatic option. Screens verified; a real cloud
@@ -283,6 +302,28 @@ here have turned out to be device-specific rather than platform-wide.
 - **Galaxy Z Fold 8 (SM-F976U1)** — Android 17, **API 37**, One UI 9. Ian's daily driver, holding a
   real 148 GB library. The only device that can verify targetSdk 37 behaviour, and the one place
   where a mistake costs real photos.
+
+### 25 Aug 2026 — the skip-existing path checked against the drive by hand
+
+**Fold 4.** `DCIM/12345clips` holds seven videos. The ledger recorded all seven as verified, but only
+one was ever uploaded by this app: its row was written at 19:40:59, and the other six were all marked
+at **19:48:36 — the same second**, which is the only way ~475 MB could be recorded as backed up that
+fast. Those six went through the skip-existing check, which matches name and size against a listing
+of the remote folder and records the listing item id without sending a byte.
+
+**Ian opened OneDrive and confirmed all six are there.** That is the first hand-check of this path,
+and it matters more than its size suggests: on a real library the skip path covers almost everything
+— 6,278 of 6,371 files on this device — so nearly every `verifiedInCloud` row in the ledger is one it
+wrote. Those rows are what Archive consults before removing a local copy. Had the match been loose,
+the app would have been removing files on the strength of a listing that meant nothing.
+
+Note the direction this does **not** prove. The 25 Aug entry on the cloud re-check still stands: a
+row records what was true *once*, and a file deleted from OneDrive by hand leaves the ledger
+asserting it is safe forever. This confirms the row was right when written, not that it stays right.
+`confirmStillInCloud` exists for the second question.
+
+The album was set to **Off** afterwards, deliberately — so nothing in it is being confirmed by
+current runs, and its counts are a snapshot rather than a live figure.
 
 ### 18 Aug 2026 — proxying
 11 photos optimised, 40,283,338 bytes reclaimed; five correctly skipped as already small. EXIF
