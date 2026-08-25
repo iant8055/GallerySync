@@ -1010,6 +1010,33 @@ that recovery is demonstrably possible here, and that the app is currently promi
 could. Whether the rule moves is Ian's call — it is a safety rule, born of a data-loss worry, and one
 successful test is not the same as a guarantee.
 
+### 25 Aug 2026 — the Archive consent dialog promised a safeguard that does not exist
+
+Seen on the Fold 4 while testing Archive. The dialog read:
+
+> Files in *1999 Tioga* will leave your gallery and move to OneDrive once they are verified there
+> **and older than your archive age.**
+
+**There is no archive age setting anywhere in the app.** No such preference, no such gate, nothing
+reading it. The sentence described protection that applied to nothing.
+
+That matters more than a wording slip, because this dialog *is* the consent. CLAUDE.md is explicit
+that setting an album to Archive is where the user agrees, once, to everything that album does
+afterwards. Someone reading "older than your archive age" would reasonably conclude only their older
+files were at stake — when in fact **every verified file in the album becomes eligible immediately**.
+
+Clause removed. If the age gate specified in TASK-012 is built later, it comes back; until then it
+must not be implied.
+
+**The rest of the dialog is correct**, checked against the rule line by line: the files leave the
+gallery, files added later are covered by the same choice, the verified cloud copy is the guarantee,
+and a local removal cannot be promised as recoverable. The standing-instruction clause is the one
+most easily left out, and it is there.
+
+*Found only because Ian selected Archive on an album to show the dialog rather than to use it.* No
+test asserts the text of a consent dialog against the behaviour behind it, and this is the second
+time today that reading the screen caught something reading the code did not.
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have

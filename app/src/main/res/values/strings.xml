@@ -187,7 +187,16 @@
 
     <!-- Archive confirmation dialog -->
     <string name="archive_confirm_title">Archive this album?</string>
-    <string name="archive_confirm_body">Files in %1$s will leave your gallery and move to OneDrive once they are verified there and older than your archive age.\n\nFiles added to this album later are covered by the same choice.\n\nThe verified cloud copy is your guarantee — a local removal cannot be promised as recoverable.</string>
+    <!--
+        Says only what actually happens. This promised "older than your archive age" until 25 Aug
+        2026, and no such setting exists anywhere in the app — so the sentence described a safeguard
+        that gated nothing, in the one dialog that constitutes consent for the most destructive mode
+        in the product. Someone reading it would reasonably believe only their older files were at
+        stake, when every verified file in the album is eligible at once.
+
+        If an age gate is built later the clause comes back. Until then it must not be implied.
+    -->
+    <string name="archive_confirm_body">Files in %1$s will leave your gallery and move to OneDrive once they are verified there.\n\nFiles added to this album later are covered by the same choice.\n\nThe verified cloud copy is your guarantee — a local removal cannot be promised as recoverable.</string>
     <string name="archive_confirm_accept">Archive</string>
     <string name="archive_confirm_cancel">Cancel</string>
 
