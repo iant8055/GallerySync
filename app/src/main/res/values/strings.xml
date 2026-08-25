@@ -204,6 +204,19 @@
     -->
     <string name="tab_setup">Cloud check</string>
 
+    <!-- Retrieval: files in OneDrive that are no longer on the phone. -->
+    <string name="tab_retrieve">Get back</string>
+    <string name="retrieve_title">Not on this phone</string>
+    <string name="retrieve_explain">These are in OneDrive but not here any more. Fetching one puts it back without touching the copy in the cloud, so you can do it as often as you like.</string>
+    <string name="retrieve_empty">Everything backed up is still on this phone. Nothing to fetch.</string>
+    <string name="retrieve_where">Files come back into a folder called Restored.</string>
+    <string name="retrieve_action">Get back</string>
+    <string name="retrieve_working">Fetching…</string>
+    <string name="retrieve_done">Back on your phone.</string>
+    <string name="retrieve_failed">Could not fetch this one: %1$s</string>
+    <string name="retrieve_unsupported">Fetching files back needs Android 10 or newer.</string>
+    <string name="retrieve_detail">%1$s · %2$s</string>
+
     <!-- Gate 1: which folders to look in. -->
     <string name="sources_title">Folders to back up</string>
     <string name="sources_explain">Gallery Sync only looks in the folders you choose. Most people want DCIM, where the camera saves photos.</string>

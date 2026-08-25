@@ -256,8 +256,10 @@ keeps working.
 ## v0.4.0 — Retrieval and deletion sync
 - [ ] Fetch a cloud-only item back on demand, registering it in MediaStore so every app sees it.
       Photos and video both — it is the only route back to a full-quality edit from a proxy.
+      **Built 25 Aug 2026, not yet verified against a real download** — see the entry below.
 - [ ] Plain retrieval list — **not** a photo browser. Also the only place a fetch can be triggered:
       there is no hydration hook, so tapping an item in Samsung Gallery cannot reach us.
+      **Built 25 Aug 2026**; renders its empty state correctly, with no populated list yet to check.
 - [ ] Deletion sync, opt-in and batched. Highest-risk feature in the product; it only follows a
       backup engine that has been watched working. Never infers deletion from absence alone.
 
@@ -777,6 +779,36 @@ promise over a soft result.
 `ApplyLibraryChoice` is scoped to Gate 1, so a bulk choice never reaches a folder the user did not
 pick, and uses `REPLACE` — correct here and only here, because an explicit bulk instruction is
 exactly the case where overwriting an earlier per-album choice is what was asked for.
+
+### 25 Aug 2026 — retrieval, built and half-verified
+
+The download side of v0.4. Before this the app could list and upload and had no way to fetch anything
+back, which made proxying a one-way door: an optimised photo is capped at 2048px for any editor, and
+nothing could recover the original.
+
+**What is proven.** Schema 6 -> 7 migrated cleanly on the real 6,371-row ledger on the Fold 4, the
+screen renders, and its empty state is correct — nothing on that device is verified in OneDrive, so
+there is genuinely nothing to fetch and it says so.
+
+**What is not.** No file has been fetched back. The download, the MediaStore write and the size check
+have never run against a real Graph response. That needs a row that is verified in the cloud *and*
+missing locally, which the Fold 4 does not currently have, and producing one means writing to Ian's
+OneDrive and arming an album — neither of which should happen unasked.
+
+**Driven from the ledger, not a remote walk.** Decided by Ian. The obvious approach — list every
+remote folder and diff against local — misses the case that matters most: once Archive removes a
+file its album may hold no local files at all, so `scanAlbums` never returns it, and the files most
+worth getting back become exactly the ones the list cannot see.
+
+So schema 7 records `localMissingSinceEpochMillis`, set by diffing the ledger against an **unscoped**
+scan. Unscoped matters: driving it from the scoped scan would mark a user's whole library as deleted
+the moment they narrowed Gate 1, and then offer it all back. It also catches more than Archive — a
+photo deleted in the gallery app, or a proxied original that genuinely is no longer on the phone.
+
+**The diff is done in Kotlin, not SQL.** `NOT IN (:sixThousandKeys)` binds one variable per file and
+exceeds SQLite's parameter limit on a real library, and it cannot be chunked — a file in the second
+chunk would be marked missing by the first. The ledger's keys are loaded once and the difference
+taken in memory, with the updates chunked at 500.
 
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 

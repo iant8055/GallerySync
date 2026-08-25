@@ -117,7 +117,21 @@ data class BackupEntryEntity(
      * Stored rather than inferred: Graph decides the lifetime and says so, and a session resumed
      * past its expiry fails in a way that looks like a network error.
      */
-    val uploadSessionExpiresAtEpochMillis: Long? = null
+    val uploadSessionExpiresAtEpochMillis: Long? = null,
+
+    /**
+     * When this file stopped being on the phone, epoch millis. Null while it is still here.
+     *
+     * Set by comparing the ledger against an **unscoped** scan, so it means "gone from the device"
+     * and never "in a folder the user narrowed away". Getting that wrong would offer someone their
+     * whole library back the moment they removed a directory from Gate 1.
+     *
+     * Covers more than Archive: a photo deleted in the gallery app is equally gone, and equally
+     * worth offering back from a cloud copy that is still there. It also covers a proxied photo,
+     * whose full-quality original genuinely is no longer on the phone — retrieval is the only route
+     * back to it.
+     */
+    val localMissingSinceEpochMillis: Long? = null
 )
 
 /**

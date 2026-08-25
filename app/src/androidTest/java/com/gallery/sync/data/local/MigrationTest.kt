@@ -198,11 +198,47 @@ class MigrationTest {
     }
 
     @Test
-    fun migrateAllTheWayFrom1To6() {
+    fun migrate6To7_producesTheSchemaRoomExpects() {
+        helper.createDatabase(TEST_DB, 6).close()
+
+        helper.runMigrationsAndValidate(TEST_DB, 7, true, Migrations.MIGRATION_6_7).close()
+    }
+
+    @Test
+    fun migrate6To7_treatsNothingAsAlreadyDeleted() {
+        // A non-null default here would claim the entire library had left the phone, and the
+        // retrieval list would offer every file back as if it had been lost.
+        helper.createDatabase(TEST_DB, 6).apply {
+            execSQL(
+                """
+                INSERT INTO backup_entries
+                    (id, mediaStoreId, contentUri, displayName, album, sizeBytes,
+                     dateModifiedEpochSeconds, mimeType, isVideo, state, attemptCount,
+                     isProxied, isProxySkipped)
+                VALUES
+                    ('k1', 42, 'content://media/external/images/media/42', 'IMG_1.jpg',
+                     'Camera', 8000000, 1700000000, 'image/jpeg', 0, 'UPLOADED', 0, 0, 0)
+                """.trimIndent()
+            )
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(TEST_DB, 7, true, Migrations.MIGRATION_6_7)
+
+        db.query("SELECT localMissingSinceEpochMillis FROM backup_entries WHERE id = 'k1'")
+            .use { cursor ->
+                cursor.moveToFirst()
+                assertTrue("an upgraded row is still on the phone", cursor.isNull(0))
+            }
+        db.close()
+    }
+
+    @Test
+    fun migrateAllTheWayFrom1To7() {
         // Someone upgrading from the first build skips every version in between.
         helper.createDatabase(TEST_DB, 1).close()
 
-        helper.runMigrationsAndValidate(TEST_DB, 6, true, *Migrations.ALL).close()
+        helper.runMigrationsAndValidate(TEST_DB, 7, true, *Migrations.ALL).close()
     }
 
     @Test

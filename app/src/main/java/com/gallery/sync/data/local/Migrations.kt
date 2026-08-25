@@ -148,6 +148,23 @@ object Migrations {
         }
     }
 
+    /**
+     * 6 -> 7: records when a backed-up file stopped being on the phone.
+     *
+     * Additive, and null is right for every existing row: nothing is known to be missing at the
+     * moment of upgrade, and the next scan fills it in properly. Defaulting to a timestamp would
+     * claim the entire library had been deleted.
+     */
+    val MIGRATION_6_7 = object : Migration(6, 7) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "ALTER TABLE `backup_entries` ADD COLUMN `localMissingSinceEpochMillis` INTEGER"
+            )
+        }
+    }
+
     /** Every migration, in order, for the database builder. */
-    val ALL = arrayOf(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+    val ALL = arrayOf(
+        MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7
+    )
 }

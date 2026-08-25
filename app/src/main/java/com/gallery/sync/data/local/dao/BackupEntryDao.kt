@@ -136,6 +136,67 @@ interface BackupEntryDao {
     )
     suspend fun forgetUploadSession(id: String)
 
+    /**
+     * Every key the ledger holds for a file it believes is in OneDrive.
+     *
+     * The caller diffs this against a scan in memory rather than asking SQLite to. A
+     * `NOT IN (:sixThousandKeys)` binds one variable per file and blows past SQLite's parameter
+     * limit on a real library — and it cannot be chunked, because a file in the second chunk would
+     * be marked missing by the first.
+     */
+    @Query("SELECT id FROM backup_entries WHERE state = :uploaded")
+    suspend fun uploadedIds(uploaded: BackupState = BackupState.UPLOADED): List<String>
+
+    /**
+     * Marks rows whose file has left the phone.
+     *
+     * Only sets the timestamp where it is currently null, so the date reflects when the file first
+     * went rather than the last time a scan noticed. Safe to call in chunks.
+     */
+    @Query(
+        """
+        UPDATE backup_entries
+        SET localMissingSinceEpochMillis = :now
+        WHERE localMissingSinceEpochMillis IS NULL
+          AND id IN (:ids)
+        """
+    )
+    suspend fun markLocalMissing(ids: List<String>, now: Long): Int
+
+    /** Clears the flag for anything back on the phone — a restore, or a file that reappeared. */
+    @Query(
+        """
+        UPDATE backup_entries
+        SET localMissingSinceEpochMillis = NULL
+        WHERE localMissingSinceEpochMillis IS NOT NULL
+          AND id IN (:ids)
+        """
+    )
+    suspend fun clearLocalMissing(ids: List<String>): Int
+
+    /**
+     * What can be fetched back: verified in OneDrive, and no longer on the phone.
+     *
+     * The same `remoteSizeBytes = sizeBytes` bar every other safe operation uses. Offering a file
+     * whose cloud copy was never confirmed whole would mean handing someone a truncated photo and
+     * calling it a restore.
+     *
+     * Newest first, because the most recently lost file is the one most likely to be wanted.
+     */
+    @Query(
+        """
+        SELECT * FROM backup_entries
+        WHERE state = :uploaded
+          AND localMissingSinceEpochMillis IS NOT NULL
+          AND remoteItemId IS NOT NULL
+          AND remoteItemId != ''
+          AND remoteSizeBytes IS NOT NULL
+          AND remoteSizeBytes = sizeBytes
+        ORDER BY dateModifiedEpochSeconds DESC
+        """
+    )
+    fun observeRetrievable(uploaded: BackupState = BackupState.UPLOADED): Flow<List<BackupEntryEntity>>
+
     /** Clears the failure count so the user can retry something that has given up. */
     @Query("UPDATE backup_entries SET state = :pending, attemptCount = 0, lastError = NULL WHERE state = :failed")
     suspend fun resetFailures(

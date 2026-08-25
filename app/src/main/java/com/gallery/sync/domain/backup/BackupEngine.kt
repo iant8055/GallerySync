@@ -161,14 +161,64 @@ class BackupEngine @Inject constructor(
         val defaultMode = settings.current().defaultAlbumMode
         albumDao.insertIfNew(albumsOnDevice.map { AlbumPreferenceEntity(it, defaultMode) })
 
-        // Unscoped, deliberately. Pruning asks "does this album still exist on the phone?", and a
-        // scoped scan answers a different question — "is it in a folder the user currently wants
-        // watched?". Driving the prune from the scoped list would forget the ledger rows and album
-        // modes of every folder someone merely narrowed away, which narrowing must never do.
-        pruneAlbumsNoLongerOnDevice(scanner.scanEverything().map { it.album }.distinct())
+        // Unscoped, deliberately, and used for two things. Pruning asks "does this album still
+        // exist on the phone?", and marking asks "is this file still here?" — both are questions
+        // about the device, not about what the user currently wants watched. Driving either from a
+        // scoped scan would treat a narrowed folder as a deletion.
+        val everything = scanner.scanEverything()
+
+        markWhatIsNoLongerOnTheDevice(everything)
+        pruneAlbumsNoLongerOnDevice(everything.map { it.album }.distinct())
 
         Logger.i(TAG, "refreshLedger: ${entries.size} files seen")
         entries.size
+    }
+
+    /**
+     * Records which backed-up files have left the phone, and which have come back.
+     *
+     * This is what the retrieval list is built from. It covers every way a file can go — Archive
+     * removing it, the user deleting it in their gallery, or a photo being proxied, whose
+     * full-quality original genuinely is no longer here.
+     *
+     * Guarded like the prune: an empty scan is never evidence that everything was deleted.
+     */
+    private suspend fun markWhatIsNoLongerOnTheDevice(everything: List<LocalMediaItem>) {
+        if (scanner.access() != MediaAccess.FULL) {
+            Logger.d(TAG, "not marking missing files: media access is not full")
+            return
+        }
+        if (everything.isEmpty()) {
+            Logger.w(TAG, "not marking missing files: the scan returned nothing at all")
+            return
+        }
+
+        val present = everything.mapTo(HashSet()) { item ->
+            backupKeyOf(
+                album = item.album,
+                displayName = item.displayName,
+                sizeBytes = item.sizeBytes,
+                dateModifiedEpochSeconds = item.dateModifiedEpochSeconds
+            )
+        }
+
+        // Diffed here rather than in SQL. A `NOT IN` over six thousand keys binds one variable per
+        // file and exceeds SQLite's parameter limit, and it cannot be chunked because a file in the
+        // second chunk would be marked missing by the first.
+        val known = entryDao.uploadedIds()
+        val gone = known.filterNot { it in present }
+        val back = known.filter { it in present }
+
+        val now = System.currentTimeMillis()
+        // Cleared first, so a file restored moments ago is never marked missing on the way through.
+        var returned = 0
+        back.chunked(SQL_BATCH).forEach { returned += entryDao.clearLocalMissing(it) }
+        var marked = 0
+        gone.chunked(SQL_BATCH).forEach { marked += entryDao.markLocalMissing(it, now) }
+
+        if (marked > 0 || returned > 0) {
+            Logger.i(TAG, "$marked files no longer on the device, $returned back")
+        }
     }
 
     /**
@@ -564,6 +614,14 @@ class BackupEngine @Inject constructor(
             ReplaceWith("RemoteRoots.SAMSUNG_GALLERY")
         )
         const val REMOTE_ROOT = RemoteRoots.SAMSUNG_GALLERY
+
+        /**
+         * Bound variables per statement.
+         *
+         * Comfortably under SQLite's historic 999 limit, which is what older Android versions
+         * enforce even though newer ones allow far more.
+         */
+        const val SQL_BATCH = 500
 
         /**
          * Ceiling on the page walk in [remoteIndexFor], so a paging loop that never terminates
