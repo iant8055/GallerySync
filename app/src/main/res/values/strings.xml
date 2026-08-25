@@ -223,6 +223,17 @@
     <string name="removal_held_unchecked">%1$s could not be checked just now. Nothing was removed for them — being unable to ask is not the same as an answer.</string>
     <string name="removal_none_confirmed">Nothing was removed. OneDrive did not confirm a single one of these files.</string>
 
+    <!--
+        The Archive summons. Not a second consent — the album mode is the consent, and CLAUDE.md
+        forbids mirroring Android's trash dialog with an app-level one. This exists because
+        createTrashRequest can only launch from an Activity, so the user has to be brought back; and
+        because it can say the one thing Android's dialog cannot, which is that the cloud copy is
+        verified.
+    -->
+    <string name="archive_ready_title">Ready to remove from this phone</string>
+    <string name="archive_ready_body">%1$s in %2$s are confirmed in OneDrive. Removing them frees %3$s here.</string>
+    <string name="archive_ready_action">Remove from this phone</string>
+
     <!-- Deletion sync: what happens to the OneDrive copy when a file leaves the phone. -->
     <string name="deletion_title">When you delete a photo from this phone</string>
     <string name="deletion_leave">Leave the OneDrive copy</string>

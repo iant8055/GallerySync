@@ -126,6 +126,17 @@ data class BackupUiState(
     val isAutoOptimiseEnabled: Boolean = false,
     /** Allow automatic runs on mobile data, not just Wi-Fi. */
     val allowMeteredNetwork: Boolean = false,
+    /**
+     * Albums set to Archive that have files confirmed in OneDrive and still on the phone.
+     *
+     * Drives the prompt on the main screen. Archive cannot run unattended —
+     * `createTrashRequest` only launches from an Activity — so something has to bring the user back
+     * when files become eligible. That prompt is a summons rather than a second consent: the mode is
+     * the consent, and CLAUDE.md forbids mirroring Android's own dialog with an app-level one.
+     *
+     * What it does carry is the fact Android's dialog cannot state — that the cloud copy is verified.
+     */
+    val archiveAlbumsReady: List<String> = emptyList(),
     /** What the last removal attempt refused to remove, and why. Null before any attempt. */
     val removalHeldBack: CloudConfirmation? = null,
     /** Photos whose local copy could be replaced by a proxy, and what they occupy now. */
@@ -387,6 +398,7 @@ class BackupViewModel @Inject constructor(
             pendingCount = entryDao.countPendingInSelectedAlbums(),
             redundantCount = redundant.size,
             redundantBytes = redundant.sumOf { it.sizeBytes },
+            archiveAlbumsReady = redundant.map { it.album }.distinct().sorted(),
             canRemoveLocalCopies = localCopyRemover.isSupported(),
             proxyCandidateCount = proxyCandidates.size,
             proxyCandidateBytes = proxyCandidates.sumOf { it.sizeBytes },

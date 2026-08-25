@@ -170,6 +170,10 @@ private fun AlbumList(
     onAlbumTapped: (AlbumRow) -> Unit
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val moveLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { viewModel.onMoveToBackupFinished() }
 
     Column(
         modifier = Modifier
@@ -234,6 +238,26 @@ private fun AlbumList(
 
         state.status?.let {
             Text(it.readable(), style = MaterialTheme.typography.bodyMedium)
+        }
+
+        // The Archive summons. Not a second consent — setting the mode was the consent, and
+        // CLAUDE.md forbids mirroring Android's trash dialog with an app-level one. It exists
+        // because createTrashRequest can only launch from an Activity, so the user must be brought
+        // back; and because it states the one thing Android's dialog cannot, which is that the cloud
+        // copy is verified.
+        if (state.archiveAlbumsReady.isNotEmpty() && state.canRemoveLocalCopies) {
+            ArchiveReadyPrompt(
+                albums = state.archiveAlbumsReady,
+                count = state.redundantCount,
+                bytes = state.redundantBytes,
+                onRemove = {
+                    scope.launch {
+                        viewModel.buildMoveToBackupRequest()?.let {
+                            moveLauncher.launch(IntentSenderRequest.Builder(it).build())
+                        }
+                    }
+                }
+            )
         }
     }
 
@@ -476,3 +500,40 @@ private fun mediaPermissions(): Array<String> =
     } else {
         arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
     }
+
+/**
+ * Says that files are verified in OneDrive and offers to take them off the phone.
+ *
+ * One prompt, deliberately. Android will ask its own question immediately after, and asking the same
+ * thing twice teaches people to tap through both — which is how a confirmation stops being one.
+ * What this adds is the fact Android's dialog has no way to state: that the cloud copy has been
+ * checked and matches.
+ */
+@Composable
+private fun ArchiveReadyPrompt(
+    albums: List<String>,
+    count: Int,
+    bytes: Long,
+    onRemove: () -> Unit
+) {
+    val context = LocalContext.current
+
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(
+            text = stringResource(R.string.archive_ready_title),
+            style = MaterialTheme.typography.titleSmall
+        )
+        Text(
+            text = stringResource(
+                R.string.archive_ready_body,
+                pluralStringResource(R.plurals.file_count, count, count),
+                albums.joinToString(", "),
+                formatBytes(context, bytes)
+            ),
+            style = MaterialTheme.typography.bodySmall
+        )
+        OutlinedButton(onClick = onRemove) {
+            Text(stringResource(R.string.archive_ready_action), maxLines = 1)
+        }
+    }
+}

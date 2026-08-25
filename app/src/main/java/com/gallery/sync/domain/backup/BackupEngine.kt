@@ -508,9 +508,24 @@ class BackupEngine @Inject constructor(
     suspend fun redundantLocalCopies(): List<LocalMediaItem> = withContext(dispatcher) {
         if (scanner.access() == MediaAccess.NONE) return@withContext emptyList()
 
+        // Scoped to albums the user set to Archive. Until 25 Aug 2026 this returned every verified
+        // file regardless of mode, so Settings offered to remove files from Backup albums — while
+        // Backup's own description promises "nothing on your phone changes and no space is freed".
+        // Observed on the Fold 4: a 440 MB video was removed from an album set to Backup.
+        //
+        // CLAUDE.md settles which of the two gives way: "Nothing leaves the gallery unless the user
+        // chose that for that album... Removal follows from a mode the user set, and from nothing
+        // else." Archive is that mode; no other route may offer a file up.
+        val archived = albumDao.albumsInMode(AlbumMode.ARCHIVE).toSet()
+        if (archived.isEmpty()) {
+            Logger.d(TAG, "redundantLocalCopies: no album is set to Archive, so nothing is offered")
+            return@withContext emptyList()
+        }
+
         val verified = entryDao.verifiedInCloud().map { it.id }.toSet()
 
         scanner.scanAll().filter { item ->
+            if (item.album !in archived) return@filter false
             val key = backupKeyOf(
                 album = item.album,
                 displayName = item.displayName,
@@ -518,7 +533,12 @@ class BackupEngine @Inject constructor(
                 dateModifiedEpochSeconds = item.dateModifiedEpochSeconds
             )
             key in verified
-        }.also { Logger.d(TAG, "redundantLocalCopies: ${it.size} files are safely in OneDrive") }
+        }.also {
+            Logger.d(
+                TAG,
+                "redundantLocalCopies: ${it.size} files in Archive albums are safely in OneDrive"
+            )
+        }
     }
 
     /**

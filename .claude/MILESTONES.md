@@ -1037,6 +1037,37 @@ most easily left out, and it is there.
 test asserts the text of a consent dialog against the behaviour behind it, and this is the second
 time today that reading the screen caught something reading the code did not.
 
+### 25 Aug 2026 — Archive: removal scoped to the mode, and one prompt rather than two
+
+Two problems found by using the app rather than reading it.
+
+**Removal was not scoped to Archive.** `redundantLocalCopies` returned every verified file whatever
+its album mode, so Settings offered to remove files from **Backup** albums — while Backup's own
+description promises "nothing on your phone changes and no space is freed". Observed live: a 440 MB
+video was removed from `12345clips`, an album set to Backup.
+
+CLAUDE.md settles which of the two contradicting statements gives way: *"Nothing leaves the gallery
+unless the user chose that for that album... Removal follows from a mode the user set, and from
+nothing else."* Now scoped to albums in `ARCHIVE`; with none set, nothing is offered at all.
+
+**Archive mode did nothing.** `AlbumMode.removesLocal` was defined and read by no one — the only
+references to `ARCHIVE` anywhere were UI labels and the confirmation dialog. Setting an album to
+Archive uploaded it and removed nothing. The consent dialog described behaviour that did not exist,
+which makes the "archive age" clause fixed earlier the smaller half of the problem.
+
+**One prompt, not two.** Ian proposed a second dialog after the mode confirmation — *"Archived
+confirmed on OneDrive, OK to remove from Gallery?"* — then withdrew it on being reminded that Android
+asks its own question. CLAUDE.md is explicit: Android's trash dialog "is not where the consent comes
+from, and it is not to be mirrored by an app-level prompt."
+
+But the instinct caught something real. `createTrashRequest` only launches from an Activity, so
+Archive **cannot** run unattended and something must bring the user back when files become eligible.
+And Android's dialog says only "move to trash" — it cannot say the cloud copy is verified.
+
+So the prompt is a **summons, not a consent**: it names the album, the count and the size, states that
+the copies are confirmed in OneDrive, and launches Android's dialog directly. The user answers one
+question. Asking the same thing twice is how a confirmation stops being one.
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have
