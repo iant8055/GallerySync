@@ -894,6 +894,25 @@ album, and only files it confirms **right now** go into the trash request. Three
 **If we could not ask, we do not remove.** The same rule the reconciliation follows, applied where
 being wrong costs a photo rather than a wasted upload. `CloudConfirmationTest` pins it.
 
+**Proven on the Fold 4, same afternoon.** A file was left on the phone with the ledger asserting it
+was verified in OneDrive, and its cloud copy deleted by hand. Tapping "Remove 123 KB from this phone"
+produced:
+
+```
+confirmStillInCloud: 0 confirmed, 1 no longer in OneDrive, 0 could not be checked
+not removing: OneDrive confirmed none of 1
+```
+
+No system trash dialog appeared and the local file was untouched at 126,162 bytes. The screen said
+so plainly, in error colour: *"Nothing was removed. OneDrive did not confirm a single one of these
+files."*
+
+Under the old code that is a deleted photo — the ledger said verified, and the trash request would
+have gone out on that word alone.
+
+**A line in Settings became true.** "Your OneDrive copy is checked first and is never touched" was
+already in the app, describing a check against a remembered value. It now describes what happens.
+
 The two held-back categories are reported separately in Settings and deliberately not merged: "OneDrive
 no longer has this" and "could not check" ask different things of the user.
 
