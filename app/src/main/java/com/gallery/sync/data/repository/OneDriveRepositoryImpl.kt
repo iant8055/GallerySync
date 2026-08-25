@@ -15,6 +15,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import retrofit2.Response
 import java.io.IOException
+import java.io.InputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -62,6 +63,51 @@ class OneDriveRepositoryImpl @Inject constructor(
     override suspend fun listNextPage(nextPageToken: String): DataResult<FolderPage> =
         withContext(dispatcher) {
             request(operation = "listNextPage") { api.listNextPage(nextPageToken) }
+        }
+
+    /**
+     * Opens the bytes of one cloud file.
+     *
+     * Deliberately not wrapped in [request]: that helper decodes a children response, while this
+     * returns a stream the caller reads over time. Buffering it here to reuse the helper would
+     * defeat `@Streaming` and load a whole video into memory.
+     *
+     * The stream is handed out open. Closing it is the caller's job, which the callback shape of
+     * `MediaStoreWriter.write` makes hard to get wrong.
+     */
+    override suspend fun openStream(itemId: String): DataResult<InputStream> =
+        withContext(dispatcher) {
+            if (tokenProvider.getAccessToken() == null) {
+                Logger.w(TAG, "openStream: no access token")
+                return@withContext DataResult.Failure(RemoteError.NoToken)
+            }
+
+            try {
+                val response = api.downloadItem(itemId)
+                val body = response.body()
+
+                when {
+                    !response.isSuccessful ->
+                        // Safe to read whole: an error body is a short JSON document, not the
+                        // streamed file this request would otherwise return.
+                        DataResult.Failure(
+                            RemoteError.Http(response.code(), response.errorBody()?.string())
+                        )
+
+                    body == null ->
+                        DataResult.Failure(RemoteError.Unknown(IOException("empty response body")))
+
+                    else -> DataResult.Success(body.byteStream())
+                }
+            } catch (e: IOException) {
+                Logger.w(TAG, "openStream: network failure")
+                DataResult.Failure(RemoteError.Network)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Throwable) {
+                Logger.e(TAG, "openStream: unexpected failure", e)
+                DataResult.Failure(RemoteError.Unknown(e))
+            }
         }
 
     /**

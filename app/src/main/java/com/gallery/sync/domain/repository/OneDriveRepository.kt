@@ -1,6 +1,7 @@
 package com.gallery.sync.domain.repository
 
 import com.gallery.sync.domain.model.DataResult
+import java.io.InputStream
 import com.gallery.sync.domain.model.FolderPage
 
 /**
@@ -29,4 +30,16 @@ interface OneDriveRepository {
 
     /** Fetches the page identified by a [FolderPage.nextPageToken] from a previous call. */
     suspend fun listNextPage(nextPageToken: String): DataResult<FolderPage>
+
+    /**
+     * Opens the bytes of one cloud file for reading.
+     *
+     * A read, which is why it belongs on this interface rather than the upload one — fetching a file
+     * back changes nothing in OneDrive, and the same file can be fetched as many times as the user
+     * likes.
+     *
+     * The caller owns the returned stream and must close it. A `java.io.InputStream` rather than an
+     * OkHttp body, so no network type escapes the data layer.
+     */
+    suspend fun openStream(itemId: String): DataResult<InputStream>
 }

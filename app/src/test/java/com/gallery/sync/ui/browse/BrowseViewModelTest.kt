@@ -214,5 +214,9 @@ class BrowseViewModelTest {
 
         override suspend fun listNextPage(nextPageToken: String): DataResult<FolderPage> =
             DataResult.Success(FolderPage(emptyList(), null))
+
+        /** Browsing never downloads, so this exists only to satisfy the interface. */
+        override suspend fun openStream(itemId: String): DataResult<java.io.InputStream> =
+            DataResult.Success(java.io.ByteArrayInputStream(ByteArray(0)))
     }
 }

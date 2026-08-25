@@ -55,7 +55,13 @@ class MediaScanner @Inject constructor(
             return@withContext emptyList()
         }
 
-        scanEverything().filter { TreeScope.isInScope(it.relativePath, granted) }
+        scanEverything()
+            .filter { TreeScope.isInScope(it.relativePath, granted) }
+            // Files fetched back from the cloud are already backed up, but they land in an album
+            // whose remote folder does not exist — so the skip-existing check would find nothing
+            // there and upload every one of them again. Excluding the album is what prevents a
+            // restore from costing a second copy. See [RestoredAlbum].
+            .filterNot { RestoredAlbum.isRestored(it.relativePath, it.album) }
             .also {
                 Logger.d(
                     TAG,

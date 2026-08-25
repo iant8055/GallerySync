@@ -5,6 +5,8 @@ import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
+import okhttp3.ResponseBody
+import retrofit2.http.Streaming
 import retrofit2.http.Url
 
 /**
@@ -58,6 +60,19 @@ interface GraphApiService {
      */
     @GET
     suspend fun listNextPage(@Url nextLink: String): Response<GraphChildrenResponseDto>
+
+    /**
+     * The bytes of one file.
+     *
+     * `@Streaming` is required, not a nicety. Without it Retrofit buffers the whole response into
+     * memory before returning, and these are photos and videos — a 2 GB clip would take the process
+     * down. With it the body is read from the socket as it is written to disk.
+     *
+     * Graph answers this with a redirect to short-lived storage; OkHttp follows it automatically.
+     */
+    @Streaming
+    @GET("me/drive/items/{itemId}/content")
+    suspend fun downloadItem(@Path("itemId") itemId: String): Response<ResponseBody>
 
     companion object {
 
