@@ -39,6 +39,12 @@ data class CloudReconciliation(
 ) {
     val backedUp: MediaTally get() = photosBackedUp + videosBackedUp
 
+    /** Every photo in scope, backed up or not — what proxying could act on. */
+    val photos: MediaTally get() = photosBackedUp + photosOutstanding
+
+    /** Every video in scope. Sync leaves these whole, which is why they are counted apart. */
+    val videos: MediaTally get() = videosBackedUp + videosOutstanding
+
     /** What a first run would actually send. The number that decides "back up everything". */
     val outstanding: MediaTally get() = photosOutstanding + videosOutstanding
 

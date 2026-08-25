@@ -748,6 +748,36 @@ Fixed by completing the suspending call first. Checked the rest of the UI layer 
 nothing else puts a suspend call inside a `copy` argument. **Worth remembering as a pattern, not an
 incident:** any `_state.value = _state.value.copy(x = someSuspendCall())` is this bug.
 
+### 25 Aug 2026 — Gate 2, and telling the truth about "free space"
+
+The second gate: what happens to the library already on the phone. Three options, safest as default,
+and Archive absent by construction — a test asserts that no Gate 2 option maps to it, because setting
+every album at once to the only mode that removes files, before v0.4 retrieval exists to undo it, is
+the largest irreversible action this product can take at the moment the user knows least.
+
+Selecting does nothing; applying is a separate tap. A radio list that acted on touch would make the
+most consequential screen in the app the easiest to trigger by accident.
+
+**The wording problem worth recording.** "Back up and free space" sounds proportional to the library
+and is not, because only photos shrink. On the Fold 8 that is 16 GB of photos against 130 GB of
+video: proxying everything reclaims about 14 GB, under 10%, while the phrase invites someone to
+expect most of 148 GB back.
+
+So the estimate lives in the domain layer (`LibraryEstimate`) rather than in copy, and the screen
+picks its wording from the answer. Below a fifth of the library the saving is treated as marginal and
+the sentence leads with what *stays*:
+
+> Only photos shrink, and most of this library is video. That frees about 2.7 GB of 132.5 GB — the
+> rest stays on your phone.
+
+Confirmed firing on real data on the Fold 4. This is the naming rule from 18 Aug pointed the other
+way: that one guarded against a soft name for a hard action, and this guards against a hard-sounding
+promise over a soft result.
+
+`ApplyLibraryChoice` is scoped to Gate 1, so a bulk choice never reaches a folder the user did not
+pick, and uses `REPLACE` — correct here and only here, because an explicit bulk instruction is
+exactly the case where overwriting an earlier per-album choice is what was asked for.
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have

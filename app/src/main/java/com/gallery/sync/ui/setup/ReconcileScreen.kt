@@ -8,7 +8,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
@@ -23,6 +26,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -39,7 +43,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
 import com.gallery.sync.data.local.media.GrantedDirectory
+import androidx.compose.ui.semantics.Role
 import com.gallery.sync.domain.backup.FirstBackupHold
+import com.gallery.sync.domain.backup.LibraryChoice
+import com.gallery.sync.domain.backup.LibraryEstimate
 import com.gallery.sync.domain.backup.FirstBackupWindow
 import com.gallery.sync.domain.backup.MediaTally
 import com.gallery.sync.domain.backup.RemoteRoots
@@ -169,6 +176,18 @@ fun ReconcileScreen(
                 }
             }
         }
+
+        HorizontalDivider()
+
+        LibrarySection(
+            selected = state.libraryChoice,
+            applied = state.libraryApplied,
+            applying = state.applyingLibraryChoice,
+            photoBytes = result.photos.bytes,
+            videoBytes = result.videos.bytes,
+            onSelected = viewModel::setLibraryChoice,
+            onApply = viewModel::applyLibraryChoice
+        )
 
         HorizontalDivider()
 
@@ -538,6 +557,126 @@ private fun SourcesSection(
 
         OutlinedButton(onClick = onAdd) {
             Text(stringResource(R.string.sources_add), maxLines = 1)
+        }
+    }
+}
+
+/**
+ * Gate 2: what happens to the library already on the phone.
+ *
+ * One choice applied to thousands of files, made by someone who has not yet watched the app do
+ * anything — so the safest option is the default, and the other two say plainly what they cost.
+ *
+ * Archive is not offered here and must not be added. Setting every album at once to the only mode
+ * that removes files, before v0.4 retrieval exists to undo it, is the largest irreversible action
+ * this product can take at the moment the user knows least about it.
+ *
+ * Selecting does nothing; applying is a separate tap. A radio list that acted on touch would make
+ * the most consequential screen in the app the easiest one to trigger by accident.
+ */
+@Composable
+private fun LibrarySection(
+    selected: LibraryChoice,
+    applied: Int?,
+    applying: Boolean,
+    photoBytes: Long,
+    videoBytes: Long,
+    onSelected: (LibraryChoice) -> Unit,
+    onApply: () -> Unit
+) {
+    val context = LocalContext.current
+    val freed = LibraryEstimate.spaceFreedBySync(photoBytes)
+    val marginal = LibraryEstimate.isSavingMarginal(photoBytes, videoBytes)
+
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Text(
+            text = stringResource(R.string.library_title),
+            style = MaterialTheme.typography.titleSmall
+        )
+
+        Column(Modifier.selectableGroup()) {
+            LibraryChoice.entries.forEach { choice ->
+                val detail = when (choice) {
+                    LibraryChoice.CHOOSE_PER_ALBUM ->
+                        stringResource(R.string.library_per_album_detail)
+
+                    LibraryChoice.BACK_UP_EVERYTHING ->
+                        stringResource(R.string.library_back_up_all_detail)
+
+                    // Only photos shrink. On a library that is mostly video, saying "frees space"
+                    // without saying how little invites someone to expect most of it back — so the
+                    // wording leads with what stays instead.
+                    LibraryChoice.BACK_UP_AND_FREE_SPACE -> if (marginal) {
+                        stringResource(
+                            R.string.library_free_space_detail_marginal,
+                            formatBytes(context, freed),
+                            formatBytes(context, photoBytes + videoBytes)
+                        )
+                    } else {
+                        stringResource(
+                            R.string.library_free_space_detail,
+                            formatBytes(context, freed)
+                        )
+                    }
+                }
+
+                ChoiceRow(
+                    label = when (choice) {
+                        LibraryChoice.CHOOSE_PER_ALBUM -> stringResource(R.string.library_per_album)
+                        LibraryChoice.BACK_UP_EVERYTHING -> stringResource(R.string.library_back_up_all)
+                        LibraryChoice.BACK_UP_AND_FREE_SPACE -> stringResource(R.string.library_free_space)
+                    },
+                    detail = detail,
+                    selected = choice == selected,
+                    onSelect = { onSelected(choice) }
+                )
+            }
+        }
+
+        // Only where it is true. Saying it beside "choose album by album" would be a warning about
+        // something that is not going to happen.
+        if (selected.uploads) {
+            Text(
+                text = stringResource(R.string.library_first_run_warning),
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+
+        applied?.let { count ->
+            Text(
+                text = stringResource(
+                    R.string.library_applied,
+                    pluralStringResource(R.plurals.album_count, count, count)
+                ),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
+        OutlinedButton(onClick = onApply, enabled = !applying) {
+            Text(stringResource(R.string.library_apply), maxLines = 1)
+        }
+    }
+}
+
+/** One radio option with its consequence written underneath it. */
+@Composable
+private fun ChoiceRow(
+    label: String,
+    detail: String,
+    selected: Boolean,
+    onSelect: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .selectable(selected = selected, onClick = onSelect, role = Role.RadioButton)
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        RadioButton(selected = selected, onClick = null)
+        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Text(label, style = MaterialTheme.typography.bodyLarge)
+            Text(detail, style = MaterialTheme.typography.bodySmall)
         }
     }
 }

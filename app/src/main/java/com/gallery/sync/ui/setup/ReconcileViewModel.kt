@@ -8,7 +8,9 @@ import android.net.Uri
 import com.gallery.sync.data.local.media.GrantedDirectory
 import com.gallery.sync.data.local.media.ScopedDirectories
 import com.gallery.sync.util.ChargingState
+import com.gallery.sync.domain.backup.ApplyLibraryChoice
 import com.gallery.sync.domain.backup.FirstBackupHold
+import com.gallery.sync.domain.backup.LibraryChoice
 import com.gallery.sync.domain.backup.FirstBackupWindow
 import com.gallery.sync.domain.backup.ReconcileWithCloud
 import com.gallery.sync.domain.backup.RemoteRoots
@@ -48,7 +50,12 @@ data class ReconcileUiState(
     /** Gate 1. Until this has something in it, the engine has nothing correct to do. */
     val directories: List<GrantedDirectory> = emptyList(),
     /** Set when a picked tree could not be used, so the screen can say why. */
-    val directoryRefused: Boolean = false
+    val directoryRefused: Boolean = false,
+    /** Gate 2, as currently selected. Not applied until the user says so. */
+    val libraryChoice: LibraryChoice = LibraryChoice.CHOOSE_PER_ALBUM,
+    /** Albums changed by the last apply, for the confirmation line. Null before any apply. */
+    val libraryApplied: Int? = null,
+    val applyingLibraryChoice: Boolean = false
 ) {
     /**
      * Whether Gate 1 has been answered.
@@ -72,7 +79,8 @@ class ReconcileViewModel @Inject constructor(
     private val reconcile: ReconcileWithCloud,
     private val settings: BackupSettings,
     private val charging: ChargingState,
-    private val sources: ScopedDirectories
+    private val sources: ScopedDirectories,
+    private val applyChoice: ApplyLibraryChoice
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ReconcileUiState())
@@ -122,6 +130,28 @@ class ReconcileViewModel @Inject constructor(
                     }
                 )
             }
+        }
+    }
+
+    /** Selects a Gate 2 option without acting on it. Applying is a separate, deliberate tap. */
+    fun setLibraryChoice(choice: LibraryChoice) {
+        _state.value = _state.value.copy(libraryChoice = choice, libraryApplied = null)
+    }
+
+    /**
+     * Applies the selected option to every in-scope album.
+     *
+     * The suspending call completes before the state is read — see the note on [addSource] for what
+     * happens when it does not.
+     */
+    fun applyLibraryChoice() {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(applyingLibraryChoice = true)
+            val changed = applyChoice.apply(_state.value.libraryChoice)
+            _state.value = _state.value.copy(
+                applyingLibraryChoice = false,
+                libraryApplied = changed
+            )
         }
     }
 

@@ -241,6 +241,29 @@
     <string name="reconcile_retry">Check again</string>
     <string name="reconcile_no_access">Gallery Sync needs access to your photos before it can check.</string>
 
+    <plurals name="album_count">
+        <item quantity="one">%1$d album</item>
+        <item quantity="other">%1$d albums</item>
+    </plurals>
+
+    <!-- Gate 2: what to do with the library already on the phone. -->
+    <string name="library_title">What about the photos already on this phone?</string>
+    <string name="library_per_album">Choose album by album</string>
+    <string name="library_per_album_detail">Nothing happens yet. You pick what each album does on the Album Modes tab.</string>
+    <string name="library_back_up_all">Back up everything</string>
+    <string name="library_back_up_all_detail">Every folder you chose is copied to OneDrive. Nothing on your phone changes and no space is freed.</string>
+    <string name="library_free_space">Back up and free space</string>
+    <!-- Photo-heavy library: the saving is worth leading with. -->
+    <string name="library_free_space_detail">Photos are replaced by smaller copies that still open in your gallery. Frees about %1$s. Video is left untouched.</string>
+    <!--
+        Video-heavy library: leads with what stays. Only photos shrink, so on a library that is
+        mostly video "free space" invites someone to expect most of it back.
+    -->
+    <string name="library_free_space_detail_marginal">Only photos shrink, and most of this library is video. That frees about %1$s of %2$s — the rest stays on your phone.</string>
+    <string name="library_apply">Apply</string>
+    <string name="library_applied">%1$s set. You can change any of them on the Album Modes tab.</string>
+    <string name="library_first_run_warning">This starts your first backup, which is the long one. It runs at the time set below.</string>
+
     <!-- Destination folder. -->
     <string name="destination_title">Where future backups go</string>
     <string name="destination_current">%1$s</string>
