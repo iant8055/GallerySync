@@ -13,6 +13,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
@@ -50,6 +53,7 @@ import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.media.MediaAccess
 import com.gallery.sync.domain.backup.StopReason
+import com.gallery.sync.ui.common.LabelWithAction
 import com.gallery.sync.ui.common.formatBytes
 import kotlinx.coroutines.launch
 
@@ -158,6 +162,7 @@ private fun PermissionPrompt(headline: String, detail: String, onGrant: () -> Un
     HorizontalDivider()
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun AlbumList(
     state: BackupUiState,
@@ -195,15 +200,22 @@ private fun AlbumList(
         selectionNote?.let {
             Text(text = it, style = MaterialTheme.typography.bodySmall)
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        // FlowRow, not Row. Three buttons do not fit across 320dp at a large font size: the third
+        // was pushed off the screen entirely and the second broke mid-word into "Sele / ct all".
+        // Wrapping puts each button on the line where it fits, at its natural width.
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             OutlinedButton(onClick = { viewModel.setAllAlbums(false) }) {
-                Text(stringResource(R.string.backup_deselect_all))
+                Text(stringResource(R.string.backup_deselect_all), maxLines = 1)
             }
             OutlinedButton(onClick = { viewModel.setAllAlbums(true) }) {
-                Text(stringResource(R.string.backup_select_all))
+                Text(stringResource(R.string.backup_select_all), maxLines = 1)
             }
             OutlinedButton(onClick = viewModel::refresh) {
-                Text(stringResource(R.string.backup_rescan))
+                Text(stringResource(R.string.backup_rescan), maxLines = 1)
             }
         }
 
@@ -276,15 +288,20 @@ private fun AlbumModeRow(
     onTapped: () -> Unit,
     onModeSelected: (AlbumMode) -> Unit
 ) {
-    Row(
+    LabelWithAction(
         modifier = Modifier
-            .fillMaxWidth()
             .clickable(onClick = onTapped)
             .padding(horizontal = 16.dp, vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        spacing = 8.dp,
+        action = { stacked ->
+            AlbumModeDropdown(
+                current = album.mode,
+                onModeSelected = onModeSelected,
+                stacked = stacked
+            )
+        }
     ) {
-        Column(modifier = Modifier.weight(1f)) {
+        Column {
             Text(
                 text = album.name,
                 style = MaterialTheme.typography.bodyLarge,
@@ -312,10 +329,6 @@ private fun AlbumModeRow(
                     MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        AlbumModeDropdown(
-            current = album.mode,
-            onModeSelected = onModeSelected
-        )
     }
 }
 
@@ -323,7 +336,8 @@ private fun AlbumModeRow(
 @Composable
 private fun AlbumModeDropdown(
     current: AlbumMode,
-    onModeSelected: (AlbumMode) -> Unit
+    onModeSelected: (AlbumMode) -> Unit,
+    stacked: Boolean = false
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -336,7 +350,15 @@ private fun AlbumModeDropdown(
             onValueChange = {},
             readOnly = true,
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-            modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+            // `widthIn(min = 0.dp)` is the load-bearing part. OutlinedTextField defaults to a
+            // 280dp minimum, which on a 320dp screen leaves the album name nothing and wraps it one
+            // character per line. Stacked it may have the full width; beside the name it may not.
+            modifier = Modifier
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                .then(
+                    if (stacked) Modifier.fillMaxWidth()
+                    else Modifier.widthIn(min = 0.dp, max = 180.dp)
+                ),
             textStyle = MaterialTheme.typography.bodySmall,
             singleLine = true
         )

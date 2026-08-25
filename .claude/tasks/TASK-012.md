@@ -652,7 +652,38 @@ someone reaches for a specific colour, and CLAUDE.md is absolute: nothing hardco
 themes checked on a device before it is called done. The teleprompter shipped unreadable in dark mode
 this way.
 
-### Known: the layout breaks on the folded cover screen
+### Fixed 24 Aug 2026: the layout broke on the folded cover screen
+
+Kept as a record of the cause and the shape of the fix, because the same trap is waiting in every
+screen TASK-014 adds. Verified fixed on hardware at 320dp x 747dp with `font_scale` 1.7, both themes.
+
+**`Modifier.weight(1f)` did not prevent any of it, and was already present.** Weight distributes what
+is *left over* after unweighted children measure at their preferred width — so a control with a large
+minimum takes its share first. Material's `OutlinedTextField` defaults to a **280dp minimum**, which
+on a 320dp screen left the album name a column narrower than one character.
+
+Four fixes, all reusable:
+
+- `ui/common/CompactLayout.kt` — `LabelWithAction` stacks a label and its control when there is not
+  room for both, and `SingleChoiceControl` becomes a radio list when a segmented row cannot fit its
+  options. Both scale the threshold by font size, because what runs out is room for *words*.
+- `widthIn(min = 0.dp, max = 180.dp)` on the mode dropdown, to defeat the 280dp default.
+- `FlowRow` for the three header buttons, which previously pushed "Rescan" off-screen and broke
+  "Select all" into "Sele / ct all".
+- `ScrollableTabRow` instead of `TabRow`, which split the width evenly and wrapped "Album Modes" onto
+  two lines while "Settings" stayed on one.
+
+**What this asks of every new screen:** use `LabelWithAction` rather than a hand-rolled `Row`, and
+check any control's default minimum width before pairing it with text. The repro needs no Fold:
+
+```
+adb shell wm size 1080x2520 && adb shell wm density 540
+adb shell settings put system font_scale 1.7
+```
+
+Reset with `wm size reset`, `wm density reset`.
+
+### Original report: the layout breaks on the folded cover screen
 Found 24 Aug 2026 on the Galaxy Z Fold 8 (SM-F976U1), Android 17 / API 37, device state `CLOSED`.
 Both tabs are affected; neither is merely ugly.
 

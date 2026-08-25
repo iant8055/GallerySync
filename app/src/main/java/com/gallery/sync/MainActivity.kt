@@ -10,11 +10,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -96,7 +97,11 @@ private fun SignedInApp(
     var selectedTab by remember { mutableIntStateOf(0) }
 
     Column(modifier = modifier.fillMaxSize()) {
-        TabRow(selectedTabIndex = selectedTab) {
+        // Scrollable, not fixed. A fixed TabRow splits the width evenly, so at 320dp with large
+        // text "Album Modes" wrapped onto two lines while "Settings" stayed on one, leaving the row
+        // uneven and the selected indicator adrift from its label. Scrollable gives each tab the
+        // width its own text needs.
+        ScrollableTabRow(selectedTabIndex = selectedTab, edgePadding = 0.dp) {
             Tab(
                 selected = selectedTab == 0,
                 onClick = { selectedTab = 0 },

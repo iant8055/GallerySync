@@ -46,6 +46,8 @@ import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.ui.backup.BackupViewModel
 import com.gallery.sync.ui.backup.ProxyStatus
 import com.gallery.sync.data.local.settings.ThemeMode
+import com.gallery.sync.ui.common.LabelWithAction
+import com.gallery.sync.ui.common.SingleChoiceControl
 import com.gallery.sync.ui.common.OneDriveLauncher
 import com.gallery.sync.ui.theme.ThemeViewModel
 import com.gallery.sync.ui.common.formatBytes
@@ -106,25 +108,20 @@ fun SettingsScreen(
 
         Section(stringResource(R.string.settings_appearance)) {
             val themeMode by themeViewModel.themeMode.collectAsStateWithLifecycle()
-            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                ThemeMode.entries.forEachIndexed { index, mode ->
-                    SegmentedButton(
-                        selected = themeMode == mode,
-                        onClick = { themeViewModel.setThemeMode(mode) },
-                        shape = SegmentedButtonDefaults.itemShape(index, ThemeMode.entries.size)
-                    ) {
-                        Text(
-                            stringResource(
-                                when (mode) {
-                                    ThemeMode.SYSTEM -> R.string.theme_system
-                                    ThemeMode.LIGHT -> R.string.theme_light
-                                    ThemeMode.DARK -> R.string.theme_dark
-                                }
-                            )
-                        )
-                    }
+            SingleChoiceControl(
+                options = ThemeMode.entries,
+                selected = themeMode,
+                onSelected = { themeViewModel.setThemeMode(it) },
+                label = { mode ->
+                    stringResource(
+                        when (mode) {
+                            ThemeMode.SYSTEM -> R.string.theme_system
+                            ThemeMode.LIGHT -> R.string.theme_light
+                            ThemeMode.DARK -> R.string.theme_dark
+                        }
+                    )
                 }
-            }
+            )
         }
 
         HorizontalDivider()
@@ -132,17 +129,15 @@ fun SettingsScreen(
         // Text left, action right, on one row — the same shape as the switches below, and it
             // keeps the button level with what it acts on instead of stranded beneath it.
         Section(stringResource(R.string.settings_account)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    accountName?.let {
-                        Text(it, style = MaterialTheme.typography.bodyLarge)
+            LabelWithAction(
+                action = {
+                    OutlinedButton(onClick = onSignOut) {
+                        Text(stringResource(R.string.sign_out_action))
                     }
                 }
-                OutlinedButton(onClick = onSignOut) {
-                    Text(stringResource(R.string.sign_out_action))
+            ) {
+                accountName?.let {
+                    Text(it, style = MaterialTheme.typography.bodyLarge)
                 }
             }
         }
@@ -150,19 +145,17 @@ fun SettingsScreen(
         HorizontalDivider()
 
         Section(stringResource(R.string.settings_cloud_files)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+            LabelWithAction(
+                action = {
+                    OutlinedButton(onClick = { OneDriveLauncher.open(context) }) {
+                        Text(stringResource(R.string.settings_open_onedrive))
+                    }
+                }
             ) {
                 Text(
                     text = stringResource(R.string.settings_open_onedrive_detail),
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.weight(1f)
+                    style = MaterialTheme.typography.bodySmall
                 )
-                Spacer(Modifier.width(12.dp))
-                OutlinedButton(onClick = { OneDriveLauncher.open(context) }) {
-                    Text(stringResource(R.string.settings_open_onedrive))
-                }
             }
         }
 
@@ -402,17 +395,12 @@ private fun DefaultModeSelector(
     current: AlbumMode,
     onModeSelected: (AlbumMode) -> Unit
 ) {
-    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-        AlbumMode.canBeDefault.forEachIndexed { index, mode ->
-            SegmentedButton(
-                selected = current == mode,
-                onClick = { onModeSelected(mode) },
-                shape = SegmentedButtonDefaults.itemShape(index, AlbumMode.canBeDefault.size)
-            ) {
-                Text(mode.settingsLabel())
-            }
-        }
-    }
+    SingleChoiceControl(
+        options = AlbumMode.canBeDefault,
+        selected = current,
+        onSelected = onModeSelected,
+        label = { it.settingsLabel() }
+    )
 }
 
 @Composable
