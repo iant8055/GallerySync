@@ -229,7 +229,12 @@
 
     <string name="deletion_candidates_title">Gone from this phone</string>
     <string name="deletion_candidates_none">Nothing to review. Files you delete will appear here once they have been gone for a while.</string>
-    <string name="deletion_candidates_summary">%1$s left your phone and are still in OneDrive, taking %2$s.</string>
+    <!--
+        Phrased without a verb that has to agree with the count. "%1$s left your phone and are still
+        in OneDrive" reads wrong at one file, and a plural-aware verb in every language is a worse
+        problem than simply not needing one.
+    -->
+    <string name="deletion_candidates_summary">%1$s no longer on this phone, still in OneDrive, taking %2$s.</string>
     <string name="deletion_review">Remove these from OneDrive</string>
     <!-- The confirmation. Names the count and the size, and says where the files go. -->
     <string name="deletion_confirm_title">Remove %1$s from OneDrive?</string>

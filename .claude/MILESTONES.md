@@ -955,9 +955,25 @@ is the state the caller wanted.
 **The 7 days is a guess and is labelled as one in the source.** Nothing measures it. It is offered as
 1 / 7 / 30 / 90 so being wrong is cheap.
 
-**Verified on the Fold 4:** both policy branches render, the grace control and review list appear only
-under Ask, and the empty state reads correctly. **Not verified:** an actual cloud deletion. Worth
-watching once on a disposable file before Archive ships.
+**Proven end to end on the Fold 4, 25 Aug 2026.** A test file was uploaded, deleted locally, its
+absence backdated past the grace period, and the confirmation answered:
+
+```
+--> DELETE https://graph.microsoft.com/v1.0/me/drive/items/1D653E117DA59436!s392bfadc...
+```
+
+**Ian confirmed the file in the OneDrive recycle bin.** That is the guarantee CLAUDE.md's remote
+deletion rule rests on — Graph soft-deletes, and the user restores or empties it themselves. The
+ledger row was forgotten, since the file is then on neither the phone nor the drive.
+
+**The request carries only an item id** — no name, no path. Ian noticed the entry in the recycle bin
+had no file extension; that cannot originate here, because nothing in the request names the file. It
+is OneDrive's own rendering of its bin. Worth a spot check on restore if it ever matters, but it is
+their behaviour and not something this app can influence.
+
+*Also fixed from that run:* the candidate summary read "1 file left your phone and **are** still in
+OneDrive". Rephrased so no verb has to agree with the count, which is a worse problem in every
+language than simply not needing one.
 
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
