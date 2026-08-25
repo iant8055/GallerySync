@@ -2,6 +2,7 @@ package com.gallery.sync.data.remote.onedrive
 
 import com.gallery.sync.data.remote.onedrive.dto.GraphChildrenResponseDto
 import retrofit2.Response
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -73,6 +74,25 @@ interface GraphApiService {
     @Streaming
     @GET("me/drive/items/{itemId}/content")
     suspend fun downloadItem(@Path("itemId") itemId: String): Response<ResponseBody>
+
+    /**
+     * Moves one item to the OneDrive recycle bin.
+     *
+     * **The only destructive remote call in this app, and the only one there may ever be.**
+     *
+     * `DELETE /me/drive/items/{id}` is a *soft* delete: Graph moves the item to the drive's recycle
+     * bin, where the user can restore it themselves. That is what CLAUDE.md requires and why this
+     * endpoint is permitted at all.
+     *
+     * What must never be added beside it: anything that empties the recycle bin, any
+     * `permanentDelete` variant, or any call that bypasses the bin. The user empties their own
+     * trash, in OneDrive, and this app offers no control that does it for them.
+     *
+     * Callers must have an explicit, per-batch confirmation naming the files. Nothing here may run
+     * on a timer, on a scan result, or as a side effect of any other operation.
+     */
+    @DELETE("me/drive/items/{itemId}")
+    suspend fun deleteItem(@Path("itemId") itemId: String): Response<Unit>
 
     companion object {
 

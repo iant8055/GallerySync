@@ -214,6 +214,37 @@ interface BackupEntryDao {
     )
     fun observeRetrievable(uploaded: BackupState = BackupState.UPLOADED): Flow<List<BackupEntryEntity>>
 
+    /**
+     * Files whose cloud copy could be offered for deletion.
+     *
+     * Every condition is a guard, and none is redundant:
+     *
+     * - `localMissingSinceEpochMillis <= :missingBefore` is the grace period. Absence observed once
+     *   is not evidence of a deletion; absence that persists is.
+     * - a usable `remoteItemId`, because without one there is nothing safe to delete, and matching
+     *   by name would be a way to remove the wrong photo.
+     * - `remoteSizeBytes = sizeBytes`, the same verification bar as everywhere else.
+     *
+     * Oldest absence first, so the least ambiguous cases are presented at the top.
+     */
+    @Query(
+        """
+        SELECT * FROM backup_entries
+        WHERE state = :uploaded
+          AND localMissingSinceEpochMillis IS NOT NULL
+          AND localMissingSinceEpochMillis <= :missingBefore
+          AND remoteItemId IS NOT NULL
+          AND remoteItemId != ''
+          AND remoteSizeBytes IS NOT NULL
+          AND remoteSizeBytes = sizeBytes
+        ORDER BY localMissingSinceEpochMillis ASC
+        """
+    )
+    suspend fun cloudDeletionCandidates(
+        missingBefore: Long,
+        uploaded: BackupState = BackupState.UPLOADED
+    ): List<BackupEntryEntity>
+
     /** Clears the failure count so the user can retry something that has given up. */
     @Query("UPDATE backup_entries SET state = :pending, attemptCount = 0, lastError = NULL WHERE state = :failed")
     suspend fun resetFailures(

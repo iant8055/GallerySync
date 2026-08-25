@@ -9,6 +9,8 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.gallery.sync.data.local.entity.AlbumMode
+import com.gallery.sync.domain.backup.CloudDeletionGrace
+import com.gallery.sync.domain.backup.CloudDeletionPolicy
 import com.gallery.sync.domain.backup.FirstBackupWindow
 import com.gallery.sync.domain.backup.RemoteRoots
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -45,7 +47,16 @@ data class BackupPreferences(
      * queue has drained, every later run is incremental and the restriction lifts — leaving it on
      * would mean a photo taken at noon waits until 1am for no reason.
      */
-    val hasCompletedFirstBackup: Boolean = false
+    val hasCompletedFirstBackup: Boolean = false,
+    /**
+     * What happens to the OneDrive copy when a file leaves the phone.
+     *
+     * Defaults to [CloudDeletionPolicy.LEAVE]. A cloud copy left behind costs storage; a cloud copy
+     * removed in error costs the photo, because the local one is already gone.
+     */
+    val cloudDeletionPolicy: CloudDeletionPolicy = CloudDeletionPolicy.DEFAULT,
+    /** How long a file must have been gone before its cloud copy may even be offered. */
+    val cloudDeletionGraceDays: Int = CloudDeletionGrace.DEFAULT_DAYS
 )
 
 /**
@@ -83,7 +94,15 @@ class BackupSettings @Inject constructor(
                 ?.takeIf { it in FirstBackupWindow.SELECTABLE_HOURS }
                 ?: FirstBackupWindow.DEFAULT_START_HOUR,
             firstBackupRequiresCharging = stored[KEY_FIRST_BACKUP_CHARGING] ?: true,
-            hasCompletedFirstBackup = stored[KEY_FIRST_BACKUP_DONE] ?: false
+            hasCompletedFirstBackup = stored[KEY_FIRST_BACKUP_DONE] ?: false,
+            // An unreadable value falls back to LEAVE, never to ASK. A corrupt preference must not
+            // be able to arm the one feature that removes a user's last copy.
+            cloudDeletionPolicy = stored[KEY_CLOUD_DELETION_POLICY]
+                ?.let { runCatching { CloudDeletionPolicy.valueOf(it) }.getOrNull() }
+                ?: CloudDeletionPolicy.DEFAULT,
+            cloudDeletionGraceDays = stored[KEY_CLOUD_DELETION_GRACE]
+                ?.takeIf { it in CloudDeletionGrace.SELECTABLE_DAYS }
+                ?: CloudDeletionGrace.DEFAULT_DAYS
         )
     }
 
@@ -111,6 +130,20 @@ class BackupSettings @Inject constructor(
 
     suspend fun setDefaultAlbumMode(mode: AlbumMode) {
         context.dataStore.edit { it[KEY_DEFAULT_ALBUM_MODE] = mode.name }
+    }
+
+    /**
+     * Chooses what happens to cloud copies when files leave the phone.
+     *
+     * Deliberately has no "automatic" value to set — see [CloudDeletionPolicy].
+     */
+    suspend fun setCloudDeletionPolicy(policy: CloudDeletionPolicy) {
+        context.dataStore.edit { it[KEY_CLOUD_DELETION_POLICY] = policy.name }
+    }
+
+    suspend fun setCloudDeletionGraceDays(days: Int) {
+        if (days !in CloudDeletionGrace.SELECTABLE_DAYS) return
+        context.dataStore.edit { it[KEY_CLOUD_DELETION_GRACE] = days }
     }
 
     suspend fun setFirstBackupStartHour(hour: Int) {
@@ -154,5 +187,7 @@ class BackupSettings @Inject constructor(
         val KEY_FIRST_BACKUP_HOUR = intPreferencesKey("first_backup_start_hour")
         val KEY_FIRST_BACKUP_CHARGING = booleanPreferencesKey("first_backup_requires_charging")
         val KEY_FIRST_BACKUP_DONE = booleanPreferencesKey("first_backup_completed")
+        val KEY_CLOUD_DELETION_POLICY = stringPreferencesKey("cloud_deletion_policy")
+        val KEY_CLOUD_DELETION_GRACE = intPreferencesKey("cloud_deletion_grace_days")
     }
 }

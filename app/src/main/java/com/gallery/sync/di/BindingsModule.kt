@@ -5,8 +5,10 @@ import com.gallery.sync.data.remote.auth.MsalOneDriveTokenProvider
 import com.gallery.sync.data.remote.auth.OneDriveSignIn
 import com.gallery.sync.data.remote.auth.OneDriveTokenProvider
 import com.gallery.sync.data.remote.auth.StoredOneDriveTokenProvider
+import com.gallery.sync.data.repository.OneDriveDeletionRepositoryImpl
 import com.gallery.sync.data.repository.OneDriveRepositoryImpl
 import com.gallery.sync.data.repository.OneDriveUploadRepositoryImpl
+import com.gallery.sync.domain.repository.OneDriveDeletionRepository
 import com.gallery.sync.domain.repository.OneDriveRepository
 import com.gallery.sync.domain.repository.OneDriveUploadRepository
 import dagger.Binds
@@ -34,6 +36,12 @@ interface BindingsModule {
     fun bindOneDriveUploadRepository(
         impl: OneDriveUploadRepositoryImpl
     ): OneDriveUploadRepository
+
+    /** The only binding that grants the ability to remove a file from OneDrive. */
+    @Binds
+    abstract fun bindOneDriveDeletionRepository(
+        impl: OneDriveDeletionRepositoryImpl
+    ): OneDriveDeletionRepository
 
     /**
      * The Azure app registration has landed, so this now binds the MSAL-backed provider.
