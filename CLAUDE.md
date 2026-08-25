@@ -90,17 +90,28 @@ This is absolute and applies to every file, in every location, without exception
   It is tempting precisely because it needs no consent dialog, which makes it the shortest path to
   unattended archiving. Take the tap instead: local removal uses `MediaStore.createTrashRequest`.
   The difference is not that the trash request is safe — the entry below records it deleting
-  outright on this same device — but that it *can* reach the recycle bin depending on a setting the
-  user controls, where `deleteDocument` never can. A chance of recovery against none.
+  outright on this same device — but that it *can* reach a trash where `deleteDocument` never can.
+  A chance of recovery against none.
   **The SAF tree grant is still the right route for proxying**, which shortens a file and removes
   nothing. The prohibition is on deleting through it, not on using it.
 - Locally this means `MediaStore.createTrashRequest()` (API 30+), never a plain delete.
   Below API 30 Android has no media trash, so local deletion is **not offered at all** on
   those versions rather than silently deleting permanently.
 - **A trash request is not a guarantee of recoverability.** Observed on a Galaxy Z Fold 4:
-  the files were removed outright. Samsung routes the request through Gallery's Recycle Bin,
-  and with that setting off the request becomes a delete. The platform gives no way to
-  detect this in advance.
+  the files were removed outright and were not in Samsung Gallery's Recycle Bin.
+
+  **Why is not known.** An earlier version of this rule said Samsung routes the request through
+  Gallery's Recycle Bin and that the behaviour follows a setting the user controls. Ian pointed out
+  on 25 Aug 2026 that **there is no such setting in Samsung Gallery**, so that explanation is
+  withdrawn. The observation stands; the cause does not.
+
+  A likelier account, untested: `createTrashRequest` sets `IS_TRASHED` in **MediaStore**, which is
+  not the same store as Samsung Gallery's own Recycle Bin. A file could be in Android's media trash
+  and simply invisible to Samsung's app. That is checkable — a trashed file is renamed on disk to
+  `.trashed-<expiry>-<name>` — and worth checking, because if it holds then recovery exists and the
+  app could offer it.
+
+  Until someone checks, the platform gives no way to detect the outcome in advance.
   Therefore: **never tell the user a local removal is recoverable.** The guarantee that
   actually holds is the verified cloud copy — remote confirmation plus a matching byte size —
   and that is what the UI may promise. Nothing else.
