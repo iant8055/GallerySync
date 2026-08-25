@@ -146,13 +146,14 @@ private fun StatusLine(status: RetrieveStatus, total: Long) {
 
         RetrieveStatus.Done -> stringResource(R.string.retrieve_done)
         RetrieveStatus.Unsupported -> stringResource(R.string.retrieve_unsupported)
+        RetrieveStatus.GoneFromCloud -> stringResource(R.string.retrieve_gone)
         is RetrieveStatus.Failed -> stringResource(R.string.retrieve_failed, status.reason)
     }
 
     Text(
         text = text,
         style = MaterialTheme.typography.bodySmall,
-        color = if (status is RetrieveStatus.Failed) {
+        color = if (status is RetrieveStatus.Failed || status is RetrieveStatus.GoneFromCloud) {
             MaterialTheme.colorScheme.error
         } else {
             MaterialTheme.colorScheme.onSurfaceVariant

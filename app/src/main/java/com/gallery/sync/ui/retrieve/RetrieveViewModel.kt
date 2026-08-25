@@ -23,6 +23,9 @@ sealed interface RetrieveStatus {
     data class Failed(val reason: String) : RetrieveStatus
 
     data object Unsupported : RetrieveStatus
+
+    /** The cloud copy has gone too. The row is dropped rather than offered again. */
+    data object GoneFromCloud : RetrieveStatus
 }
 
 data class RetrieveUiState(
@@ -89,6 +92,14 @@ class RetrieveViewModel @Inject constructor(
                     is RestoreResult.Restored -> RetrieveStatus.Done
                     is RestoreResult.Unsupported -> RetrieveStatus.Unsupported
                     is RestoreResult.Failed -> RetrieveStatus.Failed(result.reason)
+
+                    // Neither on the phone nor in the drive: the row describes nothing. Forgetting
+                    // it is bookkeeping — it removes our record and no file anywhere, since there
+                    // is no longer a file anywhere to remove.
+                    is RestoreResult.GoneFromCloud -> {
+                        entryDao.forget(entry.id)
+                        RetrieveStatus.GoneFromCloud
+                    }
                 }
             )
         }

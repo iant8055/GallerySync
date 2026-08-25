@@ -225,6 +225,7 @@
     <string name="retrieve_done">Back on your phone.</string>
     <string name="retrieve_failed">Could not fetch this one: %1$s</string>
     <string name="retrieve_unsupported">Fetching files back needs Android 10 or newer.</string>
+    <string name="retrieve_gone">This file is no longer in OneDrive either, so it cannot be fetched. Removed from this list.</string>
     <string name="retrieve_detail">%1$s · %2$s</string>
 
     <!-- Gate 1: which folders to look in. -->

@@ -5,6 +5,7 @@ import com.gallery.sync.data.local.media.RestoredAlbum
 import com.gallery.sync.data.local.media.WriteOutcome
 import com.gallery.sync.di.IoDispatcher
 import com.gallery.sync.domain.model.DataResult
+import com.gallery.sync.domain.model.RemoteError
 import com.gallery.sync.domain.repository.OneDriveRepository
 import com.gallery.sync.util.Logger
 import kotlinx.coroutines.CoroutineDispatcher
@@ -19,6 +20,18 @@ sealed interface RestoreResult {
 
     /** Below API 29 there is no way to publish a new media file safely. */
     data object Unsupported : RestoreResult
+
+    /**
+     * OneDrive no longer holds this file.
+     *
+     * Distinct from [Failed] because it is not a retry candidate and never will be. The row
+     * describes a file that is on neither the phone nor the drive, so it describes nothing — and
+     * leaving it on the list would offer the same impossible fetch forever.
+     *
+     * This is the retrieval-side cousin of the removal re-check: the ledger records what was true
+     * once, and a fetch is the moment the truth is tested.
+     */
+    data object GoneFromCloud : RestoreResult
 
     data class Failed(val reason: String) : RestoreResult
 }
@@ -72,8 +85,15 @@ class RestoreFromCloud @Inject constructor(
         val stream = when (val opened = repository.openStream(remoteItemId)) {
             is DataResult.Success -> opened.value
             is DataResult.Failure -> {
+                // A 404 for an item id is final: the file has been removed from the drive. Anything
+                // else — no token, a dropped connection — is worth trying again later.
+                val gone = (opened.error as? RemoteError.Http)?.code == HTTP_NOT_FOUND
                 Logger.w(TAG, "could not open $displayName: ${opened.error}")
-                return@withContext RestoreResult.Failed("could not reach OneDrive")
+                return@withContext if (gone) {
+                    RestoreResult.GoneFromCloud
+                } else {
+                    RestoreResult.Failed("could not reach OneDrive")
+                }
             }
         }
 
@@ -96,5 +116,6 @@ class RestoreFromCloud @Inject constructor(
 
     private companion object {
         const val TAG = "Restore"
+        const val HTTP_NOT_FOUND = 404
     }
 }
