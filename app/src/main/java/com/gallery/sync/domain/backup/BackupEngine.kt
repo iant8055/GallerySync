@@ -617,8 +617,8 @@ class BackupEngine @Inject constructor(
      * `null` when a root could not be listed, which the caller must not render as "you have no
      * backups". Failing to ask is not evidence of absence.
      */
-    suspend fun cloudFolders(): List<String>? = withContext(dispatcher) {
-        val names = sortedSetOf<String>(String.CASE_INSENSITIVE_ORDER)
+    suspend fun cloudFolders(): List<RestorableFolder>? = withContext(dispatcher) {
+        val found = mutableMapOf<String, RemoteMediaNode.Folder>()
 
         for (root in RemoteRoots.searchOrder(destinationRoot())) {
             var page = when (val result = repository.listFolderByPath(root)) {
@@ -628,7 +628,8 @@ class BackupEngine @Inject constructor(
                     return@withContext null
                 }
             }
-            names += page.nodes.filterIsInstance<RemoteMediaNode.Folder>().map { it.name }
+            page.nodes.filterIsInstance<RemoteMediaNode.Folder>()
+                .forEach { found.putIfAbsent(it.name, it) }
 
             var pages = 1
             while (page.nextPageToken != null && pages < MAX_REMOTE_PAGES) {
@@ -639,14 +640,42 @@ class BackupEngine @Inject constructor(
                     // wrong decision, only a missing row.
                     is DataResult.Failure -> break
                 }
-                names += page.nodes.filterIsInstance<RemoteMediaNode.Folder>().map { it.name }
+                page.nodes.filterIsInstance<RemoteMediaNode.Folder>()
+                    .forEach { found.putIfAbsent(it.name, it) }
                 pages++
             }
         }
 
-        Logger.d(TAG, "cloudFolders: ${names.size} folders across the search roots")
-        names.toList()
+        // One scan, grouped by album name, rather than one listing per folder. See [RestorableFolder]
+        // for why these counts are deliberately not an identity claim.
+        val hereByAlbum = if (scanner.access() == MediaAccess.FULL) {
+            scanner.scanEverything().groupingBy { it.album }.eachCount()
+        } else {
+            emptyMap()
+        }
+
+        Logger.d(TAG, "cloudFolders: ${found.size} folders across the search roots")
+        found.values
+            .map { folder ->
+                RestorableFolder(
+                    name = folder.name,
+                    fileCount = folder.childCount,
+                    sizeBytes = folder.sizeBytes,
+                    onDeviceCount = hereByAlbum[folder.name] ?: 0
+                )
+            }
+            .sortedBy { it.name.lowercase() }
     }
+
+    /**
+     * Where new uploads go, as a path the user can read.
+     *
+     * For the breadcrumb on the restore screen. The destination is shown rather than the whole
+     * search set: [remoteIndexFor] also looks in `Samsung Gallery/DCIM`, so a folder present in both
+     * has two true paths and only one of them is where the next upload would land. Showing the
+     * destination is the one that stays true as the drive changes.
+     */
+    suspend fun destinationPath(): String = destinationRoot()
 
     /**
      * Everything OneDrive holds for one album, each marked with whether the phone still has it.

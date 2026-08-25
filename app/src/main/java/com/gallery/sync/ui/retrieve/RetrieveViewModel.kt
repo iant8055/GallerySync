@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gallery.sync.domain.backup.BackupEngine
 import com.gallery.sync.domain.backup.RestorableFile
+import com.gallery.sync.domain.backup.RestorableFolder
 import com.gallery.sync.domain.backup.RestoreFromCloud
 import com.gallery.sync.domain.backup.RestoreResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,10 +29,34 @@ sealed interface RetrieveStatus {
     data object GoneFromCloud : RetrieveStatus
 }
 
+/**
+ * How a whole-folder restore is going.
+ *
+ * Separate from [RetrieveStatus] because it answers a different question. A per-file status is about
+ * one transfer; this is about a batch, and the number that matters most in it is [skipped] — the
+ * files left alone because the phone already had them.
+ */
+sealed interface FolderStatus {
+
+    /** Listing the folder to find out what is actually in it. */
+    data object Checking : FolderStatus
+
+    data class Working(val done: Int, val total: Int) : FolderStatus
+
+    data class Done(val restored: Int, val skipped: Int, val failed: Int) : FolderStatus
+
+    /** Everything in the folder is already here, so there was nothing to do. */
+    data object AlreadyHere : FolderStatus
+
+    data class Failed(val reason: String) : FolderStatus
+}
+
 data class RetrieveUiState(
     /** Folders OneDrive holds under the backup roots, or empty until they have been read. */
-    val folders: List<String> = emptyList(),
+    val folders: List<RestorableFolder> = emptyList(),
     val selectedFolder: String? = null,
+    /** Where new uploads go, e.g. `Samsung Gallery/DCIM`. The breadcrumb is built from it. */
+    val destinationPath: String = "",
     val files: List<RestorableFile> = emptyList(),
     val loading: Boolean = false,
     /**
@@ -44,6 +69,8 @@ data class RetrieveUiState(
     val couldNotList: Boolean = false,
     /** Keyed on the remote item id, so several files can be fetched at once without confusion. */
     val statuses: Map<String, RetrieveStatus> = emptyMap(),
+    /** Keyed on folder name, for the whole-folder button. */
+    val folderStatuses: Map<String, FolderStatus> = emptyMap(),
     /**
      * Files dropped because OneDrive no longer holds them, by name.
      *
@@ -94,7 +121,14 @@ class RetrieveViewModel @Inject constructor(
 
     fun loadFolders() {
         viewModelScope.launch {
-            _state.value = _state.value.copy(loading = true, couldNotList = false)
+            // Published before the listing starts. This is a DataStore read and the listing is a
+            // network call, so making the path wait on the drive leaves the header reading bare
+            // "OneDrive" for as long as the request takes.
+            _state.value = _state.value.copy(
+                loading = true,
+                couldNotList = false,
+                destinationPath = engine.destinationPath()
+            )
             val folders = engine.cloudFolders()
             _state.value = _state.value.copy(
                 folders = folders.orEmpty(),
@@ -128,6 +162,59 @@ class RetrieveViewModel @Inject constructor(
             files = emptyList(),
             couldNotList = false
         )
+    }
+
+    /**
+     * Restores everything in a folder that is not already on the phone.
+     *
+     * ### Why this one skips what a single tap does not
+     *
+     * Tapping a file is a decision about that file, and Ian was explicit that it should be honoured
+     * whatever the gallery holds. A folder button is not that: the user has not looked at 194 files,
+     * and treating it the same way would fetch 4.1 GB to produce a second copy of a folder they
+     * already have. So the batch restores what is missing and reports what it left alone, which is
+     * the reading that matches what someone means by "restore this folder".
+     *
+     * The listing is done here rather than up front, which is what keeps the folder list cheap: one
+     * request when a folder is acted on, not ninety when the screen opens.
+     */
+    fun restoreFolder(folder: RestorableFolder) {
+        val current = _state.value.folderStatuses[folder.name]
+        if (current is FolderStatus.Checking || current is FolderStatus.Working) return
+
+        viewModelScope.launch {
+            setFolderStatus(folder.name, FolderStatus.Checking)
+
+            val files = engine.restorableFilesIn(folder.name)
+            if (files == null) {
+                // Could not ask, which is not the same as nothing to do.
+                setFolderStatus(folder.name, FolderStatus.Failed(FOLDER_UNREACHABLE))
+                return@launch
+            }
+
+            val missing = files.filterNot { it.alreadyOnDevice }
+            val skipped = files.size - missing.size
+            if (missing.isEmpty()) {
+                setFolderStatus(folder.name, FolderStatus.AlreadyHere)
+                return@launch
+            }
+
+            var restored = 0
+            var failed = 0
+            missing.forEachIndexed { index, file ->
+                setFolderStatus(folder.name, FolderStatus.Working(index, missing.size))
+                val result = restore.restore(
+                    remoteItemId = file.remoteItemId,
+                    displayName = file.displayName,
+                    mimeType = file.mimeType,
+                    isVideo = file.isVideo,
+                    sizeBytes = file.sizeBytes
+                )
+                if (result is RestoreResult.Restored) restored++ else failed++
+            }
+
+            setFolderStatus(folder.name, FolderStatus.Done(restored, skipped, failed))
+        }
     }
 
     /**
@@ -177,9 +264,19 @@ class RetrieveViewModel @Inject constructor(
         }
     }
 
+    private fun setFolderStatus(name: String, status: FolderStatus) {
+        _state.value = _state.value.copy(
+            folderStatuses = _state.value.folderStatuses + (name to status)
+        )
+    }
+
     private fun setStatus(remoteItemId: String, status: RetrieveStatus) {
         _state.value = _state.value.copy(
             statuses = _state.value.statuses + (remoteItemId to status)
         )
+    }
+
+    private companion object {
+        const val FOLDER_UNREACHABLE = "could not reach OneDrive"
     }
 }

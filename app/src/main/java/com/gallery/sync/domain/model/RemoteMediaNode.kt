@@ -26,6 +26,14 @@ sealed interface RemoteMediaNode {
         override val modifiedAtUtc: Long,
         /** Number of direct children the provider reports; `0` when unreported. */
         val childCount: Int,
+        /**
+         * Total size of everything inside, as the provider reports it; `0` when unreported.
+         *
+         * Free: Graph returns `size` on a folder item and the listing already selects it. Carried so
+         * the restore screen can say what a folder holds without listing it — one request per folder
+         * across ninety albums is a screen nobody waits for.
+         */
+        val sizeBytes: Long,
         /** Provider path of the parent, e.g. `/drive/root:/Pictures`; `null` when unreported. */
         val parentPath: String?
     ) : RemoteMediaNode

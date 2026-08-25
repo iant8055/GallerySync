@@ -32,6 +32,9 @@ class GraphDriveItemMapperTest {
             id = "01FOLDER",
             name = "Holiday 2024",
             lastModifiedDateTime = "2024-01-15T10:30:00Z",
+            // Graph reports a folder's total content size here. Set so this test proves the mapper
+            // carries it: the restore screen reads it to say what a folder holds without listing it.
+            size = 1_024L,
             folder = GraphFolderFacetDto(childCount = 42),
             parentReference = GraphParentReferenceDto(id = "01ROOT", path = "/drive/root:/Pictures")
         )
@@ -44,6 +47,7 @@ class GraphDriveItemMapperTest {
                 name = "Holiday 2024",
                 modifiedAtUtc = jan15,
                 childCount = 42,
+                sizeBytes = 1_024L,
                 parentPath = "/drive/root:/Pictures"
             ),
             node

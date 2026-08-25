@@ -35,3 +35,33 @@ data class RestorableFile(
 ) {
     val isVideo: Boolean get() = mimeType.startsWith("video/")
 }
+
+/**
+ * One cloud folder, as the restore screen lists it.
+ *
+ * ### Both counts are cheap, and neither is an identity claim
+ *
+ * [fileCount] and [sizeBytes] come from the folder item Graph already returns — no extra request.
+ * [onDeviceCount] comes from one local scan grouped by album name, also no request.
+ *
+ * They are therefore two independent counts of things that share a name, **not** a statement that
+ * those particular files match. Seven in OneDrive and six here means one of them is worth opening
+ * the folder to look at; it does not say which, and the screen must not pretend otherwise. The
+ * per-file view answers that properly, by comparing content signatures.
+ *
+ * [fileCount] counts every child Graph reports, which includes any sub-folders. Media folders rarely
+ * nest, and over-counting by a sub-folder is a cosmetic error where listing ninety folders to avoid
+ * it is a screen nobody waits for.
+ */
+data class RestorableFolder(
+    val name: String,
+    val fileCount: Int,
+    val sizeBytes: Long,
+    val onDeviceCount: Int
+) {
+    /** Nothing in it, so there is nothing to restore and nothing to compare against. */
+    val isEmpty: Boolean get() = fileCount == 0
+
+    /** True when the phone appears to hold everything the folder does. */
+    val looksComplete: Boolean get() = fileCount > 0 && onDeviceCount >= fileCount
+}

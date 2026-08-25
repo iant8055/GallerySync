@@ -182,7 +182,14 @@ class BrowseViewModelTest {
     private fun page(vararg nodes: RemoteMediaNode) = FolderPage(nodes.toList(), nextPageToken = null)
 
     private fun folder(id: String, name: String) =
-        RemoteMediaNode.Folder(id, name, modifiedAtUtc = 0L, childCount = 0, parentPath = null)
+        RemoteMediaNode.Folder(
+            id,
+            name,
+            modifiedAtUtc = 0L,
+            childCount = 0,
+            sizeBytes = 0L,
+            parentPath = null
+        )
 
     private fun file(id: String, name: String) = RemoteMediaNode.File(
         id = id,

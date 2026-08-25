@@ -29,6 +29,7 @@ fun GraphDriveItemDto.toRemoteMediaNode(): RemoteMediaNode? {
             name = itemName,
             modifiedAtUtc = modifiedAtUtc,
             childCount = folder.childCount ?: 0,
+            sizeBytes = size ?: 0L,
             parentPath = parentReference?.path
         )
 
