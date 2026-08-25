@@ -473,7 +473,22 @@ class BackupEngine @Inject constructor(
      * only cause a re-upload, while an empty one guarantees a whole album of them.
      */
     internal suspend fun remoteIndexFor(album: String): Map<String, Long>? {
-        val path = remotePathFor(album)
+        val merged = mutableMapOf<String, Long>()
+
+        for (root in RemoteRoots.searchOrder(destinationRoot())) {
+            // One unreachable root makes the whole answer unknown. Merging what did list would
+            // under-report what is backed up, and under-reporting here means re-uploading files the
+            // user already has — the same "failing to ask is not evidence of absence" rule that the
+            // per-album null exists for, applied across roots.
+            val one = indexForPath("$root/$album", album) ?: return null
+            // First root wins on a duplicate name, so the destination's copy is preferred.
+            for ((name, size) in one) merged.putIfAbsent(name, size)
+        }
+        return merged
+    }
+
+    /** Every file at one remote path, by name and size, or null if it could not be listed. */
+    private suspend fun indexForPath(path: String, album: String): Map<String, Long>? {
         val index = mutableMapOf<String, Long>()
 
         var page = when (val result = repository.listFolderByPath(path)) {
@@ -509,7 +524,15 @@ class BackupEngine @Inject constructor(
      * Samsung's sync stops, new photos keep landing beside the ones already there instead of
      * starting a second parallel structure the user then has to reconcile.
      */
-    private fun remotePathFor(album: String): String = "$REMOTE_ROOT/$album"
+    private suspend fun remotePathFor(album: String): String = "${destinationRoot()}/$album"
+
+    /**
+     * Where new uploads go. User-settable; defaults to the layout Samsung created.
+     *
+     * Read per use rather than cached, so a change takes effect on the next file instead of the
+     * next process. The cost is a DataStore read, which is already in memory after the first.
+     */
+    private suspend fun destinationRoot(): String = settings.current().destinationRoot
 
     private fun stopReasonFor(error: RemoteError): StopReason? = when (error) {
         RemoteError.NoToken -> StopReason.NO_TOKEN
@@ -528,7 +551,15 @@ class BackupEngine @Inject constructor(
     companion object {
         private const val TAG = "BackupEngine"
 
-        const val REMOTE_ROOT = "Samsung Gallery/DCIM"
+        /**
+         * Retired in favour of [RemoteRoots]. The destination is now a user setting and the search
+         * set is more than one folder, so a single constant can no longer describe either.
+         */
+        @Deprecated(
+            "The destination is a setting; use RemoteRoots",
+            ReplaceWith("RemoteRoots.SAMSUNG_GALLERY")
+        )
+        const val REMOTE_ROOT = RemoteRoots.SAMSUNG_GALLERY
 
         /**
          * Ceiling on the page walk in [remoteIndexFor], so a paging loop that never terminates

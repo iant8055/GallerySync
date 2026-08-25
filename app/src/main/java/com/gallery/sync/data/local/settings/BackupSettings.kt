@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.gallery.sync.data.local.entity.AlbumMode
+import com.gallery.sync.domain.backup.RemoteRoots
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -22,7 +23,15 @@ data class BackupPreferences(
     val isAutomaticEnabled: Boolean = true,
     val allowMeteredNetwork: Boolean = false,
     val isAutoOptimiseEnabled: Boolean = false,
-    val defaultAlbumMode: AlbumMode = AlbumMode.DEFAULT
+    val defaultAlbumMode: AlbumMode = AlbumMode.DEFAULT,
+    /**
+     * Folder in OneDrive that **new** uploads go into.
+     *
+     * Only the destination. `Samsung Gallery/DCIM` stays searchable whatever this is set to, so
+     * changing it redirects new files without stranding what is already backed up — see
+     * [RemoteRoots].
+     */
+    val destinationRoot: String = RemoteRoots.DEFAULT_DESTINATION
 )
 
 /**
@@ -49,7 +58,13 @@ class BackupSettings @Inject constructor(
             defaultAlbumMode = stored[KEY_DEFAULT_ALBUM_MODE]
                 ?.let { runCatching { AlbumMode.valueOf(it) }.getOrNull() }
                 ?.takeIf { it in AlbumMode.canBeDefault }
-                ?: AlbumMode.DEFAULT
+                ?: AlbumMode.DEFAULT,
+            // Validated on the way out, not only on the way in. A stored value that is somehow
+            // unusable must fall back to the default rather than sending uploads to a path Graph
+            // will reject on every file, forever.
+            destinationRoot = stored[KEY_DESTINATION_ROOT]
+                ?.takeIf { RemoteRoots.isValidDestination(it) }
+                ?: RemoteRoots.DEFAULT_DESTINATION
         )
     }
 
@@ -79,10 +94,24 @@ class BackupSettings @Inject constructor(
         context.dataStore.edit { it[KEY_DEFAULT_ALBUM_MODE] = mode.name }
     }
 
+    /**
+     * Changes where new uploads go. Rejects a path that cannot work, leaving the old one in place.
+     *
+     * Nothing already uploaded moves or is forgotten: the old root stays in the search set, so the
+     * next reconciliation still finds everything that is there.
+     */
+    suspend fun setDestinationRoot(path: String): Boolean {
+        val normalised = RemoteRoots.normalise(path)
+        if (!RemoteRoots.isValidDestination(normalised)) return false
+        context.dataStore.edit { it[KEY_DESTINATION_ROOT] = normalised }
+        return true
+    }
+
     private companion object {
         val KEY_AUTOMATIC = booleanPreferencesKey("automatic_backup_enabled")
         val KEY_ALLOW_METERED = booleanPreferencesKey("allow_metered_network")
         val KEY_AUTO_OPTIMISE = booleanPreferencesKey("auto_optimise_enabled")
         val KEY_DEFAULT_ALBUM_MODE = stringPreferencesKey("default_album_mode")
+        val KEY_DESTINATION_ROOT = stringPreferencesKey("destination_root")
     }
 }

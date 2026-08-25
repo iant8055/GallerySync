@@ -6,7 +6,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -15,6 +19,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
@@ -24,6 +31,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
 import com.gallery.sync.domain.backup.MediaTally
+import com.gallery.sync.domain.backup.RemoteRoots
 import com.gallery.sync.ui.common.LabelWithAction
 import com.gallery.sync.ui.common.formatBytes
 
@@ -43,8 +51,6 @@ import com.gallery.sync.ui.common.formatBytes
 @Composable
 fun ReconcileScreen(
     modifier: Modifier = Modifier,
-    destinationRoot: String,
-    onChangeDestination: () -> Unit = {},
     viewModel: ReconcileViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -142,23 +148,108 @@ fun ReconcileScreen(
         )
         LabelWithAction(
             action = {
-                OutlinedButton(onClick = onChangeDestination) {
+                OutlinedButton(onClick = viewModel::openDestinationChooser) {
                     Text(stringResource(R.string.destination_change), maxLines = 1)
                 }
             }
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
-                    text = stringResource(R.string.destination_current, destinationRoot),
+                    text = stringResource(R.string.destination_current, state.destinationRoot),
                     style = MaterialTheme.typography.bodyMedium
                 )
-                Text(
-                    text = stringResource(R.string.destination_why),
-                    style = MaterialTheme.typography.bodySmall
-                )
+                // Only true while the destination still is where Samsung put things. Said once the
+                // user has moved it, this would be a lie about why the numbers above exist.
+                if (state.destinationRoot == RemoteRoots.SAMSUNG_GALLERY) {
+                    Text(
+                        text = stringResource(R.string.destination_why),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
             }
         }
     }
+
+    if (state.choosingDestination) {
+        DestinationDialog(
+            current = state.destinationRoot,
+            alreadyBackedUp = state.alreadyFoundHere,
+            rejected = state.destinationRejected,
+            onConfirm = viewModel::setDestination,
+            onDismiss = viewModel::dismissDestinationChooser
+        )
+    }
+}
+
+/**
+ * Chooses the folder new uploads go into.
+ *
+ * A text field rather than a folder browser, deliberately. Browsing OneDrive is the thumbnail
+ * browser the design principle rules out, and the default is right for almost everyone — the field
+ * exists for the few who want somewhere else, not as the main path through setup.
+ *
+ * The body text is the point of the dialog. Changing a backup destination *sounds* like it should
+ * strand what is already uploaded, and saying plainly that it does not — with the count — is what
+ * turns a frightening setting into an ordinary one.
+ */
+@Composable
+private fun DestinationDialog(
+    current: String,
+    alreadyBackedUp: Int,
+    rejected: Boolean,
+    onConfirm: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var typed by rememberSaveable(current) { mutableStateOf(current) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.destination_dialog_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedTextField(
+                    value = typed,
+                    onValueChange = { typed = it },
+                    label = { Text(stringResource(R.string.destination_label)) },
+                    singleLine = true,
+                    isError = rejected,
+                    // The 280dp default minimum is what broke the album rows; a dialog is narrower
+                    // still, so it is relaxed here too.
+                    modifier = Modifier.fillMaxWidth().widthIn(min = 0.dp)
+                )
+                Text(
+                    text = if (alreadyBackedUp > 0) {
+                        stringResource(R.string.destination_dialog_body, alreadyBackedUp)
+                    } else {
+                        stringResource(R.string.destination_dialog_body_unknown)
+                    },
+                    style = MaterialTheme.typography.bodySmall
+                )
+                if (rejected) {
+                    Text(
+                        text = stringResource(R.string.destination_invalid),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+                if (typed != RemoteRoots.DEFAULT_DESTINATION) {
+                    TextButton(onClick = { typed = RemoteRoots.DEFAULT_DESTINATION }) {
+                        Text(stringResource(R.string.destination_reset), maxLines = 1)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onConfirm(typed) }) {
+                Text(stringResource(R.string.destination_save), maxLines = 1)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.destination_cancel), maxLines = 1)
+            }
+        }
+    )
 }
 
 /** One media kind: how much is on the phone, how much is safe, how much is left. */

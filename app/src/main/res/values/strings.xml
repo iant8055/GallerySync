@@ -227,4 +227,16 @@
     <string name="destination_current">%1$s</string>
     <string name="destination_why">This is where Samsung already put yours, which is how the files above were found.</string>
     <string name="destination_change">Change</string>
+    <string name="destination_dialog_title">Where new backups go</string>
+    <string name="destination_label">Folder in OneDrive</string>
+    <!--
+        The reassurance that makes this safe to change. The previous folder stays in the search set,
+        so nothing already uploaded is stranded and nothing is sent twice.
+    -->
+    <string name="destination_dialog_body">New photos and videos will go here. The %1$d files already backed up stay where they are, and Gallery Sync keeps looking in the old folder too, so nothing is uploaded twice.</string>
+    <string name="destination_dialog_body_unknown">New photos and videos will go here. Anything already backed up stays where it is, and Gallery Sync keeps looking in the old folder too, so nothing is uploaded twice.</string>
+    <string name="destination_invalid">That folder path cannot be used. Use a plain path like Pictures/Backup, with no leading or trailing slash.</string>
+    <string name="destination_save">Use this folder</string>
+    <string name="destination_cancel">Cancel</string>
+    <string name="destination_reset">Reset to default</string>
 </resources>

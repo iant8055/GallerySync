@@ -640,6 +640,39 @@ release builds, but its only entry point was inside a `BuildConfig.DEBUG` block 
 user could reach it. Unreachable, not shipped-and-callable. Deleting it is still better than moving
 it to a debug source set — the API this project must never call is now simply absent.
 
+### 25 Aug 2026 — the destination became a setting, and stayed safe
+
+`REMOTE_ROOT` was recorded on 19 Aug as "treat it as fixed", because changing it "would strand every
+existing backup and re-upload the library". That was true of a single constant. It is no longer the
+design.
+
+**Destination and search are now separate concerns** (`RemoteRoots`):
+
+- the **destination** is where new uploads go, and the user can change it
+- the **search set** is every root checked before concluding a file is missing, and it always
+  contains `Samsung Gallery/DCIM` whether or not that is still the destination
+
+That separation is what makes the setting safe. The Samsung path is not an arbitrary default — it
+mirrors the layout Samsung's own sync created, which is the only reason the skip-existing check finds
+anything at all. If changing the destination also moved the search, that reconciliation would vanish
+the moment someone picked another folder, and the app would re-upload a library the user had already
+paid to store.
+
+`remoteIndexFor` now merges every root, and **one unreachable root makes the whole answer null**.
+Merging only what listed would under-report what is backed up, and under-reporting means re-uploading
+— the same "failing to ask is not evidence of absence" rule the per-album null exists for, applied
+across roots. A root that does not exist yet is not a failure: the repository already turns 404 into
+an empty page, so a newly chosen destination reads as empty rather than unknown.
+
+**Verified end to end on the Fold 4** at 320dp with `font_scale` 1.7: the dialog renders, a typed path
+persists to DataStore, the screen updates, and the "this is where Samsung already put yours"
+explainer correctly disappears once the destination is no longer the Samsung root — that sentence is
+only true while it is.
+
+A text field rather than a folder browser, deliberately. Browsing OneDrive is the thumbnail browser
+the design principle rules out, and the default is right for almost everyone; the field exists for
+the few who want somewhere else, not as the main path through setup.
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have
