@@ -975,6 +975,41 @@ their behaviour and not something this app can influence.
 OneDrive". Rephrased so no verb has to agree with the count, which is a worse problem in every
 language than simply not needing one.
 
+### 25 Aug 2026 — the trash request *did* reach the trash
+
+**Fold 4.** GallerySync removed one local copy from `12345clips` — a 461 MB video already verified in
+OneDrive — through `MediaStore.createTrashRequest`. Android's own dialog said "move to trash". Result:
+
+```
+-rwxrwx--- 461492580  .trashed-1790278932-20230819_121939.mp4
+```
+
+On disk, intact, byte-for-byte the original size, renamed into Android's media trash with an expiry
+of **24 Sept 2026 — a 30-day window**. Ian confirmed it visible in Samsung Gallery's Recycle Bin.
+
+**This contradicts the observation CLAUDE.md's rule was built on**, which says a trash request on this
+same device removed files outright. Same handset, same API, opposite outcome.
+
+Worth noting what the record actually contains. MILESTONES has no entry describing a
+`createTrashRequest` failure; what it does record, on 19 Aug, is that `DocumentsContract.deleteDocument`
+left nothing in the Recycle Bin — which is expected, because SAF's delete is permanent. The
+"trash request removed files outright" claim exists only in CLAUDE.md. It is possible the two were
+conflated. **That is a reading, not a finding**, and the original run cannot be re-examined.
+
+**A capability nobody knew the app had.** The outcome is not detectable *before* the request, but it
+is trivially detectable *after*: a trashed file is renamed to `.trashed-<expiry>-<name>` and sits in
+the same folder. So the app could confirm what happened and say so, rather than warning about the
+worst case unconditionally.
+
+**Also learned:** querying MediaStore for `is_trashed=1` over adb returns nothing, because trashed rows
+are owner-scoped. The disk is the reliable check; the query is not.
+
+**Not settled by one run.** A different handset, a different One UI, a full or disabled trash could
+all behave differently, and the platform still offers no way to know in advance. What has changed is
+that recovery is demonstrably possible here, and that the app is currently promising less than it
+could. Whether the rule moves is Ian's call — it is a safety rule, born of a data-loss worry, and one
+successful test is not the same as a guarantee.
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have
