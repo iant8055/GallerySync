@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;500;600&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: oklch(0.52 0.15 162); }
+    a:hover { color: oklch(0.42 0.14 162); }
+  </style>
+</helmet>
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; position: relative; overflow: hidden; background: oklch(0.98 0.008 95); font-family: 'Public Sans', system-ui, sans-serif; color: oklch(0.24 0.02 250);">
+
+  <!-- Albums behind, not Restore. This is news about the phone, so it belongs on the home screen
+       rather than under a list of things to fetch back. -->
+  <div style="position: absolute; inset: 0; padding: 28px 20px 0 20px; display: flex; flex-direction: column; gap: 16px;">
+    <div style="font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 800; font-size: 30px; letter-spacing: -0.02em;">Albums</div>
+    <div style="border-radius: 28px; padding: 22px; background: oklch(0.29 0.06 168); height: 96px;"></div>
+    <div style="border-radius: 22px; background: oklch(1 0 0); border: 1px solid oklch(0.92 0.01 250); height: 86px;"></div>
+    <div style="border-radius: 22px; background: oklch(1 0 0); border: 1px solid oklch(0.92 0.01 250); height: 86px;"></div>
+  </div>
+  <div style="position: absolute; inset: 0; background: oklch(0.20 0.02 250 / 0.52);"></div>
+
+  <div style="position: absolute; left: 20px; right: 20px; top: 50%; transform: translateY(-50%);">
+    <div style="border-radius: 30px; background: oklch(0.99 0.004 95); padding: 26px 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 24px 60px oklch(0.20 0.02 250 / 0.35);">
+
+      <!-- Neutral tile, not a red alarm. Nothing has gone wrong: the user deleted some photos and
+           the app is reporting it before asking a separate question. -->
+      <div style="width: 52px; height: 52px; border-radius: 18px; background: oklch(0.94 0.01 250); display: flex; align-items: center; justify-content: center;">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="oklch(0.42 0.02 250)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M9 8h6"/><path d="M9 12h6"/></svg>
+      </div>
+
+      <!-- Leads with what happened, not with what we propose. The user's action, reported back. -->
+      <div style="font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 800; font-size: 25px; line-height: 1.18; letter-spacing: -0.02em;">You have deleted <span style="color: oklch(0.47 0.17 25);">14 files</span> from your gallery</div>
+
+      <div style="display: flex; flex-direction: column; gap: 13px; font-size: 14px; line-height: 1.55; color: oklch(0.36 0.015 250);">
+        <div>Their copies in OneDrive are still there, using <strong style="font-weight: 600; color: oklch(0.24 0.02 250);">1.8 GB</strong>. Gallery Sync has not touched them.</div>
+        <div>Do you also want to delete them from OneDrive?</div>
+
+        <!-- The recycle bin sentence is the only promise the app may make about a removal, so it
+             gets the same green as "protected" rather than sitting in the warning's colour. -->
+        <div style="border-radius: 16px; background: oklch(0.955 0.03 165); padding: 13px 15px; font-size: 13.5px; line-height: 1.5; color: oklch(0.36 0.08 165); display: flex; gap: 11px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px;"><path d="M3 6h18"/><path d="M19 6l-1 14H6L5 6"/><path d="M12 11v5"/><path d="m9.5 13.5 2.5-2.5 2.5 2.5"/></svg>
+          <div>They go to the OneDrive recycle bin, where you can restore them yourself. Gallery Sync never empties that bin.</div>
+        </div>
+      </div>
+
+      <!-- Keeping them is the safe answer and reads first. Removing is the one that needs thought. -->
+      <div style="display: flex; flex-direction: column; gap: 9px; padding-top: 4px;">
+        <div style="text-align: center; padding: 14px 0; border-radius: 99px; background: oklch(0.29 0.06 168); color: oklch(0.97 0.01 160); font-weight: 600; font-size: 15px;">Keep them in OneDrive</div>
+        <div style="text-align: center; padding: 14px 0; border-radius: 99px; border: 1px solid oklch(0.84 0.05 25); color: oklch(0.47 0.17 25); font-weight: 600; font-size: 15px;">Delete them from OneDrive</div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {}
+</script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;500;600&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: oklch(0.52 0.15 162); }
+    a:hover { color: oklch(0.42 0.14 162); }
+  </style>
+</helmet>
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; position: relative; overflow: hidden; background: oklch(0.98 0.008 95); font-family: 'Public Sans', system-ui, sans-serif; color: oklch(0.24 0.02 250);">
+
+  <div style="display: flex; flex-direction: column; gap: 16px; padding: 28px 20px 0 20px;">
+
+    <div style="display: flex; align-items: baseline; justify-content: space-between;">
+      <div style="font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 800; font-size: 30px; letter-spacing: -0.02em;">Albums</div>
+      <div style="font-size: 13px; font-weight: 500; color: oklch(0.52 0.02 250);">90 on this phone</div>
+    </div>
+
+    <!-- Hero: the one number that matters. Everything else on this screen is a detail of it. -->
+    <div style="border-radius: 28px; padding: 22px; background: oklch(0.29 0.06 168); color: oklch(0.97 0.01 160); display: flex; flex-direction: column; gap: 16px;">
+      <div style="display: flex; align-items: flex-end; justify-content: space-between;">
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <div style="font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: oklch(0.78 0.06 165);">Protected in OneDrive</div>
+          <div style="font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 800; font-size: 46px; line-height: 1; letter-spacing: -0.03em;">8,482</div>
+        </div>
+        <div style="text-align: right; padding-bottom: 4px;">
+          <div style="font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 600; font-size: 20px; line-height: 1;">148 GB</div>
+          <div style="font-size: 12px; color: oklch(0.78 0.06 165);">of 152 GB</div>
+        </div>
+      </div>
+      <div style="height: 8px; border-radius: 99px; background: oklch(0.40 0.05 168); overflow: hidden;">
+        <div style="width: 97%; height: 100%; border-radius: 99px; background: oklch(0.82 0.19 148);"></div>
+      </div>
+      <div style="display: flex; gap: 8px;">
+        <div style="flex-grow: 1; text-align: center; padding: 11px 0; border-radius: 99px; background: oklch(0.82 0.19 148); color: oklch(0.24 0.06 168); font-weight: 600; font-size: 14px;">Sync now</div>
+        <div style="padding: 11px 18px; border-radius: 99px; border: 1px solid oklch(0.45 0.05 168); font-weight: 600; font-size: 14px;">Rescan</div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+
+      <!-- Archive is the mode that removes files, so it is the one that gets a colour. -->
+      <div style="border-radius: 22px; background: oklch(1 0 0); border: 1px solid oklch(0.92 0.01 250); padding: 16px 18px; display: flex; align-items: center; gap: 12px;">
+        <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 3px;">
+          <div style="font-weight: 600; font-size: 16px;">12345clips</div>
+          <div style="font-size: 13px; color: oklch(0.52 0.02 250);">6 files · 453 MB</div>
+          <div style="font-size: 13px; font-weight: 500; color: oklch(0.55 0.15 55);">7 in OneDrive · leaves this phone</div>
+        </div>
+        <div style="padding: 8px 14px; border-radius: 99px; background: oklch(0.95 0.05 70); color: oklch(0.45 0.13 55); font-weight: 600; font-size: 13px;">Archive</div>
+      </div>
+
+      <div style="border-radius: 22px; background: oklch(1 0 0); border: 1px solid oklch(0.92 0.01 250); padding: 16px 18px; display: flex; align-items: center; gap: 12px;">
+        <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 3px;">
+          <div style="font-weight: 600; font-size: 16px;">Zoo</div>
+          <div style="font-size: 13px; color: oklch(0.52 0.02 250);">51 files · 193 MB</div>
+          <div style="font-size: 13px; font-weight: 500; color: oklch(0.50 0.13 162);">All backed up</div>
+        </div>
+        <div style="padding: 8px 14px; border-radius: 99px; background: oklch(0.94 0.05 165); color: oklch(0.40 0.12 165); font-weight: 600; font-size: 13px;">Backup</div>
+      </div>
+
+      <div style="border-radius: 22px; background: oklch(1 0 0); border: 1px solid oklch(0.92 0.01 250); padding: 16px 18px; display: flex; align-items: center; gap: 12px;">
+        <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 3px;">
+          <div style="font-weight: 600; font-size: 16px;">1999 Tioga</div>
+          <div style="font-size: 13px; color: oklch(0.52 0.02 250);">194 files · 4.1 GB</div>
+          <div style="font-size: 13px; color: oklch(0.58 0.02 250);">Not backed up</div>
+        </div>
+        <div style="padding: 8px 14px; border-radius: 99px; background: oklch(0.95 0.005 250); color: oklch(0.50 0.02 250); font-weight: 600; font-size: 13px;">Off</div>
+      </div>
+
+      <div style="border-radius: 22px; background: oklch(1 0 0); border: 1px solid oklch(0.92 0.01 250); padding: 16px 18px; display: flex; align-items: center; gap: 12px;">
+        <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 3px;">
+          <div style="font-weight: 600; font-size: 16px;">Asian Light Festival</div>
+          <div style="font-size: 13px; color: oklch(0.52 0.02 250);">21 files · 50 MB</div>
+          <div style="font-size: 13px; font-weight: 500; color: oklch(0.50 0.13 162);">All backed up · 18 optimised</div>
+        </div>
+        <div style="padding: 8px 14px; border-radius: 99px; background: oklch(0.94 0.04 240); color: oklch(0.42 0.12 250); font-weight: 600; font-size: 13px;">Sync</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Floating bar. Four destinations, and the current one says its name. -->
+  <div style="position: absolute; left: 20px; right: 20px; bottom: 22px; height: 62px; border-radius: 99px; background: oklch(0.22 0.02 250); display: flex; align-items: center; justify-content: space-around; padding: 0 8px; box-shadow: 0 12px 28px oklch(0.24 0.02 250 / 0.28);">
+    <div style="display: flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 99px; background: oklch(0.82 0.19 148); color: oklch(0.24 0.06 168);">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      <span style="font-weight: 600; font-size: 14px;">Albums</span>
+    </div>
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="oklch(0.72 0.02 250)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9"/><path d="m7 14 5 5 5-5"/><path d="M20 8a5 5 0 0 0-9.6-1.9A4 4 0 1 0 8 14"/></svg>
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="oklch(0.72 0.02 250)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19a4.5 4.5 0 0 0 .5-9 6 6 0 0 0-11.6-1.6A4.2 4.2 0 0 0 7 19z"/><path d="m9 13 2 2 4-4"/></svg>
+    <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="oklch(0.72 0.02 250)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2v.2a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.9.4l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0-1.2-2.9H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1.1 1.7 1.7 0 0 0-.4-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H10a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V10a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {}
+</script>
+</body>
+</html>

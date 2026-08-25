@@ -1,0 +1,167 @@
+{
+  "pages": [
+    {
+      "id": "page-1",
+      "name": "Signal"
+    },
+    {
+      "id": "page-2",
+      "name": "Alternates (not chosen)"
+    }
+  ],
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Albums",
+      "page": "page-1"
+    },
+    {
+      "file": "SignalDark.dc.html",
+      "x": 490,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Albums — dark",
+      "page": "page-1"
+    },
+    {
+      "file": "Restore.dc.html",
+      "x": 980,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Restore",
+      "page": "page-1"
+    },
+    {
+      "file": "Syncing.dc.html",
+      "x": 1470,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Syncing",
+      "page": "page-1"
+    },
+    {
+      "file": "Settings.dc.html",
+      "x": 1960,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Settings",
+      "page": "page-1"
+    },
+    {
+      "file": "DirectionQuiet.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Quiet",
+      "page": "page-2"
+    },
+    {
+      "file": "DirectionConsole.dc.html",
+      "x": 490,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Console",
+      "page": "page-2"
+    },
+    {
+      "file": "DirectionTactile.dc.html",
+      "x": 980,
+      "y": 0,
+      "w": 390,
+      "h": 844,
+      "title": "Tactile",
+      "page": "page-2"
+    },
+    {
+      "file": "DialogArchive.dc.html",
+      "x": 0,
+      "y": 1010,
+      "w": 390,
+      "h": 844,
+      "title": "Archive confirmation",
+      "page": "page-1"
+    },
+    {
+      "file": "DialogDelete.dc.html",
+      "x": 490,
+      "y": 1010,
+      "w": 390,
+      "h": 844,
+      "title": "Cloud deletion confirmation",
+      "page": "page-1"
+    },
+    {
+      "file": "DialogDestination.dc.html",
+      "x": 980,
+      "y": 1010,
+      "w": 390,
+      "h": 844,
+      "title": "Destination folder",
+      "page": "page-1"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "signal-intro",
+      "x": 0,
+      "y": -190,
+      "w": 700,
+      "page": "page-1",
+      "text": "SIGNAL — chosen 25 Aug 2026\n\nOne hero card carries the only number that matters; every album row below is a\ndetail of it. Mode is a coloured pill, and Archive is the one mode that gets a\nwarm colour, because it is the one that takes files off the phone.\n\nBottom pill nav replaces the four top tabs. Real album names, counts and sizes\nthroughout — taken off the Fold 4, not invented."
+    },
+    {
+      "id": "signal-dark",
+      "x": 490,
+      "y": 880,
+      "w": 390,
+      "page": "page-1",
+      "text": "The hero inverts in dark rather than just darkening: on near-black the green\nbecomes the bright element, so it keeps its job of being the first thing the eye\nlands on. Every other surface goes to a tinted near-black, and the status colours\nlift in lightness so they stay legible instead of going muddy.\n\nDark is not a variant to add later here — it is the theme that shipped the\nTeleprompter bug, so it gets designed alongside, not after."
+    },
+    {
+      "id": "signal-next",
+      "x": 1470,
+      "y": 1900,
+      "w": 880,
+      "page": "page-1",
+      "text": "STILL TO DRAW\n\n• The foldable two-column layout — the device this mostly runs on.\n• Restore, Syncing and Settings in dark.\n• The empty state: a fresh install with nothing backed up, where the hero card has\n  no number to be proud of and still has to look deliberate.\n• Error and stopped states: drive full, signed out, network lost mid-run."
+    },
+    {
+      "id": "alternates-note",
+      "x": 0,
+      "y": -150,
+      "w": 700,
+      "page": "page-2",
+      "text": "NOT CHOSEN — kept for reference\n\nQuiet: editorial, hairline rules, no cards. Ages well, but status is easy to miss.\nConsole: dark and dense, monospaced. Most information per screen, narrow appeal,\n  punishing at large font scales.\nTactile: soft lilac, big radii. The friendliest, and the only one that leads with\n  reassurance rather than a number — but the softness can read as unserious for\n  something moving 148 GB of someone's only copies.\n\nOne idea worth stealing from Tactile: leading with \"nearly everything is safe\"\nrather than a raw count. Signal could carry that line above its number."
+    },
+    {
+      "id": "dialogs-note",
+      "x": 0,
+      "y": 1900,
+      "w": 880,
+      "page": "page-1",
+      "text": "THE THREE DIALOGS — real copy, straight from strings.xml, not rewritten\n\nEach gets a tinted icon tile rather than an alert triangle, and each pulls its single\nmost important sentence out of the paragraph into a tinted panel — that sentence is the\none people skip, and it is the one that makes the action legitimate.\n\nArchive: warm, not red. This is a consent, not an error. The panel carries the standing-\ninstruction line — that files added later are covered too — because that is the part of\nthe mode people do not expect.\n\n  Trimmed 25 Aug 2026 (Ian): the closing sentence — \"the verified cloud copy is your\n  guarantee, a local removal cannot be promised as recoverable\" — moves to a Help /\n  How-to screen. CLAUDE.md permits this: the cloud copy is what the UI MAY promise, not\n  what it must say here, and a dialog short enough to be read beats one long enough to\n  be skipped. But the second half of that sentence is a caution, not a promise, and it\n  now sits somewhere the user need not visit before consenting. Help is therefore a\n  surface that has to exist, not an optional extra — it is where a rule-bearing\n  sentence went to live.\n\nDeletion: red, and the panel is GREEN. The recycle bin sentence is the only promise the\napp is allowed to make about a removal, so it gets the same colour as \"protected\".\n\nDestination: a typed path, not a folder browser — browsing OneDrive is the thumbnail\nbrowser the design principle rules out.\n\nNOT OURS, AND MUST NOT BE COPIED: Android's own trash dialog on a local removal. It is\nthe platform's, capped at 2000 URIs per batch, and CLAUDE.md says it is not where the\nconsent comes from and must not be mirrored by an app-level prompt."
+    },
+    {
+      "id": "help-note",
+      "x": 1470,
+      "y": 1010,
+      "w": 390,
+      "page": "page-1",
+      "text": "NEW SURFACE TO DESIGN — Help / How-to\n\nCreated by the Archive trim: the recoverability caution moved here, so this is no longer\njust a nicety.\n\nWhat it has to carry, at minimum:\n• What each of the four modes actually does to your files.\n• Why a local removal cannot be promised as recoverable, and what the verified cloud\n  copy does guarantee instead.\n• Where restored files land, and why they are renamed.\n• That GallerySync never empties any recycle bin — yours to empty, in OneDrive or in\n  your gallery."
+    }
+  ],
+  "launch": {
+    "view": "canvas",
+    "page": "page-1"
+  }
+}

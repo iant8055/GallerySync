@@ -1,0 +1,66 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;500;600&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: oklch(0.52 0.15 162); }
+    a:hover { color: oklch(0.42 0.14 162); }
+  </style>
+</helmet>
+
+<div style="width: 390px; height: 844px; box-sizing: border-box; position: relative; overflow: hidden; background: oklch(0.98 0.008 95); font-family: 'Public Sans', system-ui, sans-serif; color: oklch(0.24 0.02 250);">
+
+  <div style="position: absolute; inset: 0; padding: 28px 20px 0 20px; display: flex; flex-direction: column; gap: 16px;">
+    <div style="font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 800; font-size: 30px; letter-spacing: -0.02em;">Settings</div>
+    <div style="border-radius: 22px; background: oklch(1 0 0); border: 1px solid oklch(0.92 0.01 250); height: 74px;"></div>
+    <div style="border-radius: 99px; background: oklch(0.93 0.008 250); height: 48px;"></div>
+    <div style="border-radius: 22px; background: oklch(1 0 0); border: 1px solid oklch(0.92 0.01 250); height: 90px;"></div>
+  </div>
+  <div style="position: absolute; inset: 0; background: oklch(0.20 0.02 250 / 0.52);"></div>
+
+  <div style="position: absolute; left: 20px; right: 20px; top: 50%; transform: translateY(-50%);">
+    <div style="border-radius: 30px; background: oklch(0.99 0.004 95); padding: 26px 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 24px 60px oklch(0.20 0.02 250 / 0.35);">
+
+      <div style="width: 52px; height: 52px; border-radius: 18px; background: oklch(0.94 0.04 240); display: flex; align-items: center; justify-content: center;">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="oklch(0.46 0.12 250)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      </div>
+
+      <div style="font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 800; font-size: 25px; line-height: 1.15; letter-spacing: -0.02em;">Where new backups go</div>
+
+      <!-- A typed path, not a folder browser. Browsing OneDrive is the thumbnail browser the
+           design principle rules out, and the default is right for almost everyone. -->
+      <div style="display: flex; flex-direction: column; gap: 7px;">
+        <div style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: oklch(0.52 0.02 250);">Folder in OneDrive</div>
+        <div style="border-radius: 16px; border: 2px solid oklch(0.29 0.06 168); background: oklch(1 0 0); padding: 14px 16px; display: flex; align-items: center; gap: 8px;">
+          <span style="font-size: 15px; font-weight: 500;">Samsung Gallery/DCIM</span>
+          <div style="width: 1.5px; height: 19px; background: oklch(0.29 0.06 168);"></div>
+        </div>
+      </div>
+
+      <div style="font-size: 14px; line-height: 1.55; color: oklch(0.36 0.015 250);">New photos and videos will go here. The <strong style="font-weight: 600; color: oklch(0.24 0.02 250);">8,482 files</strong> already backed up stay where they are, and Gallery Sync keeps looking in the old folder too, so nothing is uploaded twice.</div>
+
+      <div style="display: flex; flex-direction: column; gap: 9px; padding-top: 4px;">
+        <div style="text-align: center; padding: 14px 0; border-radius: 99px; background: oklch(0.29 0.06 168); color: oklch(0.97 0.01 160); font-weight: 600; font-size: 15px;">Use this folder</div>
+        <div style="display: flex; gap: 9px;">
+          <div style="flex-grow: 1; text-align: center; padding: 13px 0; border-radius: 99px; border: 1px solid oklch(0.88 0.01 250); font-weight: 600; font-size: 14px; color: oklch(0.30 0.02 250);">Reset to default</div>
+          <div style="flex-grow: 1; text-align: center; padding: 13px 0; border-radius: 99px; font-weight: 600; font-size: 14px; color: oklch(0.40 0.02 250);">Cancel</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {}
+</script>
+</body>
+</html>
