@@ -68,6 +68,23 @@ fun RetrieveScreen(
             }
         }
 
+        // Outlives the row it describes. Each name is a file that was on this list a moment ago and
+        // is not any more, which without a word for it looks like the app losing things.
+        if (state.droppedFromCloud.isNotEmpty()) {
+            Column(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                state.droppedFromCloud.forEach { name ->
+                    Text(
+                        text = stringResource(R.string.retrieve_gone_named, name),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        }
+
         HorizontalDivider()
 
         LazyColumn(modifier = Modifier.fillMaxWidth()) {

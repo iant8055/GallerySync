@@ -31,7 +31,16 @@ sealed interface RetrieveStatus {
 data class RetrieveUiState(
     val items: List<BackupEntryEntity> = emptyList(),
     /** Keyed on ledger id, so several files can be fetched at once without confusing their rows. */
-    val statuses: Map<String, RetrieveStatus> = emptyMap()
+    val statuses: Map<String, RetrieveStatus> = emptyMap(),
+    /**
+     * Files dropped because OneDrive no longer holds them, by name.
+     *
+     * Held at the screen rather than on the row, because the row is exactly what disappears. Putting
+     * the explanation on it meant the reason vanished with the thing it was explaining, leaving a
+     * row that evaporated for no visible cause — the failure this app spends most of its wording
+     * avoiding elsewhere.
+     */
+    val droppedFromCloud: List<String> = emptyList()
 )
 
 /**
@@ -98,6 +107,9 @@ class RetrieveViewModel @Inject constructor(
                     // is no longer a file anywhere to remove.
                     is RestoreResult.GoneFromCloud -> {
                         entryDao.forget(entry.id)
+                        _state.value = _state.value.copy(
+                            droppedFromCloud = _state.value.droppedFromCloud + entry.displayName
+                        )
                         RetrieveStatus.GoneFromCloud
                     }
                 }

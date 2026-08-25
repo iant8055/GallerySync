@@ -226,6 +226,8 @@
     <string name="retrieve_failed">Could not fetch this one: %1$s</string>
     <string name="retrieve_unsupported">Fetching files back needs Android 10 or newer.</string>
     <string name="retrieve_gone">This file is no longer in OneDrive either, so it cannot be fetched. Removed from this list.</string>
+    <!-- Shown after the row itself has gone, so the disappearance has a reason attached to it. -->
+    <string name="retrieve_gone_named">%1$s is no longer in OneDrive either, so it could not be fetched. It has been removed from this list.</string>
     <string name="retrieve_detail">%1$s · %2$s</string>
 
     <!-- Gate 1: which folders to look in. -->
