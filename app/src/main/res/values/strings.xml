@@ -196,4 +196,35 @@
     <string name="size_kilobytes">%1$d KB</string>
     <string name="size_megabytes">%1$d MB</string>
     <string name="size_gigabytes">%1$s GB</string>
+
+    <!--
+        Temporary tab. This screen belongs in the guided first run (TASK-014) as step 6, between the
+        source-directory gate and the choice of what to do with the existing library. It sits here
+        until that flow exists, so the reconciliation can be used and checked on hardware.
+    -->
+    <string name="tab_setup">Cloud check</string>
+
+    <!-- First-run reconciliation: what OneDrive already holds. -->
+    <string name="reconcile_title">Checking what is already in OneDrive</string>
+    <string name="reconcile_working">Checking album %1$d of %2$d…</string>
+    <string name="reconcile_photos">Photos</string>
+    <string name="reconcile_videos">Videos</string>
+    <!-- %1$s on this phone, %2$s already backed up, %3$s still to send. -->
+    <string name="reconcile_line">%1$s on this phone · %2$s already backed up · %3$s to upload</string>
+    <string name="reconcile_outstanding">About %1$s still to send.</string>
+    <string name="reconcile_all_safe">Everything on this phone is already in OneDrive.</string>
+    <!--
+        Shown only when some albums could not be listed. Deliberately says the figures are
+        incomplete rather than folding unchecked files into "not backed up" — telling someone their
+        library is unprotected when it may be fine pushes them into re-uploading all of it.
+    -->
+    <string name="reconcile_incomplete">Could not check %1$d of your albums just now, holding %2$s. They will be checked again on the first backup, and nothing about them is assumed either way.</string>
+    <string name="reconcile_retry">Check again</string>
+    <string name="reconcile_no_access">Gallery Sync needs access to your photos before it can check.</string>
+
+    <!-- Destination folder. -->
+    <string name="destination_title">Where future backups go</string>
+    <string name="destination_current">%1$s</string>
+    <string name="destination_why">This is where Samsung already put yours, which is how the files above were found.</string>
+    <string name="destination_change">Change</string>
 </resources>

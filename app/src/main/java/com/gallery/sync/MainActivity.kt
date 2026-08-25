@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.ScrollableTabRow
+import com.gallery.sync.domain.backup.BackupEngine
+import com.gallery.sync.ui.setup.ReconcileScreen
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -117,10 +119,19 @@ private fun SignedInApp(
                 onClick = { selectedTab = 1 },
                 text = { Text(stringResource(R.string.tab_settings)) }
             )
+            // Temporary home for the reconciliation step. It belongs in the guided first run as
+            // step 6; until that flow exists it lives here so it can be used and checked on real
+            // hardware rather than sitting unreachable the way the debug probes did.
+            Tab(
+                selected = selectedTab == 2,
+                onClick = { selectedTab = 2 },
+                text = { Text(stringResource(R.string.tab_setup)) }
+            )
         }
 
         when (selectedTab) {
             0 -> BackupScreen()
+            2 -> ReconcileScreen(destinationRoot = BackupEngine.REMOTE_ROOT)
             else -> SettingsScreen(accountName = accountName, onSignOut = onSignOut)
         }
     }

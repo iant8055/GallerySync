@@ -595,6 +595,30 @@ Two things that are still true and useful:
   the only safe way to run these tests against a device holding a real ledger — the warning elsewhere
   in this file about losing app data applies to the Gradle task, not to this.
 
+### 24 Aug 2026 — the reconciliation, measured on hardware
+
+**Fold 4**, folded dimensions forced to 320dp x 747dp at `font_scale` 1.7, signed in, ~90 albums.
+
+| | On the phone | Already in OneDrive | To upload |
+|---|---|---|---|
+| Photos | 4,636 | 4,578 | 58 (98 MB) |
+| Videos | 1,735 | 1,700 | 35 (2.7 GB) |
+
+**6,371 files, 6,278 of them already safe. 2.8 GB to send rather than ~120 GB.** Every album listed
+without failure, so nothing fell into the unchecked category on this run.
+
+This is the assumption the first-run flow rests on, now measured rather than argued: most of the
+library is already in OneDrive because Samsung's own sync put it there, so setup is reconciliation
+and not a bulk transfer. It also confirms `REMOTE_ROOT` is still matching Samsung's layout on a
+second device.
+
+**One defect found by watching it run.** The screen announced "Everything on this phone is already in
+OneDrive" after a single album of ninety. Mid-run the totals cover only what has been checked so far,
+and `isComplete` is trivially true while nothing has failed yet. Fixed by requiring the run to have
+finished. Worth recording because it is the mirror of the unchecked rule: that one stops the app
+claiming files are missing when it does not know, and this one stops it claiming they are safe when
+it does not know. Both are the same error, and only one of them was anticipated.
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have
