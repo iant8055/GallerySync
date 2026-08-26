@@ -37,6 +37,7 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.OutlinedButton
@@ -215,6 +216,15 @@ private fun AlbumList(
 
         state.status?.let {
             Text(it.readable(), style = MaterialTheme.typography.bodyMedium)
+
+            // Under the line that names the file and the percentage, the same order as Restore.
+            // The text says which file and how far in; the bar is that number, drawn.
+            if (it is BackupStatus.Uploading) {
+                LinearProgressIndicator(
+                    progress = { it.percentOfCurrent / 100f },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
 
         // The Archive summons. Not a second consent — setting the mode was the consent, and

@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SegmentedButton
@@ -144,9 +145,7 @@ fun SettingsScreen(
 
         // Placed above everything that depends on it. Nothing in this app scans, backs up or
         // optimises outside a granted tree, so this is the choice the rest of the screen rests on.
-        Section(stringResource(R.string.settings_sources)) {
-            SourcesSection()
-        }
+        SourcesSection(modifier = Modifier.padding(horizontal = 20.dp))
 
         HorizontalDivider()
 
@@ -330,9 +329,7 @@ fun SettingsScreen(
 
         // Last, deliberately. This is the only setting on the screen that can cause a file to leave
         // OneDrive, and it is read rather than skimmed when it is not competing with a toggle.
-        Section(stringResource(R.string.settings_deletion)) {
-            DeletionSection()
-        }
+        DeletionSection()
 
         HorizontalDivider()
 
@@ -345,6 +342,23 @@ fun SettingsScreen(
                 ),
                 style = MaterialTheme.typography.bodyMedium
             )
+
+            // Size first, then the bar — the same order as the hero and as Restore. A proportion
+            // shown above the quantity it is a proportion of reads as a bar of nothing.
+            state.backedUpFraction?.let { fraction ->
+                Text(
+                    text = stringResource(
+                        R.string.storage_backed_up,
+                        formatBytes(context, state.uploadedBytes),
+                        formatBytes(context, state.uploadedBytes + state.pendingBytes)
+                    ),
+                    style = MaterialTheme.typography.bodySmall
+                )
+                LinearProgressIndicator(
+                    progress = { fraction },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
 
             when {
                 !state.canRemoveLocalCopies -> Text(

@@ -13,8 +13,6 @@
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
     <string name="settings_account">Account</string>
-    <string name="settings_sources">Folders to back up</string>
-    <string name="settings_deletion">When you delete a photo</string>
     <string name="settings_cloud_files">Your cloud files</string>
     <string name="settings_open_onedrive">Open OneDrive</string>
     <string name="settings_show_empty_folders">Show empty folders</string>
@@ -23,6 +21,9 @@
     <string name="settings_open_onedrive_detail">Restore covers the folders GallerySync backs up to. For everything else in your OneDrive, open OneDrive.</string>
     <string name="settings_automatic">Automatic sync</string>
     <string name="settings_storage">Storage</string>
+    <!-- Storage, as a size rather than only a count: a bar means nothing without the quantity it
+         is a proportion of. -->
+    <string name="storage_backed_up">%1$s backed up of %2$s</string>
     <string name="settings_optimise">Optimise photos</string>
     <string name="settings_auto_optimise">Optimise automatically</string>
     <string name="settings_auto_optimise_on">Offered as soon as photos are verified. Android still asks you to confirm each batch — it does not allow this to happen unattended.</string>
@@ -282,7 +283,6 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
     <!-- Retrieval: files in OneDrive that are no longer on the phone. -->
     <string name="tab_retrieve">Restore</string>
     <string name="retrieve_title">Restore from OneDrive</string>
-    <string name="retrieve_explain">Everything OneDrive holds in this folder. Restoring one puts it back without touching the copy in the cloud, so you can do it as often as you like.</string>
     <string name="retrieve_empty">Nothing here to restore.</string>
     <string name="retrieve_where">Files come back into a folder called Restored, with “_restored” added to the name.</string>
     <string name="retrieve_action">Restore</string>

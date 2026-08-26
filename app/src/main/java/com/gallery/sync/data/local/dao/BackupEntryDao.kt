@@ -290,6 +290,38 @@ interface BackupEntryDao {
     fun observePendingBytes(uploaded: BackupState = BackupState.UPLOADED): Flow<Long>
 
     /**
+     * Bytes already in OneDrive, and bytes still waiting in albums the user selected.
+     *
+     * Sizes rather than counts because the UI shows a proportion, and a proportion of file *counts*
+     * is a different and more flattering number than a proportion of bytes — 900 thumbnails backed
+     * up and one 2 GB video outstanding is 99% by count and about 30% by size. The bar has to mean
+     * the one the user is waiting on.
+     *
+     * Scoped the same way [countPendingInSelectedAlbums] is: an album switched off is not work.
+     */
+    @Query(
+        """
+        SELECT COALESCE(SUM(sizeBytes), 0) FROM backup_entries
+        WHERE state = :uploaded
+          AND album IN (
+              SELECT albumName FROM album_preferences WHERE mode != 'OFF'
+          )
+        """
+    )
+    suspend fun uploadedBytesInSelectedAlbums(uploaded: BackupState = BackupState.UPLOADED): Long
+
+    @Query(
+        """
+        SELECT COALESCE(SUM(sizeBytes), 0) FROM backup_entries
+        WHERE state != :uploaded
+          AND album IN (
+              SELECT albumName FROM album_preferences WHERE mode != 'OFF'
+          )
+        """
+    )
+    suspend fun pendingBytesInSelectedAlbums(uploaded: BackupState = BackupState.UPLOADED): Long
+
+    /**
      * Rows for files no longer on the device.
      *
      * Removing these keeps the ledger honest. It never touches the copy already in OneDrive —

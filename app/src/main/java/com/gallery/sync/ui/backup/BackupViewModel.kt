@@ -123,8 +123,10 @@ data class BackupUiState(
      */
     val hasLoadedCounts: Boolean = false,
     val uploadedCount: Int = 0,
+    val uploadedBytes: Long = 0L,
     /** Outstanding files **within the selected albums** — not the whole library. */
     val pendingCount: Int = 0,
+    val pendingBytes: Long = 0L,
     /** Local copies made redundant by a confirmed cloud copy, and what they occupy. */
     val redundantCount: Int = 0,
     val redundantBytes: Long = 0L,
@@ -156,7 +158,29 @@ data class BackupUiState(
     val defaultAlbumMode: AlbumMode = AlbumMode.DEFAULT,
     /** Whether the restore screen lists cloud folders that hold nothing. */
     val showEmptyCloudFolders: Boolean = false
+
 ) {
+
+    /**
+     * How much of the selected work is done, by bytes, or null when there is nothing to show.
+     *
+     * **Both halves are scoped to selected albums, and that is the whole trick.** The first version
+     * of this divided every byte ever uploaded by the bytes pending in selected albums — a global
+     * numerator over a scoped denominator — and the bar read 99% while the hero underneath it said
+     * "Uploading 2 of 22, 8%". Caught on the Fold 4, 26 Aug 2026, by looking at the screen.
+     *
+     * The bar sits directly under "N files selected, X MB", so it has to be a proportion of exactly
+     * that and of nothing else.
+     *
+     * Null rather than zero when nothing is selected: a bar sitting empty says "none of it is backed
+     * up", which is a claim, and the honest answer is that there is no work in progress to report.
+     */
+    val backedUpFraction: Float?
+        get() {
+            val total = uploadedBytes + pendingBytes
+            return if (total <= 0L) null else (uploadedBytes.toFloat() / total).coerceIn(0f, 1f)
+        }
+
     /** Files that would be sent if a run started now. */
     val enabledItemCount: Int get() = albums.filter { it.isEnabled }.sumOf { it.itemCount }
 
@@ -435,7 +459,9 @@ class BackupViewModel @Inject constructor(
         _state.value = _state.value.copy(
             hasLoadedCounts = true,
             uploadedCount = entryDao.countInState(BackupState.UPLOADED),
+            uploadedBytes = entryDao.uploadedBytesInSelectedAlbums(),
             pendingCount = entryDao.countPendingInSelectedAlbums(),
+            pendingBytes = entryDao.pendingBytesInSelectedAlbums(),
             redundantCount = redundant.size,
             redundantBytes = redundant.sumOf { it.sizeBytes },
             archiveAlbumsReady = redundant.map { it.album }.distinct().sorted(),

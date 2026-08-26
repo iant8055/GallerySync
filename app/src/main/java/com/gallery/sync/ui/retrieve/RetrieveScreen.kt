@@ -93,16 +93,15 @@ fun RetrieveScreen(
                 text = stringResource(R.string.retrieve_title),
                 style = MaterialTheme.typography.titleMedium
             )
-            Text(
-                text = stringResource(
-                    if (state.selectedFolder == null) {
-                        R.string.retrieve_pick_folder
-                    } else {
-                        R.string.retrieve_explain
-                    }
-                ),
-                style = MaterialTheme.typography.bodySmall
-            )
+            // Only at the top level, where it is an instruction. Inside a folder it was a
+            // paragraph of reassurance above the thing the user came to do — read once, chrome
+            // thereafter. Removed 26 Aug 2026 at Ian's request.
+            if (state.selectedFolder == null) {
+                Text(
+                    text = stringResource(R.string.retrieve_pick_folder),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
             if (state.selectedFolder != null) {
                 Text(
                     text = stringResource(R.string.retrieve_where),
@@ -120,6 +119,19 @@ fun RetrieveScreen(
                 folder = state.selectedFolder,
                 onUp = viewModel::closeFolder
             )
+
+            // One indicator for the screen, directly under the path it belongs to. Determinate
+            // while a file is moving, indeterminate while the drive is being listed — a bar
+            // claiming a confident 0% is a worse lie than one admitting it does not know.
+            val restoring = (state.batchStatus as? RestoreBatchStatus.Working)?.percentOfCurrent
+            when {
+                restoring != null -> LinearProgressIndicator(
+                    progress = { restoring / 100f },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                state.loading -> LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            }
 
             // Never rendered as an empty list. "You have no backups" because the network dropped is
             // the most alarming thing this screen could say, and it would not be true.
@@ -146,19 +158,9 @@ fun RetrieveScreen(
             }
         }
 
-        // Determinate while a file is actually moving, indeterminate while listing or before the
-        // first byte — a bar claiming 0% is a worse lie than one that admits it does not know.
-        val working = state.batchStatus as? RestoreBatchStatus.Working
-        val percentOfCurrent = working?.percentOfCurrent
-        when {
-            percentOfCurrent != null -> LinearProgressIndicator(
-                progress = { percentOfCurrent / 100f },
-                modifier = Modifier.fillMaxWidth()
-            )
+        // Only the listing spinner lives here. The restore bar moved down to sit under the line
+        // that names the file and its percentage, so text-then-bar reads the same on every screen.
 
-            state.loading || working != null ->
-                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-        }
 
         // Outlives the row it describes. Each name is a file that was on this list a moment ago and
         // is not any more, which without a word for it looks like the app losing things.
