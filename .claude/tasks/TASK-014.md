@@ -388,3 +388,40 @@ equivalent.
 - Help lists the topics in the wizard's order, and is reachable without re-running setup
 - A topic explained but not asked never appears as a question in the flow
 - The two asked settings appear in the flow only when they can affect something
+
+## Why this is a wizard and not a tab — observed 26 Aug 2026
+
+The gates were specified here on 19 Aug and then built as `ReconcileScreen`, reachable as the third
+tab. That satisfies the wording of step 5 and misses its point: a gate the user has to *find* is not
+a gate.
+
+**Hit for real on the Fold 4**, on the first genuinely fresh install anyone has run — app data cleared,
+SAF grants revoked, signed into a new account. Ian reported no albums showing, and rescanning changed
+nothing. The engine was behaving exactly as designed:
+
+```
+GallerySync/MediaScanne: scanAll: no folders granted yet, returning nothing
+GallerySync/BackupEngin: refreshLedger: 0 files seen
+```
+
+Three things combined to make correct behaviour unreadable:
+
+1. **The app opens on Albums** — tab 0 in `SignedInApp` — which is empty by construction until Gate 1
+   is answered on a different tab.
+2. **Nothing on that screen explains the emptiness.** `ReconcileScreen` guards against precisely this
+   error for its own numbers, hiding everything below Sources because a reconciliation reporting zero
+   would "announce that the whole library is already backed up". Albums has no equivalent.
+3. **Rescan is offered and cannot succeed.** The screen invites the one action that has no chance of
+   working, and says nothing when it doesn't. It was pressed twice.
+
+The fix is the wizard, not a hint on the Albums screen: the folder pick belongs in the install steps
+where step 5 already puts it, and the main tabs should not be the place a fresh install lands.
+
+### Acceptance, added
+
+- A fresh install cannot reach the main tabs before both gates are answered — the wizard is the
+  landing surface, not Albums
+- No screen offers an action that cannot succeed in its current state; where Albums would be empty
+  because no source is granted, it says that and points at the gate rather than showing a bare list
+- Verified from a true fresh install — `pm clear` plus revoked SAF grants — not from an upgrade over
+  existing app data, which is what hid this

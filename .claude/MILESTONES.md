@@ -211,9 +211,14 @@ Verified on hardware: sign-in completes and the real drive lists.
 - [x] **Bound the upload batch by bytes, not just file count** — 512 MB cap, a lone oversized file
       still attempted
 - [x] **Automatic sync on by default**, armed at application start rather than only by the toggle
-- [ ] **Persist the upload session URL and its expiry on the ledger row.** Confirmed on hardware: a
-      run killed at 96% of a 164 MB video restarted from byte zero. Any file too large to finish
-      inside one run can never complete, and the threshold scales with upstream, not file size.
+- [x] **Persist the upload session URL and its expiry on the ledger row.** The failure that prompted
+      this: a run killed at 96% of a 164 MB video restarted from byte zero, so any file too large to
+      finish inside one run could never complete, with the threshold scaling on upstream rather than
+      file size. **Built and proven end to end on the Fold 4, 26 Aug 2026** — a 1,938 MB video was
+      force-stopped at ~50%, the process killed outright, and the next run resumed at byte
+      1,069,547,520 of 2,032,370,426. **Caveat: the session expires about 15 minutes after the last
+      chunk**, extending as chunks land. This covers a run killed and restarted promptly; it does not
+      cover a phone left overnight.
 - [ ] Retry failed items from the UI
 - [x] **Start time for the first backup.** The initial whole-library upload is the heaviest thing the
       app ever does. User-set, default overnight (1am, six-hour window), charging required for that
@@ -256,7 +261,8 @@ keeps working.
 ## v0.4.0 — Retrieval and deletion sync
 - [x] Fetch a cloud-only item back on demand, registering it in MediaStore so every app sees it.
       Photos and video both — it is the only route back to a full-quality edit from a proxy.
-      **Verified byte-identical on the Fold 4, 25 Aug 2026.** Video not yet exercised.
+      **Verified byte-identical on the Fold 4, 25 Aug 2026.** **Video exercised 26 Aug 2026** — a 2 GB
+      clip fetched back and SHA-256 matched the local original exactly.
 - [x] Plain retrieval list — **not** a photo browser. Also the only place a fetch can be triggered:
       there is no hydration hook, so tapping an item in Samsung Gallery cannot reach us.
       Populates, fetches, and clears itself once the file is back.
@@ -1108,6 +1114,142 @@ And Android's dialog says only "move to trash" — it cannot say the cloud copy 
 So the prompt is a **summons, not a consent**: it names the album, the count and the size, states that
 the copies are confirmed in OneDrive, and launches Android's dialog directly. The user answers one
 question. Asking the same thing twice is how a confirmation stops being one.
+
+### 26 Aug 2026 — the first true fresh install, and a gate nobody could find
+
+**Fold 4**, prepared as an isolated test rig: Samsung Gallery Sync off, the shared OneDrive account
+removed from the device, `pm clear com.gallery.sync`, signed into a newly created Microsoft account.
+Verified clean before starting — empty app data directory, no persisted SAF grants, 4,639 images and
+1,736 videos still on the phone.
+
+**Ian reported no albums in the Albums tab, unchanged by Rescan.** Nothing was broken. `scanAll`
+returns nothing until Gate 1 grants a source tree, which is deliberate, and the log said so plainly:
+`scanAll: no folders granted yet, returning nothing`, `refreshLedger: 0 files seen`.
+
+What the run actually exposed is that the app **opens on a screen that is empty by construction and
+cannot explain itself**, while the gate that fills it sits on another tab. Rescan is offered there
+and has no chance of succeeding. See TASK-014, which specified the gates as wizard steps on 19 Aug;
+they were built as a reachable tab instead.
+
+**Why this had never been seen before.** Every previous run on this device was an upgrade over
+existing app data, so a source grant was already persisted from an earlier session. The defect is
+only reachable from a state no prior test had created.
+
+*Isolation note, for the account switch:* the ledger is not bound to an account — `verifiedInCloud`
+selects on state and byte size alone, and `signOut` does not clear it. Stale UPLOADED rows therefore
+survive a switch and claim to be verified. Nothing removes on that claim: `confirmStillInCloud`
+re-asks the live drive first, and `cloudDeletionCandidates` keys on local absence rather than cloud
+absence. Both gates held. The rows were cleared anyway so the test would start from zero.
+
+### 26 Aug 2026 — resumable uploads proven, and the window they actually give you
+
+**Fold 4**, isolated rig, new Microsoft account, empty drive. The last open item in v0.2 tested
+deliberately rather than waited for.
+
+**Haku first, as a smoke test.** 19 files, 1,107 MB, all uploaded and verified — real `remoteItemId`
+on every row and `remoteSizeBytes = sizeBytes` on every row, no failures, no retries. The empty-drive
+path that had never run: `reconcile: 0 already in OneDrive, 6277 outstanding, 0 in 0 albums that
+could not be checked`, the exact inverse of the 97.6% this drive normally reports. Missing album
+folders returned 404 throughout and none of them landed in the unchecked category, which is the
+19 Aug fix holding from the direction nobody had tried.
+
+**Then the resume itself, on a 1,938 MB video.**
+
+| | |
+|---|---|
+| Upload started | 11:52:55, `byte budget trimmed 25 candidates to 1` |
+| `am force-stop` | 11:56:21, 206s in, roughly half sent |
+| Session on the row after the kill | present, with an expiry |
+| Restarted | 11:57:57, **new PID** — a cold start, not a backgrounded coroutine |
+| Resumed at | `1069547520 of 2032370426 bytes (52% already accepted)` |
+
+**1,020 MB not sent twice.** Persist, survive a process death, and resume from offset — all three
+halves of the feature, on hardware.
+
+**The caveat is the expiry, and it is shorter than it looks.** Graph returned about fifteen minutes,
+measured twice: the Haku session at 11:22:07 expired 11:37:06, and this one moved to 12:07:55 as
+chunks landed. So the window extends with activity but is always ~15 minutes from the last chunk.
+
+That bounds what the feature promises. A run killed and restarted promptly is saved. A phone that
+dies overnight is not — `resumeOffsetOf` will find the session unusable, log
+`stored session is no longer usable`, and open a fresh one at byte zero. The milestone should not be
+read as "large files can now always finish".
+
+**A lone oversized file is still attempted**, confirmed twice: 25 candidates trimmed to 1 for a
+1,938 MB file against a 512 MB budget.
+
+### 26 Aug 2026 — a full drive, and what it did not damage
+
+**Fold 4**, same rig, deliberately filled. The 5 GB test account reached 100% at 12:10:50, confirmed
+in the OneDrive app: *"Your storage is full (100%)"*, Samsung Gallery folder at 5.1 GB. 23 files and
+5,188 MB uploaded by this app to get there.
+
+The next run, against a drive that could accept nothing:
+
+```
+12:20:35.574  W OneDriveUpl: upload: drive is full
+12:20:35.575  W BackupEngin: uploadPending: stopping run — DRIVE_FULL
+```
+
+| Checked | Result |
+|---|---|
+| 507 surfaces as `StopReason.DRIVE_FULL`, and reaches the screen | yes — Ian saw the message |
+| Run aborts rather than failing the other 23 pending files | yes, one attempt then stop |
+| `attemptCount` unchanged | yes — 0 across all 6,277 rows, no `lastError` written |
+
+**The third row is the one worth having tested.** Burning an attempt per file per run against a full
+drive would walk the ledger toward `MAX_ATTEMPTS` and permanently abandon files that are undamaged
+and would upload the moment space existed — silently, and discoverable only months later. It does
+not happen.
+
+**It also bounds the "no warning" defect rather than widening it.** Four runs today ended without the
+screen saying anything, and this one did not: when a run has a `StopReason`, the UI reports it. The
+silence is specific to `stoppedBecause == null` with files still pending, which is exactly the gap
+FIX-001 describes and nothing larger.
+
+### 26 Aug 2026 — a 2 GB restore, and the logger that was eating it
+
+**Fold 4.** Fetching the 1,938 MB video back killed the process twice, identically:
+
+```
+java.lang.OutOfMemoryError: ... target footprint 536870912, growth limit 536870912
+    at okio.Buffer.writableSegment$okio
+    at okhttp3.internal.http2.Http2Stream.receiveData
+```
+
+**Cause: `HttpLoggingInterceptor.Level.BODY`.** It buffers an entire response body into memory in
+order to print it. `@Streaming` cannot stop that — the annotation is Retrofit's, the interceptor is
+OkHttp's, one layer below, and it has no idea the caller intends to stream. So the single endpoint
+returning gigabytes was the single endpoint guaranteed to be buffered whole, and it died at the
+512 MiB heap ceiling every time.
+
+The irony is on the record: `downloadItem`'s own doc comment said `@Streaming` was required because
+"a 2 GB clip would take the process down". It did, by the other route.
+
+**Debug builds only** — release logs at `NONE` and never buffered. But debug is the build large-file
+restore gets tested on, which is why video retrieval sat unverified in this milestone for eight days.
+
+**Fixed** by giving downloads their own client: `GraphDownloadService` on a `@DownloadClient` that
+logs at `HEADERS`, authenticated as before, same timeouts, `@Streaming` retained. Both defences are
+now present and both are needed — one stops Retrofit buffering before the call returns, the other
+stops the interceptor buffering after. `GraphApiService` no longer carries the endpoint at all.
+
+**Then the test it was blocking, which passed on all three counts at once:**
+
+| | |
+|---|---|
+| 2 GB download completed | no crash, `is_pending` cleared, 2,032,370,426 bytes on disk |
+| Video retrieval | exercised for the first time — closes the v0.4 item |
+| Resumed upload byte-identical | `sha256 2db7a4d6bc68a633ebd7fea301b8b15cc3d338c484f19d4b1ea5fa4dd570fb32`, local and restored |
+
+That last row is the one worth having. The cloud copy was assembled from two upload sessions across
+a process kill, and the file that came back is bit-for-bit the original. Size matching was already
+known; this is content.
+
+**Still open, noticed here:** the Restore tab shows file counts only, so a seven-minute single-file
+download reads as a hang. `RestoreFromCloud` already emits byte progress and `RetrieveViewModel`
+discards it. The Backup screen solved this and wrote down why: "a three-minute upload with no
+feedback reads as a hang, and the biggest files are exactly the ones that take longest."
 
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
