@@ -27,7 +27,23 @@ data class SelectedFile(val file: RestorableFile, val folderName: String)
 
 sealed interface RestoreBatchStatus {
 
-    data class Working(val done: Int, val total: Int) : RestoreBatchStatus
+    /**
+     * [currentFile] and [percentOfCurrent] exist because file counts alone are not progress.
+     *
+     * Restoring one 2 GB video shows "0 of 1" for seven minutes and reads as a hang — observed on
+     * the Fold 4, 26 Aug 2026. Backup already learned this and says so on `BackupProgress`: "a
+     * three-minute upload with no feedback reads as a hang, and the biggest files are exactly the
+     * ones that take longest." Downloads are no different.
+     *
+     * [percentOfCurrent] is null until the first byte lands, so the bar starts indeterminate rather
+     * than claiming a confident 0%.
+     */
+    data class Working(
+        val done: Int,
+        val total: Int,
+        val currentFile: String? = null,
+        val percentOfCurrent: Int? = null
+    ) : RestoreBatchStatus
 
     data class Done(val restored: Int, val failed: Int) : RestoreBatchStatus
 
@@ -327,7 +343,11 @@ class RetrieveViewModel @Inject constructor(
 
             chosen.forEachIndexed { index, file ->
                 _state.value = _state.value.copy(
-                    batchStatus = RestoreBatchStatus.Working(index, chosen.size)
+                    batchStatus = RestoreBatchStatus.Working(
+                        done = index,
+                        total = chosen.size,
+                        currentFile = file.displayName
+                    )
                 )
 
                 when (
@@ -336,7 +356,21 @@ class RetrieveViewModel @Inject constructor(
                         displayName = file.displayName,
                         mimeType = file.mimeType,
                         isVideo = file.isVideo,
-                        sizeBytes = file.sizeBytes
+                        sizeBytes = file.sizeBytes,
+                        onProgress = { written, total ->
+                            _state.value = _state.value.copy(
+                                batchStatus = RestoreBatchStatus.Working(
+                                    done = index,
+                                    total = chosen.size,
+                                    currentFile = file.displayName,
+                                    percentOfCurrent = if (total > 0) {
+                                        ((written * 100) / total).toInt().coerceIn(0, 100)
+                                    } else {
+                                        null
+                                    }
+                                )
+                            )
+                        }
                     )
                 ) {
                     is RestoreResult.Restored -> restored++

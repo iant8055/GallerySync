@@ -132,8 +132,18 @@ fun RetrieveScreen(
             }
         }
 
-        if (state.loading) {
-            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+        // Determinate while a file is actually moving, indeterminate while listing or before the
+        // first byte — a bar claiming 0% is a worse lie than one that admits it does not know.
+        val working = state.batchStatus as? RestoreBatchStatus.Working
+        val percentOfCurrent = working?.percentOfCurrent
+        when {
+            percentOfCurrent != null -> LinearProgressIndicator(
+                progress = { percentOfCurrent / 100f },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            state.loading || working != null ->
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         }
 
         // Outlives the row it describes. Each name is a file that was on this list a moment ago and
@@ -483,7 +493,25 @@ private fun RestoreBar(state: RetrieveUiState, onRestore: () -> Unit) {
             Text(
                 modifier = Modifier.weight(1f),
                 text = if (status is RestoreBatchStatus.Working) {
-                    stringResource(R.string.retrieve_batch_working, status.done + 1, status.total)
+                    // Name the file and its position within it once bytes are moving. A bare
+                    // "1 of 1" sat unchanged for seven minutes on a 2 GB video and read as a hang.
+                    val percent = status.percentOfCurrent
+                    val name = status.currentFile
+                    if (percent != null && name != null) {
+                        stringResource(
+                            R.string.retrieve_batch_working_file,
+                            status.done + 1,
+                            status.total,
+                            name,
+                            percent
+                        )
+                    } else {
+                        stringResource(
+                            R.string.retrieve_batch_working,
+                            status.done + 1,
+                            status.total
+                        )
+                    }
                 } else {
                     stringResource(
                         R.string.retrieve_selected_summary,
