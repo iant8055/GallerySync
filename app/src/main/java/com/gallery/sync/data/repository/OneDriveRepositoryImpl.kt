@@ -2,6 +2,7 @@ package com.gallery.sync.data.repository
 
 import com.gallery.sync.data.remote.auth.OneDriveTokenProvider
 import com.gallery.sync.data.remote.onedrive.GraphApiService
+import com.gallery.sync.data.remote.onedrive.GraphDownloadService
 import com.gallery.sync.data.remote.onedrive.dto.GraphChildrenResponseDto
 import com.gallery.sync.data.remote.onedrive.toRemoteMediaNode
 import com.gallery.sync.di.IoDispatcher
@@ -30,6 +31,9 @@ import javax.inject.Singleton
 @Singleton
 class OneDriveRepositoryImpl @Inject constructor(
     private val api: GraphApiService,
+    // Downloads use a client that never body-logs; see GraphDownloadService for why that is not
+    // optional on a path that streams gigabytes.
+    private val downloadApi: GraphDownloadService,
     private val tokenProvider: OneDriveTokenProvider,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
 ) : OneDriveRepository {
@@ -83,7 +87,7 @@ class OneDriveRepositoryImpl @Inject constructor(
             }
 
             try {
-                val response = api.downloadItem(itemId)
+                val response = downloadApi.downloadItem(itemId)
                 val body = response.body()
 
                 when {

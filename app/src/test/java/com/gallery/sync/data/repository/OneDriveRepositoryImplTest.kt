@@ -2,6 +2,7 @@ package com.gallery.sync.data.repository
 
 import com.gallery.sync.data.remote.auth.OneDriveTokenProvider
 import com.gallery.sync.data.remote.onedrive.GraphApiService
+import com.gallery.sync.data.remote.onedrive.GraphDownloadService
 import com.gallery.sync.data.remote.onedrive.dto.GraphChildrenResponseDto
 import com.gallery.sync.data.remote.onedrive.dto.GraphDriveItemDto
 import com.gallery.sync.data.remote.onedrive.dto.GraphFileFacetDto
@@ -40,6 +41,7 @@ import java.io.IOException
 class OneDriveRepositoryImplTest {
 
     private val api: GraphApiService = mock()
+    private val downloadApi: GraphDownloadService = mock()
     private val tokenProvider: OneDriveTokenProvider = mock()
 
     private val folderDto = GraphDriveItemDto(
@@ -62,6 +64,7 @@ class OneDriveRepositoryImplTest {
 
     private fun TestRepository() = OneDriveRepositoryImpl(
         api = api,
+        downloadApi = downloadApi,
         tokenProvider = tokenProvider,
         dispatcher = UnconfinedTestDispatcher()
     )
