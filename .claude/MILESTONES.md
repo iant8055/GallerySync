@@ -1458,6 +1458,52 @@ reclaimed total negative. Now guarded where both sizes are already known, before
 **Still true, and worth not forgetting:** video is never proxied, and Archive still needs
 `createTrashRequest` because SAF deletes permanently. This changes the write path only.
 
+### 26 Aug 2026 — optimising a photo made the app think it had been deleted
+
+**Fold 4.** Found by watching an Archive run behave oddly, and it turned out to be the most dangerous
+defect of the day.
+
+`refreshLedger` decides what is still on the phone by comparing **name and size**. Proxying rewrites a
+file in place and changes both its size and its mtime, so a proxied row's remembered key can never
+match the file on disk. Six optimised photos sitting in the gallery were all classified as deleted
+from the phone; fifteen such rows across the ledger.
+
+**Two features broke on that one cause.**
+
+**Deletion sync would have offered the full-quality originals of photos the user still has.** That is
+the inverse of what optimising promises. Worse, Ian made the point that sharpens it: the local copy
+carries a **cloud badge burned into its pixels**, and that badge is a standing promise that the
+original is in OneDrive. Delete the original and every badged photo asserts something false, while
+being indistinguishable from one still telling the truth. The user's only signal that their originals
+exist would have become noise — and the badge is exactly what a careful user relies on when freeing
+space.
+
+Nothing was lost. Cloud deletion moves to OneDrive's recycle bin, the policy defaults to Leave, the
+grace period had not elapsed, and the confirmation lists names. But a user on Ask would have been
+asked the wrong question about the right files, and recovery would mean a different app's web recycle
+bin inside 30 days, with nothing on the phone hinting anything was wrong.
+
+**Archive could not see them either.** An album taken Sync then Archive offered **2 of 13** files, and
+the 11 it could not see were the ones it had shrunk itself — so such an album could never be archived
+at all. That is the whole point of the two modes composing.
+
+**Fixed** by judging a proxied row on its **MediaStore id**, which survives a rewrite when size and
+mtime do not. `refreshLedger` already relied on that property for the upload path — the comment there
+calls it "the single most important line in this method" — and it simply was not extended to the two
+places that ask whether a file is still present.
+
+**And separately, not redundantly:** `cloudDeletionCandidates` now excludes `isProxied`. The
+classification fix makes the answer correct; this makes it *safe* if the classification is ever broken
+again. Wiring the badge and the cloud copy together so they cannot disagree is a stronger guarantee
+than a check that happens to catch it.
+
+**Verified:** 15 wrongly-missing rows fell to 0 on the next scan, Archive's count on the same album
+went 0 → 6, and nothing was grace-eligible at any point in between.
+
+**The method note.** This was found because a *user* said "only 2 files" about a result that looked
+plausible. Every automated signal was healthy — no errors, no failures, correct-looking logs. The two
+mismatched numbers were only visible to someone who knew what the album contained.
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have
