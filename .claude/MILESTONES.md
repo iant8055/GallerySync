@@ -230,6 +230,7 @@ The milestone that delivers the actual product: the phone stops filling up, and 
 keeps working.
 
 - [x] **Photo proxies.** Downscale to ~2048px, EXIF preserved, proxy kept in MediaStore permanently.
+      **Unattended from 26 Aug 2026** — written through the persisted SAF tree grant, no dialog.
       Roughly 10x smaller, and every photo stays visible and editable in the phone's own gallery.
 - [x] **Never proxy video silently** — kept as guidance, not as a hard rule; see the video section.
 - [x] **Clear marker showing which items are optimised.** Cloud badge burned into the proxy plus an
@@ -1416,6 +1417,46 @@ the screen on those runs. The fix is a dedicated arm job under its own name, so 
 running one. `APPEND_OR_REPLACE` was considered and rejected: appended work is cancelled when its
 parent fails, so a drive-full run would leave the trigger silently unarmed — trading a visible flaw
 for an invisible one.
+
+### 26 Aug 2026 — optimising made unattended, seven days after it was possible
+
+**Fold 4.** "Optimise automatically" meant "ask me about it automatically". `ProxyApplier` wrote
+through `MediaStore.createWriteRequest`, which raises a system dialog per batch and only launches
+from an Activity — so the rewrite could never happen without the user present, whatever the setting
+said.
+
+The 19 Aug probe had already proved the alternative, on this exact operation: a 4.4 MB photo owned by
+`com.sec.android.app.camera` shortened to 4 KB through a persisted tree grant, no dialog, surviving a
+reboot and a reinstall. CLAUDE.md names this as the grant's proper use. **The proxy path was simply
+never migrated to it** — the finding sat in the log for a week while the feature it unblocked kept
+asking for taps.
+
+**Result, with an album switched to Sync:**
+
+```
+optimising 53 files through the tree grant
+proxied 9 files, reclaimed 8071092 bytes, 44 not worth proxying
+```
+
+Ian: *"no pop up required."* 3.77 MB → 0.93, 3.25 → 1.10, 1.28 → 0.38. The other 44 were correctly
+marked `isProxySkipped` — already under 2048px, recorded permanently so the count reaches zero
+instead of sticking.
+
+**The rescan lands.** MediaStore and on-disk sizes matched exactly on every file checked afterwards —
+925513, 1095887, 384169 — so the staleness the 19 Aug run measured is handled by the
+`MediaScannerConnection.scanFile` that follows every write. It is fire-and-forget rather than awaited,
+which is the right trade: the ledger records the proxy size from the file this app just wrote, not
+from MediaStore, so a briefly stale index costs a thumbnail that is a moment behind rather than a
+wrong decision.
+
+**A second defect, found in the same table.** A proxy came out *larger* than its original — 404 KB in,
+490 KB out. The generator decides on pixel dimensions, which is the right test for whether
+downscaling is possible and the wrong one for whether it helps: a heavily compressed source above
+2048px re-encodes larger. It spent space, quality and a cloud badge to save nothing, and made the
+reclaimed total negative. Now guarded where both sizes are already known, before the file is touched.
+
+**Still true, and worth not forgetting:** video is never proxied, and Archive still needs
+`createTrashRequest` because SAF deletes permanently. This changes the write path only.
 
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
