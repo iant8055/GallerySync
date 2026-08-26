@@ -6,6 +6,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.Data
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import com.gallery.sync.data.local.settings.BackupPreferences
 import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.domain.backup.BackupEngine
 import com.gallery.sync.domain.backup.FirstBackupWindow
@@ -39,16 +40,6 @@ class BackupWorker @AssistedInject constructor(
         Logger.i(TAG, "backup run starting${if (manual) " (manual)" else ""}")
 
         val preferences = settings.current()
-
-        // Re-arm the watch for new photos straight away. A content-triggered request fires once,
-        // so without this the app would back up exactly one batch and then go quiet forever.
-        // Doing it first means a crash later in this run still leaves the watch armed.
-        if (preferences.isAutomaticEnabled) {
-            BackupScheduling.enqueueContentTriggered(
-                WorkManager.getInstance(applicationContext),
-                preferences.allowMeteredNetwork
-            )
-        }
 
         // The first whole-library upload is the heaviest thing this app does — 148 GB and roughly
         // fourteen hours on a real device — so it waits for a moment the user chose. Only automatic
@@ -84,12 +75,14 @@ class BackupWorker @AssistedInject constructor(
             if (engine.outstandingCount() == 0) {
                 Logger.i(TAG, "backlog already clear; first-backup window no longer applies")
                 settings.markFirstBackupComplete()
+                rearmContentTrigger(preferences)
                 return Result.success()
             }
 
             // success, not retry: nothing is wrong, and a retry would burn backoff attempts waiting
             // for a clock. The periodic pass and the content trigger both come back on their own.
             Logger.i(TAG, "first backup held ($hold); not uploading yet")
+            rearmContentTrigger(preferences)
             return Result.success()
         }
 
@@ -146,6 +139,8 @@ class BackupWorker @AssistedInject constructor(
             .putString(RESULT_STOPPED, result.stoppedBecause?.name)
             .build()
 
+        rearmContentTrigger(preferences)
+
         return when (result.stoppedBecause) {
             StopReason.NETWORK -> Result.retry()
 
@@ -156,6 +151,33 @@ class BackupWorker @AssistedInject constructor(
 
             null -> Result.success(outcome)
         }
+    }
+
+    /**
+     * Re-arms the watch for new photos.
+     *
+     * A content-triggered request fires once, so without this the app backs up one batch and goes
+     * quiet forever.
+     *
+     * **Called at the end of the run, never at the start.** `enqueueContentTriggered` uses
+     * `REPLACE` on `CONTENT_TRIGGER_WORK`, and when this run *is* that work, replacing it cancels
+     * the worker doing the replacing. It did exactly that on the Fold 4, 26 Aug 2026: three photos
+     * added to a Sync album, the run cancelled 188ms after starting, mid-`refreshLedger`, and
+     * nothing uploaded.
+     *
+     * It hid for so long because a run that finds nothing to do finishes inside ~44ms and beats the
+     * cancellation. Only a run with real work to do lives long enough to be killed by it.
+     *
+     * The original reason for arming first — a crash later in the run would leave the watch
+     * unarmed — is covered twice already: `enable()` runs at application start, and the 6-hourly
+     * periodic pass catches whatever a missed trigger dropped.
+     */
+    private suspend fun rearmContentTrigger(preferences: BackupPreferences) {
+        if (!preferences.isAutomaticEnabled) return
+        BackupScheduling.enqueueContentTriggered(
+            WorkManager.getInstance(applicationContext),
+            preferences.allowMeteredNetwork
+        )
     }
 
     companion object {
