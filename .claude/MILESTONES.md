@@ -1375,6 +1375,48 @@ test, and a verification log is worth more without a doctored input in it.
 on this phone in Restored" is the explanation, and the screen not giving it is the same defect this
 day kept producing.
 
+### 26 Aug 2026 — automatic backup of new photos had never worked
+
+**Fold 4.** Three photos moved into a Sync album. Nothing uploaded, nothing reached the ledger, and
+the log stopped dead one line after `backup run starting`.
+
+**The content-triggered worker cancelled itself.** Its first action was to re-arm the watch, and
+`enqueueContentTriggered` uses `REPLACE` on `CONTENT_TRIGGER_WORK` — the same unique name as the run
+executing it. WorkManager named the mechanism precisely:
+
+```
+Work [ id=dd48f3c7, tags={ BackupWorker } ] was cancelled
+androidx.work.impl.WorkerStoppedException
+    at CancelWorkRunnable.forNameInline
+    at EnqueueRunnable.enqueueWorkWithPrerequisites
+```
+
+188 ms after starting, mid-`refreshLedger`.
+
+**Why it hid for so long, which is the interesting part.** A run with nothing to do finishes in about
+44 ms and beats its own cancellation — so it logs its answer and returns looking perfectly healthy.
+Only a run with real work lives long enough to be killed. Every prior observation was of a run that
+found nothing outstanding, which is exactly the case that cannot expose the bug.
+
+New media therefore only ever reached OneDrive through the 6-hourly periodic net, while the app's own
+description promised *"New photos sync shortly after you take them"*.
+
+**Fixed** by re-arming at the end of the run rather than the start. The original comment argued for
+arming first so a crash later still left the watch armed; that protection already exists twice, in
+`enable()` at application start and in the periodic pass. The no-media-permission return still does
+not re-arm, which was already correct — a timer cannot obtain a permission.
+
+**Verified:** four photos moved into a Sync album uploaded across two unattended content-triggered
+runs, each re-arming the next, nothing pressed, nothing pending afterwards.
+
+**Residual, recorded rather than hidden.** The end-of-run re-arm still `REPLACE`s the work that is
+finishing, so that run is recorded CANCELLED rather than SUCCEEDED and its `Result` is discarded.
+Everything real is committed by then — uploads, ledger, continuation — but the outcome does not reach
+the screen on those runs. The fix is a dedicated arm job under its own name, so nothing replaces a
+running one. `APPEND_OR_REPLACE` was considered and rejected: appended work is cancelled when its
+parent fails, so a drive-full run would leave the trigger silently unarmed — trading a visible flaw
+for an invisible one.
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have
