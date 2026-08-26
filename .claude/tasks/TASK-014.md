@@ -425,3 +425,43 @@ where step 5 already puts it, and the main tabs should not be the place a fresh 
   because no source is granted, it says that and points at the gate rather than showing a bare list
 - Verified from a true fresh install — `pm clear` plus revoked SAF grants — not from an upgrade over
   existing app data, which is what hid this
+
+## The principle behind all of this — named 26 Aug 2026
+
+Five defects on one day, all the same shape. The app held correct information and gave the user no
+way to see it or ask again:
+
+| Screen | What it did | What the user saw |
+|---|---|---|
+| Albums | correctly returned nothing until Gate 1 was answered | an empty list, and a Rescan that could not work |
+| Albums | stopped on the byte budget, `stoppedBecause = null` | "Finished", 15 files remaining, no reason |
+| Restore | downloaded a 2 GB video for seven minutes | "1 of 1", unmoving — indistinguishable from a hang |
+| Restore | listed the drive once per app launch | a freshly backed-up album absent, no way to refresh |
+| Cloud check | hid its readout when no source was granted | nothing, for a reason chosen on another screen |
+
+None was a logic error. Every one was the app declining to explain itself.
+
+> **Every screen must be able to answer two questions: why does this look like this, and how do I
+> ask again?**
+
+Applied concretely:
+
+- **Empty is never bare.** A list with nothing in it says why it is empty and where the thing that
+  would fill it is set. "No folders chosen yet, so there is nothing to check" and a pointer beats a
+  blank column, always.
+- **Never offer an action that cannot succeed.** Rescan with no granted tree, and Sync now against a
+  drive that is full, both invite the user to do the one thing that has no chance of working.
+- **A stop has a reason, including the boring ones.** `DRIVE_FULL` reached the screen and read
+  correctly; the byte budget did not, because it was not modelled as a stop at all. The user cannot
+  tell those two apart from outside.
+- **Long work reports position, not just membership.** "1 of 1" is not progress. Bytes within the
+  current file are what move.
+- **Anything showing remote state can be re-asked at any time.** Not only after a failure — a
+  successful listing goes stale exactly as fast, and until this was fixed the only cure was killing
+  the app.
+
+The wizard work is where most of this lands, because a first run is the one session where every
+screen is empty for a legitimate reason and the user has no experience to fill the gap.
+
+**This is a review checklist, not a philosophy.** Before any screen is called done, sit in each of its
+empty, working and stopped states and read what it says.
