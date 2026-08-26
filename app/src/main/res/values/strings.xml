@@ -13,6 +13,8 @@
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
     <string name="settings_account">Account</string>
+    <string name="settings_sources">Folders to back up</string>
+    <string name="settings_deletion">When you delete a photo</string>
     <string name="settings_cloud_files">Your cloud files</string>
     <string name="settings_open_onedrive">Open OneDrive</string>
     <string name="settings_show_empty_folders">Show empty folders</string>
@@ -308,6 +310,9 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
     <string name="retrieve_already_here">Already on this phone — restoring makes a second copy.</string>
     <string name="retrieve_could_not_list">Could not reach OneDrive, so this is not a list of what you have. Nothing is missing; we just could not ask.</string>
     <string name="retrieve_try_again">Try again</string>
+    <!-- Always available, not only after a failure: the list is a snapshot of the drive and the
+         drive changes underneath it. -->
+    <string name="retrieve_refresh">Refresh</string>
     <string name="retrieve_working">Restoring…</string>
     <!-- Shown while one file downloads: which file, and how far in. A count alone reads as a
          hang on a large video. -->
@@ -329,6 +334,9 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
         album list unusable and the first upload enormous.
     -->
     <string name="sources_empty">No folders chosen yet. Nothing is backed up, scanned or changed until you pick one.</string>
+    <!-- Shown on Cloud check when no source folder has been granted. Names where the control is,
+         because the screen is otherwise blank for a reason the user cannot see. -->
+    <string name="reconcile_no_sources">No folders chosen yet, so there is nothing to check. Pick the folders to back up in Settings.</string>
     <string name="sources_add">Add a folder</string>
     <string name="sources_remove">Remove</string>
     <string name="sources_refused">That folder cannot be used. Choose a folder rather than a whole drive.</string>

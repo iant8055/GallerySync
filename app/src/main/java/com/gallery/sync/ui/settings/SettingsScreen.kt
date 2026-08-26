@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
+import com.gallery.sync.ui.retrieve.DeletionSection
 import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.ui.backup.BackupViewModel
 import com.gallery.sync.ui.backup.ProxyStatus
@@ -137,6 +138,14 @@ fun SettingsScreen(
                     Text(it, style = MaterialTheme.typography.bodyLarge)
                 }
             }
+        }
+
+        HorizontalDivider()
+
+        // Placed above everything that depends on it. Nothing in this app scans, backs up or
+        // optimises outside a granted tree, so this is the choice the rest of the screen rests on.
+        Section(stringResource(R.string.settings_sources)) {
+            SourcesSection()
         }
 
         HorizontalDivider()
@@ -315,6 +324,14 @@ fun SettingsScreen(
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
+        }
+
+        HorizontalDivider()
+
+        // Last, deliberately. This is the only setting on the screen that can cause a file to leave
+        // OneDrive, and it is read rather than skimmed when it is not competing with a toggle.
+        Section(stringResource(R.string.settings_deletion)) {
+            DeletionSection()
         }
 
         HorizontalDivider()
