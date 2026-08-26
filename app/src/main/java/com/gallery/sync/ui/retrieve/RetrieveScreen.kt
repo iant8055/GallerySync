@@ -24,6 +24,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -77,6 +78,12 @@ fun RetrieveScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
+    // Re-lists the drive each time this tab is entered. The ViewModel outlives a tab switch, so
+    // without this the screen keeps showing whatever the drive held at app launch — an album backed
+    // up since simply does not appear, with no way to ask. Guarded in the ViewModel so it never
+    // discards a folder the user is in or a selection they have made.
+    LaunchedEffect(Unit) { viewModel.refreshIfIdle() }
+
     Column(modifier = modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -124,6 +131,13 @@ fun RetrieveScreen(
                 )
                 TextButton(onClick = viewModel::loadFolders) {
                     Text(stringResource(R.string.retrieve_try_again))
+                }
+            } else if (state.selectedFolder == null && !state.loading) {
+                // Offered on success too, not only after a failure. This list is a snapshot of a
+                // drive that changes underneath it, and until now the only way to re-take it was to
+                // kill the app.
+                TextButton(onClick = viewModel::loadFolders) {
+                    Text(stringResource(R.string.retrieve_refresh))
                 }
             }
 
@@ -223,7 +237,6 @@ fun RetrieveScreen(
 
                     // Two halves of one question: what happened to the files that are no longer
                     // here. The list above offers them back; this offers to let them go.
-                    item { DeletionSection() }
                 }
             }
         }

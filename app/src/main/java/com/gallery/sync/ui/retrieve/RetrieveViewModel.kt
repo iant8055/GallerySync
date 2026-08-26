@@ -160,6 +160,27 @@ class RetrieveViewModel @Inject constructor(
         loadFolders()
     }
 
+    /**
+     * Re-lists the drive when the screen is entered, unless the user is in the middle of something.
+     *
+     * `loadFolders` used to run only from `init`, and this ViewModel outlives a tab switch — so the
+     * screen showed whatever the drive held when the app launched and had no way to be told
+     * otherwise. Ian backed up the Anne album on 26 Aug 2026 and the Restore tab did not list it;
+     * the only cure was killing the app. There was no refresh control either, because the one that
+     * exists appears only after a failed listing.
+     *
+     * **Guarded, because re-entering is not the same as starting over.** Reloading while the user is
+     * inside a folder, holding a selection, or restoring would throw away their position to answer a
+     * question they did not ask. Idle is the only safe moment, and it is also the only moment the
+     * staleness is visible.
+     */
+    fun refreshIfIdle() {
+        val current = _state.value
+        if (current.loading || current.isRestoring) return
+        if (current.selectedFolder != null || current.hasSelection) return
+        loadFolders()
+    }
+
     fun loadFolders() {
         viewModelScope.launch {
             // Published before the listing starts. This is a DataStore read and the listing is a
