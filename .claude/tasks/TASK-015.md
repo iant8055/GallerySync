@@ -4,6 +4,49 @@ Milestone: v0.4.x — destination handling
 Requested by: Ian, 25 Aug 2026
 Depends on: `RemoteRoots`, the skip-existing check in `BackupEngine.remoteIndexFor`
 
+## Deferred — Ian, 26 Aug 2026
+
+**Not being built now. Revisit in a later build.**
+
+The diagnosis below stands and is the reason to keep this file: the destination setting was never
+broken, and anyone who reads "backup didn't work" in a log later should find the explanation here
+rather than re-derive it.
+
+What is deferred is the *duplication feature* — the deliberate second copy. Costed 26 Aug and shelved,
+because the consequences turn out to be larger than the wording suggests.
+
+### Why, in one fact
+
+**The ledger holds one row per file with one `remoteItemId`.** A second copy has no row, so it has no
+identity the app can act on. Everything below follows from that:
+
+| | |
+|---|---|
+| Archive's safety guarantee | **unaffected** — `verifiedInCloud` then `confirmStillInCloud` both act on the tracked copy |
+| Deletion sync | deletes by `remoteItemId`, so it removes one copy and reports "the OneDrive copy" — true of one, false as stated, and the space is not freed |
+| Restore | `cloudFolders` dedups by folder name with `putIfAbsent`; a folder under two roots is listed once, first root wins, so the second copy is invisible |
+| Divergence | edit a file and the new version goes to the destination while the untracked copy stays at the old one — same name, different content, one tracked |
+| Orphans | never verified, never updated, never restorable, never removed; they only consume quota, and quota exhaustion stops backup entirely |
+
+Duplicates cost money and clarity, not data. Nothing here endangers a file, which is why this is a
+deferral and not a prohibition.
+
+### The fork this was always hiding
+
+The "Open" question below — one-off copy or standing choice — is not a detail, it is two different
+features:
+
+- **One-off copy.** Fire-and-forget. Cheap, no schema change. But the app then owes the user a plain
+  statement that the copy is *not tracked* and will not be verified, updated or removed. An untracked
+  copy the user believes is a backup is worse than no copy at all.
+- **Standing choice.** Every future photo goes to both places. Then they are not orphans, they are a
+  second backup, and a second backup has to be tracked: one row per file **per location**. That is a
+  schema change and a migration, which CLAUDE.md makes an escalation.
+
+Recommended when it returns: the one-off, with the untracked wording made explicit. The standing
+version is a genuinely larger feature and deserves costing on its own rather than arriving by
+accident through this one.
+
 ## What Ian asked for
 
 > *"If I want to backup some files to a different location (even if it means the files are
