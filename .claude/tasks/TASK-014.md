@@ -262,3 +262,83 @@ Three requirements on it, all of which follow from what setup can change:
 Whether it lives in Settings or in Help is presentation. Help is the better home if the wizard is
 mostly explanatory on a second run; Settings is better if it is mostly configuration. Both is fine
 — one entry point, linked from two places.
+
+---
+
+# One topic list, three surfaces
+
+Added 25 Aug 2026, after auditing every default (`.claude/DEFAULTS.md`).
+
+Ian: *"we can use that first run guide to frame the help section too."*
+
+This turns the bubbles from a tour into the app's **only** explanation of itself. One list of topics
+serves three places, and a topic is written once:
+
+| Surface | When it appears |
+|---|---|
+| **First-run bubbles** | in order, during setup |
+| **Help** | the same topics, the same order, readable at any time |
+| **Just-in-time** | one topic, at the moment its setting is first used |
+
+The acknowledgement record is already per topic rather than per tour, so the topics were always the
+real unit — this just makes every surface agree about what they are.
+
+What it buys beyond avoiding drift: **Help becomes the tour, re-readable.** Someone who skipped setup
+can find exactly what they skipped, in the order they would have met it, rather than a differently
+organised FAQ that leaves them wondering whether they missed something.
+
+## The topics
+
+Ordered as the wizard meets them. Archive is its own topic rather than a bullet under modes, because
+it is the one that removes files and the one the acknowledgement record gates.
+
+1. **What this is** — files are kept in OneDrive; it is not a gallery, and the phone's own gallery
+   keeps doing the viewing
+2. **Which folders it looks at** — Gate 1, and why an album outside the granted trees is not listed
+3. **Off, Backup and Sync** — what each does to your files
+4. **Archive** — leaves your gallery, covers files added later, gated on verification
+5. **What we can promise** — a verified cloud copy, and plainly what we cannot promise
+6. **Getting files back** — the Restored folder, the `_restored` suffix, repeatable
+7. **Optimising photos** — smaller copies on the phone, originals in the cloud, never video
+8. **When you delete a photo from this phone** — the Leave/Ask choice, at the moment it first matters
+9. **Emptying trash** — never done by this app, in either place
+10. **When backups run** — the first-backup window, charging, Wi-Fi only
+
+Topics 8 and 10 are the two the wizard *asks* about; the rest it explains. See below.
+
+## Which defaults the wizard sets, and which it only explains
+
+The audit in `.claude/DEFAULTS.md` establishes that **the defaults are already safe**: out of the box
+nothing happens, and no default can remove a file from anywhere. So the wizard is not there to make
+the configuration safe — it is there to reach a working one and make the consequential choices
+explicit.
+
+That matters because ten questions before the app opens produces click-through, and click-through is
+exactly what the acknowledgement record exists to prevent. Making everything a question dilutes the
+questions that count.
+
+**Asked, because there is no safe default and the engine cannot start without one:**
+source folders (Gate 1), cloud service, sign-in, media permissions, and what to do with the existing
+library (Gate 2).
+
+**Asked, because the cost is real and the right answer differs per person:**
+the first-backup window and its charging requirement — only when something was actually set to
+upload — and mobile data, where "Wi-Fi only" is the wrong default for someone with unlimited data and
+poor Wi-Fi.
+
+**Explained, never asked:** the default mode for new albums, the cloud deletion policy, the grace
+period, auto-optimise, the destination folder, and the theme.
+
+The test is whether the user can answer it usefully *yet*. Asking "what should happen to your
+OneDrive copy when you delete a photo?" of someone who has not backed up a single file invites a
+guess, and Leave is already the right answer. That topic belongs at the moment they first delete
+something — which is what just-in-time is for, and where the per-topic record makes the two routes
+equivalent.
+
+## Acceptance, added
+
+- Every topic exists exactly once as a string set, used by the bubble, the Help entry and the
+  just-in-time prompt
+- Help lists the topics in the wizard's order, and is reachable without re-running setup
+- A topic explained but not asked never appears as a question in the flow
+- The two asked settings appear in the flow only when they can affect something

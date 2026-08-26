@@ -1,0 +1,131 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;500;600&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: oklch(0.52 0.15 162); }
+    a:hover { color: oklch(0.42 0.14 162); }
+  </style>
+</helmet>
+
+<div style="width: 390px; height: 1100px; box-sizing: border-box; position: relative; overflow: hidden; background: oklch(0.98 0.008 95); font-family: 'Public Sans', system-ui, sans-serif; color: oklch(0.24 0.02 250);">
+
+  <div style="display: flex; flex-direction: column; gap: 18px; padding: 28px 20px 40px 20px;">
+
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div style="font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 800; font-size: 30px; letter-spacing: -0.02em;">How it works</div>
+      <div style="font-size: 14px; line-height: 1.5; color: oklch(0.42 0.015 250);">The same walkthrough as setup, in the same order, any time you want it.</div>
+    </div>
+
+    <!-- The topic list IS the first-run flow. Same topics, same order, so someone who skipped the
+         tour finds exactly what they skipped rather than a differently-shaped FAQ. -->
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+
+      <div style="border-radius: 18px; background: oklch(1 0 0); border: 1px solid oklch(0.92 0.01 250); padding: 15px 17px; display: flex; align-items: center; gap: 13px;">
+        <div style="font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 600; font-size: 14px; color: oklch(0.62 0.02 250); width: 17px; flex-shrink: 0;">1</div>
+        <div style="flex-grow: 1; font-weight: 600; font-size: 15px;">What this is</div>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="oklch(0.65 0.02 250)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </div>
+
+      <div style="border-radius: 18px; background: oklch(1 0 0); border: 1px solid oklch(0.92 0.01 250); padding: 15px 17px; display: flex; align-items: center; gap: 13px;">
+        <div style="font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 600; font-size: 14px; color: oklch(0.62 0.02 250); width: 17px; flex-shrink: 0;">2</div>
+        <div style="flex-grow: 1; font-weight: 600; font-size: 15px;">Which folders it looks at</div>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="oklch(0.65 0.02 250)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </div>
+
+      <div style="border-radius: 18px; background: oklch(1 0 0); border: 1px solid oklch(0.92 0.01 250); padding: 15px 17px; display: flex; align-items: center; gap: 13px;">
+        <div style="font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 600; font-size: 14px; color: oklch(0.62 0.02 250); width: 17px; flex-shrink: 0;">3</div>
+        <div style="flex-grow: 1; font-weight: 600; font-size: 15px;">Off, Backup and Sync</div>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="oklch(0.65 0.02 250)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </div>
+
+      <!-- Archive is its own topic, not a bullet under modes: it is the one that removes files and
+           the one the acknowledgement record gates. Tinted so it reads as the consequential one. -->
+      <div style="border-radius: 18px; background: oklch(1 0 0); border: 1px solid oklch(0.93 0.04 70); padding: 15px 17px; display: flex; align-items: center; gap: 13px;">
+        <div style="font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 600; font-size: 14px; color: oklch(0.55 0.11 55); width: 17px; flex-shrink: 0;">4</div>
+        <div style="flex-grow: 1; font-weight: 600; font-size: 15px;">Archive</div>
+        <div style="padding: 4px 10px; border-radius: 99px; background: oklch(0.95 0.05 70); color: oklch(0.45 0.13 55); font-weight: 600; font-size: 11.5px;">Removes files</div>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="oklch(0.65 0.02 250)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </div>
+
+      <!-- Expanded, to show what an entry holds — and because this is the topic that made Help
+           necessary when the sentence moved out of the Archive dialog. -->
+      <div style="border-radius: 18px; background: oklch(1 0 0); border: 1px solid oklch(0.92 0.01 250); padding: 15px 17px; display: flex; flex-direction: column; gap: 13px;">
+        <div style="display: flex; align-items: center; gap: 13px;">
+          <div style="font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 600; font-size: 14px; color: oklch(0.62 0.02 250); width: 17px; flex-shrink: 0;">5</div>
+          <div style="flex-grow: 1; font-weight: 600; font-size: 15px;">What we can promise</div>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="oklch(0.65 0.02 250)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+        </div>
+
+        <div style="border-radius: 15px; background: oklch(0.955 0.03 165); padding: 14px 15px; display: flex; gap: 11px;">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="oklch(0.42 0.11 165)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px;"><path d="M20 6 9 17l-5-5"/></svg>
+          <div style="font-size: 13px; line-height: 1.55; color: oklch(0.32 0.07 165);">A file only leaves your phone after OneDrive confirms it is there <strong style="font-weight: 600;">and</strong> reports the same size. That verified copy is your guarantee.</div>
+        </div>
+
+        <div style="border-radius: 15px; background: oklch(0.965 0.005 250); padding: 14px 15px; display: flex; gap: 11px;">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="oklch(0.50 0.02 250)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px;"><circle cx="12" cy="12" r="10"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg>
+          <div style="font-size: 13px; line-height: 1.55; color: oklch(0.38 0.015 250);">What we cannot promise is that a file removed from your phone can be recovered from your gallery's own bin. That behaves differently on different phones, so we never rely on it.</div>
+        </div>
+      </div>
+
+      <div style="border-radius: 18px; background: oklch(1 0 0); border: 1px solid oklch(0.92 0.01 250); padding: 15px 17px; display: flex; align-items: center; gap: 13px;">
+        <div style="font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 600; font-size: 14px; color: oklch(0.62 0.02 250); width: 17px; flex-shrink: 0;">6</div>
+        <div style="flex-grow: 1; font-weight: 600; font-size: 15px;">Getting files back</div>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="oklch(0.65 0.02 250)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </div>
+
+      <div style="border-radius: 18px; background: oklch(1 0 0); border: 1px solid oklch(0.92 0.01 250); padding: 15px 17px; display: flex; align-items: center; gap: 13px;">
+        <div style="font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 600; font-size: 14px; color: oklch(0.62 0.02 250); width: 17px; flex-shrink: 0;">7</div>
+        <div style="flex-grow: 1; font-weight: 600; font-size: 15px;">Optimising photos</div>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="oklch(0.65 0.02 250)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </div>
+
+      <div style="border-radius: 18px; background: oklch(1 0 0); border: 1px solid oklch(0.92 0.01 250); padding: 15px 17px; display: flex; align-items: center; gap: 13px;">
+        <div style="font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 600; font-size: 14px; color: oklch(0.62 0.02 250); width: 17px; flex-shrink: 0;">8</div>
+        <div style="flex-grow: 1; font-weight: 600; font-size: 15px;">When you delete a photo</div>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="oklch(0.65 0.02 250)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </div>
+
+      <div style="border-radius: 18px; background: oklch(1 0 0); border: 1px solid oklch(0.92 0.01 250); padding: 15px 17px; display: flex; align-items: center; gap: 13px;">
+        <div style="font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 600; font-size: 14px; color: oklch(0.62 0.02 250); width: 17px; flex-shrink: 0;">9</div>
+        <div style="flex-grow: 1; font-weight: 600; font-size: 15px;">Emptying trash</div>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="oklch(0.65 0.02 250)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </div>
+
+      <div style="border-radius: 18px; background: oklch(1 0 0); border: 1px solid oklch(0.92 0.01 250); padding: 15px 17px; display: flex; align-items: center; gap: 13px;">
+        <div style="font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 600; font-size: 14px; color: oklch(0.62 0.02 250); width: 17px; flex-shrink: 0;">10</div>
+        <div style="flex-grow: 1; font-weight: 600; font-size: 15px;">When backups run</div>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="oklch(0.65 0.02 250)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </div>
+
+    </div>
+
+    <!-- Below the numbered list and visually apart, because it answers a different question. The
+         topics explain how the app works; this says what yours is currently set to. -->
+    <div style="border-radius: 18px; background: oklch(0.955 0.008 250); border: 1px solid oklch(0.91 0.01 250); padding: 15px 17px; display: flex; align-items: center; gap: 13px;">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="oklch(0.42 0.02 250)" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/><circle cx="9" cy="6" r="2" fill="oklch(0.955 0.008 250)"/><circle cx="15" cy="12" r="2" fill="oklch(0.955 0.008 250)"/><circle cx="8" cy="18" r="2" fill="oklch(0.955 0.008 250)"/></svg>
+      <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 2px;">
+        <div style="font-weight: 600; font-size: 15px;">Settings and defaults</div>
+        <div style="font-size: 12.5px; color: oklch(0.48 0.02 250);">Every setting, what it is now, and what it means</div>
+      </div>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="oklch(0.65 0.02 250)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+    </div>
+
+    <div style="text-align: center; padding: 14px 0; border-radius: 99px; border: 1px solid oklch(0.86 0.01 250); font-weight: 600; font-size: 14px; color: oklch(0.32 0.02 250);">Run setup again</div>
+
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":390,"height":1100}}'>
+class Component extends DCLogic {}
+</script>
+</body>
+</html>

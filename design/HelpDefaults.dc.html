@@ -1,0 +1,125 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;500;600&display=swap">
+  <style>
+    body { margin: 0; }
+    a { color: oklch(0.52 0.15 162); }
+    a:hover { color: oklch(0.42 0.14 162); }
+  </style>
+</helmet>
+
+<div style="width: 390px; height: 1150px; box-sizing: border-box; position: relative; overflow: hidden; background: oklch(0.98 0.008 95); font-family: 'Public Sans', system-ui, sans-serif; color: oklch(0.24 0.02 250);">
+
+  <div style="display: flex; flex-direction: column; gap: 16px; padding: 28px 20px 40px 20px;">
+
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="oklch(0.50 0.02 250)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      <div style="font-size: 14px; color: oklch(0.48 0.02 250);">How it works</div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 10px;">
+      <div style="font-family: 'Bricolage Grotesque', system-ui, sans-serif; font-weight: 800; font-size: 30px; letter-spacing: -0.02em;">Settings and defaults</div>
+
+      <!-- The headline finding from the audit, and the most reassuring true sentence available. -->
+      <div style="border-radius: 18px; background: oklch(0.955 0.03 165); padding: 15px 17px; display: flex; gap: 11px;">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="oklch(0.42 0.11 165)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px;"><path d="M20 6 9 17l-5-5"/></svg>
+        <div style="font-size: 13px; line-height: 1.55; color: oklch(0.32 0.07 165);">Left as they come, none of these settings can remove a file — from your phone or from OneDrive. Removing always follows something you chose.</div>
+      </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+
+      <div style="border-radius: 18px; background: oklch(1 0 0); border: 1px solid oklch(0.92 0.01 250); padding: 14px 16px; display: flex; flex-direction: column; gap: 5px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="flex-grow: 1; font-weight: 600; font-size: 14.5px;">Back up automatically</div>
+          <div style="padding: 5px 12px; border-radius: 99px; background: oklch(0.94 0.05 165); color: oklch(0.40 0.12 165); font-weight: 600; font-size: 12.5px;">On</div>
+        </div>
+        <div style="font-size: 12.5px; line-height: 1.5; color: oklch(0.46 0.015 250);">Backups run on their own, but only for albums you have given a mode.</div>
+      </div>
+
+      <div style="border-radius: 18px; background: oklch(1 0 0); border: 1px solid oklch(0.92 0.01 250); padding: 14px 16px; display: flex; flex-direction: column; gap: 5px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="flex-grow: 1; font-weight: 600; font-size: 14.5px;">Use mobile data</div>
+          <div style="padding: 5px 12px; border-radius: 99px; background: oklch(0.95 0.005 250); color: oklch(0.50 0.02 250); font-weight: 600; font-size: 12.5px;">Off</div>
+        </div>
+        <div style="font-size: 12.5px; line-height: 1.5; color: oklch(0.46 0.015 250);">Uploads wait for Wi-Fi, so a large backup never arrives on your bill.</div>
+      </div>
+
+      <div style="border-radius: 18px; background: oklch(1 0 0); border: 1px solid oklch(0.92 0.01 250); padding: 14px 16px; display: flex; flex-direction: column; gap: 5px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="flex-grow: 1; font-weight: 600; font-size: 14.5px;">New albums start as</div>
+          <div style="padding: 5px 12px; border-radius: 99px; background: oklch(0.95 0.005 250); color: oklch(0.50 0.02 250); font-weight: 600; font-size: 12.5px;">Off</div>
+        </div>
+        <div style="font-size: 12.5px; line-height: 1.5; color: oklch(0.46 0.015 250);">An album found later is not backed up until you choose a mode for it. Archive can never be this setting.</div>
+      </div>
+
+      <div style="border-radius: 18px; background: oklch(1 0 0); border: 1px solid oklch(0.92 0.01 250); padding: 14px 16px; display: flex; flex-direction: column; gap: 5px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="flex-grow: 1; font-weight: 600; font-size: 14.5px;">Optimise photos automatically</div>
+          <div style="padding: 5px 12px; border-radius: 99px; background: oklch(0.95 0.005 250); color: oklch(0.50 0.02 250); font-weight: 600; font-size: 12.5px;">Off</div>
+        </div>
+        <div style="font-size: 12.5px; line-height: 1.5; color: oklch(0.46 0.015 250);">Photos are only made smaller when you tap Optimise.</div>
+      </div>
+
+      <!-- Changed from its default, and said so. Someone reading this page wants to know which of
+           these are still the shipped answer and which are theirs. -->
+      <div style="border-radius: 18px; background: oklch(1 0 0); border: 1px solid oklch(0.88 0.03 250); padding: 14px 16px; display: flex; flex-direction: column; gap: 5px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="flex-grow: 1; font-weight: 600; font-size: 14.5px;">Backs up into</div>
+          <div style="padding: 5px 12px; border-radius: 99px; background: oklch(0.94 0.04 240); color: oklch(0.42 0.12 250); font-weight: 600; font-size: 12.5px;">Changed by you</div>
+        </div>
+        <div style="font-size: 12.5px; line-height: 1.5; color: oklch(0.46 0.015 250);">Photos/GallerySync. Comes set to Samsung&nbsp;Gallery/DCIM, where Samsung already puts yours. The old folder is still searched, so nothing is uploaded twice.</div>
+      </div>
+
+      <div style="border-radius: 18px; background: oklch(1 0 0); border: 1px solid oklch(0.92 0.01 250); padding: 14px 16px; display: flex; flex-direction: column; gap: 5px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="flex-grow: 1; font-weight: 600; font-size: 14.5px;">First backup runs</div>
+          <div style="padding: 5px 12px; border-radius: 99px; background: oklch(0.95 0.005 250); color: oklch(0.50 0.02 250); font-weight: 600; font-size: 12.5px;">1 am, on charge</div>
+        </div>
+        <div style="font-size: 12.5px; line-height: 1.5; color: oklch(0.46 0.015 250);">Only the first run waits — it is the big one. Sync now is never held, and the wait lifts for good once it finishes.</div>
+      </div>
+
+      <div style="border-radius: 18px; background: oklch(1 0 0); border: 1px solid oklch(0.93 0.04 70); padding: 14px 16px; display: flex; flex-direction: column; gap: 5px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="flex-grow: 1; font-weight: 600; font-size: 14.5px;">When you delete a photo</div>
+          <div style="padding: 5px 12px; border-radius: 99px; background: oklch(0.94 0.05 165); color: oklch(0.40 0.12 165); font-weight: 600; font-size: 12.5px;">Keep the copy</div>
+        </div>
+        <div style="font-size: 12.5px; line-height: 1.5; color: oklch(0.46 0.015 250);">Deleting on your phone never touches OneDrive. Switch this to Ask and we will show you what has gone and ask first — never on our own.</div>
+      </div>
+
+      <div style="border-radius: 18px; background: oklch(0.975 0.005 250); border: 1px solid oklch(0.93 0.01 250); padding: 14px 16px; display: flex; flex-direction: column; gap: 5px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="flex-grow: 1; font-weight: 600; font-size: 14.5px; color: oklch(0.46 0.02 250);">Wait before asking</div>
+          <div style="padding: 5px 12px; border-radius: 99px; background: oklch(0.94 0.008 250); color: oklch(0.55 0.02 250); font-weight: 600; font-size: 12.5px;">7 days</div>
+        </div>
+        <div style="font-size: 12.5px; line-height: 1.5; color: oklch(0.52 0.015 250);">Not in use — only applies if you switch the setting above to Ask.</div>
+      </div>
+
+      <div style="border-radius: 18px; background: oklch(1 0 0); border: 1px solid oklch(0.92 0.01 250); padding: 14px 16px; display: flex; flex-direction: column; gap: 5px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="flex-grow: 1; font-weight: 600; font-size: 14.5px;">Appearance</div>
+          <div style="padding: 5px 12px; border-radius: 99px; background: oklch(0.95 0.005 250); color: oklch(0.50 0.02 250); font-weight: 600; font-size: 12.5px;">System</div>
+        </div>
+        <div style="font-size: 12.5px; line-height: 1.5; color: oklch(0.46 0.015 250);">Follows your phone's light or dark setting.</div>
+      </div>
+
+    </div>
+
+    <div style="text-align: center; padding: 14px 0; border-radius: 99px; border: 1px solid oklch(0.86 0.01 250); font-weight: 600; font-size: 14px; color: oklch(0.32 0.02 250);">Change these in Settings</div>
+
+  </div>
+
+</div>
+</x-dc>
+<script data-dc-script data-props='{"$preview":{"width":390,"height":1150}}'>
+class Component extends DCLogic {}
+</script>
+</body>
+</html>
