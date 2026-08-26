@@ -70,10 +70,6 @@ fun SettingsScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    val moveLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartIntentSenderForResult()
-    ) { viewModel.onMoveToBackupFinished() }
-
     val proxyLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult()
     ) { result ->
@@ -331,119 +327,6 @@ fun SettingsScreen(
         // OneDrive, and it is read rather than skimmed when it is not competing with a toggle.
         DeletionSection()
 
-        HorizontalDivider()
-
-        Section(stringResource(R.string.settings_storage)) {
-            Text(
-                text = pluralStringResource(
-                    R.plurals.backup_total_stored,
-                    state.uploadedCount,
-                    state.uploadedCount
-                ),
-                style = MaterialTheme.typography.bodyMedium
-            )
-
-            // Size first, then the bar — the same order as the hero and as Restore. A proportion
-            // shown above the quantity it is a proportion of reads as a bar of nothing.
-            state.backedUpFraction?.let { fraction ->
-                Text(
-                    text = stringResource(
-                        R.string.storage_backed_up,
-                        formatBytes(context, state.uploadedBytes),
-                        formatBytes(context, state.uploadedBytes + state.pendingBytes)
-                    ),
-                    style = MaterialTheme.typography.bodySmall
-                )
-                LinearProgressIndicator(
-                    progress = { fraction },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            when {
-                !state.canRemoveLocalCopies -> Text(
-                    text = stringResource(R.string.backup_move_unsupported),
-                    style = MaterialTheme.typography.bodySmall
-                )
-
-                state.redundantCount == 0 -> Text(
-                    text = stringResource(R.string.backup_nothing_redundant),
-                    style = MaterialTheme.typography.bodySmall
-                )
-
-                else -> {
-                    Text(
-                        text = pluralStringResource(
-                            R.plurals.backup_move_explainer,
-                            state.redundantCount,
-                            state.redundantCount
-                        ),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                    OutlinedButton(
-                        onClick = {
-                            scope.launch {
-                                viewModel.buildMoveToBackupRequest()?.let {
-                                    moveLauncher.launch(IntentSenderRequest.Builder(it).build())
-                                }
-                            }
-                        }
-                    ) {
-                        Text(
-                            stringResource(
-                                R.string.backup_move_to_backup,
-                                formatBytes(context, state.redundantBytes)
-                            )
-                        )
-                    }
-                    Text(
-                        text = stringResource(R.string.backup_move_trash_note),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-
-                    // What the live re-check refused to include, and why. Reported rather than
-                    // quietly dropped: "OneDrive no longer has this" means the file is not backed
-                    // up at all, which the user needs to know, and "could not check" means the app
-                    // declined to guess — a different thing again, and worth saying so.
-                    state.removalHeldBack?.let { held ->
-                        if (held.confirmed.isEmpty() && held.heldBack > 0) {
-                            Text(
-                                text = stringResource(R.string.removal_none_confirmed),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        }
-                        if (held.missing.isNotEmpty()) {
-                            Text(
-                                text = stringResource(
-                                    R.string.removal_held_missing,
-                                    pluralStringResource(
-                                        R.plurals.file_count,
-                                        held.missing.size,
-                                        held.missing.size
-                                    )
-                                ),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.error
-                            )
-                        }
-                        if (held.unconfirmed.isNotEmpty()) {
-                            Text(
-                                text = stringResource(
-                                    R.string.removal_held_unchecked,
-                                    pluralStringResource(
-                                        R.plurals.file_count,
-                                        held.unconfirmed.size,
-                                        held.unconfirmed.size
-                                    )
-                                ),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                    }
-                }
-            }
-        }
     }
 }
 

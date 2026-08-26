@@ -246,6 +246,49 @@ private fun AlbumList(
                 }
             )
         }
+
+        // What the live re-check refused to include, and why. Reported rather than quietly dropped:
+        // "OneDrive no longer has this" means the file is not backed up at all, which the user needs
+        // to know, and "could not check" means the app declined to guess — a different thing again.
+        //
+        // Sits with the summons rather than in Settings, because it explains why a removal the user
+        // just authorised did not take everything. Moved 26 Aug 2026 when the Storage section it
+        // used to live in was removed as a duplicate of this one.
+        state.removalHeldBack?.let { held ->
+            if (held.confirmed.isEmpty() && held.heldBack > 0) {
+                Text(
+                    text = stringResource(R.string.removal_none_confirmed),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(horizontal = 18.dp)
+                )
+            }
+            if (held.missing.isNotEmpty()) {
+                Text(
+                    text = stringResource(
+                        R.string.removal_held_missing,
+                        pluralStringResource(R.plurals.file_count, held.missing.size, held.missing.size)
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(horizontal = 18.dp)
+                )
+            }
+            if (held.unconfirmed.isNotEmpty()) {
+                Text(
+                    text = stringResource(
+                        R.string.removal_held_unchecked,
+                        pluralStringResource(
+                            R.plurals.file_count,
+                            held.unconfirmed.size,
+                            held.unconfirmed.size
+                        )
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(horizontal = 18.dp)
+                )
+            }
+        }
     }
 
     HorizontalDivider()
@@ -786,6 +829,19 @@ private fun ArchiveReadyPrompt(
                 albums.joinToString(", "),
                 formatBytes(context, bytes)
             ),
+            style = MaterialTheme.typography.bodySmall
+        )
+
+        // The one thing Android's own dialog cannot say, and the app must. CLAUDE.md: never tell the
+        // user a local removal is recoverable — a trash request reached the trash on this device
+        // once and removed files outright another time, and the platform gives no way to know in
+        // advance. The guarantee that holds is the verified cloud copy, which the line above states.
+        //
+        // Moved here 26 Aug 2026 from the Settings storage section. That section was a duplicate of
+        // this prompt in every other respect, and deleting it would have taken this warning out of
+        // the app entirely.
+        Text(
+            text = stringResource(R.string.backup_move_trash_note),
             style = MaterialTheme.typography.bodySmall
         )
         OutlinedButton(onClick = onRemove) {
