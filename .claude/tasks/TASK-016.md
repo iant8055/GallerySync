@@ -94,11 +94,32 @@ the most alarming thing the screen can say. It could not fire before 26 Aug beca
 see proxied files at all; the fix that let it see them exposed this. Corrected the same day: the
 expected remote size now comes from the ledger for proxied rows.
 
-**It must still handle partial validation**, which Ian's wording assumes away. `confirmStillInCloud`
-returns three categories and only one permits removal: confirmed, missing from OneDrive, and could
-not be checked. CLAUDE.md: *"if we could not ask, we do not remove."* So the headline cannot always be
-"All files VALIDATED". The screen needs a second shape for "41 of 47 confirmed" that names what is
-held back and why — the wording already exists for this, moved to the Albums summons on 26 Aug.
+**Partial validation — decided 26 Aug.** Ian: *"if a file could not be checked then the file would
+give it a big red X rather than a Green check — then we would give the user the option to Archive all
+Green checked files or do nothing."*
+
+That satisfies CLAUDE.md's *"if we could not ask, we do not remove"* **by construction** rather than
+by a check that has to be remembered: a red file is simply not in the set being archived. The rule
+becomes a property of what the button acts on.
+
+The three categories map onto two marks, because the upload rule collapses one of them:
+
+| `confirmStillInCloud` | Mark | Why |
+|---|---|---|
+| confirmed | **green tick** | the full version is in OneDrive |
+| missing from OneDrive | upload it, then **green tick** | Ian's rule: a file not found is backed up, not failed |
+| could not be checked | **red X** | we could not ask, so it stays |
+| upload failed | **red X** | same answer, same reason |
+
+So the prompt has two shapes. All green: Ian's wording verbatim. Some red: the count and size describe
+**only the green set**, and the button says so — *archive the confirmed ones, or do nothing*.
+
+**A red file is never a dead end.** The album stays in Archive mode, so the next run retries it. What
+could not be checked today is usually a network answer rather than a permanent one.
+
+**If every file is red there is nothing to offer**, and the screen must say that rather than present a
+button that archives an empty set — the rule from TASK-014: never offer an action that cannot
+succeed.
 
 ### Phase 2 — removal
 
@@ -128,6 +149,10 @@ it could not, which is why an album taken Sync then Archive offered 2 of 13 file
 - Nothing is written or removed during validation
 - The prompt states the freed size and offers Yes, No and Delay
 - Partial validation is presented as itself, never as "All files VALIDATED"
+- A file that could not be checked, or whose upload failed, shows a red X and is excluded from the
+  archived set — the guarantee holds because of what the button acts on, not because of a check
+- The count and size in the prompt describe only the green set
+- An all-red album says so instead of offering a button that archives nothing
 - A file that could not be checked is never removed
 - Removal reuses the same list, so the user sees the same names they authorised
 - An album over 2000 files reads as one operation across several system dialogs
