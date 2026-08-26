@@ -1303,6 +1303,45 @@ the bytes, and "we did not touch it" is otherwise an argument rather than a meas
 untouched. Combined with `conflictBehavior = rename` on every upload, editing a photo can never
 overwrite the backup of what it was edited from.
 
+### 26 Aug 2026 — emptying a folder makes the album vanish, and what survives it
+
+**Fold 4.** Ian deleted all six files in `DCIM/12345clips` to exercise deletion sync, confirmed they
+reached Samsung's Recycle Bin, and found the album gone from the Albums tab. "Show empty folders" did
+not bring it back — that setting governs which *cloud* folders Restore lists, not the album list, and
+reaching for it was a reasonable reading of the name.
+
+**Samsung deletes a folder when its last file goes.** GallerySync derives its album list by scanning
+local directories, so no directory means no album row.
+
+**What survived, all of it deliberately.** Ian noticed on restoring the files that the album came back
+with its GallerySync data intact, and asked whether the ledger had kept it — whether those files could
+still have been marked missing. Checked, and yes:
+
+| | |
+|---|---|
+| Ledger rows for the vanished album | kept — `forgetAlbumsNotOnDevice` exempts anything verified in OneDrive |
+| Album preference (`SYNC`) | kept |
+| `refreshLedger` | album-agnostic; diffs `uploadedKeys()` against the scan |
+| Deletion sync on an emptied folder | would have worked — nothing marked only because the files were restored before a scan ran |
+
+The prune has a companion query whose only purpose is counting the exemption for the log. So the
+record of what is safely backed up is never lost to a folder disappearing.
+
+**The consequence, which is a design hole rather than a defect.** Archive's whole purpose is removing
+local copies once verified. Run it to completion and it removes the last file in an album; Samsung
+deletes the folder; the album leaves the Albums tab. The user can then no longer see or change the
+mode of an album they set to Archive — while that mode is still in force. CLAUDE.md is explicit that
+Archive is a **standing instruction**: a file added to an Archive album later is covered by the mode
+already set. So the instruction keeps applying and becomes undiscoverable and unrevokable.
+
+**Only the display is broken, and the fix is already supported.** Every piece of data needed to keep
+showing that album is retained on purpose. Album rows want sourcing from the ledger *and* the scan,
+not the scan alone — an album with a surviving preference and verified rows should stay listed with
+no local files, which is also exactly the state Archive is trying to reach.
+
+**For the next deletion-sync attempt:** delete *some* files from a folder, not all. One file left
+behind keeps the folder alive and the test on the thing being tested.
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have
