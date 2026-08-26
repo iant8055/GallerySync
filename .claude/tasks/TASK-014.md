@@ -465,3 +465,43 @@ screen is empty for a legitimate reason and the user has no experience to fill t
 
 **This is a review checklist, not a philosophy.** Before any screen is called done, sit in each of its
 empty, working and stopped states and read what it says.
+
+## What may move behind a (?) — decided 26 Aug 2026
+
+Ian: *"we are going to have icons (?) to link to descriptions in the Help menu"*, and the reason —
+*"I just don't want the working parts of the UI cluttered with text."*
+
+Correct, and it needs a line drawn, because it pulls against the principle above. Both are right; they
+govern different sentences.
+
+**A (?) is a fourth route to a topic, not a fourth copy of it.** The rule already stated — every topic
+exists once as a string set, used by the bubble, the Help entry and the just-in-time prompt — extends
+unchanged. Today several screens carry prose that says roughly what Help says, which is how two
+answers to one question drift apart and the reader gets a different one depending on which door they
+used.
+
+### The division
+
+| Stays on the screen, always | Goes behind a (?) |
+|---|---|
+| Why this looks like this — empty, stopped, waiting | What a thing *means*: Sync, Archive, proxy, verified |
+| What just happened, and what is happening now | What it costs, in space, quota or time |
+| What to do next, when the screen is a dead end without it | Why it works the way it does |
+| The consequence of a destructive choice, at the moment of choosing | The background to that consequence |
+
+The test: **an explanation behind a (?) is not the same as a screen explaining itself.** "Why is this
+list empty" has to be answered where the emptiness is — nobody hunts for that, they conclude the app
+is broken, which is exactly what happened on 26 Aug with Albums and Gate 1. "What does Sync mode do"
+is the opposite: prose in the working surface every day, for something read once.
+
+### Applied the same day
+
+`retrieve_explain` — *"Everything OneDrive holds in this folder. Restoring one puts it back without
+touching the copy in the cloud"* — removed from the folder view. Reassurance, read once, above the
+thing the user came to do. It is a (?) topic.
+
+`retrieve_pick_folder` kept. It is the instruction that makes the top level actionable, and the screen
+is a dead end without it.
+
+Nothing consequential moves behind an icon. A destructive choice states its consequence where the
+choice is made, per the Archive rule in CLAUDE.md; the (?) may carry the background, never the warning.
