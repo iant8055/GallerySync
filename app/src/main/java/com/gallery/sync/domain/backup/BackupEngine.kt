@@ -612,6 +612,20 @@ class BackupEngine @Inject constructor(
         // One listing per album, reused across its files, exactly as the upload path does.
         val byAlbum = mutableMapOf<String, Map<String, RemoteFileRef>?>()
 
+        // What size the cloud copy *should* be, for files whose local copy is no longer that size.
+        //
+        // An optimised photo is a 2048px rewrite; OneDrive holds the full original. Comparing the
+        // remote against the local file would compare the original against the proxy, never match,
+        // and report a photo as no longer in OneDrive — false, and the most alarming thing this
+        // screen can say. The ledger remembers what was uploaded, so ask it.
+        //
+        // This is the check Ian asked for on 26 Aug: "if the file is Optimized, that a full version
+        // is sitting in OneDrive". It could not fire before that day's fix, because Archive could
+        // not see proxied files at all.
+        val expectedRemoteSize = entryDao.uploadedKeys()
+            .filter { it.isProxied }
+            .associate { it.mediaStoreId to it.sizeBytes }
+
         for (item in items) {
             val index = if (byAlbum.containsKey(item.album)) {
                 byAlbum[item.album]
@@ -619,9 +633,13 @@ class BackupEngine @Inject constructor(
                 remoteIndexFor(item.album).also { byAlbum[item.album] = it }
             }
 
+            // The proxy's own size for an ordinary file; the remembered original for an
+            // optimised one.
+            val expected = expectedRemoteSize[item.mediaStoreId] ?: item.sizeBytes
+
             when {
                 index == null -> unconfirmed += item
-                index[item.displayName]?.sizeBytes == item.sizeBytes -> confirmed += item
+                index[item.displayName]?.sizeBytes == expected -> confirmed += item
                 else -> missing += item
             }
         }
