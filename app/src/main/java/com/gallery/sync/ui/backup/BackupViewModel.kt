@@ -113,6 +113,15 @@ data class BackupUiState(
     val isScanning: Boolean = false,
     val isRunning: Boolean = false,
     val status: BackupStatus? = null,
+    /**
+     * False until [refreshCounts] has run once.
+     *
+     * Every count below starts at zero, and zero is a claim — the hero renders
+     * "0 files verified in OneDrive" on every cold start, confidently and wrongly, for as long as
+     * the first read takes. On a screen whose job is telling someone their photos are safe, that is
+     * the worst possible thing to flash. This separates "nothing" from "not known yet".
+     */
+    val hasLoadedCounts: Boolean = false,
     val uploadedCount: Int = 0,
     /** Outstanding files **within the selected albums** — not the whole library. */
     val pendingCount: Int = 0,
@@ -377,10 +386,33 @@ class BackupViewModel @Inject constructor(
     }
 
     /** Switches every discovered album on or off at once. */
+    /**
+     * Applies one mode to every album.
+     *
+     * **Kept although nothing calls it today.** The Select all / Deselect all buttons were removed
+     * from the Albums screen on 25 Aug 2026, but this is precisely what TASK-014's Gate 2 needs —
+     * the one place a bulk apply is legitimate, because it happens once, after the scan, with the
+     * count and the consequence in front of the user. Deleting it as dead code would mean writing
+     * it again, and getting the default-mode subtlety below wrong a second time.
+     *
+     * Selecting uses the user's **default mode for new albums**, not a hardcoded Backup. Those are
+     * the same intent — "what I want an album to do unless I say otherwise" — and having them
+     * disagree meant someone who chose Sync to reclaim space could tap Select all, get Backup on
+     * every album, and never have a single photo optimised. Nothing said so; the two settings just
+     * differed.
+     *
+     * Backup is the fallback when the default is Off, because a Select all that selects nothing is
+     * not a control. Archive can never arrive here: `AlbumMode.canBeDefault` excludes it, so no
+     * bulk action in the app can arm the mode that removes files — which is the property that makes
+     * reading the default safe in the first place.
+     */
     fun setAllAlbums(enabled: Boolean) {
         viewModelScope.launch {
             val albums = _state.value.albums
-            val mode = if (enabled) AlbumMode.BACKUP else AlbumMode.OFF
+            val preferred = _state.value.defaultAlbumMode
+                .takeIf { it != AlbumMode.OFF }
+                ?: AlbumMode.BACKUP
+            val mode = if (enabled) preferred else AlbumMode.OFF
             albumDao.setPreferences(albums.map { AlbumPreferenceEntity(it.name, mode) })
             _state.value = _state.value.copy(
                 albums = albums.map { it.copy(mode = mode) }
@@ -394,6 +426,7 @@ class BackupViewModel @Inject constructor(
         val proxyCandidates = proxyApplier.candidates()
 
         _state.value = _state.value.copy(
+            hasLoadedCounts = true,
             uploadedCount = entryDao.countInState(BackupState.UPLOADED),
             pendingCount = entryDao.countPendingInSelectedAlbums(),
             redundantCount = redundant.size,

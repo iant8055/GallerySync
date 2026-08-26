@@ -100,6 +100,11 @@ val SignalOnSyncDark = Color(0xFF86CAFF)
 val SignalOffDark = Color(0xFF30363C)
 val SignalOnOffDark = Color(0xFFB9BEC4)
 
+/** The floating nav bar: dark in both themes, lifted in dark so it does not read as a hole. */
+val SignalNavLight = Color(0xFF20262D)
+val SignalNavDark = Color(0xFF2A3037)
+val SignalOnNav = Color(0xFFD5DAE0)
+
 // --- Error ---
 val SignalErrorLight = Color(0xFFA51E24)
 val SignalErrorDark = Color(0xFFF47B74)

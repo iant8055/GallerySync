@@ -63,8 +63,8 @@ fun SignalNavBar(
             // the edges.
             .widthIn(max = 480.dp),
         shape = RoundedCornerShape(percent = 50),
-        color = MaterialTheme.colorScheme.inverseSurface,
-        contentColor = MaterialTheme.colorScheme.inverseOnSurface,
+        color = signal.navContainer,
+        contentColor = signal.onNavContainer,
         shadowElevation = 8.dp
     ) {
         Row(
@@ -76,12 +76,8 @@ fun SignalNavBar(
                 val isSelected = index == selected
                 Surface(
                     shape = RoundedCornerShape(percent = 50),
-                    color = if (isSelected) signal.accent else MaterialTheme.colorScheme.inverseSurface,
-                    contentColor = if (isSelected) {
-                        signal.onAccent
-                    } else {
-                        MaterialTheme.colorScheme.inverseOnSurface
-                    },
+                    color = if (isSelected) signal.accent else signal.navContainer,
+                    contentColor = if (isSelected) signal.onAccent else signal.onNavContainer,
                     onClick = { onSelect(index) }
                 ) {
                     Row(

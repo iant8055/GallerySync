@@ -55,7 +55,18 @@ data class GallerySyncColors(
 
     /** Album mode: nothing happens. Deliberately the quietest thing on the screen. */
     val offContainer: Color,
-    val onOffContainer: Color
+    val onOffContainer: Color,
+
+    /**
+     * The floating navigation bar.
+     *
+     * Its own pair rather than `inverseSurface`, which is what it used first — and `inverseSurface`
+     * does exactly what it says: dark under a light theme, near-white under a dark one. The bar
+     * flipped to white in dark mode, which is not the design and reads as a different component.
+     * The bar is dark in both themes; only how far it lifts off the background changes.
+     */
+    val navContainer: Color,
+    val onNavContainer: Color
 )
 
 private val SignalLight = GallerySyncColors(
@@ -70,7 +81,9 @@ private val SignalLight = GallerySyncColors(
     archiveContainer = SignalArchiveLight,
     onArchiveContainer = SignalOnArchiveLight,
     offContainer = SignalSurfaceVariantLight,
-    onOffContainer = SignalOnSurfaceVariantLight
+    onOffContainer = SignalOnSurfaceVariantLight,
+    navContainer = SignalNavLight,
+    onNavContainer = SignalOnNav
 )
 
 private val SignalDark = GallerySyncColors(
@@ -87,7 +100,10 @@ private val SignalDark = GallerySyncColors(
     archiveContainer = SignalArchiveDark,
     onArchiveContainer = SignalOnArchiveDark,
     offContainer = SignalOffDark,
-    onOffContainer = SignalOnOffDark
+    onOffContainer = SignalOnOffDark,
+    // Lifted off the near-black ground so the bar still reads as floating rather than as a hole.
+    navContainer = SignalNavDark,
+    onNavContainer = SignalOnNav
 )
 
 internal fun signalColors(darkTheme: Boolean): GallerySyncColors =

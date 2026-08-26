@@ -85,7 +85,12 @@
 
     <!-- Backup -->
     <string name="backup_selection_summary">%1$s selected · %2$s</string>
-    <string name="backup_hero_label">Verified in OneDrive</string>
+    <!--
+        Names the unit. "Verified in OneDrive" over a bare 13 reads as 13 albums, which is what it
+        sits above a list of — and this is the one number the whole screen is built around. It
+        counts ledger rows, so it is files.
+    -->
+    <string name="backup_hero_label">Files verified in OneDrive</string>
     <string name="backup_all_done">Everything selected is synced</string>
     <string name="backup_nothing_selected">Choose an album to sync</string>
     <!--
