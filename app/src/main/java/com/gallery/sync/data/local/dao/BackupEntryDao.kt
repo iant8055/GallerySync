@@ -27,7 +27,17 @@ import kotlinx.coroutines.flow.Flow
 data class UploadedKey(
     val id: String,
     val displayName: String,
-    val sizeBytes: Long
+    val sizeBytes: Long,
+    /**
+     * Survives a proxy rewrite when [sizeBytes] does not.
+     *
+     * Proxying replaces the file in place, so its MediaStore row keeps its id while its size and
+     * mtime both change. That makes the id the only stable way to ask "is this file still on the
+     * phone?" for a proxied row — every content-derived key is computed from a size the file no
+     * longer has.
+     */
+    val mediaStoreId: Long,
+    val isProxied: Boolean
 ) {
     /** How the same content is recognised wherever it now sits. See [RestoredAlbum]. */
     val contentSignature: String get() = RestoredAlbum.contentSignature(displayName, sizeBytes)
@@ -162,7 +172,9 @@ interface BackupEntryDao {
      * limit on a real library — and it cannot be chunked, because a file in the second chunk would
      * be marked missing by the first.
      */
-    @Query("SELECT id, displayName, sizeBytes FROM backup_entries WHERE state = :uploaded")
+    @Query(
+        "SELECT id, displayName, sizeBytes, mediaStoreId, isProxied FROM backup_entries WHERE state = :uploaded"
+    )
     suspend fun uploadedKeys(uploaded: BackupState = BackupState.UPLOADED): List<UploadedKey>
 
     /**
@@ -225,8 +237,18 @@ interface BackupEntryDao {
      * - a usable `remoteItemId`, because without one there is nothing safe to delete, and matching
      *   by name would be a way to remove the wrong photo.
      * - `remoteSizeBytes = sizeBytes`, the same verification bar as everywhere else.
+     * - **`isProxied = 0`.** A proxied photo carries a cloud badge burned into its pixels, and that
+     *   badge is a standing promise: the full-quality original is in OneDrive. Offering that
+     *   original for deletion would make the promise false while the badge went on asserting it —
+     *   and every other badged photo would become indistinguishable from a broken one. The two
+     *   facts have to be wired together rather than merely checked, which is what this line does.
      *
      * Oldest absence first, so the least ambiguous cases are presented at the top.
+     *
+     * **Why the proxy guard is not redundant with correct classification.** On 26 Aug 2026 proxying
+     * changed a file's size and mtime, so `refreshLedger` could no longer match it and marked six
+     * photos on disk as deleted from the phone. The classification bug is fixed separately; this
+     * line is what makes the same mistake harmless if it is ever reintroduced.
      */
     @Query(
         """
@@ -238,6 +260,7 @@ interface BackupEntryDao {
           AND remoteItemId != ''
           AND remoteSizeBytes IS NOT NULL
           AND remoteSizeBytes = sizeBytes
+          AND isProxied = 0
         ORDER BY localMissingSinceEpochMillis ASC
         """
     )

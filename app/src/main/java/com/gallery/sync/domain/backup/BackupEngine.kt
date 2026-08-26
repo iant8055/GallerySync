@@ -221,8 +221,22 @@ class BackupEngine @Inject constructor(
         // Diffed here rather than in SQL. A `NOT IN` over six thousand keys binds one variable per
         // file and exceeds SQLite's parameter limit, and it cannot be chunked because a file in the
         // second chunk would be marked missing by the first.
+        // Every MediaStore id the device still has. A proxied file keeps its id through the
+        // rewrite while its size and mtime both change, so this is the only question that stays
+        // answerable about it — see UploadedKey.mediaStoreId.
+        val presentIds = everything.mapTo(HashSet()) { it.mediaStoreId }
+
         val known = entryDao.uploadedKeys()
-        val back = known.filter { it.contentSignature in presentContent }.map { it.id }
+        val back = known
+            .filter {
+                // A proxied row is judged on its id alone. Judging it on content would compare a
+                // remembered original size against the proxy on disk, never match, and conclude the
+                // user had deleted a photo that is sitting in their gallery — which on 26 Aug 2026
+                // it did, to six of them.
+                if (it.isProxied) it.mediaStoreId in presentIds
+                else it.contentSignature in presentContent
+            }
+            .map { it.id }
         // Back wins over gone: a restored file is absent by key and present by content, and the
         // second reading is the one the user would recognise.
         val backIds = back.toHashSet()
@@ -541,7 +555,15 @@ class BackupEngine @Inject constructor(
             return@withContext emptyList()
         }
 
-        val verified = entryDao.verifiedInCloud().map { it.id }.toSet()
+        val verifiedEntries = entryDao.verifiedInCloud()
+        val verified = verifiedEntries.map { it.id }.toSet()
+
+        // Proxied rows are matched by MediaStore id instead. Their content key was computed from
+        // the original's size, and the file on disk is now a 2048px rewrite — so the key can never
+        // match and Archive would silently skip every photo it had already optimised. Observed
+        // 26 Aug 2026: an album switched Sync then Archive offered 2 of 13 files, and the 11 it
+        // could not see were the ones it had shrunk itself.
+        val verifiedProxiedIds = verifiedEntries.filter { it.isProxied }.mapTo(HashSet()) { it.mediaStoreId }
 
         scanner.scanAll().filter { item ->
             if (item.album !in archived) return@filter false
@@ -551,7 +573,7 @@ class BackupEngine @Inject constructor(
                 sizeBytes = item.sizeBytes,
                 dateModifiedEpochSeconds = item.dateModifiedEpochSeconds
             )
-            key in verified
+            key in verified || item.mediaStoreId in verifiedProxiedIds
         }.also {
             Logger.d(
                 TAG,
