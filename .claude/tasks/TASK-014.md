@@ -296,15 +296,61 @@ it is the one that removes files and the one the acknowledgement record gates.
    keeps doing the viewing
 2. **Which folders it looks at** — Gate 1, and why an album outside the granted trees is not listed
 3. **Off, Backup and Sync** — what each does to your files
-4. **Archive** — leaves your gallery, covers files added later, gated on verification
+4. **Archive** — leaves your gallery, covers files added later, gated on verification, and only
+   ever removes anything while you have the app open (see the trigger map below)
 5. **What we can promise** — a verified cloud copy, and plainly what we cannot promise
 6. **Getting files back** — the Restored folder, the `_restored` suffix, repeatable
-7. **Optimising photos** — smaller copies on the phone, originals in the cloud, never video
+7. **Optimising photos** — smaller copies on the phone, originals in the cloud, never video, and
+   like Archive it needs the app open and a tap
 8. **When you delete a photo from this phone** — the Leave/Ask choice, at the moment it first matters
 9. **Emptying trash** — never done by this app, in either place
-10. **When backups run** — the first-backup window, charging, Wi-Fi only
+10. **When each thing happens** — what starts a backup, a restore, an archive removal and an
+    optimise. See the trigger map below; two of the four cannot happen unless the app is open, and
+    a user who does not know that will think the app is broken.
 
-Topics 8 and 10 are the two the wizard *asks* about; the rest it explains. See below.
+Topics 8 and 10 are the two the wizard *asks* about; the rest it explains.
+
+## The trigger map, for topic 10
+
+Read from the code 25 Aug 2026, at Ian's request. The four operations are **not** symmetrical, and
+the asymmetry is the part worth explaining rather than the schedule.
+
+### Backup — three triggers, all automatic
+
+Armed on every launch when automatic sync is on (`GallerySyncApplication.armAutomaticSync`).
+
+- **On change.** Android reports a MediaStore change; the run waits 30s in case more photos arrive —
+  a burst is one run, not twenty — capped at 5 minutes. It fires once, so `BackupWorker` re-arms it
+  as the first thing it does, before anything that could throw.
+- **Continuation.** A run ending with files still pending schedules the next batch immediately
+  rather than waiting for the periodic pass. This is what makes a large library upload continuously
+  across batches instead of stalling for six hours between them.
+- **Periodic, 6 hours.** The safety net, because content triggers are missed — Doze, reboot,
+  force-stop. Without it a missed trigger means a photo silently never backed up.
+
+Plus **Sync now**, which is never gated except by the first-backup window, and that lifts for good
+once the backlog clears.
+
+### Restore — nothing triggers it
+
+Manual only, and there is no background or automatic path. Worth saying plainly: nothing is ever
+fetched back without someone asking for it.
+
+### Archive and Optimise — only while the app is open
+
+`createTrashRequest` and `createWriteRequest` both need an **Activity** to raise Android's dialog,
+and a worker cannot show one (see the platform constraints in MILESTONES). So both are prompts on
+the Albums screen rather than background work.
+
+**Setting an album to Archive does not remove anything by itself.** Files become eligible, and then
+wait on the phone until the user next opens the app and taps. On a phone not opened for a week,
+nothing is freed for a week.
+
+That is a fact about the product, not a detail of the implementation, and it has to be said in the
+Archive topic as well as here — someone who sets Archive to reclaim space and sees nothing happen
+will reasonably conclude the app is broken. It also reopens a question TASK-011 closed: whether
+`POST_NOTIFICATIONS` earns its place after all, since "files are ready to remove" is the one thing
+this app might legitimately need to interrupt someone about. See below.
 
 ## Which defaults the wizard sets, and which it only explains
 
