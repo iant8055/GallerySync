@@ -33,7 +33,10 @@ class BackupWorker @AssistedInject constructor(
 ) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result {
-        Logger.i(TAG, "backup run starting")
+        // A run the user asked for. Carried in the input data and passed to every continuation, so
+        // the whole chain stays user-initiated rather than only its first batch.
+        val manual = inputData.getBoolean(BackupScheduling.KEY_MANUAL, false)
+        Logger.i(TAG, "backup run starting${if (manual) " (manual)" else ""}")
 
         val preferences = settings.current()
 
@@ -54,7 +57,7 @@ class BackupWorker @AssistedInject constructor(
         //
         // Refreshing the ledger still happens below either way. Knowing what is outstanding costs
         // nothing and is what lets the screen say how much is waiting.
-        val hold = if (preferences.hasCompletedFirstBackup) {
+        val hold = if (preferences.hasCompletedFirstBackup || manual) {
             null
         } else {
             FirstBackupWindow.heldBecause(
@@ -74,6 +77,16 @@ class BackupWorker @AssistedInject constructor(
         }
 
         if (hold != null) {
+            // Lift the gate before returning, not after uploading. This check used to sit
+            // downstream of this return, so while the window was closed nothing was capable of
+            // noticing the window was no longer needed — the backlog could be empty for a day and
+            // the app would still announce it was waiting. See FIX-001.
+            if (engine.outstandingCount() == 0) {
+                Logger.i(TAG, "backlog already clear; first-backup window no longer applies")
+                settings.markFirstBackupComplete()
+                return Result.success()
+            }
+
             // success, not retry: nothing is wrong, and a retry would burn backoff attempts waiting
             // for a clock. The periodic pass and the content trigger both come back on their own.
             Logger.i(TAG, "first backup held ($hold); not uploading yet")
@@ -115,9 +128,23 @@ class BackupWorker @AssistedInject constructor(
             Logger.i(TAG, "${result.remaining} remaining, scheduling next batch")
             BackupScheduling.enqueueContinuation(
                 WorkManager.getInstance(applicationContext),
-                preferences.allowMeteredNetwork
+                preferences.allowMeteredNetwork,
+                manual = manual
             )
         }
+
+        // Carried out of the worker so the screen can say what happened. Without this the UI keeps
+        // whatever it last saw — which after a run that stopped on a full drive means "Uploading
+        // 2 of 16" sitting there while the actionable reason is invisible. Observed 26 Aug 2026.
+        val outcome = Data.Builder()
+            .putInt(RESULT_UPLOADED, result.uploaded)
+            .putInt(RESULT_SKIPPED, result.skipped)
+            .putInt(RESULT_FAILED, result.failed)
+            .putInt(RESULT_DEFERRED, result.deferred)
+            .putInt(RESULT_PRUNED, result.pruned)
+            .putInt(RESULT_REMAINING, result.remaining)
+            .putString(RESULT_STOPPED, result.stoppedBecause?.name)
+            .build()
 
         return when (result.stoppedBecause) {
             StopReason.NETWORK -> Result.retry()
@@ -125,9 +152,9 @@ class BackupWorker @AssistedInject constructor(
             StopReason.NO_TOKEN,
             StopReason.UNAUTHORIZED,
             StopReason.DRIVE_FULL,
-            StopReason.NO_MEDIA_ACCESS -> Result.failure()
+            StopReason.NO_MEDIA_ACCESS -> Result.failure(outcome)
 
-            null -> Result.success()
+            null -> Result.success(outcome)
         }
     }
 
@@ -137,5 +164,13 @@ class BackupWorker @AssistedInject constructor(
         const val PROGRESS_TOTAL = "total"
         const val PROGRESS_FILE = "file"
         const val PROGRESS_PERCENT = "percent"
+
+        const val RESULT_UPLOADED = "r_uploaded"
+        const val RESULT_SKIPPED = "r_skipped"
+        const val RESULT_FAILED = "r_failed"
+        const val RESULT_DEFERRED = "r_deferred"
+        const val RESULT_PRUNED = "r_pruned"
+        const val RESULT_REMAINING = "r_remaining"
+        const val RESULT_STOPPED = "r_stopped"
     }
 }

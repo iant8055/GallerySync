@@ -3,6 +3,7 @@ package com.gallery.sync.worker
 import android.provider.MediaStore
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
+import androidx.work.Data
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
@@ -29,6 +30,18 @@ object BackupScheduling {
     const val CONTENT_TRIGGER_WORK = "gallery-sync-backup-on-change"
     const val CONTINUATION_WORK = "gallery-sync-backup-continuation"
     const val PERIODIC_WORK = "gallery-sync-backup-periodic"
+
+    /**
+     * The chain a person started by pressing Sync now.
+     *
+     * Named separately from [CONTINUATION_WORK] so Stop can cancel it without touching automatic
+     * work, and so its continuations stay recognisably user-initiated all the way down — which is
+     * what keeps them out of the first-backup window.
+     */
+    const val MANUAL_WORK = "gallery-sync-backup-manual"
+
+    /** Marks a run as user-initiated. Carried into every continuation of that chain. */
+    const val KEY_MANUAL = "manual"
 
     /** Turns automatic backup on. Safe to call repeatedly. */
     fun enable(workManager: WorkManager, allowMeteredNetwork: Boolean) {
@@ -97,16 +110,40 @@ object BackupScheduling {
      * net (which waits 6 hours). This fires as soon as constraints are met, so a library that
      * spans multiple batches uploads continuously rather than stalling between runs.
      */
-    fun enqueueContinuation(workManager: WorkManager, allowMeteredNetwork: Boolean) {
+    fun enqueueContinuation(
+        workManager: WorkManager,
+        allowMeteredNetwork: Boolean,
+        manual: Boolean = false
+    ) {
         val request = OneTimeWorkRequestBuilder<BackupWorker>()
             .setConstraints(constraints(allowMeteredNetwork))
+            .setInputData(Data.Builder().putBoolean(KEY_MANUAL, manual).build())
             .build()
 
+        // A manual chain continues under its own name, so Stop cancels the whole chain with one
+        // call and automatic work is left alone.
         workManager.enqueueUniqueWork(
-            CONTINUATION_WORK,
+            if (manual) MANUAL_WORK else CONTINUATION_WORK,
             ExistingWorkPolicy.REPLACE,
             request
         )
+    }
+
+    /**
+     * Starts the chain a person asked for.
+     *
+     * Runs through WorkManager rather than in a ViewModel scope, which dies with the screen: a run
+     * to completion over a real library is hours. Network constraints still apply, because "use
+     * mobile data" is a separate choice the user made and a tap on Sync now is not a licence to
+     * spend their data plan.
+     */
+    fun enqueueManualRun(workManager: WorkManager, allowMeteredNetwork: Boolean) {
+        enqueueContinuation(workManager, allowMeteredNetwork, manual = true)
+    }
+
+    /** Stops a manual chain, including whatever batch it is in the middle of. */
+    fun cancelManualRun(workManager: WorkManager) {
+        workManager.cancelUniqueWork(MANUAL_WORK)
     }
 
     private fun constraints(allowMeteredNetwork: Boolean) = Constraints.Builder()

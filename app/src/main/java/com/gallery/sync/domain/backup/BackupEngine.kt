@@ -272,6 +272,18 @@ class BackupEngine @Inject constructor(
     }
 
     /**
+     * Files still waiting in albums the user selected.
+     *
+     * Exists so a run that never reaches the engine can still tell whether there is anything left
+     * to do. The first-backup window returns early, and until 26 Aug 2026 the only code that lifted
+     * that window sat downstream of the return — so while the gate was up nothing was capable of
+     * noticing the gate was no longer needed. See FIX-001.
+     */
+    suspend fun outstandingCount(): Int = withContext(dispatcher) {
+        entryDao.countPendingInSelectedAlbums()
+    }
+
+    /**
      * Uploads up to [limit] outstanding files, and no more than roughly [maxBytes] of them.
      *
      * The byte bound matters more than the count. Twenty-five photos is about 100 MB; twenty-five

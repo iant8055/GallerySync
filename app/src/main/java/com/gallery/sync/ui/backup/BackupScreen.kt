@@ -201,7 +201,7 @@ private fun AlbumList(
         HeroCard(
             state = state,
             context = context,
-            onSyncNow = viewModel::runBackupNow,
+            onSyncNow = { if (state.isRunning) viewModel.stopBackup() else viewModel.runBackupNow() },
             onRescan = viewModel::refresh
         )
 
@@ -698,7 +698,9 @@ private fun HeroActions(state: BackupUiState, onSyncNow: () -> Unit, onRescan: (
         ) {
             Text(
                 stringResource(
-                    if (state.isRunning) R.string.backup_running else R.string.backup_run_now
+                    // A control, not a label. It read "Syncing…" and was disabled, so a run the
+                    // user started could not be stopped by the person who started it.
+                    if (state.isRunning) R.string.backup_stop else R.string.backup_run_now
                 ),
                 maxLines = 1
             )

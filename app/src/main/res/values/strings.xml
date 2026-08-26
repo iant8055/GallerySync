@@ -146,6 +146,9 @@
     <string name="backup_rescan">Rescan</string>
     <string name="backup_run_now">Sync now</string>
     <string name="backup_running">Syncing…</string>
+    <!-- The same button, while a manual chain is live. It stops the chain, not just the file in
+         flight; what has already been sent is kept, because the resumable session is on the row. -->
+    <string name="backup_stop">Stop sync</string>
     <string name="backup_album_summary">%1$s · %2$s</string>
 
     <!--

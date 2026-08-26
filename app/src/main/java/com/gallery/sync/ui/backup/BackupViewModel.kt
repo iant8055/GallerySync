@@ -189,8 +189,14 @@ data class BackupUiState(
     /** Something selected, and all of it already in OneDrive. */
     val isSelectionFullyBackedUp: Boolean get() = enabledItemCount > 0 && pendingCount == 0
 
-    /** A run would do something. Drives whether the button is worth pressing. */
-    val canRunBackup: Boolean get() = !isRunning && pendingCount > 0
+    /**
+     * The button is worth pressing — either to start work, or to stop work already running.
+     *
+     * While a run is live this is always true, because the button is Stop then. It used to be
+     * `!isRunning && pendingCount > 0`, which disabled the one control that could end a run the
+     * user had started.
+     */
+    val canRunBackup: Boolean get() = isRunning || pendingCount > 0
 }
 
 /** What optimising photos is doing, or what it did. */
@@ -237,6 +243,7 @@ class BackupViewModel @Inject constructor(
 
     init {
         refresh()
+        observeManualRun()
         viewModelScope.launch {
             settings.preferences.collect { prefs ->
                 _state.value = _state.value.copy(
@@ -568,51 +575,119 @@ class BackupViewModel @Inject constructor(
      * Manual rather than scheduled while the feature is being proven: a run should happen because
      * someone asked for it, not as a side effect of installing a build.
      */
+    /**
+     * Starts the chain the user asked for, and lets it run to completion.
+     *
+     * Enqueued rather than run here. `viewModelScope` dies with the screen, and a run to completion
+     * over a real library is hours — but the deeper reason is that this used to call the engine
+     * directly and so skipped everything `BackupWorker` does around a run. It uploaded one
+     * byte-budget batch, scheduled nothing, and stopped: 512 MB per press, against a 148 GB library,
+     * during exactly the period when automatic runs are gated. See FIX-001.
+     *
+     * One host now. Chaining and bookkeeping happen once, in the worker, for both callers.
+     */
     fun runBackupNow() {
         if (_state.value.isRunning) return
-
         viewModelScope.launch {
-            _state.value = _state.value.copy(isRunning = true, status = BackupStatus.Scanning)
-
-            val seen = engine.refreshLedger()
-            if (seen == null) {
-                _state.value = _state.value.copy(
-                    isRunning = false,
-                    status = BackupStatus.NoPermission
-                )
-                return@launch
-            }
-
-            val result = engine.uploadPending { progress ->
-                _state.value = _state.value.copy(
-                    status = BackupStatus.Uploading(
-                        completed = progress.completed,
-                        total = progress.total,
-                        currentFile = progress.currentFile,
-                        percentOfCurrent = if (progress.currentBytesTotal > 0) {
-                            ((progress.currentBytesSent * 100) / progress.currentBytesTotal)
-                                .toInt()
-                                .coerceIn(0, 100)
-                        } else {
-                            0
-                        }
-                    )
-                )
-            }
-
-            _state.value = _state.value.copy(
-                isRunning = false,
-                status = BackupStatus.Finished(
-                    uploaded = result.uploaded,
-                    skipped = result.skipped,
-                    failed = result.failed,
-                    deferred = result.deferred,
-                    pruned = result.pruned,
-                    remaining = result.remaining,
-                    stoppedBecause = result.stoppedBecause
-                )
+            BackupScheduling.enqueueManualRun(
+                WorkManager.getInstance(context),
+                settings.current().allowMeteredNetwork
             )
-            refresh()
         }
     }
+
+    /**
+     * Stops the chain, including the batch in flight.
+     *
+     * Cancelling the work cancels the coroutine running the engine, and `ChunkedUploader` checks
+     * `ensureActive()` on every chunk — so a stopped upload stops pushing bytes rather than
+     * finishing the file it was on. What it has already sent is not wasted: the resumable session
+     * is on the ledger row, so the next run continues from that offset.
+     */
+    fun stopBackup() {
+        BackupScheduling.cancelManualRun(WorkManager.getInstance(context))
+    }
+
+    /**
+     * Mirrors the manual chain's work state into [BackupUiState].
+     *
+     * The worker publishes per-file progress through `setProgress`, so the screen says the same
+     * thing whether the run was started by a person or by the scheduler — which it could not do
+     * while the two callers drove two different code paths.
+     */
+    private fun observeManualRun() {
+        viewModelScope.launch {
+            WorkManager.getInstance(context)
+                .getWorkInfosForUniqueWorkFlow(BackupScheduling.MANUAL_WORK)
+                .collect { infos ->
+                    val info = infos.lastOrNull()
+                    val running = info?.state == WorkInfo.State.RUNNING ||
+                        info?.state == WorkInfo.State.ENQUEUED
+
+                    val status = when (info?.state) {
+                        WorkInfo.State.RUNNING -> {
+                            val total = info.progress.getInt(BackupWorker.PROGRESS_TOTAL, 0)
+                            if (total > 0) {
+                                BackupStatus.Uploading(
+                                    completed = info.progress.getInt(
+                                        BackupWorker.PROGRESS_COMPLETED, 0
+                                    ),
+                                    total = total,
+                                    currentFile = info.progress.getString(
+                                        BackupWorker.PROGRESS_FILE
+                                    ).orEmpty(),
+                                    percentOfCurrent = info.progress.getInt(
+                                        BackupWorker.PROGRESS_PERCENT, 0
+                                    )
+                                )
+                            } else {
+                                BackupStatus.Scanning
+                            }
+                        }
+
+                        // Enqueued but not started is a real state and has to say so: network
+                        // constraints still apply to a manual run, so on mobile data with Wi-Fi
+                        // only selected this can wait. A button that looks idle while work is
+                        // pending is the defect this app kept producing.
+                        WorkInfo.State.ENQUEUED -> BackupStatus.Scanning
+
+                        // The outcome, not the last thing we happened to see. Keeping the previous
+                        // status here left "Uploading 2 of 16" on screen after a run stopped on a
+                        // full drive — a claim that was false, hiding the one fact the user could
+                        // act on. Observed 26 Aug 2026.
+                        WorkInfo.State.SUCCEEDED,
+                        WorkInfo.State.FAILED -> info.outputData.toFinishedStatus()
+                            ?: _state.value.status
+
+                        // Stopped by the user. They know why; saying nothing is honest, and the
+                        // counts underneath have already updated.
+                        WorkInfo.State.CANCELLED -> null
+
+                        else -> _state.value.status
+                    }
+
+                    _state.value = _state.value.copy(isRunning = running, status = status)
+                    if (info?.state?.isFinished == true) refresh()
+                }
+        }
+    }
+}
+
+/**
+ * The worker's outcome, or null when this work carried none — a run cancelled before it finished,
+ * or an older enqueue from before outcomes were published.
+ */
+private fun androidx.work.Data.toFinishedStatus(): BackupStatus.Finished? {
+    if (!keyValueMap.containsKey(BackupWorker.RESULT_REMAINING)) return null
+    return BackupStatus.Finished(
+        uploaded = getInt(BackupWorker.RESULT_UPLOADED, 0),
+        skipped = getInt(BackupWorker.RESULT_SKIPPED, 0),
+        failed = getInt(BackupWorker.RESULT_FAILED, 0),
+        deferred = getInt(BackupWorker.RESULT_DEFERRED, 0),
+        pruned = getInt(BackupWorker.RESULT_PRUNED, 0),
+        remaining = getInt(BackupWorker.RESULT_REMAINING, 0),
+        stoppedBecause = getString(BackupWorker.RESULT_STOPPED)?.let {
+            runCatching { StopReason.valueOf(it) }.getOrNull()
+        }
+    )
 }
