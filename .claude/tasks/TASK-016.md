@@ -59,9 +59,28 @@ prompting in the sense the rule forbids. It is the user saying "ask me in an hou
 
 Repurpose **Cloud check** as **Archive**. Setting an album to Archive navigates the user there.
 
-**Open — where reconciliation goes.** Cloud check is currently the only home for the reconciliation
-readout, and TASK-014's Gate 2 depends on it. Options: move it into the wizard where it belongs
-anyway, or keep it as a section on Settings. Not decided here.
+**Decided 26 Aug — Cloud check is dismantled, not relocated.** Ian gave each piece a destination, and
+nothing is left over:
+
+| What is on Cloud check today | Where it goes |
+|---|---|
+| **Checking OneDrive** — the reconciliation readout | the first-run wizard (TASK-014) |
+| **Photos on Phone** — the local scan counts | the first-run wizard (TASK-014) |
+| **Where backups go** — the destination root and its change dialog | **Settings**, as a default |
+| Source folders | already moved to Settings, 26 Aug |
+| Gate 2 — what to do with the existing library | already a wizard step in TASK-014 |
+
+That leaves the tab free to become Archive rather than sharing it.
+
+**Why this is right rather than merely convenient.** Reconciliation answers "how much of my library is
+already safe?", which is a question asked once, at the moment of setting up — it is the first honest
+number, and TASK-014 is built around it. Keeping a permanent tab for a one-time answer is what made
+Cloud check feel like a screen looking for a purpose. The destination is a setting by the same test:
+chosen once, changed rarely, consequential when changed.
+
+**Consequence for TASK-014:** the wizard now owns the reconciliation UI outright rather than linking
+to a tab that will no longer exist. Its Gate 2 already depends on those numbers, so this removes an
+indirection rather than adding work.
 
 ### Phase 1 — validation
 

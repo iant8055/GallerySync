@@ -505,3 +505,29 @@ is a dead end without it.
 
 Nothing consequential moves behind an icon. A destructive choice states its consequence where the
 choice is made, per the Archive rule in CLAUDE.md; the (?) may carry the background, never the warning.
+
+## The wizard absorbs Cloud check — decided 26 Aug 2026
+
+Ian, while specifying the Archive tab: *"Checking OneDrive will be part of initial wizard. Photos on
+Phone is also a Set up Wizard item. Where Backups go is moving to settings as a default."*
+
+So the Cloud check tab is dismantled rather than moved, and this wizard becomes the only home for the
+two readouts it carried:
+
+- **Checking OneDrive** — the reconciliation: how much of the library OneDrive already holds
+- **Photos on Phone** — the local scan counts, photos and videos
+
+Both were already this wizard's business. Gate 2 cannot ask "what should happen to the library you
+already have?" without them, and step 6 of the flow already says *"Scan and report — we found N
+photos and M videos in K albums, the first honest number"*. What changes is that the wizard renders
+those numbers itself instead of sending the user to a tab.
+
+**The destination root goes to Settings** as a default, joining the source folders that moved there
+the same day. Chosen once, changed rarely, consequential when changed — the same test everything else
+in Settings passes.
+
+**Why the tab could not simply be renamed.** A permanent tab for a question asked once is a screen
+looking for a purpose, which is what Cloud check had become: a reconciliation number that stops being
+interesting after the first run, a path bar, and a destination setting. Splitting it three ways is
+what frees the fourth tab for Archive — see TASK-016, where removal earns a whole screen because it
+is the largest irreversible action in the app.
