@@ -1342,6 +1342,39 @@ no local files, which is also exactly the state Archive is trying to reach.
 **For the next deletion-sync attempt:** delete *some* files from a folder, not all. One file left
 behind keeps the folder alive and the test on the thing being tested.
 
+### 26 Aug 2026 — the content-signature safeguard, caught deciding a real case
+
+**Fold 4.** Setting up a deletion-sync test: five of six files deleted from `DCIM/12345clips`, one
+left so the folder would survive, mode set to Ask, grace set to 1 day. No files were ever offered for
+cloud deletion, and the ledger reported all six as still present.
+
+**Correct, and for a reason nobody had predicted.** Every one of those six had a `_restored` twin in
+`DCIM/Restored` from an earlier retrieval test. `refreshLedger` compares by
+`RestoredAlbum.contentSignature`, which strips the `_restored` suffix, so a file deleted from its
+album but present in `Restored` matches by content and is classified **back**, not gone. The rule is
+stated in the code — *"Back wins over gone: a restored file is absent by key and present by content,
+and the second reading is the one the user would recognise"* — and this is the first time it has been
+seen deciding an actual case rather than defending against a hypothetical.
+
+The app was declining to offer up the only cloud copy of content the user still holds. Any other
+answer would have been wrong.
+
+**A restore test can silently make a deletion test impossible**, because content matching spans
+folders. Worth knowing before designing either.
+
+**Verified after removing the five twins:** all five marked missing at 20:02:24, and
+`20230811_113841.mp4` — whose original is still in the folder — stayed `present`. The control behaved
+differently from the test files, which is what shows the mechanism is discriminating rather than
+merely reacting.
+
+**Still unperformed:** a real `DELETE /me/drive/items/{id}`. The five become eligible when the 1-day
+grace elapses, and it was left to elapse rather than backdated — the timestamp is not what is under
+test, and a verification log is worth more without a doctored input in it.
+
+**Suggested by this:** the deletion screen shows nothing when a file is held back for this reason. "Still
+on this phone in Restored" is the explanation, and the screen not giving it is the same defect this
+day kept producing.
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have
