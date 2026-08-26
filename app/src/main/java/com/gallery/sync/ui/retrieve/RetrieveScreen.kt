@@ -77,6 +77,7 @@ fun RetrieveScreen(
     viewModel: RetrieveViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     // Re-lists the drive each time this tab is entered. The ViewModel outlives a tab switch, so
     // without this the screen keeps showing whatever the drive held at app launch — an album backed
@@ -120,7 +121,45 @@ fun RetrieveScreen(
                 onUp = viewModel::closeFolder
             )
 
-            // One indicator for the screen, directly under the path it belongs to. Determinate
+            // The sentence, then the bar — the same order as Albums. This used to sit at the far
+            // end of the screen in the action bar while the bar sat up here, so one status was read
+            // in two places. Moved 26 Aug 2026.
+            val working = state.batchStatus as? RestoreBatchStatus.Working
+            if (working != null || state.hasSelection) {
+                Text(
+                    text = if (working != null) {
+                        // Name the file and its position within it once bytes are moving. A bare
+                        // "1 of 1" sat unchanged for seven minutes on a 2 GB video and read as a
+                        // hang.
+                        val percent = working.percentOfCurrent
+                        val name = working.currentFile
+                        if (percent != null && name != null) {
+                            stringResource(
+                                R.string.retrieve_batch_working_file,
+                                working.done + 1,
+                                working.total,
+                                name,
+                                percent
+                            )
+                        } else {
+                            stringResource(
+                                R.string.retrieve_batch_working,
+                                working.done + 1,
+                                working.total
+                            )
+                        }
+                    } else {
+                        stringResource(
+                            R.string.retrieve_selected_summary,
+                            state.selectionCount,
+                            formatBytes(context, state.selectedBytes)
+                        )
+                    },
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            // One indicator for the screen, directly under the line it describes. Determinate
             // while a file is moving, indeterminate while the drive is being listed — a bar
             // claiming a confident 0% is a worse lie than one admitting it does not know.
             val restoring = (state.batchStatus as? RestoreBatchStatus.Working)?.percentOfCurrent
@@ -493,9 +532,6 @@ private fun FileRow(
 /** The single action, and what it is about to move. */
 @Composable
 private fun RestoreBar(state: RetrieveUiState, onRestore: () -> Unit) {
-    val context = LocalContext.current
-    val status = state.batchStatus
-
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceVariant
@@ -503,39 +539,8 @@ private fun RestoreBar(state: RetrieveUiState, onRestore: () -> Unit) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.End
         ) {
-            Text(
-                modifier = Modifier.weight(1f),
-                text = if (status is RestoreBatchStatus.Working) {
-                    // Name the file and its position within it once bytes are moving. A bare
-                    // "1 of 1" sat unchanged for seven minutes on a 2 GB video and read as a hang.
-                    val percent = status.percentOfCurrent
-                    val name = status.currentFile
-                    if (percent != null && name != null) {
-                        stringResource(
-                            R.string.retrieve_batch_working_file,
-                            status.done + 1,
-                            status.total,
-                            name,
-                            percent
-                        )
-                    } else {
-                        stringResource(
-                            R.string.retrieve_batch_working,
-                            status.done + 1,
-                            status.total
-                        )
-                    }
-                } else {
-                    stringResource(
-                        R.string.retrieve_selected_summary,
-                        state.selectionCount,
-                        formatBytes(context, state.selectedBytes)
-                    )
-                },
-                style = MaterialTheme.typography.bodyMedium
-            )
             Button(
                 onClick = onRestore,
                 enabled = !state.isRestoring,
