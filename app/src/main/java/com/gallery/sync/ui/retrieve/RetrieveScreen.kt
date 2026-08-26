@@ -1,20 +1,31 @@
 package com.gallery.sync.ui.retrieve
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -25,29 +36,39 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
+import kotlin.math.abs
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import com.gallery.sync.domain.backup.RestorableFile
 import com.gallery.sync.domain.backup.RestorableFolder
-import com.gallery.sync.ui.common.LabelWithAction
 import com.gallery.sync.ui.common.OneDriveLauncher
+import com.gallery.sync.ui.common.SignalIcons
 import com.gallery.sync.ui.common.formatBytes
 
+/** Where a phone layout stops being the right answer. The standard expanded-width breakpoint. */
+private val WideBreakpoint = 600.dp
+
+/** Far enough sideways to mean it, in pixels. Short of this the list keeps its scroll. */
+private const val SwipeThresholdPx = 90f
+
 /**
- * What OneDrive holds, and a button to bring any of it back.
+ * What OneDrive holds, and a way to bring any of it back.
  *
  * Two levels: the folders in the backup roots, and the files in one of them. Every file in a folder
  * is listed whether or not the phone still has it, because a ledger-driven list cannot answer the
  * question a restore feature promises to answer — on a new handset the ledger is empty and OneDrive
- * is full. Files already here are labelled rather than hidden, so a duplicate is something the user
- * chooses rather than something that happens to them.
+ * is full.
+ *
+ * ### Selecting, not buttons
+ *
+ * Ian, 25 Aug 2026: select the file itself rather than click a button on it. Files are picked by
+ * tapping them and fetched by one action at the foot of the screen. Three things fall out of that —
+ * the rows lose a control that was competing with the filename for width and wrapping the size onto
+ * a second line; empty folders stop carrying a disabled button that means nothing; and restoring
+ * four files becomes one action instead of four transfers racing each other for one connection.
  *
  * **Deliberately not a photo browser.** No thumbnails, no grid, no search, no sort — the design
- * principle rules all of that out, and this is the screen most likely to attract them. Real browsing
- * stays with the Open OneDrive button in Settings; looking *through* your photos is a different
- * activity from getting specific ones back.
- *
- * It is also the only route back. Android offers no hydration hook for media, so nothing in Samsung
- * Gallery can reach this app when a file is missing; the list is the entire interface rather than a
- * shortcut to one.
+ * principle rules all of that out, and this is the screen most likely to attract them.
  */
 @Composable
 fun RetrieveScreen(
@@ -65,7 +86,6 @@ fun RetrieveScreen(
                 text = stringResource(R.string.retrieve_title),
                 style = MaterialTheme.typography.titleMedium
             )
-
             Text(
                 text = stringResource(
                     if (state.selectedFolder == null) {
@@ -106,6 +126,10 @@ fun RetrieveScreen(
                     Text(stringResource(R.string.retrieve_try_again))
                 }
             }
+
+            if (state.selectedFolder != null && state.files.isNotEmpty()) {
+                SelectionControls(state = state, viewModel = viewModel)
+            }
         }
 
         if (state.loading) {
@@ -131,143 +155,350 @@ fun RetrieveScreen(
 
         HorizontalDivider()
 
-        LazyColumn(modifier = Modifier.fillMaxWidth()) {
-            if (state.selectedFolder == null) {
-                items(state.folders, key = { it.name }) { folder ->
-                    FolderRow(
-                        folder = folder,
-                        status = state.folderStatuses[folder.name],
-                        onOpen = { viewModel.openFolder(folder.name) },
-                        onRestoreAll = { viewModel.restoreFolder(folder) }
-                    )
-                    HorizontalDivider()
+        // The same two-column treatment as Albums, and for the same reason: this is the app's other
+        // long list, and what it wants from a folding screen is more rows rather than wider ones.
+        // Split by count so each column stays alphabetical top to bottom.
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        ) {
+            val columns = if (maxWidth >= WideBreakpoint) 2 else 1
+            val rows = if (state.selectedFolder == null) state.folders.size else state.files.size
+            val half = if (rows == 0) 0 else (rows + columns - 1) / columns
+
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                items(count = half) { index ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        for (column in 0 until columns) {
+                            val position = index + column * half
+                            Box(modifier = Modifier.weight(1f)) {
+                                if (state.selectedFolder == null) {
+                                    state.folders.getOrNull(position)?.let { folder ->
+                                        FolderRow(
+                                            folder = folder,
+                                            selected = folder.name in state.selectedFolderNames,
+                                            onOpen = { viewModel.openFolder(folder.name) },
+                                            onSwipe = { viewModel.toggleFolderSelection(folder) }
+                                        )
+                                    }
+                                } else {
+                                    state.files.getOrNull(position)?.let { file ->
+                                        FileRow(
+                                            file = file,
+                                            selected = file.remoteItemId in state.selectedIds,
+                                            enabled = !state.isRestoring,
+                                            onToggle = { viewModel.toggleSelection(file) }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
+
+                if (!state.loading) {
+                    // The way out of this screen's one deliberate limit. Sits directly under the
+                    // list so it is read at the moment the list disappoints someone, rather than in
+                    // Settings where the question never occurs to them.
+                    //
+                    // Held back while the list is still arriving: an empty list under "Can't find
+                    // what you're looking for?" reads as an answer rather than as a wait.
+                    item { CantFindSection() }
+
+                    // Two halves of one question: what happened to the files that are no longer
+                    // here. The list above offers them back; this offers to let them go.
+                    item { DeletionSection() }
+                }
+            }
+        }
+
+        // The one action, at the foot of the screen where a thumb is, and only once something is
+        // chosen. Nothing on this screen moves a byte until it appears.
+        if (state.hasSelection || state.isRestoring) {
+            RestoreBar(state = state, onRestore = viewModel::restoreSelected)
+        }
+    }
+}
+
+/** Select all / clear, and whatever the last batch did. */
+@Composable
+private fun SelectionControls(state: RetrieveUiState, viewModel: RetrieveViewModel) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        TextButton(onClick = viewModel::selectAll, enabled = !state.isRestoring) {
+            Text(stringResource(R.string.retrieve_select_all), maxLines = 1)
+        }
+        if (state.hasSelection) {
+            TextButton(onClick = viewModel::clearSelection, enabled = !state.isRestoring) {
+                Text(stringResource(R.string.retrieve_clear_selection), maxLines = 1)
+            }
+        }
+    }
+
+    when (val status = state.batchStatus) {
+        is RestoreBatchStatus.Done -> Text(
+            text = if (status.failed == 0) {
+                stringResource(R.string.retrieve_batch_done, status.restored)
             } else {
-                items(state.files, key = { it.remoteItemId }) { file ->
-                    RetrieveRow(
-                        file = file,
-                        status = state.statuses[file.remoteItemId],
-                        onRetrieve = { viewModel.retrieve(file) }
+                stringResource(R.string.retrieve_batch_done_failed, status.restored, status.failed)
+            },
+            style = MaterialTheme.typography.bodySmall,
+            color = if (status.failed == 0) {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            } else {
+                MaterialTheme.colorScheme.error
+            }
+        )
+
+        RestoreBatchStatus.Unsupported -> Text(
+            text = stringResource(R.string.retrieve_unsupported),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.error
+        )
+
+        else -> Unit
+    }
+}
+
+/**
+ * One cloud folder: what it holds, and how much of it is here.
+ *
+ * No button any more. Tapping opens it, which was always the main path — the files inside are the
+ * point of this screen — and restoring a whole folder is now open, Select all, Restore.
+ *
+ * The two counts come from different places and are deliberately not presented as a match. See
+ * [RestorableFolder]: one is what Graph reports the folder contains, the other is what a local scan
+ * found in an album of the same name.
+ */
+@Composable
+private fun FolderRow(
+    folder: RestorableFolder,
+    selected: Boolean,
+    onOpen: () -> Unit,
+    onSwipe: () -> Unit
+) {
+    val context = LocalContext.current
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            // Tap opens, a horizontal drag takes the whole folder. Two intents, two gestures, no
+            // button — which is what removed the control that was fighting the name for width.
+            //
+            // `detectHorizontalDragGestures` rather than SwipeToDismissBox: this row is inside a
+            // vertically scrolling list and, unfolded, is one of two side-by-side columns. A
+            // dismiss box wants to own the whole width and animate the row away, neither of which
+            // is what a selection should do. The row stays put; only the ring changes.
+            .pointerInput(folder.name) {
+                var travelled = 0f
+                detectHorizontalDragGestures(
+                    onDragStart = { travelled = 0f },
+                    onDragEnd = { if (abs(travelled) > SwipeThresholdPx) onSwipe() }
+                ) { change, amount ->
+                    travelled += amount
+                    // Claimed only once it is clearly sideways, so a diagonal thumb still scrolls
+                    // the list rather than selecting something by accident.
+                    if (abs(travelled) > SwipeThresholdPx) change.consume()
+                }
+            },
+        shape = RoundedCornerShape(22.dp),
+        color = if (selected) {
+            MaterialTheme.colorScheme.primaryContainer
+        } else {
+            MaterialTheme.colorScheme.surface
+        },
+        contentColor = if (selected) {
+            MaterialTheme.colorScheme.onPrimaryContainer
+        } else {
+            MaterialTheme.colorScheme.onSurface
+        },
+        border = BorderStroke(
+            if (selected) 2.dp else 1.dp,
+            if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+        ),
+        onClick = onOpen
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(text = folder.name, style = MaterialTheme.typography.bodyLarge)
+                Text(
+                    text = if (folder.isEmpty) {
+                        stringResource(R.string.retrieve_folder_empty)
+                    } else {
+                        stringResource(
+                            R.string.retrieve_folder_detail,
+                            folder.fileCount,
+                            formatBytes(context, folder.sizeBytes)
+                        )
+                    },
+                    style = MaterialTheme.typography.bodySmall
+                )
+                if (!folder.isEmpty) {
+                    Text(
+                        text = if (folder.looksComplete) {
+                            stringResource(R.string.retrieve_folder_all_here)
+                        } else {
+                            stringResource(
+                                R.string.retrieve_folder_here_count,
+                                folder.onDeviceCount,
+                                folder.fileCount
+                            )
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    HorizontalDivider()
                 }
             }
-
-            // The way out of this screen's one deliberate limit. Sits directly under the list so it
-            // is read at the moment the list disappoints someone, rather than in Settings where the
-            // question never occurs to them.
-            item {
-                HorizontalDivider()
-                CantFindSection()
-            }
-
-            // Two halves of one question: what happened to the files that are no longer here. The
-            // list above offers them back; this offers to let them go.
-            item {
-                HorizontalDivider()
-                DeletionSection()
-            }
+            Icon(
+                imageVector = if (selected) SignalIcons.Check else SignalIcons.ChevronRight,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = if (selected) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                }
+            )
         }
     }
 }
 
 /**
- * One cloud folder: what it holds, how much of it is here, and a button for the lot.
+ * One cloud file, picked by tapping it.
  *
- * Names and counts only — no thumbnail, which is the line this screen has to keep holding.
+ * The whole card is the target rather than a control inside it, so nothing competes with the
+ * filename for width. Selection shows as a ring in the primary colour plus a tick — the same "this
+ * one" language the album mode menu uses.
  *
- * The two counts come from different places and are deliberately not presented as a match. See
- * [RestorableFolder]: one is what Graph reports the folder contains, the other is what a local scan
- * found in an album of the same name. Tapping through is what answers which files those are.
+ * A file already on the phone can still be selected. That is the point: the user asked for it, and a
+ * second copy under a `_restored` name is a cost they can see.
  */
 @Composable
-private fun FolderRow(
-    folder: RestorableFolder,
-    status: FolderStatus?,
-    onOpen: () -> Unit,
-    onRestoreAll: () -> Unit
+private fun FileRow(
+    file: RestorableFile,
+    selected: Boolean,
+    enabled: Boolean,
+    onToggle: () -> Unit
 ) {
     val context = LocalContext.current
 
-    LabelWithAction(
-        modifier = Modifier
-            .clickable(onClick = onOpen)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        action = {
-            OutlinedButton(
-                onClick = onRestoreAll,
-                // An empty folder has nothing to offer. Still enabled when the counts match, because
-                // they are two counts of same-named things rather than proof the files are the same
-                // — see [RestorableFolder]. Only "nothing there at all" is certain enough to refuse.
-                enabled = !folder.isEmpty &&
-                    status !is FolderStatus.Checking &&
-                    status !is FolderStatus.Working
-            ) {
-                Text(text = stringResource(R.string.retrieve_restore_all), maxLines = 1)
-            }
-        }
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        color = if (selected) {
+            MaterialTheme.colorScheme.primaryContainer
+        } else {
+            MaterialTheme.colorScheme.surface
+        },
+        contentColor = if (selected) {
+            MaterialTheme.colorScheme.onPrimaryContainer
+        } else {
+            MaterialTheme.colorScheme.onSurface
+        },
+        border = BorderStroke(
+            if (selected) 2.dp else 1.dp,
+            if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+        ),
+        enabled = enabled,
+        onClick = onToggle
     ) {
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(text = folder.name, style = MaterialTheme.typography.bodyLarge)
-            Text(
-                text = if (folder.isEmpty) {
-                    stringResource(R.string.retrieve_folder_empty)
-                } else {
-                    stringResource(
-                        R.string.retrieve_folder_detail,
-                        folder.fileCount,
-                        formatBytes(context, folder.sizeBytes)
-                    )
-                },
-                style = MaterialTheme.typography.bodySmall
-            )
-            if (!folder.isEmpty) {
+        Row(
+            modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(text = file.displayName, style = MaterialTheme.typography.bodyLarge)
                 Text(
-                    text = if (folder.looksComplete) {
-                        stringResource(R.string.retrieve_folder_all_here)
-                    } else {
-                        stringResource(
-                            R.string.retrieve_folder_here_count,
-                            folder.onDeviceCount,
-                            folder.fileCount
-                        )
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = formatBytes(context, file.sizeBytes),
+                    style = MaterialTheme.typography.bodySmall
+                )
+                if (file.alreadyOnDevice) {
+                    Text(
+                        text = stringResource(R.string.retrieve_already_here),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            if (selected) {
+                Icon(
+                    imageVector = SignalIcons.Check,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
-            status?.let { FolderStatusLine(it) }
         }
     }
 }
 
-/** What the whole-folder button is doing, including what it deliberately left alone. */
+/** The single action, and what it is about to move. */
 @Composable
-private fun FolderStatusLine(status: FolderStatus) {
-    val text = when (status) {
-        FolderStatus.Checking -> stringResource(R.string.retrieve_folder_checking)
-        is FolderStatus.Working ->
-            stringResource(R.string.retrieve_folder_working, status.done + 1, status.total)
+private fun RestoreBar(state: RetrieveUiState, onRestore: () -> Unit) {
+    val context = LocalContext.current
+    val status = state.batchStatus
 
-        FolderStatus.AlreadyHere -> stringResource(R.string.retrieve_folder_nothing_missing)
-        is FolderStatus.Done -> stringResource(
-            R.string.retrieve_folder_done,
-            status.restored,
-            status.skipped
-        )
-
-        is FolderStatus.Failed -> stringResource(R.string.retrieve_folder_failed, status.reason)
-    }
-
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodySmall,
-        color = if (status is FolderStatus.Failed) {
-            MaterialTheme.colorScheme.error
-        } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surfaceVariant
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                modifier = Modifier.weight(1f),
+                text = if (status is RestoreBatchStatus.Working) {
+                    stringResource(R.string.retrieve_batch_working, status.done + 1, status.total)
+                } else {
+                    stringResource(
+                        R.string.retrieve_selected_summary,
+                        state.selectionCount,
+                        formatBytes(context, state.selectedBytes)
+                    )
+                },
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Button(
+                onClick = onRestore,
+                enabled = !state.isRestoring,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            ) {
+                Text(
+                    text = stringResource(
+                        if (state.isRestoring) {
+                            R.string.retrieve_working
+                        } else {
+                            R.string.retrieve_action
+                        }
+                    ),
+                    maxLines = 1
+                )
+            }
         }
-    )
+    }
 }
 
 /**
@@ -310,85 +541,6 @@ private fun Breadcrumb(destinationPath: String, folder: String?, onUp: () -> Uni
     )
 }
 
-/** One cloud file: what it is called, how big, whether it is already here, and a button. */
-@Composable
-private fun RetrieveRow(
-    file: RestorableFile,
-    status: RetrieveStatus?,
-    onRetrieve: () -> Unit
-) {
-    val context = LocalContext.current
-
-    LabelWithAction(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-        action = {
-            OutlinedButton(
-                onClick = onRetrieve,
-                // Disabled only while this row is working — never because the file is already on
-                // the phone. Fetching one anyway is the user's call to make.
-                enabled = status !is RetrieveStatus.Working
-            ) {
-                Text(
-                    text = if (status is RetrieveStatus.Working) {
-                        stringResource(R.string.retrieve_working)
-                    } else {
-                        stringResource(R.string.retrieve_action)
-                    },
-                    maxLines = 1
-                )
-            }
-        }
-    ) {
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(
-                text = file.displayName,
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Text(
-                text = formatBytes(context, file.sizeBytes),
-                style = MaterialTheme.typography.bodySmall
-            )
-            if (file.alreadyOnDevice) {
-                Text(
-                    text = stringResource(R.string.retrieve_already_here),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            status?.let { StatusLine(it, file.sizeBytes) }
-        }
-    }
-}
-
-@Composable
-private fun StatusLine(status: RetrieveStatus, total: Long) {
-    val text = when (status) {
-        is RetrieveStatus.Working -> {
-            val percent = if (total > 0) {
-                ((status.bytesWritten * 100) / total).toInt().coerceIn(0, 100)
-            } else {
-                0
-            }
-            "$percent%"
-        }
-
-        RetrieveStatus.Done -> stringResource(R.string.retrieve_done)
-        RetrieveStatus.Unsupported -> stringResource(R.string.retrieve_unsupported)
-        RetrieveStatus.GoneFromCloud -> stringResource(R.string.retrieve_gone)
-        is RetrieveStatus.Failed -> stringResource(R.string.retrieve_failed, status.reason)
-    }
-
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodySmall,
-        color = if (status is RetrieveStatus.Failed || status is RetrieveStatus.GoneFromCloud) {
-            MaterialTheme.colorScheme.error
-        } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
-        }
-    )
-}
-
 /**
  * Where to go for anything this screen cannot show.
  *
@@ -398,12 +550,7 @@ private fun StatusLine(status: RetrieveStatus, total: Long) {
  * conclusion, and it is reachable from a screen that otherwise looks complete.
  *
  * Phrased from the reader's side. "Can't find what you're looking for?" is the thought they are
- * already having; "GallerySync only browses the backup roots" is our implementation detail, and
- * nobody arrives at this screen wondering about our implementation.
- *
- * The button leads to OneDrive itself, which does browse the whole drive and does it better than a
- * plain list ever could. The design principle rules out becoming that app; it does not rule out
- * pointing at it.
+ * already having; "GallerySync only browses the backup roots" is our implementation detail.
  */
 @Composable
 private fun CantFindSection(modifier: Modifier = Modifier) {
@@ -419,18 +566,12 @@ private fun CantFindSection(modifier: Modifier = Modifier) {
             text = stringResource(R.string.retrieve_cant_find_title),
             style = MaterialTheme.typography.titleMedium
         )
-
-        LabelWithAction(
-            action = {
-                OutlinedButton(onClick = { OneDriveLauncher.open(context) }) {
-                    Text(text = stringResource(R.string.retrieve_open_onedrive), maxLines = 1)
-                }
-            }
-        ) {
-            Text(
-                text = stringResource(R.string.retrieve_cant_find_detail),
-                style = MaterialTheme.typography.bodySmall
-            )
+        Text(
+            text = stringResource(R.string.retrieve_cant_find_detail),
+            style = MaterialTheme.typography.bodySmall
+        )
+        OutlinedButton(onClick = { OneDriveLauncher.open(context) }) {
+            Text(text = stringResource(R.string.retrieve_open_onedrive), maxLines = 1)
         }
     }
 }

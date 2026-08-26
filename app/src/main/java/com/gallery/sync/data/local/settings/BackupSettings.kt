@@ -56,7 +56,17 @@ data class BackupPreferences(
      */
     val cloudDeletionPolicy: CloudDeletionPolicy = CloudDeletionPolicy.DEFAULT,
     /** How long a file must have been gone before its cloud copy may even be offered. */
-    val cloudDeletionGraceDays: Int = CloudDeletionGrace.DEFAULT_DAYS
+    val cloudDeletionGraceDays: Int = CloudDeletionGrace.DEFAULT_DAYS,
+    /**
+     * Whether the restore screen lists folders OneDrive reports as holding nothing.
+     *
+     * Off by default. On a real drive most of them are empty — four of the first five rows on the
+     * Fold 4 — and an empty folder on a RESTORE screen offers nothing to restore, so listing it is
+     * noise between the folders that do. Ian asked for it as a choice rather than a decision, 25 Aug
+     * 2026, and it is the right shape for one: hiding costs nothing recoverable, and someone who
+     * expects a folder to be there needs a way to confirm it is.
+     */
+    val showEmptyCloudFolders: Boolean = false
 )
 
 /**
@@ -102,7 +112,8 @@ class BackupSettings @Inject constructor(
                 ?: CloudDeletionPolicy.DEFAULT,
             cloudDeletionGraceDays = stored[KEY_CLOUD_DELETION_GRACE]
                 ?.takeIf { it in CloudDeletionGrace.SELECTABLE_DAYS }
-                ?: CloudDeletionGrace.DEFAULT_DAYS
+                ?: CloudDeletionGrace.DEFAULT_DAYS,
+            showEmptyCloudFolders = stored[KEY_SHOW_EMPTY_FOLDERS] ?: false
         )
     }
 
@@ -139,6 +150,10 @@ class BackupSettings @Inject constructor(
      */
     suspend fun setCloudDeletionPolicy(policy: CloudDeletionPolicy) {
         context.dataStore.edit { it[KEY_CLOUD_DELETION_POLICY] = policy.name }
+    }
+
+    suspend fun setShowEmptyCloudFolders(show: Boolean) {
+        context.dataStore.edit { it[KEY_SHOW_EMPTY_FOLDERS] = show }
     }
 
     suspend fun setCloudDeletionGraceDays(days: Int) {
@@ -189,5 +204,6 @@ class BackupSettings @Inject constructor(
         val KEY_FIRST_BACKUP_DONE = booleanPreferencesKey("first_backup_completed")
         val KEY_CLOUD_DELETION_POLICY = stringPreferencesKey("cloud_deletion_policy")
         val KEY_CLOUD_DELETION_GRACE = intPreferencesKey("cloud_deletion_grace_days")
+        val KEY_SHOW_EMPTY_FOLDERS = booleanPreferencesKey("show_empty_cloud_folders")
     }
 }

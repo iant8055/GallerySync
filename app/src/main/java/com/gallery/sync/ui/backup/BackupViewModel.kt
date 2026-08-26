@@ -153,7 +153,9 @@ data class BackupUiState(
     val proxyCandidateBytes: Long = 0L,
     val canProxy: Boolean = false,
     val proxyStatus: ProxyStatus? = null,
-    val defaultAlbumMode: AlbumMode = AlbumMode.DEFAULT
+    val defaultAlbumMode: AlbumMode = AlbumMode.DEFAULT,
+    /** Whether the restore screen lists cloud folders that hold nothing. */
+    val showEmptyCloudFolders: Boolean = false
 ) {
     /** Files that would be sent if a run started now. */
     val enabledItemCount: Int get() = albums.filter { it.isEnabled }.sumOf { it.itemCount }
@@ -217,6 +219,7 @@ class BackupViewModel @Inject constructor(
                     isAutomaticEnabled = prefs.isAutomaticEnabled,
                     isAutoOptimiseEnabled = prefs.isAutoOptimiseEnabled,
                     allowMeteredNetwork = prefs.allowMeteredNetwork,
+                    showEmptyCloudFolders = prefs.showEmptyCloudFolders,
                     defaultAlbumMode = prefs.defaultAlbumMode
                 )
             }
@@ -377,6 +380,10 @@ class BackupViewModel @Inject constructor(
      * only an Activity can show it. What this changes is that the app offers when there is
      * something to optimise, instead of waiting to be found in Settings.
      */
+    fun setShowEmptyCloudFolders(show: Boolean) {
+        viewModelScope.launch { settings.setShowEmptyCloudFolders(show) }
+    }
+
     fun setAutoOptimiseEnabled(enabled: Boolean) {
         viewModelScope.launch { settings.setAutoOptimiseEnabled(enabled) }
     }

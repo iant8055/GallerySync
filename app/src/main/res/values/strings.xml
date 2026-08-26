@@ -15,6 +15,9 @@
     <string name="settings_account">Account</string>
     <string name="settings_cloud_files">Your cloud files</string>
     <string name="settings_open_onedrive">Open OneDrive</string>
+    <string name="settings_show_empty_folders">Show empty folders</string>
+    <string name="settings_show_empty_folders_on">Restore lists every folder in your backup folders, including ones with nothing in them.</string>
+    <string name="settings_show_empty_folders_off">Restore lists only folders that have something in them to bring back.</string>
     <string name="settings_open_onedrive_detail">Restore covers the folders GallerySync backs up to. For everything else in your OneDrive, open OneDrive.</string>
     <string name="settings_automatic">Automatic sync</string>
     <string name="settings_storage">Storage</string>
@@ -286,7 +289,12 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
     <string name="retrieve_cant_find_title">Can\'t find what you\'re looking for?</string>
     <string name="retrieve_cant_find_detail">This list covers the folders GallerySync backs up to. Anything else in your OneDrive is still there — open OneDrive to find it.</string>
     <string name="retrieve_open_onedrive">Open OneDrive</string>
-    <string name="retrieve_restore_all">Restore all</string>
+    <string name="retrieve_select_all">Select all</string>
+    <string name="retrieve_clear_selection">Clear</string>
+    <string name="retrieve_selected_summary">%1$d selected · %2$s</string>
+    <string name="retrieve_batch_working">Restoring %1$d of %2$d…</string>
+    <string name="retrieve_batch_done">%1$d back on your phone.</string>
+    <string name="retrieve_batch_done_failed">%1$d back on your phone. %2$d could not be restored.</string>
     <string name="retrieve_folder_detail">%1$d files · %2$s</string>
     <string name="retrieve_folder_empty">Empty</string>
     <string name="retrieve_folder_here_count">%1$d of %2$d already on this phone</string>

@@ -154,6 +154,19 @@ fun SettingsScreen(
                     style = MaterialTheme.typography.bodySmall
                 )
             }
+
+            SettingSwitch(
+                label = stringResource(R.string.settings_show_empty_folders),
+                detail = stringResource(
+                    if (state.showEmptyCloudFolders) {
+                        R.string.settings_show_empty_folders_on
+                    } else {
+                        R.string.settings_show_empty_folders_off
+                    }
+                ),
+                checked = state.showEmptyCloudFolders,
+                onCheckedChange = viewModel::setShowEmptyCloudFolders
+            )
         }
 
         HorizontalDivider()

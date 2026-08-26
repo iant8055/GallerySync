@@ -50,6 +50,16 @@ object SignalIcons {
         )
     }
 
+    /** Marks a selected row. */
+    val Check: ImageVector = stroked("check") {
+        listOf("M20 6 9 17l-5-5")
+    }
+
+    /** A folder row leads somewhere. */
+    val ChevronRight: ImageVector = stroked("chevronRight") {
+        listOf("m9 18 6-6-6-6")
+    }
+
     val Settings: ImageVector = stroked("settings") {
         listOf(
             "M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z",
