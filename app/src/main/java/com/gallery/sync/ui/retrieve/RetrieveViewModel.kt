@@ -22,6 +22,9 @@ import javax.inject.Inject
  * per-row buttons: a queue that runs one file at a time has one position in it, and reporting that
  * once is both truer and quieter than five rows each claiming to be busy.
  */
+/** One picked file, and the folder it was picked in. */
+data class SelectedFile(val file: RestorableFile, val folderName: String)
+
 sealed interface RestoreBatchStatus {
 
     data class Working(val done: Int, val total: Int) : RestoreBatchStatus
@@ -48,15 +51,21 @@ data class RetrieveUiState(
      */
     val couldNotList: Boolean = false,
     /**
-     * Remote item ids the user has picked.
+     * What the user has picked, by remote item id, and which folder each came from.
      *
-     * Selection replaced a Restore button on every row. Ian, 25 Aug 2026: select the file itself
-     * rather than click a button on it. Three things fall out of that — the rows lose the control
-     * that was fighting them for width, empty folders stop carrying a disabled button that means
-     * nothing, and **several files can be restored in one go**, which the app could not do at all.
-     * Tapping four buttons started four unrelated transfers at once.
+     * ### It holds the files, not their ids
+     *
+     * Leaving a folder discards its listing, so a selection kept as bare ids would lose the name,
+     * size and mime type needed to fetch anything. The files ride along.
+     *
+     * ### It survives navigation, deliberately
+     *
+     * An earlier version cleared this on every open and close, reasoning that a selection belonged
+     * to the folder it was made in. Ian, 25 Aug 2026: it does not — the point is to pick files from
+     * several folders and bring them back together. The selection belongs to the person, and only
+     * a restore or an explicit Clear empties it.
      */
-    val selectedIds: Set<String> = emptySet(),
+    val selection: Map<String, SelectedFile> = emptyMap(),
     /**
      * Whole folders the user swiped, by name.
      *
@@ -81,23 +90,22 @@ data class RetrieveUiState(
      */
     val droppedFromCloud: List<String> = emptyList()
 ) {
-    val selectedFiles: List<RestorableFile> get() = files.filter { it.remoteItemId in selectedIds }
+    val selectedFiles: List<RestorableFile> get() = selection.values.map { it.file }
 
     val chosenFolders: List<RestorableFolder> get() = folders.filter { it.name in selectedFolderNames }
 
-    /** What the bar is holding, whichever level the user is on. */
+    /** How many files are picked, counting a whole swiped folder as everything in it. */
     val selectionCount: Int
-        get() = if (selectedFolder == null) chosenFolders.sumOf { it.fileCount } else selectedFiles.size
+        get() = selection.size + chosenFolders.sumOf { it.fileCount }
 
     val selectedBytes: Long
-        get() = if (selectedFolder == null) {
-            chosenFolders.sumOf { it.sizeBytes }
-        } else {
-            selectedFiles.sumOf { it.sizeBytes }
-        }
+        get() = selection.values.sumOf { it.file.sizeBytes } + chosenFolders.sumOf { it.sizeBytes }
 
-    val hasSelection: Boolean
-        get() = if (selectedFolder == null) selectedFolderNames.isNotEmpty() else selectedIds.isNotEmpty()
+    val hasSelection: Boolean get() = selection.isNotEmpty() || selectedFolderNames.isNotEmpty()
+
+    /** How many picked files came from one folder, for the count on its row. */
+    fun selectedCountIn(folderName: String): Int =
+        selection.values.count { it.folderName == folderName }
 
     val isRestoring: Boolean get() = batchStatus is RestoreBatchStatus.Working
 }
@@ -164,10 +172,8 @@ class RetrieveViewModel @Inject constructor(
             _state.value = _state.value.copy(
                 selectedFolder = album,
                 files = emptyList(),
-                // A selection belongs to the folder it was made in. Carrying it across would mean
-                // acting on files the user can no longer see.
-                selectedIds = emptySet(),
-                selectedFolderNames = emptySet(),
+                // The selection is deliberately NOT cleared here, nor on the way back out. Picking
+                // from several folders and restoring them together is the point.
                 batchStatus = null,
                 loading = true,
                 couldNotList = false
@@ -186,8 +192,6 @@ class RetrieveViewModel @Inject constructor(
         _state.value = _state.value.copy(
             selectedFolder = null,
             files = emptyList(),
-            selectedIds = emptySet(),
-            selectedFolderNames = emptySet(),
             batchStatus = null,
             couldNotList = false
         )
@@ -201,12 +205,13 @@ class RetrieveViewModel @Inject constructor(
      */
     fun toggleSelection(file: RestorableFile) {
         if (_state.value.isRestoring) return
-        val current = _state.value.selectedIds
+        val folder = _state.value.selectedFolder ?: return
+        val current = _state.value.selection
         _state.value = _state.value.copy(
-            selectedIds = if (file.remoteItemId in current) {
+            selection = if (file.remoteItemId in current) {
                 current - file.remoteItemId
             } else {
-                current + file.remoteItemId
+                current + (file.remoteItemId to SelectedFile(file, folder))
             },
             // A finished batch's result described the last selection, not this one.
             batchStatus = null
@@ -224,8 +229,10 @@ class RetrieveViewModel @Inject constructor(
      */
     fun selectAll() {
         if (_state.value.isRestoring) return
+        val folder = _state.value.selectedFolder ?: return
         _state.value = _state.value.copy(
-            selectedIds = _state.value.files.map { it.remoteItemId }.toSet(),
+            selection = _state.value.selection +
+                _state.value.files.associate { it.remoteItemId to SelectedFile(it, folder) },
             batchStatus = null
         )
     }
@@ -247,7 +254,7 @@ class RetrieveViewModel @Inject constructor(
     fun clearSelection() {
         if (_state.value.isRestoring) return
         _state.value = _state.value.copy(
-            selectedIds = emptySet(),
+            selection = emptyMap(),
             selectedFolderNames = emptySet(),
             batchStatus = null
         )
@@ -294,13 +301,19 @@ class RetrieveViewModel @Inject constructor(
         if (_state.value.isRestoring) return
 
         viewModelScope.launch {
-            val chosen = if (_state.value.selectedFolder == null) {
-                filesInChosenFolders() ?: return@launch
+            // Files picked one by one, plus everything in any folder that was swiped. Both at
+            // once, because the bar shows one total and the user asked for one action.
+            val fromFolders = if (_state.value.selectedFolderNames.isEmpty()) {
+                emptyList()
             } else {
-                _state.value.selectedFiles
+                filesInChosenFolders() ?: return@launch
             }
+            val alreadyPicked = _state.value.selectedFiles.map { it.remoteItemId }.toSet()
+            val chosen = _state.value.selectedFiles +
+                fromFolders.filterNot { it.remoteItemId in alreadyPicked }
             if (chosen.isEmpty()) {
                 _state.value = _state.value.copy(
+                    selection = emptyMap(),
                     selectedFolderNames = emptySet(),
                     batchStatus = RestoreBatchStatus.Done(restored = 0, failed = 0)
                 )
@@ -347,7 +360,7 @@ class RetrieveViewModel @Inject constructor(
             _state.value = _state.value.copy(
                 files = _state.value.files.filterNot { it.displayName in gone },
                 droppedFromCloud = _state.value.droppedFromCloud + gone,
-                selectedIds = emptySet(),
+                selection = emptyMap(),
                 selectedFolderNames = emptySet(),
                 batchStatus = if (unsupported) {
                     RestoreBatchStatus.Unsupported

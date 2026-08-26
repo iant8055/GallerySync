@@ -127,7 +127,7 @@ fun RetrieveScreen(
                 }
             }
 
-            if (state.selectedFolder != null && state.files.isNotEmpty()) {
+            if ((state.selectedFolder != null && state.files.isNotEmpty()) || state.hasSelection) {
                 SelectionControls(state = state, viewModel = viewModel)
             }
         }
@@ -182,6 +182,7 @@ fun RetrieveScreen(
                                         FolderRow(
                                             folder = folder,
                                             selected = folder.name in state.selectedFolderNames,
+                                            pickedHere = state.selectedCountIn(folder.name),
                                             onOpen = { viewModel.openFolder(folder.name) },
                                             onSwipe = { viewModel.toggleFolderSelection(folder) }
                                         )
@@ -190,7 +191,7 @@ fun RetrieveScreen(
                                     state.files.getOrNull(position)?.let { file ->
                                         FileRow(
                                             file = file,
-                                            selected = file.remoteItemId in state.selectedIds,
+                                            selected = file.remoteItemId in state.selection,
                                             enabled = !state.isRestoring,
                                             onToggle = { viewModel.toggleSelection(file) }
                                         )
@@ -232,8 +233,12 @@ private fun SelectionControls(state: RetrieveUiState, viewModel: RetrieveViewMod
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        TextButton(onClick = viewModel::selectAll, enabled = !state.isRestoring) {
-            Text(stringResource(R.string.retrieve_select_all), maxLines = 1)
+        // Only inside a folder — there is nothing to select all of on the folder list, where the
+        // equivalent is swiping the folders you want.
+        if (state.selectedFolder != null && state.files.isNotEmpty()) {
+            TextButton(onClick = viewModel::selectAll, enabled = !state.isRestoring) {
+                Text(stringResource(R.string.retrieve_select_all), maxLines = 1)
+            }
         }
         if (state.hasSelection) {
             TextButton(onClick = viewModel::clearSelection, enabled = !state.isRestoring) {
@@ -281,6 +286,7 @@ private fun SelectionControls(state: RetrieveUiState, viewModel: RetrieveViewMod
 private fun FolderRow(
     folder: RestorableFolder,
     selected: Boolean,
+    pickedHere: Int,
     onOpen: () -> Unit,
     onSwipe: () -> Unit
 ) {
@@ -347,6 +353,15 @@ private fun FolderRow(
                     },
                     style = MaterialTheme.typography.bodySmall
                 )
+                // What the standing selection took from this folder. Without it, coming back out
+                // to the list leaves no trace of where the files in the bar came from.
+                if (pickedHere > 0) {
+                    Text(
+                        text = stringResource(R.string.retrieve_picked_here, pickedHere),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
                 if (!folder.isEmpty) {
                     Text(
                         text = if (folder.looksComplete) {

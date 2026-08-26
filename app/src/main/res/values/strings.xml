@@ -291,6 +291,7 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
     <string name="retrieve_open_onedrive">Open OneDrive</string>
     <string name="retrieve_select_all">Select all</string>
     <string name="retrieve_clear_selection">Clear</string>
+    <string name="retrieve_picked_here">%1$d selected here</string>
     <string name="retrieve_selected_summary">%1$d selected · %2$s</string>
     <string name="retrieve_batch_working">Restoring %1$d of %2$d…</string>
     <string name="retrieve_batch_done">%1$d back on your phone.</string>
