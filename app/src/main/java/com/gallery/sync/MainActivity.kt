@@ -5,12 +5,16 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.ScrollableTabRow
+import com.gallery.sync.ui.common.NavDestination
+import com.gallery.sync.ui.common.SignalIcons
+import com.gallery.sync.ui.common.SignalNavBar
 import com.gallery.sync.ui.retrieve.RetrieveScreen
 import com.gallery.sync.ui.setup.ReconcileScreen
 import androidx.compose.material3.Text
@@ -20,6 +24,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -98,49 +103,32 @@ private fun SignedInApp(
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
 
+    // Order is the order of use. Albums is what people open the app for; Cloud check and Settings
+    // are things done once. Restore moved second because it was the tab falling off the right edge
+    // of the old row — a quarter of the app reachable only by a scroll gesture nobody knew was
+    // there.
+    val destinations = listOf(
+        NavDestination(SignalIcons.Albums, stringResource(R.string.tab_backup)),
+        NavDestination(SignalIcons.Restore, stringResource(R.string.tab_retrieve)),
+        NavDestination(SignalIcons.CloudCheck, stringResource(R.string.tab_setup)),
+        NavDestination(SignalIcons.Settings, stringResource(R.string.tab_settings))
+    )
+
     Column(modifier = modifier.fillMaxSize()) {
-        // Scrollable, not fixed. A fixed TabRow splits the width evenly, so at 320dp with large
-        // text "Album Modes" wrapped onto two lines while "Settings" stayed on one, leaving the row
-        // uneven and the selected indicator adrift from its label. Scrollable gives each tab the
-        // width its own text needs.
-        ScrollableTabRow(selectedTabIndex = selectedTab, edgePadding = 0.dp) {
-            Tab(
-                selected = selectedTab == 0,
-                onClick = { selectedTab = 0 },
-                text = { Text(stringResource(R.string.tab_backup)) }
-            )
-            // The OneDrive browser is hidden, not deleted. Browsing cloud files is the thumbnail
-            // browser the design principle rules out, and v0.4 needs this screen repurposed as the
-            // retrieval list — a plain list of what is not on the phone. Settings offers a "Open
-            // OneDrive" button meanwhile, which is a better answer than a browser we should not
-            // be building. See .claude/tasks/TASK-012.md.
-            Tab(
-                selected = selectedTab == 1,
-                onClick = { selectedTab = 1 },
-                text = { Text(stringResource(R.string.tab_settings)) }
-            )
-            // Temporary home for the reconciliation step. It belongs in the guided first run as
-            // step 6; until that flow exists it lives here so it can be used and checked on real
-            // hardware rather than sitting unreachable the way the debug probes did.
-            Tab(
-                selected = selectedTab == 2,
-                onClick = { selectedTab = 2 },
-                text = { Text(stringResource(R.string.tab_setup)) }
-            )
-            // The retrieval list. Not a browser, and the only route back for a file that is not on
-            // the phone — Android has no hydration hook, so nothing in the gallery can reach us.
-            Tab(
-                selected = selectedTab == 3,
-                onClick = { selectedTab = 3 },
-                text = { Text(stringResource(R.string.tab_retrieve)) }
-            )
+        Box(modifier = Modifier.weight(1f)) {
+            when (selectedTab) {
+                0 -> BackupScreen()
+                1 -> RetrieveScreen()
+                2 -> ReconcileScreen()
+                else -> SettingsScreen(accountName = accountName, onSignOut = onSignOut)
+            }
         }
 
-        when (selectedTab) {
-            0 -> BackupScreen()
-            2 -> ReconcileScreen()
-            3 -> RetrieveScreen()
-            else -> SettingsScreen(accountName = accountName, onSignOut = onSignOut)
-        }
+        SignalNavBar(
+            destinations = destinations,
+            selected = selectedTab,
+            onSelect = { selectedTab = it },
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
     }
 }
