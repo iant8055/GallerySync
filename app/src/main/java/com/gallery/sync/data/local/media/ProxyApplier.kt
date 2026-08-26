@@ -59,6 +59,7 @@ sealed interface ProxyOutcome {
  */
 @Singleton
 class ProxyApplier @Inject constructor(
+    private val safWriter: SafMediaWriter,
     @ApplicationContext private val context: Context,
     private val generator: ProxyGenerator,
     private val entryDao: BackupEntryDao,
@@ -111,6 +112,26 @@ class ProxyApplier @Inject constructor(
         resolver.query(uri, arrayOf(MediaStore.MediaColumns._ID), null, null, null)
             ?.use { it.moveToFirst() } ?: false
     }.getOrDefault(false)
+
+    /**
+     * Whether these files still need Android's write dialog.
+     *
+     * False when every one of them sits inside a granted SAF tree, which is the ordinary case once
+     * the user has answered Gate 1 — and it is what lets optimising happen without a tap. Asked
+     * rather than assumed: a file outside the granted trees genuinely does need the dialog, and
+     * skipping it silently would be worse than showing one.
+     */
+    suspend fun needsWriteRequest(entries: List<BackupEntryEntity>): Boolean {
+        if (entries.isEmpty()) return false
+        val paths = entries.mapNotNull { relativePathOf(Uri.parse(it.contentUri)) }
+        if (paths.size != entries.size) return true
+        return !safWriter.covers(paths)
+    }
+
+    private fun relativePathOf(uri: Uri): String? = runCatching {
+        resolver.query(uri, arrayOf(MediaStore.MediaColumns.RELATIVE_PATH), null, null, null)
+            ?.use { if (it.moveToFirst()) it.getString(0) else null }
+    }.getOrNull()
 
     /**
      * Asks Android for permission to modify [entries].
@@ -222,8 +243,30 @@ class ProxyApplier @Inject constructor(
                 return FileResult.Failed("generated proxy lost its EXIF")
             }
 
-            // "wt" truncates first, so no tail of the original survives beneath the new bytes.
-            val wrote = runCatching {
+            // A proxy that is not smaller is not a proxy. The generator decides on pixel
+            // dimensions, which is the right test for whether downscaling is possible but not for
+            // whether it helps: a heavily-compressed source above 2048px can re-encode larger.
+            // Observed 26 Aug 2026 — a 404 KB image became a 490 KB "proxy", spending space,
+            // quality and a cloud badge to save nothing, and making the reclaimed total negative.
+            //
+            // NotWorthwhile rather than Failed, because the answer will not change on a retry.
+            if (proxy.sizeBytes >= entry.sizeBytes) {
+                Logger.d(
+                    TAG,
+                    "${entry.displayName}: proxy ${proxy.sizeBytes} >= original ${entry.sizeBytes}; not worthwhile"
+                )
+                return FileResult.NotWorthwhile
+            }
+
+            // The tree grant first: it writes with no dialog, which is the whole reason optimising
+            // can run unattended. Falls back to the MediaStore path for anything outside a granted
+            // tree, where Android still requires the per-batch confirmation.
+            val wroteViaTree = safWriter.writeTruncating(uri) { out ->
+                proxy.file.inputStream().use { it.copyTo(out) }
+            }
+
+            val wrote = wroteViaTree || runCatching {
+                // "wt" truncates first, so no tail of the original survives beneath the new bytes.
                 resolver.openOutputStream(uri, "wt")?.use { out ->
                     proxy.file.inputStream().use { it.copyTo(out) }
                     true

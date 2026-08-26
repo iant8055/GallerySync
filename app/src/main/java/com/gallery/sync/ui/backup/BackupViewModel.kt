@@ -488,6 +488,17 @@ class BackupViewModel @Inject constructor(
      */
     suspend fun buildProxyWriteRequest(): IntentSender? {
         pendingProxyCandidates = proxyApplier.candidates()
+
+        // No dialog when every candidate sits inside a granted SAF tree — the grant already carries
+        // write permission, verified on hardware 19 Aug 2026. Returning null here means the caller
+        // proceeds straight to the rewrite, which is what makes "optimise automatically" mean what
+        // its name says rather than "ask me about it automatically".
+        if (!proxyApplier.needsWriteRequest(pendingProxyCandidates)) {
+            Logger.i("BackupViewModel", "optimising ${pendingProxyCandidates.size} files through the tree grant")
+            applyPendingProxies()
+            return null
+        }
+
         val sender = proxyApplier.createWriteRequest(pendingProxyCandidates)
 
         // Clears any earlier result on success, so the dialog is not shown over a stale message.
@@ -502,7 +513,15 @@ class BackupViewModel @Inject constructor(
         return sender
     }
 
-    fun onProxyConsentGranted() {
+    fun onProxyConsentGranted() = applyPendingProxies()
+
+    /**
+     * Rewrites the captured candidates.
+     *
+     * Shared by both routes so the set that was decided on is exactly the set that is rewritten,
+     * whether the decision came from Android's dialog or from a tree grant the user gave at Gate 1.
+     */
+    private fun applyPendingProxies() {
         val candidates = pendingProxyCandidates
         if (candidates.isEmpty()) return
 
