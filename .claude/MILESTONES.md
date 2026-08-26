@@ -1251,6 +1251,40 @@ download reads as a hang. `RestoreFromCloud` already emits byte progress and `Re
 discards it. The Backup screen solved this and wrote down why: "a three-minute upload with no
 feedback reads as a hang, and the biggest files are exactly the ones that take longest."
 
+### 26 Aug 2026 — proxying does not cost editability
+
+**Fold 4.** v0.3 promises a proxied photo "stays visible and editable in the phone's own gallery".
+The visible half was verified on 18 Aug. The editable half never was, and it rested on an untested
+assumption: that rewriting a file through the SAF tree grant leaves its MediaStore row alone.
+
+Checked against files this app proxied on 25 Aug, alongside untouched files in the same album:
+
+| File | `owner_package_name` | Size |
+|---|---|---|
+| `20260103_120938.jpg`, proxied | `com.samsung.android.scloud` | 819 KB, was 3.79 MB |
+| `20260103_114450.jpg`, proxied | `com.samsung.android.scloud` | 624 KB, was 6.99 MB |
+| `20260103_140149.jpg`, untouched | `com.samsung.android.scloud` | — |
+
+**Ownership is unchanged.** A proxied file still belongs to whichever app created it, so it is exactly
+as editable as before — the SAF write changes bytes, not the row. Reduction measured at 8–9x, against
+the milestone's "roughly 10x".
+
+**The footnote matters more than the result.** For these files "editable" already meant *editable as
+a copy*, and not because of anything this app did. Ian edited a photo in Haku on 26 Aug and Samsung
+Gallery would not let him save over it — it wrote `…(1).jpg` instead, owned by
+`com.sec.android.mimage.photoretouching`, while the original stayed owned by
+`com.samsung.android.scloud`. An app modifies files it owns freely and needs a `createWriteRequest`
+dialog for anyone else's; Samsung's editor prefers Save As Copy to prompting.
+
+So the constraint recorded above — "Rewriting a photo always needs the user" — was caught applying to
+**Samsung's own editor, on a file owned by Samsung's own cloud app**. The persisted SAF tree grant
+lets GallerySync do something Samsung Gallery's editor will not.
+
+*Practical consequence for the ledger:* an edit saved as a copy is a new file with a new
+`backupKeyOf` key, so it arrives as a fresh PENDING row and the original's row and cloud copy are
+untouched. Combined with `conflictBehavior = rename` on every upload, editing a photo can never
+overwrite the backup of what it was edited from.
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have
