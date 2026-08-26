@@ -1269,16 +1269,34 @@ Checked against files this app proxied on 25 Aug, alongside untouched files in t
 as editable as before — the SAF write changes bytes, not the row. Reduction measured at 8–9x, against
 the milestone's "roughly 10x".
 
-**The footnote matters more than the result.** For these files "editable" already meant *editable as
-a copy*, and not because of anything this app did. Ian edited a photo in Haku on 26 Aug and Samsung
-Gallery would not let him save over it — it wrote `…(1).jpg` instead, owned by
-`com.sec.android.mimage.photoretouching`, while the original stayed owned by
-`com.samsung.android.scloud`. An app modifies files it owns freely and needs a `createWriteRequest`
-dialog for anyone else's; Samsung's editor prefers Save As Copy to prompting.
+**A note on how this was found, and one explanation withdrawn.** Ian edited a photo in Haku on 26 Aug
+and Samsung Gallery would not save over it, writing `…(1).jpg` instead. That was recorded here the
+same day as a consequence of file ownership — the original being owned by `com.samsung.android.scloud`
+rather than by the editor. **That explanation is withdrawn.** It was tested and it does not hold.
 
-So the constraint recorded above — "Rewriting a photo always needs the user" — was caught applying to
-**Samsung's own editor, on a file owned by Samsung's own cloud app**. The persisted SAF tree grant
-lets GallerySync do something Samsung Gallery's editor will not.
+Six controls, all edited and saved in place without complaint:
+
+| | Resolution | Folder | Owner | Editable |
+|---|---|---|---|---|
+| `20260626_114338.jpg` | 4000 x 3000 | Camera | camera | yes |
+| `20240621_050917.jpg` | 4000 x 2252 | Camera | **scloud** | yes |
+| `Screenshot_20260701_181125_Messages.jpg` | 1812 x 2055 | Screenshots | systemui | yes |
+| `Screenshot_20230615_054302_YouTube.jpg` | 1812 x 1968 | things to keep | scloud | yes |
+| `IMG_5311.jpg` | **180 x 240** | 1999 Tioga | scloud | yes |
+| `Screenshot_20250410_123138_YouTube Music.jpg` | 561 x 413 | Haku | scloud | **no** |
+
+So ownership, folder, screenshot class, resolution and the `Samsung_Capture_Info` SEF marker are each
+eliminated — the editable screenshots carry that marker too. The file itself is structurally sound:
+SOF0 says 561 x 413 matching MediaStore, baseline JPEG, image data complete, ordinary 719-byte SEF
+trailer. **The same image opens and edits fine from OneDrive**, so it is not the content either.
+
+**Cause unknown.** It is one file in 6,375 and nothing about it touches this app.
+
+**What it did prove is that backup writes nothing.** The Anne album, 53 images, was backed up with
+before/after captures on both axes: every MD5 unchanged, and every MediaStore row unchanged —
+`owner_package_name`, `is_pending`, `is_trashed`. Backup opens files read-only and alters no row.
+That is worth having recorded, because editability is governed by the MediaStore row rather than by
+the bytes, and "we did not touch it" is otherwise an argument rather than a measurement.
 
 *Practical consequence for the ledger:* an edit saved as a copy is a new file with a new
 `backupKeyOf` key, so it arrives as a fresh PENDING row and the original's row and cloud copy are
