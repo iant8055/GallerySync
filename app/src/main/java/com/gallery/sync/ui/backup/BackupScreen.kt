@@ -415,10 +415,15 @@ private fun ModeFilterGrid(
     selected: AlbumMode?,
     onSelect: (AlbumMode) -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Text(
             text = stringResource(R.string.backup_hero_label),
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.headlineSmall,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
         )
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             ModeFilterChip(
@@ -442,9 +447,13 @@ private fun ModeFilterGrid(
 /**
  * One mode, its count, and whether the list is currently narrowed to it.
  *
- * Deliberately reuses the mode's own colour from the theme, so the chip that filters to Archive is
- * the same warm colour as the Archive badge on every album row. The link between "the thing I
- * tapped" and "the rows I now see" should not need explaining.
+ * Wears the mode's own colours — the same pair the badge on every album row uses. Ian, 27 Aug 2026.
+ * The link between "the thing I tapped" and "the rows I now see" should not need explaining, and it
+ * does not when both are the same warm orange.
+ *
+ * Selection is a ring in the mode's own content colour rather than a change of fill, for the reason
+ * the dropdown gives: a mark drawn ON the pill keeps all four the same size, where a mark beside it
+ * makes one of them wider than the rest.
  */
 @Composable
 private fun ModeFilterChip(
@@ -455,19 +464,24 @@ private fun ModeFilterChip(
     modifier: Modifier = Modifier
 ) {
     val isOn = selected == mode
+    val (container, onContainer) = mode.pillColors()
+
     Surface(
         modifier = modifier,
         onClick = { onClick(mode) },
         shape = RoundedCornerShape(percent = 50),
-        color = if (isOn) LocalContentColor.current.copy(alpha = 0.20f) else Color.Transparent,
-        contentColor = LocalContentColor.current,
-        border = BorderStroke(1.dp, LocalContentColor.current.copy(alpha = if (isOn) 0.7f else 0.3f))
+        color = container,
+        contentColor = onContainer,
+        border = if (isOn) BorderStroke(2.dp, onContainer) else null
     ) {
         Text(
             text = "$count ${mode.label()}",
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.labelLarge,
             maxLines = 1,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 10.dp)
         )
     }
 }
@@ -560,11 +574,18 @@ private fun AlbumModeDropdown(
             contentColor = onContainer,
             onClick = { expanded = true }
         ) {
+            // A minimum width so Off and Sync are not visibly smaller buttons than Backup and
+            // Archive. Ian, 27 Aug 2026. The note above still holds — this is not full width, which
+            // is what made Off shout on the cover screen; it is the same equalising the dropdown
+            // already does, for the same reason: four ragged widths read as four unrelated things.
             Text(
                 text = current.label(),
                 style = MaterialTheme.typography.labelLarge,
                 maxLines = 1,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .widthIn(min = ModePillMinWidth)
+                    .padding(horizontal = 16.dp, vertical = 10.dp)
             )
         }
         // The menu is the same vocabulary as the pill that opened it: every mode shown in its own
@@ -610,7 +631,7 @@ private fun AlbumModeDropdown(
                                 maxLines = 1,
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier
-                                    .widthIn(min = 132.dp)
+                                    .widthIn(min = MenuPillMinWidth)
                                     .padding(horizontal = 16.dp, vertical = 8.dp)
                             )
                         }
@@ -820,6 +841,12 @@ private val WideBreakpoint = 600.dp
 
 
 /** The tint each mode is recognised by. Paired, so no caller has to choose a text colour. */
+/** Enough for "Archive" at a large font scale, so the four row pills match. */
+private val ModePillMinWidth = 96.dp
+
+/** Wider again in the menu, where the four are stacked and compared directly. */
+private val MenuPillMinWidth = 132.dp
+
 @Composable
 private fun AlbumMode.pillColors(): Pair<Color, Color> {
     val signal = LocalGallerySyncColors.current
