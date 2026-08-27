@@ -51,6 +51,13 @@ fun HeroCard(
     label: String,
     figure: String,
     modifier: Modifier = Modifier,
+    /**
+     * Replaces the label-and-figure block entirely.
+     *
+     * Albums uses it: that tab is where modes are chosen, so its lead is a heading and the four mode
+     * buttons rather than a count of anything. The other two tabs pass nothing and get the figure.
+     */
+    figureContent: (@Composable ColumnScope.() -> Unit)? = null,
     detail: @Composable ColumnScope.() -> Unit = {},
     actions: @Composable ColumnScope.() -> Unit = {}
 ) {
@@ -69,7 +76,9 @@ fun HeroCard(
                     horizontalArrangement = Arrangement.spacedBy(24.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(modifier = Modifier.weight(1f)) { HeroFigure(label, figure) }
+                    Column(modifier = Modifier.weight(1f)) {
+                        if (figureContent != null) figureContent() else HeroFigure(label, figure)
+                    }
                     Column(
                         modifier = Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -80,7 +89,7 @@ fun HeroCard(
                 }
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    HeroFigure(label, figure)
+                    if (figureContent != null) figureContent() else HeroFigure(label, figure)
                     detail()
                     actions()
                 }

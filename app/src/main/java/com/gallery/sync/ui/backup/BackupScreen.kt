@@ -207,15 +207,15 @@ private fun AlbumList(
         // the tab where modes are chosen — see backup_hero_label for why it stopped counting files.
         HeroCard(
             label = stringResource(R.string.backup_hero_label),
-            figure = if (state.hasLoadedCounts) state.activeAlbumCount.toString() else "—",
-            detail = {
-                HeroDetail(
+            figure = "",
+            figureContent = {
+                ModeFilterGrid(
                     state = state,
-                    context = context,
-                    modeFilter = modeFilter,
-                    onModeFilter = { modeFilter = if (modeFilter == it) null else it }
+                    selected = modeFilter,
+                    onSelect = { modeFilter = if (modeFilter == it) null else it }
                 )
             },
+            detail = { HeroDetail(state = state, context = context) },
             actions = {
                 HeroActions(
                     state = state,
@@ -400,6 +400,46 @@ private fun AlbumFilterBar(text: String, onTextChange: (String) -> Unit) {
 }
 
 /**
+ * The heading, and the four modes as a 2 x 2 of buttons.
+ *
+ * Ian, 27 Aug 2026, replacing a count that led the card: this tab is where modes are chosen, so its
+ * lead should be the modes themselves. Four equal buttons in a square read as a set of choices;
+ * the same four in a scrolling row read as a toolbar, and the fourth falls off a folded screen.
+ *
+ * Each button carries its count, so the block is still the summary it replaced — it just answers
+ * "which ones?" when tapped instead of only stating a number.
+ */
+@Composable
+private fun ModeFilterGrid(
+    state: BackupUiState,
+    selected: AlbumMode?,
+    onSelect: (AlbumMode) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = stringResource(R.string.backup_hero_label),
+            style = MaterialTheme.typography.titleMedium
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            ModeFilterChip(
+                AlbumMode.BACKUP, state.backupAlbumCount, selected, onSelect, Modifier.weight(1f)
+            )
+            ModeFilterChip(
+                AlbumMode.SYNC, state.syncAlbumCount, selected, onSelect, Modifier.weight(1f)
+            )
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            ModeFilterChip(
+                AlbumMode.ARCHIVE, state.archiveAlbumCount, selected, onSelect, Modifier.weight(1f)
+            )
+            ModeFilterChip(
+                AlbumMode.OFF, state.offAlbumCount, selected, onSelect, Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+/**
  * One mode, its count, and whether the list is currently narrowed to it.
  *
  * Deliberately reuses the mode's own colour from the theme, so the chip that filters to Archive is
@@ -411,10 +451,12 @@ private fun ModeFilterChip(
     mode: AlbumMode,
     count: Int,
     selected: AlbumMode?,
-    onClick: (AlbumMode) -> Unit
+    onClick: (AlbumMode) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val isOn = selected == mode
     Surface(
+        modifier = modifier,
         onClick = { onClick(mode) },
         shape = RoundedCornerShape(percent = 50),
         color = if (isOn) LocalContentColor.current.copy(alpha = 0.20f) else Color.Transparent,
@@ -680,27 +722,7 @@ private fun AlbumRow.statusBreakdown(): String {
  * core promise, but it describes files rather than the albums it was sitting above.
  */
 @Composable
-private fun HeroDetail(
-    state: BackupUiState,
-    context: android.content.Context,
-    modeFilter: AlbumMode?,
-    onModeFilter: (AlbumMode) -> Unit
-) {
-    // The summary *is* the filter. Ian, 27 Aug 2026: "click on mode type to filter". One control
-    // rather than a summary and a separate row of chips saying the same four words — and the counts
-    // give it its own affordance, because a number beside a mode invites the question "which ones?"
-    // Tapping the selected mode again clears it, so there is always a way back to the whole list.
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
-    ) {
-        ModeFilterChip(AlbumMode.BACKUP, state.backupAlbumCount, modeFilter, onModeFilter)
-        ModeFilterChip(AlbumMode.SYNC, state.syncAlbumCount, modeFilter, onModeFilter)
-        ModeFilterChip(AlbumMode.ARCHIVE, state.archiveAlbumCount, modeFilter, onModeFilter)
-        if (state.offAlbumCount > 0) {
-            ModeFilterChip(AlbumMode.OFF, state.offAlbumCount, modeFilter, onModeFilter)
-        }
-    }
+private fun HeroDetail(state: BackupUiState, context: android.content.Context) {
 
     Text(
         text = stringResource(
