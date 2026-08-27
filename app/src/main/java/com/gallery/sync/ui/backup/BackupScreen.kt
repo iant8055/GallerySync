@@ -233,48 +233,9 @@ private fun AlbumList(
         // launches from an Activity, and because it states the one thing Android's dialog cannot,
         // which is that the cloud copy has been re-checked and matches.
 
-        // What the live re-check refused to include, and why. Reported rather than quietly dropped:
-        // "OneDrive no longer has this" means the file is not backed up at all, which the user needs
-        // to know, and "could not check" means the app declined to guess — a different thing again.
-        //
-        // Sits with the summons rather than in Settings, because it explains why a removal the user
-        // just authorised did not take everything. Moved 26 Aug 2026 when the Storage section it
-        // used to live in was removed as a duplicate of this one.
-        state.removalHeldBack?.let { held ->
-            if (held.confirmed.isEmpty() && held.heldBack > 0) {
-                Text(
-                    text = stringResource(R.string.removal_none_confirmed),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(horizontal = 18.dp)
-                )
-            }
-            if (held.missing.isNotEmpty()) {
-                Text(
-                    text = stringResource(
-                        R.string.removal_held_missing,
-                        pluralStringResource(R.plurals.file_count, held.missing.size, held.missing.size)
-                    ),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.padding(horizontal = 18.dp)
-                )
-            }
-            if (held.unconfirmed.isNotEmpty()) {
-                Text(
-                    text = stringResource(
-                        R.string.removal_held_unchecked,
-                        pluralStringResource(
-                            R.plurals.file_count,
-                            held.unconfirmed.size,
-                            held.unconfirmed.size
-                        )
-                    ),
-                    style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(horizontal = 18.dp)
-                )
-            }
-        }
+        // The held-back reporting moved with it. "OneDrive no longer has this" and "could not
+        // check" are answers to a question this tab no longer asks, and TASK-016 puts them where the
+        // decision is now made: beside the file they are about, as a red X, in the Archive list.
     }
 
     HorizontalDivider()

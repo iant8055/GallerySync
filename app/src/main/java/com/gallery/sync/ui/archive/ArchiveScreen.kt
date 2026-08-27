@@ -1,0 +1,431 @@
+package com.gallery.sync.ui.archive
+
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.gallery.sync.R
+import com.gallery.sync.domain.backup.ArchiveDelay
+import com.gallery.sync.domain.backup.ArchiveEntry
+import com.gallery.sync.domain.backup.ArchiveFailure
+import com.gallery.sync.domain.backup.ArchiveMark
+import com.gallery.sync.ui.common.SignalIcons
+import com.gallery.sync.ui.common.formatBytes
+import com.gallery.sync.ui.theme.LocalGallerySyncColors
+import kotlinx.coroutines.launch
+
+/**
+ * Removal gets its own screen, its own time, and the user's own eyes on the file names.
+ *
+ * ### Why this is not a two-line prompt on another tab
+ *
+ * This is the largest irreversible action in the product. Until 26 Aug 2026 it was offered as a
+ * count and a button above an unrelated list of albums — authorising a number rather than a list.
+ * Here the user sees the files, watches them being checked, and answers one question afterwards.
+ *
+ * ### It is still one consent, not two
+ *
+ * CLAUDE.md: the album mode *is* the consent, given once when the mode is set. This screen adds no
+ * second approval. What it adds is the **summons**, which exists only because `createTrashRequest`
+ * cannot launch without an Activity — made legible instead of terse.
+ *
+ * ### Not a gallery
+ *
+ * Names, sizes and a mark. No thumbnails, no grid, no sort, no preview. The design principle rules
+ * that out, and it would also make this screen pleasant to linger on, which is the opposite of what
+ * it is for.
+ */
+@Composable
+fun ArchiveScreen(
+    modifier: Modifier = Modifier,
+    viewModel: ArchiveViewModel = hiltViewModel()
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
+
+    val removalLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { viewModel.onRemovalDialogClosed() }
+
+    // Each finished dialog may be followed by another, because Android caps a trash request at 2000
+    // URIs. Driving the next one from the batch index keeps a large album reading as one operation
+    // rather than as the app asking again because something went wrong.
+    //
+    // Keyed on the index rather than the phase alone: the phase stays REMOVING across every batch,
+    // so a phase-only key would fire once and stall on album 2001.
+    LaunchedEffect(state.phase, state.batchIndex) {
+        if (state.phase == ArchivePhase.REMOVING && state.batchIndex > 0) {
+            viewModel.nextRemovalRequest()?.let {
+                removalLauncher.launch(IntentSenderRequest.Builder(it).build())
+            }
+        }
+    }
+
+    // One Column, and everything is a child of it. The prompt used to be a sibling of this layout,
+    // which in Compose means it paints *over* the list rather than beside it — the header and the
+    // first rows disappeared underneath it. Seen immediately on the Fold 4, 26 Aug 2026.
+    //
+    // The order is deliberate now that they share a flow: what is happening, then the question,
+    // then the names. The list keeps its own scroll under the question rather than being pushed off,
+    // because the whole argument for this screen is that the user can see what they are authorising
+    // while they authorise it.
+    Column(modifier = modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.archive_title),
+                style = MaterialTheme.typography.titleMedium
+            )
+
+            when {
+                !state.isSupported -> Text(
+                    text = stringResource(R.string.archive_unsupported),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+
+                state.plan.isEmpty -> {
+                    Text(
+                        text = stringResource(R.string.archive_empty),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = stringResource(R.string.archive_empty_hint),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+
+                else -> ArchiveHeader(state = state, onValidate = viewModel::validate)
+            }
+        }
+
+        if (state.showPrompt) {
+            ArchivePrompt(
+                state = state,
+                onYes = {
+                    scope.launch {
+                        viewModel.nextRemovalRequest()?.let {
+                            removalLauncher.launch(IntentSenderRequest.Builder(it).build())
+                        }
+                    }
+                },
+                onNo = viewModel::dismiss,
+                onDelay = viewModel::delay
+            )
+        }
+
+        if (state.plan.entries.isNotEmpty()) {
+            HorizontalDivider()
+            // weight(1f) rather than fillMaxWidth alone: the list takes whatever height is left once
+            // the header and the question have theirs, so a long album scrolls inside its own space
+            // instead of pushing the question off the screen.
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                items(state.plan.entries, key = { it.item.mediaStoreId }) { entry ->
+                    ArchiveRow(entry)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ArchiveHeader(state: ArchiveUiState, onValidate: () -> Unit) {
+    val context = LocalContext.current
+
+    Text(
+        text = state.plan.albums.joinToString(", "),
+        style = MaterialTheme.typography.titleSmall,
+        fontWeight = FontWeight.SemiBold
+    )
+    Text(
+        text = stringResource(R.string.archive_intro),
+        style = MaterialTheme.typography.bodySmall
+    )
+
+    when (state.phase) {
+        ArchivePhase.IDLE -> OutlinedButton(onClick = onValidate) {
+            Text(stringResource(R.string.archive_validate), maxLines = 1)
+        }
+
+        ArchivePhase.VALIDATING -> Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            CircularProgressIndicator(modifier = Modifier.size(16.dp))
+            Text(
+                text = stringResource(R.string.archive_validating),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
+        ArchivePhase.REMOVING -> Text(
+            text = stringResource(
+                R.string.archive_batch_progress,
+                state.batchIndex + 1,
+                state.batchTotal
+            ),
+            style = MaterialTheme.typography.bodyMedium
+        )
+
+        ArchivePhase.DONE -> Text(
+            text = if (state.plan.removed.isEmpty()) {
+                stringResource(R.string.archive_done_none)
+            } else {
+                stringResource(
+                    R.string.archive_done,
+                    pluralStringResource(
+                        R.plurals.file_count,
+                        state.plan.removed.size,
+                        state.plan.removed.size
+                    ),
+                    formatBytes(context, state.plan.removed.sumOf { it.sizeBytes })
+                )
+            },
+            style = MaterialTheme.typography.bodyMedium
+        )
+
+        ArchivePhase.READY -> if (state.delayedUntil != null) {
+            Text(
+                text = stringResource(R.string.archive_delayed),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    }
+}
+
+/**
+ * One file: its name, its size, and one mark.
+ *
+ * A tick or a cross rather than a per-file bar. Verification is one Graph listing per album, not a
+ * request per file, so a bar filling per row would be animation dressed as information — decided by
+ * Ian, 26 Aug 2026.
+ */
+@Composable
+private fun ArchiveRow(entry: ArchiveEntry) {
+    val context = LocalContext.current
+    val signal = LocalGallerySyncColors.current
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = entry.name,
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 1
+            )
+            val detail = when {
+                entry.failure == ArchiveFailure.COULD_NOT_CHECK ->
+                    stringResource(R.string.archive_failed_unchecked)
+
+                entry.failure == ArchiveFailure.NOT_BACKED_UP ->
+                    stringResource(R.string.archive_failed_not_backed_up)
+
+                entry.mark == ArchiveMark.BACKING_UP ->
+                    stringResource(R.string.archive_state_backing_up)
+
+                entry.mark == ArchiveMark.REMOVING ->
+                    stringResource(R.string.archive_state_removing)
+
+                entry.mark == ArchiveMark.REMOVED ->
+                    stringResource(R.string.archive_state_removed)
+
+                else -> formatBytes(context, entry.sizeBytes)
+            }
+            Text(
+                text = detail,
+                style = MaterialTheme.typography.bodySmall,
+                color = if (entry.failure != null) {
+                    MaterialTheme.colorScheme.error
+                } else {
+                    LocalContentColor.current
+                }
+            )
+        }
+
+        when (entry.mark) {
+            ArchiveMark.CHECKING, ArchiveMark.BACKING_UP, ArchiveMark.REMOVING ->
+                CircularProgressIndicator(modifier = Modifier.size(18.dp))
+
+            ArchiveMark.CONFIRMED, ArchiveMark.REMOVED -> Icon(
+                imageVector = SignalIcons.Check,
+                contentDescription = null,
+                tint = signal.accent,
+                modifier = Modifier.size(22.dp)
+            )
+
+            ArchiveMark.FAILED -> Icon(
+                imageVector = SignalIcons.Cross,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error,
+                modifier = Modifier.size(22.dp)
+            )
+
+            ArchiveMark.WAITING -> Unit
+        }
+    }
+}
+
+/**
+ * The one question, asked once per archive operation.
+ *
+ * Two shapes, because a partial result must never be dressed as a complete one: when some files are
+ * red the count and the size describe **only** the green set, and the button says as much. Reporting
+ * "All files VALIDATED" over a partial run would be the app claiming a guarantee it does not have.
+ */
+@Composable
+private fun ArchivePrompt(
+    state: ArchiveUiState,
+    onYes: () -> Unit,
+    onNo: () -> Unit,
+    onDelay: (ArchiveDelay) -> Unit
+) {
+    val context = LocalContext.current
+    var delayOpen by remember { mutableStateOf(false) }
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Nothing survived the check, so there is nothing to offer. Showing a Yes button here
+            // would offer an action that cannot succeed.
+            if (state.plan.allFailed) {
+                Text(
+                    text = stringResource(R.string.archive_none_confirmed),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error
+                )
+                TextButton(onClick = onNo) { Text(stringResource(R.string.archive_prompt_no)) }
+                return@Column
+            }
+
+            val confirmedCount = pluralStringResource(
+                R.plurals.file_count,
+                state.plan.confirmed.size,
+                state.plan.confirmed.size
+            )
+            val freed = formatBytes(context, state.plan.freeableBytes)
+
+            if (state.plan.isPartial) {
+                Text(
+                    text = stringResource(R.string.archive_prompt_partial_title, confirmedCount),
+                    style = MaterialTheme.typography.titleSmall
+                )
+                Text(
+                    text = stringResource(
+                        R.string.archive_prompt_partial_body,
+                        pluralStringResource(
+                            R.plurals.file_count,
+                            state.plan.failed.size,
+                            state.plan.failed.size
+                        ),
+                        freed
+                    ),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            } else {
+                Text(
+                    text = stringResource(R.string.archive_prompt_all_title),
+                    style = MaterialTheme.typography.titleSmall
+                )
+                Text(
+                    text = stringResource(R.string.archive_prompt_all_body, freed),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            // CLAUDE.md: never tell the user a local removal is recoverable. The guarantee the app
+            // may state is the verified cloud copy, which the lines above are about. This warning
+            // has now travelled with the removal control through three screens and must keep doing
+            // so.
+            Text(
+                text = stringResource(R.string.backup_move_trash_note),
+                style = MaterialTheme.typography.bodySmall
+            )
+
+            Text(
+                text = stringResource(R.string.archive_prompt_question),
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(onClick = onYes) {
+                    Text(stringResource(R.string.archive_prompt_yes), maxLines = 1)
+                }
+                OutlinedButton(onClick = onNo) {
+                    Text(stringResource(R.string.archive_prompt_no), maxLines = 1)
+                }
+                TextButton(onClick = { delayOpen = !delayOpen }) {
+                    Text(stringResource(R.string.archive_prompt_delay), maxLines = 1)
+                }
+            }
+
+            if (delayOpen) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    TextButton(onClick = { onDelay(ArchiveDelay.ONE_HOUR) }) {
+                        Text(stringResource(R.string.archive_delay_1h), maxLines = 1)
+                    }
+                    TextButton(onClick = { onDelay(ArchiveDelay.TWELVE_HOURS) }) {
+                        Text(stringResource(R.string.archive_delay_12h), maxLines = 1)
+                    }
+                    TextButton(onClick = { onDelay(ArchiveDelay.ONE_DAY) }) {
+                        Text(stringResource(R.string.archive_delay_1d), maxLines = 1)
+                    }
+                }
+            }
+        }
+    }
+}

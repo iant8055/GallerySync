@@ -55,6 +55,18 @@ object SignalIcons {
         listOf("M20 6 9 17l-5-5")
     }
 
+    /**
+     * A file that could not be confirmed, and so is staying on the phone.
+     *
+     * Paired with [Check] on the Archive screen, where the two marks are the whole vocabulary: a
+     * tick means the full version is in OneDrive, a cross means we could not establish that. Drawn
+     * at the same weight and size as the tick deliberately — the cross is not an error the user
+     * caused, it is the app declining to remove something it cannot vouch for.
+     */
+    val Cross: ImageVector = stroked("cross") {
+        listOf("M18 6 6 18", "m6 6 12 12")
+    }
+
     /** A folder row leads somewhere. */
     val ChevronRight: ImageVector = stroked("chevronRight") {
         listOf("m9 18 6-6-6-6")

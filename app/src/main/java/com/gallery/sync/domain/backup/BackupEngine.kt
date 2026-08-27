@@ -532,6 +532,34 @@ class BackupEngine @Inject constructor(
 
 
     /**
+     * Every file sitting in an album the user set to Archive, whatever its backup state.
+     *
+     * Deliberately **not** [redundantLocalCopies], which returns only what the ledger already calls
+     * verified. The Archive screen has to show the user the whole folder, because Ian's rule is that
+     * a file not found in OneDrive is uploaded rather than reported — so a file the ledger knows
+     * nothing about is work to be done, not a file to be hidden. Listing only the verified ones would
+     * quietly drop exactly the files that still need attention, and the screen would claim an album
+     * was ready when part of it had never been backed up at all.
+     *
+     * Scoped to Archive albums for the same reason everything else is: CLAUDE.md's rule that removal
+     * follows from a mode the user set and from nothing else.
+     */
+    suspend fun filesInArchiveAlbums(): List<LocalMediaItem> = withContext(dispatcher) {
+        if (scanner.access() == MediaAccess.NONE) return@withContext emptyList()
+
+        val archived = albumDao.albumsInMode(AlbumMode.ARCHIVE).toSet()
+        if (archived.isEmpty()) {
+            Logger.d(TAG, "filesInArchiveAlbums: no album is set to Archive")
+            return@withContext emptyList()
+        }
+
+        scanner.scanAll()
+            .filter { it.album in archived }
+            .sortedWith(compareBy({ it.album }, { it.displayName }))
+            .also { Logger.d(TAG, "filesInArchiveAlbums: ${it.size} files in ${archived.size} albums") }
+    }
+
+    /**
      * Local files whose cloud copy is confirmed, so the phone's copy is redundant.
      *
      * Matched against a fresh scan rather than trusted from the ledger alone: a ledger row can

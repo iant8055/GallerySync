@@ -211,7 +211,41 @@
         source-directory gate and the choice of what to do with the existing library. It sits here
         until that flow exists, so the reconciliation can be used and checked on hardware.
     -->
-    <string name="tab_setup">Cloud check</string>
+    <string name="tab_setup">Archive</string>
+
+    <!-- The Archive tab: validate, then confirm, then remove. -->
+    <string name="archive_title">Archive</string>
+    <string name="archive_empty">No album is set to Archive. Nothing here will remove anything from your phone.</string>
+    <string name="archive_empty_hint">Set an album to Archive on the Albums tab, and its files will be listed here for checking before anything leaves your phone.</string>
+    <string name="archive_intro">Every file below is checked against OneDrive first. Anything that is not there yet is backed up before it counts.</string>
+    <string name="archive_validate">Check these files</string>
+    <string name="archive_validating">Checking against OneDrive…</string>
+    <string name="archive_unsupported">This version of Android has no media trash, so removing local copies is not offered here.</string>
+
+    <string name="archive_state_backing_up">Backing up…</string>
+    <string name="archive_state_removing">Moving to Recycle Bin…</string>
+    <string name="archive_state_removed">Removed from this phone</string>
+    <string name="archive_failed_unchecked">Could not check OneDrive — staying on your phone</string>
+    <string name="archive_failed_not_backed_up">Not in OneDrive — staying on your phone</string>
+
+    <!-- The prompt. Ian's wording, with the numbers filled in. -->
+    <string name="archive_prompt_all_title">All files validated</string>
+    <string name="archive_prompt_all_body">All files are confirmed in OneDrive. Archiving them will free %1$s on your phone.</string>
+    <string name="archive_prompt_partial_title">%1$s validated</string>
+    <string name="archive_prompt_partial_body">%1$s could not be confirmed and will stay on your phone. Archiving the confirmed ones will free %2$s.</string>
+    <string name="archive_prompt_question">Do you want to continue?</string>
+    <string name="archive_prompt_yes">Yes</string>
+    <string name="archive_prompt_no">No</string>
+    <string name="archive_prompt_delay">Delay</string>
+    <string name="archive_delay_1h">1 hour</string>
+    <string name="archive_delay_12h">12 hours</string>
+    <string name="archive_delay_1d">1 day</string>
+    <string name="archive_delayed">Asked to wait. These files stay on your phone until then.</string>
+
+    <string name="archive_none_confirmed">Nothing can be archived. OneDrive did not confirm a single one of these files, so they all stay on your phone.</string>
+    <string name="archive_batch_progress">Batch %1$d of %2$d</string>
+    <string name="archive_done">%1$s removed from this phone, freeing %2$s.</string>
+    <string name="archive_done_none">Nothing was removed.</string>
 
     <!-- Live re-check before removing a local copy. -->
     <string name="removal_checking">Checking OneDrive still has these…</string>

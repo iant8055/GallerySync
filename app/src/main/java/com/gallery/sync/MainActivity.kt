@@ -15,8 +15,8 @@ import androidx.compose.material3.ScrollableTabRow
 import com.gallery.sync.ui.common.NavDestination
 import com.gallery.sync.ui.common.SignalIcons
 import com.gallery.sync.ui.common.SignalNavBar
+import com.gallery.sync.ui.archive.ArchiveScreen
 import com.gallery.sync.ui.retrieve.RetrieveScreen
-import com.gallery.sync.ui.setup.ReconcileScreen
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -119,7 +119,7 @@ private fun SignedInApp(
             when (selectedTab) {
                 0 -> BackupScreen()
                 1 -> RetrieveScreen()
-                2 -> ReconcileScreen()
+                2 -> ArchiveScreen()
                 else -> SettingsScreen(accountName = accountName, onSignOut = onSignOut)
             }
         }

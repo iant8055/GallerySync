@@ -1,0 +1,238 @@
+package com.gallery.sync.ui.archive
+
+import android.content.Context
+import android.content.IntentSender
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import com.gallery.sync.data.local.media.LocalCopyRemover
+import com.gallery.sync.data.local.settings.BackupSettings
+import com.gallery.sync.domain.backup.ArchiveDelay
+import com.gallery.sync.domain.backup.ArchiveEntry
+import com.gallery.sync.domain.backup.ArchiveFailure
+import com.gallery.sync.domain.backup.ArchiveMark
+import com.gallery.sync.domain.backup.ArchivePlan
+import com.gallery.sync.domain.backup.BackupEngine
+import com.gallery.sync.util.Logger
+import com.gallery.sync.worker.BackupScheduling
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import java.time.Instant
+import javax.inject.Inject
+
+/** Which of the two passes the screen is showing. */
+enum class ArchivePhase { IDLE, VALIDATING, READY, REMOVING, DONE }
+
+data class ArchiveUiState(
+    val plan: ArchivePlan = ArchivePlan(),
+    val phase: ArchivePhase = ArchivePhase.IDLE,
+    val isSupported: Boolean = true,
+    /** Set when the user chose Delay, so the screen can say what it is waiting for. */
+    val delayedUntil: Instant? = null,
+    /** How many system dialogs the removal will need, and which one we are on. */
+    val batchTotal: Int = 0,
+    val batchIndex: Int = 0
+) {
+    val showPrompt: Boolean get() = phase == ArchivePhase.READY && delayedUntil == null
+}
+
+/**
+ * Drives the Archive tab: validate, confirm, then remove.
+ *
+ * ### Two passes, never one
+ *
+ * Validation writes nothing and removes nothing, so leaving the screen mid-check costs the user
+ * exactly nothing. Only [remove] touches the phone, and it acts on [ArchivePlan.confirmed] — the
+ * list the user was shown and said yes to.
+ */
+@HiltViewModel
+class ArchiveViewModel @Inject constructor(
+    private val engine: BackupEngine,
+    private val localCopyRemover: LocalCopyRemover,
+    private val settings: BackupSettings,
+    @ApplicationContext private val context: Context
+) : ViewModel() {
+
+    private val _state = MutableStateFlow(ArchiveUiState())
+    val state: StateFlow<ArchiveUiState> = _state.asStateFlow()
+
+    init {
+        _state.value = _state.value.copy(isSupported = localCopyRemover.isSupported())
+        load()
+    }
+
+    /** Lists what is in Archive albums. Cheap, and safe to call whenever the screen appears. */
+    fun load() {
+        viewModelScope.launch {
+            val files = engine.filesInArchiveAlbums()
+            _state.value = _state.value.copy(
+                plan = ArchivePlan(entries = files.map { ArchiveEntry(it) }),
+                phase = ArchivePhase.IDLE,
+                batchTotal = 0,
+                batchIndex = 0
+            )
+        }
+    }
+
+    /**
+     * Asks OneDrive about every file, uploading the ones it does not have.
+     *
+     * Ian, 26 Aug 2026: *"If a file can not be found the local copy will be backed up."* So the
+     * missing category is work rather than an error — it becomes a backup run, and only a file that
+     * verifies afterwards earns its tick. A file that still cannot be confirmed gets a red X and is
+     * left on the phone, which is CLAUDE.md's *"if we could not ask, we do not remove"* expressed as
+     * membership of a list rather than as a rule someone has to remember.
+     */
+    fun validate() {
+        val entries = _state.value.plan.entries
+        if (entries.isEmpty()) return
+
+        viewModelScope.launch {
+            _state.value = _state.value.copy(
+                phase = ArchivePhase.VALIDATING,
+                plan = _state.value.plan.copy(
+                    entries = entries.map { it.copy(mark = ArchiveMark.CHECKING, failure = null) },
+                    validated = false
+                )
+            )
+
+            val confirmation = engine.confirmStillInCloud(entries.map { it.item })
+
+            var plan = _state.value.plan
+                .withMarks(confirmation.confirmed.mapTo(HashSet()) { it.mediaStoreId }, ArchiveMark.CONFIRMED)
+                .withMarks(
+                    confirmation.unconfirmed.mapTo(HashSet()) { it.mediaStoreId },
+                    ArchiveMark.FAILED,
+                    ArchiveFailure.COULD_NOT_CHECK
+                )
+
+            val missing = confirmation.missing.mapTo(HashSet()) { it.mediaStoreId }
+            if (missing.isNotEmpty()) {
+                plan = plan.withMarks(missing, ArchiveMark.BACKING_UP)
+                _state.value = _state.value.copy(plan = plan)
+
+                Logger.i(TAG, "validate: ${missing.size} files are not in OneDrive — backing them up")
+                plan = backUpAndRecheck(plan, missing)
+            }
+
+            _state.value = _state.value.copy(
+                plan = plan.copy(validated = true),
+                phase = ArchivePhase.READY
+            )
+            Logger.i(
+                TAG,
+                "validate: ${plan.confirmed.size} confirmed, ${plan.failed.size} could not be archived"
+            )
+        }
+    }
+
+    /**
+     * Runs the ordinary backup chain, then asks OneDrive again about just these files.
+     *
+     * Reuses `BackupWorker` rather than uploading from here. That worker already chains itself until
+     * the backlog clears, persists upload sessions, respects the byte budget and reports its stop
+     * reason — none of which would be true of a second upload path written for this screen, and
+     * FIX-001 exists because a caller once did exactly that.
+     */
+    private suspend fun backUpAndRecheck(plan: ArchivePlan, missing: Set<Long>): ArchivePlan {
+        val workManager = WorkManager.getInstance(context)
+        BackupScheduling.enqueueManualRun(workManager, settings.current().allowMeteredNetwork)
+
+        // Wait for the chain to finish before re-asking. A recheck against a half-finished upload
+        // would mark files as not-backed-up that are seconds from being safe.
+        workManager.getWorkInfosForUniqueWorkFlow(BackupScheduling.MANUAL_WORK)
+            .first { infos -> infos.isNotEmpty() && infos.all { it.state.isFinished } }
+
+        val stillMissing = plan.entries.filter { it.item.mediaStoreId in missing }
+        val recheck = engine.confirmStillInCloud(stillMissing.map { it.item })
+
+        return plan
+            .withMarks(recheck.confirmed.mapTo(HashSet()) { it.mediaStoreId }, ArchiveMark.CONFIRMED)
+            .withMarks(
+                recheck.missing.mapTo(HashSet()) { it.mediaStoreId },
+                ArchiveMark.FAILED,
+                ArchiveFailure.NOT_BACKED_UP
+            )
+            .withMarks(
+                recheck.unconfirmed.mapTo(HashSet()) { it.mediaStoreId },
+                ArchiveMark.FAILED,
+                ArchiveFailure.COULD_NOT_CHECK
+            )
+    }
+
+    /**
+     * Builds the next system trash request, marking its files as being removed.
+     *
+     * Returns null when there is nothing left to ask about, which is how the caller knows the
+     * operation is over rather than merely between dialogs.
+     */
+    suspend fun nextRemovalRequest(): IntentSender? {
+        val plan = _state.value.plan
+        val batches = localCopyRemover.batch(plan.confirmed)
+        val index = _state.value.batchIndex
+        if (index >= batches.size) return null
+
+        val batch = batches[index]
+        _state.value = _state.value.copy(
+            phase = ArchivePhase.REMOVING,
+            batchTotal = batches.size,
+            plan = plan.withMarks(batch.mapTo(HashSet()) { it.item.mediaStoreId }, ArchiveMark.REMOVING)
+        )
+
+        return localCopyRemover.createMoveToBackupRequest(batch.map { it.item.contentUri })
+    }
+
+    /**
+     * Called once Android's dialog closes.
+     *
+     * The outcome is read from a rescan rather than from the dialog's result code, because the user
+     * may have allowed some and not others, and the files themselves are the only honest record of
+     * what happened.
+     */
+    fun onRemovalDialogClosed() {
+        viewModelScope.launch {
+            val stillHere = engine.filesInArchiveAlbums().mapTo(HashSet()) { it.mediaStoreId }
+            val plan = _state.value.plan
+            val settled = plan.copy(
+                entries = plan.entries.map {
+                    when {
+                        it.mark != ArchiveMark.REMOVING -> it
+                        it.item.mediaStoreId in stillHere -> it.copy(mark = ArchiveMark.CONFIRMED)
+                        else -> it.copy(mark = ArchiveMark.REMOVED)
+                    }
+                }
+            )
+
+            val next = _state.value.batchIndex + 1
+            val more = next < localCopyRemover.batch(settled.confirmed).size
+            _state.value = _state.value.copy(
+                plan = settled,
+                batchIndex = next,
+                phase = if (more) ArchivePhase.REMOVING else ArchivePhase.DONE
+            )
+            Logger.i(TAG, "archive: ${settled.removed.size} files removed from this phone")
+        }
+    }
+
+    /** The user said no. Nothing is remembered — the album is still Archive, so it will offer again. */
+    fun dismiss() {
+        _state.value = _state.value.copy(phase = ArchivePhase.IDLE)
+    }
+
+    /** The user asked to be left alone for a while. Their choice, not the app deciding to re-ask. */
+    fun delay(delay: ArchiveDelay) {
+        _state.value = _state.value.copy(
+            delayedUntil = Instant.now().plusSeconds(delay.hours * 3600)
+        )
+    }
+
+    private companion object {
+        const val TAG = "ArchiveViewModel"
+    }
+}
