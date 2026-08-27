@@ -43,6 +43,7 @@ import com.gallery.sync.domain.backup.ArchiveDelay
 import com.gallery.sync.domain.backup.ArchiveEntry
 import com.gallery.sync.domain.backup.ArchiveFailure
 import com.gallery.sync.domain.backup.ArchiveMark
+import com.gallery.sync.ui.common.HeroCard
 import com.gallery.sync.ui.common.SignalIcons
 import com.gallery.sync.ui.common.formatBytes
 import com.gallery.sync.ui.theme.LocalGallerySyncColors
@@ -108,30 +109,38 @@ fun ArchiveScreen(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(
-                text = stringResource(R.string.archive_title),
-                style = MaterialTheme.typography.titleMedium
-            )
+            // The same card Albums and Restore open with. The figure is the number of files waiting
+            // on this tab — which is what someone arriving here wants to know before anything else.
+            HeroCard(
+                label = stringResource(R.string.archive_hero_label),
+                figure = state.plan.entries.size.toString(),
+                detail = {
+                    when {
+                        !state.isSupported -> Text(
+                            text = stringResource(R.string.archive_unsupported),
+                            style = MaterialTheme.typography.bodySmall
+                        )
 
-            when {
-                !state.isSupported -> Text(
-                    text = stringResource(R.string.archive_unsupported),
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                        state.plan.isEmpty -> {
+                            Text(
+                                text = stringResource(R.string.archive_empty),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                            Text(
+                                text = stringResource(R.string.archive_empty_hint),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
 
-                state.plan.isEmpty -> {
-                    Text(
-                        text = stringResource(R.string.archive_empty),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Text(
-                        text = stringResource(R.string.archive_empty_hint),
-                        style = MaterialTheme.typography.bodySmall
-                    )
+                        else -> ArchiveHeroDetail(state)
+                    }
+                },
+                actions = {
+                    if (state.isSupported && !state.plan.isEmpty) {
+                        ArchiveHeroActions(state = state, onValidate = viewModel::validate)
+                    }
                 }
-
-                else -> ArchiveHeader(state = state, onValidate = viewModel::validate)
-            }
+            )
         }
 
         if (state.showPrompt) {
@@ -167,10 +176,9 @@ fun ArchiveScreen(
     }
 }
 
+/** The album names and the one-line explanation of what this tab does before it does it. */
 @Composable
-private fun ArchiveHeader(state: ArchiveUiState, onValidate: () -> Unit) {
-    val context = LocalContext.current
-
+private fun ArchiveHeroDetail(state: ArchiveUiState) {
     Text(
         text = state.plan.albums.joinToString(", "),
         style = MaterialTheme.typography.titleSmall,
@@ -180,6 +188,17 @@ private fun ArchiveHeader(state: ArchiveUiState, onValidate: () -> Unit) {
         text = stringResource(R.string.archive_intro),
         style = MaterialTheme.typography.bodySmall
     )
+}
+
+/**
+ * The control, or what is happening instead of one.
+ *
+ * Sits in the hero's action slot, where Albums keeps Sync now and Rescan — so the thing the user
+ * came to press is in the same place on every tab.
+ */
+@Composable
+private fun ArchiveHeroActions(state: ArchiveUiState, onValidate: () -> Unit) {
+    val context = LocalContext.current
 
     when (state.phase) {
         ArchivePhase.IDLE -> OutlinedButton(onClick = onValidate) {
@@ -193,7 +212,7 @@ private fun ArchiveHeader(state: ArchiveUiState, onValidate: () -> Unit) {
             CircularProgressIndicator(modifier = Modifier.size(16.dp))
             Text(
                 text = stringResource(R.string.archive_validating),
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodySmall
             )
         }
 
@@ -203,7 +222,7 @@ private fun ArchiveHeader(state: ArchiveUiState, onValidate: () -> Unit) {
                 state.batchIndex + 1,
                 state.batchTotal
             ),
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodySmall
         )
 
         ArchivePhase.DONE -> Text(
@@ -220,13 +239,13 @@ private fun ArchiveHeader(state: ArchiveUiState, onValidate: () -> Unit) {
                     formatBytes(context, state.plan.removed.sumOf { it.sizeBytes })
                 )
             },
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodySmall
         )
 
         ArchivePhase.READY -> if (state.delayedUntil != null) {
             Text(
                 text = stringResource(R.string.archive_delayed),
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodySmall
             )
         }
     }

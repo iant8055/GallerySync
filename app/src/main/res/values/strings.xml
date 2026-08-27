@@ -215,6 +215,7 @@
 
     <!-- The Archive tab: validate, then confirm, then remove. -->
     <string name="archive_title">Archive</string>
+    <string name="archive_hero_label">Files waiting to leave this phone</string>
     <string name="archive_empty">No album is set to Archive. Nothing here will remove anything from your phone.</string>
     <string name="archive_empty_hint">Set an album to Archive on the Albums tab, and its files will be listed here for checking before anything leaves your phone.</string>
     <string name="archive_intro">Every file below is checked against OneDrive first. Anything that is not there yet is backed up before it counts.</string>
@@ -304,6 +305,9 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
 
     <!-- Retrieval: files in OneDrive that are no longer on the phone. -->
     <string name="tab_retrieve">Restore</string>
+    <string name="retrieve_hero_label_folders">Folders in OneDrive</string>
+    <string name="retrieve_hero_label_files">Files in this folder</string>
+
     <string name="retrieve_title">Restore from OneDrive</string>
     <string name="retrieve_empty">Nothing here to restore.</string>
     <string name="retrieve_where">Files come back into a folder called Restored, with “_restored” added to the name.</string>

@@ -44,6 +44,7 @@ import com.gallery.sync.domain.backup.RestorableFile
 import com.gallery.sync.domain.backup.RestorableFolder
 import com.gallery.sync.ui.common.OneDriveLauncher
 import com.gallery.sync.ui.common.SignalIcons
+import com.gallery.sync.ui.common.HeroCard
 import com.gallery.sync.ui.common.formatBytes
 
 /** Where a phone layout stops being the right answer. The standard expanded-width breakpoint. */
@@ -90,25 +91,53 @@ fun RetrieveScreen(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(
-                text = stringResource(R.string.retrieve_title),
-                style = MaterialTheme.typography.titleMedium
+            // The same card Albums and Archive open with, so the three tabs read as one app.
+            // Ian, 26 Aug 2026. The figure is what is in OneDrive and reachable from here: at the
+            // top level the folder count, inside a folder the files in it.
+            HeroCard(
+                label = if (state.selectedFolder == null) {
+                    stringResource(R.string.retrieve_hero_label_folders)
+                } else {
+                    stringResource(R.string.retrieve_hero_label_files)
+                },
+                figure = if (state.loading) {
+                    // Never a confident zero while the drive is still being listed. Albums learned
+                    // this as an em dash and the reason carries over unchanged: a count nobody has
+                    // read yet is not a count of nothing.
+                    "—"
+                } else if (state.selectedFolder == null) {
+                    state.folders.size.toString()
+                } else {
+                    state.files.size.toString()
+                },
+                detail = {
+                    // Only at the top level, where it is an instruction. Inside a folder it was a
+                    // paragraph of reassurance above the thing the user came to do — read once,
+                    // chrome thereafter. Removed 26 Aug 2026 at Ian's request.
+                    Text(
+                        text = if (state.selectedFolder == null) {
+                            stringResource(R.string.retrieve_pick_folder)
+                        } else {
+                            stringResource(R.string.retrieve_where)
+                        },
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                },
+                actions = {
+                    // Inside the card, where Albums keeps Sync now and Rescan. It sat below the
+                    // card when the hero arrived, leaving a band of empty space between the two and
+                    // making the tab look unlike the one beside it.
+                    //
+                    // Offered on success too, not only after a failure: this list is a snapshot of a
+                    // drive that changes underneath it, and the only other way to re-take it was to
+                    // kill the app.
+                    if (state.selectedFolder == null && !state.loading) {
+                        OutlinedButton(onClick = viewModel::loadFolders) {
+                            Text(stringResource(R.string.retrieve_refresh), maxLines = 1)
+                        }
+                    }
+                }
             )
-            // Only at the top level, where it is an instruction. Inside a folder it was a
-            // paragraph of reassurance above the thing the user came to do — read once, chrome
-            // thereafter. Removed 26 Aug 2026 at Ian's request.
-            if (state.selectedFolder == null) {
-                Text(
-                    text = stringResource(R.string.retrieve_pick_folder),
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-            if (state.selectedFolder != null) {
-                Text(
-                    text = stringResource(R.string.retrieve_where),
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
 
             // The path, kept last so it sits directly above the list it describes rather than above
             // a paragraph. It is also the way back: tapping it leaves the folder, the way a path bar
@@ -182,13 +211,6 @@ fun RetrieveScreen(
                 )
                 TextButton(onClick = viewModel::loadFolders) {
                     Text(stringResource(R.string.retrieve_try_again))
-                }
-            } else if (state.selectedFolder == null && !state.loading) {
-                // Offered on success too, not only after a failure. This list is a snapshot of a
-                // drive that changes underneath it, and until now the only way to re-take it was to
-                // kill the app.
-                TextButton(onClick = viewModel::loadFolders) {
-                    Text(stringResource(R.string.retrieve_refresh))
                 }
             }
 
