@@ -1613,6 +1613,53 @@ is a **portrait photo**, which Samsung writes at orientation 6. Still worth havi
 output, because a square image is the degenerate case of the centred-square anchoring — the largest
 centred square is the whole frame, so the badge lands in the true corner.
 
+### 26 Aug 2026 — the Archive tab removes six files, and all six reach the trash
+
+**Fold 4.** Ian validated `12345clips` on the new Archive tab and pressed Yes. Six files, one system
+dialog — under the 2000-URI cap, so the batching path was not exercised. Every one of them left the
+gallery.
+
+**They are in Android's media trash, intact.** `ls -la` on the folder, which is the check MILESTONES
+proposed on 25 Aug and nobody had run on a real removal:
+
+```
+.trashed-1790444333-123_1 (1).jpg                           493769
+.trashed-1790444333-20260826_161003.jpg                     274441
+.trashed-1790444333-20260826_161049.jpg                     851082
+.trashed-1790444333-20260826_161057.jpg                     581083
+.trashed-1790444333-20260826_162457.jpg                     691868
+.trashed-1790444333-Screenshot_20240902_085700_Facebook.jpg 399920
+```
+
+Every byte size matches what was on disk before. Expiry 1790444333 is **26 Sep 2026** — a 30-day
+window. `ls -l` showed the folder as empty, which is worth writing down on its own: the rename starts
+with a dot, so the ordinary listing hides it and a removal that *did* reach the trash looks identical
+to one that did not.
+
+**And the cloud half held.** OneDrive has the full originals, not the proxies: `_161003` at 5.2 MB
+against a 274 KB local proxy, `_161049` at 6.5 MB against 851 KB, `_161057` at 4.9 MB, `_162457` at
+5.5 MB. `remoteSizeBytes` equals `sizeBytes` on every archived row. The thing the screen promised is
+the thing that is true.
+
+**This does not change the rule, and must not be read as changing it.** CLAUDE.md forbids telling the
+user a local removal is recoverable. The tally on this one handset is now two recoveries against one
+outright deletion, which is not a guarantee — it is the same unpredictability with a larger sample.
+The guarantee the UI may state remains the verified cloud copy. What this does establish is that the
+recoverable path is real and reachable, so the wording *"on some phones the local copy goes to your
+gallery's Recently deleted; on others it is removed straight away"* is accurate rather than cautious
+hedging.
+
+**One finding, and it is not a live defect.** `123_1 (1).jpg` had a local proxy of 493,769 bytes
+against an original of 404,241 — the proxy was 89 KB *larger*, so optimising it spent space to save
+nothing. `ProxyApplier` already refuses this (`proxy.sizeBytes >= entry.sizeBytes` → `NotWorthwhile`),
+and its comment cites this exact file as the case that motivated the guard. It is a pre-fix leftover:
+1 of 15 proxied rows, and now archived. Every proxy written since the guard is smaller than its
+original.
+
+Worth noting what the archive did here regardless — it removed the *proxy*, and the full original was
+already safe. That is the design working as intended on a file whose local copy was the wrong size for
+the wrong reason.
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have
