@@ -86,7 +86,12 @@
     <string name="permission_grant_action">Grant access</string>
 
     <!-- Backup -->
-    <string name="backup_selection_summary">%1$s selected · %2$s</string>
+    <!--
+        Says what Sync now would do, because it sits directly above it. Was "%1$s selected · %2$s",
+        wording left over from when albums were checkboxes — nothing is "selected" now, albums have
+        modes. Ian, 27 Aug 2026.
+    -->
+    <string name="backup_pending_summary">%1$s · %2$s to back up</string>
     <!--
         The Albums tab is where modes are chosen, so its hero counts albums, not files. It read
         "Files verified in OneDrive" until 27 Aug 2026 — a true number about a different subject,
@@ -102,8 +107,8 @@
     <string name="albums_filter_hint">Tap to filter by mode</string>
     <!-- Shown when a mode button is tapped and no album is in that mode. -->
     <string name="albums_filter_none">No album is in that mode.</string>
-    <string name="backup_all_done">Everything selected is synced</string>
-    <string name="backup_nothing_selected">Choose an album to sync</string>
+    <string name="backup_all_done">Everything is backed up</string>
+    <string name="backup_nothing_selected">No albums switched on</string>
     <!--
         "verified" matters: this is what Gallery Sync has confirmed, not what OneDrive contains.
         After a reinstall the ledger is empty and this reads 0, which would otherwise look like

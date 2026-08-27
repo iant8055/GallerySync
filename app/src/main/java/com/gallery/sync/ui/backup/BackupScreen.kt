@@ -752,26 +752,25 @@ private fun AlbumRow.statusBreakdown(): String {
  */
 @Composable
 private fun HeroDetail(state: BackupUiState, context: android.content.Context) {
-
-    Text(
-        text = stringResource(
-            R.string.backup_selection_summary,
-            pluralStringResource(
-                R.plurals.file_count,
-                state.enabledItemCount,
-                state.enabledItemCount
-            ),
-            formatBytes(context, state.enabledBytes)
-        ),
-        style = MaterialTheme.typography.bodySmall
-    )
-
-    val selectionNote = when {
+    // One line about the button below it, then one about the promise underneath.
+    //
+    // There were three, and they did not add up: "70 files selected · 834 MB" counted files in
+    // switched-on albums, "138 files verified in OneDrive" counted ledger rows including files no
+    // longer on the phone, and neither number explained the other or the buttons beneath them. Ian
+    // kept looking at it. The fix is to say what pressing Sync now would achieve — which is the
+    // pending work, not the whole selection.
+    val summary = when {
+        !state.hasLoadedCounts -> null
         state.enabledItemCount == 0 -> stringResource(R.string.backup_nothing_selected)
-        state.isSelectionFullyBackedUp -> stringResource(R.string.backup_all_done)
-        else -> null
+        state.pendingCount > 0 -> stringResource(
+            R.string.backup_pending_summary,
+            pluralStringResource(R.plurals.file_count, state.pendingCount, state.pendingCount),
+            formatBytes(context, state.pendingBytes)
+        )
+
+        else -> stringResource(R.string.backup_all_done)
     }
-    selectionNote?.let { Text(text = it, style = MaterialTheme.typography.bodySmall) }
+    summary?.let { Text(text = it, style = MaterialTheme.typography.bodySmall) }
 
     // An em dash until the count is read, never a zero — the same rule the figure follows. A
     // confident "0 verified in OneDrive" on a cold start is a claim, and a frightening one.
@@ -779,11 +778,7 @@ private fun HeroDetail(state: BackupUiState, context: android.content.Context) {
         text = stringResource(
             R.string.backup_verified_line,
             if (state.hasLoadedCounts) {
-                pluralStringResource(
-                    R.plurals.file_count,
-                    state.uploadedCount,
-                    state.uploadedCount
-                )
+                pluralStringResource(R.plurals.file_count, state.uploadedCount, state.uploadedCount)
             } else {
                 "—"
             }
