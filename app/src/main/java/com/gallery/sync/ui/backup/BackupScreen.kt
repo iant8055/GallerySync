@@ -548,17 +548,12 @@ private fun AlbumModeRow(
                 overflow = TextOverflow.Ellipsis
             )
             if (album.isArchivedAndEmpty) {
-                // The usual counts would describe files that are not here any more. This row exists
-                // so a finished Archive album stays reachable and revokable, so it says both what
-                // happened and that the mode is still standing.
+                // One line. The usual counts would describe files that are not here any more, and
+                // the row's own Archive badge already says the mode stands and can be changed.
                 Text(
                     text = stringResource(R.string.album_archived_empty),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    text = stringResource(R.string.album_archived_empty_detail),
-                    style = MaterialTheme.typography.bodySmall
                 )
             } else {
                 Text(

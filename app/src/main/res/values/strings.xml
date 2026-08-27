@@ -229,11 +229,13 @@
 
     <!-- Archive confirmation dialog -->
     <!--
-        An Archive album with nothing left on the phone. Says the mode did its job and that the
-        mode is still in force, because this row exists so the user can still switch it off.
+        An Archive album with nothing left on the phone.
+        Was two lines, the second explaining that the mode still stands. Ian cut it to one on
+        27 Aug 2026, and the mechanism does not depend on the sentence: the row is still listed
+        with a tappable Archive badge, which is what makes the mode discoverable and revokable.
+        The prose was belt-and-braces, and it wrapped to four lines in a two-column grid.
     -->
-    <string name="album_archived_empty">Archived · nothing left on this phone</string>
-    <string name="album_archived_empty_detail">Still watched. Anything added here is archived too.</string>
+    <string name="album_archived_empty">All files Archived</string>
     <string name="archive_confirm_title">Archive this album?</string>
     <!--
         Says only what actually happens. This promised "older than your archive age" until 25 Aug
