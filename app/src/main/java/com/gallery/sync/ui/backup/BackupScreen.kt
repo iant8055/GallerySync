@@ -7,6 +7,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,6 +35,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -50,6 +53,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -70,6 +74,7 @@ import com.gallery.sync.data.local.media.MediaAccess
 import com.gallery.sync.domain.backup.StopReason
 import com.gallery.sync.ui.common.LabelWithAction
 import com.gallery.sync.ui.common.SignalIcons
+import com.gallery.sync.ui.common.HeroCard
 import com.gallery.sync.ui.common.HeroOutlinedButton
 import com.gallery.sync.ui.common.formatBytes
 import com.gallery.sync.ui.theme.LocalGallerySyncColors
@@ -189,17 +194,37 @@ private fun AlbumList(
 ) {
     val context = LocalContext.current
 
+    // Hoisted to the screen, because the hero sets it and the list below obeys it.
+    var modeFilter by rememberSaveable { mutableStateOf<AlbumMode?>(null) }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        // The shared card, same as Restore and Archive. The figure counts *albums*, because this is
+        // the tab where modes are chosen — see backup_hero_label for why it stopped counting files.
         HeroCard(
-            state = state,
-            context = context,
-            onSyncNow = { if (state.isRunning) viewModel.stopBackup() else viewModel.runBackupNow() },
-            onRescan = viewModel::refresh
+            label = stringResource(R.string.backup_hero_label),
+            figure = if (state.hasLoadedCounts) state.activeAlbumCount.toString() else "—",
+            detail = {
+                HeroDetail(
+                    state = state,
+                    context = context,
+                    modeFilter = modeFilter,
+                    onModeFilter = { modeFilter = if (modeFilter == it) null else it }
+                )
+            },
+            actions = {
+                HeroActions(
+                    state = state,
+                    onSyncNow = {
+                        if (state.isRunning) viewModel.stopBackup() else viewModel.runBackupNow()
+                    },
+                    onRescan = viewModel::refresh
+                )
+            }
         )
 
         // No Select all / Deselect all. Removed 25 Aug 2026 (Ian): a bulk grant across every
@@ -274,11 +299,38 @@ private fun AlbumList(
         }
     }
 
-    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+    // Filtering the list, not searching media. CLAUDE.md's design principle rules out search, and
+    // that rule is about not rebuilding a gallery — no searching photos, faces or content. This
+    // narrows a settings list of ninety album names down to the one whose mode you came to change.
+    // Ian asked for it on 27 Aug 2026 and chose "filter" over "search" for exactly that reason.
+    var filterText by rememberSaveable { mutableStateOf("") }
+
+    val visibleAlbums = state.albums.filter { album ->
+        (modeFilter == null || album.mode == modeFilter) &&
+            album.name.contains(filterText.trim(), ignoreCase = true)
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        AlbumFilterBar(text = filterText, onTextChange = { filterText = it })
+
+        if (visibleAlbums.isEmpty() && state.albums.isNotEmpty()) {
+            Text(
+                text = stringResource(R.string.albums_filter_none),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+            )
+            return@Column
+        }
+
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        ) {
         val columns = if (maxWidth >= WideBreakpoint) 2 else 1
         // Ceiling, so an odd list puts the extra row in the left column and the right one ends a
         // row short — rather than the left ending short and the split reading as off-by-one.
-        val half = (state.albums.size + columns - 1) / columns
+        val half = (visibleAlbums.size + columns - 1) / columns
 
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -289,10 +341,10 @@ private fun AlbumList(
             // stays alphabetical top to bottom, so you scan one and ignore the other; row-major
             // would put consecutive albums side by side and make the eye zigzag for every item —
             // worse for finding a name, which is the only thing anyone does on this screen.
-            items(count = half, key = { index -> state.albums[index].name }) { index ->
+            items(count = half, key = { index -> visibleAlbums[index].name }) { index ->
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     for (column in 0 until columns) {
-                        val album = state.albums.getOrNull(index + column * half)
+                        val album = visibleAlbums.getOrNull(index + column * half)
                         if (album == null) {
                             // The odd list's empty slot. Keeps the left column's width honest
                             // rather than letting its last card stretch across both.
@@ -311,6 +363,70 @@ private fun AlbumList(
                 }
             }
         }
+        }
+    }
+}
+
+/**
+ * Narrows the album list by name and by mode.
+ *
+ * Both together, because they answer different questions: the field is "where is the album I am
+ * thinking of", the chips are "what have I already set". On a phone reporting ninety albums the
+ * second is the one that makes the screen reviewable at all — "show me everything set to Archive"
+ * is the check a person actually wants before trusting that setting.
+ */
+@Composable
+private fun AlbumFilterBar(text: String, onTextChange: (String) -> Unit) {
+    Column(
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        OutlinedTextField(
+            value = text,
+            onValueChange = onTextChange,
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text(stringResource(R.string.albums_filter_hint)) },
+            trailingIcon = {
+                if (text.isNotEmpty()) {
+                    TextButton(onClick = { onTextChange("") }) {
+                        Text(stringResource(R.string.albums_filter_clear), maxLines = 1)
+                    }
+                }
+            }
+        )
+
+    }
+}
+
+/**
+ * One mode, its count, and whether the list is currently narrowed to it.
+ *
+ * Deliberately reuses the mode's own colour from the theme, so the chip that filters to Archive is
+ * the same warm colour as the Archive badge on every album row. The link between "the thing I
+ * tapped" and "the rows I now see" should not need explaining.
+ */
+@Composable
+private fun ModeFilterChip(
+    mode: AlbumMode,
+    count: Int,
+    selected: AlbumMode?,
+    onClick: (AlbumMode) -> Unit
+) {
+    val isOn = selected == mode
+    Surface(
+        onClick = { onClick(mode) },
+        shape = RoundedCornerShape(percent = 50),
+        color = if (isOn) LocalContentColor.current.copy(alpha = 0.20f) else Color.Transparent,
+        contentColor = LocalContentColor.current,
+        border = BorderStroke(1.dp, LocalContentColor.current.copy(alpha = if (isOn) 0.7f else 0.3f))
+    ) {
+        Text(
+            text = "$count ${mode.label()}",
+            style = MaterialTheme.typography.labelMedium,
+            maxLines = 1,
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+        )
     }
 }
 
@@ -557,80 +673,35 @@ private fun AlbumRow.statusBreakdown(): String {
 }
 
 /**
- * The one number that matters, and the controls that change it.
+ * What the modes add up to, what a run would move, and the promise underneath.
  *
- * Everything on this screen is a detail of this card, so it is the only thing drawn on a filled
- * surface. It replaces what used to be four separate lines and five loose buttons stacked above the
- * list — the information was all there and none of it was ranked.
- *
- * The figure is [BackupUiState.uploadedCount]: files this app has confirmed in OneDrive. It is
- * deliberately not "your library", which the app does not know, and not a percentage of a quota,
- * which it also does not know — Graph's drive total is not read anywhere.
+ * The mode breakdown leads, because it is the summary of the list below and the thing the tab is
+ * for. The verified count comes last: it was the headline until 27 Aug 2026 and is still the app's
+ * core promise, but it describes files rather than the albums it was sitting above.
  */
 @Composable
-private fun HeroCard(
+private fun HeroDetail(
     state: BackupUiState,
     context: android.content.Context,
-    onSyncNow: () -> Unit,
-    onRescan: () -> Unit
+    modeFilter: AlbumMode?,
+    onModeFilter: (AlbumMode) -> Unit
 ) {
-    val signal = LocalGallerySyncColors.current
-
-    Surface(
+    // The summary *is* the filter. Ian, 27 Aug 2026: "click on mode type to filter". One control
+    // rather than a summary and a separate row of chips saying the same four words — and the counts
+    // give it its own affordance, because a number beside a mode invites the question "which ones?"
+    // Tapping the selected mode again clears it, so there is always a way back to the whole list.
+    Row(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
-        color = signal.heroContainer,
-        contentColor = signal.onHero
+        horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        // Unfolded, the phone layout left two thirds of the card as empty green: the figure and the
-        // controls both sat in one narrow left column because that is all a 390dp screen has. Past
-        // the standard expanded-width breakpoint they split — the figure keeps the left, the
-        // detail and the controls take the right — so the card uses the width it is given instead
-        // of stretching around a hole.
-        BoxWithConstraints(modifier = Modifier.padding(20.dp)) {
-            if (maxWidth >= WideBreakpoint) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(24.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) { HeroFigure(state) }
-                    Column(
-                        modifier = Modifier.weight(1f),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        HeroDetail(state, context)
-                        HeroActions(state, onSyncNow, onRescan)
-                    }
-                }
-            } else {
-                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    HeroFigure(state)
-                    HeroDetail(state, context)
-                    HeroActions(state, onSyncNow, onRescan)
-                }
-            }
+        ModeFilterChip(AlbumMode.BACKUP, state.backupAlbumCount, modeFilter, onModeFilter)
+        ModeFilterChip(AlbumMode.SYNC, state.syncAlbumCount, modeFilter, onModeFilter)
+        ModeFilterChip(AlbumMode.ARCHIVE, state.archiveAlbumCount, modeFilter, onModeFilter)
+        if (state.offAlbumCount > 0) {
+            ModeFilterChip(AlbumMode.OFF, state.offAlbumCount, modeFilter, onModeFilter)
         }
     }
-}
 
-/** The label and the number. The one thing on this screen that is not a detail of something else. */
-@Composable
-private fun HeroFigure(state: BackupUiState) {
-    Text(
-        text = stringResource(R.string.backup_hero_label),
-        style = MaterialTheme.typography.labelMedium
-    )
-    Text(
-        // An em dash until the count is read, never a zero. See BackupUiState.hasLoadedCounts.
-        text = if (state.hasLoadedCounts) state.uploadedCount.toString() else "—",
-        style = MaterialTheme.typography.displaySmall
-    )
-}
-
-/** What a run would move now, and the two states the counts cannot convey. */
-@Composable
-private fun HeroDetail(state: BackupUiState, context: android.content.Context) {
     Text(
         text = stringResource(
             R.string.backup_selection_summary,
@@ -650,6 +721,24 @@ private fun HeroDetail(state: BackupUiState, context: android.content.Context) {
         else -> null
     }
     selectionNote?.let { Text(text = it, style = MaterialTheme.typography.bodySmall) }
+
+    // An em dash until the count is read, never a zero — the same rule the figure follows. A
+    // confident "0 verified in OneDrive" on a cold start is a claim, and a frightening one.
+    Text(
+        text = stringResource(
+            R.string.backup_verified_line,
+            if (state.hasLoadedCounts) {
+                pluralStringResource(
+                    R.plurals.file_count,
+                    state.uploadedCount,
+                    state.uploadedCount
+                )
+            } else {
+                "—"
+            }
+        ),
+        style = MaterialTheme.typography.bodySmall
+    )
 }
 
 /**

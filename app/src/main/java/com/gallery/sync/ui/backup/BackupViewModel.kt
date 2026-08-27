@@ -190,6 +190,23 @@ data class BackupUiState(
     val isSelectionFullyBackedUp: Boolean get() = enabledItemCount > 0 && pendingCount == 0
 
     /**
+     * How many albums are in each mode.
+     *
+     * The Albums tab is where modes are chosen, so this is what its hero counts. It used to head the
+     * screen with "Files verified in OneDrive", which is a true and reassuring number about a
+     * different subject — Ian, 27 Aug 2026: *"This is the tab where we select Album modes."* The
+     * verified figure has not been dropped; it moved into the detail beneath, where it reads as
+     * context rather than as the headline of a list it does not describe.
+     */
+    val backupAlbumCount: Int get() = albums.count { it.mode == AlbumMode.BACKUP }
+    val syncAlbumCount: Int get() = albums.count { it.mode == AlbumMode.SYNC }
+    val archiveAlbumCount: Int get() = albums.count { it.mode == AlbumMode.ARCHIVE }
+    val offAlbumCount: Int get() = albums.count { it.mode == AlbumMode.OFF }
+
+    /** Albums doing something. The count the hero leads with. */
+    val activeAlbumCount: Int get() = albums.count { it.mode != AlbumMode.OFF }
+
+    /**
      * The button is worth pressing — either to start work, or to stop work already running.
      *
      * While a run is live this is always true, because the button is Stop then. It used to be

@@ -88,11 +88,21 @@
     <!-- Backup -->
     <string name="backup_selection_summary">%1$s selected · %2$s</string>
     <!--
-        Names the unit. "Verified in OneDrive" over a bare 13 reads as 13 albums, which is what it
-        sits above a list of — and this is the one number the whole screen is built around. It
-        counts ledger rows, so it is files.
+        The Albums tab is where modes are chosen, so its hero counts albums, not files. It read
+        "Files verified in OneDrive" until 27 Aug 2026 — a true number about a different subject,
+        heading a list it did not describe. Ian: "This is the tab where we select Album modes."
     -->
-    <string name="backup_hero_label">Files verified in OneDrive</string>
+    <string name="backup_hero_label">Albums switched on</string>
+    <string name="backup_mode_breakdown">%1$d Backup · %2$d Sync · %3$d Archive</string>
+    <string name="backup_modes_off">%1$d off</string>
+    <!-- The old headline, kept as context rather than dropped. It is still the app's core promise. -->
+    <string name="backup_verified_line">%1$s verified in OneDrive</string>
+
+    <!-- Filtering the album list. Not media search — see the design principle in CLAUDE.md. -->
+    <string name="albums_filter_hint">Filter albums</string>
+    <string name="albums_filter_clear">Clear</string>
+    <string name="albums_filter_all">All</string>
+    <string name="albums_filter_none">No album matches that.</string>
     <string name="backup_all_done">Everything selected is synced</string>
     <string name="backup_nothing_selected">Choose an album to sync</string>
     <!--
