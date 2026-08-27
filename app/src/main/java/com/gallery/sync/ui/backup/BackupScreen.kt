@@ -204,6 +204,7 @@ private fun AlbumList(
         HeroCard(
             label = stringResource(R.string.backup_hero_label),
             figure = "",
+            actionsAtBottom = true,
             figureContent = {
                 ModeFilterGrid(
                     selected = modeFilter,
@@ -792,32 +793,52 @@ private fun HeroDetail(
     if (!state.hasLoadedCounts) return
     val summary = state.summaryFor(modeFilter)
 
+    // Ian's order, 27 Aug 2026: how many albums and how big, then — for All Albums — the split by
+    // mode, then the media breakdown, then whatever that mode is judged on.
     Text(
         text = stringResource(
-            R.string.albums_media_summary,
-            pluralStringResource(R.plurals.image_count, summary.imageCount, summary.imageCount),
-            pluralStringResource(R.plurals.video_count, summary.videoCount, summary.videoCount),
+            R.string.albums_size_summary,
+            pluralStringResource(
+                R.plurals.albums_hero_albums,
+                summary.albumCount,
+                summary.albumCount
+            ),
             formatBytes(context, summary.totalBytes)
         ),
-        style = MaterialTheme.typography.bodySmall
+        style = MaterialTheme.typography.titleSmall
     )
 
-    Text(
-        text = if (modeFilter == null) {
-            stringResource(
+    if (modeFilter == null) {
+        Text(
+            text = stringResource(
                 R.string.albums_mode_totals,
                 state.backupAlbumCount,
                 state.syncAlbumCount,
                 state.archiveAlbumCount,
                 state.offAlbumCount
+            ),
+            style = MaterialTheme.typography.bodyMedium
+        )
+    }
+
+    Text(
+        text = stringResource(
+            R.string.albums_media_summary,
+            pluralStringResource(
+                R.plurals.albums_hero_images,
+                summary.imageCount,
+                summary.imageCount
+            ),
+            pluralStringResource(
+                R.plurals.albums_hero_videos,
+                summary.videoCount,
+                summary.videoCount
             )
-        } else {
-            pluralStringResource(R.plurals.album_count, summary.albumCount, summary.albumCount)
-        },
-        style = MaterialTheme.typography.bodySmall
+        ),
+        style = MaterialTheme.typography.bodyMedium
     )
 
-    // Sync is the mode that shrinks things, so it is the one judged on what came back.
+    // Sync is the mode that shrinks things, so it is judged on what came back.
     if (modeFilter == AlbumMode.SYNC) {
         Text(
             text = stringResource(
@@ -825,20 +846,20 @@ private fun HeroDetail(
                 summary.optimisedCount,
                 formatBytes(context, summary.savedBytes)
             ),
-            style = MaterialTheme.typography.bodySmall
+            style = MaterialTheme.typography.bodyMedium
         )
     }
 
-    // Archive is judged on what cannot leave yet. A file not verified is a file that stays, and
-    // that is the number worth knowing before opening the Archive tab.
+    // Archive is judged on what is still here. Every file in an Archive album is scheduled to
+    // leave, so the count of them is the honest number — and unlike "waiting to be verified" it
+    // compares nothing against the ledger, which is where the previous line went wrong.
     if (modeFilter == AlbumMode.ARCHIVE) {
         Text(
-            text = if (summary.awaitingVerification == 0) {
-                stringResource(R.string.albums_awaiting_none)
-            } else {
-                stringResource(R.string.albums_awaiting_summary, summary.awaitingVerification)
-            },
-            style = MaterialTheme.typography.bodySmall
+            text = stringResource(
+                R.string.albums_scheduled_summary,
+                summary.imageCount + summary.videoCount
+            ),
+            style = MaterialTheme.typography.bodyMedium
         )
     }
 }

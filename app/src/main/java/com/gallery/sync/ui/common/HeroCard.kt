@@ -6,6 +6,10 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -58,6 +62,15 @@ fun HeroCard(
      * buttons rather than a count of anything. The other two tabs pass nothing and get the figure.
      */
     figureContent: (@Composable ColumnScope.() -> Unit)? = null,
+    /**
+     * Pushes [actions] to the foot of the card instead of letting them follow [detail].
+     *
+     * Only worth it where the other column is the taller one — Albums, whose heading and 2 x 2 of
+     * modes set the card's height. There the controls used to float mid-air beside the second row
+     * of buttons; sitting on the bottom edge they read as the card's controls rather than as a
+     * third thing in the middle of it. Ian, 27 Aug 2026.
+     */
+    actionsAtBottom: Boolean = false,
     detail: @Composable ColumnScope.() -> Unit = {},
     actions: @Composable ColumnScope.() -> Unit = {}
 ) {
@@ -72,18 +85,32 @@ fun HeroCard(
         BoxWithConstraints(modifier = Modifier.padding(20.dp)) {
             if (maxWidth >= HeroWideBreakpoint) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    // IntrinsicSize.Min, so the fillMaxHeight below resolves against the taller
+                    // COLUMN rather than against the incoming constraint. Without it the card grew
+                    // to the height of the screen and pushed the album list off the bottom.
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .then(if (actionsAtBottom) Modifier.height(IntrinsicSize.Min) else Modifier),
                     horizontalArrangement = Arrangement.spacedBy(24.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = if (actionsAtBottom) {
+                        Alignment.Top
+                    } else {
+                        Alignment.CenterVertically
+                    }
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         if (figureContent != null) figureContent() else HeroFigure(label, figure)
                     }
                     Column(
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier
+                            .weight(1f)
+                            .then(if (actionsAtBottom) Modifier.fillMaxHeight() else Modifier),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         detail()
+                        // Fills whatever is left, so the controls land on the card's bottom edge
+                        // rather than immediately under the text.
+                        if (actionsAtBottom) Spacer(modifier = Modifier.weight(1f))
                         actions()
                     }
                 }
