@@ -145,6 +145,14 @@ fun SettingsScreen(
 
         HorizontalDivider()
 
+        // Directly under the source folders, because the pair answers one question between them:
+        // where files are read from, and where they are written to.
+        Section(stringResource(R.string.destination_title)) {
+            DestinationSection()
+        }
+
+        HorizontalDivider()
+
         Section(stringResource(R.string.settings_cloud_files)) {
             LabelWithAction(
                 action = {
@@ -175,6 +183,8 @@ fun SettingsScreen(
 
         HorizontalDivider()
 
+        // Beside automatic sync rather than anywhere else: both govern *when* the app is allowed to
+        // move bytes, and the first run is the one people most want held back to a quiet hour.
         Section(stringResource(R.string.settings_automatic)) {
             SettingSwitch(
                 label = stringResource(R.string.backup_automatic),
@@ -203,6 +213,11 @@ fun SettingsScreen(
                     onCheckedChange = viewModel::setAllowMeteredNetwork
                 )
             }
+
+            // The first run is the one worth holding to a quiet hour: it is the whole library rather
+            // than a handful of new photos, and it is the run most likely to be noticed on a bill or
+            // a battery.
+            FirstBackupSettings()
         }
 
         HorizontalDivider()
