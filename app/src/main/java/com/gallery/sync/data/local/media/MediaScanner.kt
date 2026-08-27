@@ -102,7 +102,9 @@ class MediaScanner @Inject constructor(
                 MediaAlbum(
                     name = name,
                     itemCount = items.size,
-                    totalBytes = items.sumOf { it.sizeBytes }
+                    totalBytes = items.sumOf { it.sizeBytes },
+                    imageCount = items.count { !it.isVideo },
+                    videoCount = items.count { it.isVideo }
                 )
             }
             .sortedBy { it.name.lowercase() }

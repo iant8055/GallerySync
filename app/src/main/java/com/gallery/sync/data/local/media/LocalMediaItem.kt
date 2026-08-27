@@ -35,7 +35,14 @@ data class LocalMediaItem(
 data class MediaAlbum(
     val name: String,
     val itemCount: Int,
-    val totalBytes: Long
+    val totalBytes: Long,
+    /**
+     * Split out because the two behave differently and the user knows it: videos are never
+     * optimised, and they are what makes an album large. "17 files" hides whether an album is a
+     * handful of clips or a hundred photos; "2 videos, 15 images" does not.
+     */
+    val imageCount: Int = 0,
+    val videoCount: Int = 0
 )
 
 /** How much of the user's media the app is currently allowed to see. */

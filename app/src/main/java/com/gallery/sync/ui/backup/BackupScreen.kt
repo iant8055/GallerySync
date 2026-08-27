@@ -206,7 +206,6 @@ private fun AlbumList(
             figure = "",
             figureContent = {
                 ModeFilterGrid(
-                    state = state,
                     selected = modeFilter,
                     onSelect = { tapped ->
                         // Tapping the active mode again clears it, so every button is its own way
@@ -215,7 +214,7 @@ private fun AlbumList(
                     }
                 )
             },
-            detail = { HeroDetail(state = state, context = context) },
+            detail = { HeroDetail(state = state, context = context, modeFilter = modeFilter) },
             actions = {
                 HeroActions(
                     state = state,
@@ -372,7 +371,6 @@ private fun AlbumList(
  */
 @Composable
 private fun ModeFilterGrid(
-    state: BackupUiState,
     selected: AlbumMode?,
     onSelect: (AlbumMode?) -> Unit
 ) {
@@ -410,18 +408,18 @@ private fun ModeFilterGrid(
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             ModeFilterChip(
-                AlbumMode.BACKUP, state.backupAlbumCount, selected, onSelect, Modifier.weight(1f)
+                AlbumMode.BACKUP, selected, onSelect, Modifier.weight(1f)
             )
             ModeFilterChip(
-                AlbumMode.SYNC, state.syncAlbumCount, selected, onSelect, Modifier.weight(1f)
+                AlbumMode.SYNC, selected, onSelect, Modifier.weight(1f)
             )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             ModeFilterChip(
-                AlbumMode.ARCHIVE, state.archiveAlbumCount, selected, onSelect, Modifier.weight(1f)
+                AlbumMode.ARCHIVE, selected, onSelect, Modifier.weight(1f)
             )
             ModeFilterChip(
-                AlbumMode.OFF, state.offAlbumCount, selected, onSelect, Modifier.weight(1f)
+                AlbumMode.OFF, selected, onSelect, Modifier.weight(1f)
             )
         }
 
@@ -452,7 +450,6 @@ private fun ModeFilterGrid(
 @Composable
 private fun ModeFilterChip(
     mode: AlbumMode,
-    count: Int,
     selected: AlbumMode?,
     onClick: (AlbumMode?) -> Unit,
     modifier: Modifier = Modifier
@@ -469,7 +466,7 @@ private fun ModeFilterChip(
         border = if (isOn) BorderStroke(2.dp, onContainer) else null
     ) {
         Text(
-            text = "$count ${mode.label()}",
+            text = mode.label(),
             style = MaterialTheme.typography.labelLarge,
             maxLines = 1,
             textAlign = TextAlign.Center,
@@ -750,38 +747,81 @@ private fun AlbumRow.statusBreakdown(): String {
  * for. The verified count comes last: it was the headline until 27 Aug 2026 and is still the app's
  * core promise, but it describes files rather than the albums it was sitting above.
  */
+/**
+ * What the filter is currently showing, in its own terms.
+ *
+ * Per-mode rather than one fixed set of lines, because the interesting number differs: Sync is
+ * judged on what optimising saved, Archive on what is not yet verified and so cannot be removed,
+ * and Backup on neither since it never touches the local copy.
+ *
+ * This replaced a line reading "Everything is backed up", which counted only switched-on albums and
+ * so said "everything" about a subset — with an Off album sitting in the list holding eleven files
+ * that were not backed up at all. A summary that names the slice it counts cannot make that claim.
+ */
 @Composable
-private fun HeroDetail(state: BackupUiState, context: android.content.Context) {
-    // One line about the button below it, then one about the promise underneath.
-    //
-    // There were three, and they did not add up: "70 files selected · 834 MB" counted files in
-    // switched-on albums, "138 files verified in OneDrive" counted ledger rows including files no
-    // longer on the phone, and neither number explained the other or the buttons beneath them. Ian
-    // kept looking at it. The fix is to say what pressing Sync now would achieve — which is the
-    // pending work, not the whole selection.
-    val summary = when {
-        !state.hasLoadedCounts -> null
-        state.enabledItemCount == 0 -> stringResource(R.string.backup_nothing_selected)
-        state.pendingCount > 0 -> stringResource(
-            R.string.backup_pending_summary,
-            pluralStringResource(R.plurals.file_count, state.pendingCount, state.pendingCount),
-            formatBytes(context, state.pendingBytes)
+private fun HeroDetail(
+    state: BackupUiState,
+    context: android.content.Context,
+    modeFilter: AlbumMode?
+) {
+    if (!state.hasLoadedCounts) return
+    val summary = state.summaryFor(modeFilter)
+
+    Text(
+        text = stringResource(
+            R.string.albums_media_summary,
+            pluralStringResource(R.plurals.image_count, summary.imageCount, summary.imageCount),
+            pluralStringResource(R.plurals.video_count, summary.videoCount, summary.videoCount),
+            formatBytes(context, summary.totalBytes)
+        ),
+        style = MaterialTheme.typography.bodySmall
+    )
+
+    Text(
+        text = if (modeFilter == null) {
+            stringResource(
+                R.string.albums_mode_totals,
+                state.backupAlbumCount,
+                state.syncAlbumCount,
+                state.archiveAlbumCount,
+                state.offAlbumCount
+            )
+        } else {
+            pluralStringResource(R.plurals.album_count, summary.albumCount, summary.albumCount)
+        },
+        style = MaterialTheme.typography.bodySmall
+    )
+
+    // Sync is the mode that shrinks things, so it is the one judged on what came back.
+    if (modeFilter == AlbumMode.SYNC) {
+        Text(
+            text = stringResource(
+                R.string.albums_optimised_summary,
+                summary.optimisedCount,
+                formatBytes(context, summary.savedBytes)
+            ),
+            style = MaterialTheme.typography.bodySmall
         )
-
-        else -> stringResource(R.string.backup_all_done)
     }
-    summary?.let { Text(text = it, style = MaterialTheme.typography.bodySmall) }
 
-    // An em dash until the count is read, never a zero — the same rule the figure follows. A
-    // confident "0 verified in OneDrive" on a cold start is a claim, and a frightening one.
+    // Archive is judged on what cannot leave yet. A file not verified is a file that stays, and
+    // that is the number worth knowing before opening the Archive tab.
+    if (modeFilter == AlbumMode.ARCHIVE) {
+        Text(
+            text = if (summary.awaitingVerification == 0) {
+                stringResource(R.string.albums_awaiting_none)
+            } else {
+                stringResource(R.string.albums_awaiting_summary, summary.awaitingVerification)
+            },
+            style = MaterialTheme.typography.bodySmall
+        )
+    }
+
+    // The promise, last and always. Follows the em-dash rule above via hasLoadedCounts.
     Text(
         text = stringResource(
             R.string.backup_verified_line,
-            if (state.hasLoadedCounts) {
-                pluralStringResource(R.plurals.file_count, state.uploadedCount, state.uploadedCount)
-            } else {
-                "—"
-            }
+            pluralStringResource(R.plurals.file_count, state.uploadedCount, state.uploadedCount)
         ),
         style = MaterialTheme.typography.bodySmall
     )

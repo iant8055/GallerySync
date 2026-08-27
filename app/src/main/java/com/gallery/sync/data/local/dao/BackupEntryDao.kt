@@ -47,7 +47,15 @@ data class AlbumBackupCount(
     val album: String,
     val total: Int,
     val backedUp: Int,
-    val proxied: Int
+    val proxied: Int,
+    /**
+     * What optimising actually reclaimed: the original's size less the proxy now on disk.
+     *
+     * Summed from the ledger rather than measured, because the original is no longer on the phone
+     * to measure. `sizeBytes` is what was uploaded and `localProxySizeBytes` is what replaced it,
+     * so the difference is the space that came back — and it is the only honest way to state it.
+     */
+    val savedBytes: Long
 )
 
 @Dao
@@ -527,7 +535,11 @@ interface BackupEntryDao {
         SELECT album AS album,
                COUNT(*) AS total,
                SUM(CASE WHEN state = :uploaded THEN 1 ELSE 0 END) AS backedUp,
-               SUM(CASE WHEN isProxied = 1 THEN 1 ELSE 0 END) AS proxied
+               SUM(CASE WHEN isProxied = 1 THEN 1 ELSE 0 END) AS proxied,
+               COALESCE(SUM(
+                   CASE WHEN isProxied = 1 AND localProxySizeBytes IS NOT NULL
+                        THEN sizeBytes - localProxySizeBytes ELSE 0 END
+               ), 0) AS savedBytes
         FROM backup_entries
         GROUP BY album
         """

@@ -35,6 +35,25 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 /**
+ * The hero's readout for one slice of the album list.
+ *
+ * Per-mode rather than global, because the numbers that matter differ by mode: Sync is judged on
+ * what optimising saved, Archive on what is still unverified — and asking "how much space did I
+ * get back" of a Backup album is a category error, since Backup never removes anything.
+ */
+data class AlbumsSummary(
+    val mode: AlbumMode?,
+    val albumCount: Int,
+    val imageCount: Int,
+    val videoCount: Int,
+    val totalBytes: Long,
+    val optimisedCount: Int,
+    val savedBytes: Long,
+    /** In Archive albums, files not yet confirmed in OneDrive — so, not yet removable. */
+    val awaitingVerification: Int
+)
+
+/**
  * One album: how much of it is safe, and whether it is still being watched.
  *
  * [mode] and [backedUpCount] are deliberately independent. An album that will never gain another
@@ -48,7 +67,11 @@ data class AlbumRow(
     /** What the user chose for this album. [AlbumMode.OFF] means finished or ignored. */
     val mode: AlbumMode,
     val backedUpCount: Int = 0,
-    val proxiedCount: Int = 0
+    val proxiedCount: Int = 0,
+    val imageCount: Int = 0,
+    val videoCount: Int = 0,
+    /** What optimising reclaimed in this album. Zero unless something here has been proxied. */
+    val savedBytes: Long = 0L
 ) {
     val isEnabled: Boolean get() = mode.uploads
 
@@ -203,8 +226,33 @@ data class BackupUiState(
     val archiveAlbumCount: Int get() = albums.count { it.mode == AlbumMode.ARCHIVE }
     val offAlbumCount: Int get() = albums.count { it.mode == AlbumMode.OFF }
 
-    /** Albums doing something. The count the hero leads with. */
+    /** Albums doing something. */
     val activeAlbumCount: Int get() = albums.count { it.mode != AlbumMode.OFF }
+
+    /**
+     * What the hero says about whatever the filter is showing.
+     *
+     * Replaces a single line that claimed "Everything is backed up" — true of the switched-on
+     * albums and false of the phone, because an album set to Off is excluded from the count and
+     * still full of files. Ian caught it on 27 Aug 2026 with `Test` sitting there at 11 files,
+     * none of them backed up, under a card saying everything was.
+     *
+     * A summary of the *filtered* set cannot make that mistake: it describes the albums it is
+     * counting, and the filter says which those are.
+     */
+    fun summaryFor(mode: AlbumMode?): AlbumsSummary {
+        val rows = if (mode == null) albums else albums.filter { it.mode == mode }
+        return AlbumsSummary(
+            mode = mode,
+            albumCount = rows.size,
+            imageCount = rows.sumOf { it.imageCount },
+            videoCount = rows.sumOf { it.videoCount },
+            totalBytes = rows.sumOf { it.totalBytes },
+            optimisedCount = rows.sumOf { it.proxiedCount },
+            savedBytes = rows.sumOf { it.savedBytes },
+            awaitingVerification = rows.sumOf { it.outstanding }
+        )
+    }
 
     /**
      * The button is worth pressing — either to start work, or to stop work already running.
@@ -384,7 +432,10 @@ class BackupViewModel @Inject constructor(
                     totalBytes = album.totalBytes,
                     mode = mode,
                     backedUpCount = counts?.backedUp ?: 0,
-                    proxiedCount = counts?.proxied ?: 0
+                    proxiedCount = counts?.proxied ?: 0,
+                    imageCount = album.imageCount,
+                    videoCount = album.videoCount,
+                    savedBytes = counts?.savedBytes ?: 0L
                 )
             }
 

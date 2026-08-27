@@ -87,11 +87,24 @@
 
     <!-- Backup -->
     <!--
-        Says what Sync now would do, because it sits directly above it. Was "%1$s selected · %2$s",
-        wording left over from when albums were checkboxes — nothing is "selected" now, albums have
-        modes. Ian, 27 Aug 2026.
+        The hero's summary, per filter. Replaced a line claiming "Everything is backed up" — true of
+        the switched-on albums and false of the phone, since an album set to Off is excluded from
+        the count and still full of files. Ian caught it, 27 Aug 2026.
     -->
     <string name="backup_pending_summary">%1$s · %2$s to back up</string>
+    <plurals name="image_count">
+        <item quantity="one">%d image</item>
+        <item quantity="other">%d images</item>
+    </plurals>
+    <plurals name="video_count">
+        <item quantity="one">%d video</item>
+        <item quantity="other">%d videos</item>
+    </plurals>
+    <string name="albums_media_summary">%1$s · %2$s · %3$s</string>
+    <string name="albums_mode_totals">%1$d Backup · %2$d Sync · %3$d Archive · %4$d Off</string>
+    <string name="albums_optimised_summary">%1$d optimised · %2$s saved</string>
+    <string name="albums_awaiting_summary">%1$d waiting to be verified</string>
+    <string name="albums_awaiting_none">All verified in OneDrive</string>
     <!--
         The Albums tab is where modes are chosen, so its hero counts albums, not files. It read
         "Files verified in OneDrive" until 27 Aug 2026 — a true number about a different subject,
