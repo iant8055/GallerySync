@@ -71,7 +71,9 @@ data class AlbumRow(
     val imageCount: Int = 0,
     val videoCount: Int = 0,
     /** What optimising reclaimed in this album. Zero unless something here has been proxied. */
-    val savedBytes: Long = 0L
+    val savedBytes: Long = 0L,
+    /** Uploaded rows including files no longer on the phone. Only for [isArchivedAndEmpty]. */
+    val everBackedUpCount: Int = 0
 ) {
     val isEnabled: Boolean get() = mode.uploads
 
@@ -93,7 +95,7 @@ data class AlbumRow(
      * that are no longer on the phone — "1 backed up · 12 optimized" over an album holding nothing.
      */
     val isArchivedAndEmpty: Boolean
-        get() = mode == AlbumMode.ARCHIVE && itemCount == 0 && backedUpCount > 0
+        get() = mode == AlbumMode.ARCHIVE && itemCount == 0 && everBackedUpCount > 0
 }
 
 enum class AlbumStatus {
@@ -444,7 +446,8 @@ class BackupViewModel @Inject constructor(
                     proxiedCount = counts?.proxied ?: 0,
                     imageCount = album.imageCount,
                     videoCount = album.videoCount,
-                    savedBytes = counts?.savedBytes ?: 0L
+                    savedBytes = counts?.savedBytes ?: 0L,
+                    everBackedUpCount = counts?.everBackedUp ?: 0
                 )
             }
 
@@ -477,7 +480,8 @@ class BackupViewModel @Inject constructor(
                         mode = mode,
                         backedUpCount = counts?.backedUp ?: 0,
                         proxiedCount = counts?.proxied ?: 0,
-                        savedBytes = counts?.savedBytes ?: 0L
+                        savedBytes = counts?.savedBytes ?: 0L,
+                        everBackedUpCount = counts?.everBackedUp ?: 0
                     )
                 }
 

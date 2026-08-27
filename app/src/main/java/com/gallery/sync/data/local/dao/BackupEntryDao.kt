@@ -55,7 +55,17 @@ data class AlbumBackupCount(
      * to measure. `sizeBytes` is what was uploaded and `localProxySizeBytes` is what replaced it,
      * so the difference is the space that came back — and it is the only honest way to state it.
      */
-    val savedBytes: Long
+    val savedBytes: Long,
+    /**
+     * Rows this album has ever had uploaded, including files no longer on the phone.
+     *
+     * [backedUp] deliberately counts only what is still here, because it is rendered beside a file
+     * count taken from the device and the two must describe one population. This one exists for the
+     * single question that genuinely spans both: has this album ever had anything backed up? An
+     * Archive album that ran to completion has [backedUp] of zero and a non-zero value here, and
+     * that is exactly how it is told apart from an Archive album that was always empty.
+     */
+    val everBackedUp: Int
 )
 
 @Dao
@@ -529,17 +539,30 @@ interface BackupEntryDao {
         syncMode: AlbumMode = AlbumMode.SYNC
     ): List<BackupEntryEntity>
 
-    /** Per-album totals, so each row can say whether it is completely safe. */
+    /**
+     * Per-album totals, so each row can say whether it is completely safe.
+     *
+     * **Counted over files still on the phone.** The card puts these beside a file count taken from
+     * a device scan, and until 27 Aug 2026 they were counted over every ledger row — so `Weird Al`
+     * read "17 files" above "28 backed up", which is not arithmetic anyone can follow. Both numbers
+     * were true and they counted different populations: 17 on the device, 28 in OneDrive, 11 of
+     * those no longer here. Ian asked what the discrepancy was, which is the only reasonable
+     * response to a card that says that.
+     */
     @Query(
         """
         SELECT album AS album,
                COUNT(*) AS total,
-               SUM(CASE WHEN state = :uploaded THEN 1 ELSE 0 END) AS backedUp,
-               SUM(CASE WHEN isProxied = 1 THEN 1 ELSE 0 END) AS proxied,
+               SUM(CASE WHEN state = :uploaded AND localMissingSinceEpochMillis IS NULL
+                        THEN 1 ELSE 0 END) AS backedUp,
+               SUM(CASE WHEN isProxied = 1 AND localMissingSinceEpochMillis IS NULL
+                        THEN 1 ELSE 0 END) AS proxied,
                COALESCE(SUM(
                    CASE WHEN isProxied = 1 AND localProxySizeBytes IS NOT NULL
+                             AND localMissingSinceEpochMillis IS NULL
                         THEN sizeBytes - localProxySizeBytes ELSE 0 END
-               ), 0) AS savedBytes
+               ), 0) AS savedBytes,
+               SUM(CASE WHEN state = :uploaded THEN 1 ELSE 0 END) AS everBackedUp
         FROM backup_entries
         GROUP BY album
         """
