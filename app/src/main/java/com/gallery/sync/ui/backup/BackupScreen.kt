@@ -541,26 +541,41 @@ private fun AlbumModeRow(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Text(
-                text = stringResource(
-                    R.string.backup_album_summary,
-                    pluralStringResource(
-                        R.plurals.file_count,
-                        album.itemCount,
-                        album.itemCount
+            if (album.isArchivedAndEmpty) {
+                // The usual counts would describe files that are not here any more. This row exists
+                // so a finished Archive album stays reachable and revokable, so it says both what
+                // happened and that the mode is still standing.
+                Text(
+                    text = stringResource(R.string.album_archived_empty),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = stringResource(R.string.album_archived_empty_detail),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            } else {
+                Text(
+                    text = stringResource(
+                        R.string.backup_album_summary,
+                        pluralStringResource(
+                            R.plurals.file_count,
+                            album.itemCount,
+                            album.itemCount
+                        ),
+                        formatBytes(context, album.totalBytes)
                     ),
-                    formatBytes(context, album.totalBytes)
-                ),
-                style = MaterialTheme.typography.bodySmall
-            )
-            Text(
-                text = album.statusBreakdown(),
-                style = MaterialTheme.typography.bodySmall,
-                color = if (album.outstanding == 0 && album.backedUpCount > 0)
-                    MaterialTheme.colorScheme.primary
-                else
-                    MaterialTheme.colorScheme.onSurfaceVariant
-            )
+                    style = MaterialTheme.typography.bodySmall
+                )
+                Text(
+                    text = album.statusBreakdown(),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (album.outstanding == 0 && album.backedUpCount > 0)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
 
         AlbumModeDropdown(current = album.mode, onModeSelected = onModeSelected)

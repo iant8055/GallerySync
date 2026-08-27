@@ -227,6 +227,12 @@
     <string name="mode_archive">Archive</string>
 
     <!-- Archive confirmation dialog -->
+    <!--
+        An Archive album with nothing left on the phone. Says the mode did its job and that the
+        mode is still in force, because this row exists so the user can still switch it off.
+    -->
+    <string name="album_archived_empty">Archived · nothing left on this phone</string>
+    <string name="album_archived_empty_detail">Still watched. Anything added here is archived too.</string>
     <string name="archive_confirm_title">Archive this album?</string>
     <!--
         Says only what actually happens. This promised "older than your archive age" until 25 Aug

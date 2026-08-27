@@ -85,6 +85,15 @@ data class AlbumRow(
         }
 
     val outstanding: Int get() = (itemCount - backedUpCount).coerceAtLeast(0)
+
+    /**
+     * Archive ran to completion: the mode is set, the ledger remembers files, none are still here.
+     *
+     * Rendered as its own line rather than through the usual counts, which would describe files
+     * that are no longer on the phone — "1 backed up · 12 optimized" over an album holding nothing.
+     */
+    val isArchivedAndEmpty: Boolean
+        get() = mode == AlbumMode.ARCHIVE && itemCount == 0 && backedUpCount > 0
 }
 
 enum class AlbumStatus {
@@ -439,7 +448,43 @@ class BackupViewModel @Inject constructor(
                 )
             }
 
-            _state.value = _state.value.copy(albums = albums, isScanning = false)
+            // Archive albums the scan can no longer see, listed anyway at zero files.
+            //
+            // Archive's success state is an emptied album, and an emptied album is invisible to the
+            // scan: MediaStore excludes trashed files, so a folder whose contents have all been
+            // archived returns no items and produces no row. The album leaves this list while its
+            // mode is still in force — and CLAUDE.md makes that mode a **standing instruction**
+            // covering anything added to the folder later. Undiscoverable and unrevokable is the
+            // wrong end state for the one mode that removes files.
+            //
+            // Recorded as a design hole on 26 Aug 2026, blamed on Samsung deleting the folder, and
+            // corrected on 27 Aug when the folder turned out to still be there: the cause is this
+            // list being built from MediaStore contents rather than from what the user chose.
+            //
+            // Archive only. Ian, 27 Aug 2026. An emptied Backup or Sync album has nothing in force
+            // and hiding it is right; an emptied Archive album is empty *because the mode worked*,
+            // and it has to stay reachable so it can be switched off. Nothing new is invented to do
+            // this — the preference row and the verified ledger rows are both kept on purpose.
+            val listed = albums.mapTo(HashSet()) { it.name }
+            val archivedButEmpty = storedModes
+                .filter { (name, mode) -> mode == AlbumMode.ARCHIVE && name !in listed }
+                .map { (name, mode) ->
+                    val counts = countsByAlbum[name]
+                    AlbumRow(
+                        name = name,
+                        itemCount = 0,
+                        totalBytes = 0L,
+                        mode = mode,
+                        backedUpCount = counts?.backedUp ?: 0,
+                        proxiedCount = counts?.proxied ?: 0,
+                        savedBytes = counts?.savedBytes ?: 0L
+                    )
+                }
+
+            _state.value = _state.value.copy(
+                albums = (albums + archivedButEmpty).sortedBy { it.name.lowercase() },
+                isScanning = false
+            )
             refreshCounts()
 
             if (hasNewUploadAlbums && prefs.isAutomaticEnabled) {
