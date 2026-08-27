@@ -424,6 +424,17 @@ private fun ModeFilterGrid(
                 AlbumMode.OFF, state.offAlbumCount, selected, onSelect, Modifier.weight(1f)
             )
         }
+
+        // These read as status until you know they are controls — a count beside a word looks like
+        // a summary, which is exactly what they were an hour ago. One quiet line rather than an
+        // affordance on each button, which would make five loud things out of five calm ones.
+        Text(
+            text = stringResource(R.string.albums_filter_hint),
+            style = MaterialTheme.typography.bodySmall,
+            textAlign = TextAlign.Center,
+            color = LocalContentColor.current.copy(alpha = 0.7f),
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 
