@@ -1,19 +1,25 @@
 package com.gallery.sync.ui.common
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.gallery.sync.ui.theme.LocalGallerySyncColors
 
@@ -83,11 +89,53 @@ fun HeroCard(
     }
 }
 
-/** The label and the number. The one thing on a tab that is not a detail of something else. */
+/**
+ * An outlined button that stays legible on the hero's filled container.
+ *
+ * Material derives an `OutlinedButton`'s content from the **scheme's** primary, not from the
+ * surface it is sitting on — which on the dark green hero comes out dim and grey, exactly the
+ * washed-out look Ian reported on "Check these files" on 27 Aug 2026. Taking `LocalContentColor`
+ * instead means the label is the same brightness as the text beside it, in either theme, because
+ * the hero has already set that colour for its own contents.
+ *
+ * Lived privately in `BackupScreen` first. Shared here when Archive and Restore gained heroes and
+ * immediately reproduced the bug it had already solved — which is the argument for the shared card
+ * making itself again.
+ */
+@Composable
+fun HeroOutlinedButton(onClick: () -> Unit, label: String, modifier: Modifier = Modifier) {
+    OutlinedButton(
+        onClick = onClick,
+        modifier = modifier,
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+        colors = ButtonDefaults.outlinedButtonColors(contentColor = LocalContentColor.current),
+        border = BorderStroke(1.dp, LocalContentColor.current.copy(alpha = 0.35f))
+    ) {
+        Text(label, maxLines = 1)
+    }
+}
+
+/**
+ * The label and the number. The one thing on a tab that is not a detail of something else.
+ *
+ * The figure is centred under its label rather than aligned to the start of the column. Ian,
+ * 27 Aug 2026. Left-aligned, a short number sat off under the first two or three characters of a
+ * long label and read as unrelated to it; centred, the pair reads as one object — which is what it
+ * is, a caption and the thing it names.
+ */
 @Composable
 private fun HeroFigure(label: String, figure: String) {
-    Text(text = label, style = MaterialTheme.typography.labelMedium)
-    Text(text = figure, style = MaterialTheme.typography.displaySmall)
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            textAlign = TextAlign.Center
+        )
+        Text(text = figure, style = MaterialTheme.typography.displaySmall)
+    }
 }
 
 /** Where a phone screen stops being one narrow column. Matches the album and folder grids. */

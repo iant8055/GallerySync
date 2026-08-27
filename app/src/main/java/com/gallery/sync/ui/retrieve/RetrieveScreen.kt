@@ -45,6 +45,7 @@ import com.gallery.sync.domain.backup.RestorableFolder
 import com.gallery.sync.ui.common.OneDriveLauncher
 import com.gallery.sync.ui.common.SignalIcons
 import com.gallery.sync.ui.common.HeroCard
+import com.gallery.sync.ui.common.HeroOutlinedButton
 import com.gallery.sync.ui.common.formatBytes
 
 /** Where a phone layout stops being the right answer. The standard expanded-width breakpoint. */
@@ -132,9 +133,10 @@ fun RetrieveScreen(
                     // drive that changes underneath it, and the only other way to re-take it was to
                     // kill the app.
                     if (state.selectedFolder == null && !state.loading) {
-                        OutlinedButton(onClick = viewModel::loadFolders) {
-                            Text(stringResource(R.string.retrieve_refresh), maxLines = 1)
-                        }
+                        HeroOutlinedButton(
+                            onClick = viewModel::loadFolders,
+                            label = stringResource(R.string.retrieve_refresh)
+                        )
                     }
                 }
             )

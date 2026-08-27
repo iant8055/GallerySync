@@ -44,6 +44,7 @@ import com.gallery.sync.domain.backup.ArchiveEntry
 import com.gallery.sync.domain.backup.ArchiveFailure
 import com.gallery.sync.domain.backup.ArchiveMark
 import com.gallery.sync.ui.common.HeroCard
+import com.gallery.sync.ui.common.HeroOutlinedButton
 import com.gallery.sync.ui.common.SignalIcons
 import com.gallery.sync.ui.common.formatBytes
 import com.gallery.sync.ui.theme.LocalGallerySyncColors
@@ -201,9 +202,10 @@ private fun ArchiveHeroActions(state: ArchiveUiState, onValidate: () -> Unit) {
     val context = LocalContext.current
 
     when (state.phase) {
-        ArchivePhase.IDLE -> OutlinedButton(onClick = onValidate) {
-            Text(stringResource(R.string.archive_validate), maxLines = 1)
-        }
+        ArchivePhase.IDLE -> HeroOutlinedButton(
+            onClick = onValidate,
+            label = stringResource(R.string.archive_validate)
+        )
 
         ArchivePhase.VALIDATING -> Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -364,7 +366,12 @@ private fun ArchivePrompt(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.error
                 )
-                TextButton(onClick = onNo) { Text(stringResource(R.string.archive_prompt_no)) }
+                // "Continue", not "No". Ian, 27 Aug 2026, on seeing this screen for real: nothing
+                // can be archived here and the app is not asking for anything, so a No button was
+                // an answer to a question nobody put. This one only dismisses.
+                TextButton(onClick = onNo) {
+                    Text(stringResource(R.string.archive_prompt_continue))
+                }
                 return@Column
             }
 

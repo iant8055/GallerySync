@@ -70,6 +70,7 @@ import com.gallery.sync.data.local.media.MediaAccess
 import com.gallery.sync.domain.backup.StopReason
 import com.gallery.sync.ui.common.LabelWithAction
 import com.gallery.sync.ui.common.SignalIcons
+import com.gallery.sync.ui.common.HeroOutlinedButton
 import com.gallery.sync.ui.common.formatBytes
 import com.gallery.sync.ui.theme.LocalGallerySyncColors
 import kotlinx.coroutines.launch
@@ -706,26 +707,6 @@ private fun HeroActions(state: BackupUiState, onSyncNow: () -> Unit, onRescan: (
 /** Where a phone layout stops being the right answer. The standard expanded-width breakpoint. */
 private val WideBreakpoint = 600.dp
 
-/**
- * An outlined button on the hero's filled surface.
- *
- * Material's own outlined button takes its border and label from the colour scheme, which is
- * correct everywhere except on top of a filled container — there it draws a scheme colour on a
- * surface the scheme knows nothing about. Both are taken from [LocalContentColor] instead, so they
- * follow whichever way the hero is painted in this theme.
- */
-@Composable
-private fun HeroOutlinedButton(onClick: () -> Unit, label: String, modifier: Modifier = Modifier) {
-    OutlinedButton(
-        onClick = onClick,
-        modifier = modifier,
-        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-        colors = ButtonDefaults.outlinedButtonColors(contentColor = LocalContentColor.current),
-        border = BorderStroke(1.dp, LocalContentColor.current.copy(alpha = 0.35f))
-    ) {
-        Text(label, maxLines = 1)
-    }
-}
 
 /** The tint each mode is recognised by. Paired, so no caller has to choose a text colour. */
 @Composable

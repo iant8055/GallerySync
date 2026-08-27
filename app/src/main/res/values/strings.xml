@@ -215,7 +215,7 @@
 
     <!-- The Archive tab: validate, then confirm, then remove. -->
     <string name="archive_title">Archive</string>
-    <string name="archive_hero_label">Files waiting to leave this phone</string>
+    <string name="archive_hero_label">Files to Archive</string>
     <string name="archive_empty">No album is set to Archive. Nothing here will remove anything from your phone.</string>
     <string name="archive_empty_hint">Set an album to Archive on the Albums tab, and its files will be listed here for checking before anything leaves your phone.</string>
     <string name="archive_intro">Every file below is checked against OneDrive first. Anything that is not there yet is backed up before it counts.</string>
@@ -237,6 +237,11 @@
     <string name="archive_prompt_question">Do you want to continue?</string>
     <string name="archive_prompt_yes">Yes</string>
     <string name="archive_prompt_no">No</string>
+    <!--
+        The all-red case only. There is no question on that screen — nothing can be archived and the
+        app is not asking for anything — so "No" was an answer to nothing. This button dismisses.
+    -->
+    <string name="archive_prompt_continue">Continue</string>
     <string name="archive_prompt_delay">Delay</string>
     <string name="archive_delay_1h">1 hour</string>
     <string name="archive_delay_12h">12 hours</string>
