@@ -92,7 +92,7 @@
         "Files verified in OneDrive" until 27 Aug 2026 — a true number about a different subject,
         heading a list it did not describe. Ian: "This is the tab where we select Album modes."
     -->
-    <string name="backup_hero_label">Albums</string>
+    <string name="backup_hero_label">All Albums</string>
     <string name="backup_mode_breakdown">%1$d Backup · %2$d Sync · %3$d Archive</string>
     <string name="backup_modes_off">%1$d off</string>
     <!-- The old headline, kept as context rather than dropped. It is still the app's core promise. -->

@@ -208,7 +208,11 @@ private fun AlbumList(
                 ModeFilterGrid(
                     state = state,
                     selected = modeFilter,
-                    onSelect = { modeFilter = if (modeFilter == it) null else it }
+                    onSelect = { tapped ->
+                        // Tapping the active mode again clears it, so every button is its own way
+                        // out; All Albums passes null and clears it outright.
+                        modeFilter = if (tapped != null && modeFilter == tapped) null else tapped
+                    }
                 )
             },
             detail = { HeroDetail(state = state, context = context) },
@@ -370,18 +374,40 @@ private fun AlbumList(
 private fun ModeFilterGrid(
     state: BackupUiState,
     selected: AlbumMode?,
-    onSelect: (AlbumMode) -> Unit
+    onSelect: (AlbumMode?) -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = stringResource(R.string.backup_hero_label),
-            style = MaterialTheme.typography.headlineSmall,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
-        )
+        // The heading is also the way back. Ian, 27 Aug 2026. Four buttons that narrow the list
+        // need a fifth that widens it again, and the word at the top of the card was already
+        // sitting there meaning "all of them" — so it says so and does so rather than being a
+        // label above controls that quietly contradict it.
+        //
+        // Ringed when nothing is filtered, the same mark the mode buttons use for the same fact:
+        // this is the set you are looking at.
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { onSelect(null) },
+            shape = RoundedCornerShape(percent = 50),
+            color = Color.Transparent,
+            contentColor = LocalContentColor.current,
+            border = BorderStroke(
+                width = if (selected == null) 2.dp else 1.dp,
+                color = LocalContentColor.current.copy(alpha = if (selected == null) 0.9f else 0.35f)
+            )
+        ) {
+            Text(
+                text = stringResource(R.string.backup_hero_label),
+                style = MaterialTheme.typography.headlineSmall,
+                textAlign = TextAlign.Center,
+                maxLines = 1,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+            )
+        }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             ModeFilterChip(
                 AlbumMode.BACKUP, state.backupAlbumCount, selected, onSelect, Modifier.weight(1f)
@@ -417,7 +443,7 @@ private fun ModeFilterChip(
     mode: AlbumMode,
     count: Int,
     selected: AlbumMode?,
-    onClick: (AlbumMode) -> Unit,
+    onClick: (AlbumMode?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val isOn = selected == mode
