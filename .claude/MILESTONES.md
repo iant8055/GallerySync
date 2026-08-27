@@ -1536,19 +1536,38 @@ rather than a capture.
 
 **What it exposed, in the code rather than on the device.** Checking how the screen came to say
 "Uploading 1 of 1" led to `BackupViewModel.observeBackgroundWork`, which handles exactly two work
-states: `RUNNING` sets `BackupStatus.Uploading`, and `SUCCEEDED` clears it. There is no `CANCELLED`
-branch — and because of the residual recorded above, a content-triggered run *always* ends
-`CANCELLED` by replacing itself when it re-arms. So the `SUCCEEDED` branch can never fire for an
-automatic run: the status is set and never cleared, and the `refresh()` beside it never runs.
+states: `RUNNING` sets `BackupStatus.Uploading`, and `SUCCEEDED` clears it. Nothing else clears it,
+so an automatic run leaves "Uploading" on screen after it has finished, with the `refresh()` beside
+it never running and the counts underneath stale. The manual path solved this earlier the same day
+and wrote down why: *"The outcome, not the last thing we happened to see."*
 
-Anyone who opens the app while an automatic run is live sees "Uploading" and goes on seeing it after
-the run has finished, with the counts underneath stale. The manual path already solved this and wrote
-down why, on this same day: *"The outcome, not the last thing we happened to see."*
+**The first diagnosis was wrong, and the correction matters more than the defect.** It was recorded
+here as "the run ends `CANCELLED` and there is no `CANCELLED` branch", with the fix being to add one.
+Ian reported the status was gone by the time he looked again, which did not fit, so WorkManager's own
+database was read:
 
-**Not established:** whether that is what Ian saw tonight. He may simply have caught the run at 100%
-a few seconds before it finished, which is the innocent reading and fits the timing. The defect is
-real either way, and it is now a wrong claim on screen rather than a missing log line — which is what
-moves it ahead of the reporting gap it was filed as.
+| name | state | enqueued |
+|---|---|---|
+| `gallery-sync-backup-on-change` | **ENQUEUED** | 21:05:06 |
+| `gallery-sync-backup-continuation` | SUCCEEDED | 17:03:02 |
+| `gallery-sync-backup-manual` | SUCCEEDED | 16:51:58 |
+
+**The 20:55 run has no row at all** — not `CANCELLED`, absent. That is not age-pruning, because the
+`SUCCEEDED` rows from hours earlier are still there. `ExistingWorkPolicy.REPLACE` *deletes* the
+WorkSpec it replaces, so the run erased its own record when it re-armed.
+
+So `getWorkInfosForUniqueWorkFlow` never emits any terminal state for content-triggered work: the
+list goes from `[RUNNING]` straight to `[ENQUEUED]` for a new spec. **No terminal-state branch can
+ever fire, and adding a `CANCELLED` branch would fix nothing.** Only the structural split works —
+give the trigger its own name so the run is not the thing being replaced, and it can end `SUCCEEDED`
+where the observer can see it. The cheap patch was available, plausible, and would have shipped a fix
+that changed nothing.
+
+**Blast radius, narrower than first written.** The stuck status does not survive the app dying. Ian
+saw it because he opened the app mid-run and the ViewModel was alive to catch `RUNNING`; the process
+was frozen at 20:59:00, and on relaunch a fresh ViewModel starts at `status = null` with no `RUNNING`
+work to find, so the screen reads clean. The defect is confined to one foreground session and clears
+itself when the user leaves. Still a false claim on screen; not the persistent one first recorded.
 
 **Also noted, and not a defect.** The photo is 6112 x 6112 and unproxied — `isProxied` and
 `isProxySkipped` both false — so it is a live candidate for optimising and has not been offered yet.
