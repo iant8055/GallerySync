@@ -81,8 +81,14 @@ fun SignalNavBar(
                     onClick = { onSelect(index) }
                 ) {
                     Row(
-                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        // The selected pill is the widest thing in the bar and the only one that
+                        // can overflow at 320dp — it alone carries a label. So it is trimmed while
+                        // the icon-only pills keep their padding and stay comfortably round.
+                        modifier = Modifier.padding(
+                            horizontal = if (isSelected) 10.dp else 14.dp,
+                            vertical = 10.dp
+                        ),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
@@ -90,7 +96,11 @@ fun SignalNavBar(
                             // The label already names the selected destination, and naming it twice
                             // makes a screen reader say it twice.
                             contentDescription = if (isSelected) null else destination.label,
-                            modifier = Modifier.size(20.dp)
+                            // 24dp, Material's own navigation icon size. Was 20dp, which read as
+                            // undersized next to labelLarge beside it. The three unlabelled icons
+                            // are the only thing naming their destinations, so they carry more
+                            // meaning here than in a bar where every item has a label.
+                            modifier = Modifier.size(24.dp)
                         )
                         if (isSelected) {
                             Text(

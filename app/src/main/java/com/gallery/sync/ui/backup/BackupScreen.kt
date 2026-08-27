@@ -187,10 +187,6 @@ private fun AlbumList(
     onAlbumTapped: (AlbumRow) -> Unit
 ) {
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val moveLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartIntentSenderForResult()
-    ) { viewModel.onMoveToBackupFinished() }
 
     Column(
         modifier = Modifier
@@ -227,25 +223,15 @@ private fun AlbumList(
             }
         }
 
-        // The Archive summons. Not a second consent — setting the mode was the consent, and
-        // CLAUDE.md forbids mirroring Android's trash dialog with an app-level one. It exists
-        // because createTrashRequest can only launch from an Activity, so the user must be brought
-        // back; and because it states the one thing Android's dialog cannot, which is that the cloud
-        // copy is verified.
-        if (state.archiveAlbumsReady.isNotEmpty() && state.canRemoveLocalCopies) {
-            ArchiveReadyPrompt(
-                albums = state.archiveAlbumsReady,
-                count = state.redundantCount,
-                bytes = state.redundantBytes,
-                onRemove = {
-                    scope.launch {
-                        viewModel.buildMoveToBackupRequest()?.let {
-                            moveLauncher.launch(IntentSenderRequest.Builder(it).build())
-                        }
-                    }
-                }
-            )
-        }
+        // The Archive summons used to sit here. Removed 26 Aug 2026 (Ian): removal does not belong
+        // on the Albums tab at all, and TASK-016 gives it a screen of its own where the user sees
+        // the files before authorising anything.
+        //
+        // What must survive the move, because it is not decoration: the prompt is a *summons and
+        // not a consent* — setting the album mode was the consent, and CLAUDE.md forbids mirroring
+        // Android's trash dialog with an app-level one. It exists because createTrashRequest only
+        // launches from an Activity, and because it states the one thing Android's dialog cannot,
+        // which is that the cloud copy has been re-checked and matches.
 
         // What the live re-check refused to include, and why. Reported rather than quietly dropped:
         // "OneDrive no longer has this" means the file is not backed up at all, which the user needs
@@ -800,52 +786,9 @@ private fun mediaPermissions(): Array<String> =
         arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
     }
 
-/**
- * Says that files are verified in OneDrive and offers to take them off the phone.
- *
- * One prompt, deliberately. Android will ask its own question immediately after, and asking the same
- * thing twice teaches people to tap through both — which is how a confirmation stops being one.
- * What this adds is the fact Android's dialog has no way to state: that the cloud copy has been
- * checked and matches.
- */
-@Composable
-private fun ArchiveReadyPrompt(
-    albums: List<String>,
-    count: Int,
-    bytes: Long,
-    onRemove: () -> Unit
-) {
-    val context = LocalContext.current
-
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(
-            text = stringResource(R.string.archive_ready_title),
-            style = MaterialTheme.typography.titleSmall
-        )
-        Text(
-            text = stringResource(
-                R.string.archive_ready_body,
-                pluralStringResource(R.plurals.file_count, count, count),
-                albums.joinToString(", "),
-                formatBytes(context, bytes)
-            ),
-            style = MaterialTheme.typography.bodySmall
-        )
-
-        // The one thing Android's own dialog cannot say, and the app must. CLAUDE.md: never tell the
-        // user a local removal is recoverable — a trash request reached the trash on this device
-        // once and removed files outright another time, and the platform gives no way to know in
-        // advance. The guarantee that holds is the verified cloud copy, which the line above states.
-        //
-        // Moved here 26 Aug 2026 from the Settings storage section. That section was a duplicate of
-        // this prompt in every other respect, and deleting it would have taken this warning out of
-        // the app entirely.
-        Text(
-            text = stringResource(R.string.backup_move_trash_note),
-            style = MaterialTheme.typography.bodySmall
-        )
-        OutlinedButton(onClick = onRemove) {
-            Text(stringResource(R.string.archive_ready_action), maxLines = 1)
-        }
-    }
-}
+// ArchiveReadyPrompt lived here until 26 Aug 2026, when removal left the Albums tab for TASK-016's
+// Archive screen. Its four strings are deliberately left in strings.xml — archive_ready_title,
+// archive_ready_body, archive_ready_action and backup_move_trash_note — because the new screen needs
+// all four and they carry wording that was argued over rather than drafted. The trash note in
+// particular is the app's only statement of CLAUDE.md's rule that a local removal must never be
+// promised as recoverable; it has now been moved twice and lost neither time.
