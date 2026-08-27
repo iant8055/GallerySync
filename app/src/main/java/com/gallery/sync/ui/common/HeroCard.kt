@@ -107,10 +107,21 @@ fun HeroCard(
                             .then(if (actionsAtBottom) Modifier.fillMaxHeight() else Modifier),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        detail()
-                        // Fills whatever is left, so the controls land on the card's bottom edge
-                        // rather than immediately under the text.
-                        if (actionsAtBottom) Spacer(modifier = Modifier.weight(1f))
+                        if (actionsAtBottom) {
+                            // Equal spacers above and below, so the text sits in the middle of the
+                            // space it has rather than clinging to the top of the card while the
+                            // controls hold the bottom. Ian, 27 Aug 2026. Indented too: the column
+                            // starts hard against the gap, and a little inset settles it into its
+                            // half instead of leaning on the mode buttons.
+                            Spacer(modifier = Modifier.weight(1f))
+                            Column(
+                                modifier = Modifier.padding(start = 16.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) { detail() }
+                            Spacer(modifier = Modifier.weight(1f))
+                        } else {
+                            detail()
+                        }
                         actions()
                     }
                 }
