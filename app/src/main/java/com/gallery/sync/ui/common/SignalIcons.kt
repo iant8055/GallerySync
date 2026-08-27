@@ -67,6 +67,18 @@ object SignalIcons {
         listOf("M18 6 6 18", "m6 6 12 12")
     }
 
+    /**
+     * This pill shows a value *and* changes it.
+     *
+     * The album row's mode pill reads "Sync", which is the state, not what tapping does — so
+     * nothing about it says it can be tapped at all. Ian, 27 Aug 2026. A caret is the standard way
+     * out of that: the label stays the current value, because that is the thing worth reading at a
+     * glance down a list, and the caret carries "and you can change it".
+     */
+    val ChevronDown: ImageVector = stroked("chevronDown") {
+        listOf("m6 9 6 6 6-6")
+    }
+
     /** A folder row leads somewhere. */
     val ChevronRight: ImageVector = stroked("chevronRight") {
         listOf("m9 18 6-6-6-6")

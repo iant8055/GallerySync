@@ -572,15 +572,29 @@ private fun AlbumModeDropdown(
             // Archive. Ian, 27 Aug 2026. The note above still holds — this is not full width, which
             // is what made Off shout on the cover screen; it is the same equalising the dropdown
             // already does, for the same reason: four ragged widths read as four unrelated things.
-            Text(
-                text = current.label(),
-                style = MaterialTheme.typography.labelLarge,
-                maxLines = 1,
-                textAlign = TextAlign.Center,
+            Row(
                 modifier = Modifier
                     .widthIn(min = ModePillMinWidth)
-                    .padding(horizontal = 16.dp, vertical = 10.dp)
-            )
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = current.label(),
+                    style = MaterialTheme.typography.labelLarge,
+                    maxLines = 1,
+                    textAlign = TextAlign.Center
+                )
+                Icon(
+                    imageVector = SignalIcons.ChevronDown,
+                    // The pill already reads its mode aloud; naming the caret separately would make
+                    // a screen reader say the control twice.
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(start = 4.dp)
+                        .size(18.dp)
+                )
+            }
         }
         // The menu is the same vocabulary as the pill that opened it: every mode shown in its own
         // tint, so choosing is recognising a colour rather than reading four words. A stock menu of
