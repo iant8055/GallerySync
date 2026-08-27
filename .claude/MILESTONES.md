@@ -1601,9 +1601,17 @@ once, four pieces of it fixed the same day:
 Every previous test drove one of these with the others held still. This was one ordinary action with
 nothing pressed, which is the only way to find out whether they compose.
 
-**Unchecked:** the cloud badge on this proxy. It is the first written onto a square 6112 x 6112
-source, and six photos in `AaSync` carry the pre-fix sideways badge, so orientation is worth an eye
-rather than an assumption.
+**The badge, checked by looking at the file.** Pulled off the device and inspected: white cloud,
+upright, on the dark rounded scrim, bottom-right, legible against a pale background. Geometry matches
+`ProxyBadge.boundsFor` — a 2048 x 2048 proxy, badge 266 px at `SIZE_FRACTION` 0.13, inset 51 px at
+`MARGIN_FRACTION` 0.025, spanning 1731–1997 on both axes.
+
+**It does not test what it was flagged for.** EXIF Orientation is **1**, so the `when (rotation)`
+block never ran: the badge is upright because no correction was needed, not because the correction
+works. The `AaSync` sideways badges were a rotation failure specifically, and the case that retests it
+is a **portrait photo**, which Samsung writes at orientation 6. Still worth having on real camera
+output, because a square image is the degenerate case of the centred-square anchoring — the largest
+centred square is the whole frame, so the badge lands in the true corner.
 
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
