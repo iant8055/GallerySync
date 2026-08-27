@@ -85,6 +85,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun BackupScreen(
     modifier: Modifier = Modifier,
+    /** Called once the user accepts the Archive confirmation, to show them where it now lives. */
+    onAlbumArchived: () -> Unit = {},
     viewModel: BackupViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -143,6 +145,7 @@ fun BackupScreen(
                 AlbumList(
                     state = state,
                     viewModel = viewModel,
+                    onAlbumArchived = onAlbumArchived,
                     onAlbumTapped = { album ->
                         scope.launch {
                             detailEntries = viewModel.albumEntries(album.name)
@@ -155,6 +158,7 @@ fun BackupScreen(
             MediaAccess.FULL -> AlbumList(
                 state = state,
                 viewModel = viewModel,
+                onAlbumArchived = onAlbumArchived,
                 onAlbumTapped = { album ->
                     scope.launch {
                         detailEntries = viewModel.albumEntries(album.name)
@@ -186,6 +190,7 @@ private fun PermissionPrompt(headline: String, detail: String, onGrant: () -> Un
 private fun AlbumList(
     state: BackupUiState,
     viewModel: BackupViewModel,
+    onAlbumArchived: () -> Unit,
     onAlbumTapped: (AlbumRow) -> Unit
 ) {
     val context = LocalContext.current
@@ -284,6 +289,9 @@ private fun AlbumList(
             onConfirm = {
                 viewModel.setAlbumMode(albumName, AlbumMode.ARCHIVE)
                 archiveConfirmAlbum = null
+                // Only on accept. Cancelling leaves the user exactly where they were, which is the
+                // whole point of a confirmation having two answers.
+                onAlbumArchived()
             },
             onDismiss = { archiveConfirmAlbum = null }
         )

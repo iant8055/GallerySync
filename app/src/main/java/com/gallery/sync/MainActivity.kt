@@ -114,10 +114,20 @@ private fun SignedInApp(
         NavDestination(SignalIcons.Settings, stringResource(R.string.tab_settings))
     )
 
+    // Setting an album to Archive takes the user to the Archive tab. TASK-016 opens its acceptance
+    // list with this and it was missed when the tab was built; Ian asked for it on 27 Aug 2026.
+    //
+    // It follows from what the mode means. Archive is the one mode whose consequence is not
+    // immediate — the files stay until they are checked — so leaving the user on the album list
+    // after they accept the confirmation tells them nothing about what happens next. The tab is the
+    // answer to "and then what?", and arriving there is how the app says the choice was taken
+    // seriously.
+    val archiveTab = 2
+
     Column(modifier = modifier.fillMaxSize()) {
         Box(modifier = Modifier.weight(1f)) {
             when (selectedTab) {
-                0 -> BackupScreen()
+                0 -> BackupScreen(onAlbumArchived = { selectedTab = archiveTab })
                 1 -> RetrieveScreen()
                 2 -> ArchiveScreen()
                 else -> SettingsScreen(accountName = accountName, onSignOut = onSignOut)
