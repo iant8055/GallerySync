@@ -1504,6 +1504,56 @@ went 0 → 6, and nothing was grace-eligible at any point in between.
 plausible. Every automated signal was healthy — no errors, no failures, correct-looking logs. The two
 mismatched numbers were only visible to someone who knew what the album contained.
 
+### 26 Aug 2026 — the founding use case, in 37 seconds, with nothing pressed
+
+**Fold 4.** Ian took a photo, moved it from Camera into `Anne`, and opened the app. It was already
+uploaded. Not a staged test — an ordinary action on a phone, which is the first time this feature has
+been exercised that way.
+
+Read out of the ledger afterwards rather than from the screen:
+
+| | |
+|---|---|
+| `20260826_205441.jpg` | shutter 20:54:41, 4,643,976 bytes, 6112 x 6112 |
+| Landed in `Anne` (mode `SYNC`) | 20:55:14 |
+| `UPLOADED`, `remoteSizeBytes` = `sizeBytes` | **20:55:51** |
+| `remoteItemId` | a real 50-character Graph id, not `""` |
+| `attemptCount` | 0 — first attempt, no retries |
+| `localMissingSinceEpochMillis` | null — **still on the phone** |
+
+**37 seconds from the move into a Sync album to verified in OneDrive**, with the app closed and
+nothing tapped. The whole ledger was clean afterwards: 136 rows, all `UPLOADED`, nothing pending.
+
+This is the founding use case answered on its own terms. The original complaint was a clip that was
+safe and *gone* ten minutes after recording; this is a photo that is safe in well under a minute and
+still in the gallery, which Ian confirmed by looking at it in Samsung Gallery while this was being
+checked. Both halves at once is the thing the product is for, and until tonight only the halves had
+been tested separately.
+
+It is also the strongest available confirmation of the content-trigger fix from earlier today. The
+staged run moved four photos deliberately; this one nobody set up, and the trigger fired on a *move*
+rather than a capture.
+
+**What it exposed, in the code rather than on the device.** Checking how the screen came to say
+"Uploading 1 of 1" led to `BackupViewModel.observeBackgroundWork`, which handles exactly two work
+states: `RUNNING` sets `BackupStatus.Uploading`, and `SUCCEEDED` clears it. There is no `CANCELLED`
+branch — and because of the residual recorded above, a content-triggered run *always* ends
+`CANCELLED` by replacing itself when it re-arms. So the `SUCCEEDED` branch can never fire for an
+automatic run: the status is set and never cleared, and the `refresh()` beside it never runs.
+
+Anyone who opens the app while an automatic run is live sees "Uploading" and goes on seeing it after
+the run has finished, with the counts underneath stale. The manual path already solved this and wrote
+down why, on this same day: *"The outcome, not the last thing we happened to see."*
+
+**Not established:** whether that is what Ian saw tonight. He may simply have caught the run at 100%
+a few seconds before it finished, which is the innocent reading and fits the timing. The defect is
+real either way, and it is now a wrong claim on screen rather than a missing log line — which is what
+moves it ahead of the reporting gap it was filed as.
+
+**Also noted, and not a defect.** The photo is 6112 x 6112 and unproxied — `isProxied` and
+`isProxySkipped` both false — so it is a live candidate for optimising and has not been offered yet.
+Expected: nothing has run since it arrived.
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have
