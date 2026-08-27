@@ -1660,6 +1660,45 @@ Worth noting what the archive did here regardless — it removed the *proxy*, an
 already safe. That is the design working as intended on a file whose local copy was the wrong size for
 the wrong reason.
 
+### 27 Aug 2026 — a new album, end to end, and a defect that was never there
+
+**Fold 4.** Ian made a `Test` album — 10 photos and one 115 MB video, 171 MB — and set it to Sync.
+Nothing else was pressed.
+
+| | |
+|---|---|
+| 11 files | `UPLOADED`, `remoteSizeBytes` = `sizeBytes` on every row |
+| The video | `isProxied` 0, 115,244,716 bytes, untouched |
+| The 10 photos | 56,277,329 → 7,156,743 bytes, **7.9x**, about 46.8 MB freed |
+
+The video rule had never been tested on real content before. It held: videos are never optimised,
+because a degraded clip fails silently inside an editor and is only found in the export.
+
+**The defect that was never there, and how it was manufactured.** Mid-run the ledger appeared to show
+3 of the 10 photos proxied on disk but unmarked in their rows. That is a real failure mode on paper —
+`ProxyApplier` writes the file and *then* records it, and the two are not atomic — so it was
+diagnosed confidently, written up with its consequences for Archive, and a repair pass was built and
+shipped into `refreshLedger`.
+
+It was a measurement error. **Room journals in WAL mode, and the database was being copied without
+`gallery_sync.db-wal`.** Recent writes live in that file until a checkpoint, so every snapshot showed
+pre-checkpoint state. The first pull of the evening included the WAL; every later one did not, and
+nothing announced the difference.
+
+Ian caught it by asking whether the original assumption was wrong. It was: all 10 had been proxied and
+recorded correctly the whole time. The repair pass was reverted — it fixed nothing, and it would have
+cost an EXIF read per candidate on every scan of a six-thousand-file library to guard a failure that
+has never been observed.
+
+**The rule this leaves.** Reading this app's ledger means reading `gallery_sync.db`, `-wal` and
+`-shm` together, or checkpointing first. A single-file `cat` of a Room database is not a snapshot of
+it. Every ledger figure quoted from one is suspect, including the ones in this file that were gathered
+that way.
+
+**The diagnostic that settled it** is worth keeping too: the repair pass logged `row=null` for every
+file, which read as "the lookup is broken" and was actually "the live database has nothing to repair".
+An instrument disagreeing with the evidence is a reason to doubt the evidence.
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have
