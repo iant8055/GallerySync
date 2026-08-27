@@ -1311,8 +1311,26 @@ reached Samsung's Recycle Bin, and found the album gone from the Albums tab. "Sh
 not bring it back — that setting governs which *cloud* folders Restore lists, not the album list, and
 reaching for it was a reasonable reading of the name.
 
-**Samsung deletes a folder when its last file goes.** GallerySync derives its album list by scanning
-local directories, so no directory means no album row.
+**Corrected 27 Aug 2026 — Samsung does not delete the folder, and the cause is ours.** This entry
+said "Samsung deletes a folder when its last file goes". Ian doubted it; the evidence was already in
+hand. After the Archive tab removed all six files from `DCIM/12345clips` on 26 Aug, `ls -la` on that
+folder returned `total 30952` and eight `.trashed-` entries. The directory was never deleted.
+
+**The album disappears because our own scan cannot see the files.** `MediaScanner` queries the
+MediaStore images and video collections, which exclude trashed items, and `scanAlbums()` groups
+whatever comes back by album name. A folder whose files are all trashed yields no items, so no group,
+so no album row. The list is built from MediaStore contents, not from directories.
+
+The distinction changes what the hole is:
+
+| | attributed to Samsung | actually ours |
+|---|---|---|
+| Where to fix it | work around a vendor | change how album rows are sourced |
+| Which devices | Samsung | every device |
+| When | when the folder is deleted | the instant the files are trashed |
+
+It also means the hole appears even where the trash works perfectly — which is the case the app most
+wants to be correct in.
 
 **What survived, all of it deliberately.** Ian noticed on restoring the files that the album came back
 with its GallerySync data intact, and asked whether the ledger had kept it — whether those files could
