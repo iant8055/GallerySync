@@ -98,11 +98,8 @@
     <!-- The old headline, kept as context rather than dropped. It is still the app's core promise. -->
     <string name="backup_verified_line">%1$s verified in OneDrive</string>
 
-    <!-- Filtering the album list. Not media search — see the design principle in CLAUDE.md. -->
-    <string name="albums_filter_hint">Filter albums</string>
-    <string name="albums_filter_clear">Clear</string>
-    <string name="albums_filter_all">All</string>
-    <string name="albums_filter_none">No album matches that.</string>
+    <!-- Shown when a mode button is tapped and no album is in that mode. -->
+    <string name="albums_filter_none">No album is in that mode.</string>
     <string name="backup_all_done">Everything selected is synced</string>
     <string name="backup_nothing_selected">Choose an album to sync</string>
     <!--

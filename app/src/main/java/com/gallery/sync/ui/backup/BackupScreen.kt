@@ -7,8 +7,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,7 +33,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -44,7 +41,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -299,20 +295,13 @@ private fun AlbumList(
         }
     }
 
-    // Filtering the list, not searching media. CLAUDE.md's design principle rules out search, and
-    // that rule is about not rebuilding a gallery — no searching photos, faces or content. This
-    // narrows a settings list of ninety album names down to the one whose mode you came to change.
-    // Ian asked for it on 27 Aug 2026 and chose "filter" over "search" for exactly that reason.
-    var filterText by rememberSaveable { mutableStateOf("") }
-
-    val visibleAlbums = state.albums.filter { album ->
-        (modeFilter == null || album.mode == modeFilter) &&
-            album.name.contains(filterText.trim(), ignoreCase = true)
-    }
+    // Filtering by mode only. A "Filter albums" text field sat here for about an hour on
+    // 27 Aug 2026 before Ian removed it: the four mode buttons above already answer the question
+    // this screen is for, and a search box is the first thing that makes an app feel like it has
+    // more in it than it does. CLAUDE.md's "no search" comes out intact rather than argued around.
+    val visibleAlbums = state.albums.filter { modeFilter == null || it.mode == modeFilter }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        AlbumFilterBar(text = filterText, onTextChange = { filterText = it })
-
         if (visibleAlbums.isEmpty() && state.albums.isNotEmpty()) {
             Text(
                 text = stringResource(R.string.albums_filter_none),
@@ -364,38 +353,6 @@ private fun AlbumList(
             }
         }
         }
-    }
-}
-
-/**
- * Narrows the album list by name and by mode.
- *
- * Both together, because they answer different questions: the field is "where is the album I am
- * thinking of", the chips are "what have I already set". On a phone reporting ninety albums the
- * second is the one that makes the screen reviewable at all — "show me everything set to Archive"
- * is the check a person actually wants before trusting that setting.
- */
-@Composable
-private fun AlbumFilterBar(text: String, onTextChange: (String) -> Unit) {
-    Column(
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        OutlinedTextField(
-            value = text,
-            onValueChange = onTextChange,
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text(stringResource(R.string.albums_filter_hint)) },
-            trailingIcon = {
-                if (text.isNotEmpty()) {
-                    TextButton(onClick = { onTextChange("") }) {
-                        Text(stringResource(R.string.albums_filter_clear), maxLines = 1)
-                    }
-                }
-            }
-        )
-
     }
 }
 
