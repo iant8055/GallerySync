@@ -458,21 +458,37 @@ private fun ModeFilterChip(
     val (container, onContainer) = mode.pillColors()
 
     // Read the HERO's content colour, before the Surface below replaces it with the pill's own.
-    //
-    // The ring used to be drawn in `onContainer` — the pill's ink — which is pale in dark theme and
-    // dark in light theme. On the dark green hero the light-theme ring all but vanished, and
-    // Backup's was dark green on dark green: invisible. Ian saw it as the ring having gone
-    // altogether. Drawn in the hero's own content colour it reads on all four tints in both themes,
-    // which is what a selection mark has to do.
+    // A ring drawn in the pill's ink is pale in dark theme and dark in light, and on the dark green
+    // hero the light-theme one all but vanished — Backup's was dark green on dark green.
     val heroContent = LocalContentColor.current
+
+    // A ring alone was not enough, twice. Ian could still not tell which mode was selected: a pale
+    // ring around a pale pill on a dark card reads as a slightly larger pill, because nothing about
+    // the figure changes, only its edge.
+    //
+    // So the unselected ones lose their fill and become outlines. Filled-versus-ghost is a change
+    // to the figure itself and cannot be missed at a glance, which is the whole job.
+    //
+    // The first attempt at this faded the pill's own colours instead, and measured 1.24:1 in light
+    // theme — illegible. Fading a dark ink toward a dark-tinted container moves both ends of the
+    // contrast the same way. The hero's ink is the colour already chosen to be read on this card,
+    // so the ghost uses that: 7.7:1 in light, 6.7:1 in dark.
+    //
+    // With no filter every pill keeps its fill. That is a real state — "all albums" — and greying
+    // all four to say "none chosen" would misreport four modes that do exist.
+    val dimmed = selected != null && !isOn
 
     Surface(
         modifier = modifier,
         onClick = { onClick(mode) },
         shape = RoundedCornerShape(percent = 50),
-        color = container,
-        contentColor = onContainer,
-        border = if (isOn) BorderStroke(3.dp, heroContent) else null
+        color = if (dimmed) Color.Transparent else container,
+        contentColor = if (dimmed) heroContent.copy(alpha = 0.75f) else onContainer,
+        border = when {
+            isOn -> BorderStroke(3.dp, heroContent)
+            dimmed -> BorderStroke(1.dp, heroContent.copy(alpha = 0.35f))
+            else -> null
+        }
     ) {
         Text(
             text = mode.label(),
