@@ -457,13 +457,22 @@ private fun ModeFilterChip(
     val isOn = selected == mode
     val (container, onContainer) = mode.pillColors()
 
+    // Read the HERO's content colour, before the Surface below replaces it with the pill's own.
+    //
+    // The ring used to be drawn in `onContainer` — the pill's ink — which is pale in dark theme and
+    // dark in light theme. On the dark green hero the light-theme ring all but vanished, and
+    // Backup's was dark green on dark green: invisible. Ian saw it as the ring having gone
+    // altogether. Drawn in the hero's own content colour it reads on all four tints in both themes,
+    // which is what a selection mark has to do.
+    val heroContent = LocalContentColor.current
+
     Surface(
         modifier = modifier,
         onClick = { onClick(mode) },
         shape = RoundedCornerShape(percent = 50),
         color = container,
         contentColor = onContainer,
-        border = if (isOn) BorderStroke(2.dp, onContainer) else null
+        border = if (isOn) BorderStroke(3.dp, heroContent) else null
     ) {
         Text(
             text = mode.label(),
@@ -816,15 +825,6 @@ private fun HeroDetail(
             style = MaterialTheme.typography.bodySmall
         )
     }
-
-    // The promise, last and always. Follows the em-dash rule above via hasLoadedCounts.
-    Text(
-        text = stringResource(
-            R.string.backup_verified_line,
-            pluralStringResource(R.plurals.file_count, state.uploadedCount, state.uploadedCount)
-        ),
-        style = MaterialTheme.typography.bodySmall
-    )
 }
 
 /**

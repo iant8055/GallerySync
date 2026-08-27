@@ -113,8 +113,6 @@
     <string name="backup_hero_label">All Albums</string>
     <string name="backup_mode_breakdown">%1$d Backup · %2$d Sync · %3$d Archive</string>
     <string name="backup_modes_off">%1$d off</string>
-    <!-- The old headline, kept as context rather than dropped. It is still the app's core promise. -->
-    <string name="backup_verified_line">%1$s verified in OneDrive</string>
 
     <!-- "Tap" rather than "click": the Android convention, on a device with no pointer. -->
     <string name="albums_filter_hint">Tap to filter by mode</string>
