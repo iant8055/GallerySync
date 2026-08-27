@@ -1569,9 +1569,41 @@ was frozen at 20:59:00, and on relaunch a fresh ViewModel starts at `status = nu
 work to find, so the screen reads clean. The defect is confined to one foreground session and clears
 itself when the user leaves. Still a false claim on screen; not the persistent one first recorded.
 
-**Also noted, and not a defect.** The photo is 6112 x 6112 and unproxied — `isProxied` and
-`isProxySkipped` both false — so it is a live candidate for optimising and has not been offered yet.
-Expected: nothing has run since it arrived.
+**And then it optimised itself.** Recorded above as a live proxy candidate; at 21:04 the proxy ran,
+unattended, closing the chain in the same unbroken action.
+
+| | |
+|---|---|
+| `isProxied`, `localProxySizeBytes` | 1, 478,497 |
+| On disk | 478,497 bytes, written 21:04 |
+| MediaStore `_size` | 478,497 — the rescan landed, no staleness |
+| `owner_package_name` | `com.sec.android.app.camera`, unchanged — still editable |
+| `remoteSizeBytes` | 4,643,976 — the OneDrive original untouched at full size |
+| `localMissingSinceEpochMillis` | null — still on the phone |
+| `mediaStoreId` | 41946, unchanged by the rewrite |
+
+**4,643,976 → 478,497 bytes. 9.7x**, the best measured yet against the milestone's "roughly 10x" and
+the 8–9x of 25 Aug.
+
+Nine minutes from shutter to safe, shrunk and still in the gallery, with the 37MP original one
+Restore tap away. What makes it worth more than the ratio is how much of the project it exercised at
+once, four pieces of it fixed the same day:
+
+1. the content trigger fired on a **move**, not a capture — this morning's self-cancelling worker fix
+2. uploaded and verified in 37 seconds
+3. proxied through the **SAF tree grant with no dialog** — the 19 Aug finding, unused for seven days
+4. the rescan reconciled MediaStore, so the staleness requirement from 19 Aug held
+5. the proxy came out *smaller*, exercising today's guard on the case that motivated it
+6. `mediaStoreId` survived the rewrite, which is what stops it being read as deleted — today's most
+   dangerous defect
+7. ownership unchanged, so the editability finding from earlier today held on a fresh file
+
+Every previous test drove one of these with the others held still. This was one ordinary action with
+nothing pressed, which is the only way to find out whether they compose.
+
+**Unchecked:** the cloud badge on this proxy. It is the first written onto a square 6112 x 6112
+source, and six photos in `AaSync` carry the pre-fix sideways badge, so orientation is worth an eye
+rather than an assumption.
 
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
