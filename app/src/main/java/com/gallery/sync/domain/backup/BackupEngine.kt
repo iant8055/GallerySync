@@ -544,6 +544,17 @@ class BackupEngine @Inject constructor(
      * Scoped to Archive albums for the same reason everything else is: CLAUDE.md's rule that removal
      * follows from a mode the user set and from nothing else.
      */
+    /**
+     * Album names the user has set to Archive, whether or not anything is left in them.
+     *
+     * Distinct from [filesInArchiveAlbums] returning nothing, and the difference is what the screen
+     * says: no Archive album at all means "nothing here removes anything", while an Archive album
+     * holding no files means the mode ran to completion — and is still standing.
+     */
+    suspend fun archiveAlbumNames(): List<String> = withContext(dispatcher) {
+        albumDao.albumsInMode(AlbumMode.ARCHIVE).sorted()
+    }
+
     suspend fun filesInArchiveAlbums(): List<LocalMediaItem> = withContext(dispatcher) {
         if (scanner.access() == MediaAccess.NONE) return@withContext emptyList()
 

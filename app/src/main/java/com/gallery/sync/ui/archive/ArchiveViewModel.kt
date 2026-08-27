@@ -37,7 +37,19 @@ data class ArchiveUiState(
     val delayedUntil: Instant? = null,
     /** How many system dialogs the removal will need, and which one we are on. */
     val batchTotal: Int = 0,
-    val batchIndex: Int = 0
+    val batchIndex: Int = 0,
+    /**
+     * What the last removal achieved, kept apart from [plan].
+     *
+     * The list is reloaded from the device once a removal finishes, so the rows that were removed
+     * are gone from it — they are not on the phone any more and a list of them is a list of things
+     * that no longer exist. The outcome still has to be reportable, so it lives here instead of
+     * being derived from rows that have been cleared. Ian, 27 Aug 2026.
+     */
+    val removedCount: Int = 0,
+    val removedBytes: Long = 0L,
+    /** Albums set to Archive, even ones with nothing left in them. */
+    val archiveAlbums: List<String> = emptyList()
 ) {
     val showPrompt: Boolean get() = phase == ArchivePhase.READY && delayedUntil == null
 }
@@ -71,11 +83,15 @@ class ArchiveViewModel @Inject constructor(
     fun load() {
         viewModelScope.launch {
             val files = engine.filesInArchiveAlbums()
+            val albums = engine.archiveAlbumNames()
             _state.value = _state.value.copy(
                 plan = ArchivePlan(entries = files.map { ArchiveEntry(it) }),
+                archiveAlbums = albums,
                 phase = ArchivePhase.IDLE,
                 batchTotal = 0,
-                batchIndex = 0
+                batchIndex = 0,
+                removedCount = 0,
+                removedBytes = 0L
             )
         }
     }
@@ -211,12 +227,31 @@ class ArchiveViewModel @Inject constructor(
 
             val next = _state.value.batchIndex + 1
             val more = next < localCopyRemover.batch(settled.confirmed).size
+
+            if (more) {
+                _state.value = _state.value.copy(
+                    plan = settled,
+                    batchIndex = next,
+                    phase = ArchivePhase.REMOVING
+                )
+                return@launch
+            }
+
+            // Finished. Re-read the album from the device rather than keeping the settled plan:
+            // every row that was removed describes a file that is no longer there, and a list of
+            // those is a list of things that do not exist. What survives is the count and the
+            // bytes, which is what the screen actually needs to report.
+            val removed = settled.removed
+            val remaining = engine.filesInArchiveAlbums()
             _state.value = _state.value.copy(
-                plan = settled,
-                batchIndex = next,
-                phase = if (more) ArchivePhase.REMOVING else ArchivePhase.DONE
+                plan = ArchivePlan(entries = remaining.map { ArchiveEntry(it) }),
+                batchIndex = 0,
+                batchTotal = 0,
+                phase = ArchivePhase.DONE,
+                removedCount = removed.size,
+                removedBytes = removed.sumOf { it.sizeBytes }
             )
-            Logger.i(TAG, "archive: ${settled.removed.size} files removed from this phone")
+            Logger.i(TAG, "archive: ${removed.size} files removed from this phone")
         }
     }
 

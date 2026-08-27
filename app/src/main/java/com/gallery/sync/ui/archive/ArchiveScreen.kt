@@ -122,13 +122,31 @@ fun ArchiveScreen(
                             style = MaterialTheme.typography.bodySmall
                         )
 
-                        state.plan.isEmpty -> {
+                        // Two different emptinesses. No Archive album at all means nothing here can
+                        // remove anything; Archive albums holding no files means the mode finished
+                        // and is still standing. Telling the user the first when the second is true
+                        // would be false about the one mode that takes files off the phone.
+                        state.plan.isEmpty && state.archiveAlbums.isEmpty() -> {
                             Text(
                                 text = stringResource(R.string.archive_empty),
                                 style = MaterialTheme.typography.bodySmall
                             )
                             Text(
                                 text = stringResource(R.string.archive_empty_hint),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+
+                        state.plan.isEmpty -> {
+                            Text(
+                                text = stringResource(
+                                    R.string.archive_all_done,
+                                    state.archiveAlbums.joinToString(", ")
+                                ),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                            Text(
+                                text = stringResource(R.string.archive_all_done_hint),
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
@@ -228,17 +246,17 @@ private fun ArchiveHeroActions(state: ArchiveUiState, onValidate: () -> Unit) {
         )
 
         ArchivePhase.DONE -> Text(
-            text = if (state.plan.removed.isEmpty()) {
+            text = if (state.removedCount == 0) {
                 stringResource(R.string.archive_done_none)
             } else {
                 stringResource(
                     R.string.archive_done,
                     pluralStringResource(
                         R.plurals.file_count,
-                        state.plan.removed.size,
-                        state.plan.removed.size
+                        state.removedCount,
+                        state.removedCount
                     ),
-                    formatBytes(context, state.plan.removed.sumOf { it.sizeBytes })
+                    formatBytes(context, state.removedBytes)
                 )
             },
             style = MaterialTheme.typography.bodySmall

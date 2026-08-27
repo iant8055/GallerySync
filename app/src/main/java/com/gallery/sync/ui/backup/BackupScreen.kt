@@ -92,6 +92,12 @@ fun BackupScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
 
+    // Re-read on entering the tab. Archiving happens on another screen with its own ViewModel, so
+    // nothing here hears about it: after a removal this tab went on saying "13 Scheduled to leave
+    // this phone" about files already in the trash. Ian, 27 Aug 2026. The ViewModel outlives a tab
+    // switch, which is what makes the staleness survive.
+    LaunchedEffect(Unit) { viewModel.refresh() }
+
     var detailAlbum by remember { mutableStateOf<AlbumRow?>(null) }
     var detailEntries by remember { mutableStateOf<List<BackupEntryEntity>>(emptyList()) }
 
@@ -877,11 +883,14 @@ private fun HeroDetail(
     // leave, so the count of them is the honest number — and unlike "waiting to be verified" it
     // compares nothing against the ledger, which is where the previous line went wrong.
     if (modeFilter == AlbumMode.ARCHIVE) {
+        val scheduled = summary.imageCount + summary.videoCount
         Text(
-            text = stringResource(
-                R.string.albums_scheduled_summary,
-                summary.imageCount + summary.videoCount
-            ),
+            text = if (scheduled == 0) {
+                // Archive finished. "0 Scheduled to leave this phone" is arithmetic, not an answer.
+                stringResource(R.string.albums_scheduled_none)
+            } else {
+                stringResource(R.string.albums_scheduled_summary, scheduled)
+            },
             style = MaterialTheme.typography.bodyMedium
         )
     }

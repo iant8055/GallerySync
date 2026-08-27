@@ -121,6 +121,7 @@
         caught it: 13 ledger rows against 2 files on the phone.
     -->
     <string name="albums_scheduled_summary">%1$d Scheduled to leave this phone</string>
+    <string name="albums_scheduled_none">Nothing left to archive</string>
     <!--
         The Albums tab is where modes are chosen, so its hero counts albums, not files. It read
         "Files verified in OneDrive" until 27 Aug 2026 — a true number about a different subject,
@@ -264,6 +265,12 @@
     <string name="archive_title">Archive</string>
     <string name="archive_hero_label">Files to Archive</string>
     <string name="archive_empty">No album is set to Archive. Nothing here will remove anything from your phone.</string>
+    <!--
+        Archive albums exist but hold nothing: the mode ran to completion. Saying "no album is set
+        to Archive" here would be false, and about the one mode that removes files.
+    -->
+    <string name="archive_all_done">Nothing waiting. Every file in %1$s is already off this phone.</string>
+    <string name="archive_all_done_hint">Those albums are still watched. Anything added to them is archived too.</string>
     <string name="archive_empty_hint">Set an album to Archive on the Albums tab, and its files will be listed here for checking before anything leaves your phone.</string>
     <string name="archive_intro">Every file below is checked against OneDrive first. Anything that is not there yet is backed up before it counts.</string>
     <string name="archive_validate">Check these files</string>
