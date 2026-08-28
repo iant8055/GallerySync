@@ -152,6 +152,43 @@ text at all. That is a shipped-to-users bug, not a cosmetic one.
 - All network calls go through the repository layer — never call APIs from ViewModels directly
 - Unit tests live in app/src/test/, instrumented tests in app/src/androidTest/
 
+## Hardware — the devices this is tested on
+
+**Always pin adb with `-s <serial>`.** Two phones are usually attached, and on 28 Aug 2026 an
+unpinned command read one device's MediaStore and attributed it to the other — which produced a
+confident, wrong report that Ian's library was at risk and cost about an hour.
+
+| Device | Serial | What it is |
+|---|---|---|
+| Galaxy Z Fold 4 | `RFCT71H7RSW` | Samsung rig on a **development-only** OneDrive account; contents disposable. Cover screen is **344dp**, the narrowest surface this app runs on, and the only place the compact layout can be proven. Wireless debugging drops whenever it sleeps or folds — USB is steadier. |
+| Moto G 2026 | `ZT422CTZQV` | Stock Android, **Google Photos rather than Samsung Gallery** — so it is where non-Samsung behaviour gets checked. Destination root `MotoG/Gallery`. |
+| Galaxy Z Fold 8 | — | **Ian's real phone.** Never experiment on it. |
+
+Wireless debugging assigns a **new port every time it is toggled**, so a remembered address goes
+stale; rediscover with `adb mdns services`. An address in `100.64.0.0/10` means the phone is on
+mobile data or a VPN and is not reachable from this machine.
+
+## Working practices — learned the hard way
+
+- **Verify on hardware before calling anything done.** Nearly every real defect in this project was
+  found by eye on a device, not by reading code — including several that passed review and compiled
+  cleanly.
+- **After every install, launch the app and run `adb logcat -b crash -d`.** On 28 Aug 2026 a crash
+  that killed the app on every launch of the Albums tab shipped to both phones, because "install
+  succeeded" plus a screenshot looked like proof it worked. A screenshot of a crashed app looks like
+  a screenshot of a launcher.
+- **Read the Room database with its `-wal` and `-shm` files together**, or checkpoint first. A
+  single-file copy is not a snapshot: recent writes live in the WAL, and reading without it once
+  produced a defect report for a bug that did not exist.
+- **Prefer a screen recording to screenshots for anything that changes over time**, and diff the
+  frames. On 28 Aug a recording diffed with ffmpeg located every change to one label in seconds and
+  revealed two interleaving values that stills had made look frozen.
+- **When an instrument disagrees with the evidence, doubt the instrument.** `content query` returned
+  three different row counts for one table in a single session; `ls` and `du` were stable throughout.
+- **Update `.claude/MILESTONES.md` before staging**, per `.claude/agents/backup-agent.md`. It is the
+  project's memory, and a correction that lands in one file and not the other is how a withdrawn
+  claim comes back weeks later and gets acted on.
+
 ## Escalate to Ian — Lead Agent only, when:
 - OAuth app registration is needed (Google Cloud Console or Azure app registration)
 - A new Android permission is required that affects the Play Store listing
