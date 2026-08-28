@@ -214,6 +214,28 @@ interface BackupEntryDao {
     suspend fun uploadedKeys(uploaded: BackupState = BackupState.UPLOADED): List<UploadedKey>
 
     /**
+     * Every key the ledger holds for a file it still intends to upload.
+     *
+     * The counterpart to [uploadedKeys], and needed for a different reason. A row that has been
+     * uploaded and whose file has gone is a *question* — should the cloud copy follow? — so it is
+     * flagged and kept. A row that was never uploaded and whose file has gone is simply work that
+     * no longer exists, and keeping it means the engine queues a file it cannot open.
+     */
+    @Query(
+        "SELECT id, displayName, sizeBytes, mediaStoreId, isProxied FROM backup_entries WHERE state != :uploaded"
+    )
+    suspend fun pendingKeys(uploaded: BackupState = BackupState.UPLOADED): List<UploadedKey>
+
+    /**
+     * Forgets rows for files that were never uploaded and are no longer on the device.
+     *
+     * A delete rather than a flag, because there is nothing to decide: nothing was sent, so nothing
+     * in OneDrive depends on the row. If the file reappears the scan seeds it again.
+     */
+    @Query("DELETE FROM backup_entries WHERE id IN (:ids) AND state != :uploaded")
+    suspend fun forgetPending(ids: List<String>, uploaded: BackupState = BackupState.UPLOADED): Int
+
+    /**
      * Marks rows whose file has left the phone.
      *
      * Only sets the timestamp where it is currently null, so the date reflects when the file first

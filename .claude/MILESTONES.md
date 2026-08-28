@@ -1743,6 +1743,34 @@ that way.
 file, which read as "the lookup is broken" and was actually "the live database has nothing to repair".
 An instrument disagreeing with the evidence is a reason to doubt the evidence.
 
+### 28 Aug 2026 — a ledger gap that was real, and a diagnosis that was not
+
+Two batches of 25 files ran against an album holding 11, which looked like the engine queueing rows
+for files that no longer exist. It was not. `uploadedAtEpochMillis` settled it: **46 files from
+`Political humour`**, an album set to Backup earlier with a 55-file backlog. 46 uploaded plus 9
+pending is exactly 55. The queue is global and ledger-ordered, not scoped to whichever album was
+changed most recently — which is why the album being watched never moved.
+
+**The 14 suspicious rows were not ghosts either.** `camera roll` had 14 `PENDING` rows against an
+empty `DCIM/camera roll`, and the files turned out to be alive in `Pictures/camera roll` — outside
+the granted tree, so invisible to the scan but present on the device. The reconciliation checked the
+whole device, found them, and correctly did nothing. See TASK-014: album identity is the bucket name,
+so two directories in different trees are one album.
+
+**One real gap did come out of it.** `markWhatIsNoLongerOnTheDevice` reads `uploadedKeys()`, so it
+only ever examines uploaded rows — correct for its purpose, since the missing flag drives the
+cloud-deletion question and that only exists for a file with a cloud copy. The consequence is that a
+**pending** row whose file has genuinely left the device is reconciled by nothing, and becomes queued
+work the moment its album is given a mode: an upload the engine attempts on a file it cannot open.
+
+Now handled by `forgetPendingFilesThatAreGone`, deleting rather than flagging — nothing was sent, so
+nothing in OneDrive depends on the row, and a returning file is re-seeded by the scan. Guarded by the
+same conditions as the marking it sits beside, so a revoked permission cannot read as a mass
+deletion.
+
+**Worth recording that the fix was built on a wrong diagnosis and is still correct.** The case it
+guards is real; it simply was not the case in front of us.
+
 ### 28 Aug 2026 — three filters, four numbers, none of them wrong
 
 Ian counted 45 files in Samsung Gallery while the hero claimed "52 Images · 34 Videos" and the phone

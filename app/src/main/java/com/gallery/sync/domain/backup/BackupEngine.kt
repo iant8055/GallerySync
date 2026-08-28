@@ -334,6 +334,46 @@ class BackupEngine @Inject constructor(
         if (marked > 0 || returned > 0) {
             Logger.i(TAG, "$marked files no longer on the device, $returned back")
         }
+
+        forgetPendingFilesThatAreGone(present, presentContent, presentIds)
+    }
+
+    /**
+     * Drops rows for files that were never uploaded and are no longer on the device.
+     *
+     * The marking above deliberately looks only at uploaded rows, because the flag it sets drives
+     * the cloud-deletion question and that question only exists for a file with a cloud copy. The
+     * consequence was that a **pending** row whose file had gone was reconciled by nothing at all
+     * and stayed in the ledger for good — fourteen of them on the Fold 4, 28 Aug 2026, for an
+     * album whose folder was empty.
+     *
+     * Harmless while that album is `OFF`, and not harmless afterwards: give it a mode and the
+     * engine queues uploads for files it cannot open, burning a batch slot on each.
+     *
+     * Deleted rather than flagged, because there is nothing to decide. Nothing was sent, so nothing
+     * in OneDrive depends on the row, and if the file comes back the scan seeds it again. That is
+     * also why this is safe where [pruneAlbumsNoLongerOnDevice] has to be so careful: losing a
+     * pending row costs a re-scan, losing an uploaded one costs the record of what is safe.
+     *
+     * Guarded by the same conditions as the marking above — it runs only on a full-access,
+     * non-empty scan, so a revoked permission cannot read as "every file was deleted".
+     */
+    private suspend fun forgetPendingFilesThatAreGone(
+        present: Set<String>,
+        presentContent: Set<String>,
+        presentIds: Set<Long>
+    ) {
+        val gone = entryDao.pendingKeys()
+            .filterNot { it.id in present }
+            .filterNot { it.contentSignature in presentContent }
+            .filterNot { it.mediaStoreId in presentIds }
+            .map { it.id }
+
+        if (gone.isEmpty()) return
+
+        var forgotten = 0
+        gone.chunked(SQL_BATCH).forEach { forgotten += entryDao.forgetPending(it) }
+        Logger.i(TAG, "forgot $forgotten pending rows whose files are no longer on the device")
     }
 
     /**

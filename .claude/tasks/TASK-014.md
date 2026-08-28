@@ -244,6 +244,35 @@ That is the right default for the reason the enum already gives — the failure 
 the wizard at the moment the directory is added**, with the album count, rather than discovered from
 a running upload.
 
+## Album identity is the bucket name, not the path — found 28 Aug 2026
+
+`MediaStore` buckets by the **immediate parent folder**, and the ledger keys albums by that name. So
+two directories with the same name, in different trees, are **one album** to this app.
+
+Observed on the Fold 4: `DCIM/camera roll` and `Pictures/camera roll` both bucket as `camera roll`.
+The ledger held 14 rows seeded while those files were briefly in DCIM; the files now live in
+`Pictures`, outside the granted tree. One album row, one mode, two directories.
+
+Inert while only `DCIM` is granted — the scan filters by `relativePath`, so the 2,001 files under
+`Pictures` are correctly ignored. **The grant picker is what makes it reachable**, which is why this
+belongs here: adding `Pictures` as a second tree would fold those 2,001 files into an album that
+already carries a mode the user chose for a different folder.
+
+**The mode that matters is Archive.** Its consent rests on the user recognising the album name on the
+card. A name that spans two directories means files can leave the phone from a folder the decision
+was never about.
+
+Worth adding to the acceptance list when the picker gains a second tree:
+
+- Adding a directory whose album names collide with an existing album must say so, and must not
+  silently extend that album's mode to the new files
+
+**A related discovery from the same session**, and the reason the collision surfaced at all: Samsung
+Gallery does not display folders nested more than one level under DCIM, while MediaStore indexes them
+normally. `DCIM/Test/Treasure Island/` was invisible in Gallery and fully present in the app. So the
+scan can offer an album the user cannot see in their own gallery — the same consent problem by a
+different route.
+
 ## Re-running setup — decided
 
 Ian, 19 Aug 2026: an option in Settings, or in the Help menu.
