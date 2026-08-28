@@ -266,26 +266,46 @@ keeps working.
       clip fetched back and SHA-256 matched the local original exactly.
 - [x] Plain retrieval list — **not** a photo browser. Also the only place a fetch can be triggered:
       there is no hydration hook, so tapping an item in Samsung Gallery cannot reach us.
-      Populates, fetches, and clears itself once the file is back.
-- [x] **Retrieval reads the drive, not the ledger.** 25 Aug 2026. `observeRetrievable()` offers a
-      file only when the ledger knows it *and* it has already left the phone, which answers "what
-      have I lost from this device?" rather than what a restore feature promises. `DCIM/12345clips`
-      showed the gap in miniature — seven videos backed up, one offered, the other six absent only
-      because they were still on the phone.
-      **The case that settles it is a new phone.** The ledger records what left *this* device, so on
-      a fresh install it is empty by construction: the user signs in, their whole library is in
-      OneDrive, and a ledger-driven list offers nothing at all. That is the moment someone most
-      wants a restore and the moment the ledger knows least. Ian, 25 Aug 2026: if we offer restore
-      then it has to restore any file, not just the ones we backed up, synced or archived.
-      Files already on the phone are listed and labelled rather than hidden — retrieving one is
-      allowed, and what lands carries `_restored` before the extension so the two are told apart.
-      That rename is why `RestoredAlbum.contentSignature` exists: three places test `name|size` to
-      decide whether content is on the phone, and one of them is the last check before a cloud copy
-      goes to the recycle bin.
-      **Confined to the backup roots**, and no thumbnails, grid, search or sort. Ian: only the roots
-      for now — likely to need revisiting once other cloud services arrive, since a second provider
-      will not lay its files out under a Samsung path. Real browsing stays with the Open OneDrive
-      button; looking *through* photos is a different activity from getting specific ones back.
+      Populates, fetches, and clears itself once the file is back. **What it lists changes with
+      TASK-018** — see the restore entry below; the "not a photo browser" constraint is the part
+      that carries over unchanged.
+- [x] **Never trust the ledger for what is on the phone.** 25 Aug 2026, and it still holds — it is
+      the reasoning `ProxyMarker` was later built on. The ledger records what left *this* device, so
+      on a fresh install it is empty by construction: the user signs in, their whole library is in
+      OneDrive, and a ledger-driven list offers nothing at all. `DCIM/12345clips` showed the gap in
+      miniature — seven videos backed up, one offered, the other six absent only because they were
+      still on the phone. Anything answering "is this on the phone, and is it ours?" asks the file,
+      not the ledger.
+- [ ] **Restore replaces the proxy; it does not download a second copy.** Supersedes the
+      drive-listing tab built 25–26 Aug 2026. See TASK-018.
+
+      The old tab listed what OneDrive holds under the backup roots and fetched a chosen file into
+      `DCIM/Restored` as `name_restored.ext`. Ian, 27 Aug 2026: *"This really ISN'T a restore — we
+      are not restoring a file, just downloading it,"* and *"if the user wants a straight download
+      they can use OneDrive."* It was a worse version of a file browser the user already has, and
+      the copy it produced landed beside the file they were looking at rather than replacing it.
+
+      What replaces it: opening the tab scans the gallery for files carrying the proxy marker,
+      groups them under their own folders, and restoring one writes the full-size original back
+      over the proxy, in place, through the persisted SAF tree grant.
+
+      **The new-phone case moves to initial download, not to this tab.** TASK-014's guided first run
+      is where a fresh handset gets its library back — bulk, once. Restore is what happens
+      afterwards, to files this app has since shrunk. Initial setup **downloads** what is not here;
+      restore **replaces** what is here but smaller. Different verbs, different populations, and
+      neither is the other's fallback. So this tab being empty on a new phone is the correct answer
+      to "what have I optimised on this device?", not a gap.
+
+      **The grow is verified.** Fold 4, 27 Aug 2026, via `SafGrowProbe` — a 4,096-byte file rewritten
+      to 524,288 bytes through the tree grant, no dialog, MediaStore reporting the new size after the
+      rescan. Until that measurement existed the whole design was resting on an assumption, since
+      what had been proven on 19 Aug was a *truncating* write and this is its reverse. Not yet
+      measured at 40 MB or in a separately granted directory.
+
+      `RestoredAlbum` and the `_restored` suffix stay. Files fetched by the old flow carry that name,
+      and `contentSignature` must keep stripping it — three places test `name|size` to decide whether
+      content is on the phone, and one of them is the last check before a cloud copy goes to the
+      recycle bin.
 - [x] Deletion sync, opt-in and batched. Highest-risk feature in the product; it only follows a
       backup engine that has been watched working. Never infers deletion from absence alone.
       **Built 25 Aug 2026**, default Leave, no automatic option. Screens verified; a real cloud
