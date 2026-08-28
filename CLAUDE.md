@@ -89,32 +89,36 @@ This is absolute and applies to every file, in every location, without exception
   from the API name.
   It is tempting precisely because it needs no consent dialog, which makes it the shortest path to
   unattended archiving. Take the tap instead: local removal uses `MediaStore.createTrashRequest`.
-  The difference is not that the trash request is safe — the entry below records it deleting
-  outright on this same device — but that it *can* reach a trash where `deleteDocument` never can.
-  A chance of recovery against none.
+  The difference is that the trash request reaches a trash where `deleteDocument` never can — see
+  the entry below, confirmed twice on this device.
   **The SAF tree grant is still the right route for proxying**, which shortens a file and removes
   nothing. The prohibition is on deleting through it, not on using it.
 - Locally this means `MediaStore.createTrashRequest()` (API 30+), never a plain delete.
   Below API 30 Android has no media trash, so local deletion is **not offered at all** on
   those versions rather than silently deleting permanently.
-- **A trash request is not a guarantee of recoverability.** Observed on a Galaxy Z Fold 4:
-  the files were removed outright and were not in Samsung Gallery's Recycle Bin.
+- **A trash request reaches Android's media trash.** Confirmed twice on a Galaxy Z Fold 4 —
+  25 Aug 2026 (one file, 461 MB) and 27 Aug 2026 (51 files, album `Anne`). The file is renamed in
+  place to `.trashed-<expiry>-<name>`, keeps its bytes, expires after 30 days, and **is visible in
+  Samsung Gallery's Recycle Bin**. Ian checked the Recycle Bin on both occasions.
 
-  **Why is not known.** An earlier version of this rule said Samsung routes the request through
-  Gallery's Recycle Bin and that the behaviour follows a setting the user controls. Ian pointed out
-  on 25 Aug 2026 that **there is no such setting in Samsung Gallery**, so that explanation is
-  withdrawn. The observation stands; the cause does not.
+  **The earlier "removed outright" claim is withdrawn.** It appeared only here and never in
+  MILESTONES, and was almost certainly a conflation with `DocumentsContract.deleteDocument` — a
+  permanent SAF delete, which genuinely does leave nothing in the Recycle Bin and remains forbidden
+  above.
 
-  A likelier account, untested: `createTrashRequest` sets `IS_TRASHED` in **MediaStore**, which is
-  not the same store as Samsung Gallery's own Recycle Bin. A file could be in Android's media trash
-  and simply invisible to Samsung's app. That is checkable — a trashed file is renamed on disk to
-  `.trashed-<expiry>-<name>` — and worth checking, because if it holds then recovery exists and the
-  app could offer it.
+  The outcome cannot be known *before* the request, but it is trivially checkable *after*: the
+  rename sits on disk in the same folder. So the app may state what actually happened rather than
+  warning about the worst case unconditionally. Note that `is_trashed` queries over adb return
+  nothing, because trashed rows are owner-scoped — the disk is the reliable check.
 
-  Until someone checks, the platform gives no way to detect the outcome in advance.
-  Therefore: **never tell the user a local removal is recoverable.** The guarantee that
-  actually holds is the verified cloud copy — remote confirmation plus a matching byte size —
-  and that is what the UI may promise. Nothing else.
+  **A trashed file still occupies its bytes.** Measured 27 Aug 2026: `du` reported 18.6 MB in
+  `DCIM/Anne` before 51 files were trashed and 18.6 MB after. Space returns when the user empties
+  the Recycle Bin or the 30 days elapse, never on the tap. Any UI saying a removal "frees up X" is
+  describing what happens after the bin is emptied, and must say so.
+
+  A different handset or One UI version may still behave differently. The guarantee that always
+  holds is the verified cloud copy — remote confirmation plus a matching byte size — and that
+  remains what the UI may promise unconditionally.
 - Remotely this means Graph `DELETE /me/drive/items/{id}`, which moves to the recycle bin.
   Never anything that bypasses it.
 - Removing a row from the local ledger or index is bookkeeping and is not a deletion — but

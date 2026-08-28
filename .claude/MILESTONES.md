@@ -1743,6 +1743,45 @@ that way.
 file, which read as "the lookup is broken" and was actually "the live database has nothing to repair".
 An instrument disagreeing with the evidence is a reason to doubt the evidence.
 
+### 27 Aug 2026 — the trash request confirmed at scale, and the bytes that do not come back
+
+**Fold 4.** `Anne` switched from Sync to Archive — 51 photos, all verified in OneDrive. After the
+validation pass and Android's own dialog, every one of the 51 was renamed in place:
+
+```
+/storage/emulated/0/DCIM/Anne/.trashed-1790483890-123_1(1).jpg
+/storage/emulated/0/DCIM/Anne/.trashed-1790483890-5189.jpeg
+… 51 files, none missing
+```
+
+Expiry `1790483890` decodes to **27 Sept 2026 — a 30-day window**, matching the single-file result of
+25 Aug. Two runs, two days apart, one file and fifty-one: this is the device's behaviour, not a fluke.
+
+**What it settles.** CLAUDE.md's "the files were removed outright and were not in Samsung Gallery's
+Recycle Bin" is withdrawn. It appeared only there, never here, and was a conflation with
+`DocumentsContract.deleteDocument`. The rule has been rewritten, and "never tell the user a local
+removal is recoverable" went with it. Ian had already reported the Recycle Bin result on 25 Aug; the
+correction landed in this file and not in the rules file, which is exactly how a withdrawn claim
+keeps coming back. Hence the MILESTONES step now in the backup procedure.
+
+**What it does not settle — the space.** `du` reported **18.6 MB in `DCIM/Anne` before the archive and
+18.6 MB after**. A trashed file keeps its bytes for the full 30 days. Archive frees nothing at the
+moment it runs, and the prompt's "Archiving them will free up XXX GB on your phone" is describing
+what happens once the user empties the Recycle Bin. TASK-016 lists that self-checking claim as an
+acceptance criterion; it currently passes arithmetic and fails the filesystem.
+
+**Consequence for the storage budget.** Photo proxying is not merely the weakest lever, it is the only
+one that frees space *immediately*. Archive's contribution arrives up to 30 days later, on a user
+action the app is forbidden to take for them.
+
+**Method note, and a wasted hour.** Three `content query` reads of the same MediaStore table disagreed
+within one session — 67 rows, then 8,447 rows and 147.64 GB, then 67 again — and the middle reading was
+reported to Ian as his library being at risk. Two handsets were connected at different moments (a
+Fold 4 being returned and a new Fold 8), and adb was never pinned with `-s <serial>`. `ls` and `du`
+were stable throughout. **Pin the serial on every call, and prefer the filesystem to the provider
+when the two disagree.** This is the WAL lesson of the same date in a different costume: a confident
+diagnosis built on an instrument nobody had checked.
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have
