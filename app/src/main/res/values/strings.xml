@@ -374,9 +374,9 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
     <string name="restore_selected_summary">%1$d selected · %2$s to recover</string>
     <string name="restore_folder_detail">%1$d files · %2$s to recover</string>
     <!-- Named separately: they are different operations on the phone, and one total would hide that. -->
-    <string name="restore_folder_split">%1$d optimised · %2$d not on this phone</string>
+    <string name="restore_folder_split">%1$d optimised · %2$d to download</string>
     <string name="restore_sizes">%1$s now · %2$s full size</string>
-    <string name="restore_missing_size">Not on this phone · %1$s in OneDrive</string>
+    <string name="restore_missing_size">Available for download · %1$s</string>
     <string name="restore_downloading">Working… %1$d%%</string>
     <string name="restore_done_row">Restored to full size</string>
     <string name="restore_downloaded_row">Back on this phone</string>
