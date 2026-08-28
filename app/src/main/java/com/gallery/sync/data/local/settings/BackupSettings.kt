@@ -113,7 +113,19 @@ data class BackupPreferences(
      * which is the safe direction: a stale timestamp is old, and old means the session is
      * discarded.
      */
-    val uploadInterruptedAtEpochMillis: Long = 0L
+    val uploadInterruptedAtEpochMillis: Long = 0L,
+    /**
+     * Bytes outstanding when the current run began, or 0 when no run is in progress.
+     *
+     * The denominator for run progress. Without it the only honest percentage is of the whole
+     * selected library, which on a mostly-backed-up phone opens a fresh run at 93% — a true
+     * statement about the library and a useless one about the run. Observed on the Fold 4,
+     * 28 Aug 2026: 7,516 MB already uploaded against 574 MB pending.
+     *
+     * Persisted rather than held in memory because a run is a chain of worker invocations, and a
+     * baseline captured per invocation would reset every batch. That is the defect this replaced.
+     */
+    val runBaselineBytes: Long = 0L
 )
 
 /**
@@ -164,7 +176,8 @@ class BackupSettings @Inject constructor(
             acknowledgedTopics = stored[KEY_ACKNOWLEDGED_TOPICS] ?: emptySet(),
             hasCompletedSetup = stored[KEY_SETUP_COMPLETE] ?: false,
             isPaused = stored[KEY_PAUSED] ?: false,
-            uploadInterruptedAtEpochMillis = stored[KEY_INTERRUPTED_AT] ?: 0L
+            uploadInterruptedAtEpochMillis = stored[KEY_INTERRUPTED_AT] ?: 0L,
+            runBaselineBytes = stored[KEY_RUN_BASELINE] ?: 0L
         )
     }
 
@@ -188,6 +201,16 @@ class BackupSettings @Inject constructor(
      */
     suspend fun hasSetupDecision(): Boolean =
         context.dataStore.data.first()[KEY_SETUP_COMPLETE] != null
+
+    /**
+     * Records what the current run set out to move, so progress can be a proportion of it.
+     *
+     * Never lowered while a run is live — files added midway raise it, so the reported progress
+     * slows rather than jumping backwards.
+     */
+    suspend fun setRunBaselineBytes(bytes: Long) {
+        context.dataStore.edit { it[KEY_RUN_BASELINE] = bytes }
+    }
 
     /** Stamps the moment a run was interrupted, so a later resume can judge the held session. */
     suspend fun setUploadInterruptedAt(millis: Long) {
@@ -300,5 +323,6 @@ class BackupSettings @Inject constructor(
         val KEY_SETUP_COMPLETE = booleanPreferencesKey("setup_complete")
         val KEY_PAUSED = booleanPreferencesKey("backup_paused")
         val KEY_INTERRUPTED_AT = longPreferencesKey("upload_interrupted_at")
+        val KEY_RUN_BASELINE = longPreferencesKey("run_baseline_bytes")
     }
 }

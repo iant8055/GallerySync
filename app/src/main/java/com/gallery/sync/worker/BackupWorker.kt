@@ -58,6 +58,9 @@ class BackupWorker @AssistedInject constructor(
         // changed in the meantime.
         engine.discardStaleUploadSessions()
 
+        // The denominator for the percentage on the hero. Set once per chain, not per batch.
+        engine.openRunBaseline()
+
         // The first whole-library upload is the heaviest thing this app does — 148 GB and roughly
         // fourteen hours on a real device — so it waits for a moment the user chose. Only automatic
         // runs are held: "Sync now" goes straight to the engine and is never gated, because someone
@@ -109,6 +112,7 @@ class BackupWorker @AssistedInject constructor(
                     .putInt(PROGRESS_COMPLETED, progress.completed)
                     .putInt(PROGRESS_TOTAL, progress.total)
                     .putString(PROGRESS_FILE, progress.currentFile)
+                    .putLong(PROGRESS_RUN_BYTES, progress.runBytesSent)
                     .putInt(PROGRESS_PERCENT, if (progress.currentBytesTotal > 0) {
                         ((progress.currentBytesSent * 100) / progress.currentBytesTotal)
                             .toInt().coerceIn(0, 100)
@@ -203,6 +207,9 @@ class BackupWorker @AssistedInject constructor(
         const val PROGRESS_TOTAL = "total"
         const val PROGRESS_FILE = "file"
         const val PROGRESS_PERCENT = "percent"
+
+        /** Bytes moved so far this run. The hero's percentage is a proportion of this. */
+        const val PROGRESS_RUN_BYTES = "runBytes"
 
         const val RESULT_UPLOADED = "r_uploaded"
         const val RESULT_SKIPPED = "r_skipped"

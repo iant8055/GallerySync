@@ -1743,6 +1743,33 @@ that way.
 file, which read as "the lookup is broken" and was actually "the live database has nothing to repair".
 An instrument disagreeing with the evidence is a reason to doubt the evidence.
 
+### 28 Aug 2026 — a crash on every launch, found by accident
+
+**Fold 4.** `BoxWithConstraints` was added inside the Albums hero to measure the row for the compact
+icon fallback. `HeroCard` applies `Modifier.height(IntrinsicSize.Min)` when its actions sit at the
+bottom, so it asks its children for intrinsic measurements — and a `SubcomposeLayout` cannot answer
+one:
+
+```
+java.lang.IllegalStateException: Asking for intrinsic measurements of SubcomposeLayout
+layouts is not supported.
+```
+
+Fatal on the first draw, so the app died on **every** launch of the Albums tab. Four crashes in the
+buffer inside two minutes. Both phones had the build installed.
+
+**It was found because Ian mentioned the crash dialog in passing**, while asking about something
+else entirely — not by testing, and not by me. Nothing in the build, install or screenshot loop
+noticed that the app was dead, because a screenshot of a crashed app looks like a screenshot of a
+launcher, and the install had reported success.
+
+**The lesson is about the loop, not the API.** Installing and screenshotting proves a package landed,
+not that it runs. A launch check — `logcat -b crash` after starting the activity — costs one command
+and would have caught this the moment it was introduced.
+
+The fix is `LocalConfiguration.current.screenWidthDp`, which needs no subcomposition and is the right
+measure anyway: the row spans the hero card, which spans the window.
+
 ### 28 Aug 2026 — what a pause should cost, settled in three reversals
 
 The question looked trivial and took four rounds, each overturning the last. Worth recording as a

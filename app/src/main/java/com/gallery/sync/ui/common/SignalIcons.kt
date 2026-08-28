@@ -80,6 +80,17 @@ object SignalIcons {
     }
 
     /**
+     * Start again from where a pause left off.
+     *
+     * The transport triangle. Drawn as a closed stroked path rather than a filled one so it carries
+     * the same weight as [Pause] beside it — the two are read as a pair, and a solid shape next to
+     * a two-stroke one looks like a different control set.
+     */
+    val Resume: ImageVector = stroked("resume") {
+        listOf("M8 5 19 12 8 19Z")
+    }
+
+    /**
      * End a run and hand control back to automatic sync.
      *
      * Deliberately not a cross. [Cross] already means "could not be confirmed" on the Archive

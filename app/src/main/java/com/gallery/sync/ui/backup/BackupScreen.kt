@@ -57,6 +57,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -972,10 +973,19 @@ private fun HeroActions(
     val signal = LocalGallerySyncColors.current
     val active = state.isRunning || state.isPaused
 
-    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val compact = isCompactWidth(maxWidth)
+    // Window width, not BoxWithConstraints.
+    //
+    // BoxWithConstraints is a SubcomposeLayout, and something above this row measures intrinsics —
+    // which throws "Asking for intrinsic measurements of SubcomposeLayout layouts is not supported"
+    // during draw. It crashed the app on every launch of the Albums tab, four times in a row on the
+    // Fold 4, 28 Aug 2026, before it was caught.
+    //
+    // The window is the right measure anyway: this row spans the hero card, which spans the screen,
+    // so the only difference is padding — and the threshold has far more slack than that. Cover
+    // screen 344dp, Moto G 443dp, Fold inner 690dp, against a 360dp threshold.
+    val compact = isCompactWidth(LocalConfiguration.current.screenWidthDp.dp)
 
-        Row(
+    Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -989,7 +999,7 @@ private fun HeroActions(
                 // zero rendered a confident "Syncing 0%" on every cold start — observed on the
                 // Moto G, 28 Aug 2026, while four files were already uploaded. Zero is a claim, and
                 // this is the same trap [BackupUiState.hasLoadedCounts] was added for.
-                val fraction = state.backedUpFraction.takeIf { state.hasLoadedCounts }
+                val fraction = state.runProgress.takeIf { state.hasLoadedCounts }
                 Text(
                     text = if (fraction == null) {
                         stringResource(
@@ -1040,7 +1050,7 @@ private fun HeroActions(
                 state.isPaused -> {
                     HeroControl(
                         compact = compact,
-                        icon = SignalIcons.Albums,
+                        icon = SignalIcons.Resume,
                         label = stringResource(R.string.backup_resume),
                         onClick = onResume
                     )
@@ -1067,12 +1077,11 @@ private fun HeroActions(
                     )
                 }
 
-                else -> HeroOutlinedButton(
-                    onClick = onRescan,
-                    label = stringResource(R.string.backup_rescan),
-                    modifier = Modifier.weight(1f)
-                )
-            }
+            else -> HeroOutlinedButton(
+                onClick = onRescan,
+                label = stringResource(R.string.backup_rescan),
+                modifier = Modifier.weight(1f)
+            )
         }
     }
 }

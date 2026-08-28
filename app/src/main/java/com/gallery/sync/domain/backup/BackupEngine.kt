@@ -60,7 +60,16 @@ data class BackupProgress(
     val total: Int,
     val currentFile: String,
     val currentBytesSent: Long,
-    val currentBytesTotal: Long
+    val currentBytesTotal: Long,
+    /**
+     * Bytes this run has moved in total, including the part of the current file already sent.
+     *
+     * The hero's percentage needs a number that changes while a file is uploading. Deriving it from
+     * the ledger instead only moves when counts are refreshed, which is between runs — so the
+     * figure sat still through an entire transfer and jumped when the user pressed Pause. Observed
+     * on the Fold 4, 28 Aug 2026.
+     */
+    val runBytesSent: Long = 0L
 )
 
 data class BackupRunResult(
@@ -115,6 +124,30 @@ class BackupEngine @Inject constructor(
             entry.uploadSessionUrl?.let { uploadRepository.cancelUploadSession(it) }
             entryDao.forgetUploadSession(entry.id)
             Logger.i(TAG, "discarded in-flight upload of ${entry.displayName}")
+        }
+    }
+
+    /**
+     * Opens or updates the denominator for run progress.
+     *
+     * Called at the start of every worker invocation. The first one in a chain sets the baseline to
+     * what is outstanding; later ones leave it alone, which is what makes progress span the whole
+     * run instead of resetting each batch.
+     *
+     * Raised, never lowered, while a run is live: files arriving midway make the reported progress
+     * slow down rather than leap backwards, which is the honest rendering of "there is now more to
+     * do than when we started".
+     *
+     * Cleared when nothing is outstanding, so the next run opens at zero rather than inheriting a
+     * finished run's denominator.
+     */
+    suspend fun openRunBaseline() = withContext(dispatcher) {
+        val outstanding = entryDao.pendingBytesInSelectedAlbums()
+        val current = settings.current().runBaselineBytes
+
+        when {
+            outstanding <= 0L -> if (current != 0L) settings.setRunBaselineBytes(0L)
+            outstanding > current -> settings.setRunBaselineBytes(outstanding)
         }
     }
 
@@ -376,6 +409,9 @@ class BackupEngine @Inject constructor(
             val pending = entryDao.nextPending(limit = limit, maxAttempts = MAX_ATTEMPTS)
                 .let { candidates -> withinByteBudget(candidates, maxBytes) }
             var uploaded = 0
+            // Bytes finished this run. Added to the in-flight file's sent count so the reported
+            // figure climbs continuously rather than stepping once per file.
+            var runBytesDone = 0L
             var failed = 0
             var skipped = 0
             var pruned = 0
@@ -473,7 +509,8 @@ class BackupEngine @Inject constructor(
                         total = pending.size,
                         currentFile = entry.displayName,
                         currentBytesSent = 0,
-                        currentBytesTotal = entry.sizeBytes
+                        currentBytesTotal = entry.sizeBytes,
+                        runBytesSent = runBytesDone
                     )
                 )
 
@@ -487,7 +524,8 @@ class BackupEngine @Inject constructor(
                                 total = pending.size,
                                 currentFile = entry.displayName,
                                 currentBytesSent = sent,
-                                currentBytesTotal = total
+                                currentBytesTotal = total,
+                                runBytesSent = runBytesDone + sent
                             )
                         )
                     },
@@ -527,6 +565,7 @@ class BackupEngine @Inject constructor(
                             )
                             entryDao.forgetUploadSession(entry.id)
                             uploaded++
+                            runBytesDone += entry.sizeBytes
                         } else {
                             entryDao.markFailed(
                                 entry.id,

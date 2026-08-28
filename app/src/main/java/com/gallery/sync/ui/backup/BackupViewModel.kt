@@ -213,7 +213,11 @@ data class BackupUiState(
      * Distinct from "not running". A paused app is deliberately idle and stays that way through
      * every automatic trigger; an idle one is simply waiting for the next.
      */
-    val isPaused: Boolean = false
+    val isPaused: Boolean = false,
+    /** Bytes outstanding when this run began. The denominator for [runProgress]. */
+    val runBaselineBytes: Long = 0L,
+    /** Bytes moved so far by the live run, published by the worker as it goes. */
+    val runBytesSent: Long = 0L
 
 ) {
 
@@ -231,6 +235,36 @@ data class BackupUiState(
      * Null rather than zero when nothing is selected: a bar sitting empty says "none of it is backed
      * up", which is a claim, and the honest answer is that there is no work in progress to report.
      */
+    /**
+     * How far through *this run* we are, by bytes, or null when no run is in progress.
+     *
+     * Deliberately not [backedUpFraction], which is a proportion of the whole selected library and
+     * so opens a run at whatever the library already was — 93% on the Fold 4, 28 Aug 2026, with
+     * 7,516 MB uploaded against 574 MB pending. True about the library, useless about the run, and
+     * read as the latter by everyone because it sits on the button they just pressed.
+     *
+     * Starts at zero, ends at one, and does not reset between the batches of one run because the
+     * baseline is persisted rather than recomputed per invocation.
+     */
+    val runProgress: Float?
+        get() {
+            if (runBaselineBytes <= 0L) return null
+
+            // The worker's live figure while it is running, because the ledger-derived one only
+            // moves when counts are refreshed — which is between runs, so the percentage sat
+            // still through an entire transfer and jumped on Pause.
+            //
+            // The ledger is still the answer when nothing is publishing: after a pause, a crash or
+            // a restart there is no live figure, and what has actually been recorded is the honest
+            // fallback.
+            val moved = if (isRunning && runBytesSent > 0L) {
+                runBytesSent
+            } else {
+                (runBaselineBytes - pendingBytes).coerceAtLeast(0L)
+            }
+            return (moved.toFloat() / runBaselineBytes).coerceIn(0f, 1f)
+        }
+
     val backedUpFraction: Float?
         get() {
             val total = uploadedBytes + pendingBytes
@@ -360,6 +394,7 @@ class BackupViewModel @Inject constructor(
                     allowMeteredNetwork = prefs.allowMeteredNetwork,
                     showEmptyCloudFolders = prefs.showEmptyCloudFolders,
                     isPaused = prefs.isPaused,
+                    runBaselineBytes = prefs.runBaselineBytes,
                     defaultAlbumMode = prefs.defaultAlbumMode
                 )
             }
@@ -400,6 +435,7 @@ class BackupViewModel @Inject constructor(
                         val total = data.getInt(BackupWorker.PROGRESS_TOTAL, 0)
                         if (total > 0) {
                             _state.value = _state.value.copy(
+                                runBytesSent = data.getLong(BackupWorker.PROGRESS_RUN_BYTES, 0L),
                                 status = BackupStatus.Uploading(
                                     completed = data.getInt(BackupWorker.PROGRESS_COMPLETED, 0),
                                     total = total,
@@ -874,6 +910,9 @@ class BackupViewModel @Inject constructor(
         viewModelScope.launch {
             settings.setPaused(false)
             settings.setUploadInterruptedAt(0L)
+            // Ends the run, so the next opens its own denominator rather than inheriting this one's
+            // and appearing to start part-finished.
+            settings.setRunBaselineBytes(0L)
             // Ends the run but leaves automatic sync armed — that is the whole difference from
             // Pause. Re-arming is needed because Pause may have torn the triggers down.
             rearmAutomaticSync()
@@ -943,7 +982,12 @@ class BackupViewModel @Inject constructor(
                         if (running) live + BackupScheduling.MANUAL_WORK
                         else live - BackupScheduling.MANUAL_WORK
                     }
-                    _state.value = _state.value.copy(status = status)
+                    _state.value = _state.value.copy(
+                        status = status,
+                        runBytesSent = info?.progress
+                            ?.getLong(BackupWorker.PROGRESS_RUN_BYTES, 0L)
+                            ?: _state.value.runBytesSent
+                    )
                     if (info?.state?.isFinished == true) refresh()
                 }
         }
