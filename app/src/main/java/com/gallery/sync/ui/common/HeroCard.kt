@@ -158,18 +158,37 @@ fun HeroCard(
  * instead means the label is the same brightness as the text beside it, in either theme, because
  * the hero has already set that colour for its own contents.
  *
+ * The **disabled** pair is derived the same way, and for the same reason. Material's defaults come
+ * off the scheme's surface, which on this container reads as dark-green-on-dark-green — a hole
+ * rather than a control. Derived from the hero's own content colour, a disabled button is plainly
+ * present and plainly unavailable, which is the point of showing it at all. Albums' Sync now
+ * already carried this fix privately; adding `enabled` here is what let Restore stop hiding Clear.
+ *
  * Lived privately in `BackupScreen` first. Shared here when Archive and Restore gained heroes and
  * immediately reproduced the bug it had already solved — which is the argument for the shared card
  * making itself again.
  */
 @Composable
-fun HeroOutlinedButton(onClick: () -> Unit, label: String, modifier: Modifier = Modifier) {
+fun HeroOutlinedButton(
+    onClick: () -> Unit,
+    label: String,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
+) {
+    val content = LocalContentColor.current
     OutlinedButton(
         onClick = onClick,
         modifier = modifier,
+        enabled = enabled,
         contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-        colors = ButtonDefaults.outlinedButtonColors(contentColor = LocalContentColor.current),
-        border = BorderStroke(1.dp, LocalContentColor.current.copy(alpha = 0.35f))
+        colors = ButtonDefaults.outlinedButtonColors(
+            contentColor = content,
+            disabledContentColor = content.copy(alpha = 0.45f)
+        ),
+        border = BorderStroke(
+            1.dp,
+            content.copy(alpha = if (enabled) 0.35f else 0.18f)
+        )
     ) {
         Text(label, maxLines = 1)
     }

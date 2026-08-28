@@ -117,43 +117,47 @@ fun RestoreScreen(
                 },
                 actions = {
                     // Two fixed half-width slots, weighted as Albums weights Sync now and Rescan so
-                    // a button here is the same size as a button there. The empty slot is a Spacer,
-                    // or a lone button stretches across the card.
+                    // a button here is the same size as a button there.
                     //
-                    // Slot one changes with the level: Refresh belongs to the folder list, Select
-                    // all to a folder. Without Refresh the folder view had no control at all, since
-                    // Clear only appears with a selection. Ian noticed, 27 Aug 2026.
+                    // **Nothing here disappears.** Ian, 27 Aug 2026: don't have the Clear button
+                    // vanish. A control that comes and goes makes the card twitch as the selection
+                    // changes and the user has to find it again each time; greyed out it holds its
+                    // place and says plainly that there is nothing to undo. Same for the first slot
+                    // while a run is going.
+                    //
+                    // The disabled colours come off the hero's own content colour rather than the
+                    // scheme — see HeroOutlinedButton. Material's defaults would paint
+                    // dark-green-on-dark-green here and read as a hole rather than a control.
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        when {
-                            state.running -> Spacer(modifier = Modifier.weight(1f))
-
-                            // Re-reads the ledger. An optimise or archive run while this tab was
-                            // open changes what belongs here, and this is the only way to ask.
-                            state.openFolder == null -> HeroOutlinedButton(
+                        // Slot one changes with the level: Refresh belongs to the folder list,
+                        // Select all to a folder. Refresh re-reads the ledger, which is the only
+                        // way to notice an optimise or archive run that happened while this tab
+                        // was open.
+                        if (state.openFolder == null) {
+                            HeroOutlinedButton(
                                 onClick = viewModel::refresh,
                                 label = stringResource(R.string.retrieve_refresh),
-                                modifier = Modifier.weight(1f)
-                            )
-
-                            else -> HeroOutlinedButton(
-                                onClick = viewModel::selectAllHere,
-                                label = stringResource(R.string.retrieve_select_all),
-                                modifier = Modifier.weight(1f)
-                            )
-                        }
-
-                        if (state.hasSelection && !state.running) {
-                            HeroOutlinedButton(
-                                onClick = viewModel::clearSelection,
-                                label = stringResource(R.string.retrieve_clear_selection),
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
+                                enabled = !state.running
                             )
                         } else {
-                            Spacer(modifier = Modifier.weight(1f))
+                            HeroOutlinedButton(
+                                onClick = viewModel::selectAllHere,
+                                label = stringResource(R.string.retrieve_select_all),
+                                modifier = Modifier.weight(1f),
+                                enabled = !state.running
+                            )
                         }
+
+                        HeroOutlinedButton(
+                            onClick = viewModel::clearSelection,
+                            label = stringResource(R.string.retrieve_clear_selection),
+                            modifier = Modifier.weight(1f),
+                            enabled = state.hasSelection && !state.running
+                        )
                     }
                 }
             )
