@@ -142,6 +142,25 @@ replace, which is the second-copy behaviour this whole task exists to remove.
 So: the name tells you whether the file is present, and the marker tells you which of the two present
 states it is in. Size is not part of either question.
 
+**The two run in that order, and cannot run in the other.** It is tempting to think the marker is what
+separates a proxy from a file that is genuinely gone — it is not, and it cannot be, because *you
+cannot read a marker off a file that is not there*. A missing file has no local copy to open and no
+EXIF header to inspect. Presence has to be established first, by name; only then is there a file to
+ask the second question of.
+
+| | Question | Answered by | Outcome |
+|---|---|---|---|
+| 1 | is there a local file with this name in this album? | **name** | present / absent |
+| 2 | if present — is it one of ours? | **the marker** | proxy / full size |
+
+**Strip `_restored` before comparing names.** Files fetched by the old flow are on the phone as
+`name_restored.jpg`. A name-only test that does not strip the suffix reads them as missing and offers
+them again — which is `contentSignature`'s whole reason for existing, applied to a test that no longer
+uses size.
+
+Note the marker is not new work for this task. It already stops `BackupEngine` re-uploading a proxy
+as though it were a fresh photo; this is a second use of the same stamp.
+
 The folder card's "17 of 19 already on this phone" is no help either. It comes from
 `scanEverything().groupingBy { it.album }.eachCount()`, and `RestorableFolder`'s own doc calls those
 counts "deliberately not an identity claim". Per-file classification is new work.
