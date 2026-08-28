@@ -84,6 +84,19 @@ object SignalIcons {
         listOf("m9 18 6-6-6-6")
     }
 
+    /**
+     * Out of a folder and back to the list of them. Ian drew it as `←┘`, and that is what this is:
+     * the return glyph, a line dropping from the right and turning left into an arrowhead — not a
+     * plain back arrow. It reads as leaving the level you are in rather than as browser history,
+     * which is the difference that matters on a screen with only two levels.
+     */
+    val Back: ImageVector = stroked("back") {
+        listOf(
+            "M20 6v6a2 2 0 0 1-2 2H5",
+            "m9 10-4 4 4 4"
+        )
+    }
+
     val Settings: ImageVector = stroked("settings") {
         listOf(
             "M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z",

@@ -137,19 +137,12 @@ fun ArchiveScreen(
                             )
                         }
 
-                        state.plan.isEmpty -> {
-                            Text(
-                                text = stringResource(
-                                    R.string.archive_all_done,
-                                    state.archiveAlbums.joinToString(", ")
-                                ),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                            Text(
-                                text = stringResource(R.string.archive_all_done_hint),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
+                        // Archive albums exist and hold nothing: the mode ran to completion, and
+                        // the card already says so — "Files to Archive" standing over a zero. The
+                        // two sentences that sat here restated the standing-instruction rule on
+                        // every visit to a finished tab; that explanation belongs in Help
+                        // (TASK-017), not here. Ian, 27 Aug 2026.
+                        state.plan.isEmpty -> Unit
 
                         else -> ArchiveHeroDetail(state)
                     }

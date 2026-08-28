@@ -267,12 +267,6 @@
     <string name="archive_title">Archive</string>
     <string name="archive_hero_label">Files to Archive</string>
     <string name="archive_empty">No album is set to Archive. Nothing here will remove anything from your phone.</string>
-    <!--
-        Archive albums exist but hold nothing: the mode ran to completion. Saying "no album is set
-        to Archive" here would be false, and about the one mode that removes files.
-    -->
-    <string name="archive_all_done">Nothing waiting. Every file in %1$s is already off this phone.</string>
-    <string name="archive_all_done_hint">Those albums are still watched. Anything added to them is archived too.</string>
     <string name="archive_empty_hint">Set an album to Archive on the Albums tab, and its files will be listed here for checking before anything leaves your phone.</string>
     <string name="archive_intro">Every file below is checked against OneDrive first. Anything that is not there yet is backed up before it counts.</string>
     <string name="archive_validate">Check these files</string>
@@ -366,17 +360,21 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
 
     <!-- Retrieval: files in OneDrive that are no longer on the phone. -->
     <string name="tab_retrieve">Restore</string>
-    <string name="retrieve_hero_label_folders">Folders in OneDrive</string>
+    <string name="retrieve_hero_label_folders">Folders/Files to Restore</string>
     <string name="retrieve_hero_label_files">Files in this folder</string>
 
     <string name="retrieve_title">Restore from OneDrive</string>
     <string name="retrieve_empty">Nothing here to restore.</string>
     <string name="retrieve_where">Files come back into a folder called Restored, with “_restored” added to the name.</string>
     <string name="retrieve_action">Restore</string>
-    <string name="retrieve_pick_folder">Pick a folder to see everything OneDrive holds in it.</string>
+    <string name="retrieve_pick_folder">Swipe right to select / left to deselect</string>
+    <!-- Its own line under the swipes, so the two gestures do not read as one instruction. -->
+    <string name="retrieve_tap_to_open">Tap to open</string>
     <string name="retrieve_drive_name">OneDrive</string>
+    <!-- The way out of a folder, spoken by TalkBack. The glyph itself carries no words. -->
+    <string name="retrieve_back">Back to folders</string>
     <string name="retrieve_cant_find_title">Can\'t find what you\'re looking for?</string>
-    <string name="retrieve_cant_find_detail">This list covers the folders GallerySync backs up to. Anything else in your OneDrive is still there — open OneDrive to find it.</string>
+    <string name="retrieve_cant_find_detail">To Download other items from your OneDrive click here</string>
     <string name="retrieve_open_onedrive">Open OneDrive</string>
     <string name="retrieve_select_all">Select all</string>
     <string name="retrieve_clear_selection">Clear</string>
@@ -400,7 +398,11 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
     <!-- Always available, not only after a failure: the list is a snapshot of the drive and the
          drive changes underneath it. -->
     <string name="retrieve_refresh">Refresh</string>
-    <string name="retrieve_working">Restoring…</string>
+    <!--
+        A control, not a label. The button used to say "Restoring…" and disable itself, so a fetch
+        the user started could not be stopped by the person who started it.
+    -->
+    <string name="retrieve_stop">Stop restoring</string>
     <!-- Shown while one file downloads: which file, and how far in. A count alone reads as a
          hang on a large video. -->
     <string name="retrieve_batch_working_file">Restoring %1$d of %2$d — %3$s, %4$d%%</string>

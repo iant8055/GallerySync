@@ -9,6 +9,7 @@ import com.gallery.sync.domain.backup.RestorableFolder
 import com.gallery.sync.domain.backup.RestoreFromCloud
 import com.gallery.sync.domain.backup.RestoreResult
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -155,6 +156,15 @@ class RetrieveViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(RetrieveUiState())
     val state: StateFlow<RetrieveUiState> = _state.asStateFlow()
+
+    /**
+     * The running batch, held so it can be stopped.
+     *
+     * `viewModelScope.launch` alone gave the user no way back out of a restore they started: the
+     * button went to "Restoring…" and disabled itself, so a 2 GB clip fetched by mistake had to run
+     * to the end. Albums' Sync now had the same fault and fixed it the same way.
+     */
+    private var restoreJob: Job? = null
 
     init {
         loadFolders()
@@ -337,7 +347,7 @@ class RetrieveViewModel @Inject constructor(
     fun restoreSelected() {
         if (_state.value.isRestoring) return
 
-        viewModelScope.launch {
+        restoreJob = viewModelScope.launch {
             // Files picked one by one, plus everything in any folder that was swiped. Both at
             // once, because the bar shows one total and the user asked for one action.
             val fromFolders = if (_state.value.selectedFolderNames.isEmpty()) {
@@ -362,67 +372,90 @@ class RetrieveViewModel @Inject constructor(
             var unsupported = false
             val gone = mutableListOf<String>()
 
-            chosen.forEachIndexed { index, file ->
-                _state.value = _state.value.copy(
-                    batchStatus = RestoreBatchStatus.Working(
-                        done = index,
-                        total = chosen.size,
-                        currentFile = file.displayName
+            // A stop unwinds through here, so the summary is written in a `finally` rather than
+            // after the loop. Without it, cancelling would leave the card saying "Restoring 3 of
+            // 12" forever — `isRestoring` is derived from that status and nothing else clears it.
+            //
+            // The counters are only ever incremented by a file that finished, so a stopped batch
+            // reports what it actually did rather than blaming the interrupted file.
+            try {
+                chosen.forEachIndexed { index, file ->
+                    _state.value = _state.value.copy(
+                        batchStatus = RestoreBatchStatus.Working(
+                            done = index,
+                            total = chosen.size,
+                            currentFile = file.displayName
+                        )
                     )
-                )
 
-                when (
-                    restore.restore(
-                        remoteItemId = file.remoteItemId,
-                        displayName = file.displayName,
-                        mimeType = file.mimeType,
-                        isVideo = file.isVideo,
-                        sizeBytes = file.sizeBytes,
-                        onProgress = { written, total ->
-                            _state.value = _state.value.copy(
-                                batchStatus = RestoreBatchStatus.Working(
-                                    done = index,
-                                    total = chosen.size,
-                                    currentFile = file.displayName,
-                                    percentOfCurrent = if (total > 0) {
-                                        ((written * 100) / total).toInt().coerceIn(0, 100)
-                                    } else {
-                                        null
-                                    }
+                    when (
+                        restore.restore(
+                            remoteItemId = file.remoteItemId,
+                            displayName = file.displayName,
+                            mimeType = file.mimeType,
+                            isVideo = file.isVideo,
+                            sizeBytes = file.sizeBytes,
+                            onProgress = { written, total ->
+                                _state.value = _state.value.copy(
+                                    batchStatus = RestoreBatchStatus.Working(
+                                        done = index,
+                                        total = chosen.size,
+                                        currentFile = file.displayName,
+                                        percentOfCurrent = if (total > 0) {
+                                            ((written * 100) / total).toInt().coerceIn(0, 100)
+                                        } else {
+                                            null
+                                        }
+                                    )
                                 )
-                            )
+                            }
+                        )
+                    ) {
+                        is RestoreResult.Restored -> restored++
+
+                        // The listing said it was there and the fetch says it is not, so the
+                        // listing is stale. Drop the row and say so by name — a row that simply
+                        // vanished would look like the app losing things.
+                        is RestoreResult.GoneFromCloud -> {
+                            gone += file.displayName
+                            failed++
                         }
-                    )
-                ) {
-                    is RestoreResult.Restored -> restored++
 
-                    // The listing said it was there and the fetch says it is not, so the listing is
-                    // stale. Drop the row and say so by name — a row that simply vanished would look
-                    // like the app losing things.
-                    is RestoreResult.GoneFromCloud -> {
-                        gone += file.displayName
-                        failed++
+                        // Below API 29 there is no way to publish a new media file at all, so the
+                        // whole batch is impossible rather than this one file being unlucky.
+                        is RestoreResult.Unsupported -> unsupported = true
+
+                        is RestoreResult.Failed -> failed++
                     }
-
-                    // Below API 29 there is no way to publish a new media file at all, so the whole
-                    // batch is impossible rather than this one file being unlucky.
-                    is RestoreResult.Unsupported -> unsupported = true
-
-                    is RestoreResult.Failed -> failed++
                 }
+            } finally {
+                _state.value = _state.value.copy(
+                    files = _state.value.files.filterNot { it.displayName in gone },
+                    droppedFromCloud = _state.value.droppedFromCloud + gone,
+                    selection = emptyMap(),
+                    selectedFolderNames = emptySet(),
+                    batchStatus = if (unsupported) {
+                        RestoreBatchStatus.Unsupported
+                    } else {
+                        RestoreBatchStatus.Done(restored, failed)
+                    }
+                )
             }
-
-            _state.value = _state.value.copy(
-                files = _state.value.files.filterNot { it.displayName in gone },
-                droppedFromCloud = _state.value.droppedFromCloud + gone,
-                selection = emptyMap(),
-                selectedFolderNames = emptySet(),
-                batchStatus = if (unsupported) {
-                    RestoreBatchStatus.Unsupported
-                } else {
-                    RestoreBatchStatus.Done(restored, failed)
-                }
-            )
         }
+    }
+
+    /**
+     * Stops the batch, including the file in flight.
+     *
+     * Cancelling the job unwinds `MediaStoreWriter.write`, which checks `ensureActive()` on every
+     * buffer — so a stopped restore stops pulling bytes rather than finishing the file it was on,
+     * and the half-written row it was filling is discarded. That row was never visible to any app
+     * and holds nothing the user had, so removing it is not a deletion under CLAUDE.md; it is the
+     * same cleanup a short read or a dropped connection already triggers.
+     *
+     * Files already restored stay restored. Stopping is not undoing.
+     */
+    fun stopRestore() {
+        restoreJob?.cancel()
     }
 }

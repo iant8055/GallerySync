@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -17,7 +18,9 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -47,6 +50,7 @@ import com.gallery.sync.ui.common.SignalIcons
 import com.gallery.sync.ui.common.HeroCard
 import com.gallery.sync.ui.common.HeroOutlinedButton
 import com.gallery.sync.ui.common.formatBytes
+import com.gallery.sync.ui.theme.LocalGallerySyncColors
 
 /** Where a phone layout stops being the right answer. The standard expanded-width breakpoint. */
 private val WideBreakpoint = 600.dp
@@ -111,32 +115,186 @@ fun RetrieveScreen(
                 } else {
                     state.files.size.toString()
                 },
+                // Under the figure, not in the detail column. Ian, 27 Aug 2026: it was landing on
+                // top of the swipe line, where a count read as another instruction. Stacked under
+                // the number it qualifies, the pair says what the drive holds and how much of that
+                // is spoken for.
+                //
+                // Unfolded this costs no height at all — the detail column is the taller of the
+                // two, so the card is already that tall. Folded it adds a line to a card that was
+                // going to change anyway when Clear appears.
+                //
+                // Null rather than an empty lambda when nothing is picked, so the card knows there
+                // is no footer and leaves out the gap above it as well as the line itself.
+                figureFooter = if (state.hasSelection) {
+                    {
+                        Text(
+                            text = stringResource(
+                                R.string.retrieve_selected_summary,
+                                state.selectionCount,
+                                formatBytes(context, state.selectedBytes)
+                            ),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                } else {
+                    null
+                },
+                // The instructions hold their place through a selection now that the count has its
+                // own. Only a transfer displaces them, and only while it runs.
                 detail = {
-                    // Only at the top level, where it is an instruction. Inside a folder it was a
-                    // paragraph of reassurance above the thing the user came to do — read once,
-                    // chrome thereafter. Removed 26 Aug 2026 at Ian's request.
+                    val working = state.batchStatus as? RestoreBatchStatus.Working
+
                     Text(
-                        text = if (state.selectedFolder == null) {
-                            stringResource(R.string.retrieve_pick_folder)
-                        } else {
-                            stringResource(R.string.retrieve_where)
+                        text = when {
+                            // Name the file and its position within it once bytes are moving. A
+                            // bare "1 of 1" sat unchanged for seven minutes on a 2 GB video and
+                            // read as a hang.
+                            working != null -> {
+                                val percent = working.percentOfCurrent
+                                val name = working.currentFile
+                                if (percent != null && name != null) {
+                                    stringResource(
+                                        R.string.retrieve_batch_working_file,
+                                        working.done + 1,
+                                        working.total,
+                                        name,
+                                        percent
+                                    )
+                                } else {
+                                    stringResource(
+                                        R.string.retrieve_batch_working,
+                                        working.done + 1,
+                                        working.total
+                                    )
+                                }
+                            }
+
+                            // Inside a folder it says where the files land instead — a paragraph
+                            // of reassurance was cut from here on 26 Aug 2026 at Ian's request.
+                            state.selectedFolder == null ->
+                                stringResource(R.string.retrieve_pick_folder)
+
+                            else -> stringResource(R.string.retrieve_where)
                         },
-                        style = MaterialTheme.typography.bodySmall
+                        style = MaterialTheme.typography.bodyMedium
                     )
+
+                    // Its own line under the swipes. Ian, 27 Aug 2026. Sharing a line with them
+                    // made three gestures read as one sentence, and the tap is the odd one out —
+                    // the swipes pick, the tap goes somewhere.
+                    //
+                    // Kept up while a selection stands, not swapped away with the instruction
+                    // above it: tapping a folder still opens it with files already picked, and
+                    // holding the line steady is also what stops the card changing height and
+                    // shifting the list, which is why the count moved in here in the first place.
+                    //
+                    // Dropped only while bytes are moving, where the card is carrying a filename
+                    // and a progress bar and nothing should invite a detour.
+                    if (state.selectedFolder == null && working == null) {
+                        Text(
+                            text = stringResource(R.string.retrieve_tap_to_open),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+
+                    // Directly under the line it describes, which is the rule that moved it in
+                    // here with that line. Determinate only: the indeterminate listing bar stays
+                    // outside, where it belongs to an empty list rather than to a transfer.
+                    val percentOfCurrent = working?.percentOfCurrent
+                    if (percentOfCurrent != null) {
+                        LinearProgressIndicator(
+                            progress = { percentOfCurrent / 100f },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+
+                    // Whatever the last batch did. Outlives the selection, so it is the one thing
+                    // here that is read after the fact.
+                    when (val status = state.batchStatus) {
+                        is RestoreBatchStatus.Done -> Text(
+                            text = if (status.failed == 0) {
+                                stringResource(R.string.retrieve_batch_done, status.restored)
+                            } else {
+                                stringResource(
+                                    R.string.retrieve_batch_done_failed,
+                                    status.restored,
+                                    status.failed
+                                )
+                            },
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = if (status.failed == 0) {
+                                LocalContentColor.current
+                            } else {
+                                MaterialTheme.colorScheme.error
+                            }
+                        )
+
+                        RestoreBatchStatus.Unsupported -> Text(
+                            text = stringResource(R.string.retrieve_unsupported),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.error
+                        )
+
+                        else -> Unit
+                    }
                 },
                 actions = {
                     // Inside the card, where Albums keeps Sync now and Rescan. It sat below the
                     // card when the hero arrived, leaving a band of empty space between the two and
                     // making the tab look unlike the one beside it.
                     //
-                    // Offered on success too, not only after a failure: this list is a snapshot of a
-                    // drive that changes underneath it, and the only other way to re-take it was to
-                    // kill the app.
-                    if (state.selectedFolder == null && !state.loading) {
-                        HeroOutlinedButton(
-                            onClick = viewModel::loadFolders,
-                            label = stringResource(R.string.retrieve_refresh)
-                        )
+                    // Select all and Clear joined them on 27 Aug 2026, for the reason the count
+                    // did: appearing below the card, they moved the list.
+                    //
+                    // HeroOutlinedButton rather than TextButton: on the dark green container
+                    // Material derives a TextButton's colour from the scheme and it comes out dim.
+                    //
+                    // Two fixed half-width slots, weighted exactly as Albums weights Sync now and
+                    // Rescan, so a button here is the same size as a button there. Ian, 27 Aug
+                    // 2026. Sized to their labels they came out unequal — "Clear" a stub beside
+                    // "Refresh" — and neither matched the tab next door.
+                    //
+                    // The empty slot is a Spacer rather than nothing, so a lone Refresh stays half
+                    // the row instead of stretching across it. Never more than two are live at
+                    // once: Refresh belongs to the folder list and Select all to a folder, so they
+                    // share the first slot and Clear always has the second.
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        when {
+                            // Offered on success too, not only after a failure: this list is a
+                            // snapshot of a drive that changes underneath it, and the only other
+                            // way to re-take it was to kill the app.
+                            state.selectedFolder == null && !state.loading -> HeroOutlinedButton(
+                                onClick = viewModel::loadFolders,
+                                label = stringResource(R.string.retrieve_refresh),
+                                modifier = Modifier.weight(1f)
+                            )
+
+                            // Nothing to select all of on the folder list, where the equivalent is
+                            // swiping the folders you want.
+                            state.selectedFolder != null &&
+                                state.files.isNotEmpty() &&
+                                !state.isRestoring -> HeroOutlinedButton(
+                                onClick = viewModel::selectAll,
+                                label = stringResource(R.string.retrieve_select_all),
+                                modifier = Modifier.weight(1f)
+                            )
+
+                            else -> Spacer(modifier = Modifier.weight(1f))
+                        }
+
+                        if (state.hasSelection && !state.isRestoring) {
+                            HeroOutlinedButton(
+                                onClick = viewModel::clearSelection,
+                                label = stringResource(R.string.retrieve_clear_selection),
+                                modifier = Modifier.weight(1f)
+                            )
+                        } else {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
                     }
                 }
             )
@@ -152,55 +310,11 @@ fun RetrieveScreen(
                 onUp = viewModel::closeFolder
             )
 
-            // The sentence, then the bar — the same order as Albums. This used to sit at the far
-            // end of the screen in the action bar while the bar sat up here, so one status was read
-            // in two places. Moved 26 Aug 2026.
-            val working = state.batchStatus as? RestoreBatchStatus.Working
-            if (working != null || state.hasSelection) {
-                Text(
-                    text = if (working != null) {
-                        // Name the file and its position within it once bytes are moving. A bare
-                        // "1 of 1" sat unchanged for seven minutes on a 2 GB video and read as a
-                        // hang.
-                        val percent = working.percentOfCurrent
-                        val name = working.currentFile
-                        if (percent != null && name != null) {
-                            stringResource(
-                                R.string.retrieve_batch_working_file,
-                                working.done + 1,
-                                working.total,
-                                name,
-                                percent
-                            )
-                        } else {
-                            stringResource(
-                                R.string.retrieve_batch_working,
-                                working.done + 1,
-                                working.total
-                            )
-                        }
-                    } else {
-                        stringResource(
-                            R.string.retrieve_selected_summary,
-                            state.selectionCount,
-                            formatBytes(context, state.selectedBytes)
-                        )
-                    },
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-
-            // One indicator for the screen, directly under the line it describes. Determinate
-            // while a file is moving, indeterminate while the drive is being listed — a bar
-            // claiming a confident 0% is a worse lie than one admitting it does not know.
-            val restoring = (state.batchStatus as? RestoreBatchStatus.Working)?.percentOfCurrent
-            when {
-                restoring != null -> LinearProgressIndicator(
-                    progress = { restoring / 100f },
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                state.loading -> LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            // The listing bar, and only the listing bar. Indeterminate because a bar claiming a
+            // confident 0% is a worse lie than one admitting it does not know. It appears while the
+            // list below is empty anyway, so it moves nothing.
+            if (state.loading) {
+                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
 
             // Never rendered as an empty list. "You have no backups" because the network dropped is
@@ -215,14 +329,8 @@ fun RetrieveScreen(
                     Text(stringResource(R.string.retrieve_try_again))
                 }
             }
-
-            if ((state.selectedFolder != null && state.files.isNotEmpty()) || state.hasSelection) {
-                SelectionControls(state = state, viewModel = viewModel)
-            }
         }
 
-        // Only the listing spinner lives here. The restore bar moved down to sit under the line
-        // that names the file and its percentage, so text-then-bar reads the same on every screen.
 
 
         // Outlives the row it describes. Each name is a file that was on this list a moment ago and
@@ -309,54 +417,12 @@ fun RetrieveScreen(
         // The one action, at the foot of the screen where a thumb is, and only once something is
         // chosen. Nothing on this screen moves a byte until it appears.
         if (state.hasSelection || state.isRestoring) {
-            RestoreBar(state = state, onRestore = viewModel::restoreSelected)
+            RestoreBar(
+                state = state,
+                onRestore = viewModel::restoreSelected,
+                onStop = viewModel::stopRestore
+            )
         }
-    }
-}
-
-/** Select all / clear, and whatever the last batch did. */
-@Composable
-private fun SelectionControls(state: RetrieveUiState, viewModel: RetrieveViewModel) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        // Only inside a folder — there is nothing to select all of on the folder list, where the
-        // equivalent is swiping the folders you want.
-        if (state.selectedFolder != null && state.files.isNotEmpty()) {
-            TextButton(onClick = viewModel::selectAll, enabled = !state.isRestoring) {
-                Text(stringResource(R.string.retrieve_select_all), maxLines = 1)
-            }
-        }
-        if (state.hasSelection) {
-            TextButton(onClick = viewModel::clearSelection, enabled = !state.isRestoring) {
-                Text(stringResource(R.string.retrieve_clear_selection), maxLines = 1)
-            }
-        }
-    }
-
-    when (val status = state.batchStatus) {
-        is RestoreBatchStatus.Done -> Text(
-            text = if (status.failed == 0) {
-                stringResource(R.string.retrieve_batch_done, status.restored)
-            } else {
-                stringResource(R.string.retrieve_batch_done_failed, status.restored, status.failed)
-            },
-            style = MaterialTheme.typography.bodySmall,
-            color = if (status.failed == 0) {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            } else {
-                MaterialTheme.colorScheme.error
-            }
-        )
-
-        RestoreBatchStatus.Unsupported -> Text(
-            text = stringResource(R.string.retrieve_unsupported),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.error
-        )
-
-        else -> Unit
     }
 }
 
@@ -386,15 +452,32 @@ private fun FolderRow(
             // Tap opens, a horizontal drag takes the whole folder. Two intents, two gestures, no
             // button — which is what removed the control that was fighting the name for width.
             //
+            // Directional since 27 Aug 2026, at Ian's request: right selects, left deselects. It
+            // was a toggle in either direction, which meant the gesture's meaning depended on
+            // state the thumb could not see — on a screen of six folders, "swipe them" would
+            // silently unpick anything already picked. Now each direction has one meaning and
+            // repeating it is a no-op, so a swipe can be finished twice without undoing itself.
+            //
+            // `selected` is in the pointerInput key. Without it the lambda keeps the value it
+            // captured when the row first composed, and every swipe after the first would test
+            // against a stale answer.
+            //
             // `detectHorizontalDragGestures` rather than SwipeToDismissBox: this row is inside a
             // vertically scrolling list and, unfolded, is one of two side-by-side columns. A
             // dismiss box wants to own the whole width and animate the row away, neither of which
             // is what a selection should do. The row stays put; only the ring changes.
-            .pointerInput(folder.name) {
+            .pointerInput(folder.name, selected) {
                 var travelled = 0f
                 detectHorizontalDragGestures(
                     onDragStart = { travelled = 0f },
-                    onDragEnd = { if (abs(travelled) > SwipeThresholdPx) onSwipe() }
+                    onDragEnd = {
+                        val wants = when {
+                            travelled > SwipeThresholdPx -> true
+                            travelled < -SwipeThresholdPx -> false
+                            else -> selected
+                        }
+                        if (wants != selected) onSwipe()
+                    }
                 ) { change, amount ->
                     travelled += amount
                     // Claimed only once it is clearly sideways, so a diagonal thumb still scrolls
@@ -419,8 +502,12 @@ private fun FolderRow(
         ),
         onClick = onOpen
     ) {
+        // Bigger than the file rows below it, deliberately, and raised a second notch on 27 Aug
+        // 2026 at Ian's request. This is the level someone lands on and reads at arm's length to
+        // decide where to go, so the name carries a headline style and the two lines under it are
+        // full body text rather than the caption they started as.
         Row(
-            modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
+            modifier = Modifier.padding(horizontal = 18.dp, vertical = 18.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -428,7 +515,7 @@ private fun FolderRow(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(2.dp)
             ) {
-                Text(text = folder.name, style = MaterialTheme.typography.bodyLarge)
+                Text(text = folder.name, style = MaterialTheme.typography.headlineSmall)
                 Text(
                     text = if (folder.isEmpty) {
                         stringResource(R.string.retrieve_folder_empty)
@@ -439,14 +526,14 @@ private fun FolderRow(
                             formatBytes(context, folder.sizeBytes)
                         )
                     },
-                    style = MaterialTheme.typography.bodySmall
+                    style = MaterialTheme.typography.bodyLarge
                 )
                 // What the standing selection took from this folder. Without it, coming back out
                 // to the list leaves no trace of where the files in the bar came from.
                 if (pickedHere > 0) {
                     Text(
                         text = stringResource(R.string.retrieve_picked_here, pickedHere),
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -461,7 +548,7 @@ private fun FolderRow(
                                 folder.fileCount
                             )
                         },
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -553,9 +640,28 @@ private fun FileRow(
     }
 }
 
-/** The single action, and what it is about to move. */
+/**
+ * The single action, and what it is about to move.
+ *
+ * Made loud on 27 Aug 2026 at Ian's request. It was `colorScheme.primary` at its natural width,
+ * tucked into the right end of a `surfaceVariant` bar — in light mode that is dark green on pale
+ * grey, the same weight as the outlined controls up in the card, for the one control on this screen
+ * that moves bytes. Three changes, in order of how much they do:
+ *
+ * - **`signal.accent`**, the colour Albums gives Sync now and the nav bar gives the current tab.
+ *   The app already has a colour that means "this is the action"; this button was not using it.
+ * - **Full width.** It is the only thing in the bar, and a bar with one control at one end reads as
+ *   a footer rather than as a button.
+ * - **Taller, with a `titleMedium` label**, so it is a thumb target at the foot of the screen.
+ *
+ * Disabled colours are derived from the bar's own content colour, not from the scheme. Material's
+ * defaults come off `surfaceVariant` here and produced grey-on-grey — the same washed-out failure
+ * already fixed on the hero's outlined buttons and on Albums' Sync now.
+ */
 @Composable
-private fun RestoreBar(state: RetrieveUiState, onRestore: () -> Unit) {
+private fun RestoreBar(state: RetrieveUiState, onRestore: () -> Unit, onStop: () -> Unit) {
+    val signal = LocalGallerySyncColors.current
+
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceVariant
@@ -565,22 +671,34 @@ private fun RestoreBar(state: RetrieveUiState, onRestore: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.End
         ) {
+            // A control, not a label — the same fix Albums' Sync now already carries. It read
+            // "Restoring…" and disabled itself, so a fetch the user started could not be stopped
+            // by the person who started it, and a 2 GB clip picked by mistake ran to the end.
+            // Ian, 27 Aug 2026.
+            //
+            // The same button rather than a second one beside it: a permanently disabled Stop is
+            // dead weight on a bar that holds one action, and the tab next door already teaches
+            // this shape.
             Button(
-                onClick = onRestore,
-                enabled = !state.isRestoring,
+                onClick = if (state.isRestoring) onStop else onRestore,
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = signal.accent,
+                    contentColor = signal.onAccent,
+                    disabledContainerColor = LocalContentColor.current.copy(alpha = 0.14f),
+                    disabledContentColor = LocalContentColor.current.copy(alpha = 0.55f)
                 )
             ) {
                 Text(
                     text = stringResource(
                         if (state.isRestoring) {
-                            R.string.retrieve_working
+                            R.string.retrieve_stop
                         } else {
                             R.string.retrieve_action
                         }
                     ),
+                    style = MaterialTheme.typography.titleMedium,
                     maxLines = 1
                 )
             }
@@ -613,19 +731,42 @@ private fun Breadcrumb(destinationPath: String, folder: String?, onUp: () -> Uni
         }
     }
 
-    Text(
-        text = text,
-        // A step up from the bodySmall the explanatory text uses. It is a control and a location,
-        // not a footnote, and at bodySmall it read as one more line of prose.
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier
-            .fillMaxWidth()
-            // Only clickable when there is somewhere to go. At the top of the tree the path is a
-            // label, and a control that looks live and does nothing is worse than no control.
-            .clickable(enabled = folder != null, onClick = onUp)
-            .padding(vertical = 6.dp)
-    )
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = text,
+            // A step up from the bodySmall the explanatory text uses. It is a control and a
+            // location, not a footnote, and at bodySmall it read as one more line of prose.
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .weight(1f)
+                // Still the target itself, so the habit of tapping the path keeps working. The
+                // button beside it is the discoverable way; this is the fast one.
+                .clickable(enabled = folder != null, onClick = onUp)
+                .padding(vertical = 6.dp)
+        )
+
+        // Ian, 27 Aug 2026: a back button, on the right. The path bar was the only way out of a
+        // folder and nothing about a line of grey text says so — a file manager teaches that habit
+        // but this screen has two levels and no chrome to teach it with.
+        //
+        // Absent rather than disabled at the top level, for the reason the path itself is: there is
+        // nowhere up from the roots, and a greyed control still asks to be tried.
+        if (folder != null) {
+            IconButton(onClick = onUp) {
+                Icon(
+                    imageVector = SignalIcons.Back,
+                    contentDescription = stringResource(R.string.retrieve_back),
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+    }
 }
 
 /**
@@ -638,6 +779,11 @@ private fun Breadcrumb(destinationPath: String, folder: String?, onUp: () -> Uni
  *
  * Phrased from the reader's side. "Can't find what you're looking for?" is the thought they are
  * already having; "GallerySync only browses the backup roots" is our implementation detail.
+ *
+ * The line under it used to explain that scope. Ian replaced it on 27 Aug 2026 with an instruction —
+ * "To Download other items from your OneDrive click here" — which trades the explanation for the way
+ * out. The heading already carries the problem, so the second sentence was restating it before
+ * offering the answer.
  */
 @Composable
 private fun CantFindSection(modifier: Modifier = Modifier) {
@@ -653,12 +799,26 @@ private fun CantFindSection(modifier: Modifier = Modifier) {
             text = stringResource(R.string.retrieve_cant_find_title),
             style = MaterialTheme.typography.titleMedium
         )
-        Text(
-            text = stringResource(R.string.retrieve_cant_find_detail),
-            style = MaterialTheme.typography.bodySmall
-        )
-        OutlinedButton(onClick = { OneDriveLauncher.open(context) }) {
-            Text(text = stringResource(R.string.retrieve_open_onedrive), maxLines = 1)
+        // Sentence and button on one line. Ian, 27 Aug 2026. The text now ends "click here", which
+        // only means anything while the thing to click is beside it — stacked, "here" pointed at
+        // the line below and read as a broken link.
+        //
+        // The button keeps its intrinsic width and the text takes the rest, so a long line wraps
+        // within its half instead of squeezing the label. Centred against it, because the sentence
+        // is one or two lines and the button should sit against the middle of either.
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.retrieve_cant_find_detail),
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.weight(1f)
+            )
+            OutlinedButton(onClick = { OneDriveLauncher.open(context) }) {
+                Text(text = stringResource(R.string.retrieve_open_onedrive), maxLines = 1)
+            }
         }
     }
 }

@@ -6,6 +6,9 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import com.gallery.sync.util.Logger
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.InputStream
 import javax.inject.Inject
@@ -86,12 +89,18 @@ class MediaStoreWriter @Inject constructor(
         val uri = runCatching { resolver.insert(collection, pending) }.getOrNull()
             ?: return WriteOutcome.Failed("MediaStore refused to create the row")
 
-        val written = runCatching {
-            var total = 0L
+        var total = 0L
+        val written: Long? = try {
             resolver.openOutputStream(uri)?.use { out ->
                 source().use { input ->
                     val buffer = ByteArray(BUFFER_BYTES)
                     while (true) {
+                        // Stop means stop, mid-file. This loop is plain blocking IO with no
+                        // suspension point in it, so without an explicit check a cancelled restore
+                        // kept pulling bytes until the current file finished — which on a 2 GB clip
+                        // is minutes after the user pressed the button. Ian asked for a Stop
+                        // control on 27 Aug 2026; this is what makes it mean anything.
+                        currentCoroutineContext().ensureActive()
                         val read = input.read(buffer)
                         if (read <= 0) break
                         out.write(buffer, 0, read)
@@ -99,9 +108,16 @@ class MediaStoreWriter @Inject constructor(
                         onProgress(total)
                     }
                 }
-            } ?: return@runCatching null
-            total
-        }.getOrElse { error ->
+                total
+            }
+        } catch (cancelled: CancellationException) {
+            // A stop, not a failure, and the difference reaches the user: rethrowing means the
+            // batch ends where it was rather than counting this file as one that could not be
+            // restored. The half-written row goes either way — see [discard].
+            Logger.i(TAG, "restore of $displayName stopped at $total bytes")
+            discard(uri)
+            throw cancelled
+        } catch (error: Throwable) {
             Logger.e(TAG, "restore of $displayName failed: ${error.javaClass.simpleName}")
             null
         }

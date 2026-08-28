@@ -63,6 +63,17 @@ fun HeroCard(
      */
     figureContent: (@Composable ColumnScope.() -> Unit)? = null,
     /**
+     * A line under the figure, inside the same centred column.
+     *
+     * For a second number that qualifies the first rather than commenting on it. Restore uses it
+     * for the selection: "6" is what the drive holds, "13 selected" is how much of it is spoken
+     * for, and the two belong stacked under one label. Ian, 27 Aug 2026 — it had been sitting in
+     * [detail], on top of that tab's swipe instructions, where it read as a third gesture.
+     *
+     * Ignored when [figureContent] is given, which replaces this whole block.
+     */
+    figureFooter: (@Composable ColumnScope.() -> Unit)? = null,
+    /**
      * Pushes [actions] to the foot of the card instead of letting them follow [detail].
      *
      * Only worth it where the other column is the taller one — Albums, whose heading and 2 x 2 of
@@ -92,14 +103,16 @@ fun HeroCard(
                         .fillMaxWidth()
                         .then(if (actionsAtBottom) Modifier.height(IntrinsicSize.Min) else Modifier),
                     horizontalArrangement = Arrangement.spacedBy(24.dp),
-                    verticalAlignment = if (actionsAtBottom) {
-                        Alignment.Top
-                    } else {
-                        Alignment.CenterVertically
-                    }
+                    // Tops, always. Centred, a column that grows re-centres itself and everything
+                    // in it moves: on Restore, selecting files added a line under the figure and
+                    // the label above it jumped upward, which is a label moving to report
+                    // something that did not happen to it. Ian, 27 Aug 2026. Pinned to the top,
+                    // the label and the first line of the detail column start at the same height
+                    // and stay there whatever either column does underneath.
+                    verticalAlignment = Alignment.Top
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        if (figureContent != null) figureContent() else HeroFigure(label, figure)
+                        if (figureContent != null) figureContent() else HeroFigure(label, figure, figureFooter)
                     }
                     Column(
                         modifier = Modifier
@@ -127,7 +140,7 @@ fun HeroCard(
                 }
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    if (figureContent != null) figureContent() else HeroFigure(label, figure)
+                    if (figureContent != null) figureContent() else HeroFigure(label, figure, figureFooter)
                     detail()
                     actions()
                 }
@@ -169,19 +182,37 @@ fun HeroOutlinedButton(onClick: () -> Unit, label: String, modifier: Modifier = 
  * 27 Aug 2026. Left-aligned, a short number sat off under the first two or three characters of a
  * long label and read as unrelated to it; centred, the pair reads as one object — which is what it
  * is, a caption and the thing it names.
+ *
+ * The label is `titleLarge`, not the `labelMedium` a caption would normally take. Ian, 27 Aug 2026,
+ * on the Archive tab: with the finished-state sentences gone the card is a label and a number, and a
+ * 12sp caption under a 36sp figure read as a footnote to it rather than as its name. Raised again
+ * the same day, to sit level with the detail column beside it. Restore takes the same step up —
+ * one card, so the tabs cannot drift.
  */
 @Composable
-private fun HeroFigure(label: String, figure: String) {
+private fun HeroFigure(
+    label: String,
+    figure: String,
+    footer: (@Composable ColumnScope.() -> Unit)?
+) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = label,
-            style = MaterialTheme.typography.labelMedium,
+            style = MaterialTheme.typography.titleLarge,
             textAlign = TextAlign.Center
         )
         Text(text = figure, style = MaterialTheme.typography.displaySmall)
+        // A gap, not the column's default nothing. The footer is a second number and it was
+        // touching the first — "6" and "13 selected" ran together as one block. Ian, 27 Aug 2026.
+        // Only when there is a footer: the caller passes null rather than an empty lambda, so an
+        // unselected card has no stray space under its figure.
+        if (footer != null) {
+            Spacer(modifier = Modifier.height(10.dp))
+            footer()
+        }
     }
 }
 
