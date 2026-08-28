@@ -76,18 +76,75 @@ contradictory settled decisions in the same file is worse than either of them.
 
 ## How it works
 
-### Finding the restorable files
+### What the tab lists
 
-`ProxyMarker.isProxy(uri)` is the test, not the ledger. Its own reasoning already covers why:
+Three local states, all three shown, two of them actionable. Ian settled this over 27 Aug 2026.
+
+| Local state | Row offers | Selectable |
+|---|---|---|
+| Shrunken by us — carries the proxy marker | **Restore** — the full-size original replaces it in place | yes |
+| Absent from the phone entirely | **Download** — the file lands in its album, under its own name | yes |
+| Present at full size | nothing — greyed, and labelled as already full size | **no** |
+
+**The third is shown, not hidden.** Ian, 27 Aug 2026: *"keep the file listed, just grey out,
+unavailable for restore."* It is the same conclusion the old tab reached — *"files already on the
+phone are listed and labelled rather than hidden"* — and for the same reason. A file absent from the
+list reads as one the app does not have; greyed out it reads as one there is nothing to do about.
+Together the three states make a folder legible at a glance: this much is full quality, this much is
+shrunken, this much is gone.
+
+**Why it is not actionable, having briefly been going to be.** Ian argued for restoring it first —
+*"sometimes you may want to restore the exact same file: if you edit something, you don't like the
+edit and need a fresh full-sized copy to work from"* — which is a real use. He withdrew it the same
+day: *"if the user wants it they can do it manually via OneDrive and the consequences are their
+own."*
+
+That is the right call, because overwriting a full-size local file is the most destructive thing this
+app could do. Replacing a proxy cannot lose anything: the local copy is a downscale and the original
+is verified in the cloud. Replacing a full-size file destroys whatever is in it, and if that is an
+edit which has not been uploaded, it exists nowhere afterwards — no trash, no undo. The app declining
+to be the instrument of that, while OneDrive remains available to anyone who wants it, puts the
+consequence with the person choosing it.
+
+Two things worth recording so the idea is not re-proposed without them:
+
+- **The cloud copy may already be the edit.** In a Backup or Sync album an edit changes size and
+  mtime, the scanner computes a new ledger key, and the file is uploaded. Restoring then returns the
+  very edit the user was trying to escape. The feature only does what it promises if the edit has not
+  yet been backed up.
+- **"The pre-edit original" is a different feature.** Graph exposes OneDrive's version history and
+  this app does not use it. Restoring returns the *current* cloud version, never a prior one. If
+  rolling back to an earlier version is wanted, it is its own task, not a checkbox on this one.
+
+`Select all` takes the first two states and skips the third, which falls out of the rows simply not
+being selectable.
+### Classifying a file — and the trap in the existing test
+
+`ProxyMarker.kindOf(uri)` is the test for the first state, not the ledger. Its own reasoning covers
+why:
 
 > The ledger cannot answer this reliably: it is wiped by an uninstall, absent on a new phone, and has
 > been observed going stale. A stamp inside the file survives all of that, and survives being copied
 > or shared as well.
 
-It reads the EXIF header only, never the pixels, which is what makes asking it of every file in the
-scan affordable. A file that cannot be read answers `false`; refusing to claim a file is a proxy
-stays the safe direction here, since a wrong "yes" would offer to overwrite a file that is already
+For a photo it reads the EXIF header only, never the pixels, which is what makes asking it of every
+file in the scan affordable. A file that cannot be read answers `null`; refusing to claim a file is a
+proxy stays the safe direction, since a wrong "yes" would offer to overwrite a file that is already
 the original.
+
+**Presence is decided by name, and by name alone.** `BackupEngine` line 802 currently answers "is this
+already on the phone?" with `RestoredAlbum.contentSignature(name, ref.sizeBytes)` — name plus the size
+OneDrive reports. **That test must not be reused here.** A proxy's local size is deliberately about a
+tenth of the cloud original's, so it returns *not on this phone* for every proxied file — and the
+download path would then offer to fetch the exact files the restore path is already offering to
+replace, which is the second-copy behaviour this whole task exists to remove.
+
+So: the name tells you whether the file is present, and the marker tells you which of the two present
+states it is in. Size is not part of either question.
+
+The folder card's "17 of 19 already on this phone" is no help either. It comes from
+`scanEverything().groupingBy { it.album }.eachCount()`, and `RestorableFolder`'s own doc calls those
+counts "deliberately not an identity claim". Per-file classification is new work.
 
 The scan runs when the tab is opened. Rows group under the folder the file actually lives in —
 `MediaFolderEntity`'s bucket, not a OneDrive path — because "in their original folders" is where the
@@ -95,6 +152,24 @@ user will look for the result.
 
 A proxy with no cloud copy to restore from is not listed. The full-size original must be present in
 OneDrive and identifiable, or the row is a promise the app cannot keep.
+
+### Downloading what is missing
+
+A folder can hold both kinds. Ian, 27 Aug 2026, on a folder with proxies *and* files the phone no
+longer has: offer to *"Download files not already in Album"*. This closes a gap the earlier
+restorable-only rule left open — a file the user deleted from the phone themselves is still in
+OneDrive and nothing in the app would otherwise offer it back.
+
+A downloaded file lands **in its album, under its real name**. No `Restored` folder and no
+`_restored` suffix: that suffix exists only to distinguish a fetched copy from a file already
+present, and by definition this one is not. A download that puts the album back the way it was should
+be indistinguishable from never having lost the file.
+
+**Open — when the offer appears.** Ian suggested a prompt on selecting such a folder. A prompt per
+swipe is a poor trade when several folders are being picked; the recommendation is one confirmation
+when Restore is pressed, covering everything selected, naming the count and the total size — the same
+confirm-once-before-the-run shape Archive uses, and it can state the megabytes, which matters because
+downloading consumes space rather than freeing it. Not yet decided.
 
 ### Replacing the file
 
@@ -144,7 +219,12 @@ Per-file states, in order:
 | Downloading… | bytes moving, with the per-file percentage |
 | Verifying… | full size arrived, being checked against what OneDrive reported |
 | Restored to full size | the proxy has been replaced and the rescan has run |
+| Downloaded to <album> | a file that was missing is back, under its own name |
 | Could not restore — your file is unchanged | any failure; states plainly that nothing was lost |
+
+A row says which of the two things it did. They look alike while bytes move and diverge at the end,
+and a user who selected a folder of both should be able to see afterwards which files were replaced
+and which were fetched back.
 
 The last row's wording matters and should not be softened into an apology. It is the sentence that
 tells the user a failure costs them nothing.
@@ -214,9 +294,14 @@ file restored and every untouched proxy untouched.
 ## Not in scope
 
 - **Browsing OneDrive.** That is the OneDrive app's job and the Open OneDrive button already points
-  at it. This tab lists local proxies and nothing else.
-- **Restoring a file that was never optimised.** There is nothing to replace, and downloading a
-  second copy of a file the user already has is the behaviour this task removes.
+  at it. The folder list stays confined to the backup roots, with no search, grid, thumbnails or
+  sort — the constraint is held by the absence of those, not by hiding rows.
+- **Overwriting a file already on the phone at full size.** It is listed and greyed rather than
+  offered. Ian, 27 Aug 2026: the user can do it through OneDrive, and the consequences are then
+  theirs. See *What the tab lists* for why this app declines to be the instrument of destroying an
+  unbacked-up edit.
+- **Rolling back to an earlier OneDrive version.** Graph exposes version history; restoring here
+  returns the current cloud copy and nothing else. A separate task if it is ever wanted.
 - **Listing video**, until TASK-013 produces video proxies for it to list. The detection framework
   is in place and costs nothing while there is nothing to find.
 - **Removing `RestoredAlbum`.** `contentSignature` must keep stripping `_restored` for files already
@@ -225,15 +310,21 @@ file restored and every untouched proxy untouched.
 
 ## Acceptance
 
-- Opening the tab scans the gallery and lists only files carrying the proxy marker, grouped by their
-  own folder
-- A file with no restorable cloud original is not offered
+- Opening the tab scans the gallery and lists, grouped by their own folder, every file in the cloud
+  folder in one of three states: restorable, downloadable, or already full size
+- A file present on the phone at full size is shown greyed and labelled, and cannot be selected —
+  including by `Select all`
+- Presence is decided by name alone. A proxied file is never classed as missing — the regression test
+  is a folder of proxies offering zero downloads
+- A proxy with no cloud original to restore from is not offered
 - Restoring replaces the proxy in its original folder — same name, same album, no second copy
   anywhere
+- A downloaded file lands in its album under its real name, with no `_restored` suffix
 - The overwrite happens only after the downloaded bytes match the size OneDrive reports
 - A failed or stopped restore leaves the proxy intact and the cloud copy untouched, and the same file
   can be restored again immediately
 - MediaStore reports the restored size after the run, verified by opening the file in Samsung Gallery
-- The per-file progress screen reports each file's outcome by name
+- The per-file progress screen reports each file's outcome by name, and says which of the two things
+  it did
 - MILESTONES' "Retrieval reads the drive, not the ledger" paragraph is rewritten to match
 - Verified on hardware in both themes, per CLAUDE.md
