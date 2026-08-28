@@ -127,6 +127,9 @@
         caught it: 13 ledger rows against 2 files on the phone.
     -->
     <string name="albums_scheduled_summary">%1$d Scheduled to leave this phone</string>
+    <!-- What the Archive mode has actually taken off this phone. The only non-zero figures an
+         archived album has, since every other count on the card describes local files. -->
+    <string name="albums_archived_summary">%1$d files archived · %2$s in OneDrive</string>
     <string name="albums_scheduled_none">Nothing left to archive</string>
     <!--
         The Albums tab is where modes are chosen, so its hero counts albums, not files. It read

@@ -65,7 +65,16 @@ data class AlbumBackupCount(
      * Archive album that ran to completion has [backedUp] of zero and a non-zero value here, and
      * that is exactly how it is told apart from an Archive album that was always empty.
      */
-    val everBackedUp: Int
+    val everBackedUp: Int,
+
+    /**
+     * What those uploaded rows occupy in OneDrive.
+     *
+     * The size the Archive filter reports, because an archived album holds nothing locally and
+     * `totalBytes` is therefore zero — which is how that view came to describe a finished archive as
+     * "0 Images · 0 Videos". Ian, 27 Aug 2026.
+     */
+    val everBackedUpBytes: Long
 )
 
 @Dao
@@ -662,7 +671,11 @@ interface BackupEntryDao {
                              AND localMissingSinceEpochMillis IS NULL
                         THEN sizeBytes - localProxySizeBytes ELSE 0 END
                ), 0) AS savedBytes,
-               SUM(CASE WHEN state = :uploaded THEN 1 ELSE 0 END) AS everBackedUp
+               SUM(CASE WHEN state = :uploaded THEN 1 ELSE 0 END) AS everBackedUp,
+               COALESCE(SUM(
+                   CASE WHEN state = :uploaded
+                        THEN COALESCE(remoteSizeBytes, sizeBytes) ELSE 0 END
+               ), 0) AS everBackedUpBytes
         FROM backup_entries
         GROUP BY album
         """

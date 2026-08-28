@@ -50,7 +50,18 @@ data class AlbumsSummary(
     val optimisedCount: Int,
     val savedBytes: Long,
     /** In Archive albums, files not yet confirmed in OneDrive — so, not yet removable. */
-    val awaitingVerification: Int
+    val awaitingVerification: Int,
+
+    /**
+     * Files this set has put in OneDrive, and what they occupy there.
+     *
+     * The population an Archive album is *about*. Every other figure here counts what is on the
+     * phone, which for a finished archive is nothing — so the Archive filter reported "0 Images · 0
+     * Videos" over two albums holding 24 files in the cloud. Ian, 27 Aug 2026: it should list what
+     * has been archived from those folders.
+     */
+    val archivedCount: Int,
+    val archivedBytes: Long
 )
 
 /**
@@ -73,7 +84,10 @@ data class AlbumRow(
     /** What optimising reclaimed in this album. Zero unless something here has been proxied. */
     val savedBytes: Long = 0L,
     /** Uploaded rows including files no longer on the phone. Only for [isArchivedAndEmpty]. */
-    val everBackedUpCount: Int = 0
+    val everBackedUpCount: Int = 0,
+
+    /** What those uploaded rows occupy in OneDrive — the only non-zero size an archived album has. */
+    val everBackedUpBytes: Long = 0L
 ) {
     val isEnabled: Boolean get() = mode.uploads
 
@@ -261,7 +275,9 @@ data class BackupUiState(
             totalBytes = rows.sumOf { it.totalBytes },
             optimisedCount = rows.sumOf { it.proxiedCount },
             savedBytes = rows.sumOf { it.savedBytes },
-            awaitingVerification = rows.sumOf { it.outstanding }
+            awaitingVerification = rows.sumOf { it.outstanding },
+            archivedCount = rows.sumOf { it.everBackedUpCount },
+            archivedBytes = rows.sumOf { it.everBackedUpBytes }
         )
     }
 
@@ -447,7 +463,8 @@ class BackupViewModel @Inject constructor(
                     imageCount = album.imageCount,
                     videoCount = album.videoCount,
                     savedBytes = counts?.savedBytes ?: 0L,
-                    everBackedUpCount = counts?.everBackedUp ?: 0
+                    everBackedUpCount = counts?.everBackedUp ?: 0,
+                    everBackedUpBytes = counts?.everBackedUpBytes ?: 0L
                 )
             }
 
@@ -481,7 +498,8 @@ class BackupViewModel @Inject constructor(
                         backedUpCount = counts?.backedUp ?: 0,
                         proxiedCount = counts?.proxied ?: 0,
                         savedBytes = counts?.savedBytes ?: 0L,
-                        everBackedUpCount = counts?.everBackedUp ?: 0
+                        everBackedUpCount = counts?.everBackedUp ?: 0,
+                        everBackedUpBytes = counts?.everBackedUpBytes ?: 0L,
                     )
                 }
 

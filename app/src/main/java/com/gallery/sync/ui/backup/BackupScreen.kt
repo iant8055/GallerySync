@@ -882,7 +882,10 @@ private fun HeroDetail(
     // than the disabled Sync now beside it — that one only cares about albums it is allowed to
     // upload from.
     val shown = state.albums.filter { modeFilter == null || it.mode == modeFilter }
-    if (shown.isNotEmpty() && shown.all { it.outstanding == 0 }) {
+    // `all` over empty albums is vacuously true, which put "0 Images · 0 Videos / are backed up" on
+    // the Archive filter — where every album is empty by design. The claim needs something to be
+    // true of, so the counts it sits under must be non-zero.
+    if (shown.sumOf { it.itemCount } > 0 && shown.all { it.outstanding == 0 }) {
         Text(
             text = stringResource(R.string.albums_all_backed_up),
             style = MaterialTheme.typography.bodyMedium
@@ -901,10 +904,25 @@ private fun HeroDetail(
         )
     }
 
-    // Archive is judged on what is still here. Every file in an Archive album is scheduled to
-    // leave, so the count of them is the honest number — and unlike "waiting to be verified" it
-    // compares nothing against the ledger, which is where the previous line went wrong.
+    // Archive is the one filter whose subject is not on the phone. Every other figure on this card
+    // counts local files, which for a finished archive is nothing — so this view reported "0 Images
+    // · 0 Videos" over two albums holding 24 files in OneDrive. Ian, 27 Aug 2026: it should list
+    // what has been archived from those folders.
+    //
+    // Two different questions, both answered, because a half-archived album needs both: what has
+    // already gone, and what is still waiting to go.
     if (modeFilter == AlbumMode.ARCHIVE) {
+        if (summary.archivedCount > 0) {
+            Text(
+                text = stringResource(
+                    R.string.albums_archived_summary,
+                    summary.archivedCount,
+                    formatBytes(context, summary.archivedBytes)
+                ),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
         val scheduled = summary.imageCount + summary.videoCount
         Text(
             text = if (scheduled == 0) {
