@@ -498,6 +498,32 @@ interface BackupEntryDao {
     suspend fun restorableProxies(): List<BackupEntryEntity>
 
     /**
+     * Files this phone no longer has, which OneDrive still does.
+     *
+     * The download half of the Restore tab. Where [restorableProxies] answers *what have I shrunk*,
+     * this answers *what has left this phone* — chiefly an Archive album, whose whole point is that
+     * the local copies are gone.
+     *
+     * **Scope, deliberately: what this app took, not everything in the drive.** A row exists here
+     * only because this device uploaded the file and later noticed it gone. A photo put in OneDrive
+     * from a PC has no row and is not offered — Ian, 27 Aug 2026: *"if the user wants a straight
+     * download they can use OneDrive."*
+     *
+     * `remoteItemId` is required for the same reason it is in [restorableProxies]: without it there
+     * is nothing to fetch, and offering the row would be a promise the app cannot keep.
+     */
+    @Query(
+        """
+        SELECT * FROM backup_entries
+        WHERE localMissingSinceEpochMillis IS NOT NULL
+          AND remoteItemId IS NOT NULL
+          AND remoteSizeBytes IS NOT NULL
+        ORDER BY album, displayName
+        """
+    )
+    suspend fun downloadableFiles(): List<BackupEntryEntity>
+
+    /**
      * Moves a row onto the file that has just replaced it, in one statement.
      *
      * **The id changes, and it has to.** A row's identity is

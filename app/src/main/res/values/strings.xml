@@ -365,14 +365,21 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
         The Restore tab, TASK-018: what on this phone has been shrunk, and putting it back.
         Distinct from the old drive-listing tab, which fetched second copies into DCIM/Restored.
     -->
-    <string name="restore_hero_label">Files to Restore</string>
-    <string name="restore_intro">Swipe or tap to select. Restoring replaces the small copy in its own folder.</string>
-    <string name="restore_empty">Nothing on this phone has been optimised, so there is nothing to restore.</string>
+    <string name="restore_hero_label_folders">Folders to Restore</string>
+    <string name="restore_hero_label_files">Files in this folder</string>
+    <string name="restore_all_folders">All folders</string>
+    <string name="restore_intro_folders">Swipe right to select / left to deselect\nTap to open</string>
+    <string name="restore_intro_files">Tap a file to select it. Nothing moves until you press Restore.</string>
+    <string name="restore_empty">Nothing has been optimised or archived from this phone, so there is nothing to bring back.</string>
     <string name="restore_selected_summary">%1$d selected · %2$s to recover</string>
+    <string name="restore_folder_detail">%1$d files · %2$s to recover</string>
+    <!-- Named separately: they are different operations on the phone, and one total would hide that. -->
+    <string name="restore_folder_split">%1$d optimised · %2$d not on this phone</string>
     <string name="restore_sizes">%1$s now · %2$s full size</string>
-    <string name="restore_downloading">Downloading… %1$d%%</string>
-    <string name="restore_overwriting">Replacing the small copy…</string>
+    <string name="restore_missing_size">Not on this phone · %1$s in OneDrive</string>
+    <string name="restore_downloading">Working… %1$d%%</string>
     <string name="restore_done_row">Restored to full size</string>
+    <string name="restore_downloaded_row">Back on this phone</string>
     <!--
         Says the file is unchanged, and must not be softened into an apology. A restore reads from
         OneDrive and writes to the phone, so nothing remote is touched and the small copy is only
