@@ -116,18 +116,33 @@ fun RestoreScreen(
                     )
                 },
                 actions = {
+                    // Two fixed half-width slots, weighted as Albums weights Sync now and Rescan so
+                    // a button here is the same size as a button there. The empty slot is a Spacer,
+                    // or a lone button stretches across the card.
+                    //
+                    // Slot one changes with the level: Refresh belongs to the folder list, Select
+                    // all to a folder. Without Refresh the folder view had no control at all, since
+                    // Clear only appears with a selection. Ian noticed, 27 Aug 2026.
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        if (state.openFolder != null && !state.running) {
-                            HeroOutlinedButton(
+                        when {
+                            state.running -> Spacer(modifier = Modifier.weight(1f))
+
+                            // Re-reads the ledger. An optimise or archive run while this tab was
+                            // open changes what belongs here, and this is the only way to ask.
+                            state.openFolder == null -> HeroOutlinedButton(
+                                onClick = viewModel::refresh,
+                                label = stringResource(R.string.retrieve_refresh),
+                                modifier = Modifier.weight(1f)
+                            )
+
+                            else -> HeroOutlinedButton(
                                 onClick = viewModel::selectAllHere,
                                 label = stringResource(R.string.retrieve_select_all),
                                 modifier = Modifier.weight(1f)
                             )
-                        } else {
-                            Spacer(modifier = Modifier.weight(1f))
                         }
 
                         if (state.hasSelection && !state.running) {
