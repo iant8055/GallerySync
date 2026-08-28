@@ -199,6 +199,72 @@ MediaStore reports the old size until a rescan — established 19 Aug 2026 and a
 proxy path. Reuse that step; a restored file that still reads as 4 KB in the gallery has not been
 restored as far as any other app is concerned.
 
+### Restoring must not start a loop
+
+Ian, 27 Aug 2026, before any of this was built: *"when a proxied file is restored, will sync see it as
+a new file and automatically try to sync/optimize it again?"*
+
+It would. `BackupEntryDao.proxyCandidates` selects on:
+
+```
+state = UPLOADED
+AND remoteSizeBytes = sizeBytes
+AND isProxied = 0
+AND isProxySkipped = 0
+AND isVideo = 0
+AND album IN (SELECT albumName FROM album_preferences WHERE mode = SYNC)
+```
+
+A successfully restored file satisfies every one of those again — the local copy is once more
+byte-identical to the cloud original, so `remoteSizeBytes = sizeBytes` holds. The only thing keeping
+it out is `isProxied`, and that leaves two bad options:
+
+- **Leave `isProxied = true`.** No re-optimise, but the ledger now lies. `localProxySizeBytes` says
+  small while the file is full size, and `ProxyApplier`'s requirement that "which photos are still
+  full quality" stay answerable is broken.
+- **Clear it.** The ledger is honest and the file is a proxy candidate on the next run. With
+  automatic optimising on — which it is by default — that is restore, shrink, restore, shrink: a loop
+  the user drives without understanding why the photo keeps changing.
+
+**A per-file flag is the answer.** Ian, 27 Aug 2026. `isProxied` goes false so the ledger stops lying,
+and a new column — `restoredToFullSize`, or whatever it ends up called — records that the user
+deliberately un-shrunk this file. `proxyCandidates` gains one more `AND`.
+
+It must be its own column and not a second meaning for `isProxySkipped`. That flag means *cannot
+usefully shrink*; this means *must not be shrunk*. One is a fact about the file, the other is a
+standing instruction from the user, and a query that conflated them would silently start
+re-optimising restored files the day someone widened the skip logic.
+
+This is a Room schema change and therefore an escalation under CLAUDE.md. Raised with Ian and agreed
+in the same conversation, 27 Aug 2026.
+
+**Rejected: switching the album to Off.** Considered and dropped the same day. Mechanically it works
+— `proxyCandidates` filters on album mode — but `AlbumMode.OFF` means *not uploaded*, not merely *not
+optimised*. Restoring one photo would stop backing up every other file in that album and every photo
+taken into it afterwards, silently, five weeks before Samsung's sync stops. It also inverts the
+consent model: CLAUDE.md has behaviour following from "a mode the user set, and from nothing else",
+and an app that rewrites a mode on the user's behalf is deciding for them in the direction of less
+protection.
+
+`SYNC → BACKUP` would have been the safe version of that idea — `proxiesPhotos` is `mode == SYNC`, so
+Backup uploads normally and never touches the local file. It is still album-wide for a per-file
+intent, so it is not the mechanism. It is a reasonable thing to **offer**: someone who restores most
+of an album is saying that album should not be in Sync, and a prompt — *"you have restored 12 of 15
+photos here; keep this album at full quality?"* — puts that switch under their thumb rather than the
+app's.
+
+**Restore is not offered in Archive albums.** `redundantLocalCopies` matches proxied rows by
+`mediaStoreId`, and a restored file is still verified in the cloud — so Archive would offer to take it
+off the phone again immediately. Restoring into an album whose standing instruction is "remove these
+from the gallery" is contradictory intent, and the tab should say so rather than let the two fight.
+
+**Still to check: does the changed mtime cause a re-upload?** A non-proxied row is matched by
+`contentSignature`, which is name plus size, and after a restore the local size matches the ledger's
+recorded original — so it should read as present rather than new. What has not been traced is whether
+`backupKeyOf(album, displayName, sizeBytes, dateModifiedEpochSeconds)` treats the file as new anywhere
+upstream, since a restore necessarily changes the mtime. Worth confirming rather than assuming; a
+wasted re-upload of a file already in the cloud is harmless but looks like a bug.
+
 ### The rule that makes overwriting acceptable
 
 **Download and verify first. Overwrite second.**
@@ -345,5 +411,9 @@ file restored and every untouched proxy untouched.
 - MediaStore reports the restored size after the run, verified by opening the file in Samsung Gallery
 - The per-file progress screen reports each file's outcome by name, and says which of the two things
   it did
+- A restored file is never re-optimised. `isProxied` is cleared and a per-file flag records the
+  user's choice; the regression test is a restored photo surviving an automatic optimise run
+- Restore is not offered for albums in Archive mode
+- No album's mode is changed by the app. Any mode change is a switch the user taps
 - MILESTONES' "Retrieval reads the drive, not the ledger" paragraph is rewritten to match
 - Verified on hardware in both themes, per CLAUDE.md
