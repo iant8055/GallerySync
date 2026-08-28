@@ -409,7 +409,7 @@ Stop stays available throughout — the control added to the Restore bar on 27 A
 mid-file rather than at the end of the current one. A stopped restore leaves every already-restored
 file restored and every untouched proxy untouched.
 
-## Unknowns — one answered, two open
+## Unknowns — two answered, one open
 
 1. ~~**Does the SAF tree grant permit a file to grow?**~~ **ANSWERED — yes.** Fold 4, 27 Aug 2026,
    via the in-app probe (`SafGrowProbe`, Settings → Debug in debug builds): a 4,096-byte file in
@@ -448,11 +448,48 @@ file restored and every untouched proxy untouched.
    stamped before this — reads as `PhotoDownscaled`. Those files are on real devices, and reading
    them as "not a proxy" would offer them for upload as though they were originals.
 
-3. **What identifies the cloud original for a given proxy?** The proxy has the same name as what was
-   uploaded, but `contentSignature` exists because `name|size` is how three separate places answer
-   "is this content on the phone?" — and a proxy's size is deliberately not the original's. Confirm
-   the ledger row survives proxying with the remote item id intact, and that a rescan does not orphan
-   it.
+3. ~~**What identifies the cloud original for a given proxy?**~~ **ANSWERED — the ledger row, and it
+   survives.** Measured against the live ledger on the Fold 4, 27 Aug 2026, not reasoned about.
+
+   | Check | Result |
+   |---|---|
+   | Proxied rows | 26 |
+   | Still carrying a `remoteItemId` | 26 of 26 |
+   | Distinct remote ids among them | 26 — no collisions |
+   | `remoteSizeBytes = sizeBytes` | 26 of 26 |
+   | Carrying a `mediaStoreId` | 26 of 26 |
+   | Duplicate `album + displayName` rows anywhere in the ledger | none, across 147 rows |
+
+   So a proxy's row already holds all three things a restore needs: **which** cloud item to fetch
+   (`remoteItemId`), **how many bytes** to expect (`remoteSizeBytes`, still equal to the original's
+   `sizeBytes`), and **which local file** to write over (`mediaStoreId`).
+
+   The id survives because the row does. `markProxied` is `UPDATE backup_entries SET isProxied = 1,
+   localProxySizeBytes = :size WHERE id = :id` — a field update on the existing row, never a delete
+   and re-insert, so nothing that was on it is lost.
+
+   **The no-duplicates result is the load-bearing one.** The danger was never `markProxied`; it was a
+   later scan computing a fresh content key for the shrunken file, inserting a second row, and
+   orphaning the one holding the remote id. That has not happened once on this device, which is the
+   skip-by-`mediaStoreId` path in `BackupEngine` working as its doc claims.
+
+   **What is not proven, and cannot be from a snapshot:** this measures a device where every scan has
+   behaved. The failure mode is a `mediaStoreId` that changes — the entity's own doc calls that field
+   "unfit for identity" — after which the skip misses, a duplicate row appears, and the restore for
+   that file loses its cloud pointer. Re-run the check after any change to the scanner or to
+   proxying:
+
+   ```bash
+   adb exec-out run-as com.gallery.sync cat databases/gallery_sync.db > ledger.db
+   sqlite3 ledger.db "
+     SELECT COUNT(*) FROM backup_entries WHERE isProxied=1 AND remoteItemId IS NULL;
+     SELECT album, displayName, COUNT(*) FROM backup_entries
+       GROUP BY album, displayName HAVING COUNT(*) > 1;"
+   ```
+
+   Both should return nothing. The first says every proxy still knows where its original is; the
+   second says no rescan has orphaned a row. Note `sqlite3` is not on the device — it ships with the
+   platform-tools on the desktop — and this needs a debug build for `run-as` to be permitted.
 
 ## Not in scope
 
@@ -500,5 +537,8 @@ file restored and every untouched proxy untouched.
   a new file to upload
 - Restore is not offered for albums in Archive mode
 - No album's mode is changed by the app. Any mode change is a switch the user taps
+- The ledger invariants hold after the feature ships: no proxied row without a `remoteItemId`, and no
+  duplicate `album + displayName`. The query is in *Unknowns*, and is the check to re-run after any
+  change to scanning or proxying
 - MILESTONES' "Retrieval reads the drive, not the ledger" paragraph is rewritten to match
 - Verified on hardware in both themes, per CLAUDE.md
