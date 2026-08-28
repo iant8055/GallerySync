@@ -4,6 +4,7 @@ import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.PUT
@@ -37,6 +38,23 @@ interface UploadChunkService {
      */
     @GET
     suspend fun querySession(@Url uploadUrl: String): Response<ResponseBody>
+
+    /**
+     * Abandons a session and releases the chunks Graph is holding for it.
+     *
+     * Used when the user pauses. Resuming from a half-sent file would read the *current* local
+     * bytes at a stored offset, and if that file changed while paused the two halves would be
+     * spliced into something Graph accepts and marks complete. The ledger key includes size and
+     * modification time, so a changed file normally lands on a different row — but "normally" is
+     * not the standard the rest of this app holds itself to, and the cost of ruling it out is
+     * bandwidth rather than data.
+     *
+     * A failure here is not worth reporting. The session expires on its own within about fifteen
+     * minutes, nothing partial is ever visible in the drive, and the local row has already been
+     * cleared — so the worst case is chunks Microsoft discards slightly later than we asked.
+     */
+    @DELETE
+    suspend fun cancelSession(@Url uploadUrl: String): Response<ResponseBody>
 
     @PUT
     suspend fun uploadChunk(

@@ -1743,6 +1743,44 @@ that way.
 file, which read as "the lookup is broken" and was actually "the live database has nothing to repair".
 An instrument disagreeing with the evidence is a reason to doubt the evidence.
 
+### 28 Aug 2026 — what a pause should cost, settled in three reversals
+
+The question looked trivial and took four rounds, each overturning the last. Worth recording as a
+sequence, because each step was wrong for a reason worth keeping.
+
+1. **"Finish the current file, then pause."** Rejected. Built on the premise that interrupting an
+   upload re-sends it — which is **false**. `resumeOffsetOf` asks Graph what it has already
+   accepted. Verified three times on the Moto G: `at 10485760 of 127247142`, `at 20971520 of
+   117668262`, and once at 57%. Every offset an exact multiple of the 5 MB chunk size, so at most
+   one chunk is ever re-sent.
+2. **"Then suspend indefinitely, it is free."** Rejected by Ian: suspend was not what he asked for.
+3. **"Always roll back."** Built, then superseded. The tidiness argument for it evaporated on
+   inspection — a suspended upload leaves **nothing** in OneDrive, since Graph does not create the
+   DriveItem until the final chunk. Confirmed against the live drive: six files present, six
+   `UPLOADED` rows, and a seventh sitting at 57% entirely invisible. What remained was one real
+   argument, below.
+4. **Ian's compromise: hold the session for ten minutes, then discard.** Short pauses free, long
+   pauses clean.
+
+**The one argument that survived all four.** Resuming reads the *current* local file at a stored
+offset, so a file rewritten while a session was held would be spliced from two versions into
+something Graph accepts and marks complete. The ledger key carries size and modification time, so a
+changed file normally lands on a different row — but "normally" is not this app's standard
+elsewhere.
+
+**And the mechanism that closes it is not the timer.** The size check at the call site is:
+`existingSession` is withheld unless the file's current size still matches the row it was opened for.
+Ten minutes only bounds the window. Recorded explicitly because it would be easy to remember this as
+"the timer made it safe", and then to remove the size check as redundant.
+
+**Ten minutes was chosen to sit inside Graph's own window**, measured at `expires 11:34:26, 5.7
+minutes left` on a live suspended file — so a session is never held past the point it would work.
+
+**No timer was built.** The staleness test runs when the next run starts, not on a schedule: a job
+that must survive process death, reboot and Doze to fire correctly is a great deal of machinery for a
+question answerable at the moment it matters. A crash leaves the interruption stamp unset rather than
+stale, which fails in the safe direction — unset reads as old, and old discards.
+
 ### 28 Aug 2026 — pause, resume, and four bugs that only a thumb could find
 
 **Moto G.** TASK-019 built and verified. The Albums hero now reports rather than acts: the left slot

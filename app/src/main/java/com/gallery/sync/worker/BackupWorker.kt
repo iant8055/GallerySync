@@ -53,6 +53,11 @@ class BackupWorker @AssistedInject constructor(
             return Result.success()
         }
 
+        // Before a byte moves. A session held since an interruption more than ten minutes ago is
+        // dropped, so the file starts clean rather than resuming against local bytes that may have
+        // changed in the meantime.
+        engine.discardStaleUploadSessions()
+
         // The first whole-library upload is the heaviest thing this app does — 148 GB and roughly
         // fourteen hours on a real device — so it waits for a moment the user chose. Only automatic
         // runs are held: "Sync now" goes straight to the engine and is never gated, because someone

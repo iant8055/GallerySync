@@ -126,4 +126,8 @@ class OneDriveUploadRepositoryImpl @Inject constructor(
         const val HTTP_UNAUTHORIZED = 401
         const val HTTP_INSUFFICIENT_STORAGE = 507
     }
+
+    override suspend fun cancelUploadSession(uploadUrl: String) {
+        withContext(dispatcher) { uploader.cancelSession(uploadUrl) }
+    }
 }

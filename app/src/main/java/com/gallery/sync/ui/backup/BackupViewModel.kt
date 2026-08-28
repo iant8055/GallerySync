@@ -843,6 +843,11 @@ class BackupViewModel @Inject constructor(
             // 2026, and precisely the "finish the file first" behaviour we decided against.
             BackupScheduling.cancelManualRun(workManager)
             BackupScheduling.disable(workManager)
+
+            // The session is kept, not discarded, and stamped instead. A pause attended to within
+            // ten minutes resumes from the accepted offset for free; one walked away from is
+            // discarded before the next run. See BackupEngine.discardStaleUploadSessions.
+            settings.setUploadInterruptedAt(System.currentTimeMillis())
         }
     }
 
@@ -850,6 +855,9 @@ class BackupViewModel @Inject constructor(
     fun resumeBackup() {
         viewModelScope.launch {
             settings.setPaused(false)
+            // Attended to, so the clock stops. The worker still judges the session's age before
+            // using it, which is what makes a resume after a reboot behave the same as one now.
+            settings.setUploadInterruptedAt(0L)
             rearmAutomaticSync()
             runBackupNow()
         }
@@ -865,6 +873,7 @@ class BackupViewModel @Inject constructor(
     fun stopBackup() {
         viewModelScope.launch {
             settings.setPaused(false)
+            settings.setUploadInterruptedAt(0L)
             // Ends the run but leaves automatic sync armed — that is the whole difference from
             // Pause. Re-arming is needed because Pause may have torn the triggers down.
             rearmAutomaticSync()

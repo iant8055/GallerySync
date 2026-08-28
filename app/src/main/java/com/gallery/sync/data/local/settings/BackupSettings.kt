@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -103,7 +104,16 @@ data class BackupPreferences(
      * Stop means "end this run and go back to normal automatic behaviour", and the hold is part of
      * what it undoes.
      */
-    val isPaused: Boolean = false
+    val isPaused: Boolean = false,
+    /**
+     * When an upload was last interrupted by the user, or 0 if it has not been.
+     *
+     * Held here rather than on the ledger row because a new column means a Room migration, and
+     * there is at most one upload in flight at a time. A crash leaves this stale rather than set,
+     * which is the safe direction: a stale timestamp is old, and old means the session is
+     * discarded.
+     */
+    val uploadInterruptedAtEpochMillis: Long = 0L
 )
 
 /**
@@ -153,7 +163,8 @@ class BackupSettings @Inject constructor(
             showEmptyCloudFolders = stored[KEY_SHOW_EMPTY_FOLDERS] ?: false,
             acknowledgedTopics = stored[KEY_ACKNOWLEDGED_TOPICS] ?: emptySet(),
             hasCompletedSetup = stored[KEY_SETUP_COMPLETE] ?: false,
-            isPaused = stored[KEY_PAUSED] ?: false
+            isPaused = stored[KEY_PAUSED] ?: false,
+            uploadInterruptedAtEpochMillis = stored[KEY_INTERRUPTED_AT] ?: 0L
         )
     }
 
@@ -177,6 +188,11 @@ class BackupSettings @Inject constructor(
      */
     suspend fun hasSetupDecision(): Boolean =
         context.dataStore.data.first()[KEY_SETUP_COMPLETE] != null
+
+    /** Stamps the moment a run was interrupted, so a later resume can judge the held session. */
+    suspend fun setUploadInterruptedAt(millis: Long) {
+        context.dataStore.edit { it[KEY_INTERRUPTED_AT] = millis }
+    }
 
     /** Holds backing up until Resume or Stop. See [BackupPreferences.isPaused]. */
     suspend fun setPaused(paused: Boolean) {
@@ -283,5 +299,6 @@ class BackupSettings @Inject constructor(
         val KEY_ACKNOWLEDGED_TOPICS = stringSetPreferencesKey("acknowledged_topics")
         val KEY_SETUP_COMPLETE = booleanPreferencesKey("setup_complete")
         val KEY_PAUSED = booleanPreferencesKey("backup_paused")
+        val KEY_INTERRUPTED_AT = longPreferencesKey("upload_interrupted_at")
     }
 }

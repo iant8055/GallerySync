@@ -188,6 +188,19 @@ class ChunkedUploader @Inject constructor(
      * server claims everything has arrived while never having returned a finished item. All of them
      * mean the same thing to the caller: open a new session and start over.
      */
+    /**
+     * Abandons a session so Graph releases the chunks it is holding.
+     *
+     * Best effort by design. The caller has already cleared the local row, the session expires on
+     * its own within about fifteen minutes, and nothing partial is ever visible in the drive — so a
+     * failure here changes nothing a user could observe.
+     */
+    suspend fun cancelSession(uploadUrl: String) {
+        runCatching { chunkApi.cancelSession(uploadUrl) }
+            .onSuccess { Logger.d(TAG, "released upload session") }
+            .onFailure { Logger.d(TAG, "upload session release failed, letting it expire: ${it.message}") }
+    }
+
     private suspend fun resumeOffsetOf(session: ResumableSession, total: Long): Long? {
         val response = runCatching { chunkApi.querySession(session.uploadUrl) }.getOrNull()
             ?: return null

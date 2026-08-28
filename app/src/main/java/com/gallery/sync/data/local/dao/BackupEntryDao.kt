@@ -192,6 +192,15 @@ interface BackupEntryDao {
     suspend fun forgetUploadSession(id: String)
 
     /**
+     * Rows still holding a session, so a pause can release them.
+     *
+     * There is normally at most one — a run uploads a file at a time — but a crash between chunks
+     * can leave an older one behind, and releasing those costs nothing.
+     */
+    @Query("SELECT * FROM backup_entries WHERE uploadSessionUrl IS NOT NULL")
+    suspend fun entriesWithUploadSession(): List<BackupEntryEntity>
+
+    /**
      * Every key the ledger holds for a file it believes is in OneDrive.
      *
      * The caller diffs this against a scan in memory rather than asking SQLite to. A

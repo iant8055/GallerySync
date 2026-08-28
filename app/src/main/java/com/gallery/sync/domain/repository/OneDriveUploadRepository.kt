@@ -47,4 +47,12 @@ interface OneDriveUploadRepository {
         existingSession: ResumableSession? = null,
         onSessionCreated: suspend (ResumableSession) -> Unit = {}
     ): DataResult<UploadedItem>
+
+    /**
+     * Abandons a resumable session so Graph releases the chunks staged against it.
+     *
+     * Best effort: the session expires on its own, and nothing partial is ever visible in the
+     * drive, so a failure here is not worth surfacing.
+     */
+    suspend fun cancelUploadSession(uploadUrl: String)
 }

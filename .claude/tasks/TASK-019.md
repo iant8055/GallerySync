@@ -117,29 +117,54 @@ two hours and then leaps. Bytes track what is actually happening.
 `SUM(sizeBytes) WHERE state='UPLOADED'` over `SUM(sizeBytes)` for albums in scope. The ledger already
 holds both.
 
-### Pause is instant, and rolls back the file in flight
+### Pause is instant, and the held session has ten minutes to live
 
-**Decided by Ian, 28 Aug 2026, after the first draft got this wrong.**
+**Decided by Ian, 28 Aug 2026, after two reversals and a compromise.**
 
-The first draft had Pause wait for the current file to finish, on the grounds that interrupting
-mid-file would abandon the upload session and re-send the whole file on resume. **That is false.**
-`ChunkedUploader.resumeOffsetOf` asks Graph for the ranges already accepted and resumes from that
-offset — proven on the Fold 4, 26 Aug 2026, where a 1,938 MB video force-stopped at ~50% resumed at
-byte 1,069,547,520 rather than at zero.
+The first draft had Pause wait for the current file to finish, on the premise that interrupting would
+re-send it. **That premise was false.** `ChunkedUploader.resumeOffsetOf` asks Graph for the ranges
+already accepted and resumes from that offset — verified three times on the Moto G, at
+`10485760 of 127247142`, `20971520 of 117668262`, and once at 57%, each landing on an exact 5 MB
+chunk boundary. At most one chunk is ever re-sent.
 
-So interrupting costs nothing that survives a resume, and waiting costs up to seven minutes of
-transfer the user explicitly asked to stop — landing hardest in the cases Pause is actually reached
-for: a data cap about to break, Wi‑Fi about to be left, a battery about to die.
+The second draft therefore kept the session indefinitely. Ian rejected that too, and the compromise
+is better than either:
 
-**The one real cost** is a pause outliving the upload session, which expires roughly fifteen minutes
-after its last chunk. Then that single file restarts from zero on resume. One file, not the batch,
-and only after a long hold. Not worth surfacing to the user.
+| Pause length | Behaviour | Cost |
+|---|---|---|
+| Under 10 min, file unchanged | resumes from the accepted offset | ≤ 5 MB |
+| Under 10 min, file changed | discards, starts clean | that file |
+| Over 10 min | discards, starts clean | that file |
 
-Files under `SMALL_FILE_THRESHOLD_BYTES` (4 MB) go as a single PUT with no session at all, so a pause
-during one either completes or is discarded. Sub-second at any realistic rate.
+**Ten minutes sits inside Graph's roughly fifteen-minute window**, so a session is never kept past
+the point it would still work. Measured on a live suspended file: `expires 11:34:26, 5.7 minutes
+left`. Beyond that the session is dead anyway, and discarding merely makes the restart deliberate
+rather than emergent.
+
+**Why not indefinitely.** Resuming reads the **current** local file at a stored offset. A file
+rewritten while a session was held would be spliced from two versions into something Graph accepts
+and marks complete. The ledger key carries size and modification time, so a changed file normally
+lands on a different row — but "normally" is not the standard this app holds itself to elsewhere.
+
+**Two mechanisms, and only one of them is the safety.** The ten-minute rule bounds the window; the
+**size check at the call site** closes it. `existingSession` is withheld unless the file's current
+size still matches the row it was opened for. The timer is about predictability — it makes the cost
+of pausing statable in a sentence — and should not be sold as the correctness measure.
+
+**Decided at the moment it matters, not by a timer.** A scheduled job would have to survive process
+death, reboot and Doze to fire correctly, which is a lot of machinery for a question answerable when
+the next run starts. `BackupWorker` calls `discardStaleUploadSessions()` before a byte moves.
+
+**The clock stops on either button.** Resume and Stop both clear the stamp, because both are the user
+attending to the run. Only walking away leaves it running. A crash leaves the stamp stale rather than
+set, which fails in the safe direction: stale reads as old, and old discards.
+
+**What was checked and found not to matter.** A suspended upload leaves nothing in OneDrive — Graph
+does not create the DriveItem until the final chunk. Confirmed on the drive: six files present
+against six `UPLOADED` rows while a seventh sat at 57%, invisible. Tidiness was never the argument.
 
 **This removes the "Pausing…" state entirely**, along with the dead button and the
-second-tap-to-abort escape hatch the earlier draft needed. Pause means paused, at once.
+second-tap-to-abort escape hatch the first draft needed. Pause means paused, at once.
 
 ### Pause and Stop are different questions about the *next* run
 
@@ -181,14 +206,16 @@ So:
 
 ### Pausing mid-file, mechanically
 
-Setting the flag cancels the running work. `ChunkedUploader` stops between chunks, the persisted
-`uploadSessionUrl` and its expiry stay on the ledger row, and the next run resumes from the accepted
-offset. This is the same path a killed process already takes, which is why it is proven rather than
-new.
+Pause does three things, in order: writes the flag, cancels every chain, then calls
+`BackupEngine.discardInFlightUploads()` to release any held session and clear it from its row.
 
-The interrupted row stays `PENDING` with its session intact. Nothing marks it failed, and
-`attemptCount` must not be incremented — a user pausing is not an error, and counting it as one
-would eventually push the file into the backoff a real failure earns.
+Cancelling alone is not enough, and cancelling only `MANUAL_WORK` is how the first build shipped a
+pause that waited for the current file: the run was automatic, nothing was cancelled, and the hold
+took effect only when the worker next declined.
+
+The interrupted row stays `PENDING` with no session. Nothing marks it failed, and `attemptCount` must
+not be incremented — a user pausing is not an error, and counting it as one would eventually push
+the file into the backoff a real failure earns.
 
 ## Acceptance
 
@@ -202,11 +229,13 @@ would eventually push the file into the backoff a real failure earns.
 - Pressing Stop ends the run and leaves automatic sync armed: the regression test is Stop followed by
   new media appearing, which must start a run without the user asking
 - Pressing Stop while paused clears the hold, so the next trigger runs normally
-- A file interrupted by Pause resumes from its accepted byte offset, not from zero, provided the
-  session has not expired. The regression test is pausing partway through a large video and checking
-  the resume log reports a non-zero offset
-- An interrupted file stays `PENDING` with its session intact, is not marked failed, and does not
-  have `attemptCount` incremented
+- A pause attended to within ten minutes resumes from the accepted byte offset; one left longer
+  starts that file clean. The regression tests are both halves: resume promptly and check the log
+  reports a non-zero offset, then pause and wait it out and check the row holds no session
+- A session is not reused when the file's size no longer matches the row it was opened for
+- An interrupted file stays `PENDING`, is not marked failed, and does not have `attemptCount`
+  incremented — a user pausing is not an error
+- Nothing partial appears in OneDrive at any point
 - A paused app stays paused across a process restart, an app launch, new media appearing, and the
   six-hourly trigger — all three arming paths must respect it
 - Resume starts a run immediately rather than waiting for the next trigger

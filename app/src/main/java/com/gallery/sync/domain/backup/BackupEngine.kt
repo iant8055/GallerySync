@@ -105,6 +105,52 @@ class BackupEngine @Inject constructor(
 ) {
 
     /**
+     * Releases any upload session left in flight, so a paused file starts clean.
+     *
+     * Called when the user pauses or stops, and again before a run begins if the interruption is
+     * older than [STALE_SESSION_AFTER_MILLIS].
+     */
+    suspend fun discardInFlightUploads() = withContext(dispatcher) {
+        entryDao.entriesWithUploadSession().forEach { entry ->
+            entry.uploadSessionUrl?.let { uploadRepository.cancelUploadSession(it) }
+            entryDao.forgetUploadSession(entry.id)
+            Logger.i(TAG, "discarded in-flight upload of ${entry.displayName}")
+        }
+    }
+
+    /**
+     * Drops a held session that is too old to trust, leaving a fresh one to be opened.
+     *
+     * The compromise Ian settled on, 28 Aug 2026, after two reversals in the other direction.
+     * Suspending an upload is nearly free — resume continues from the offset Graph reports
+     * accepted, verified three times at three offsets, each on an exact 5 MB chunk boundary. But
+     * resuming reads the **current** local file at a stored offset, so a file changed while paused
+     * could be spliced from two versions into something Graph accepts and marks complete.
+     *
+     * Holding the session for a short window keeps the common pause cheap — take a call, step away
+     * — while a long one starts clean. Ten minutes sits inside Graph's roughly fifteen-minute
+     * session window, so the shortcut is only ever kept while it is still usable; past that the
+     * session would be dead anyway and the restart merely becomes deliberate rather than emergent.
+     *
+     * **Decided at the moment it matters rather than by a timer.** A scheduled job would have to
+     * survive process death, reboot and Doze to fire correctly, which is a great deal of machinery
+     * for a question answerable when the next run starts.
+     *
+     * The clock stops on either button: Resume and Stop both clear the stamp, because both are the
+     * user attending to the run. Only walking away leaves it running.
+     */
+    suspend fun discardStaleUploadSessions() = withContext(dispatcher) {
+        val interruptedAt = settings.current().uploadInterruptedAtEpochMillis
+        if (interruptedAt <= 0L) return@withContext
+
+        val age = System.currentTimeMillis() - interruptedAt
+        if (age >= STALE_SESSION_AFTER_MILLIS) {
+            Logger.i(TAG, "held upload session is ${age / 60_000}m old, discarding")
+            discardInFlightUploads()
+        }
+    }
+
+    /**
      * Records every readable file in the ledger. Existing rows are untouched, so already-uploaded
      * files stay uploaded.
      *
@@ -447,9 +493,15 @@ class BackupEngine @Inject constructor(
                     },
                     // Anything this row was part-way through last time. Expiry and whether the
                     // server still honours it are decided further down; here it is just handed over.
-                    existingSession = entry.uploadSessionUrl?.let {
-                        ResumableSession(it, entry.uploadSessionExpiresAtEpochMillis)
-                    },
+                    //
+                    // Withheld when the file on disk no longer matches the row it was opened for.
+                    // Resuming reads the *current* bytes at a stored offset, so a file rewritten
+                    // while a session was held would be spliced from two versions into something
+                    // Graph accepts and marks complete. The ten-minute rule narrows that window;
+                    // this closes it, for the price of one size check.
+                    existingSession = entry.uploadSessionUrl
+                        ?.takeIf { source.sizeBytes == entry.sizeBytes }
+                        ?.let { ResumableSession(it, entry.uploadSessionExpiresAtEpochMillis) },
                     // Stored before the first byte leaves. The run that dies is the one whose
                     // session matters, so waiting for success would record nothing useful.
                     onSessionCreated = { session ->
@@ -931,6 +983,14 @@ class BackupEngine @Inject constructor(
          * Comfortably under SQLite's historic 999 limit, which is what older Android versions
          * enforce even though newer ones allow far more.
          */
+        /**
+         * How long a held upload session stays usable after the user interrupted it.
+         *
+         * Inside Graph's own window, deliberately, so a session is never kept past the point it
+         * would work.
+         */
+        const val STALE_SESSION_AFTER_MILLIS = 10 * 60 * 1000L
+
         const val SQL_BATCH = 500
 
         /**
