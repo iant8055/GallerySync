@@ -159,6 +159,12 @@ class MediaStoreWriter @Inject constructor(
      * Not a deletion in the sense CLAUDE.md governs: the file never became visible, never belonged
      * to the user, and holds no bytes they had before. Leaving it would litter the gallery with
      * invisible half-files that nothing can clean up.
+     *
+     * **Verified on the Fold 4, 27 Aug 2026.** Ian stopped two restores mid-transfer — 36 MB and
+     * 47 MB already written — and found no partial file in the gallery afterwards. That is this
+     * function working on the cancellation path, which until then had only ever been reasoned
+     * about: the abandoned bytes are reachable by nothing, so they have to be cleaned up here or
+     * not at all.
      */
     private fun discard(uri: Uri) {
         runCatching { context.contentResolver.delete(uri, null, null) }

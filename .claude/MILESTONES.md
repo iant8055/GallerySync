@@ -302,6 +302,12 @@ keeps working.
       what had been proven on 19 Aug was a *truncating* write and this is its reverse. Not yet
       measured at 40 MB or in a separately granted directory.
 
+      **An interrupted restore costs nothing on either side.** Fold 4, 27 Aug 2026. Two restores
+      stopped mid-transfer, 36 MB and 47 MB already written: no degradation to the OneDrive copies,
+      no partial file in the gallery, and the stop was immediate rather than running on to the end of
+      the current file. That is the premise the whole design rests on, since this one overwrites a
+      file the user has.
+
       `RestoredAlbum` and the `_restored` suffix stay. Files fetched by the old flow carry that name,
       and `contentSignature` must keep stripping it — three places test `name|size` to decide whether
       content is on the phone, and one of them is the last check before a cloud copy goes to the

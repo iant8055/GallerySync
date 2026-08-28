@@ -121,6 +121,16 @@ nothing is removed, marked, or moved remotely. That is what makes a failed resto
 retry free, and it is why the progress screen may say "could not restore" without alarm — the proxy
 is still there and the original is still in OneDrive.
 
+**Both halves of that are now observed rather than argued.** Fold 4, 27 Aug 2026: Ian stopped two
+restores mid-transfer — 36 MB and 47 MB of a 70 MB and a 200 MB clip already written — and checked
+afterwards for the two ways it could have gone wrong. No degradation to the OneDrive copies, and no
+partial file in the gallery. The abandoned bytes were discarded and the remote originals were exactly
+as they had been.
+
+That matters more here than it did for the old download tab, because this design overwrites a file
+the user has. The evidence says an interrupted restore costs nothing on either side, which is the
+premise the "Could not restore — your file is unchanged" wording rests on.
+
 ## The progress screen
 
 Modelled on the Archive tab, which already does this shape: select, confirm, then a live per-file
