@@ -265,6 +265,84 @@ recorded original — so it should read as present rather than new. What has not
 upstream, since a restore necessarily changes the mtime. Worth confirming rather than assuming; a
 wasted re-upload of a file already in the cloud is harmless but looks like a bug.
 
+### The per-file flag is a mode, not a boolean
+
+Ian, 27 Aug 2026: *"when a file is restored or downloaded the flag moves from SYNC to Backup for that
+file only."*
+
+Framing it as a mode rather than a `restoredToFullSize` boolean is the better shape, and it costs
+nothing extra. `AlbumMode.BACKUP` already means exactly the thing that is wanted — *"uploaded; the
+local file is never touched"* — and `proxiesPhotos` is already `mode == SYNC`. So the file keeps being
+backed up and stops being a proxy candidate, with no new vocabulary invented for it.
+
+A nullable per-file mode column on `backup_entries`. Null means *inherit the album*, which is every
+row that exists today, so the migration has no backfill. `proxyCandidates` reads the override where
+one is set and the album's mode where it is not.
+
+Two things this buys over a boolean:
+
+- **It says why, not just what.** A row reading `BACKUP` explains itself; a row reading
+  `restoredToFullSize = 1` needs the reader to know what that implies about optimising.
+- **It generalises.** The same column later lets a user pin any individual file out of Sync without a
+  second mechanism, which is a thing people will ask for once they understand what Sync does.
+
+It must still not be confused with `isProxySkipped`. That means *cannot usefully shrink* — a fact
+about the file. This means *the user chose full quality for this file* — a standing instruction. A
+query that treated them as interchangeable would silently start re-optimising restored files.
+
+### The user sees it worked when the badge goes
+
+Ian, 27 Aug 2026: *"identification is the removal of the Cloud Icon."*
+
+The badge is drawn into the proxy's own pixels — `ProxyBadge`'s doc: *"Baked into the image because
+that is the only mechanism there is."* A restore replaces the whole file with the cloud original,
+which never had a badge, so it disappears without anything having to remove it.
+
+That makes it the acceptance test a person can run without the app: open the album in Samsung Gallery
+and the cloud corner is gone. It is also why the badge cannot be the *machine* test — it is pixels,
+and asking "is this a proxy?" of pixels means image analysis. The EXIF marker stays the readable
+answer; the badge is the human one. The two are set and cleared together, so they cannot disagree.
+
+**Still open:** what identifies the *cloud item* to restore from — the remote item id on the ledger
+row. Confirm the row survives proxying with that id intact and that a rescan does not orphan it. The
+badge answers "has this been restored?"; it does not answer "which OneDrive file does this proxy come
+from?"
+
+### One prompt, with a way out
+
+Ian, 27 Aug 2026: *"one prompt works — with the option to cancel and open the folder to select
+individual files."*
+
+So the download offer is a single confirmation when Restore is pressed, covering everything selected,
+naming the count and the total size. Downloading consumes space rather than freeing it, so the
+megabytes belong in the sentence.
+
+Three ways out of it, not two: take everything, take only the restores and skip the downloads, or
+cancel back to the list to pick by hand.
+
+**Detail to settle:** "open the folder" is unambiguous when one folder is selected and meaningless
+when four are. Either the prompt offers to open only in the single-folder case, or cancelling simply
+returns to the list and the user opens what they want. The second is simpler and never wrong.
+
+### A restore does not trigger a sync
+
+Ian, 27 Aug 2026: *"a restored file should not trigger a sync — only if the file is moved or saved."*
+
+A restore changes the local size and mtime, and the scan's identity key is
+`backupKeyOf(album, displayName, sizeBytes, dateModifiedEpochSeconds)` — so left alone, the next run
+would compute a key it has never seen and treat a file already in OneDrive as new work.
+
+The ledger row is therefore updated as part of the restore, from the file just written rather than
+from MediaStore. That is the pattern `SafMediaWriter` already relies on for the proxy path — *"the
+ledger records `localProxySizeBytes` from the file this app just wrote rather than from MediaStore"* —
+applied in the other direction. The restore knows exactly what it wrote and what size it is; the row
+should say so before the next scan runs.
+
+The distinction Ian is drawing is the right one. A restore is the app putting back what it took, and
+nothing about the file's content has changed from OneDrive's point of view. A *user* moving or
+editing the file is a real change and should upload. Keying on mtime alone cannot tell those apart,
+which is why the restore has to say which one it was.
+
 ### The rule that makes overwriting acceptable
 
 **Download and verify first. Overwrite second.**
@@ -387,7 +465,9 @@ file restored and every untouched proxy untouched.
   unbacked-up edit.
 - **Rolling back to an earlier OneDrive version.** Graph exposes version history; restoring here
   returns the current cloud copy and nothing else. A separate task if it is ever wanted.
-- **Listing video**, until TASK-013 produces video proxies for it to list. The detection framework
+- **Listing video**, until TASK-013 produces video proxies for it to list. Ian confirmed 27 Aug 2026
+  that truncated clips will eventually be offered for restore, so `VideoTruncated` is in scope, not an
+  edge case to design away. The detection framework
   is in place and costs nothing while there is nothing to find.
 - **Removing `RestoredAlbum`.** `contentSignature` must keep stripping `_restored` for files already
   fetched by the old flow — it is the last check before a cloud copy goes to the recycle bin, and
@@ -413,6 +493,11 @@ file restored and every untouched proxy untouched.
   it did
 - A restored file is never re-optimised. `isProxied` is cleared and a per-file flag records the
   user's choice; the regression test is a restored photo surviving an automatic optimise run
+- A restored file's per-file mode reads BACKUP while its album stays SYNC, and the album's mode is
+  unchanged
+- The cloud badge is gone from the restored file, checked by opening the album in Samsung Gallery
+- The ledger row is updated from the file just written, so the next scan does not treat a restore as
+  a new file to upload
 - Restore is not offered for albums in Archive mode
 - No album's mode is changed by the app. Any mode change is a switch the user taps
 - MILESTONES' "Retrieval reads the drive, not the ledger" paragraph is rewritten to match
