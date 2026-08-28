@@ -554,6 +554,25 @@ class BackupViewModel @Inject constructor(
         viewModelScope.launch { settings.setAutoOptimiseEnabled(enabled) }
     }
 
+    /**
+     * Reopens guided setup.
+     *
+     * Clears only the completion flag, which is what [com.gallery.sync.MainActivity] reads to
+     * decide between the wizard and the tabs. Deliberately touches nothing else, per TASK-014:
+     *
+     * - **Current values, not defaults.** The wizard reads live preferences, so it opens on what is
+     *   set today. A setup flow that reset the configuration it exists to adjust would be a trap,
+     *   and the destructive settings are the ones it would reset.
+     * - **No silent re-apply.** Gate 2's bulk mode change is UI state starting at "choose per
+     *   album", so walking the flow again changes no album unless the user picks again.
+     * - **Acknowledgements survive.** The record is additive and nothing clears it. Making someone
+     *   re-acknowledge Archive to change a folder would devalue the acknowledgement, which works
+     *   only while it stays rare.
+     */
+    fun restartSetup() {
+        viewModelScope.launch { settings.setSetupCompleted(false) }
+    }
+
     fun setDefaultAlbumMode(mode: AlbumMode) {
         viewModelScope.launch { settings.setDefaultAlbumMode(mode) }
     }

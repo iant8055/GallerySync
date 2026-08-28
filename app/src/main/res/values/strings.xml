@@ -547,4 +547,92 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
     <string name="first_backup_done">Your first backup is done, so this no longer applies — new photos back up as they arrive.</string>
     <string name="first_backup_manual_note">You can always press Sync now to start immediately.</string>
     <string name="hour_label">%1$s</string>
+
+    <!-- First-run topics. One topic exists once; the bubbles, Help and the just-in-time
+         prompts all read these. Changing deletion wording here changes it everywhere. -->
+    <string name="topic_what_title">What this app does</string>
+    <string name="topic_what_body">It keeps your photos and videos in OneDrive and manages how much space they take on your phone. It is not a gallery — your phone’s own gallery keeps doing the viewing, and everything stays there as an ordinary file.</string>
+
+    <string name="topic_folders_title">Which folders it looks at</string>
+    <string name="topic_folders_body">You choose the folders. Anything outside them is not scanned, not listed, and never touched — so an album you did not pick cannot be given a mode by accident.</string>
+
+    <string name="topic_modes_title">Off, Backup and Sync</string>
+    <string name="topic_modes_body">Off leaves an album alone. Backup copies it to OneDrive and changes nothing on your phone. Sync copies it and then shrinks the photos to save space, leaving them visible in your gallery. Video is left whole.</string>
+    <string name="topic_modes_ack">I understand — Sync makes my photos smaller on this phone</string>
+
+    <string name="topic_archive_title">Archive</string>
+    <string name="topic_archive_body">Archive takes an album off your phone once every file in it is confirmed in OneDrive. It is a standing instruction: anything you add to that album later is covered by the same choice.
+
+The files go to your gallery’s recycle bin, where you can put them back. The space they used does not come back until you empty that bin yourself — this app never empties it for you.</string>
+    <string name="topic_archive_ack">I understand — Archive takes these files off my phone</string>
+
+    <string name="topic_promise_title">What we can promise</string>
+    <string name="topic_promise_body">Before anything is removed or shrunk, OneDrive has to confirm it holds the file and report the same size as the copy on your phone. That check is the guarantee, and nothing skips it.
+
+Local removals go to your gallery’s recycle bin and can be restored for 30 days. We have seen that hold on the phones we tested, but we cannot promise it for every phone — the verified cloud copy is the part that always holds.</string>
+
+    <string name="topic_getting_back_title">Getting files back</string>
+    <string name="topic_getting_back_body">The Restore tab lists what this app has shrunk on this phone and puts the full-size original back in place, in its own folder, under its own name. Stopping partway costs nothing and you can run it again.</string>
+
+    <string name="topic_optimising_title">Optimising photos</string>
+    <string name="topic_optimising_body">A photo is replaced by a smaller version while the full-size original stays in OneDrive. It keeps working everywhere on your phone and you can fetch the original back whenever you want. Video is never optimised — a degraded clip fails quietly inside an editor and you would only find out on export.</string>
+    <string name="topic_optimising_ack">I understand — optimised photos are smaller until I fetch the original</string>
+
+    <string name="topic_deleting_title">When you delete a photo from this phone</string>
+    <string name="topic_deleting_body">Nothing happens to the OneDrive copy unless you say so. The app will not read a missing file as an instruction to delete anything. You can change this later, and it will ask you at the point it first matters.</string>
+
+    <string name="topic_trash_title">Emptying the bin</string>
+    <string name="topic_trash_body">This app never empties a recycle bin — not your gallery’s and not OneDrive’s. Whatever gets removed stays recoverable until you empty it yourself, in those apps.</string>
+
+    <string name="topic_when_title">When each thing happens</string>
+    <string name="topic_when_body">Backing up runs on its own in the background. Archiving and optimising only ever happen while this app is open, because Android requires a tap for them — so if you are waiting for space to be freed, open the app. Restoring only happens when you ask.</string>
+
+    <!-- Guided first run. -->
+    <string name="wizard_next">Next</string>
+    <string name="wizard_back">Back</string>
+    <string name="wizard_skip">Skip setup</string>
+    <string name="wizard_finish">Finish</string>
+
+    <string name="wizard_sources_title">Choose your folders</string>
+    <string name="wizard_sources_body">Pick the folders holding the photos and videos you want looked after. DCIM is where most phones put the camera. You can add or remove folders later, and removing one only hides its albums — nothing is forgotten and nothing is deleted.</string>
+    <string name="wizard_sources_add">Add a folder</string>
+    <string name="wizard_sources_remove">Remove</string>
+    <string name="wizard_sources_refused">That folder could not be used. Try picking it again, or choose another.</string>
+
+    <string name="wizard_scan_title">What we found</string>
+    <string name="wizard_scan_running">Looking through your folders…</string>
+    <string name="wizard_scan_no_access">Without permission to read your media, nothing can be counted. This is not the same as finding nothing.</string>
+
+    <string name="wizard_library_title">What should happen to these?</string>
+    <string name="wizard_library_body">This sets every album at once. You can change any album individually afterwards, and nothing here removes a file from your phone.</string>
+
+    <!-- Photos and videos counted apart: Sync shrinks one and leaves the other whole, so a single
+         "N files" would hide the half that cannot be made smaller. Quantity is the album count. -->
+    <plurals name="wizard_scan_found">
+        <item quantity="one">%1$d photos and %2$d videos, in %3$d album.</item>
+        <item quantity="other">%1$d photos and %2$d videos, across %3$d albums.</item>
+    </plurals>
+
+    <!-- The wizard's questions. Option labels are reused from Settings where they exist, so one
+         description of each choice survives rather than two that drift. -->
+    <string name="wizard_default_mode_body">When a new album appears on your phone later, this is what happens to it. You can change any album at any time.</string>
+
+    <string name="wizard_auto_optimise_body">Optimising shrinks photos already safe in OneDrive. Android needs you to approve each batch either way — this only decides whether the app asks when there is something to do, or waits to be opened.</string>
+    <string name="wizard_optimise_ask_first">Wait until I open the app</string>
+    <string name="wizard_optimise_automatic">Tell me when there is something to optimise</string>
+
+    <string name="wizard_deletion_body">If you delete a photo from your phone, what should happen to the copy in OneDrive? You can change this later, and nothing is ever removed without you confirming it.</string>
+
+    <string name="wizard_metered_body">Backing up over mobile data can be expensive on a metered plan, and Wi‑Fi only is the safer default — but it is the wrong answer if your data is unlimited and your Wi‑Fi is poor.</string>
+    <string name="wizard_metered_wifi_only">Wi‑Fi only</string>
+    <string name="wizard_metered_allow">Use mobile data too</string>
+
+    <string name="wizard_first_backup_body">Your first backup is the big one — everything you chose, all at once. Pick when it should start.</string>
+    <string name="wizard_charging_body">Should that first run wait until the phone is charging?</string>
+    <string name="wizard_charging_required">Only while charging</string>
+    <string name="wizard_charging_anytime">Any time</string>
+
+    <string name="settings_setup">Setup</string>
+    <string name="settings_setup_detail">Walk through the introduction again. It opens on your current settings, changes no album on its own, and does not ask you to re-confirm anything you have already read.</string>
+    <string name="settings_setup_action">Run setup again</string>
 </resources>

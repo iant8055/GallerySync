@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.domain.backup.CloudDeletionGrace
@@ -66,7 +67,31 @@ data class BackupPreferences(
      * 2026, and it is the right shape for one: hiding costs nothing recoverable, and someone who
      * expects a folder to be there needs a way to confirm it is.
      */
-    val showEmptyCloudFolders: Boolean = false
+    val showEmptyCloudFolders: Boolean = false,
+    /**
+     * Setup topics whose explanation the user has explicitly acknowledged.
+     *
+     * Holds [com.gallery.sync.domain.setup.SetupTopic.key] values. This records that the
+     * explanation was *put in front of them and deliberately dismissed* — not that they consented
+     * to anything, and not that they understood it. Choosing Archive for an album still raises its
+     * own confirmation; the two must never be collapsed, because one is "I know what this does" and
+     * the other is "do it to this album".
+     *
+     * Per topic rather than per tour, so that adding an eleventh topic later does not re-run setup
+     * for everyone, and someone who read the Archive explanation during the tour is not shown it
+     * again at first use.
+     */
+    val acknowledgedTopics: Set<String> = emptySet(),
+    /**
+     * Whether guided setup has been finished or deliberately skipped.
+     *
+     * Separate from having sources granted, because the two answer different questions. A user who
+     * skips the tour has completed setup; a user whose grants were later revoked has not lost it.
+     * The wizard still runs regardless of this flag while Gate 1 is unanswered — an install with
+     * no granted tree can only reach a screen reporting zero albums and offering a Rescan that
+     * cannot succeed, which is what two of two fresh installs hit on 26 and 28 Aug 2026.
+     */
+    val hasCompletedSetup: Boolean = false
 )
 
 /**
@@ -113,11 +138,43 @@ class BackupSettings @Inject constructor(
             cloudDeletionGraceDays = stored[KEY_CLOUD_DELETION_GRACE]
                 ?.takeIf { it in CloudDeletionGrace.SELECTABLE_DAYS }
                 ?: CloudDeletionGrace.DEFAULT_DAYS,
-            showEmptyCloudFolders = stored[KEY_SHOW_EMPTY_FOLDERS] ?: false
+            showEmptyCloudFolders = stored[KEY_SHOW_EMPTY_FOLDERS] ?: false,
+            acknowledgedTopics = stored[KEY_ACKNOWLEDGED_TOPICS] ?: emptySet(),
+            hasCompletedSetup = stored[KEY_SETUP_COMPLETE] ?: false
         )
     }
 
     suspend fun current(): BackupPreferences = preferences.first()
+
+    /**
+     * Records that a topic's explanation was acknowledged.
+     *
+     * Additive and idempotent. Nothing removes an acknowledgement, including re-running setup —
+     * the record is about what the user has been shown across the life of the install, so clearing
+     * it would mean re-teaching someone what they already read.
+     */
+    /**
+     * Whether a setup decision has ever been written.
+     *
+     * Absent is not the same as false. Absent means this install predates guided setup and should
+     * be backfilled; a stored false means the user pressed "Run setup again" and is owed the
+     * wizard. Collapsing the two lets the upgrade backfill silently undo an explicit request —
+     * observed on the Fold 4, 28 Aug 2026, where reopening the app after asking to re-run setup
+     * put the tabs back.
+     */
+    suspend fun hasSetupDecision(): Boolean =
+        context.dataStore.data.first()[KEY_SETUP_COMPLETE] != null
+
+    /** Marks guided setup finished. Skipping counts — the tour is optional, the gates are not. */
+    suspend fun setSetupCompleted(completed: Boolean) {
+        context.dataStore.edit { it[KEY_SETUP_COMPLETE] = completed }
+    }
+
+    suspend fun acknowledgeTopic(key: String) {
+        context.dataStore.edit {
+            it[KEY_ACKNOWLEDGED_TOPICS] = (it[KEY_ACKNOWLEDGED_TOPICS] ?: emptySet()) + key
+        }
+    }
 
     suspend fun setAutomaticEnabled(enabled: Boolean) {
         context.dataStore.edit { it[KEY_AUTOMATIC] = enabled }
@@ -205,5 +262,7 @@ class BackupSettings @Inject constructor(
         val KEY_CLOUD_DELETION_POLICY = stringPreferencesKey("cloud_deletion_policy")
         val KEY_CLOUD_DELETION_GRACE = intPreferencesKey("cloud_deletion_grace_days")
         val KEY_SHOW_EMPTY_FOLDERS = booleanPreferencesKey("show_empty_cloud_folders")
+        val KEY_ACKNOWLEDGED_TOPICS = stringSetPreferencesKey("acknowledged_topics")
+        val KEY_SETUP_COMPLETE = booleanPreferencesKey("setup_complete")
     }
 }

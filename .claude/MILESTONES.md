@@ -1743,6 +1743,68 @@ that way.
 file, which read as "the lookup is broken" and was actually "the live database has nothing to repair".
 An instrument disagreeing with the evidence is a reason to doubt the evidence.
 
+### 28 Aug 2026 — the engine at twenty-two times its previous scale
+
+**Moto G 2026 (Android 16), a second test device.** 3,326 files and 21.02 GB pushed into four purpose-built
+albums, then uploaded to a dedicated `MotoG/Gallery` root.
+
+| | |
+|---|---|
+| Uploaded | **3,326 of 3,326** |
+| Verified — `remoteSizeBytes = sizeBytes` | **3,326** |
+| Errors, retries, skips | **0** |
+| Largest single file | 1.44 GB video, first attempt, no resume needed |
+
+The previous largest library this engine had handled was 149 ledger rows. The scanner met 3,327 rows without
+a pagination defect — the specific failure class that bit on 19 Aug — and the byte-capped batching chained
+across roughly forty runs without intervention.
+
+**Throughput is file-size bound, not bandwidth bound.** Measured across the run: 0.73 MB/s on 0.24 MB files,
+rising to 3.32 MB/s once multi-hundred-megabyte video dominated. Real upstream is about 22 Mbps; everything
+below that was per-request overhead. `ChunkedUploader` already sends anything under 4 MB as a single PUT
+rather than opening a session, so the obvious optimisation was checked and found already present. What
+remains is one round trip plus a verification per file, which simply dominates at a quarter of a megabyte.
+
+**The rig is left armed.** `isProxied` is 0 across all 3,326 rows because auto-optimise was deliberately left
+off, so the ~8.9 GB proxy lever is unspent on a phone held at 18 GB free by a 58 GB ballast file against a
+20 GB default floor. The first thing TASK-011 ever does will be a real decision against a real deficit.
+
+### 28 Aug 2026 — the guided first run, and a migration that undid itself
+
+**TASK-014 built.** Eighteen panels: two gates, a scan report, ten explanations and seven questions. Three
+panels advance only on a named acknowledgement — *"I understand — Archive takes these files off my phone"*
+— recorded per topic in `BackupSettings.acknowledgedTopics`. The topic strings are the single source the
+Help screen (TASK-017) will read, so the wizard and Help cannot drift.
+
+**Verified on the Fold 4 in both themes.** Dark mode is correct — dark container, light body text, no
+hardcoded colours. The migration was checked first: an install with granted folders lands on its tabs with
+every album and mode intact, not in the wizard.
+
+**Two defects found by looking rather than by reasoning.**
+
+*The backfill undid an explicit request.* It marked setup complete whenever the stored flag was false and a
+source grant existed — but "Run setup again" stores exactly that. Pressing it, closing the app and reopening
+returned the user to the tabs. DataStore distinguishes an absent key from a stored `false`, and the fix is to
+key the backfill on whether a decision was ever *written*. It was racy, which is why the first test passed
+and the second did not.
+
+*The layout ignored the large screen.* One card at the top of the Fold's inner display above roughly sixty
+percent emptiness, with a paragraph set to a 140-character measure. Content is now centred and capped at
+600dp. This is the `targetSdk` 37 adaptation requirement arriving in practice rather than in principle.
+
+**Two of two fresh installs have now hit the Gate 1 wall** — Fold 4 on 26 Aug, Moto G on 28 Aug, different
+vendors and different Android versions, both landing on "0 Albums · 0 B" beside a Rescan that cannot
+succeed. That is not an edge case; it is what every new user meets, and it is what the wizard exists to
+prevent. The milestone box stays unticked because TASK-014's scope-narrowing acceptance lines — removing a
+directory hides albums without forgetting them, re-adding restores modes and re-uploads nothing — are still
+unverified.
+
+**Found while testing, unfixed:** an automatic backup run cannot be stopped from the UI. `isRunning` is set
+only from the manual work chain, so during the Moto's upload the button read "Sync now" throughout, and
+`canRunBackup` would have let a second, manual run be queued alongside. Automatic sync is on by default, so
+the runs a user most wants to interrupt are the ones with no control attached. This is the gap Ian's
+Pause/Resume proposal closes.
+
 ### 27 Aug 2026 — the trash request confirmed at scale, and the bytes that do not come back
 
 **Fold 4.** `Anne` switched from Sync to Archive — 51 photos, all verified in OneDrive. After the

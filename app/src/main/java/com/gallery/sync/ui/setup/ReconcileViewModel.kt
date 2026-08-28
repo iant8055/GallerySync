@@ -11,6 +11,8 @@ import com.gallery.sync.util.ChargingState
 import com.gallery.sync.domain.backup.ApplyLibraryChoice
 import com.gallery.sync.domain.backup.FirstBackupHold
 import com.gallery.sync.domain.backup.LibraryChoice
+import com.gallery.sync.data.local.entity.AlbumMode
+import com.gallery.sync.domain.backup.CloudDeletionPolicy
 import com.gallery.sync.domain.backup.FirstBackupWindow
 import com.gallery.sync.domain.backup.ReconcileWithCloud
 import com.gallery.sync.domain.backup.RemoteRoots
@@ -19,6 +21,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 import javax.inject.Inject
@@ -55,7 +58,23 @@ data class ReconcileUiState(
     val libraryChoice: LibraryChoice = LibraryChoice.CHOOSE_PER_ALBUM,
     /** Albums changed by the last apply, for the confirmation line. Null before any apply. */
     val libraryApplied: Int? = null,
-    val applyingLibraryChoice: Boolean = false
+    val applyingLibraryChoice: Boolean = false,
+    /** Setup topics already acknowledged. Survives a skip, and is never cleared. */
+    val acknowledgedTopics: Set<String> = emptySet(),
+    val hasCompletedSetup: Boolean = false,
+    /**
+     * Whether stored preferences have been read at least once.
+     *
+     * Without it, [hasCompletedSetup] reads false for the first frame of every launch, and an
+     * install that finished setup months ago would flash the wizard before settling. The wizard is
+     * unmissable by design, which makes showing it wrongly worse than usual.
+     */
+    val settingsLoaded: Boolean = false,
+    /** Defaults the wizard offers to set. Each is also reachable from Settings afterwards. */
+    val allowMeteredNetwork: Boolean = false,
+    val defaultAlbumMode: AlbumMode = AlbumMode.DEFAULT,
+    val isAutoOptimiseEnabled: Boolean = false,
+    val cloudDeletionPolicy: CloudDeletionPolicy = CloudDeletionPolicy.DEFAULT
 ) {
     /**
      * Whether Gate 1 has been answered.
@@ -90,6 +109,24 @@ class ReconcileViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            // Backfill for installs that predate guided setup.
+            //
+            // `hasCompletedSetup` defaults false, so without this every existing user would be
+            // dropped into the wizard on upgrade. An install holding a granted tree has already
+            // answered Gate 1 by definition, and answering it is the whole reason the wizard is
+            // unmissable.
+            //
+            // Keyed on whether a decision was ever *written*, not on its value. "Run setup again"
+            // stores an explicit false, and an earlier version of this checked the value instead —
+            // so reopening the app undid the request and returned the user to the tabs.
+            //
+            // One shot, at construction. A fresh install has no grants at this moment, so it is not
+            // backfilled — and when that user later grants a folder from inside the wizard, this
+            // has long since run and cannot cut the tour short.
+            if (!settings.hasSetupDecision() && sources.directories.first().isNotEmpty()) {
+                settings.setSetupCompleted(true)
+            }
+
             // Grants can be revoked outside the app. Checking once at start keeps the list from
             // claiming a folder is watched when nothing in it is readable any more.
             sources.forgetRevokedGrants()
@@ -116,6 +153,13 @@ class ReconcileViewModel @Inject constructor(
                     firstBackupStartHour = prefs.firstBackupStartHour,
                     firstBackupRequiresCharging = prefs.firstBackupRequiresCharging,
                     hasCompletedFirstBackup = prefs.hasCompletedFirstBackup,
+                    acknowledgedTopics = prefs.acknowledgedTopics,
+                    hasCompletedSetup = prefs.hasCompletedSetup,
+                    settingsLoaded = true,
+                    allowMeteredNetwork = prefs.allowMeteredNetwork,
+                    defaultAlbumMode = prefs.defaultAlbumMode,
+                    isAutoOptimiseEnabled = prefs.isAutoOptimiseEnabled,
+                    cloudDeletionPolicy = prefs.cloudDeletionPolicy,
                     // Recomputed whenever a setting changes, so moving the start time updates the
                     // "waiting until" line immediately rather than at the next run.
                     firstBackupHold = if (prefs.hasCompletedFirstBackup) {
@@ -131,6 +175,36 @@ class ReconcileViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    /**
+     * Records that a topic's explanation was acknowledged.
+     *
+     * Not consent to anything. Choosing Archive for an album still raises its own confirmation.
+     */
+    fun acknowledgeTopic(key: String) {
+        viewModelScope.launch { settings.acknowledgeTopic(key) }
+    }
+
+    fun setAllowMeteredNetwork(allowed: Boolean) {
+        viewModelScope.launch { settings.setAllowMeteredNetwork(allowed) }
+    }
+
+    fun setDefaultAlbumMode(mode: AlbumMode) {
+        viewModelScope.launch { settings.setDefaultAlbumMode(mode) }
+    }
+
+    fun setAutoOptimiseEnabled(enabled: Boolean) {
+        viewModelScope.launch { settings.setAutoOptimiseEnabled(enabled) }
+    }
+
+    fun setCloudDeletionPolicy(policy: CloudDeletionPolicy) {
+        viewModelScope.launch { settings.setCloudDeletionPolicy(policy) }
+    }
+
+    /** Ends guided setup, whether it was completed or skipped. */
+    fun completeSetup() {
+        viewModelScope.launch { settings.setSetupCompleted(true) }
     }
 
     /** Selects a Gate 2 option without acting on it. Applying is a separate, deliberate tap. */

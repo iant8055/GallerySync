@@ -339,6 +339,18 @@ fun SettingsScreen(
 
         HorizontalDivider()
 
+        Section(stringResource(R.string.settings_setup)) {
+            Text(
+                text = stringResource(R.string.settings_setup_detail),
+                style = MaterialTheme.typography.bodySmall
+            )
+            OutlinedButton(onClick = viewModel::restartSetup) {
+                Text(stringResource(R.string.settings_setup_action))
+            }
+        }
+
+        HorizontalDivider()
+
         // Last, deliberately. This is the only setting on the screen that can cause a file to leave
         // OneDrive, and it is read rather than skimmed when it is not competing with a toggle.
         DeletionSection()

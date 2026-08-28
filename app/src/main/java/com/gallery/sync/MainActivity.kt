@@ -31,6 +31,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.ui.backup.BackupScreen
 import com.gallery.sync.ui.settings.SettingsScreen
+import com.gallery.sync.ui.setup.ReconcileViewModel
+import com.gallery.sync.ui.setup.SetupWizardScreen
 import com.gallery.sync.ui.signin.SignInScreen
 import com.gallery.sync.ui.signin.SignInUiState
 import com.gallery.sync.ui.signin.SignInViewModel
@@ -77,7 +79,7 @@ private fun GallerySyncApp(modifier: Modifier = Modifier) {
     val signInState by signInViewModel.state.collectAsStateWithLifecycle()
 
     when (val current = signInState) {
-        is SignInUiState.SignedIn -> SignedInApp(
+        is SignInUiState.SignedIn -> SignedInOrSetup(
             accountName = current.accountName,
             onSignOut = signInViewModel::signOut,
             modifier = modifier
@@ -86,6 +88,42 @@ private fun GallerySyncApp(modifier: Modifier = Modifier) {
         else -> SignInScreen(
             modifier = modifier,
             viewModel = signInViewModel
+        )
+    }
+}
+
+/**
+ * Guided setup, or the app, depending on whether the gates have been answered.
+ *
+ * The wizard runs when setup has not been completed **or** when no source folder is granted. The
+ * second condition is what makes it a gate rather than a tour: with nothing granted the scan
+ * returns nothing, and every screen behind here describes an empty library. Two of two fresh
+ * installs — Fold 4 on 26 Aug 2026, Moto G on 28 Aug — reached an Albums tab reporting no
+ * albums and offering a Rescan that could not succeed, which is the state this prevents.
+ *
+ * Nothing is shown until preferences have been read once. The wizard is deliberately impossible to
+ * miss, so showing it to someone who finished setup long ago is the one failure worth a frame of
+ * blankness to avoid.
+ */
+@Composable
+private fun SignedInOrSetup(
+    accountName: String,
+    onSignOut: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val setupViewModel: ReconcileViewModel = hiltViewModel()
+    val setupState by setupViewModel.state.collectAsStateWithLifecycle()
+
+    when {
+        !setupState.settingsLoaded -> Box(modifier.fillMaxSize())
+
+        !setupState.hasCompletedSetup || !setupState.hasSources ->
+            SetupWizardScreen(modifier = modifier, viewModel = setupViewModel)
+
+        else -> SignedInApp(
+            accountName = accountName,
+            onSignOut = onSignOut,
+            modifier = modifier
         )
     }
 }
