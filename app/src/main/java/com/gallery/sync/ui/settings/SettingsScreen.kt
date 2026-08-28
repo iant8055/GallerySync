@@ -39,6 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.gallery.sync.BuildConfig
 import com.gallery.sync.R
 import com.gallery.sync.ui.retrieve.DeletionSection
 import com.gallery.sync.data.local.entity.AlbumMode
@@ -341,6 +342,14 @@ fun SettingsScreen(
         // Last, deliberately. This is the only setting on the screen that can cause a file to leave
         // OneDrive, and it is read rather than skimmed when it is not competing with a toggle.
         DeletionSection()
+
+        // Debug builds only, and absent from anything that reaches Play. It exists to answer the
+        // question TASK-018 is blocked on — whether the tree grant lets a file grow — on the device
+        // that actually holds the grant.
+        if (BuildConfig.DEBUG) {
+            HorizontalDivider()
+            SafGrowProbeSection()
+        }
 
     }
 }
