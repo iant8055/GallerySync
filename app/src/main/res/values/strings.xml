@@ -372,7 +372,7 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
     <string name="restore_intro_files">Tap a file to select it. Nothing moves until you press Restore.</string>
     <string name="restore_empty">Nothing has been optimised or archived from this phone, so there is nothing to bring back.</string>
     <string name="restore_selected_summary">%1$d selected · %2$s to recover</string>
-    <string name="restore_folder_detail">%1$d files · %2$s to recover</string>
+    <string name="restore_folder_detail">%1$d files · %2$s</string>
     <!-- Named separately: they are different operations on the phone, and one total would hide that. -->
     <!-- Parallel verbs, matching the file rows and the button: two things one action does. -->
     <string name="restore_folder_split">%1$d to restore · %2$d to download</string>
