@@ -117,7 +117,7 @@
         itself. Without it a greyed-out primary action reads as a fault rather than as a finished
         state. Says "in your albums" because files in Off albums are deliberately not counted.
     -->
-    <string name="albums_all_backed_up">Everything in your albums is backed up.</string>
+    <string name="albums_all_backed_up">are backed up</string>
     <string name="albums_optimised_summary">%1$d Optimized · %2$s Saved</string>
     <!--
         Files in Archive albums still on the phone — every one of them is scheduled to leave.

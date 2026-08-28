@@ -831,7 +831,6 @@ private fun HeroDetail(
         ),
         style = MaterialTheme.typography.titleSmall
     )
-
     if (modeFilter == null) {
         Text(
             text = stringResource(
@@ -842,6 +841,16 @@ private fun HeroDetail(
                 state.offAlbumCount
             ),
             style = MaterialTheme.typography.bodyMedium
+        )
+
+        // A hairline under the mode split, separating what the albums are set to from what is
+        // actually in them. Ian, 27 Aug 2026. Drawn from LocalContentColor rather than a fixed
+        // white so it follows the hero's own contents in either theme — a hardcoded colour here is
+        // exactly what the dark-mode rule forbids.
+        HorizontalDivider(
+            modifier = Modifier.padding(vertical = 2.dp),
+            thickness = 1.dp,
+            color = LocalContentColor.current.copy(alpha = 0.25f)
         )
     }
 
@@ -863,19 +872,23 @@ private fun HeroDetail(
     )
 
 
-    // Why Sync now is unavailable, said rather than left to be worked out. Ian, 27 Aug 2026: the
-    // button greys itself out when a run would move nothing, which is right, but a disabled control
-    // with no stated reason is the same problem as a hidden one — the user cannot tell "finished"
-    // from "broken" or "signed out".
+    // Reads as a continuation of the line above it — "60 Images · 11 Videos / are backed up".
+    // Ian, 27 Aug 2026.
     //
-    // Only when there is something to have finished. On a phone with no albums chosen the sentence
-    // would be true and useless, and it would be the first thing a new user read.
-    if (!state.canRunBackup && state.activeAlbumCount > 0) {
+    // Which means it has to be true of *those* counts, not merely of the albums that are switched
+    // on. The media summary includes Off albums, so a phone with two unsynced photos in Camera
+    // would otherwise read "60 Images · 11 Videos / are backed up" while two of them are not. The
+    // gate is therefore every album in the shown set having nothing outstanding, which is stricter
+    // than the disabled Sync now beside it — that one only cares about albums it is allowed to
+    // upload from.
+    val shown = state.albums.filter { modeFilter == null || it.mode == modeFilter }
+    if (shown.isNotEmpty() && shown.all { it.outstanding == 0 }) {
         Text(
             text = stringResource(R.string.albums_all_backed_up),
             style = MaterialTheme.typography.bodyMedium
         )
     }
+
     // Sync is the mode that shrinks things, so it is judged on what came back.
     if (modeFilter == AlbumMode.SYNC) {
         Text(
