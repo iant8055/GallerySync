@@ -70,6 +70,18 @@ data class ReconcileUiState(
      * unmissable by design, which makes showing it wrongly worse than usual.
      */
     val settingsLoaded: Boolean = false,
+    /**
+     * Whether the upgrade backfill has finished deciding.
+     *
+     * Separate from [settingsLoaded] because they complete at different times, and the gap is
+     * visible. Preferences load fast and report `hasCompletedSetup = false`; the backfill then reads
+     * the grants and writes `true` a beat later. Gating only on the preferences therefore shows an
+     * existing user the wizard for that beat — observed on the Moto G, 28 Aug 2026, and long enough
+     * to be caught in a screenshot, which means long enough to be tapped.
+     */
+    val migrationChecked: Boolean = false,
+    /** Whether the granted-directory list has emitted at least once. */
+    val sourcesLoaded: Boolean = false,
     /** Defaults the wizard offers to set. Each is also reachable from Settings afterwards. */
     val allowMeteredNetwork: Boolean = false,
     val defaultAlbumMode: AlbumMode = AlbumMode.DEFAULT,
@@ -84,6 +96,18 @@ data class ReconcileUiState(
      * — which is false, and false in the direction that stops someone acting.
      */
     val hasSources: Boolean get() = directories.isNotEmpty()
+
+    /**
+     * Whether enough is known to decide between the wizard and the app.
+     *
+     * Three independent async sources feed that decision — stored preferences, the upgrade
+     * backfill, and the granted-directory list — and each one defaults to the value that means
+     * "show the wizard". Gating on them one at a time produced the same flash three times over on
+     * 28 Aug 2026: first the preferences, then the backfill, then the directories, each fixed in
+     * turn while the next kept the bug alive. They are gathered here so a fourth input cannot
+     * reintroduce it quietly.
+     */
+    val setupDecisionReady: Boolean get() = settingsLoaded && migrationChecked && sourcesLoaded
     /**
      * Whether changing the destination now would leave already-backed-up files behind.
      *
@@ -126,6 +150,7 @@ class ReconcileViewModel @Inject constructor(
             if (!settings.hasSetupDecision() && sources.directories.first().isNotEmpty()) {
                 settings.setSetupCompleted(true)
             }
+            _state.value = _state.value.copy(migrationChecked = true)
 
             // Grants can be revoked outside the app. Checking once at start keeps the list from
             // claiming a folder is watched when nothing in it is readable any more.
@@ -136,7 +161,7 @@ class ReconcileViewModel @Inject constructor(
                 // that here rather than in each caller means no path can forget to re-check.
                 val changed = _state.value.directories.map { it.treeUri }.toSet() !=
                     dirs.map { it.treeUri }.toSet()
-                _state.value = _state.value.copy(directories = dirs)
+                _state.value = _state.value.copy(directories = dirs, sourcesLoaded = true)
 
                 if (!changed) return@collect
                 if (dirs.isEmpty()) {

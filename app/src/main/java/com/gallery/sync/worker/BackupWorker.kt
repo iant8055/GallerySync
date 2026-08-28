@@ -41,6 +41,18 @@ class BackupWorker @AssistedInject constructor(
 
         val preferences = settings.current()
 
+        // Held by the user, so nothing transfers — including a manual run, because Sync now is not
+        // reachable while paused and anything else arriving here is a trigger the user already said
+        // no to.
+        //
+        // Declining here rather than tearing down the schedule is the point: the triggers stay
+        // armed, so Resume needs only to clear the flag rather than rebuild anything, and a pause
+        // survives every path that would otherwise restart a cancelled chain.
+        if (preferences.isPaused) {
+            Logger.i(TAG, "backup run declined: paused by the user")
+            return Result.success()
+        }
+
         // The first whole-library upload is the heaviest thing this app does — 148 GB and roughly
         // fourteen hours on a real device — so it waits for a moment the user chose. Only automatic
         // runs are held: "Sync now" goes straight to the engine and is never gated, because someone

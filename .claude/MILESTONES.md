@@ -1743,6 +1743,49 @@ that way.
 file, which read as "the lookup is broken" and was actually "the live database has nothing to repair".
 An instrument disagreeing with the evidence is a reason to doubt the evidence.
 
+### 28 Aug 2026 — pause, resume, and four bugs that only a thumb could find
+
+**Moto G.** TASK-019 built and verified. The Albums hero now reports rather than acts: the left slot
+shows overall progress, and Pause, Resume and Stop sit beside it. All three fit at 443 dp.
+
+**The claim the design rests on is proven for the pause path.** Pausing mid-clip and resuming logged:
+
+```
+resuming REC_1661620432421.mp4 at 10485760 of 127247142 bytes (8% already accepted)
+```
+
+Byte 10,485,760 of 127,247,142, not zero. This had been shown for a killed process on 26 Aug; it is
+now shown for a deliberate pause, which is the path users take. That is what makes an instant pause
+free, and it is why Ian's question — *"do we want to complete the file or rollback?"* — overturned
+the first draft's "finish the current file" design. The premise behind that draft, that interrupting
+re-sends the file, was simply false.
+
+**Four defects, every one found by pressing the screen rather than by reading the code, and every one
+of them would have shipped.**
+
+| Defect | Cause |
+|---|---|
+| "Paused at 95%" beside a **Pause** button | `isRunning` tested before `isPaused`; both are true while the cancellation lands |
+| Pause waited for the current file | only `MANUAL_WORK` was cancelled, and the run was automatic — so the pause took hold only when the worker next declined |
+| "Syncing 0%" on a cold start | the percentage ignored `hasLoadedCounts`, rendering zero as fact. The comment warning about exactly this trap was already in the file |
+| The wizard flashing over a set-up install | **fixed three times before it was right** |
+
+That last one is the one worth remembering. The decision between wizard and app depends on three
+independent async sources — stored preferences, the upgrade backfill, and the granted-directory list
+— and **each defaults to the value meaning "show the wizard"**. Each was gated in turn, and each fix
+looked complete until the next input was observed doing the same thing. They are now behind one
+`setupDecisionReady`, so a fourth input cannot reintroduce it quietly.
+
+**Also fixed, and the reason the feature exists:** an automatic run is now reported as running.
+`isRunning` was set only from the manual chain, so during the 21 GB upload the button read "Sync now"
+throughout and nothing could touch it. Four flows were racing to write one boolean; they now report
+into a set.
+
+**Method note.** Driving the app over `adb input tap` cost far more turns than it saved: taps landed
+on the wrong row while a fling settled, one dismissed a menu, one exited the app. Screenshots must be
+compared for equality before trusting a coordinate read from them. Handing the taps to Ian was faster
+than automating them, and found more.
+
 ### 28 Aug 2026 — the engine at twenty-two times its previous scale
 
 **Moto G 2026 (Android 16), a second test device.** 3,326 files and 21.02 GB pushed into four purpose-built

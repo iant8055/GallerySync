@@ -75,6 +75,12 @@ import com.gallery.sync.ui.common.HeroOutlinedButton
 import com.gallery.sync.ui.common.formatBytes
 import com.gallery.sync.ui.theme.LocalGallerySyncColors
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.material3.IconButton
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.gallery.sync.ui.common.isCompactWidth
+import kotlin.math.roundToInt
 
 /**
  * Backup control: which albums, and a manual run.
@@ -230,10 +236,11 @@ private fun AlbumList(
             actions = {
                 HeroActions(
                     state = state,
-                    onSyncNow = {
-                        if (state.isRunning) viewModel.stopBackup() else viewModel.runBackupNow()
-                    },
-                    onRescan = viewModel::refresh
+                    onSyncNow = viewModel::runBackupNow,
+                    onRescan = viewModel::refresh,
+                    onPause = viewModel::pauseBackup,
+                    onResume = viewModel::resumeBackup,
+                    onStop = viewModel::stopBackup
                 )
             }
         )
@@ -937,54 +944,158 @@ private fun HeroDetail(
 }
 
 /**
- * Sync now and Rescan, sharing one line.
+ * What the app is doing, and the controls for it.
  *
  * A Row that shares the width, not a FlowRow that wraps. Two buttons at their natural width did not
  * both fit on the cover screen and the second dropped to its own line, which made the hero taller
- * than the list it introduces. Equal weights let them shrink together instead — with reduced content
- * padding so the labels still fit at a large font scale rather than truncating.
+ * than the list it introduces. Equal weights let them shrink together instead — with reduced
+ * content padding so the labels still fit at a large font scale rather than truncating.
+ *
+ * **The left control reports; it does not act.** It used to be Sync now and relabel to "Stop sync"
+ * while running, which is why Stop appeared to have nowhere to live once Pause wanted a slot. It is
+ * a button only when there is a run to start.
+ *
+ * Three controls do not fit the cover screen at 344dp — about 85dp each against a
+ * [ModePillMinWidth] of 96dp — so Pause and Stop drop to icons there. [isCompactWidth] decides,
+ * and it keys on font scale as well as width: a 400dp screen at 2x has the same problem as a 320dp
+ * one at 1.6x.
  */
 @Composable
-private fun HeroActions(state: BackupUiState, onSyncNow: () -> Unit, onRescan: () -> Unit) {
+private fun HeroActions(
+    state: BackupUiState,
+    onSyncNow: () -> Unit,
+    onRescan: () -> Unit,
+    onPause: () -> Unit,
+    onResume: () -> Unit,
+    onStop: () -> Unit
+) {
     val signal = LocalGallerySyncColors.current
+    val active = state.isRunning || state.isPaused
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        // Disabled when a run would transfer nothing. A button that can be pressed and then
-        // visibly does nothing is worse than one that is plainly unavailable.
-        //
-        // The disabled pair matters as much as the enabled one here. Material's defaults derive
-        // disabled colours from the SCHEME's surface, which on the hero's filled container came out
-        // dark-green-on-dark-green and read as an empty hole. Derived from the hero's own content
-        // colour instead, so it is plainly present and plainly unavailable.
-        Button(
-            onClick = onSyncNow,
-            enabled = state.canRunBackup,
-            modifier = Modifier.weight(1f),
-            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = signal.accent,
-                contentColor = signal.onAccent,
-                disabledContainerColor = LocalContentColor.current.copy(alpha = 0.14f),
-                disabledContentColor = LocalContentColor.current.copy(alpha = 0.55f)
-            )
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val compact = isCompactWidth(maxWidth)
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                stringResource(
-                    // A control, not a label. It read "Syncing…" and was disabled, so a run the
-                    // user started could not be stopped by the person who started it.
-                    if (state.isRunning) R.string.backup_stop else R.string.backup_run_now
-                ),
-                maxLines = 1
-            )
+            if (active) {
+                // A report, not a control. The percentage is of bytes within the selected albums,
+                // because by file count a video-heavy library crawls and then leaps: on the Moto G
+                // the same moment read 5% by files and 37% by bytes.
+                //
+                // No number until the counts have actually been read. Defaulting the fraction to
+                // zero rendered a confident "Syncing 0%" on every cold start — observed on the
+                // Moto G, 28 Aug 2026, while four files were already uploaded. Zero is a claim, and
+                // this is the same trap [BackupUiState.hasLoadedCounts] was added for.
+                val fraction = state.backedUpFraction.takeIf { state.hasLoadedCounts }
+                Text(
+                    text = if (fraction == null) {
+                        stringResource(
+                            if (state.isPaused) R.string.backup_paused else R.string.backup_syncing
+                        )
+                    } else {
+                        stringResource(
+                            if (state.isPaused) {
+                                R.string.backup_paused_at
+                            } else {
+                                R.string.backup_syncing_at
+                            },
+                            (fraction * 100).roundToInt()
+                        )
+                    },
+                    style = MaterialTheme.typography.labelLarge,
+                    maxLines = 1,
+                    modifier = Modifier
+                        .weight(1f)
+                        .alpha(if (state.isPaused) 0.6f else 1f)
+                )
+            } else {
+                Button(
+                    onClick = onSyncNow,
+                    enabled = state.pendingCount > 0,
+                    modifier = Modifier.weight(1f),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = signal.accent,
+                        contentColor = signal.onAccent,
+                        disabledContainerColor = LocalContentColor.current.copy(alpha = 0.14f),
+                        disabledContentColor = LocalContentColor.current.copy(alpha = 0.55f)
+                    )
+                ) {
+                    Text(stringResource(R.string.backup_run_now), maxLines = 1)
+                }
+            }
+
+            when {
+                // Paused is tested first, and the order is load-bearing: cancelling the work takes
+                // a moment, so both flags are true in between. Testing isRunning first left the
+                // screen reading "Paused at 95%" beside a Pause button — observed on the Moto G,
+                // 28 Aug 2026, on the first press.
+                //
+                // Pause holds until told otherwise; Stop ends the run and lets automatic sync pick
+                // up at the next trigger. Two different answers about the *next* run, which is why
+                // they are two controls rather than one.
+                state.isPaused -> {
+                    HeroControl(
+                        compact = compact,
+                        icon = SignalIcons.Albums,
+                        label = stringResource(R.string.backup_resume),
+                        onClick = onResume
+                    )
+                    HeroControl(
+                        compact = compact,
+                        icon = SignalIcons.Stop,
+                        label = stringResource(R.string.backup_stop_run),
+                        onClick = onStop
+                    )
+                }
+
+                state.isRunning -> {
+                    HeroControl(
+                        compact = compact,
+                        icon = SignalIcons.Pause,
+                        label = stringResource(R.string.backup_pause),
+                        onClick = onPause
+                    )
+                    HeroControl(
+                        compact = compact,
+                        icon = SignalIcons.Stop,
+                        label = stringResource(R.string.backup_stop_run),
+                        onClick = onStop
+                    )
+                }
+
+                else -> HeroOutlinedButton(
+                    onClick = onRescan,
+                    label = stringResource(R.string.backup_rescan),
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
-        HeroOutlinedButton(
-            onClick = onRescan,
-            label = stringResource(R.string.backup_rescan),
-            modifier = Modifier.weight(1f)
-        )
+    }
+}
+
+/**
+ * One hero control, worded or drawn depending on the room available.
+ *
+ * The label is the content description in both forms, so the icon and the words cannot drift and
+ * TalkBack says the same thing either way.
+ */
+@Composable
+private fun RowScope.HeroControl(
+    compact: Boolean,
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit
+) {
+    if (compact) {
+        IconButton(onClick = onClick) {
+            Icon(imageVector = icon, contentDescription = label)
+        }
+    } else {
+        HeroOutlinedButton(onClick = onClick, label = label, modifier = Modifier.weight(1f))
     }
 }
 

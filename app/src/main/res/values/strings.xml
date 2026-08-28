@@ -635,4 +635,14 @@ Local removals go to your gallery’s recycle bin and can be restored for 30 day
     <string name="settings_setup">Setup</string>
     <string name="settings_setup_detail">Walk through the introduction again. It opens on your current settings, changes no album on its own, and does not ask you to re-confirm anything you have already read.</string>
     <string name="settings_setup_action">Run setup again</string>
+
+    <!-- The hero's run controls. Pause holds until told otherwise; Stop ends this run and lets
+         automatic sync pick up at the next trigger. -->
+    <string name="backup_syncing">Syncing…</string>
+    <string name="backup_paused">Paused</string>
+    <string name="backup_syncing_at">Syncing %1$d%%</string>
+    <string name="backup_paused_at">Paused at %1$d%%</string>
+    <string name="backup_pause">Pause</string>
+    <string name="backup_resume">Resume</string>
+    <string name="backup_stop_run">Stop</string>
 </resources>

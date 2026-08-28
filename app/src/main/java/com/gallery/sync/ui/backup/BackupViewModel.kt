@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -205,7 +206,14 @@ data class BackupUiState(
     val proxyStatus: ProxyStatus? = null,
     val defaultAlbumMode: AlbumMode = AlbumMode.DEFAULT,
     /** Whether the restore screen lists cloud folders that hold nothing. */
-    val showEmptyCloudFolders: Boolean = false
+    val showEmptyCloudFolders: Boolean = false,
+    /**
+     * The user has held backing up until they say otherwise.
+     *
+     * Distinct from "not running". A paused app is deliberately idle and stays that way through
+     * every automatic trigger; an idle one is simply waiting for the next.
+     */
+    val isPaused: Boolean = false
 
 ) {
 
@@ -330,6 +338,14 @@ class BackupViewModel @Inject constructor(
     /** Captured when consent is requested, so exactly that set is what gets rewritten. */
     private var pendingProxyCandidates: List<BackupEntryEntity> = emptyList()
 
+    /**
+     * Which backup chains are live, by unique work name.
+     *
+     * One set rather than one boolean per collector: four flows each writing `isRunning` would
+     * race, and the last to emit would win regardless of what the others were doing.
+     */
+    private val runningWork = MutableStateFlow(emptySet<String>())
+
     private val _state = MutableStateFlow(BackupUiState())
     val state: StateFlow<BackupUiState> = _state.asStateFlow()
 
@@ -343,6 +359,7 @@ class BackupViewModel @Inject constructor(
                     isAutoOptimiseEnabled = prefs.isAutoOptimiseEnabled,
                     allowMeteredNetwork = prefs.allowMeteredNetwork,
                     showEmptyCloudFolders = prefs.showEmptyCloudFolders,
+                    isPaused = prefs.isPaused,
                     defaultAlbumMode = prefs.defaultAlbumMode
                 )
             }
@@ -357,10 +374,25 @@ class BackupViewModel @Inject constructor(
             BackupScheduling.CONTINUATION_WORK,
             BackupScheduling.PERIODIC_WORK
         )
+
+        // isRunning used to be set only from the manual chain, so an automatic run left the button
+        // reading "Sync now" throughout — observed on the Moto G, 28 Aug 2026, while 21 GB
+        // uploaded. Since the button is also the only way to reach Pause and Stop, the runs a user
+        // most wants to interrupt were the ones with no control attached. Every chain now reports
+        // into one set, and running means any of them is live.
+        viewModelScope.launch {
+            runningWork.collect { live ->
+                _state.value = _state.value.copy(isRunning = live.isNotEmpty())
+            }
+        }
+
         for (name in workNames) {
             viewModelScope.launch {
                 workManager.getWorkInfosForUniqueWorkFlow(name).collectLatest { infos ->
-                    if (_state.value.isRunning) return@collectLatest
+                    runningWork.update { live ->
+                        if (infos.any { it.state == WorkInfo.State.RUNNING }) live + name
+                        else live - name
+                    }
 
                     val running = infos.firstOrNull { it.state == WorkInfo.State.RUNNING }
                     if (running != null) {
@@ -573,6 +605,22 @@ class BackupViewModel @Inject constructor(
         viewModelScope.launch { settings.setSetupCompleted(false) }
     }
 
+    /**
+     * Restores the automatic triggers Pause cancelled, if the user still wants them.
+     *
+     * Reads [BackupPreferences.isAutomaticEnabled] rather than assuming: pausing must not switch
+     * automatic sync back on for someone who had deliberately turned it off.
+     */
+    private suspend fun rearmAutomaticSync() {
+        val preferences = settings.current()
+        if (preferences.isAutomaticEnabled) {
+            BackupScheduling.enable(
+                WorkManager.getInstance(context),
+                preferences.allowMeteredNetwork
+            )
+        }
+    }
+
     fun setDefaultAlbumMode(mode: AlbumMode) {
         viewModelScope.launch { settings.setDefaultAlbumMode(mode) }
     }
@@ -777,7 +825,50 @@ class BackupViewModel @Inject constructor(
      * finishing the file it was on. What it has already sent is not wasted: the resumable session
      * is on the ledger row, so the next run continues from that offset.
      */
+    /**
+     * Holds backing up until Resume or Stop.
+     *
+     * Cancels what is running *and* records the intent, because cancelling alone lasts until the
+     * next trigger. Nothing is lost by stopping mid-file: `ChunkedUploader` resumes from the offset
+     * Graph reports accepted, proven at 1,938 MB on the Fold 4.
+     */
+    fun pauseBackup() {
+        viewModelScope.launch {
+            settings.setPaused(true)
+            val workManager = WorkManager.getInstance(context)
+
+            // Every chain, not just the manual one. Cancelling only MANUAL_WORK left an automatic
+            // run going until its current file finished, because nothing was cancelled and the
+            // pause took hold only when the worker next declined — observed on the Moto G, 28 Aug
+            // 2026, and precisely the "finish the file first" behaviour we decided against.
+            BackupScheduling.cancelManualRun(workManager)
+            BackupScheduling.disable(workManager)
+        }
+    }
+
+    /** Lifts the hold and starts a run now, rather than waiting for the next trigger. */
+    fun resumeBackup() {
+        viewModelScope.launch {
+            settings.setPaused(false)
+            rearmAutomaticSync()
+            runBackupNow()
+        }
+    }
+
+    /**
+     * Ends this run and hands control back to automatic sync.
+     *
+     * Clears the paused flag as well, because "go back to normal" is exactly what it means — so
+     * pressing Stop while paused releases the hold without starting anything. The next trigger runs
+     * as it always would.
+     */
     fun stopBackup() {
+        viewModelScope.launch {
+            settings.setPaused(false)
+            // Ends the run but leaves automatic sync armed — that is the whole difference from
+            // Pause. Re-arming is needed because Pause may have torn the triggers down.
+            rearmAutomaticSync()
+        }
         BackupScheduling.cancelManualRun(WorkManager.getInstance(context))
     }
 
@@ -839,7 +930,11 @@ class BackupViewModel @Inject constructor(
                         else -> _state.value.status
                     }
 
-                    _state.value = _state.value.copy(isRunning = running, status = status)
+                    runningWork.update { live ->
+                        if (running) live + BackupScheduling.MANUAL_WORK
+                        else live - BackupScheduling.MANUAL_WORK
+                    }
+                    _state.value = _state.value.copy(status = status)
                     if (info?.state?.isFinished == true) refresh()
                 }
         }

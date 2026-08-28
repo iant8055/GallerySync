@@ -91,7 +91,19 @@ data class BackupPreferences(
      * no granted tree can only reach a screen reporting zero albums and offering a Rescan that
      * cannot succeed, which is what two of two fresh installs hit on 26 and 28 Aug 2026.
      */
-    val hasCompletedSetup: Boolean = false
+    val hasCompletedSetup: Boolean = false,
+    /**
+     * Whether the user has held backing up until they say otherwise.
+     *
+     * A preference the worker consults, **not** a cancelled job. Backup has three automatic
+     * triggers — armed on every launch, content-triggered on new media, and a six-hourly safety
+     * net — so cancelling the running chain would last until the next trigger, which is minutes.
+     *
+     * Set by Pause. Cleared by Resume, which starts a run at once, and by Stop, which does not:
+     * Stop means "end this run and go back to normal automatic behaviour", and the hold is part of
+     * what it undoes.
+     */
+    val isPaused: Boolean = false
 )
 
 /**
@@ -140,7 +152,8 @@ class BackupSettings @Inject constructor(
                 ?: CloudDeletionGrace.DEFAULT_DAYS,
             showEmptyCloudFolders = stored[KEY_SHOW_EMPTY_FOLDERS] ?: false,
             acknowledgedTopics = stored[KEY_ACKNOWLEDGED_TOPICS] ?: emptySet(),
-            hasCompletedSetup = stored[KEY_SETUP_COMPLETE] ?: false
+            hasCompletedSetup = stored[KEY_SETUP_COMPLETE] ?: false,
+            isPaused = stored[KEY_PAUSED] ?: false
         )
     }
 
@@ -164,6 +177,11 @@ class BackupSettings @Inject constructor(
      */
     suspend fun hasSetupDecision(): Boolean =
         context.dataStore.data.first()[KEY_SETUP_COMPLETE] != null
+
+    /** Holds backing up until Resume or Stop. See [BackupPreferences.isPaused]. */
+    suspend fun setPaused(paused: Boolean) {
+        context.dataStore.edit { it[KEY_PAUSED] = paused }
+    }
 
     /** Marks guided setup finished. Skipping counts — the tour is optional, the gates are not. */
     suspend fun setSetupCompleted(completed: Boolean) {
@@ -264,5 +282,6 @@ class BackupSettings @Inject constructor(
         val KEY_SHOW_EMPTY_FOLDERS = booleanPreferencesKey("show_empty_cloud_folders")
         val KEY_ACKNOWLEDGED_TOPICS = stringSetPreferencesKey("acknowledged_topics")
         val KEY_SETUP_COMPLETE = booleanPreferencesKey("setup_complete")
+        val KEY_PAUSED = booleanPreferencesKey("backup_paused")
     }
 }

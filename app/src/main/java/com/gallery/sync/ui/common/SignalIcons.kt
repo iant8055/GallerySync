@@ -68,6 +68,29 @@ object SignalIcons {
     }
 
     /**
+     * Hold a run where it is.
+     *
+     * The two-bar transport symbol, because it is the one control here everybody already knows.
+     * Shown only where the row is too narrow to carry the word — see `isCompactWidth`, which is why
+     * the icon and the label are never both the source of truth: the label string is also this
+     * icon's content description.
+     */
+    val Pause: ImageVector = stroked("pause") {
+        listOf("M10 5v14", "M14 5v14")
+    }
+
+    /**
+     * End a run and hand control back to automatic sync.
+     *
+     * Deliberately not a cross. [Cross] already means "could not be confirmed" on the Archive
+     * screen, and stopping a run is neither a failure nor a refusal — it is the transport square,
+     * which carries no judgement.
+     */
+    val Stop: ImageVector = stroked("stop") {
+        listOf("M7 7h10v10H7z")
+    }
+
+    /**
      * This pill shows a value *and* changes it.
      *
      * The album row's mode pill reads "Sync", which is the state, not what tapping does — so

@@ -115,7 +115,8 @@ private fun SignedInOrSetup(
     val setupState by setupViewModel.state.collectAsStateWithLifecycle()
 
     when {
-        !setupState.settingsLoaded -> Box(modifier.fillMaxSize())
+        // Every input, not some of them. See ReconcileUiState.setupDecisionReady.
+        !setupState.setupDecisionReady -> Box(modifier.fillMaxSize())
 
         !setupState.hasCompletedSetup || !setupState.hasSources ->
             SetupWizardScreen(modifier = modifier, viewModel = setupViewModel)
