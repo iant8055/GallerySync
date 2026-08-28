@@ -77,6 +77,8 @@ import com.gallery.sync.ui.common.formatBytes
 import com.gallery.sync.ui.theme.LocalGallerySyncColors
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.material3.OutlinedIconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -1083,7 +1085,17 @@ private fun RowScope.HeroControl(
     onClick: () -> Unit
 ) {
     if (compact) {
-        IconButton(onClick = onClick) {
+        // Outlined, not a bare IconButton. A plain icon draws no container, so on the cover screen
+        // Pause and Stop floated beside the text with nothing marking them as controls — Ian, on
+        // seeing them folded: *"they were not buttons"*. The border is the same one
+        // [HeroOutlinedButton] uses, derived from LocalContentColor so it follows the hero in
+        // either theme rather than being a fixed white.
+        val content = LocalContentColor.current
+        OutlinedIconButton(
+            onClick = onClick,
+            colors = IconButtonDefaults.outlinedIconButtonColors(contentColor = content),
+            border = BorderStroke(1.dp, content.copy(alpha = 0.35f))
+        ) {
             Icon(imageVector = icon, contentDescription = label)
         }
     } else {

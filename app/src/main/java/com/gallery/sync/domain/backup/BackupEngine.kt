@@ -119,11 +119,17 @@ class BackupEngine @Inject constructor(
     }
 
     /**
-     * Opens or updates the denominator for run progress.
+     * Opens, carries or closes the denominator for run progress.
      *
-     * Called at the start of every worker invocation. The first one in a chain sets the baseline to
-     * what is outstanding; later ones leave it alone, which is what makes progress span the whole
-     * run instead of resetting each batch.
+     * Called at **both ends** of every worker invocation, and the second call is the one that keeps
+     * it honest. Raising-only at the start left a finished run's baseline in place: the queue
+     * drained, nothing cleared it, and the next run — smaller than the last — neither raised it nor
+     * reset it. A 62-file album opened at **79%** against an 884 MB denominator from an hour
+     * earlier. Fold 4, 28 Aug 2026.
+     *
+     * At the start of a chain it sets the baseline to what is outstanding; later invocations in the
+     * same chain leave it alone, which is what makes progress span the whole run rather than
+     * resetting each batch.
      *
      * Raised, never lowered, while a run is live: files arriving midway make the reported progress
      * slow down rather than leap backwards, which is the honest rendering of "there is now more to
@@ -132,7 +138,7 @@ class BackupEngine @Inject constructor(
      * Cleared when nothing is outstanding, so the next run opens at zero rather than inheriting a
      * finished run's denominator.
      */
-    suspend fun openRunBaseline() = withContext(dispatcher) {
+    suspend fun updateRunBaseline() = withContext(dispatcher) {
         val outstanding = entryDao.pendingBytesInSelectedAlbums()
         val current = settings.current().runBaselineBytes
 

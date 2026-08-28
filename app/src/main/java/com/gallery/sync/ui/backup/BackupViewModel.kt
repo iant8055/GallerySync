@@ -217,7 +217,19 @@ data class BackupUiState(
     /** Bytes outstanding when this run began. The denominator for [runProgress]. */
     val runBaselineBytes: Long = 0L,
     /** Bytes of the file currently uploading that have been sent. Smooths the figure below. */
-    val currentBytesSent: Long = 0L
+    val currentBytesSent: Long = 0L,
+    /**
+     * The highest progress this run has reported, so it never goes backwards.
+     *
+     * Its two halves update at different moments: `currentBytesSent` drops to zero the instant a
+     * file completes, while `pendingBytes` only falls when counts are refreshed a beat later. In
+     * that window the sum collapses, and the hero flashed a percentage and fell back to 0% on every
+     * file. Fold 4, 28 Aug 2026.
+     *
+     * Refreshing counts on completion closes most of the gap; this closes the rest, because a
+     * progress bar that goes backwards is worse than one that is briefly stale.
+     */
+    val runProgressFloor: Float = 0f
 
 ) {
 
@@ -260,7 +272,7 @@ data class BackupUiState(
             // different things and the percentage lurched on every restart — 81% dropping to 1%
             // with nothing having changed. Fold 4, 28 Aug 2026.
             val done = (runBaselineBytes - pendingBytes).coerceAtLeast(0L) + currentBytesSent
-            return (done.toFloat() / runBaselineBytes).coerceIn(0f, 1f)
+            return (done.toFloat() / runBaselineBytes).coerceIn(0f, 1f).coerceAtLeast(runProgressFloor)
         }
 
     val backedUpFraction: Float?
@@ -377,6 +389,9 @@ class BackupViewModel @Inject constructor(
      * race, and the last to emit would win regardless of what the others were doing.
      */
     private val runningWork = MutableStateFlow(emptySet<String>())
+
+    /** Last completed-file count seen from a worker, so counts are re-read once per file. */
+    private var lastCompletedSeen = -1
 
     private val _state = MutableStateFlow(BackupUiState())
     val state: StateFlow<BackupUiState> = _state.asStateFlow()
@@ -700,6 +715,21 @@ class BackupViewModel @Inject constructor(
         val redundant = engine.redundantLocalCopies()
         val proxyCandidates = proxyApplier.candidates()
 
+        // Close the run's denominator the moment there is nothing left to do.
+        //
+        // The worker closes it too, at the end of a run, but that depends on a particular exit path
+        // executing — and it did not: the Fold finished a run on 28 Aug 2026 with zero outstanding
+        // and a 172 MB baseline still stored, which would have opened the next run part-finished.
+        // This asks the only question that matters, wherever the app happens to notice: no work
+        // outstanding means no run in progress, so the denominator is meaningless.
+        if (entryDao.countPendingInSelectedAlbums() == 0 &&
+            settings.current().runBaselineBytes != 0L
+        ) {
+            settings.setRunBaselineBytes(0L)
+            _state.value = _state.value.copy(runProgressFloor = 0f)
+            lastCompletedSeen = -1
+        }
+
         _state.value = _state.value.copy(
             hasLoadedCounts = true,
             uploadedCount = entryDao.countInState(BackupState.UPLOADED),
@@ -842,7 +872,23 @@ class BackupViewModel @Inject constructor(
      *
      * One host now. Chaining and bookkeeping happen once, in the worker, for both callers.
      */
+    /**
+     * Raises the floor to whatever progress currently reads, and never lowers it.
+     *
+     * Reset when a run ends or a new baseline is opened — see [runBackupNow] and [stopBackup].
+     */
+    private fun holdProgressFloor() {
+        val now = _state.value.runProgress ?: return
+        if (now > _state.value.runProgressFloor) {
+            _state.value = _state.value.copy(runProgressFloor = now)
+        }
+    }
+
+    
     fun runBackupNow() {
+        // A new run reports its own progress from zero, so last run's high-water mark must go.
+        _state.value = _state.value.copy(runProgressFloor = 0f)
+        lastCompletedSeen = -1
         if (_state.value.isRunning) return
         viewModelScope.launch {
             BackupScheduling.enqueueManualRun(
@@ -912,6 +958,8 @@ class BackupViewModel @Inject constructor(
             // Ends the run, so the next opens its own denominator rather than inheriting this one's
             // and appearing to start part-finished.
             settings.setRunBaselineBytes(0L)
+            _state.value = _state.value.copy(runProgressFloor = 0f)
+            lastCompletedSeen = -1
             // Ends the run but leaves automatic sync armed — that is the whole difference from
             // Pause. Re-arming is needed because Pause may have torn the triggers down.
             rearmAutomaticSync()
@@ -993,6 +1041,15 @@ class BackupViewModel @Inject constructor(
                         status = status,
                         currentBytesSent = sent ?: _state.value.currentBytesSent
                     )
+                    holdProgressFloor()
+
+                    // A file finishing is what makes pendingBytes stale, so that is the moment to
+                    // re-read it rather than waiting for the run to end.
+                    val done = info?.progress?.getInt(BackupWorker.PROGRESS_COMPLETED, 0) ?: 0
+                    if (done != lastCompletedSeen) {
+                        lastCompletedSeen = done
+                        refreshCounts()
+                    }
                     if (info?.state?.isFinished == true) refresh()
                 }
         }

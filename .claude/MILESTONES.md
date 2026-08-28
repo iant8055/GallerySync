@@ -1743,6 +1743,54 @@ that way.
 file, which read as "the lookup is broken" and was actually "the live database has nothing to repair".
 An instrument disagreeing with the evidence is a reason to doubt the evidence.
 
+### 28 Aug 2026 — the percentage, settled in four passes
+
+Getting one number onto one label took four corrections, each exposing the next. Recorded as a
+sequence because every wrong version was wrong for a reason that would recur.
+
+1. **Per-run byte counter over a persisted baseline.** Two quantities that reset at different times.
+   Produced the frozen 21% and the 48→15→48→18→22→67→2 lurching Ian caught on video.
+2. **Ledger figure plus the file in flight.** Correct in principle — `(baseline − pending) +
+   currentBytesSent`, both halves surviving a restart, no double counting because an uploading file
+   is still `PENDING`. But the halves update at different moments.
+3. **The stale baseline.** `openRunBaseline` only ever *raised* the denominator or cleared it at
+   zero, and it ran at the start of a run. A drained queue left the old baseline behind, so a new
+   62-file album opened at **79%** against an 884 MB denominator from an hour earlier.
+   `(884 − 180) / 884 = 79.6%`, exactly what was on screen.
+4. **The flash to zero.** `currentBytesSent` drops the instant a file completes; `pendingBytes` only
+   falls when counts refresh. In that window the sum collapsed and the hero flashed a percentage and
+   fell back to 0% on every file.
+
+**What finally holds**, and it needed all three:
+
+- counts refresh **per file completion**, not per run, so the two halves move together
+- a **floor** the figure cannot fall below inside a run — a bar going backwards is worse than one
+  briefly stale
+- the baseline **closes wherever the app observes no outstanding work**, not only on a worker exit
+  path. That mattered: the closing call was added to the worker and *still* left 172 MB stored after
+  a drained run, which would have opened the next one part-finished all over again
+
+**Confirmed by Ian on the Fold 4:** *"the % look good"*.
+
+**The lesson worth keeping** is about denominators. Every failure here was the same shape — a
+numerator and a denominator that were measured over different spans, or updated at different
+moments. Whenever this app shows a proportion, the two halves must come from the same place and
+change at the same time.
+
+### 28 Aug 2026 — icons that were not buttons
+
+The compact layout dropped Pause and Stop to bare `IconButton`s, which draw no container. Folded, they
+floated beside the text with nothing marking them as controls — Ian: *"they were not buttons"*. Now
+`OutlinedIconButton` carrying the same border as [HeroOutlinedButton], derived from
+`LocalContentColor` so it follows the hero in either theme.
+
+`SignalIcons.Resume` was also still wired to `SignalIcons.Albums` — a placeholder that rendered
+Resume as a **folder** on the cover screen. Now a transport triangle, drawn as a closed stroked path
+so it carries the weight of the Pause bars beside it.
+
+**Unverified:** both were installed after the run drained, and these controls only exist while
+something is uploading.
+
 ### 28 Aug 2026 — two numbers wearing one label, caught on video
 
 Ian screen-recorded the hero through two pause/resume cycles. The first recording sat frozen at

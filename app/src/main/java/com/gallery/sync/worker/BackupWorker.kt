@@ -59,7 +59,7 @@ class BackupWorker @AssistedInject constructor(
         engine.discardStaleUploadSessions()
 
         // The denominator for the percentage on the hero. Set once per chain, not per batch.
-        engine.openRunBaseline()
+        engine.updateRunBaseline()
 
         // The first whole-library upload is the heaviest thing this app does — 148 GB and roughly
         // fourteen hours on a real device — so it waits for a moment the user chose. Only automatic
@@ -95,7 +95,12 @@ class BackupWorker @AssistedInject constructor(
             if (engine.outstandingCount() == 0) {
                 Logger.i(TAG, "backlog already clear; first-backup window no longer applies")
                 settings.markFirstBackupComplete()
-                rearmContentTrigger(preferences)
+                // Closes the run's denominator when the queue is drained. Doing this only at the start of
+        // the next run was not enough: by then new files may exist, so nothing cleared the old
+        // baseline and the next run opened part-finished against it.
+        engine.updateRunBaseline()
+
+        rearmContentTrigger(preferences)
                 return Result.success()
             }
 
