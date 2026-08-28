@@ -862,6 +862,20 @@ private fun HeroDetail(
         style = MaterialTheme.typography.bodyMedium
     )
 
+
+    // Why Sync now is unavailable, said rather than left to be worked out. Ian, 27 Aug 2026: the
+    // button greys itself out when a run would move nothing, which is right, but a disabled control
+    // with no stated reason is the same problem as a hidden one — the user cannot tell "finished"
+    // from "broken" or "signed out".
+    //
+    // Only when there is something to have finished. On a phone with no albums chosen the sentence
+    // would be true and useless, and it would be the first thing a new user read.
+    if (!state.canRunBackup && state.activeAlbumCount > 0) {
+        Text(
+            text = stringResource(R.string.albums_all_backed_up),
+            style = MaterialTheme.typography.bodyMedium
+        )
+    }
     // Sync is the mode that shrinks things, so it is judged on what came back.
     if (modeFilter == AlbumMode.SYNC) {
         Text(
