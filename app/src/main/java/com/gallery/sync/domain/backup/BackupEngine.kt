@@ -60,16 +60,7 @@ data class BackupProgress(
     val total: Int,
     val currentFile: String,
     val currentBytesSent: Long,
-    val currentBytesTotal: Long,
-    /**
-     * Bytes this run has moved in total, including the part of the current file already sent.
-     *
-     * The hero's percentage needs a number that changes while a file is uploading. Deriving it from
-     * the ledger instead only moves when counts are refreshed, which is between runs — so the
-     * figure sat still through an entire transfer and jumped when the user pressed Pause. Observed
-     * on the Fold 4, 28 Aug 2026.
-     */
-    val runBytesSent: Long = 0L
+    val currentBytesTotal: Long
 )
 
 data class BackupRunResult(
@@ -449,9 +440,6 @@ class BackupEngine @Inject constructor(
             val pending = entryDao.nextPending(limit = limit, maxAttempts = MAX_ATTEMPTS)
                 .let { candidates -> withinByteBudget(candidates, maxBytes) }
             var uploaded = 0
-            // Bytes finished this run. Added to the in-flight file's sent count so the reported
-            // figure climbs continuously rather than stepping once per file.
-            var runBytesDone = 0L
             var failed = 0
             var skipped = 0
             var pruned = 0
@@ -549,8 +537,7 @@ class BackupEngine @Inject constructor(
                         total = pending.size,
                         currentFile = entry.displayName,
                         currentBytesSent = 0,
-                        currentBytesTotal = entry.sizeBytes,
-                        runBytesSent = runBytesDone
+                        currentBytesTotal = entry.sizeBytes
                     )
                 )
 
@@ -564,8 +551,7 @@ class BackupEngine @Inject constructor(
                                 total = pending.size,
                                 currentFile = entry.displayName,
                                 currentBytesSent = sent,
-                                currentBytesTotal = total,
-                                runBytesSent = runBytesDone + sent
+                                currentBytesTotal = total
                             )
                         )
                     },
@@ -605,7 +591,6 @@ class BackupEngine @Inject constructor(
                             )
                             entryDao.forgetUploadSession(entry.id)
                             uploaded++
-                            runBytesDone += entry.sizeBytes
                         } else {
                             entryDao.markFailed(
                                 entry.id,

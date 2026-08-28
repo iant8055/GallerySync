@@ -216,8 +216,8 @@ data class BackupUiState(
     val isPaused: Boolean = false,
     /** Bytes outstanding when this run began. The denominator for [runProgress]. */
     val runBaselineBytes: Long = 0L,
-    /** Bytes moved so far by the live run, published by the worker as it goes. */
-    val runBytesSent: Long = 0L
+    /** Bytes of the file currently uploading that have been sent. Smooths the figure below. */
+    val currentBytesSent: Long = 0L
 
 ) {
 
@@ -250,19 +250,17 @@ data class BackupUiState(
         get() {
             if (runBaselineBytes <= 0L) return null
 
-            // The worker's live figure while it is running, because the ledger-derived one only
-            // moves when counts are refreshed — which is between runs, so the percentage sat
-            // still through an entire transfer and jumped on Pause.
+            // Finished work comes from the ledger, which survives a restart and only ever falls;
+            // the file in flight comes from the worker, which is the part the ledger cannot see
+            // until it completes. Adding them cannot double-count, because a file being uploaded
+            // is still PENDING and so still inside pendingBytes.
             //
-            // The ledger is still the answer when nothing is publishing: after a pause, a crash or
-            // a restart there is no live figure, and what has actually been recorded is the honest
-            // fallback.
-            val moved = if (isRunning && runBytesSent > 0L) {
-                runBytesSent
-            } else {
-                (runBaselineBytes - pendingBytes).coerceAtLeast(0L)
-            }
-            return (moved.toFloat() / runBaselineBytes).coerceIn(0f, 1f)
+            // An earlier version divided a per-run byte count by this baseline. The run total
+            // resets when the process does while the baseline persists, so the two measured
+            // different things and the percentage lurched on every restart — 81% dropping to 1%
+            // with nothing having changed. Fold 4, 28 Aug 2026.
+            val done = (runBaselineBytes - pendingBytes).coerceAtLeast(0L) + currentBytesSent
+            return (done.toFloat() / runBaselineBytes).coerceIn(0f, 1f)
         }
 
     val backedUpFraction: Float?
@@ -435,7 +433,8 @@ class BackupViewModel @Inject constructor(
                         val total = data.getInt(BackupWorker.PROGRESS_TOTAL, 0)
                         if (total > 0) {
                             _state.value = _state.value.copy(
-                                runBytesSent = data.getLong(BackupWorker.PROGRESS_RUN_BYTES, 0L),
+                                currentBytesSent =
+                                    data.getLong(BackupWorker.PROGRESS_CURRENT_SENT, 0L),
                                 status = BackupStatus.Uploading(
                                     completed = data.getInt(BackupWorker.PROGRESS_COMPLETED, 0),
                                     total = total,
@@ -982,11 +981,17 @@ class BackupViewModel @Inject constructor(
                         if (running) live + BackupScheduling.MANUAL_WORK
                         else live - BackupScheduling.MANUAL_WORK
                     }
+                    // Zero is meaningful here — it means no file is in flight — but a *finished*
+                    // WorkInfo carries empty progress, and reading that would clear the figure the
+                    // other chain just published. Only a running one speaks.
+                    val sent = info
+                        ?.takeIf { it.state == WorkInfo.State.RUNNING }
+                        ?.progress
+                        ?.getLong(BackupWorker.PROGRESS_CURRENT_SENT, 0L)
+
                     _state.value = _state.value.copy(
                         status = status,
-                        runBytesSent = info?.progress
-                            ?.getLong(BackupWorker.PROGRESS_RUN_BYTES, 0L)
-                            ?: _state.value.runBytesSent
+                        currentBytesSent = sent ?: _state.value.currentBytesSent
                     )
                     if (info?.state?.isFinished == true) refresh()
                 }

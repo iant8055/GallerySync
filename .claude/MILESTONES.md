@@ -1743,6 +1743,41 @@ that way.
 file, which read as "the lookup is broken" and was actually "the live database has nothing to repair".
 An instrument disagreeing with the evidence is a reason to doubt the evidence.
 
+### 28 Aug 2026 — two numbers wearing one label, caught on video
+
+Ian screen-recorded the hero through two pause/resume cycles. The first recording sat frozen at
+**21% for 39 seconds** — 156 frames, three pixel-changes, all of them the word and the icons. The
+second jumped: **48 → 15 → 48 → 18 → 22 → 67 → 2 → 7 → 10 → 75 → 4 → 5**.
+
+Two symptoms, one cause. The label was being fed by **two different quantities**, and which one won
+depended on whichever collector spoke last:
+
+| Series | Values seen | What it was |
+|---|---|---|
+| High | 48, 67, 75 | `(baseline − pending)` from the ledger — correct, but only moving when a file completed |
+| Low | 2, 4, 15, 18 | a per-run byte counter — reset to zero every time the worker chain restarted |
+
+The frozen recording is the same bug from the other side: a **finished** `WorkInfo` carries empty
+progress data, so reading it with a default of zero wrote zero over the live figure, and the two
+collectors took turns clearing each other. The pause values were the honest ones, which is why
+pausing appeared to fix the number — it only stopped the low series overwriting it.
+
+**The error was conceptual, not wiring.** A per-run total and a persisted baseline measure different
+things: the counter resets when the process does, the baseline does not. Dividing one by the other
+was never going to hold.
+
+Now a single quantity: `(baseline − pending) + bytes of the file in flight`. The finished part comes
+from the ledger and survives a restart; the in-flight part comes from the worker and is the only
+piece the ledger cannot see. They cannot double-count, because a file being uploaded is still
+`PENDING` and therefore still inside `pendingBytes`.
+
+**Unverified.** The run finished before the fixed build was installed — by five minutes — so the
+corrected behaviour has not been observed. It will prove itself on the next run either phone does.
+
+**Method note.** A screen recording turned out to be a far better instrument than repeated
+screenshots: 146 frames diffed against each other located every change to the label in seconds and
+showed the interleaving that single captures had made look like a freeze.
+
 ### 28 Aug 2026 — a ledger gap that was real, and a diagnosis that was not
 
 Two batches of 25 files ran against an album holding 11, which looked like the engine queueing rows

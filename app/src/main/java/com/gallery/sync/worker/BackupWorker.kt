@@ -112,7 +112,7 @@ class BackupWorker @AssistedInject constructor(
                     .putInt(PROGRESS_COMPLETED, progress.completed)
                     .putInt(PROGRESS_TOTAL, progress.total)
                     .putString(PROGRESS_FILE, progress.currentFile)
-                    .putLong(PROGRESS_RUN_BYTES, progress.runBytesSent)
+                    .putLong(PROGRESS_CURRENT_SENT, progress.currentBytesSent)
                     .putInt(PROGRESS_PERCENT, if (progress.currentBytesTotal > 0) {
                         ((progress.currentBytesSent * 100) / progress.currentBytesTotal)
                             .toInt().coerceIn(0, 100)
@@ -208,8 +208,15 @@ class BackupWorker @AssistedInject constructor(
         const val PROGRESS_FILE = "file"
         const val PROGRESS_PERCENT = "percent"
 
-        /** Bytes moved so far this run. The hero's percentage is a proportion of this. */
-        const val PROGRESS_RUN_BYTES = "runBytes"
+        /**
+         * Bytes of the **current file** already sent.
+         *
+         * Not a per-run total. A run total resets when the process does, while the baseline it
+         * would be divided by persists — so the two measured different things and the percentage
+         * lurched whenever the app restarted. The ledger already knows what is finished; this is
+         * only the part it cannot see, the file in flight.
+         */
+        const val PROGRESS_CURRENT_SENT = "currentSent"
 
         const val RESULT_UPLOADED = "r_uploaded"
         const val RESULT_SKIPPED = "r_skipped"
