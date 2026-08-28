@@ -1743,6 +1743,40 @@ that way.
 file, which read as "the lookup is broken" and was actually "the live database has nothing to repair".
 An instrument disagreeing with the evidence is a reason to doubt the evidence.
 
+### 28 Aug 2026 — three filters, four numbers, none of them wrong
+
+Ian counted 45 files in Samsung Gallery while the hero claimed "52 Images · 34 Videos" and the phone
+held 150. Chasing it turned up three independent filters, each correct, stacked:
+
+| Layer | Sees | Why |
+|---|---|---|
+| Disk, `DCIM/` | 150 | everything |
+| MediaStore | 99 | **`Anne`'s 51 trashed files are excluded** — the archive run of 27 Aug, invisible until the bin is emptied |
+| `MediaScanner` | 86 | **`Restored` is filtered out** — those files came from OneDrive, and counting them would upload a second copy |
+| Samsung Gallery | 45 | **nested folders are not shown** |
+
+**The Gallery gap was a nested folder.** `DCIM/Test/Treasure Island/` — MediaStore buckets by the
+immediate parent, so it indexed those files under `Treasure Island 4th of July`, and Samsung Gallery
+never displayed them. Worth keeping, because it has an edge on Archive: **the scan can offer an album
+the user cannot see in their gallery**, and the consent model assumes they recognise the name on the
+card.
+
+Moving the folder up to `DCIM/` fixed Gallery's view and completed MediaStore's indexing — it had
+only 4 of the 11 while nested.
+
+**A rescan that changed nothing was also correct.** Moving a folder within `DCIM` leaves the same
+files in the same granted tree, so the total should not move. Confirmed by then moving 20 files in
+from `Pictures`: 86 → 106, 5 → 6 albums, exactly.
+
+**The line was removed rather than explained.** Ian, 28 Aug: *"each folder has a count and that
+should be enough"*. A figure needing three filters explained before it can be read is not a summary,
+and the album rows already carry per-album counts beside the album they describe. The hairline added
+on 27 Aug went with it — it existed to separate the mode split from those counts.
+
+**Also confirmed here:** files under `Pictures/` stay invisible to the app while only `DCIM` is
+granted — 2,001 of them indexed by MediaStore and correctly ignored by the scan. The grant scoping
+holds at real scale.
+
 ### 28 Aug 2026 — a crash on every launch, found by accident
 
 **Fold 4.** `BoxWithConstraints` was added inside the Albums hero to measure the row for the compact

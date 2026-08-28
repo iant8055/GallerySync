@@ -851,44 +851,27 @@ private fun HeroDetail(
             style = MaterialTheme.typography.bodyMedium
         )
 
-        // A hairline under the mode split, separating what the albums are set to from what is
-        // actually in them. Ian, 27 Aug 2026. Drawn from LocalContentColor rather than a fixed
-        // white so it follows the hero's own contents in either theme — a hardcoded colour here is
-        // exactly what the dark-mode rule forbids.
-        HorizontalDivider(
-            modifier = Modifier.padding(vertical = 2.dp),
-            thickness = 1.dp,
-            color = LocalContentColor.current.copy(alpha = 0.25f)
-        )
+        // The hairline that sat here went with the media counts on 28 Aug 2026. It was added on
+        // 27 Aug to separate what the albums are set to from what is actually in them; with the
+        // second half gone it had nothing to divide and left a rule floating above a gap.
     }
 
-    Text(
-        text = stringResource(
-            R.string.albums_media_summary,
-            pluralStringResource(
-                R.plurals.albums_hero_images,
-                summary.imageCount,
-                summary.imageCount
-            ),
-            pluralStringResource(
-                R.plurals.albums_hero_videos,
-                summary.videoCount,
-                summary.videoCount
-            )
-        ),
-        style = MaterialTheme.typography.bodyMedium
-    )
-
-
-    // Reads as a continuation of the line above it — "60 Images · 11 Videos / are backed up".
-    // Ian, 27 Aug 2026.
+    // The "N Images · M Videos" line lived here until 28 Aug 2026. Removed because the number
+    // could not be read correctly without knowing three separate filters: it counted only files
+    // inside the granted trees, excluded the Restored album (already in OneDrive, so counting it
+    // would mean uploading a second copy), and could not see trashed files at all. On the Fold 4
+    // that made it 86 while the phone held 150 files and Samsung Gallery showed 45 — every figure
+    // correct about a different question.
     //
-    // Which means it has to be true of *those* counts, not merely of the albums that are switched
-    // on. The media summary includes Off albums, so a phone with two unsynced photos in Camera
-    // would otherwise read "60 Images · 11 Videos / are backed up" while two of them are not. The
-    // gate is therefore every album in the shown set having nothing outstanding, which is stricter
-    // than the disabled Sync now beside it — that one only cares about albums it is allowed to
-    // upload from.
+    // Ian, 28 Aug 2026: *"each folder has a count and that should be enough"*. The album rows carry
+    // per-album counts, scoped the same way and next to the album they describe, where the scope is
+    // obvious rather than needing a Help entry.
+
+    // Gated on the shown set rather than on albums that merely upload, and it used to read as a
+    // continuation of the counts above it. Standing alone now, it has to be a sentence.
+    //
+    // The claim must be true of everything shown, including Off albums — a phone with two unsynced
+    // photos in Camera must not announce that everything is safe.
     val shown = state.albums.filter { modeFilter == null || it.mode == modeFilter }
     // `all` over empty albums is vacuously true, which put "0 Images · 0 Videos / are backed up" on
     // the Archive filter — where every album is empty by design. The claim needs something to be
