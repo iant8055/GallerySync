@@ -454,6 +454,11 @@ class RetrieveViewModel @Inject constructor(
      * same cleanup a short read or a dropped connection already triggers.
      *
      * Files already restored stay restored. Stopping is not undoing.
+     *
+     * **Verified on the Fold 4, 27 Aug 2026** — Ian ran it four ways: the card lands on a summary
+     * rather than sticking on "Restoring 3 of 12", the count reflects only files that finished, the
+     * interrupted file is not reported as one that could not be restored, and nothing partial is
+     * left behind. Immediate, with no delay, on a 200 MB clip a quarter downloaded.
      */
     fun stopRestore() {
         restoreJob?.cancel()

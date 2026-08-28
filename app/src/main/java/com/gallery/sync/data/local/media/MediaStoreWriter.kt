@@ -100,6 +100,13 @@ class MediaStoreWriter @Inject constructor(
                         // kept pulling bytes until the current file finished — which on a 2 GB clip
                         // is minutes after the user pressed the button. Ian asked for a Stop
                         // control on 27 Aug 2026; this is what makes it mean anything.
+                        //
+                        // **Verified on the Fold 4, 27 Aug 2026.** Two runs, both abandoned mid
+                        // file: a 70,302,605-byte clip stopped at 36,644,457, and a 200,584,568-byte
+                        // clip stopped at 47,656,084. The second is the one that proves it — a
+                        // quarter of the way in, on a file that would otherwise have taken minutes
+                        // more. Ian: no delay, stop was immediate. The backup run that followed each
+                        // stop uploaded nothing, so neither partial survived to become a candidate.
                         currentCoroutineContext().ensureActive()
                         val read = input.read(buffer)
                         if (read <= 0) break
