@@ -163,8 +163,26 @@ object Migrations {
         }
     }
 
+
+    /**
+     * 7 -> 8: a file may carry its own mode, overriding its album's.
+     *
+     * Additive, and null is right for every existing row: nothing has been pinned at the moment of
+     * upgrade, so every file keeps following its album exactly as it does today. Backfilling a value
+     * would be worse than useless — it would claim the user had made a choice they have not made.
+     *
+     * Set to `BACKUP` when a file is restored to full size, so the optimiser does not shrink back
+     * what the user just pulled down. See TASK-018.
+     */
+    val MIGRATION_7_8 = object : Migration(7, 8) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE `backup_entries` ADD COLUMN `modeOverride` TEXT")
+        }
+    }
+
     /** Every migration, in order, for the database builder. */
     val ALL = arrayOf(
-        MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7
+        MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7,
+        MIGRATION_7_8
     )
 }

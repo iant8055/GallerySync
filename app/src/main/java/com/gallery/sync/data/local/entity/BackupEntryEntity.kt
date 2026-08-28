@@ -131,7 +131,26 @@ data class BackupEntryEntity(
      * whose full-quality original genuinely is no longer on the phone — retrieval is the only route
      * back to it.
      */
-    val localMissingSinceEpochMillis: Long? = null
+    val localMissingSinceEpochMillis: Long? = null,
+
+    /**
+     * This file's own mode, overriding its album's. Null means "whatever the album says", which is
+     * every row until something deliberately pins one.
+     *
+     * Set to [AlbumMode.BACKUP] when a file is restored to full size. Ian, 27 Aug 2026: *"when a
+     * file is restored or downloaded the flag moves from SYNC to Backup for that file only."*
+     *
+     * A mode rather than a `restoredToFullSize` boolean, because `BACKUP` already means exactly the
+     * wanted thing — *uploaded; the local file is never touched* — and `proxiesPhotos` is already
+     * `mode == SYNC`. Nothing new is invented, a row reading `BACKUP` explains itself, and the same
+     * column later lets a user pin any individual file out of Sync without a second mechanism.
+     *
+     * **Not the same as [isProxySkipped].** That means *cannot usefully shrink*, a fact about the
+     * file. This means *the user chose full quality for this one*, a standing instruction. A query
+     * treating them as interchangeable would silently start re-optimising restored files the day
+     * someone widened the skip logic.
+     */
+    val modeOverride: AlbumMode? = null
 )
 
 /**

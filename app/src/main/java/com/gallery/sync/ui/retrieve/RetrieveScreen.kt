@@ -61,6 +61,11 @@ private const val SwipeThresholdPx = 90f
 /**
  * What OneDrive holds, and a way to bring any of it back.
  *
+ * **Superseded, and no longer reachable.** The nav points at `ui.restore.RestoreScreen` since
+ * 27 Aug 2026: this tab listed the drive and fetched second copies into `DCIM/Restored`, which never
+ * restored anything — see TASK-018. Kept only until the download half of that task is ported, since
+ * the folder listing and fetch machinery here are what it will be built from. Delete it then.
+ *
  * Two levels: the folders in the backup roots, and the files in one of them. Every file in a folder
  * is listed whether or not the phone still has it, because a ledger-driven list cannot answer the
  * question a restore feature promises to answer — on a new handset the ledger is empty and OneDrive

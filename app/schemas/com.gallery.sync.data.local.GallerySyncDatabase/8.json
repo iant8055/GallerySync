@@ -1,0 +1,404 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 8,
+    "identityHash": "a17dc8beaf3ee4da796ef285d6d43d75",
+    "entities": [
+      {
+        "tableName": "media_items",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `remoteId` TEXT NOT NULL, `source` TEXT NOT NULL, `name` TEXT NOT NULL, `mimeType` TEXT NOT NULL, `sizeBytes` INTEGER NOT NULL, `widthPx` INTEGER, `heightPx` INTEGER, `createdAtUtc` INTEGER, `modifiedAtUtc` INTEGER NOT NULL, `parentFolderId` TEXT, `eTag` TEXT, `localCachePath` TEXT, `cachedAtUtc` INTEGER, `lastAccessedUtc` INTEGER, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "remoteId",
+            "columnName": "remoteId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "source",
+            "columnName": "source",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mimeType",
+            "columnName": "mimeType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sizeBytes",
+            "columnName": "sizeBytes",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "widthPx",
+            "columnName": "widthPx",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "heightPx",
+            "columnName": "heightPx",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "createdAtUtc",
+            "columnName": "createdAtUtc",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "modifiedAtUtc",
+            "columnName": "modifiedAtUtc",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "parentFolderId",
+            "columnName": "parentFolderId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "eTag",
+            "columnName": "eTag",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "localCachePath",
+            "columnName": "localCachePath",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "cachedAtUtc",
+            "columnName": "cachedAtUtc",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "lastAccessedUtc",
+            "columnName": "lastAccessedUtc",
+            "affinity": "INTEGER"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_media_items_parentFolderId",
+            "unique": false,
+            "columnNames": [
+              "parentFolderId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_media_items_parentFolderId` ON `${TABLE_NAME}` (`parentFolderId`)"
+          },
+          {
+            "name": "index_media_items_source",
+            "unique": false,
+            "columnNames": [
+              "source"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_media_items_source` ON `${TABLE_NAME}` (`source`)"
+          },
+          {
+            "name": "index_media_items_lastAccessedUtc",
+            "unique": false,
+            "columnNames": [
+              "lastAccessedUtc"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_media_items_lastAccessedUtc` ON `${TABLE_NAME}` (`lastAccessedUtc`)"
+          }
+        ]
+      },
+      {
+        "tableName": "media_folders",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `remoteId` TEXT NOT NULL, `source` TEXT NOT NULL, `name` TEXT NOT NULL, `parentFolderId` TEXT, `childCount` INTEGER NOT NULL, `modifiedAtUtc` INTEGER NOT NULL, `path` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "remoteId",
+            "columnName": "remoteId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "source",
+            "columnName": "source",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "parentFolderId",
+            "columnName": "parentFolderId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "childCount",
+            "columnName": "childCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "modifiedAtUtc",
+            "columnName": "modifiedAtUtc",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "path",
+            "columnName": "path",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_media_folders_parentFolderId",
+            "unique": false,
+            "columnNames": [
+              "parentFolderId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_media_folders_parentFolderId` ON `${TABLE_NAME}` (`parentFolderId`)"
+          },
+          {
+            "name": "index_media_folders_source",
+            "unique": false,
+            "columnNames": [
+              "source"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_media_folders_source` ON `${TABLE_NAME}` (`source`)"
+          }
+        ]
+      },
+      {
+        "tableName": "backup_entries",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `mediaStoreId` INTEGER NOT NULL, `contentUri` TEXT NOT NULL, `displayName` TEXT NOT NULL, `album` TEXT NOT NULL, `sizeBytes` INTEGER NOT NULL, `dateModifiedEpochSeconds` INTEGER NOT NULL, `mimeType` TEXT NOT NULL, `isVideo` INTEGER NOT NULL, `state` TEXT NOT NULL, `remoteItemId` TEXT, `remoteSizeBytes` INTEGER, `uploadedAtEpochMillis` INTEGER, `attemptCount` INTEGER NOT NULL, `lastError` TEXT, `isProxied` INTEGER NOT NULL, `isProxySkipped` INTEGER NOT NULL, `localProxySizeBytes` INTEGER, `uploadSessionUrl` TEXT, `uploadSessionExpiresAtEpochMillis` INTEGER, `localMissingSinceEpochMillis` INTEGER, `modeOverride` TEXT, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mediaStoreId",
+            "columnName": "mediaStoreId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "contentUri",
+            "columnName": "contentUri",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "displayName",
+            "columnName": "displayName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "album",
+            "columnName": "album",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sizeBytes",
+            "columnName": "sizeBytes",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dateModifiedEpochSeconds",
+            "columnName": "dateModifiedEpochSeconds",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mimeType",
+            "columnName": "mimeType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isVideo",
+            "columnName": "isVideo",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "state",
+            "columnName": "state",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "remoteItemId",
+            "columnName": "remoteItemId",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "remoteSizeBytes",
+            "columnName": "remoteSizeBytes",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "uploadedAtEpochMillis",
+            "columnName": "uploadedAtEpochMillis",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "attemptCount",
+            "columnName": "attemptCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastError",
+            "columnName": "lastError",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "isProxied",
+            "columnName": "isProxied",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isProxySkipped",
+            "columnName": "isProxySkipped",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "localProxySizeBytes",
+            "columnName": "localProxySizeBytes",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "uploadSessionUrl",
+            "columnName": "uploadSessionUrl",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "uploadSessionExpiresAtEpochMillis",
+            "columnName": "uploadSessionExpiresAtEpochMillis",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "localMissingSinceEpochMillis",
+            "columnName": "localMissingSinceEpochMillis",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "modeOverride",
+            "columnName": "modeOverride",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_backup_entries_state",
+            "unique": false,
+            "columnNames": [
+              "state"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_backup_entries_state` ON `${TABLE_NAME}` (`state`)"
+          },
+          {
+            "name": "index_backup_entries_album",
+            "unique": false,
+            "columnNames": [
+              "album"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_backup_entries_album` ON `${TABLE_NAME}` (`album`)"
+          },
+          {
+            "name": "index_backup_entries_album_state",
+            "unique": false,
+            "columnNames": [
+              "album",
+              "state"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_backup_entries_album_state` ON `${TABLE_NAME}` (`album`, `state`)"
+          }
+        ]
+      },
+      {
+        "tableName": "album_preferences",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`albumName` TEXT NOT NULL, `mode` TEXT NOT NULL, PRIMARY KEY(`albumName`))",
+        "fields": [
+          {
+            "fieldPath": "albumName",
+            "columnName": "albumName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "mode",
+            "columnName": "mode",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "albumName"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a17dc8beaf3ee4da796ef285d6d43d75')"
+    ]
+  }
+}

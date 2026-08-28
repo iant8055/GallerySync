@@ -360,6 +360,25 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
 
     <!-- Retrieval: files in OneDrive that are no longer on the phone. -->
     <string name="tab_retrieve">Restore</string>
+
+    <!--
+        The Restore tab, TASK-018: what on this phone has been shrunk, and putting it back.
+        Distinct from the old drive-listing tab, which fetched second copies into DCIM/Restored.
+    -->
+    <string name="restore_hero_label">Files to Restore</string>
+    <string name="restore_intro">Swipe or tap to select. Restoring replaces the small copy in its own folder.</string>
+    <string name="restore_empty">Nothing on this phone has been optimised, so there is nothing to restore.</string>
+    <string name="restore_selected_summary">%1$d selected · %2$s to recover</string>
+    <string name="restore_sizes">%1$s now · %2$s full size</string>
+    <string name="restore_downloading">Downloading… %1$d%%</string>
+    <string name="restore_overwriting">Replacing the small copy…</string>
+    <string name="restore_done_row">Restored to full size</string>
+    <!--
+        Says the file is unchanged, and must not be softened into an apology. A restore reads from
+        OneDrive and writes to the phone, so nothing remote is touched and the small copy is only
+        replaced once a complete, size-checked download is in hand.
+    -->
+    <string name="restore_failed_row">Could not restore — your file is unchanged (%1$s)</string>
     <string name="retrieve_hero_label_folders">Folders/Files to Restore</string>
     <string name="retrieve_hero_label_files">Files in this folder</string>
 

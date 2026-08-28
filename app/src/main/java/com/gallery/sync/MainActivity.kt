@@ -16,7 +16,7 @@ import com.gallery.sync.ui.common.NavDestination
 import com.gallery.sync.ui.common.SignalIcons
 import com.gallery.sync.ui.common.SignalNavBar
 import com.gallery.sync.ui.archive.ArchiveScreen
-import com.gallery.sync.ui.retrieve.RetrieveScreen
+import com.gallery.sync.ui.restore.RestoreScreen
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -128,7 +128,7 @@ private fun SignedInApp(
         Box(modifier = Modifier.weight(1f)) {
             when (selectedTab) {
                 0 -> BackupScreen(onAlbumArchived = { selectedTab = archiveTab })
-                1 -> RetrieveScreen()
+                1 -> RestoreScreen()
                 2 -> ArchiveScreen()
                 else -> SettingsScreen(accountName = accountName, onSignOut = onSignOut)
             }

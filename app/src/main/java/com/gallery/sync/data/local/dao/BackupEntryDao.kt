@@ -475,6 +475,71 @@ interface BackupEntryDao {
     suspend fun markProxySkipped(id: String)
 
     /**
+     * Every proxy that could be restored: ours, still here, and with a cloud original to fetch.
+     *
+     * `remoteItemId` and `remoteSizeBytes` are both required because a row missing either cannot be
+     * restored — one says which OneDrive item to fetch and the other is the byte count the download
+     * is checked against before anything is overwritten. Offering a row without them would be a
+     * promise the app cannot keep.
+     *
+     * Measured against the live ledger on 27 Aug 2026: all 26 proxied rows on the Fold 4 carried
+     * both, and no duplicate `album + displayName` existed anywhere in 147 rows. See TASK-018.
+     */
+    @Query(
+        """
+        SELECT * FROM backup_entries
+        WHERE isProxied = 1
+          AND remoteItemId IS NOT NULL
+          AND remoteSizeBytes IS NOT NULL
+          AND localMissingSinceEpochMillis IS NULL
+        ORDER BY album, displayName
+        """
+    )
+    suspend fun restorableProxies(): List<BackupEntryEntity>
+
+    /**
+     * Moves a row onto the file that has just replaced it, in one statement.
+     *
+     * **The id changes, and it has to.** A row's identity is
+     * `backupKeyOf(album, name, size, mtime)`, and a restore necessarily rewrites the mtime. Left
+     * alone, the next scan computes a key the ledger has never seen and inserts a second, PENDING
+     * row — so a file already sitting in OneDrive is uploaded again. Ian, 27 Aug 2026: *"a restored
+     * file should not trigger a sync, only if the file is moved or saved."* Updating the key here is
+     * what tells those two apart, because the app knows which one it just did and the mtime does not.
+     *
+     * Everything else on the row survives, `remoteItemId` above all — this is an UPDATE precisely so
+     * the pointer to the cloud original is not lost the way a delete-and-reinsert would lose it.
+     *
+     * [modeOverride] is set to `BACKUP` by the caller, so the optimiser does not shrink back what the
+     * user just pulled down.
+     */
+    @Query(
+        """
+        UPDATE backup_entries
+        SET id = :newId,
+            dateModifiedEpochSeconds = :dateModifiedEpochSeconds,
+            sizeBytes = :sizeBytes,
+            mediaStoreId = :mediaStoreId,
+            contentUri = :contentUri,
+            isProxied = 0,
+            isProxySkipped = 0,
+            localProxySizeBytes = NULL,
+            localMissingSinceEpochMillis = NULL,
+            modeOverride = :modeOverride
+        WHERE id = :oldId
+        """
+    )
+    suspend fun markRestored(
+        oldId: String,
+        newId: String,
+        dateModifiedEpochSeconds: Long,
+        sizeBytes: Long,
+        mediaStoreId: Long,
+        contentUri: String,
+        modeOverride: AlbumMode = AlbumMode.BACKUP
+    )
+
+    /**
      * Records a file that was already backed up and already proxied, when the ledger had no memory
      * of either — after an uninstall, or on a new phone.
      *
@@ -528,8 +593,17 @@ interface BackupEntryDao {
           AND isProxied = 0
           AND isProxySkipped = 0
           AND isVideo = 0
-          AND album IN (
-              SELECT albumName FROM album_preferences WHERE mode = :syncMode
+          -- The file's own mode wins over its album's. A restored photo is pinned to BACKUP so the
+          -- optimiser does not shrink back what the user just pulled down; every other row is null
+          -- here and follows its album exactly as before. See TASK-018.
+          AND (
+              modeOverride = :syncMode
+              OR (
+                  modeOverride IS NULL
+                  AND album IN (
+                      SELECT albumName FROM album_preferences WHERE mode = :syncMode
+                  )
+              )
           )
         ORDER BY sizeBytes DESC
         """
