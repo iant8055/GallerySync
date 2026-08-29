@@ -592,10 +592,10 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
 
     <!-- Gate 2: what to do with the library already on the phone. -->
     <string name="library_title">What about the photos already on this phone?</string>
-    <string name="library_per_album">Choose album by album</string>
-    <string name="library_per_album_detail">Nothing happens yet. You pick what each album does on the Album Modes tab.</string>
-    <string name="library_back_up_all">Back up everything</string>
-    <string name="library_back_up_all_detail">Every folder you chose is copied to OneDrive. Nothing on your phone changes and no space is freed.</string>
+    <string name="library_per_album">Check OneDrive, but back nothing up yet</string>
+    <string name="library_per_album_detail">No space saved. You choose which albums to back up or sync yourself, on the Album Modes tab.</string>
+    <string name="library_back_up_all">Back up everything not already in OneDrive</string>
+    <string name="library_back_up_all_detail">Uploads whatever OneDrive does not already have. Nothing on your phone changes and no space is freed.</string>
     <!--
         Ian's middle option, 28 Aug 2026: "we back them up first and leave an opt file behind."
 
@@ -604,9 +604,9 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
         outstanding, measured - so this option can touch two percent of a library while sounding
         substantial. Saying what it leaves alone is what stops the honest choice looking broken.
     -->
-    <string name="library_optimise_new">Back up everything, optimise only the new</string>
-    <string name="library_optimise_new_detail">Smaller copies are made of the %1$d files not yet in OneDrive. The %2$d already backed up are left at full size on your phone.</string>
-    <string name="library_free_space">Back up and free space</string>
+    <string name="library_optimise_new">Back up, then optimise only what it uploads</string>
+    <string name="library_optimise_new_detail">Moderate space saved. Smaller copies are made of the %1$d files not yet in OneDrive. The %2$d already backed up stay full size on your phone.</string>
+    <string name="library_free_space">Back up, then optimise everything</string>
     <!-- Photo-heavy library: the saving is worth leading with. -->
     <string name="library_free_space_detail">Photos are replaced by smaller copies that still open in your gallery. Frees about %1$s. Video is left untouched.</string>
     <!--
@@ -620,7 +620,7 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
         until video optimising was built on 28 Aug 2026, and now understating the saving by roughly
         eight times. A missing number is better than a wrong one on this screen.
     -->
-    <string name="library_free_space_detail_plain">Photos and video are replaced by smaller copies that still open in your gallery. The full-quality originals stay in OneDrive.</string>
+    <string name="library_free_space_detail_plain">Maximum space saved. Every photo and video on this phone is replaced by a smaller copy that still opens in your gallery. The full-quality originals stay in OneDrive and can be fetched back whenever you want.</string>
     <string name="library_apply">Apply</string>
     <string name="library_applied">%1$s set. You can change any of them on the Album Modes tab.</string>
     <string name="library_first_run_warning">This starts your first backup, which is the long one. It runs at the time set below.</string>
@@ -732,8 +732,8 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="wizard_scan_running">Looking through your folders…</string>
     <string name="wizard_scan_no_access">Without permission to read your media, nothing can be counted. This is not the same as finding nothing.</string>
 
-    <string name="wizard_library_title">What should happen to these?</string>
-    <string name="wizard_library_body">This sets every album at once. You can change any album individually afterwards, and nothing here removes a file from your phone.</string>
+    <string name="wizard_library_title">What should Gallery Sync do?</string>
+    <string name="wizard_library_body">Every option checks OneDrive first to see what is already there. This sets every album at once, you can change any of them afterwards, and nothing here removes a file from your phone.</string>
 
     <!-- Photos and videos counted apart: Sync shrinks one and leaves the other whole, so a single
          "N files" would hide the half that cannot be made smaller. Quantity is the album count. -->

@@ -8,10 +8,14 @@ import com.gallery.sync.data.local.entity.AlbumMode
  * The highest-regret moment in the app — one choice applied to thousands of files, made by someone
  * who has not yet watched the app do anything.
  *
- * **Four options, not the three Ian listed.** He asked for optimise-everything, optimise-only-the-new,
- * and choose-per-album. [BACK_UP_EVERYTHING] is kept alongside them because dropping it would remove
- * the only way to say "back it all up and change nothing on my phone" — today the safest choice on
- * the screen, and the one a cautious user reaches for first.
+ * **Ordered as Ian wrote them, 28 Aug 2026**, and the order is the argument: a baseline first, then
+ * the two things that can be added to it, then the opt-out. Each option is the previous one plus
+ * something, so the screen reads as a single decision with a scale rather than four unrelated
+ * buttons.
+ *
+ * Every option except the last does the same backup. **Optimising is the only variable**, which is
+ * why the heading states the backup once and the options carry only the part that differs — an
+ * earlier draft repeated "Back up everything" in three of four labels and buried the actual choice.
  *
  * **[ARCHIVE][AlbumMode.ARCHIVE] is deliberately absent and must stay absent.** Setting every album
  * to Archive in a wizard is the largest irreversible thing this product can do, chosen at the moment
@@ -21,29 +25,41 @@ import com.gallery.sync.data.local.entity.AlbumMode
 enum class LibraryChoice(val mode: AlbumMode?) {
 
     /**
-     * Nothing happens until the user visits Album Modes. The default, and the honest answer for
-     * someone who has not seen the app work yet.
+     * Reconcile, then upload what OneDrive does not already have. Nothing local changes.
+     *
+     * The baseline every other choice is expressed against, and Ian's #1: *"check Cloud Storage and
+     * back up everything that isn't already backed up."*
      */
-    CHOOSE_PER_ALBUM(mode = null),
-
-    /** Every album in scope to Backup. Nothing local changes and nothing is freed. */
     BACK_UP_EVERYTHING(mode = AlbumMode.BACKUP),
 
     /**
-     * Back up everything, but only make smaller copies of what was not already backed up.
+     * All of [BACK_UP_EVERYTHING], plus a smaller local copy of everything eligible.
      *
-     * Ian's middle option, 28 Aug 2026: *"we back them up first and leave an opt file behind."* The
-     * albums all go to Sync so new files are handled from here on, and [OptimiseCutoff] keeps the
-     * thousands already in OneDrive at full size on the phone.
+     * Ian's #2 — maximum space saved.
+     */
+    BACK_UP_AND_FREE_SPACE(mode = AlbumMode.SYNC),
+
+    /**
+     * All of [BACK_UP_EVERYTHING], plus smaller copies of **only what this run uploads**.
      *
-     * The cautious choice, and the one for somebody unwilling to have a library they already own
-     * rewritten in a single overnight pass. **It frees little on a typical install** — most of a real
-     * library is already in the cloud — which is why the screen has to show both counts.
+     * Ian's #3 — moderate space saved, and his phrasing for it was *"we back them up first and leave
+     * an opt file behind."* The albums all go to Sync so new files are handled from here on, and
+     * [OptimiseCutoff] keeps what was already in OneDrive at full size on the phone.
+     *
+     * The cautious choice, for somebody unwilling to have a library they already own rewritten in a
+     * single overnight pass. **It frees little on a typical install**, because most of a real library
+     * is already in the cloud — which is why the screen shows both counts rather than a promise.
      */
     BACK_UP_AND_OPTIMISE_NEW(mode = AlbumMode.SYNC),
 
-    /** Every album in scope to Sync, and everything eligible gets a smaller local copy. */
-    BACK_UP_AND_FREE_SPACE(mode = AlbumMode.SYNC);
+    /**
+     * Reconcile, and stop. The default.
+     *
+     * Ian's #4: *"check Cloud Storage but do not back up any new files."* Note that the check still
+     * happens — it is what produced the scan report the user has just read — so this is not "nothing
+     * happens", and an earlier draft of the copy saying so was wrong.
+     */
+    CHOOSE_PER_ALBUM(mode = null);
 
     /** Whether choosing this starts uploading. Every non-default choice does. */
     val uploads: Boolean get() = mode?.uploads == true
