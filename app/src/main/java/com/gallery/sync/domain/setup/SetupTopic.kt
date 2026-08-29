@@ -50,6 +50,30 @@ enum class SetupTopic(
 
     PROMISE("promise", R.string.topic_promise_title, R.string.topic_promise_body),
 
+    /**
+     * Told immediately after the guarantee, and carrying an acknowledgement, because it is the
+     * limit of the sentence the user has just read.
+     *
+     * Added by Ian, 28 Aug 2026, on the day a file turned up in OneDrive at **zero bytes** while its
+     * ledger row recorded a matching size — the exact shape of failure that the verification check
+     * is meant to exclude and, in that instance, did not. See MILESTONES.
+     *
+     * It carries an acknowledgement despite describing nothing this app does to a file. The label
+     * rule above says only removals and rewrites earn one; this is the deliberate exception, because
+     * what it asks for is a habit rather than a permission, and a habit nobody registered forming is
+     * one nobody keeps.
+     *
+     * **This is not a licence to leave verification broken.** CLAUDE.md: the verified cloud copy is
+     * the only guarantee the UI is allowed to make. Telling the user to check does not lower that
+     * bar, and any defect in `verifiedInCloud()` is a defect whether or not this screen exists.
+     */
+    VERIFY_BACKUPS(
+        "verify_backups",
+        R.string.topic_verify_title,
+        R.string.topic_verify_body,
+        R.string.topic_verify_ack
+    ),
+
     GETTING_BACK("getting_back", R.string.topic_getting_back_title, R.string.topic_getting_back_body),
 
     OPTIMISING(

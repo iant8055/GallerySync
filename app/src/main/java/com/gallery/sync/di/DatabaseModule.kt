@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import com.gallery.sync.data.local.GallerySyncDatabase
 import com.gallery.sync.data.local.Migrations
+import com.gallery.sync.data.local.dao.AlbumCloudStatusDao
 import com.gallery.sync.data.local.dao.AlbumPreferenceDao
 import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.dao.MediaFolderDao
@@ -53,4 +54,9 @@ object DatabaseModule {
     @Singleton
     fun provideAlbumPreferenceDao(database: GallerySyncDatabase): AlbumPreferenceDao =
         database.albumPreferenceDao()
+
+    @Provides
+    @Singleton
+    fun provideAlbumCloudStatusDao(database: GallerySyncDatabase): AlbumCloudStatusDao =
+        database.albumCloudStatusDao()
 }

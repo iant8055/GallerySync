@@ -12,7 +12,8 @@ import com.gallery.sync.data.local.media.LocalMediaItem
  */
 data class RemoteFileRef(
     val id: String,
-    val sizeBytes: Long,
+    /** `null` when the listing did not report a size — see `RemoteMediaNode.File.sizeBytes`. */
+    val sizeBytes: Long?,
     /**
      * What the provider says this file is.
      *
@@ -36,7 +37,18 @@ data class RemoteFileRef(
 data class CloudConfirmation(
     val confirmed: List<LocalMediaItem> = emptyList(),
     val missing: List<LocalMediaItem> = emptyList(),
-    val unconfirmed: List<LocalMediaItem> = emptyList()
+    val unconfirmed: List<LocalMediaItem> = emptyList(),
+    /**
+     * MediaStore ids within [missing] that the drive **does** hold under the same name, at a size
+     * that is not the file's.
+     *
+     * Additive and purely descriptive: these files stay in [missing] and are treated exactly as
+     * before, because a wrong-sized copy protects nothing and must not permit a removal. What it
+     * buys is the ability to say which of the two situations a file is in. Told apart on
+     * 28 Aug 2026, when a zero-byte item on the drive was reported to the user as *"Not in
+     * OneDrive"* — a sentence they could only read as the app having failed to try.
+     */
+    val presentAtWrongSize: Set<Long> = emptySet()
 ) {
     /** True when every file asked about came back confirmed. */
     val isComplete: Boolean get() = missing.isEmpty() && unconfirmed.isEmpty()

@@ -56,9 +56,16 @@ This is absolute and applies to every file, in every location, without exception
   **The album mode is the consent, confirmed once when the mode is set.** Setting an album to
   Archive *is* the user saying "take this album off the phone once it is safely in OneDrive".
   Switching an album to Archive must raise an explicit confirmation before it takes effect, saying
-  that the files leave the gallery and that files added to that album later are covered by the same
-  choice. After that the mode stands until it is changed: no per-file approval and no repeat
-  prompting, which would make the mode unbuildable and is not what this rule says.
+  what Archive does: it checks the files are in the cloud, and the local copies then leave the
+  gallery for the phone's trash. After that the mode stands until it is changed: no per-file
+  approval and no repeat prompting, which would make the mode unbuildable and is not what this rule
+  says.
+
+  **The dialog no longer has to spell out that files added later are covered.** Removed by Ian,
+  28 Aug 2026, when he rewrote that copy. The requirement had been to state the standing-instruction
+  property in the dialog itself; his judgement is that the mode's name and the album row that shows
+  it carry that, and that the dialog reads better saying what Archive does than enumerating its
+  consequences. **The property itself is unchanged and still governs the code** — see below.
 
   **"Safely" is not a judgement call.** Graph confirmed the file *and* the byte size it reported
   equals the local size — `BackupEntryDao.verifiedInCloud()`, the same bar as every other removal.
@@ -68,8 +75,16 @@ This is absolute and applies to every file, in every location, without exception
   What the rule forbids is removal the user did not choose: uploading, backing up, syncing,
   proxying, a storage budget, or any worker deciding on its own that a file should go. Removal
   follows from a mode the user set, and from nothing else. Note the standing-instruction property —
-  a file added to an Archive album later is covered by the mode already set, so the mode's wording
-  has to make that plain before it is applied.
+  a file added to an Archive album later is covered by the mode already set, and is removed without
+  anyone being asked again. That is how the mode is built and it is not in question; what changed on
+  28 Aug 2026 is only whether the confirmation dialog has to say it out loud. It does not.
+
+  The property still binds the code: anything that widens what an Archive album contains widens what
+  will be removed under a choice made earlier, so **the album's membership is not a free variable**.
+  Emptying an album does not retire its mode — the folder survives on disk even when every file in it
+  is trashed (27 Aug 2026), so a camera, a download or a file manager can refill it and the mode still
+  applies. Treat a change that lets files enter an Archive album by some new route as touching this
+  rule.
 
   Android shows its own dialog for a trash request, per batch, capped at 2000 URIs. That is the
   platform's and not ours: it is not where the consent comes from, and it is not to be mirrored by

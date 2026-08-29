@@ -77,6 +77,18 @@ class ArchiveViewModel @Inject constructor(
     init {
         _state.value = _state.value.copy(isSupported = localCopyRemover.isSupported())
         load()
+
+        // The snooze is persisted, so it outlives the app being closed — which is the case it now
+        // has to cover, since the exit warning fires at exactly the moment someone who chose Delay
+        // is walking away. See BackupPreferences.archiveDelayedUntilEpochMillis.
+        viewModelScope.launch {
+            settings.preferences.collect { prefs ->
+                val millis = prefs.archiveDelayedUntilEpochMillis
+                _state.value = _state.value.copy(
+                    delayedUntil = if (millis > 0L) Instant.ofEpochMilli(millis) else null
+                )
+            }
+        }
     }
 
     /** Lists what is in Archive albums. Cheap, and safe to call whenever the screen appears. */
@@ -157,6 +169,25 @@ class ArchiveViewModel @Inject constructor(
      * FIX-001 exists because a caller once did exactly that.
      */
     private suspend fun backUpAndRecheck(plan: ArchivePlan, missing: Set<Long>): ArchivePlan {
+        val stillMissing = plan.entries.filter { it.item.mediaStoreId in missing }
+
+        // Make the files visible to the uploader before asking it to upload them.
+        //
+        // `nextPending` selects `state != UPLOADED`, and a file reaches this method precisely
+        // because its row already says UPLOADED against a drive that does not have it. Without this
+        // the run below selects nothing: measured on the Moto G, 28 Aug 2026, "backup run finished:
+        // 0 uploaded, 0 remaining" in 600 ms, and the file then reported as not backed up — which
+        // read to the user as the app refusing to try.
+        //
+        // Wired in, removed, and wired back the same evening. It was taken out because it did not
+        // rescue a file whose cloud copy was present but zero bytes — re-uploading files a renamed
+        // sibling rather than replacing the bad item, so it bought traffic and no correctness. What
+        // brought it back was Ian deleting a backup folder from OneDrive by hand: all eight rows
+        // still said UPLOADED, the drive held nothing, and this is the case the method was written
+        // for. A wrong-sized remote item is the narrow case and is tracked separately; a file simply
+        // gone from the drive is the common one, and re-uploading it is exactly right.
+        engine.requeueMissingFromCloud(stillMissing.map { it.item })
+
         val workManager = WorkManager.getInstance(context)
         BackupScheduling.enqueueManualRun(workManager, settings.current().allowMeteredNetwork)
 
@@ -165,15 +196,26 @@ class ArchiveViewModel @Inject constructor(
         workManager.getWorkInfosForUniqueWorkFlow(BackupScheduling.MANUAL_WORK)
             .first { infos -> infos.isNotEmpty() && infos.all { it.state.isFinished } }
 
-        val stillMissing = plan.entries.filter { it.item.mediaStoreId in missing }
         val recheck = engine.confirmStillInCloud(stillMissing.map { it.item })
+
+        // Absent from the drive and present-but-wrong-size are both refusals, and the file stays on
+        // the phone for either. They are labelled apart because only one of them is the user's to
+        // act on: a damaged cloud copy is worth knowing about, and "we did not upload it" — which is
+        // what the single old message implied — is not what happened.
+        val wrongSize = recheck.missing.filter { it.mediaStoreId in recheck.presentAtWrongSize }
+        val absent = recheck.missing.filterNot { it.mediaStoreId in recheck.presentAtWrongSize }
 
         return plan
             .withMarks(recheck.confirmed.mapTo(HashSet()) { it.mediaStoreId }, ArchiveMark.CONFIRMED)
             .withMarks(
-                recheck.missing.mapTo(HashSet()) { it.mediaStoreId },
+                absent.mapTo(HashSet()) { it.mediaStoreId },
                 ArchiveMark.FAILED,
                 ArchiveFailure.NOT_BACKED_UP
+            )
+            .withMarks(
+                wrongSize.mapTo(HashSet()) { it.mediaStoreId },
+                ArchiveMark.FAILED,
+                ArchiveFailure.WRONG_SIZE_IN_CLOUD
             )
             .withMarks(
                 recheck.unconfirmed.mapTo(HashSet()) { it.mediaStoreId },
@@ -262,9 +304,9 @@ class ArchiveViewModel @Inject constructor(
 
     /** The user asked to be left alone for a while. Their choice, not the app deciding to re-ask. */
     fun delay(delay: ArchiveDelay) {
-        _state.value = _state.value.copy(
-            delayedUntil = Instant.now().plusSeconds(delay.hours * 3600)
-        )
+        val until = Instant.now().plusSeconds(delay.hours * 3600)
+        _state.value = _state.value.copy(delayedUntil = until)
+        viewModelScope.launch { settings.setArchiveDelayedUntil(until.toEpochMilli()) }
     }
 
     private companion object {

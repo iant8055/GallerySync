@@ -2,6 +2,8 @@ package com.gallery.sync
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -12,6 +14,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.ScrollableTabRow
+import com.gallery.sync.domain.backup.ExitWarning
+import com.gallery.sync.ui.backup.BackupViewModel
+import com.gallery.sync.ui.common.ExitWarningDialog
 import com.gallery.sync.ui.common.NavDestination
 import com.gallery.sync.ui.common.SignalIcons
 import com.gallery.sync.ui.common.SignalNavBar
@@ -21,6 +26,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,6 +46,7 @@ import com.gallery.sync.data.local.settings.ThemeMode
 import com.gallery.sync.ui.theme.GallerySyncTheme
 import com.gallery.sync.ui.theme.ThemeViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import java.time.Instant
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -162,6 +169,42 @@ private fun SignedInApp(
     // answer to "and then what?", and arriving there is how the app says the choice was taken
     // seriously.
     val archiveTab = 2
+
+    // Leaving with files checked, verified and waiting on one tap.
+    //
+    // The same BackupViewModel instance the Albums tab uses — both resolve against the Activity's
+    // store — so arming this costs no extra scan. ArchiveViewModel is deliberately not touched
+    // here: it scans the device on creation, and referencing it at the root would run that on every
+    // launch to decide whether to show a dialog that is usually not needed.
+    val backupViewModel: BackupViewModel = hiltViewModel()
+    val backupState by backupViewModel.state.collectAsStateWithLifecycle()
+    val activity = LocalActivity.current
+
+    var showExitWarning by remember { mutableStateOf(false) }
+    val warnOnExit = ExitWarning.shouldWarn(
+        readyCount = backupState.redundantCount,
+        delayedUntilEpochMillis = backupState.archiveDelayedUntilEpochMillis,
+        now = Instant.now()
+    )
+
+    // Only the back gesture can be caught. Home and a swipe from Recents cannot be, so this is a
+    // net rather than a guarantee — see ExitWarning.
+    BackHandler(enabled = warnOnExit && !showExitWarning) { showExitWarning = true }
+
+    if (showExitWarning) {
+        ExitWarningDialog(
+            readyCount = backupState.redundantCount,
+            onGoToArchive = {
+                showExitWarning = false
+                selectedTab = archiveTab
+            },
+            onLeave = {
+                showExitWarning = false
+                activity?.finish()
+            },
+            onDismiss = { showExitWarning = false }
+        )
+    }
 
     Column(modifier = modifier.fillMaxSize()) {
         Box(modifier = Modifier.weight(1f)) {

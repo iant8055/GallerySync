@@ -223,6 +223,9 @@ private fun wizardSteps(hasSources: Boolean, willUpload: Boolean): List<WizardSt
     add(WizardStep.Topic(SetupTopic.OPTIMISING))
     add(WizardStep.AutoOptimise)
     add(WizardStep.Topic(SetupTopic.PROMISE))
+    // Straight after the guarantee, because it is that sentence's limit and reads as evasion
+    // anywhere else.
+    add(WizardStep.Topic(SetupTopic.VERIFY_BACKUPS))
     add(WizardStep.Topic(SetupTopic.GETTING_BACK))
     add(WizardStep.Topic(SetupTopic.DELETING))
     add(WizardStep.DeletionPolicy)

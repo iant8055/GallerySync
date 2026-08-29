@@ -296,7 +296,9 @@ private fun RemoteMediaNode.subtitle(): String = when (this) {
         }
 
     is RemoteMediaNode.File ->
-        "${formatBytes(LocalContext.current, sizeBytes)} · $mimeType"
+        // A file whose size OneDrive did not report shows its type alone rather than "0 B",
+        // which would be a statement about the file rather than about the listing.
+        sizeBytes?.let { "${formatBytes(LocalContext.current, it)} · $mimeType" } ?: mimeType
 }
 
 @Composable

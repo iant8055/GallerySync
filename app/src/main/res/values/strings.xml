@@ -184,8 +184,21 @@
     -->
     <string name="album_status_complete">All synced</string>
     <string name="album_status_partial">%1$d still to sync</string>
-    <string name="album_status_none">Not synced yet</string>
-    <string name="album_status_backed_up">%1$d backed up</string>
+    <!--
+        What the row is allowed to say about OneDrive, added 28 Aug 2026.
+
+        Every other count on an album row describes the phone, and until now this one did too while
+        being worded as a statement about the cloud: "N backed up" came from the local ledger, which
+        records what this phone once sent. Ian deleted an album's OneDrive folder by hand and the row
+        went on saying eight files were backed up, because that screen had never asked the drive.
+
+        These four cover the four things that can actually be known, and "never checked" is one of
+        them rather than a blank.
+    -->
+    <string name="album_cloud_never_checked">Not checked against OneDrive yet</string>
+    <string name="album_cloud_unreachable">Could not reach OneDrive when this was last checked</string>
+    <string name="album_cloud_all_present">%1$d verified in OneDrive</string>
+    <string name="album_cloud_some_missing">%1$d of %2$d verified in OneDrive</string>
     <string name="album_status_optimized">%1$d optimized</string>
     <string name="album_status_pending">%1$d pending</string>
     <string name="album_watching">Watching for new files</string>
@@ -245,8 +258,23 @@
         stake, when every verified file in the album is eligible at once.
 
         If an age gate is built later the clause comes back. Until then it must not be implied.
+
+        Rewritten by Ian, 28 Aug 2026, to three plain steps: what Archive checks, where the files go,
+        and what the user must do to actually get the space back. The last of those is the one the app
+        could not previously say - a trashed file keeps its bytes for 30 days, measured on the Fold 4
+        on 27 Aug (18.6 MB in DCIM/Anne before 51 files were trashed and 18.6 MB after), so every
+        earlier "frees up X" described a moment that had not arrived. Emptying the bin is the user's
+        own action, which is also the only version CLAUDE.md permits: this app must never call an
+        empty-trash API nor offer a control that does.
+
+        Two clauses dropped on Ian's instruction. The recoverability caveat went because the trash
+        request has now reached Samsung's Recycle Bin twice, at one file and at fifty-one, so the
+        warning had become more pessimistic than the evidence. The standing-instruction clause -
+        files added later are covered by the same choice - went on the grounds that an emptied album
+        stops being visible; note that the folder itself is never deleted (27 Aug correction in
+        MILESTONES), so the case it described can still occur.
     -->
-    <string name="archive_confirm_body">Files in %1$s will leave your gallery and move to OneDrive once they are verified there.\n\nFiles added to this album later are covered by the same choice.\n\nThe verified cloud copy is your guarantee — a local removal cannot be promised as recoverable.</string>
+    <string name="archive_confirm_body">Archive will verify all files are uploaded to the cloud.\n\nArchived files will be moved to your phone\'s Recycle Bin.\n\nPlease empty your Recycle Bin to free up storage.</string>
     <string name="archive_confirm_accept">Archive</string>
     <string name="archive_confirm_cancel">Cancel</string>
 
@@ -268,7 +296,7 @@
     <string name="archive_hero_label">Files to Archive</string>
     <string name="archive_empty">No album is set to Archive. Nothing here will remove anything from your phone.</string>
     <string name="archive_empty_hint">Set an album to Archive on the Albums tab, and its files will be listed here for checking before anything leaves your phone.</string>
-    <string name="archive_intro">Every file below is checked against OneDrive first. Anything that is not there yet is backed up before it counts.</string>
+    <string name="archive_intro">Every file below is checked against OneDrive first. Anything that is not there yet is backed up before it is verified.</string>
     <string name="archive_validate">Check these files</string>
     <string name="archive_validating">Checking against OneDrive…</string>
     <string name="archive_unsupported">This version of Android has no media trash, so removing local copies is not offered here.</string>
@@ -278,6 +306,13 @@
     <string name="archive_state_removed">Removed from this phone</string>
     <string name="archive_failed_unchecked">Could not check OneDrive — staying on your phone</string>
     <string name="archive_failed_not_backed_up">Not in OneDrive — staying on your phone</string>
+    <!--
+        Split from the line above on 28 Aug 2026. A zero-byte item on the drive was being reported
+        as "Not in OneDrive" — untrue, and it reads as the app having declined to upload rather than
+        as a damaged cloud copy. The file stays on the phone either way; only this one is worth the
+        user going and looking.
+    -->
+    <string name="archive_failed_wrong_size">In OneDrive but the wrong size — staying on your phone</string>
 
     <!-- The prompt. Ian's wording, with the numbers filled in. -->
     <string name="archive_prompt_all_title">All files validated</string>
@@ -562,6 +597,23 @@ The files go to your gallery’s recycle bin, where you can put them back. The s
 
 Local removals go to your gallery’s recycle bin and can be restored for 30 days. We have seen that hold on the phones we tested, but we cannot promise it for every phone — the verified cloud copy is the part that always holds.</string>
 
+    <!--
+        The disclaimer, and it is deliberately not boilerplate. Added 28 Aug 2026, the day a file
+        was found sitting in OneDrive at zero bytes while its ledger row recorded a matching size.
+        It sits immediately after "What we can promise" because it is that promise's limit, and it
+        reads as evasion anywhere else in the tour.
+
+        Says what to actually do, not "we accept no liability". The last line is the only advice
+        here that survives this app being wrong in a way nobody predicted.
+    -->
+    <string name="topic_verify_title">Check your backups yourself</string>
+    <string name="topic_verify_body">No backup is safe because an app says so, and that includes this one. Software has bugs, cloud accounts expire, and a file can arrive damaged in ways a size check does not catch.
+
+Open OneDrive now and then and look at your photos there. Not the list — open a few and check they actually appear. Do it before you empty a recycle bin, because that is the point where the second copy stops existing.
+
+For anything you could not bear to lose, keep a copy somewhere this app cannot reach.</string>
+    <string name="topic_verify_ack">I understand — I will check my own backups</string>
+
     <string name="topic_getting_back_title">Getting files back</string>
     <string name="topic_getting_back_body">The Restore tab lists what this app has shrunk on this phone and puts the full-size original back in place, in its own folder, under its own name. Stopping partway costs nothing and you can run it again.</string>
 
@@ -629,6 +681,8 @@ Local removals go to your gallery’s recycle bin and can be restored for 30 day
 
     <!-- The hero's run controls. Pause holds until told otherwise; Stop ends this run and lets
          automatic sync pick up at the next trigger. -->
+    <!-- Rescan walks the whole drive, tens of seconds on a real library, so the button says so. -->
+    <string name="backup_checking_cloud">Checking OneDrive…</string>
     <string name="backup_syncing">Syncing…</string>
     <string name="backup_paused">Paused</string>
     <string name="backup_syncing_at">Syncing %1$d%%</string>
@@ -636,4 +690,18 @@ Local removals go to your gallery’s recycle bin and can be restored for 30 day
     <string name="backup_pause">Pause</string>
     <string name="backup_resume">Resume</string>
     <string name="backup_stop_run">Stop</string>
+    <!-- The exit warning. A third surface for the Archive summons, added 28 Aug 2026 in place of a
+         notification: it needs no permission and cannot be silently switched off. It is a net and
+         not a guarantee - Android lets us intercept the back gesture and nothing else, so the
+         Albums tab summons stays the surface that is always there.
+
+         The buttons name their actions rather than saying OK and Cancel. Against a sentence about
+         leaving, "OK" could as easily mean "yes, go" as "yes, take me to it". -->
+    <string name="exit_warning_title">Files ready to Archive</string>
+    <plurals name="exit_warning_body">
+        <item quantity="one">%1$d file is verified in OneDrive and ready to leave this phone. It stays where it is until you approve the removal.</item>
+        <item quantity="other">%1$d files are verified in OneDrive and ready to leave this phone. They stay where they are until you approve the removal.</item>
+    </plurals>
+    <string name="exit_warning_go">Archive now</string>
+    <string name="exit_warning_leave">Leave</string>
 </resources>

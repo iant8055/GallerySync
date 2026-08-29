@@ -183,3 +183,52 @@ it could not, which is why an album taken Sync then Archive offered 2 of 13 file
 The `ArchiveReadyPrompt` on the Albums screen, and the held-back reporting moved there on 26 Aug.
 Both are superseded: the summons becomes navigation, and the held-back explanation belongs in the
 prompt where the decision is made.
+
+---
+
+## The exit warning — a third surface for the summons
+
+Added 28 Aug 2026, at Ian's request, and it belongs to this task because the summons does.
+
+> *"We can warn the user when they go to close the app if there are files still in Archive that haven't
+> been attended to. Give them a little caution pop-up."*
+
+### What it is, and what it is not
+
+It is the summons, again, at the moment someone walks away from a job that is checked, verified and
+waiting on one tap. It is **not** a second consent: the album mode is the consent, given once when the
+mode was set, and CLAUDE.md forbids re-asking. This says only that the job is unfinished — a statement
+about state, not a question about intent.
+
+It replaces the notification. `POST_NOTIFICATIONS` had two uses left after the SAF finding: saying free
+space is low, which duplicates Android, and summoning the user to a batch, which is this. A dialog needs
+no permission, cannot be denied, and cannot be silently switched off.
+
+### It cannot catch most exits
+
+Android has no general "app is closing" event. Only the back gesture from the root screen is
+interceptable; Home and a swipe from Recents are not, and on gesture navigation Home is the common way
+out. So this is a net, not a guarantee, and **the Albums tab summons stays the surface that is always
+there.** Nothing may become reachable only from here — the same rule TASK-011 recorded about
+notifications, for the same reason.
+
+### The snooze has to be persisted, and was not
+
+`ArchiveViewModel.delayedUntil` was in-memory, so a Delay died when the app closed — which is exactly
+when this dialog fires. Someone who chose "1 hour" and then left would have been warned anyway, by the
+act the snooze existed to cover. Now `archive_delayed_until` in `BackupSettings`.
+
+### Where the decision lives
+
+`ExitWarning.shouldWarn(readyCount, delayedUntilEpochMillis, now)` — pure, unit-tested, six cases.
+`BackupUiState` carries both inputs so the root can decide without touching `ArchiveViewModel`, which
+scans the device on creation and would run that on every launch to arm a dialog usually not needed.
+
+### Acceptance
+
+- [x] Back with files ready shows the warning; back with none does not
+- [x] A live delay silences it; an expired one does not
+- [x] The delay survives the app being closed
+- [x] "Archive now" lands on the Archive tab; "Leave" closes the app
+- [x] Buttons name their actions rather than OK/Cancel
+- [x] Verified on the Fold 4 cover screen in both themes, no crash

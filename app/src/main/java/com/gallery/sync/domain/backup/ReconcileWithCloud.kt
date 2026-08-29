@@ -1,5 +1,7 @@
 package com.gallery.sync.domain.backup
 
+import com.gallery.sync.data.local.dao.AlbumCloudStatusDao
+import com.gallery.sync.data.local.entity.AlbumCloudStatusEntity
 import com.gallery.sync.data.local.media.MediaAccess
 import com.gallery.sync.data.local.media.MediaScanner
 import com.gallery.sync.di.IoDispatcher
@@ -38,6 +40,7 @@ import kotlin.coroutines.coroutineContext
 @Singleton
 class ReconcileWithCloud @Inject constructor(
     private val scanner: MediaScanner,
+    private val cloudStatusDao: AlbumCloudStatusDao,
     private val engine: BackupEngine,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
 ) {
@@ -74,7 +77,27 @@ class ReconcileWithCloud @Inject constructor(
             // is exactly the mistake that reported 8,177 safe files as missing.
             val remoteIndex = engine.remoteIndexFor(album.name)
 
-            total += ReconciliationRules.tallyAlbum(local, remoteIndex)
+            val forAlbum = ReconciliationRules.tallyAlbum(local, remoteIndex)
+
+            // Keep the per-album answer, not just its contribution to the total.
+            //
+            // This loop already asked the drive about every album and already computed exactly the
+            // numbers the Albums tab needs; until 28 Aug 2026 it added them to a running total and
+            // discarded the detail, so the one place in the app that knew what OneDrive actually
+            // holds told only the setup wizard, and the album rows went on quoting the ledger.
+            cloudStatusDao.upsert(
+                AlbumCloudStatusEntity(
+                    albumName = album.name,
+                    checkedAtEpochMillis = System.currentTimeMillis(),
+                    verifiedFiles = forAlbum.backedUp.files,
+                    missingFiles = forAlbum.outstanding.files,
+                    // A failed listing is recorded rather than skipped: "asked and could not reach
+                    // the drive" is a different thing to show than "never asked".
+                    couldNotCheck = remoteIndex == null
+                )
+            )
+
+            total += forAlbum
             onProgress(total)
         }
 

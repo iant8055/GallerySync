@@ -484,7 +484,20 @@ class BackupEngine @Inject constructor(
                 // sync while both run in parallel, or by this app before a reinstall lost the
                 // ledger. Uploading anyway produces a renamed duplicate, which is what the user
                 // saw before this check existed.
+                // `match.sizeBytes` null means the listing did not report one. That is not a
+                // mismatch and must not be read as one: falling through would upload a second copy
+                // beside a file that may well already be there, which is the renamed-duplicate
+                // failure this check exists to prevent. Defer instead and ask again next run.
                 val match = alreadyThere[entry.displayName]
+                if (match != null && match.sizeBytes == null) {
+                    Logger.w(
+                        TAG,
+                        "OneDrive reported no size for ${entry.displayName}; deferring rather " +
+                            "than risking a duplicate"
+                    )
+                    deferred++
+                    continue
+                }
                 if (match?.sizeBytes == entry.sizeBytes) {
                     Logger.d(TAG, "already in OneDrive, not re-uploading: ${entry.displayName}")
                     entryDao.markUploaded(
@@ -667,6 +680,25 @@ class BackupEngine @Inject constructor(
      * follows from a mode the user set and from nothing else.
      */
     /**
+     * Marks files for upload again, for ones the drive turns out not to have.
+     *
+     * Archive's validation treats "not in OneDrive" as work rather than as a verdict, and backs the
+     * file up before deciding. That only functions if the uploader can see the file: `nextPending`
+     * selects `state != UPLOADED`, and a file the ledger believes it already sent is excluded by
+     * exactly that clause. So the run enqueued to fix the problem had nothing to select, and the
+     * recheck afterwards could only reach the same answer as before.
+     *
+     * Bookkeeping only — see `BackupEntryDao.requeueForUpload`. Nothing is removed anywhere.
+     */
+    suspend fun requeueMissingFromCloud(items: List<LocalMediaItem>): Int =
+        withContext(dispatcher) {
+            if (items.isEmpty()) return@withContext 0
+            val count = entryDao.requeueForUpload(items.map { it.mediaStoreId })
+            Logger.i(TAG, "requeueMissingFromCloud: $count rows returned to pending for re-upload")
+            count
+        }
+
+    /**
      * Album names the user has set to Archive, whether or not anything is left in them.
      *
      * Distinct from [filesInArchiveAlbums] returning nothing, and the difference is what the screen
@@ -769,6 +801,7 @@ class BackupEngine @Inject constructor(
         val confirmed = mutableListOf<LocalMediaItem>()
         val missing = mutableListOf<LocalMediaItem>()
         val unconfirmed = mutableListOf<LocalMediaItem>()
+        val presentAtWrongSize = mutableSetOf<Long>()
 
         // One listing per album, reused across its files, exactly as the upload path does.
         val byAlbum = mutableMapOf<String, Map<String, RemoteFileRef>?>()
@@ -798,10 +831,30 @@ class BackupEngine @Inject constructor(
             // optimised one.
             val expected = expectedRemoteSize[item.mediaStoreId] ?: item.sizeBytes
 
+            val ref = index?.get(item.displayName)
+
             when {
+                // Could not list the album at all.
                 index == null -> unconfirmed += item
-                index[item.displayName]?.sizeBytes == expected -> confirmed += item
-                else -> missing += item
+
+                // Listed, and the drive reports the size we expect. The only confirming case.
+                ref?.sizeBytes == expected -> confirmed += item
+
+                // Listed, the name is there, and the drive did not say how big it is. **Not**
+                // evidence the file is gone — it is the absence of evidence either way, and it
+                // belongs with "could not check" rather than with "no longer in OneDrive". Told
+                // apart since 28 Aug 2026: the mapper used to render a missing size as 0, which
+                // made this indistinguishable from a genuinely empty file and put it in `missing`.
+                // The user then read "Not in OneDrive" about a file that was sitting in OneDrive.
+                ref != null && ref.sizeBytes == null -> unconfirmed += item
+
+                // Either the name is absent, or it is there at a size that is not the file's.
+                // Both stay in `missing` — a wrong-sized copy protects nothing — but they are
+                // recorded apart so the screen can say which one happened.
+                else -> {
+                    missing += item
+                    if (ref != null) presentAtWrongSize += item.mediaStoreId
+                }
             }
         }
 
@@ -810,7 +863,24 @@ class BackupEngine @Inject constructor(
             "confirmStillInCloud: ${confirmed.size} confirmed, ${missing.size} no longer in " +
                 "OneDrive, ${unconfirmed.size} could not be checked"
         )
-        CloudConfirmation(confirmed, missing, unconfirmed)
+
+        // Name the ones that failed, and say what the listing held instead.
+        //
+        // "1 no longer in OneDrive" is not a diagnosable statement: it cannot distinguish a file
+        // that is genuinely absent from one whose name or size does not match what the listing
+        // returned, and those want opposite fixes. Cost is one line per failure, and only when
+        // there is a failure.
+        for (item in missing) {
+            val index = byAlbum[item.album]
+            Logger.w(
+                TAG,
+                "confirmStillInCloud: '${item.displayName}' (${item.sizeBytes} B) not matched in " +
+                    "${item.album} — listing held ${index?.size ?: 0} names, " +
+                    "same name present: ${index?.containsKey(item.displayName)}, " +
+                    "its size there: ${index?.get(item.displayName)?.sizeBytes ?: "not reported"}"
+            )
+        }
+        CloudConfirmation(confirmed, missing, unconfirmed, presentAtWrongSize)
     }
 
     /**
@@ -916,12 +986,16 @@ class BackupEngine @Inject constructor(
         }
 
         index.map { (name, ref) ->
+            // An unreported size shows as 0 in the list and never matches an on-device signature.
+            // Both are the safe direction here: the row still offers the download, and "already on
+            // this phone" stays a claim we can only make when we actually know the size.
             RestorableFile(
                 remoteItemId = ref.id,
                 displayName = name,
                 mimeType = ref.mimeType,
-                sizeBytes = ref.sizeBytes,
-                alreadyOnDevice = RestoredAlbum.contentSignature(name, ref.sizeBytes) in onDevice
+                sizeBytes = ref.sizeBytes ?: 0L,
+                alreadyOnDevice = ref.sizeBytes != null &&
+                    RestoredAlbum.contentSignature(name, ref.sizeBytes) in onDevice
             )
         }.sortedBy { it.displayName.lowercase() }
     }
@@ -1000,6 +1074,11 @@ class BackupEngine @Inject constructor(
         }
 
         if (pages > 1) Logger.d(TAG, "$album: ${index.size} remote files across $pages pages")
+        // Name the path. Two roots are searched for every album — the destination and the legacy
+        // Samsung one — and until this line the log said only that *a* listing returned N items,
+        // which is not enough to tell "your files are in OneDrive" from "your files are in a
+        // OneDrive folder you were not looking in".
+        Logger.i(TAG, "listed '$path': ${index.size} files")
         return index
     }
 

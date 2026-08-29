@@ -68,6 +68,7 @@ import com.gallery.sync.R
 import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.media.MediaAccess
+import com.gallery.sync.domain.backup.AlbumCloudClaim
 import com.gallery.sync.domain.backup.StopReason
 import com.gallery.sync.ui.common.LabelWithAction
 import com.gallery.sync.ui.common.SignalIcons
@@ -101,11 +102,15 @@ fun BackupScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
 
-    // Re-read on entering the tab. Archiving happens on another screen with its own ViewModel, so
-    // nothing here hears about it: after a removal this tab went on saying "13 Scheduled to leave
-    // this phone" about files already in the trash. Ian, 27 Aug 2026. The ViewModel outlives a tab
-    // switch, which is what makes the staleness survive.
-    LaunchedEffect(Unit) { viewModel.refresh() }
+    // Re-read on entering the tab, OneDrive included. Archiving happens on another screen with its
+    // own ViewModel, so nothing here hears about it: after a removal this tab went on saying "13
+    // Scheduled to leave this phone" about files already in the trash. Ian, 27 Aug 2026. The
+    // ViewModel outlives a tab switch, which is what makes the staleness survive.
+    //
+    // `rescan` rather than `refresh` since 28 Aug 2026, so the "verified in OneDrive" lines are
+    // answered by the drive on arrival rather than inherited from whenever the app last launched.
+    // It guards against overlapping walks itself.
+    LaunchedEffect(Unit) { viewModel.rescan() }
 
     var detailAlbum by remember { mutableStateOf<AlbumRow?>(null) }
     var detailEntries by remember { mutableStateOf<List<BackupEntryEntity>>(emptyList()) }
@@ -240,7 +245,7 @@ private fun AlbumList(
                 HeroActions(
                     state = state,
                     onSyncNow = viewModel::runBackupNow,
-                    onRescan = viewModel::refresh,
+                    onRescan = viewModel::rescan,
                     onPause = viewModel::pauseBackup,
                     onResume = viewModel::resumeBackup,
                     onStop = viewModel::stopBackup
@@ -301,7 +306,6 @@ private fun AlbumList(
 
     archiveConfirmAlbum?.let { albumName ->
         ArchiveConfirmDialog(
-            albumName = albumName,
             onConfirm = {
                 viewModel.setAlbumMode(albumName, AlbumMode.ARCHIVE)
                 archiveConfirmAlbum = null
@@ -578,10 +582,25 @@ private fun AlbumModeRow(
                     ),
                     style = MaterialTheme.typography.bodySmall
                 )
+                // Only when there is something to say. With the upload count gone this is empty for
+                // an ordinary album, and an empty Text still takes a line's height — which would
+                // leave a ragged gap between the file count and the cloud line.
+                val breakdown = album.statusBreakdown()
+                if (breakdown.isNotEmpty()) {
+                    Text(
+                        text = breakdown,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                // The cloud line, on its own and sourced from the drive rather than the ledger. It
+                // is only tinted as good news when the drive actually said so — an unchecked album
+                // gets the ordinary colour, because a reassuring green on an unverified claim is
+                // the same lie in a different medium.
                 Text(
-                    text = album.statusBreakdown(),
+                    text = album.cloudClaim.sentence(),
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (album.outstanding == 0 && album.backedUpCount > 0)
+                    color = if (album.cloudClaim is AlbumCloudClaim.AllPresent)
                         MaterialTheme.colorScheme.primary
                     else
                         MaterialTheme.colorScheme.onSurfaceVariant
@@ -720,15 +739,17 @@ private fun AlbumMode.label(): String = when (this) {
 }
 
 @Composable
+// The album name is no longer a parameter: the body was rewritten on 28 Aug 2026 into three steps
+// that describe the mode rather than the album, and the title already says "this album" against the
+// row the user just tapped.
 private fun ArchiveConfirmDialog(
-    albumName: String,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.archive_confirm_title)) },
-        text = { Text(stringResource(R.string.archive_confirm_body, albumName)) },
+        text = { Text(stringResource(R.string.archive_confirm_body)) },
         confirmButton = {
             TextButton(onClick = onConfirm) {
                 Text(stringResource(R.string.archive_confirm_accept))
@@ -780,16 +801,41 @@ private fun StopReason.readable(): String = when (this) {
     StopReason.NO_MEDIA_ACCESS -> stringResource(R.string.backup_stopped_no_media_access)
 }
 
+/**
+ * What the row says about OneDrive, and it only says what the drive was actually asked.
+ *
+ * The counts below this line describe the phone. This one describes the cloud, and until
+ * 28 Aug 2026 it was drawn from the ledger like all the others — so an album whose OneDrive folder
+ * had been deleted by hand went on reading "8 backed up". See `AlbumCloudClaim`.
+ */
+@Composable
+private fun AlbumCloudClaim.sentence(): String = when (this) {
+    AlbumCloudClaim.NeverChecked -> stringResource(R.string.album_cloud_never_checked)
+    is AlbumCloudClaim.Unreachable -> stringResource(R.string.album_cloud_unreachable)
+    is AlbumCloudClaim.AllPresent ->
+        stringResource(R.string.album_cloud_all_present, verified)
+    is AlbumCloudClaim.SomeMissing ->
+        stringResource(R.string.album_cloud_some_missing, verified, verified + missing)
+}
+
+/**
+ * What is true of the files on this phone. Empty when there is nothing to say.
+ *
+ * **The upload count is gone**, removed by Ian on 28 Aug 2026: *"it can get confusing as files are
+ * moved, added, deleted."* He is describing a real drift. The ledger counts rows this phone once
+ * sent, keyed on content, while the file count beside it comes from a live device scan — so moving
+ * a file between albums, deleting one, or adding one already in the cloud moves the two numbers
+ * independently, and the row ends up showing a pair nobody can reconcile by looking. The cloud line
+ * underneath now carries the claim that actually matters, and it is sourced from the drive.
+ *
+ * What is left describes the phone in the present tense and cannot drift: how many files here are
+ * optimised, and how many are still waiting to go.
+ */
 @Composable
 private fun AlbumRow.statusBreakdown(): String {
-    if (backedUpCount == 0) return stringResource(R.string.album_status_none)
-
     val separator = " · "
     return buildString {
-        val backupOnly = backedUpOnly
-        if (backupOnly > 0) append(stringResource(R.string.album_status_backed_up, backupOnly))
         if (proxiedCount > 0) {
-            if (isNotEmpty()) append(separator)
             append(stringResource(R.string.album_status_optimized, proxiedCount))
         }
         val pending = outstanding
@@ -1062,9 +1108,16 @@ private fun HeroActions(
                     )
                 }
 
+            // Says what it is doing while it does it. The drive walk takes tens of seconds on a
+            // real library, and a button that looks idle throughout invites a second press.
             else -> HeroOutlinedButton(
                 onClick = onRescan,
-                label = stringResource(R.string.backup_rescan),
+                label = if (state.isCheckingCloud) {
+                    stringResource(R.string.backup_checking_cloud)
+                } else {
+                    stringResource(R.string.backup_rescan)
+                },
+                enabled = !state.isCheckingCloud,
                 modifier = Modifier.weight(1f)
             )
         }

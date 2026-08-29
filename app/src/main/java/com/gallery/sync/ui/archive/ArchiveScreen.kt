@@ -83,6 +83,26 @@ fun ArchiveScreen(
         ActivityResultContracts.StartIntentSenderForResult()
     ) { viewModel.onRemovalDialogClosed() }
 
+    // Re-read the album every time the tab is opened.
+    //
+    // `load()` used to run only from the ViewModel's init, and the ViewModel is scoped to the
+    // Activity — so it ran once per app session, at whatever moment the tab was first shown. Open
+    // the tab before setting any album to Archive and the empty list it built then never changed:
+    // setting an album to Archive afterwards took the user straight here, to a screen still saying
+    // "No album is set to Archive". Observed on the Moto G, 28 Aug 2026, with eight files verified
+    // and offered by the engine at the same moment the screen said there were none.
+    //
+    // The other ordering — set the mode first, arrive here with the ViewModel not yet built — runs
+    // init with the album already in place and looks perfectly correct, which is why this survived
+    // the hardware pass that introduced the summons.
+    //
+    // Only from IDLE. A reload during VALIDATING or REMOVING would cut across a run, from READY it
+    // would throw away the validation the user is being asked about, and from DONE it would wipe
+    // the report of what was just removed.
+    LaunchedEffect(Unit) {
+        if (state.phase == ArchivePhase.IDLE) viewModel.load()
+    }
+
     // Each finished dialog may be followed by another, because Android caps a trash request at 2000
     // URIs. Driving the next one from the batch index keeps a large album reading as one operation
     // rather than as the app asking again because something went wrong.
@@ -295,6 +315,9 @@ private fun ArchiveRow(entry: ArchiveEntry) {
 
                 entry.failure == ArchiveFailure.NOT_BACKED_UP ->
                     stringResource(R.string.archive_failed_not_backed_up)
+
+                entry.failure == ArchiveFailure.WRONG_SIZE_IN_CLOUD ->
+                    stringResource(R.string.archive_failed_wrong_size)
 
                 entry.mark == ArchiveMark.BACKING_UP ->
                     stringResource(R.string.archive_state_backing_up)

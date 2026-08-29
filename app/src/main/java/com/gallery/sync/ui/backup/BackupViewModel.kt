@@ -14,6 +14,7 @@ import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.worker.BackupScheduling
 import com.gallery.sync.worker.BackupWorker
 import dagger.hilt.android.qualifiers.ApplicationContext
+import com.gallery.sync.data.local.dao.AlbumCloudStatusDao
 import com.gallery.sync.data.local.dao.AlbumPreferenceDao
 import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.entity.AlbumMode
@@ -21,8 +22,10 @@ import com.gallery.sync.data.local.entity.AlbumPreferenceEntity
 import com.gallery.sync.data.local.entity.BackupState
 import com.gallery.sync.data.local.media.MediaAccess
 import com.gallery.sync.data.local.media.MediaScanner
+import com.gallery.sync.domain.backup.AlbumCloudClaim
 import com.gallery.sync.domain.backup.BackupEngine
 import com.gallery.sync.domain.backup.CloudConfirmation
+import com.gallery.sync.domain.backup.ReconcileWithCloud
 import com.gallery.sync.domain.backup.StopReason
 import com.gallery.sync.util.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -78,7 +81,16 @@ data class AlbumRow(
     val totalBytes: Long,
     /** What the user chose for this album. [AlbumMode.OFF] means finished or ignored. */
     val mode: AlbumMode,
+    /**
+     * How many of this album's files the **ledger** says were uploaded from this phone.
+     *
+     * Retained for the progress arithmetic and the pending count, and deliberately no longer used to
+     * tell the user their files are in OneDrive. That claim is [cloudClaim], which comes from asking
+     * the drive. See `AlbumCloudClaim`.
+     */
     val backedUpCount: Int = 0,
+    /** What the drive itself last said about this album, or NeverChecked. */
+    val cloudClaim: AlbumCloudClaim = AlbumCloudClaim.NeverChecked,
     val proxiedCount: Int = 0,
     val imageCount: Int = 0,
     val videoCount: Int = 0,
@@ -171,6 +183,8 @@ data class BackupUiState(
      * the worst possible thing to flash. This separates "nothing" from "not known yet".
      */
     val hasLoadedCounts: Boolean = false,
+    /** A Rescan is walking OneDrive. Separate from [isScanning], which is the device scan. */
+    val isCheckingCloud: Boolean = false,
     val uploadedCount: Int = 0,
     val uploadedBytes: Long = 0L,
     /** Outstanding files **within the selected albums** — not the whole library. */
@@ -197,6 +211,14 @@ data class BackupUiState(
      * What it does carry is the fact Android's dialog cannot state — that the cloud copy is verified.
      */
     val archiveAlbumsReady: List<String> = emptyList(),
+    /**
+     * When the user's "ask me later" on the Archive summons runs out, or 0 if none is set.
+     *
+     * Carried here because the exit warning is decided at the root of the app, and forcing
+     * `ArchiveViewModel` into existence there would run a full device scan on every launch just to
+     * find out whether to arm a dialog. See [ExitWarning].
+     */
+    val archiveDelayedUntilEpochMillis: Long = 0L,
     /** What the last removal attempt refused to remove, and why. Null before any attempt. */
     val removalHeldBack: CloudConfirmation? = null,
     /** Photos whose local copy could be replaced by a proxy, and what they occupy now. */
@@ -372,6 +394,8 @@ class BackupViewModel @Inject constructor(
     private val scanner: MediaScanner,
     private val albumDao: AlbumPreferenceDao,
     private val entryDao: BackupEntryDao,
+    private val cloudStatusDao: AlbumCloudStatusDao,
+    private val reconcile: ReconcileWithCloud,
     private val engine: BackupEngine,
     private val localCopyRemover: LocalCopyRemover,
     private val proxyApplier: ProxyApplier,
@@ -408,11 +432,36 @@ class BackupViewModel @Inject constructor(
                     showEmptyCloudFolders = prefs.showEmptyCloudFolders,
                     isPaused = prefs.isPaused,
                     runBaselineBytes = prefs.runBaselineBytes,
-                    defaultAlbumMode = prefs.defaultAlbumMode
+                    defaultAlbumMode = prefs.defaultAlbumMode,
+                    archiveDelayedUntilEpochMillis = prefs.archiveDelayedUntilEpochMillis
                 )
             }
         }
         observeBackgroundWork()
+        observeCloudStatus()
+    }
+
+    /**
+     * Keeps each album row's cloud claim current as the reconciliation answers for it.
+     *
+     * The reconciliation writes a row per album while walking the drive, and it runs at launch at
+     * the same time this ViewModel is building its list — so reading once caught only the albums
+     * that happened to finish first. Rebuilding just the claims, rather than re-running the whole
+     * refresh, keeps this cheap enough to fire per album.
+     */
+    private fun observeCloudStatus() {
+        viewModelScope.launch {
+            cloudStatusDao.observeAll().collect { statuses ->
+                val byAlbum = statuses.associateBy { it.albumName }
+                _state.update { current ->
+                    current.copy(
+                        albums = current.albums.map { album ->
+                            album.copy(cloudClaim = AlbumCloudClaim.from(byAlbum[album.name]))
+                        }
+                    )
+                }
+            }
+        }
     }
 
     private fun observeBackgroundWork() {
@@ -497,6 +546,40 @@ class BackupViewModel @Inject constructor(
     }
 
     /** Re-reads permission state and the album list. Cheap enough to call on every resume. */
+    /**
+     * What the Rescan button does: re-read the phone, **then ask OneDrive about every album**.
+     *
+     * Also what entering the Albums tab does. Ian, 28 Aug 2026: *"a move to the Albums tab is ok to
+     * trigger a refresh — just so we know the user is getting fresh data."* Weighed against the
+     * cost, and the cost loses: a screen whose whole job is telling somebody their photos are safe
+     * should not be showing them an answer from an hour ago.
+     *
+     * Kept out of [refresh] all the same, because that is called from several places that only want
+     * the device counts — a rebuild after a mode change has no business walking OneDrive.
+     *
+     * The cost is real: roughly one listing per album plus one per extra page, measured at about
+     * 55 seconds for 3,335 files across six albums on the Moto G. Hence the in-flight guard below,
+     * and the button that says what it is doing.
+     */
+    fun rescan() {
+        refresh()
+
+        // One walk at a time. This runs on entry to the tab as well as from the button, so without
+        // the guard a few tab switches would stack several full drive walks on top of each other.
+        if (_state.value.isCheckingCloud) return
+
+        viewModelScope.launch {
+            _state.update { it.copy(isCheckingCloud = true) }
+            try {
+                reconcile.run()
+            } finally {
+                // In a finally: a walk abandoned half way still has to clear the flag, or the
+                // button stays busy for the life of the process.
+                _state.update { it.copy(isCheckingCloud = false) }
+            }
+        }
+    }
+
     fun refresh() {
         viewModelScope.launch {
             val access = scanner.access()
@@ -524,6 +607,7 @@ class BackupViewModel @Inject constructor(
             // factory default until TASK-012 makes that a user setting.
             val storedModes = albumDao.all().associate { it.albumName to it.mode }
             val countsByAlbum = entryDao.albumCounts().associateBy { it.album }
+            val cloudByAlbum = cloudStatusDao.all().associateBy { it.albumName }
             val prefs = settings.current()
             val defaultMode = prefs.defaultAlbumMode
 
@@ -541,6 +625,7 @@ class BackupViewModel @Inject constructor(
                     totalBytes = album.totalBytes,
                     mode = mode,
                     backedUpCount = counts?.backedUp ?: 0,
+                    cloudClaim = AlbumCloudClaim.from(cloudByAlbum[album.name]),
                     proxiedCount = counts?.proxied ?: 0,
                     imageCount = album.imageCount,
                     videoCount = album.videoCount,
@@ -578,6 +663,7 @@ class BackupViewModel @Inject constructor(
                         totalBytes = 0L,
                         mode = mode,
                         backedUpCount = counts?.backedUp ?: 0,
+                        cloudClaim = AlbumCloudClaim.from(cloudByAlbum[name]),
                         proxiedCount = counts?.proxied ?: 0,
                         savedBytes = counts?.savedBytes ?: 0L,
                         everBackedUpCount = counts?.everBackedUp ?: 0,

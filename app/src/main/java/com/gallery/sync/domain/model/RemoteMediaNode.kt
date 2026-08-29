@@ -44,7 +44,16 @@ sealed interface RemoteMediaNode {
         override val modifiedAtUtc: Long,
         /** e.g. `image/jpeg`. Falls back to `application/octet-stream` when unreported. */
         val mimeType: String,
-        val sizeBytes: Long,
+        /**
+         * What Graph said this file weighs, or `null` when it did not say.
+         *
+         * Nullable since 28 Aug 2026. It was `Long` with the mapper coercing a missing `size` to
+         * `0`, which turned "Graph did not report a size" into the confident claim "this file is
+         * empty" — and `confirmStillInCloud` read that as the file being gone from the drive and
+         * told the user so. Same mistake as the folder listing that once returned an empty map on
+         * failure: absence of an answer rendered as an answer. Failing to ask is not evidence.
+         */
+        val sizeBytes: Long?,
         /** Pixel width, when the provider exposes an image facet for this file. */
         val widthPx: Int?,
         /** Pixel height, when the provider exposes an image facet for this file. */

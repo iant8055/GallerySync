@@ -2097,6 +2097,261 @@ were stable throughout. **Pin the serial on every call, and prefer the filesyste
 when the two disagree.** This is the WAL lesson of the same date in a different costume: a confident
 diagnosis built on an instrument nobody had checked.
 
+### 28 Aug 2026 — the exit warning, and a snooze that did not survive being left
+
+**Fold 4, cover screen (344dp), both themes.** Ian, 28 Aug: *"We can warn the user when they go to close
+the app if there are files still in Archive that haven't been attended to."* Built as a third surface for
+the Archive summons, in place of a notification.
+
+**Why a dialog rather than a notification.** The notification half of TASK-011 was designed when the
+notification was the *consent mechanism* — a background worker cannot obtain write consent, so it was the
+only way to ask for the next batch. The SAF finding of 19 Aug removed that job. What was left was telling
+someone their storage is low, which Android already does. Ian, 28 Aug: *"no need to duplicate their
+systems."* A dialog needs no permission, cannot be denied, and cannot be silently switched off, which is
+exactly the failure `POST_NOTIFICATIONS` carries.
+
+**It is a net, not a guarantee, and this is the part not to forget.** Android has no general "app is
+closing" event. Only the back gesture from the root can be intercepted; Home and a swipe from Recents
+cannot, and on gesture navigation Home is the common way out. The Albums tab summons remains the surface
+that is always there — nothing may become reachable only from the dialog.
+
+**Measured, with `Header` (62 files, 190 MB) switched to Archive for the test and switched back after:**
+
+```
+redundantLocalCopies: 62 files in Archive albums are safely in OneDrive
+[back gesture] -> "Files ready to Archive - 62 files are verified in OneDrive
+                  and ready to leave this phone."   Leave | Archive now
+```
+
+Archive now landed on the Archive tab; Leave closed the app to the launcher. Both themes correct, no
+hardcoded colours, no crash. **Nothing was archived** — validation was run (62 confirmed, 0 unchecked) and
+the Delay branch taken rather than Yes.
+
+**A defect found by building it.** The Archive snooze lived in `ArchiveViewModel` as in-memory state, so
+it died the moment the app closed — which is precisely when this dialog fires. Someone who chose Delay and
+then left would have been warned anyway, by the very act the snooze was meant to cover. Now persisted as
+`archive_delayed_until`, confirmed in the DataStore file and confirmed surviving a full close and relaunch:
+back went straight to the launcher with the hour still running.
+
+**Buttons name their actions.** Against a sentence about leaving, "OK" reads as both "yes, close it" and
+"yes, take me there". The 18 Aug naming rule, pointed at buttons.
+
+**The Archive consent copy, rewritten the same day.** Ian, having opened the old dialog on the Moto and
+declined it, replaced the body with three plain steps:
+
+> Archive will verify all files are uploaded to the cloud.
+> Archived files will be moved to your phone's Recycle Bin.
+> Please empty your Recycle Bin to free up storage.
+
+The third line is the one the app could never say before. A trashed file keeps its bytes for 30 days, so
+every earlier "frees up X" described a moment that had not arrived; this asks the user to do the thing that
+actually returns the space, which is also the only version CLAUDE.md permits — the app must never empty a
+trash itself. Verified on the Moto G and the Fold 4, both themes, cancelled rather than accepted so no
+album changed.
+
+Two clauses went with it, on Ian's instruction. The recoverability caveat, because the 27 Aug entry above
+supersedes it. And the standing-instruction clause — *files added to this album later are covered by the
+same choice* — on the grounds that an emptied album stops being visible.
+
+**That second removal was raised as a concern and then settled.** The objection was that CLAUDE.md
+required the wording, and that the stated reason is narrower than the clause: the 27 Aug correction in this
+file says the folder is *never deleted* — the album row vanishes only because `MediaScanner` cannot see
+trashed files — so a camera, a download or a file manager can refill it and the mode set earlier still
+applies.
+
+Ian's answer, 28 Aug 2026: **change the rule.** CLAUDE.md now requires the dialog to say what Archive
+*does* rather than to enumerate its consequences, on the judgement that the mode's name and the album row
+showing it carry the standing-instruction property well enough.
+
+**The property itself was not weakened, and CLAUDE.md now says so explicitly.** A file added to an Archive
+album later is still removed with nobody asked again. So the album's membership is not a free variable:
+anything that lets files enter an Archive album by a new route widens what gets removed under a choice made
+earlier, and counts as touching the deletion rule. That is the part to keep hold of — it was previously
+carried, weakly, by a sentence in a dialog.
+
+**Still unfixed:** `backup_move_trash_note` on the validated-files prompt still says the local copy *"is
+removed straight away on some phones, so treat this as permanent"*. It now contradicts the dialog above as
+well as the 27 Aug measurement.
+
+### 28 Aug 2026 — the Archive tab never reloaded, and the test that could not have caught it
+
+**Moto G.** Ian set an album to Archive and the Archive tab said *"No album is set to Archive. Nothing here
+will remove anything from your phone."* The engine disagreed in the same minute:
+
+```
+17:03:20  filesInArchiveAlbums: no album is set to Archive
+17:03:30  redundantLocalCopies: 8 files in Archive albums are safely in OneDrive
+17:04     [screen] Files to Archive - 0 - "No album is set to Archive"
+```
+
+**`load()` ran once per app session.** It was called only from `ArchiveViewModel.init`, and the ViewModel is
+scoped to the Activity, so it ran at whatever moment the tab was first shown and never again. Open the tab
+before setting any album to Archive and the empty list built then was permanent: setting a mode afterwards
+took the user straight to a screen still describing the state from before. The screen's only
+`LaunchedEffect` keys on `phase` and `batchIndex` and drives the removal batch loop, not loading.
+
+`load()`'s own doc comment said *"Cheap, and safe to call whenever the screen appears"* — describing a
+contract nothing in the UI honoured.
+
+**Why the hardware pass that shipped the summons did not catch it.** That test only ever exercised the
+other ordering: set the mode, accept, get carried to the tab by `onAlbumArchived()` with the ViewModel not
+yet built, so `init` ran with the album already in place. In that ordering the screen is correct, and 62
+files listed. Two orderings, one of them right by accident, and the wrong one is the one a user reaches by
+visiting the tab first to see what it does. **Verifying the path the feature creates is not the same as
+verifying the paths a user takes into it.**
+
+**Fixed** with `LaunchedEffect(Unit)` reloading on entry, guarded to `IDLE` — a reload from `VALIDATING` or
+`REMOVING` would cut across a run, from `READY` it would discard the validation the user is being asked
+about, and from `DONE` it would wipe the report of what was just removed. Verified on the Moto: three
+`filesInArchiveAlbums` calls across one session of tab entries where there was previously one, and
+`PauseTest` with its eight files now listed.
+
+### 28 Aug 2026 — a file that is in OneDrive at zero bytes, and a ledger that says otherwise
+
+**Moto G, album `PauseTest`.** Ian: *"It indicated 1 file not on OneDrive — staying on your phone. But
+the fact that it isn't uploaded yet should not stop it from being Archived."* Correct as a principle, and
+already the design — validation treats "not in OneDrive" as work, backs the file up, and only then judges
+it. Two things were wrong underneath it, and the second is the serious one.
+
+**1. The back-up-and-recheck step could not do its job.** `nextPending` selects `state != UPLOADED`, and
+a file reaches the missing category precisely because its row already says `UPLOADED`. So the run enqueued
+to fix the problem had nothing to select:
+
+```
+17:08:48  validate: 1 files are not in OneDrive — backing them up
+17:08:48  backup run starting (manual)
+17:08:49  backup run finished: 0 uploaded, 0 already there, 0 failed, 0 remaining
+17:08:51  confirmStillInCloud: 0 confirmed, 1 no longer in OneDrive
+```
+
+600 ms, nothing selected, same answer. `BackupEngine.requeueMissingFromCloud` and
+`BackupEntryDao.requeueForUpload` were written to close this — return the row to pending and clear the
+remote columns it has just been shown to be wrong about — and with them the run uploaded for real
+(`1 uploaded`, 24 s). **They are deliberately not wired in**, for the reason below.
+
+**2. The file is on the drive, at zero bytes, and the ledger records a matching size.** Found by adding
+the failing name to the log rather than by reasoning:
+
+```
+confirmStillInCloud: '20251220_120042.mp4' (117668262 B) not matched in PauseTest
+  — listing held 10 names, same name present: true, its size there: 0
+```
+
+The ledger row for it reads `state=UPLOADED, sizeBytes=117668262, remoteSizeBytes=117668262` with a real
+`remoteItemId`. The drive says 0. **So `remoteSizeBytes` is not always what Graph reported** — and that
+column is half of `verifiedInCloud()`, the gate every removal in this app passes through. A file in this
+state would pass the check that is supposed to make removal safe. What caught it was the Archive tab
+asking the drive live; the ledger alone would have said yes.
+
+Re-uploading did not clear it: the name still resolved to 0 afterwards. So requeueing against a bad remote
+item buys traffic and no correctness, which is why it is left out until the questions below are answered.
+
+**Correction, same evening.** The first hypothesis was that Graph had *omitted* the size and the
+mapper's `size ?: 0L` had rendered that absence as a confident zero. Wrong. The mapper was changed to
+carry null through and the diagnostic to print `not reported` for it, and on the next run it printed
+**`its size there: 0`** — a reported zero. The file genuinely is a zero-byte item in OneDrive, and
+Archive refusing it is correct behaviour, not a misreading. Ian, before the test ran: *"it is a good
+test of the Archive flagging a failed file."* It was.
+
+**The nullable-size change was kept**, because the latent bug it removes is real even though it is not
+this one: `size ?: 0L` still made "Graph did not say" indistinguishable from "the file is empty", and
+`confirmStillInCloud` would have called that gone. Absence now routes to *could not check*, the
+skip-existing path defers rather than risking a duplicate, and a test that asserted the old coercion —
+`a file with no size defaults to zero bytes` — was asserting the defect and has been replaced by two
+that separate unknown from genuinely empty.
+
+**What is actually wrong, still open.** A 117 MB upload reported success and left a zero-byte item, and
+re-uploads do not replace it — the folder listing went 10 names, then 11, against 8 local files, so each
+attempt files a renamed sibling beside the bad item while the original name still resolves to zero. The
+name is occupied by something empty and nothing reclaims it.
+
+**Open, and worth answering before anything else in Archive:**
+- How does an item reach OneDrive at zero bytes while the row records a matching size? The album is
+  `PauseTest`, used for the 28 Aug pause/resume work, so an interrupted resumable session is the first
+  place to look. Confirmed a reported zero, not a missing field.
+- Why does a re-upload file a renamed sibling instead of replacing a wrong-sized item of the same name?
+  `conflictBehavior` is the thing to check. As it stands a bad remote item is permanent and every retry
+  adds another file.
+- Should `markUploaded` record the size Graph returns for the item rather than the local size?
+- What should an upload do when it finds an item of the wrong size already at the destination?
+- Is `verifiedInCloud()` safe on its own, given it trusts a column this can falsify?
+
+**Method note.** "1 no longer in OneDrive" was undiagnosable — it cannot separate absent from
+present-but-wrong, and those want opposite fixes. One log line naming the file, the size, whether the name
+was in the listing and what size it had there turned an hour of hypotheses into one reading. That line is
+kept.
+
+**Also corrected here:** a first reading of the ledger appeared to show two `UPLOADED` rows for this one
+file and was reported as duplication caused by the requeue. Wrong — the rows are `BudgetVideo` and
+`PauseTest`, two albums holding the same video, different `mediaStoreId`s, both legitimate. The query was
+not scoped to the album. Zero duplicate name+album rows across all 3,335.
+
+### 28 Aug 2026 — the Albums tab stops claiming what it never checked
+
+Ian, after deleting an album's OneDrive folder by hand and watching the row carry on regardless:
+*"if the Album tab never syncs with Cloud then it should not proclaim X files backed up."*
+
+**He was right, and the evidence was unambiguous.** Ledger: eight `PauseTest` rows, all `UPLOADED`,
+all with real OneDrive item ids. Drive: `listed 'MotoG/Gallery/PauseTest': 0 files` and
+`listed 'Samsung Gallery/DCIM/PauseTest': 0 files`. The row's "8 backed up" came from
+`SUM(CASE WHEN state = UPLOADED)` over local rows — a record of what this phone once sent, worded in
+the present tense about a drive nobody had asked.
+
+**The honest number already existed and was being thrown away.** `ReconcileWithCloud` walks every
+album against OneDrive and calls `ReconciliationRules.tallyAlbum` per album — then added each result
+to a running total for the setup wizard and dropped the per-album detail. So the one part of the app
+that knew what the drive holds told the wizard and nothing else.
+
+**What changed.** A new `album_cloud_status` table (schema 9, additive, migration verified on the
+Moto's real 3,335-row database) keeps each album's answer: when it was checked, how many the drive
+verified, how many it did not hold, and whether the listing failed at all. Deliberately **not** stored
+on `album_preferences`, whose own documentation calls it the one table that cannot be rebuilt — a
+disposable cache does not belong in the table holding pure user intent.
+
+`AlbumCloudClaim` turns a stored row into what may be said, and `NeverChecked` is a first-class state
+rather than a zero. It cannot see the ledger at all, which is what makes the old claim impossible to
+reintroduce by accident. Six unit tests, including the case Ian created by hand.
+
+**The rows now carry two lines that describe different things**, which was the other half of the
+problem. `"%1$d backed up"` became **"N uploaded from this phone"** — true, and about the phone — and
+the green tint moved off it onto the line that actually asks the drive: **"N verified in OneDrive"**,
+**"N of M verified in OneDrive"**, **"Could not reach OneDrive when this was last checked"**, or
+**"Not checked against OneDrive yet"**. An unchecked album is never tinted as good news, because a
+reassuring colour on an unverified claim is the same lie in a different medium.
+
+**Seen on the Moto before any rescan:** every row reading "Not checked against OneDrive yet" under a
+plain-coloured upload count. Which is the correct thing for the app to say about a question it has
+not asked.
+
+**Then the upload count went too.** Ian, on seeing the two lines together: *"get rid of the XXX
+uploaded from this phone line — it can get confusing as files are moved, added, deleted."* He is
+describing a real drift, not a preference. The ledger counts rows this phone once sent, keyed on
+content; the file count beside it comes from a live device scan. Move a file between albums, delete
+one, or add one the cloud already has, and the two numbers move independently — leaving a pair nobody
+can reconcile by looking. What remains describes the phone in the present tense and cannot drift:
+optimised, and pending. `album_status_backed_up` and `album_status_none` went with it rather than
+being left as callerless strings.
+
+**A defect found by looking, immediately after building it.** The first run showed `BudgetMixed`
+verified while the five albums checked seconds later still read "not checked". The reconciliation
+writes a row per album as it walks, and it runs at launch alongside the Albums tab building its list,
+so a one-shot read caught whichever albums happened to finish first. The rows observe the table now
+and fill in as the answers land.
+
+**Rescan, then the tab itself.** The button had never triggered the reconciliation at all — it
+refreshed the file counts and left the "verified in OneDrive" lines beside them untouched, which is
+the one thing somebody pressing it after moving files is trying to find out. Wired, then widened on
+Ian's call: *"a move to the Albums tab is ok to trigger a refresh — just so we know the user is
+getting fresh data."* The cost was weighed and lost — about 55 seconds for 3,335 files across six
+albums, one listing per album plus one per page — on the grounds that a screen whose job is telling
+somebody their photos are safe should not be showing an answer from an hour ago.
+
+Two guards came with it. An in-flight check, because entry-triggered plus button-triggered would
+otherwise stack full drive walks on top of each other from a few tab switches; and the button says
+**"Checking OneDrive…"** and disables while it runs, since a control that looks idle for a minute
+invites a second press. `refresh()` is deliberately left alone — several callers want only the device
+counts, and a rebuild after a mode change has no business walking OneDrive.
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have
@@ -2168,9 +2423,15 @@ uploaded.
 ## Open questions
 
 **Needs Ian's decision**
-- **Where TASK-011's applying step runs.** WorkManager cannot attach the `ClipData` that carries the
-  write grant, and Android 12+ blocks starting a foreground service from the background. Recommended:
-  background detection and notification, applying on the tap. See TASK-011.
+- **Where TASK-011's applying step runs.** ~~WorkManager cannot attach the `ClipData` that carries the
+  write grant, and Android 12+ blocks starting a foreground service from the background.~~
+
+  **Answered 19 Aug 2026, and it should have been struck through then.** The SAF conclusion in the
+  hardware log says it directly: options 1/2/3 for where the applying step runs are *"not needed for
+  photos"*, because the tree grant needs no `ClipData` and no Activity. The bullet below carries the
+  finding and this one never got it, so for nine days the record showed a blocker against TASK-011 that
+  the same day's probe had already removed. Noticed 28 Aug 2026 while auditing why the floor was never
+  built.
 - **Whether the tap can be removed entirely.** Two routes: `MANAGE_EXTERNAL_STORAGE`, which works
   and spends Play-listing scrutiny, and a persisted SAF tree grant, which is cheaper and unverified.
   Recommended: test the SAF route on hardware first. A new Play-visible permission and a fork in the
@@ -2180,10 +2441,18 @@ uploaded.
   the proxy write with no dialog and survives reboot; `MANAGE_EXTERNAL_STORAGE` is not needed and
   the Play listing is untouched. Archive still needs `createTrashRequest`, because SAF deletes
   permanently. See the SAF entry in the hardware log.
-- **`POST_NOTIFICATIONS`** — the only live question is **when to ask**, not whether. The SAF finding
-  removed its consent role for photos, so it is now informational plus the Archive batch prompt, and
-  nothing breaks if denied. Play cost is negligible. Recommended: media permissions at first run,
-  notifications when the user first sets a floor or an Archive album. See TASK-011.
+- **`POST_NOTIFICATIONS`** — **answered 28 Aug 2026 by Ian: not needed, and not asked for.**
+
+  Its two remaining uses both fell. Saying free space is low duplicates Android, which warns on its own
+  — *"no need to duplicate their systems."* Summoning the user to an Archive batch is now the exit
+  warning, which needs no permission and cannot be denied or silently switched off. See the exit-warning
+  entry in the hardware log.
+
+  What this closes is larger than one permission: it removes the last CLAUDE.md escalation standing
+  against TASK-011, and with the applying-step bullet above, **TASK-011 has no open questions left.**
+  It was never blocked on a decision — see the exit-warning entry for what it was blocked on instead.
+
+  Still available if a later feature earns it: FIX-001's shade-level Stop control is the one candidate.
 - **Language dropdown** — **answered 19 Aug 2026:** it belongs in a first-run wizard alongside
   permissions, cloud choice and defaults. Ship English only behind it. See TASK-012.
 

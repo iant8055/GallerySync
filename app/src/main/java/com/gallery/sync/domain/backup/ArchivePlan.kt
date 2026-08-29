@@ -43,7 +43,17 @@ enum class ArchiveFailure {
     COULD_NOT_CHECK,
 
     /** We asked, it was not there, and the upload that would have fixed that did not succeed. */
-    NOT_BACKED_UP
+    NOT_BACKED_UP,
+
+    /**
+     * It **is** on the drive, under this name, at a size that is not this file's.
+     *
+     * Split out 28 Aug 2026. A zero-byte item on the drive was being reported as "Not in OneDrive",
+     * which is both untrue and unactionable — the user cannot tell a file the app declined to
+     * upload from one whose cloud copy is damaged, and only the second is worth their attention.
+     * The file stays on the phone either way: a wrong-sized copy is not a backup.
+     */
+    WRONG_SIZE_IN_CLOUD
 }
 
 /** One row on the Archive screen. */

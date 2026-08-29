@@ -38,7 +38,9 @@ fun GraphDriveItemDto.toRemoteMediaNode(): RemoteMediaNode? {
             name = itemName,
             modifiedAtUtc = modifiedAtUtc,
             mimeType = file.mimeType ?: DEFAULT_MIME_TYPE,
-            sizeBytes = size ?: 0L,
+            // Carried through as-is. `?: 0L` here is what made a file with no reported size look
+            // like an empty one to every caller downstream.
+            sizeBytes = size,
             widthPx = image?.width,
             heightPx = image?.height,
             eTag = eTag

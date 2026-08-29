@@ -327,6 +327,37 @@ interface BackupEntryDao {
         uploaded: BackupState = BackupState.UPLOADED
     ): List<BackupEntryEntity>
 
+    /**
+     * Returns rows to pending so the uploader will send them again.
+     *
+     * For files the ledger records as `UPLOADED` that OneDrive turns out not to have. Archive's
+     * validation backs up anything it cannot find — Ian, 26 Aug 2026 — but `nextPending` selects on
+     * `state != UPLOADED`, so a file in exactly this state was invisible to the run sent to fix it.
+     * Observed on the Moto G, 28 Aug 2026: eight `UPLOADED` rows with matching remote sizes, one of
+     * them absent from the drive, and a manual run that finished in 600 ms having selected nothing.
+     *
+     * `remoteItemId` and `remoteSizeBytes` are cleared with the state. Leaving them would keep the
+     * row asserting a cloud copy that has just been shown not to exist, and `verifiedInCloud()` —
+     * the gate every removal passes through — reads exactly those columns.
+     *
+     * This is bookkeeping. It removes nothing anywhere; its only effect is to cause an upload.
+     */
+    @Query(
+        """
+        UPDATE backup_entries
+        SET state = :pending,
+            attemptCount = 0,
+            lastError = NULL,
+            remoteItemId = '',
+            remoteSizeBytes = NULL
+        WHERE mediaStoreId IN (:mediaStoreIds)
+        """
+    )
+    suspend fun requeueForUpload(
+        mediaStoreIds: List<Long>,
+        pending: BackupState = BackupState.PENDING
+    ): Int
+
     /** Clears the failure count so the user can retry something that has given up. */
     @Query("UPDATE backup_entries SET state = :pending, attemptCount = 0, lastError = NULL WHERE state = :failed")
     suspend fun resetFailures(

@@ -140,12 +140,33 @@ class GraphDriveItemMapperTest {
         assertEquals(DEFAULT_MIME_TYPE, node.mimeType)
     }
 
+    /**
+     * Changed 28 Aug 2026. This test used to assert `0L`, and it was asserting the defect: the
+     * mapper turned "Graph did not report a size" into "this file is empty", and
+     * `confirmStillInCloud` read that as the file being gone and told the user so about a file that
+     * was sitting in OneDrive. Null is the honest answer and every caller now has to decide what to
+     * do about not knowing.
+     */
     @Test
-    fun `a file with no size defaults to zero bytes`() {
+    fun `a file with no size reports null rather than zero`() {
         val dto = GraphDriveItemDto(
             id = "01FILE",
             name = "no-size.jpg",
             size = null,
+            file = GraphFileFacetDto(mimeType = "image/jpeg")
+        )
+
+        val node = dto.toRemoteMediaNode() as RemoteMediaNode.File
+
+        assertNull(node.sizeBytes)
+    }
+
+    @Test
+    fun `a file genuinely reported as zero bytes is still zero, not unknown`() {
+        val dto = GraphDriveItemDto(
+            id = "01EMPTY",
+            name = "empty.jpg",
+            size = 0L,
             file = GraphFileFacetDto(mimeType = "image/jpeg")
         )
 

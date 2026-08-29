@@ -125,7 +125,16 @@ data class BackupPreferences(
      * Persisted rather than held in memory because a run is a chain of worker invocations, and a
      * baseline captured per invocation would reset every batch. That is the defect this replaced.
      */
-    val runBaselineBytes: Long = 0L
+    val runBaselineBytes: Long = 0L,
+    /**
+     * When the user's "ask me later" on the Archive summons runs out, or 0 if none was set.
+     *
+     * Persisted rather than held in the ViewModel, which is where it lived until 28 Aug 2026. In
+     * memory it died the moment the app closed — so someone who chose Delay and then left got the
+     * exit warning anyway, and the snooze they had just set did nothing. A delay that does not
+     * survive leaving is not a delay.
+     */
+    val archiveDelayedUntilEpochMillis: Long = 0L
 )
 
 /**
@@ -177,7 +186,8 @@ class BackupSettings @Inject constructor(
             hasCompletedSetup = stored[KEY_SETUP_COMPLETE] ?: false,
             isPaused = stored[KEY_PAUSED] ?: false,
             uploadInterruptedAtEpochMillis = stored[KEY_INTERRUPTED_AT] ?: 0L,
-            runBaselineBytes = stored[KEY_RUN_BASELINE] ?: 0L
+            runBaselineBytes = stored[KEY_RUN_BASELINE] ?: 0L,
+            archiveDelayedUntilEpochMillis = stored[KEY_ARCHIVE_DELAYED_UNTIL] ?: 0L
         )
     }
 
@@ -215,6 +225,15 @@ class BackupSettings @Inject constructor(
     /** Stamps the moment a run was interrupted, so a later resume can judge the held session. */
     suspend fun setUploadInterruptedAt(millis: Long) {
         context.dataStore.edit { it[KEY_INTERRUPTED_AT] = millis }
+    }
+
+    /**
+     * Records the user's "ask me later" on the Archive summons.
+     *
+     * Their choice to make, not the app deciding to stop asking — see [ArchiveDelay].
+     */
+    suspend fun setArchiveDelayedUntil(millis: Long) {
+        context.dataStore.edit { it[KEY_ARCHIVE_DELAYED_UNTIL] = millis }
     }
 
     /** Holds backing up until Resume or Stop. See [BackupPreferences.isPaused]. */
@@ -324,5 +343,6 @@ class BackupSettings @Inject constructor(
         val KEY_PAUSED = booleanPreferencesKey("backup_paused")
         val KEY_INTERRUPTED_AT = longPreferencesKey("upload_interrupted_at")
         val KEY_RUN_BASELINE = longPreferencesKey("run_baseline_bytes")
+        val KEY_ARCHIVE_DELAYED_UNTIL = longPreferencesKey("archive_delayed_until")
     }
 }

@@ -6,10 +6,12 @@ import androidx.room.TypeConverters
 import com.gallery.sync.data.local.converter.AlbumModeConverter
 import com.gallery.sync.data.local.converter.BackupStateConverter
 import com.gallery.sync.data.local.converter.MediaSourceConverter
+import com.gallery.sync.data.local.dao.AlbumCloudStatusDao
 import com.gallery.sync.data.local.dao.AlbumPreferenceDao
 import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.dao.MediaFolderDao
 import com.gallery.sync.data.local.dao.MediaItemDao
+import com.gallery.sync.data.local.entity.AlbumCloudStatusEntity
 import com.gallery.sync.data.local.entity.AlbumPreferenceEntity
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.entity.MediaFolderEntity
@@ -32,9 +34,10 @@ import com.gallery.sync.data.local.entity.MediaItemEntity
         MediaItemEntity::class,
         MediaFolderEntity::class,
         BackupEntryEntity::class,
-        AlbumPreferenceEntity::class
+        AlbumPreferenceEntity::class,
+        AlbumCloudStatusEntity::class
     ],
-    version = 8,
+    version = 9,
     exportSchema = true
 )
 @TypeConverters(MediaSourceConverter::class, BackupStateConverter::class, AlbumModeConverter::class)
@@ -47,6 +50,8 @@ abstract class GallerySyncDatabase : RoomDatabase() {
     abstract fun backupEntryDao(): BackupEntryDao
 
     abstract fun albumPreferenceDao(): AlbumPreferenceDao
+
+    abstract fun albumCloudStatusDao(): AlbumCloudStatusDao
 
     companion object {
         const val DATABASE_NAME = "gallery_sync.db"
