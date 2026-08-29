@@ -2671,13 +2671,19 @@ export — which is precisely why only old video is touched and retrieval covers
 cannot tell the difference watching it" is the criterion that argument assumed, now tested rather than
 asserted.
 
-**Before this is built on, three things should be checked, because one viewing is one viewing:**
-- **The largest screen it will be seen on.** The Fold's inner display is 7.6 inches; 480p upscales
-  about 2.5× there, and that is the hardest case a phone offers.
-- **A high-motion, detailed clip.** Content dependence has moved these numbers twice already, and
-  fine texture with fast panning is where low resolution shows first.
+**The screen question is already answered, and in the hardest way available.** Ian made the
+comparison on the Fold 4's **inner display** — 2176×1812, 7.6 inches — where a 480×853 clip is
+upscaled roughly 2.5× linear on a large, dense panel. That is the most demanding surface this app
+runs on, the opposite end of the range from the 344dp cover screen the compact layout is proven
+against. It was not a forgiving test and 480p passed it.
+
+**Two things still worth checking before this is built on:**
+- **A high-motion, detailed clip.** Content dependence has moved these numbers twice already — the
+  dark clip flattered them by up to 24 points — and fine texture with fast panning is where low
+  resolution shows first. One clip judged is one clip.
 - **That the export cap is still understood.** A downscaled clip edited in CapCut exports at that
-  resolution permanently. Nothing here changes that; it is what the age gate exists for.
+  resolution permanently. Nothing here changes that; it is what the age gate exists for, and it is
+  the one place where "I cannot see the difference" stops being the right test.
 
 Speed remains negligible — 0.11–0.19× realtime, an 18-second clip in 2–3.4 seconds.
 
