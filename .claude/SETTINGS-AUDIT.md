@@ -95,7 +95,7 @@ Ordered by how much their absence changes what the app does.
 | Setting | Decided | Intended default | Status |
 |---|---|---|---|
 | ~~**Archive minimum age**~~ | 19 Aug · TASK-012 | ~~1 month~~ | **Superseded** — Archive is manual |
-| **Sync scope** — Photos only / Video only / Both | 19 Aug · TASK-011 | Both | Not built |
+| **Sync scope** — two toggles, photos and video · *gates optimising, not upload* | 19 Aug, revised 29 Aug | both on | Not built |
 | **Space saved per album** — freed so far, and what the mode could free | 19 Aug · TASK-011 | — | Not built |
 | **Retry failed items** from the UI | v0.2 backlog | — | Not built |
 | ~~**Storage floor**~~ — see above | 18 Aug · TASK-011 | ~~20 GB~~ | **Not a user setting** — resolved |

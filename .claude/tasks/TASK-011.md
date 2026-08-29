@@ -593,9 +593,20 @@ differently for one album than another.
 
 | Setting | Photos in a Sync album | Video in a Sync album |
 |---|---|---|
-| **Photos only** | uploaded, then proxied | not uploaded, untouched |
-| **Video only** | not uploaded, untouched | uploaded, untouched |
-| **Both** *(default)* | uploaded, then proxied | uploaded, untouched |
+| **Photos only** | uploaded, then optimised | uploaded, left at full size |
+| **Video only** | uploaded, left at full size | uploaded, then optimised |
+| **Both** *(default)* | uploaded, then optimised | uploaded, then optimised |
+
+> **Revised by Ian, 29 Aug 2026.** The three "not uploaded, untouched" cells above are struck: they
+> said this setting could stop a medium being backed up, and it cannot. Uploading follows the album
+> mode — Backup, Sync and Archive all upload; only Off does not — so a setting scoping *Sync* scopes
+> the optimising half and nothing else. *"Turning off syncing/optimising doesn't mean it can't still
+> be backed up."*
+>
+> The old reading was also unsafe in a way nobody had noticed: everything downstream needs a verified
+> cloud copy, so excluding video from upload would have silently disabled optimising, archiving and
+> restore for it, and left the largest files on the phone with no cloud copy at all. The shape is now
+> two toggles rather than a tri-state, and the worst a toggle can do is leave a file at full size.
 
 Only `SYNC` albums are affected — Ian's wording, and it is also the coherent line. `BACKUP` means
 "copy everything and change nothing", and a type filter silently narrowing it would make the safe

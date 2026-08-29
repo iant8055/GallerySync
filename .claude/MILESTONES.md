@@ -277,9 +277,19 @@ keeps working.
       been freed and what its selected mode could free, updating as the mode changes. Same
       aggregates the floor uses, so the two screens cannot disagree. Added by Ian 19 Aug 2026. See
       TASK-011.
-- [ ] **Sync scope — Photos only / Video only / Both.** One universal setting applying to every Sync
-      album. Default Both, which is today's behaviour. Photos only leaves video in Sync albums
-      unuploaded, so it has to say what it is excluding. Added by Ian 19 Aug 2026. See TASK-011.
+- [ ] **Sync scope — two toggles, photos and video, and they gate optimising only.** Revised by Ian,
+      29 Aug 2026, replacing a tri-state (Photos only / Video only / Both) that gated *uploading*.
+
+      **The old shape was wrong about what Sync is.** TASK-011's table said the excluded medium was
+      "not uploaded, untouched", and MILESTONES repeated it. But uploading is governed by the album
+      mode — Backup, Sync and Archive all upload, and only Off does not. Sync is backup **plus**
+      space management, so a setting scoping Sync can only sensibly scope the second half.
+
+      Ian, 29 Aug: *"turning off syncing/optimising doesn't mean it can't still be backed up."*
+      Correct, and it makes the setting far safer: video with optimising off is still in OneDrive at
+      full size, and still archivable and restorable — all of which need a verified cloud copy. Under
+      the old reading, one toggle silently disabled three features and left the largest files on the
+      phone unprotected.
 - [ ] **Video transcode for old clips**, age a user setting — see TASK-013. The write needs no tap
       (SAF, verified 19 Aug 2026); the blocker is a transcode cost measured on real 8K footage, and
       it is gated on v0.4 retrieval.
