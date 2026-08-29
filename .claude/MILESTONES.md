@@ -279,6 +279,14 @@ The four options, verbatim:
 - **If #2 OR #3 is chosen**, the user is then asked the optimisation **level: High / Medium / Low**,
   mirroring the same three levels in Settings (High 480p · Medium 720p · Low 1080p). This level is
   used only for the one-time bulk optimise and **does not persist into Settings.**
+- **The level applies to video only** (Ian, 29 Aug 2026). Photos optimise to their fixed proxy size —
+  there is no photo level to ask for. So the H/M/L prompt is a video-quality choice, and it is asked
+  because #2/#3 may optimise video.
+- **#3 identifies "newly backed up, not already in cloud" by comparing the device against cloud
+  storage** (Ian, 29 Aug 2026) — the same reconcile the app already performs. This choice runs after
+  access to both cloud storage and the local device has been granted, so the comparison is available:
+  the files that were **not** already in the cloud are exactly the ones this pass backs up, and those
+  are the ones #3 then optimises.
 
 This is the guided first run — see TASK-014.
 
@@ -306,13 +314,11 @@ isOptimiseEnabled     master switch, off until asked
 
 See TASK-012 for where this lives in the Settings screen.
 
-### Not yet specified — do not invent
+### Resolved 29 Aug 2026
 
-- Whether Area 1's bulk optimise covers photos as well as video, and how the video-shaped H/M/L level
-  applies to photos (photo proxies are a fixed size elsewhere in this doc). Not stated.
-- The exact mechanism by which #3 identifies "newly backed up, not already in cloud." Presumed to be
-  the files uploaded during this install's own backup pass, but not confirmed. Confirm with Ian before
-  building either.
+Both points that were open here are now answered by Ian and folded into Area 1 above: the H/M/L level
+is **video only** (photos take their fixed proxy size), and #3's "newly backed up" set is found by the
+**device-vs-cloud reconcile** the app already runs, once cloud and device access is granted.
 
 ## v0.3.0 — Space management
 The milestone that delivers the actual product: the phone stops filling up, and the existing gallery
