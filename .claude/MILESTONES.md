@@ -163,7 +163,17 @@ problem, and it must survive every future change.
 ### Decisions
 - **Recent video is never touched.** Not a compromise forced by the platform — it is the
   requirement, and both middle-state options would attack it. Truncation hands CapCut two seconds;
-  full-length downscale hands it 480p and caps the export.
+  full-length downscale hands it 480p to edit from.
+
+  **"Caps the export" was wrong and is withdrawn — Ian, 28 Aug 2026:** *"In CapCut you CAN upscale a
+  480p to 1080p and even higher."* He is right, and it was said twice in this file. What a downscale
+  actually costs an edit is **detail, not resolution**: the export can be any size, and upscaling
+  cannot put back information that is not in the source. That is a real cost and a smaller one than
+  claimed, and the claim should not be repeated in the stronger form.
+
+  **The rule does not rest on it.** Recent video is protected because of the founding use case —
+  shooting something and wanting to edit it properly ten minutes later — which stands whatever CapCut
+  can be persuaded to output.
 - **Old video may be downscaled full-length**, marked, on charge, Sync albums only. For footage
   people *watch* rather than edit, a downscaled clip is fine, and retrieval covers the rare edit —
   exactly as for photos. Needs Media3 Transformer and a transcode cost measured on real 8K footage
@@ -2681,9 +2691,12 @@ against. It was not a forgiving test and 480p passed it.
 - **A high-motion, detailed clip.** Content dependence has moved these numbers twice already — the
   dark clip flattered them by up to 24 points — and fine texture with fast panning is where low
   resolution shows first. One clip judged is one clip.
-- **That the export cap is still understood.** A downscaled clip edited in CapCut exports at that
-  resolution permanently. Nothing here changes that; it is what the age gate exists for, and it is
-  the one place where "I cannot see the difference" stops being the right test.
+- **What an edit really costs.** Stated here first as "exports at that resolution permanently",
+  which Ian corrected: CapCut will export a 480p clip at 1080p or higher. The cost is detail rather
+  than resolution — upscaling cannot invent what the source does not hold. Worth a look rather than
+  an assumption, and cheap to check: export one of these 480p clips from CapCut at 1080p and watch
+  it. Given 480p already proved indistinguishable on the inner display, the honest expectation is
+  that this matters less than the original claim assumed.
 
 Speed remains negligible — 0.11–0.19× realtime, an 18-second clip in 2–3.4 seconds.
 
