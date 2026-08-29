@@ -114,11 +114,30 @@ class ChunkedUploaderTest {
         assertTrue(request.path!!.contains(":/content"))
     }
 
+    /**
+     * Changed 28 Aug 2026, and the old version was asserting the defect.
+     *
+     * It required an empty file to upload "successfully", which writes a zero-byte file to the drive
+     * under that photo's name. `conflictBehavior` is `rename`, so no later upload can repair it —
+     * the name is occupied for good and every retry files a sibling beside it. Worse, the empty
+     * upload reports size 0, the local file reads 0, `verifiedInCloud()` sees them match, and the
+     * photo becomes eligible for removal from the phone.
+     *
+     * The request count is the real assertion: nothing must reach the network at all.
+     */
     @Test
-    fun `an empty file still takes the single-request path and completes`() = runTest {
-        server.enqueue(jsonResponse(200, """{"id":"A2","name":"empty.jpg","size":0}"""))
-
+    fun `an empty file is refused rather than uploaded as nothing`() = runTest {
         val outcome = uploader.upload(fileOfSize("empty.jpg", 0), "DCIM/Camera")
+
+        assertEquals(UploadOutcome.EmptySource, outcome)
+        assertEquals(0, server.requestCount)
+    }
+
+    @Test
+    fun `a one byte file is still uploaded`() = runTest {
+        server.enqueue(jsonResponse(200, """{"id":"A3","name":"tiny.jpg","size":1}"""))
+
+        val outcome = uploader.upload(fileOfSize("tiny.jpg", 1), "DCIM/Camera")
 
         assertTrue(outcome is UploadOutcome.Success)
         assertEquals(1, server.requestCount)

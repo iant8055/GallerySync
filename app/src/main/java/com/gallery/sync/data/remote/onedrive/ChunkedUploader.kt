@@ -21,6 +21,23 @@ sealed interface UploadOutcome {
     data class Success(val item: UploadedItemDto) : UploadOutcome
 
     data class HttpFailure(val code: Int, val body: String?) : UploadOutcome
+
+    /**
+     * The local file read as zero bytes, so nothing was sent.
+     *
+     * Not a success and not a network failure — a refusal. Uploading it would have written an empty
+     * file to the drive under this photo's name, and because `conflictBehavior` is `rename` (see
+     * `UploadablePropertiesDto`, and it is right to be) that name could never afterwards be
+     * corrected by retrying: every later attempt files a sibling beside the empty one.
+     *
+     * Worse than untidy. An empty upload reports its size as 0, the ledger records 0 against a local
+     * file that also reads 0, `verifiedInCloud()` sees them match, and the file becomes eligible for
+     * removal from the phone — a data-loss path whose every individual step looks correct.
+     *
+     * A zero-length read is nearly always transient: a content URI whose file is mid-write, being
+     * proxied, or already trashed. Deferring costs one run; uploading costs the name forever.
+     */
+    data object EmptySource : UploadOutcome
 }
 
 /**
@@ -53,6 +70,13 @@ class ChunkedUploader @Inject constructor(
         val total = source.sizeBytes
         val remotePath = buildRemotePath(remoteFolderPath, source.displayName)
 
+        // Nothing to send, so send nothing. See UploadOutcome.EmptySource for why this is a refusal
+        // rather than a trivially successful upload of no bytes.
+        if (total <= 0L) {
+            Logger.w(TAG, "not uploading ${source.displayName}: it reads as zero bytes")
+            return UploadOutcome.EmptySource
+        }
+
         return if (total < SMALL_FILE_THRESHOLD_BYTES) {
             // Small files go in one request, so there is no session to resume and nothing an
             // interruption could leave half-done.
@@ -78,7 +102,7 @@ class ChunkedUploader @Inject constructor(
         Logger.d(TAG, "uploading ${source.displayName} as a single request ($total bytes)")
 
         val bytes = ByteArray(total.toInt())
-        if (total > 0) source.open().use { it.readFully(0, bytes, total.toInt()) }
+        source.open().use { it.readFully(0, bytes, total.toInt()) }
 
         val response = uploadApi.uploadSmallFile(remotePath, bytes.toRequestBody(OCTET_STREAM))
 

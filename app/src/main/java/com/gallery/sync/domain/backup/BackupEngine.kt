@@ -634,6 +634,15 @@ class BackupEngine @Inject constructor(
                             continue
                         }
 
+                        // Read as zero bytes. Deferred rather than failed: no attempt is spent, the
+                        // row is kept, and the next run tries again — which is right because the
+                        // cause is nearly always a file caught mid-write or mid-proxy. What must
+                        // not happen is the upload proceeding; see RemoteError.EmptyLocalFile.
+                        if (result.error == RemoteError.EmptyLocalFile) {
+                            deferred++
+                            continue
+                        }
+
                         val stop = stopReasonFor(result.error)
                         if (stop != null) {
                             Logger.w(TAG, "uploadPending: stopping run — $stop")
@@ -1144,6 +1153,7 @@ class BackupEngine @Inject constructor(
         // outlive the file it describes, and letting that halt everything means one deleted photo
         // silently stops the rest of a library being backed up.
         RemoteError.LocalFileMissing,
+        RemoteError.EmptyLocalFile,
         is RemoteError.Http,
         is RemoteError.Unknown -> null
     }

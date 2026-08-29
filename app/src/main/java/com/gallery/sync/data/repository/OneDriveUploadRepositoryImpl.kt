@@ -77,13 +77,22 @@ class OneDriveUploadRepositoryImpl @Inject constructor(
                         UploadedItem(
                             id = item.id.orEmpty(),
                             name = item.name ?: source.displayName,
-                            sizeBytes = item.size ?: 0L,
+                            // -1 for "the server did not say", never 0. Zero is a size, and the
+                            // caller compares this against the local length to decide the upload
+                            // worked — so an unreported size must fail that test, not accidentally
+                            // pass it for an empty file.
+                            sizeBytes = item.size ?: -1L,
                             eTag = item.eTag
                         )
                     )
                 }
 
                 is UploadOutcome.HttpFailure -> mapFailure(outcome)
+
+                UploadOutcome.EmptySource -> {
+                    Logger.w(TAG, "upload: ${source.displayName} read as zero bytes, nothing sent")
+                    DataResult.Failure(RemoteError.EmptyLocalFile)
+                }
             }
         } catch (e: FileNotFoundException) {
             // Must be caught before IOException, which it extends. A ledger row can outlive the

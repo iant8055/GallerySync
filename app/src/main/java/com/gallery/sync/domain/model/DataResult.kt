@@ -35,6 +35,20 @@ sealed interface RemoteError {
     data object LocalFileMissing : RemoteError
 
     /**
+     * The local file is there but reads as zero bytes, so nothing was uploaded.
+     *
+     * Kept apart from [LocalFileMissing] because the two want opposite handling. A missing file is
+     * never coming back, so its row is forgotten. A zero-length read almost always is transient — a
+     * file mid-write, mid-proxy, or just trashed — so the row is kept and simply tried again.
+     *
+     * It exists at all because sending those zero bytes was the alternative, and that writes an
+     * empty file to the drive under the photo's name. `conflictBehavior` is `rename`, correctly, so
+     * no later upload can repair it: the name stays occupied by an empty file for good. See
+     * `UploadOutcome.EmptySource`.
+     */
+    data object EmptyLocalFile : RemoteError
+
+    /**
      * The drive is full, so the write could not be stored.
      *
      * Separated from [Http] because it is the one remote failure the user can actually fix, and

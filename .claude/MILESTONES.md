@@ -2461,6 +2461,50 @@ separately is what makes the row readable.
 Backed by five `RestoreScopeTest` cases, including the duplicate-in-another-album case and the
 empty-scan guard, which returns nothing rather than offering the entire library. 289 tests green.
 
+### 28 Aug 2026 — the app would upload nothing and call it a backup
+
+Chasing the zero-byte item Ian found in `PauseTest`. The original artefact went with the folder he
+deleted, so this is reasoned from the code rather than reproduced — but the path is real, it is short,
+and it ends in data loss.
+
+```kotlin
+val bytes = ByteArray(total.toInt())
+if (total > 0) source.open().use { it.readFully(0, bytes, total.toInt()) }
+uploadApi.uploadSmallFile(remotePath, bytes.toRequestBody(OCTET_STREAM))
+```
+
+A source reading zero bytes took the small-file path — `0 < 4 MiB` — and **uploaded an empty body**.
+The `if (total > 0)` skipped the read and sent the empty array anyway. Graph stores a zero-byte file
+under the photo's name and returns it as a success.
+
+**Then every check downstream agrees with it.** The response reports size 0; the local file reads 0;
+`item.sizeBytes == entry.sizeBytes` passes; the row is marked `UPLOADED` with a real `remoteItemId`
+and `remoteSizeBytes = 0`. `verifiedInCloud()` compares those same two numbers, finds them equal, and
+**the photo becomes eligible for removal from the phone.** Every individual step is correct.
+
+**And it cannot be undone by retrying.** `conflictBehavior` is `rename`, which is right — CLAUDE.md
+forbids destroying a user's cloud file, and two phones easily produce the same camera filename. The
+consequence is that the name stays occupied by the empty file for good, and each later attempt files
+a sibling beside it. That is exactly the shape observed: a folder growing 8 names, then 10, then 11,
+while the original name went on resolving to zero.
+
+**A zero-length read is nearly always transient** — a file caught mid-write, mid-proxy, or just
+trashed. So the fix is to refuse, not to fail: `UploadOutcome.EmptySource` and
+`RemoteError.EmptyLocalFile`, deferred by the engine with no attempt spent and the row kept, tried
+again next run. Deferring costs one run; uploading costs the name forever.
+
+**Two smaller things fixed alongside.** `sizeBytes = item.size ?: 0L` in the upload response was the
+same absence-rendered-as-zero coercion found in the listing mapper earlier the same day — now `-1`,
+so an unreported size fails the equality test rather than accidentally passing it for an empty file.
+And a test named *"an empty file still takes the single-request path and completes"* was asserting the
+defect, exactly as `a file with no size defaults to zero bytes` had been that morning. **Two tests in
+one day pinning behaviour that was wrong.** Worth noticing as a pattern: both were written to
+describe what the code did rather than what it should do.
+
+**Not proven on hardware**, and deliberately not manufactured: reproducing it means getting a real
+file to read as zero at the moment of upload. The unit test asserts the thing that matters — nothing
+reaches the network — and 290 tests pass.
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have
