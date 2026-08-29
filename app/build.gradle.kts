@@ -79,6 +79,9 @@ dependencies {
     implementation(libs.androidx.media3.transformer)
     implementation(libs.androidx.media3.effect)
     implementation(libs.androidx.media3.common)
+    // media3-container: the MdtaMetadataEntry type the marker probe writes. Provisional, like the
+    // rest of media3 here — it stays only if the video proxy-marker path is built on mdta.
+    implementation(libs.androidx.media3.container)
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(platform(libs.okhttp.bom))

@@ -2784,6 +2784,41 @@ it by describing a mechanism rather than an outcome, or by describing yesterday'
 that has survived — the Archive confirmation, Gate 2's numbers, "N verified in OneDrive" — says what
 the user gets and where their files are. The copy that keeps breaking explains how Android works.
 
+### 29 Aug 2026 — the video proxy marker has a route, proven on hardware
+
+The open hole from `c910a26`: a transcoded clip is not stamped as a proxy, so a reinstall leaves
+smaller copies nothing can recognise. The plan `ProxyMarker` was written around assumed the transcode
+would write an MP4 `©wrt` atom that `MediaMetadataRetriever.METADATA_KEY_WRITER` reads. **That plan
+cannot work, and a different one can — both settled by a probe on the Moto G (Android 16, Media3
+1.9), `VideoMarkerProbeTest`.**
+
+- **Media3's muxer cannot emit `©wrt`.** Its metadata is orientation, location, capture-FPS,
+  timestamp, XMP, and custom key/value (`MdtaMetadataEntry`, the `mdta` box). No iTunes writer atom.
+  So the contract as written — write `©wrt`, read `METADATA_KEY_WRITER` — is unbuildable from both
+  ends: the write side can't produce the atom, and `MediaMetadataRetriever` can't read the `mdta`
+  store the muxer *can* write. The one field both sides share is location, unusable without clobbering
+  GPS.
+- **The `mdta` route works.** Writing `MdtaMetadataEntry("com.gallery.sync.proxy", …,
+  TYPE_INDICATOR_STRING)` through `InAppMp4Muxer.Factory`'s `MetadataProvider` hook — wired via
+  `Transformer.Builder.setMuxerFactory` — put the key and value into the muxed output. Read back by a
+  ~40-line `moov → ilst → data` byte walk (no `media3-exoplayer`), the value came out exactly:
+  `GallerySync proxy/video-transcoded`. The probe's summary: `optionA_write=true optionA_read=true`.
+- **The current reader confirms it must change.** On the same file `ProxyMarker.isProxy` returned
+  false and `METADATA_KEY_WRITER` was null — an `mdta` marker is invisible to today's read path.
+- **The `©wrt`-injection alternative is not cheap.** Media3 writes `moov` **before** `mdat`
+  (`[ftyp, moov, free, mdat]`), so inserting a `udta/©wrt` into `moov` would shift `mdat` and force a
+  rewrite of every chunk offset. That kills the keep-the-reader-as-is option; the `mdta` route is the
+  one to build.
+
+**So Option A is confirmed:** write the marker as an `mdta` key via the muxer hook, and replace
+`ProxyMarker.videoStamp`'s `MediaMetadataRetriever` read with the small box parser. The shared key
+string must live as a constant in `ProxyMarker` so write and read cannot drift.
+
+**Confirmed on two vendors.** Moto G 2026 and Galaxy Z Fold 4 (SM-F936U) gave byte-for-byte the same
+verdict — write, read, and the `[ftyp, moov, free, mdat]` order all identical — so this is Media3's
+behaviour, not one skin's. `media3-container` was added for `MdtaMetadataEntry`, provisional like the
+rest of media3 here.
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have
