@@ -2632,9 +2632,20 @@ of 1080p costs about ten seconds, against fifteen seconds for thirty-one seconds
 `/sdcard/Download/transcode-samples/` to be watched, because whether 8.7 Mbps is distinguishable from
 30 on a phone screen is the entire decision and only eyes can make it.
 
-*How far it generalises.* 30 Mbps is a high source bitrate. A phone recording 1080p at a more typical
-17 Mbps has less fat to trim and would not save 71%. The shape of the curve should hold; the numbers
-on it are this clip's.
+*How far it generalises.* Two reasons to hold the 71% loosely.
+
+30 Mbps is a high source bitrate; a phone recording 1080p at a more typical 17 Mbps has less fat to
+trim.
+
+And **the clip is bad content for this test**, which Ian spotted straight away: a sped-up fireworks
+display, shot at night, very dark. Compression is content-dependent, and darkness is the easy case —
+large near-black areas cost almost nothing to encode, so the saving is probably flattered. The
+time-lapse cuts the other way, since every frame differs sharply from the last and that is expensive,
+but "the two effects partly cancel" is not a measurement.
+
+**To be re-run on ordinary footage** — daylight, texture, faces or foliage, handheld motion, normal
+speed. The shape of the curve should hold, since it comes from bitrate rather than scene content; the
+numbers on it are this clip's and should not be quoted as the feature's.
 
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
