@@ -70,8 +70,6 @@ Verified on a Galaxy Z Fold 4 (Android 16), 17–19 August 2026.
   SAF entry in the verification log below. Delete and the truncating write are still untested, so
   the MediaStore facts above remain what the app relies on today.
 
-- **A trash request is not a guarantee of recoverability.** See the deletion rule in CLAUDE.md.
-
 - **Therefore: storage can be reduced, never eliminated.** Any plan that assumes zero local storage
   while remaining visible in the gallery is impossible, not merely hard.
 
@@ -2785,49 +2783,6 @@ Written down now so the rewrite starts from an inventory rather than a reading o
 it by describing a mechanism rather than an outcome, or by describing yesterday's mechanism. The copy
 that has survived — the Archive confirmation, Gate 2's numbers, "N verified in OneDrive" — says what
 the user gets and where their files are. The copy that keeps breaking explains how Android works.
-
-### 29 Aug 2026 — Android 10, and a mode the phone can never perform
-
-**LG L322DL, Android 10, API 29** — a third device, and the first below the API 30 floor where
-`MediaStore.createTrashRequest` exists. Ian unlocked developer options and handed the rig over; the
-test photos below are four generated 4032x3024 JPEGs pushed into `DCIM/TestAlbum`.
-
-**Most of the app is fine at 29.** Installs, launches in 461 ms, ContentProvider registers, MSAL
-sign-in completes, the scan finds the album, the destination defaults sensibly to `LG/Gallery`, and
-the new per-album cloud line reads **"0 of 4 verified in OneDrive"** correctly. The empty-scan guards
-also fired for real on the empty phone — *"not marking missing files: the scan returned nothing at
-all"* — which is the protection against reading an empty device as a mass deletion, never previously
-exercised.
-
-**Optimising degrades correctly.** Settings shows the explanation and then *"Optimising photos needs
-Android 11 or newer."* No control is offered. That is the right shape.
-
-**Archive does not.** `LocalCopyRemover.isSupported()` is false on this device, and the Archive tab
-says so plainly — *"This version of Android has no media trash, so removing local copies is not
-offered here."* But nothing upstream checks it:
-
-1. The per-album mode dropdown **offers Archive**, alongside Off, Backup and Sync.
-2. Choosing it raises the consent dialog, which promises *"Archived files will be moved to your
-   phone's Trash/Recycle Bin"* and *"Please empty your Trash/Recycle Bin to free up storage."*
-   **Neither can happen on this device.** There is no media trash to move them to.
-3. The mode is set and the user is taken to the Archive tab, which then reads
-   **"Files to Archive · 4"**, lists all four files, and immediately below says the removal is not
-   offered here. The figure and the explanation contradict each other on one card.
-
-**Nothing is at risk.** No removal is ever built, because `isSupported()` gates
-`createMoveToBackupRequest`. The defect is that the app asks for consent — and CLAUDE.md is explicit
-that this dialog *is* the consent — using a description of behaviour that cannot occur, and then
-lands the user on a screen arguing with itself.
-
-**Three places to fix, and the third is a design call.**
-
-- The mode dropdown should not offer Archive where it cannot be performed. There is precedent for the
-  gentler version: a disabled Sync already says why it is disabled (27 Aug).
-- The Archive hero should not report a count of files it cannot act on.
-- The consent dialog, if the mode is offered at all below API 30, must not promise a trash the device
-  does not have.
-
-Left in that state on the rig rather than reverted, so it can be seen rather than re-read.
 
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
