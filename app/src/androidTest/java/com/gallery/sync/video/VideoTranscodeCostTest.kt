@@ -70,15 +70,56 @@ class VideoTranscodeCostTest {
     @Test
     fun measureEightKDownscale() {
         val input = File("/sdcard/Download/8k-sample.mp4")
-        assumeTrue("no 8K sample on this device at ${input.path}", input.exists())
+        assumeTrue("no 8K sample at ${input.path}", input.exists())
+        report(transcode(input, shortSide = 1080, label = "8K->1080"))
+    }
 
-        val output = File(context.cacheDir, "8k-downscaled.mp4").also { it.delete() }
+    /**
+     * What downscaling buys on ordinary 1080p footage, which is what most phones actually shoot.
+     *
+     * Ian, 28 Aug 2026: *"maybe testing what a 1080p video looks like when it is transcoded down to
+     * 720, 540 or even 480p and how much room that would save."* The 8K number is spectacular and
+     * unrepresentative — most libraries are not 8K, and a phone that only shoots 1080p has far less
+     * obvious headroom.
+     *
+     * **1080 is in the sweep deliberately.** Re-encoding at the same resolution changes nothing about
+     * the picture's size and everything about its bitrate, and the sample here is ~30 Mbps. If most
+     * of the saving comes from the bitrate rather than the pixels, the honest feature is "re-encode"
+     * and not "downscale" — and it would cost far less quality than dropping to 480p.
+     *
+     * Outputs are left on the device so they can be watched. **Numbers cannot answer the half of the
+     * question that matters**, which is what 540p looks like on the phone in your hand.
+     */
+    @Test
+    fun measureTenEightyDownscaleSweep() {
+        val input = File("/sdcard/Download/1080p-sample.mp4")
+        assumeTrue("no 1080p sample at ${input.path}", input.exists())
+
+        listOf(1080, 720, 540, 480).forEach { shortSide ->
+            report(transcode(input, shortSide, label = "1080->$shortSide"))
+        }
+    }
+
+    private data class Result(
+        val label: String,
+        val inBytes: Long,
+        val outBytes: Long,
+        val elapsedMs: Long,
+        val footageMs: Long,
+        val output: File
+    )
+
+    private fun transcode(input: File, shortSide: Int, label: String): Result {
+        // Somewhere adb can reach without run-as, so the results can be watched rather than only
+        // counted.
+        val outDir = File("/sdcard/Download/transcode-samples").also { it.mkdirs() }
+        val output = File(outDir, "${input.nameWithoutExtension}-${shortSide}p.mp4").also { it.delete() }
 
         var result: ExportResult? = null
         var failure: ExportException? = null
         val done = CountDownLatch(1)
 
-        val elapsedMs = measureTimeMillis {
+        val elapsed = measureTimeMillis {
             InstrumentationRegistry.getInstrumentation().runOnMainSync {
                 val transformer = Transformer.Builder(context)
                     .setVideoMimeType(MimeTypes.VIDEO_H264)
@@ -99,20 +140,16 @@ class VideoTranscodeCostTest {
                     })
                     .build()
 
-                // Long edge to 1080. Presentation scales while preserving aspect, which matters for
-                // the portrait video phones actually produce.
                 val item = EditedMediaItem.Builder(MediaItem.fromUri(Uri.fromFile(input)))
-                    .setEffects(Effects(emptyList(), listOf(Presentation.createForShortSide(1080))))
+                    .setEffects(Effects(emptyList(), listOf(Presentation.createForShortSide(shortSide))))
                     .build()
 
                 // Tone-map to SDR rather than keeping HDR.
                 //
-                // The first run failed here, and the reason is worth keeping: Samsung's 8K is HEVC
-                // with a PQ transfer and HDR10+ metadata, and H.264 cannot carry HDR10 at all. The
-                // default HDR_MODE_KEEP_HDR against an H.264 target is a contradiction the pipeline
-                // reports as "Video frame processing error", which names the symptom and not the
-                // cause. Tone-mapping is also the right product choice: a downscaled clip is for
-                // watching, and SDR H.264 plays everywhere.
+                // Samsung's 8K is HEVC with a PQ transfer and HDR10+ metadata, and H.264 cannot carry
+                // HDR10 at all. The default HDR_MODE_KEEP_HDR against an H.264 target is a
+                // contradiction the pipeline reports as "Video frame processing error", naming the
+                // symptom and not the cause. Harmless for SDR input, required for HDR.
                 val composition = Composition.Builder(
                     ImmutableList.of(EditedMediaItemSequence.Builder(item).build())
                 ).setHdrMode(Composition.HDR_MODE_TONE_MAP_HDR_TO_SDR_USING_OPEN_GL).build()
@@ -120,29 +157,26 @@ class VideoTranscodeCostTest {
                 transformer.start(composition, output.absolutePath)
             }
 
-            // Generous: this is a measurement, and an 8K transcode being slow is the finding rather
-            // than a reason to give up on it.
-            check(done.await(30, TimeUnit.MINUTES)) { "transcode did not finish within 30 minutes" }
+            check(done.await(30, TimeUnit.MINUTES)) { "$label did not finish within 30 minutes" }
         }
 
-        val inMb = input.length() / 1_000_000.0
-        val outMb = output.length() / 1_000_000.0
+        failure?.let { throw AssertionError("$label failed: ${it.errorCodeName} — ${it.message}", it) }
 
+        return Result(label, input.length(), output.length(), elapsed, result?.durationMs ?: 0, output)
+    }
+
+    private fun report(r: Result) {
+        val inMb = r.inBytes / 1_000_000.0
+        val outMb = r.outBytes / 1_000_000.0
         Log.i(
             TAG,
-            failure?.let { "TRANSCODE FAILED after ${elapsedMs}ms: ${it.errorCodeName} — ${it.message}" }
-                ?: buildString {
-                    append("TRANSCODE OK: ")
-                    append("${"%.1f".format(inMb)} MB in, ${"%.1f".format(outMb)} MB out ")
-                    append("(${"%.1f".format(inMb / outMb.coerceAtLeast(0.001))}x smaller), ")
-                    append("${elapsedMs}ms elapsed, ")
-                    append("${"%.2f".format(elapsedMs / 1000.0)}s for ")
-                    append("${result?.durationMs ?: -1}ms of footage, ")
-                    append("ratio ${"%.2f".format(elapsedMs.toDouble() / (result?.durationMs ?: 1))}x realtime")
-                }
+            "RESULT ${r.label}: ${"%.1f".format(inMb)} MB -> ${"%.1f".format(outMb)} MB " +
+                "(${"%.1f".format(inMb / outMb.coerceAtLeast(0.001))}x smaller, " +
+                "${"%.0f".format(100 - 100 * outMb / inMb)}% saved), " +
+                "${r.elapsedMs}ms for ${r.footageMs}ms " +
+                "(${"%.2f".format(r.elapsedMs.toDouble() / r.footageMs.coerceAtLeast(1))}x realtime) " +
+                "-> ${r.output.absolutePath}"
         )
-
-        failure?.let { throw AssertionError("transcode failed: ${it.errorCodeName} — ${it.message}", it) }
     }
 
     private companion object {

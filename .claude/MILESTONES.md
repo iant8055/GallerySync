@@ -2597,6 +2597,45 @@ guard is cheap, and not the justification the feature rests on.
 - **Where the real ceiling is on the devices that can do it.** The Fold managed 8K; nothing has
   established what a mid-range phone that *can* decode 4K costs to transcode it.
 
+### 28 Aug 2026 — on 1080p footage the saving is bitrate, not pixels
+
+Ian, after the 8K number: *"maybe testing what a 1080p video looks like when it is transcoded down to
+720, 540 or even 480p and how much room that would save."* The right question, because 8K is
+spectacular and unrepresentative — most libraries are 1080p, and the Moto records nothing else.
+
+**Fold 4, one 59.8 s clip at 1920×1080, 221.6 MB — about 30 Mbps:**
+
+| Target | Out | Saved | Elapsed |
+|---|---|---|---|
+| **1080p, re-encode only** | **64.8 MB** | **71%** | 11.2 s |
+| 720p | 31.0 MB | 86% | 9.3 s |
+| 540p | 18.1 MB | 92% | 8.7 s |
+| 480p | 13.1 MB | 94% | 8.3 s |
+
+**Re-encoding at the same resolution saves 71% without losing a pixel.** Everything below that is
+diminishing: 720p adds 15 points, 540p adds 6, 480p adds 2 — so dropping to 480p buys 23 further
+points at the cost of three-quarters of the linear resolution.
+
+**This is a different answer from the photo proxies, and worth not assuming otherwise.** A photo is
+shrunk by throwing away pixels; this clip is shrunk by throwing away bitrate. Samsung records at
+~30 Mbps and Media3 re-encoded at ~8.7. The pixels were never where the space was.
+
+**So the honest feature for 1080p footage may be "re-encode", not "downscale"** — which would keep
+full resolution, sidestep most of the quality argument, and make the setting easier to explain.
+
+**Speed is a non-issue here.** 0.14–0.19× realtime, roughly six times faster than playback: a minute
+of 1080p costs about ten seconds, against fifteen seconds for thirty-one seconds of 8K.
+
+**Two things this does not settle.**
+
+*What it looks like.* Numbers cannot answer it. The four outputs are left on the Fold at
+`/sdcard/Download/transcode-samples/` to be watched, because whether 8.7 Mbps is distinguishable from
+30 on a phone screen is the entire decision and only eyes can make it.
+
+*How far it generalises.* 30 Mbps is a high source bitrate. A phone recording 1080p at a more typical
+17 Mbps has less fat to trim and would not save 71%. The shape of the curve should hold; the numbers
+on it are this clip's.
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have
