@@ -178,9 +178,24 @@ problem, and it must survive every future change.
   people *watch* rather than edit, a downscaled clip is fine, and retrieval covers the rare edit —
   exactly as for photos. Needs Media3 Transformer and a transcode cost measured on real 8K footage
   before committing.
-- **"Old" is a user setting, decided by Ian 19 Aug 2026.** **Immediately · 1 week · 1 month ·
-  1 year**, defaulting to 1 year — the same four values the Archive age uses, so the app has one
-  vocabulary of ages. "Old" is not a fact about anyone's footage: client work gets edited for
+- **"Old" is a user setting, decided by Ian 19 Aug 2026 and rescaled 28 Aug.** Now **Straight away ·
+  1 hour · 12 hours · 1 day · 1 week**, shared by photos and video so the app still has one
+  vocabulary of ages. The original values were Immediately / 1 week / 1 month / 1 year defaulting to
+  a year.
+
+  **The rescale weakens "recent video is never touched", knowingly.** Under a one-hour age a clip
+  shot this morning can be reduced to 480p. Two measurements make that defensible: the founding
+  failure was *absence* rather than quality — the clip had been moved off the phone, where optimising
+  leaves it in the gallery playing normally — and 480p proved indistinguishable from the original on
+  the Fold's inner display. A wait measured in months was protecting against a difference nobody
+  could see. What survives is the edit case, which is what the age gate is now for.
+
+  **The age is asked of each file, not of the setting.** "1 day" means each file becomes eligible a
+  day after it was last modified — so within a Sync album, everything old qualifies at once and the
+  gate only ever holds back the recent end. Ian's correction, 28 Aug: this is scoped to Sync albums,
+  and an earlier note here saying "the entire back catalogue" was wrong. Worth remembering that
+  Gate 2's *"Back up and free space"* sets **every** album to Sync in one tap, so the whole-library
+  case is reachable by someone who has not yet met this setting. "Old" is not a fact about anyone's footage: client work gets edited for
   months, family video never gets opened again. **It gates downscaling only and never uploading** —
   a clip is uploaded immediately whatever its age, because a threshold that held new video out of
   OneDrive would rebuild the founding failure while wearing the name of the fix. Measured against

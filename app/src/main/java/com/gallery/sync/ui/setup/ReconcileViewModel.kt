@@ -14,6 +14,7 @@ import com.gallery.sync.domain.backup.LibraryChoice
 import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.domain.backup.CloudDeletionPolicy
 import com.gallery.sync.domain.backup.FirstBackupWindow
+import com.gallery.sync.domain.backup.OptimiseMode
 import com.gallery.sync.domain.backup.ReconcileWithCloud
 import com.gallery.sync.domain.backup.RemoteRoots
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -183,7 +184,8 @@ class ReconcileViewModel @Inject constructor(
                     settingsLoaded = true,
                     allowMeteredNetwork = prefs.allowMeteredNetwork,
                     defaultAlbumMode = prefs.defaultAlbumMode,
-                    isAutoOptimiseEnabled = prefs.isAutoOptimiseEnabled,
+                    isAutoOptimiseEnabled = prefs.isOptimiseEnabled &&
+                        prefs.photoOptimiseMode == OptimiseMode.Auto,
                     cloudDeletionPolicy = prefs.cloudDeletionPolicy,
                     // Recomputed whenever a setting changes, so moving the start time updates the
                     // "waiting until" line immediately rather than at the next run.
@@ -219,8 +221,18 @@ class ReconcileViewModel @Inject constructor(
         viewModelScope.launch { settings.setDefaultAlbumMode(mode) }
     }
 
+    /**
+     * The old single photo switch, expressed through the two settings that replaced it.
+     *
+     * Kept so existing callers keep working while the new Settings section is built. It sets the
+     * master switch and puts photos in Auto, which is what this control used to mean - "optimise
+     * photos without asking me each time".
+     */
     fun setAutoOptimiseEnabled(enabled: Boolean) {
-        viewModelScope.launch { settings.setAutoOptimiseEnabled(enabled) }
+        viewModelScope.launch {
+            settings.setOptimiseEnabled(enabled)
+            if (enabled) settings.setPhotoOptimiseMode(OptimiseMode.Auto)
+        }
     }
 
     fun setCloudDeletionPolicy(policy: CloudDeletionPolicy) {

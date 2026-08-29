@@ -51,6 +51,26 @@
     <string name="video_quality_low">Low</string>
     <string name="video_quality_low_detail">Best quality — 1080p kept, saves about %1$d%%</string>
 
+    <!--
+        The age gate. Ian, 19 Aug 2026: four values, shared with the Archive age so the app has one
+        vocabulary rather than two dialects for the same question.
+
+        "Straight away" rather than "Immediately" because it sits beside a warning, and the warning
+        is the point: this value reaches a clip shot this morning, which is in tension with "recent
+        video is never touched". MILESTONES flags that rather than resolving it, so the UI must not
+        quietly smooth it over.
+
+        Says "on this phone" throughout. The age gates the local copy only - a clip is uploaded the
+        moment it qualifies whatever its age.
+    -->
+    <string name="settings_video_age">Optimise video older than</string>
+    <string name="settings_video_age_detail">Only affects the copy on this phone. Video is backed up to OneDrive straight away whatever this is set to.</string>
+    <string name="media_age_immediately">Straight away</string>
+    <string name="media_age_immediately_warning">Reaches clips shot today. They stay in your gallery and still play, but editing one starts from the smaller copy until you fetch the original back.</string>
+    <string name="media_age_one_week">1 week</string>
+    <string name="media_age_one_month">1 month</string>
+    <string name="media_age_one_year">1 year</string>
+
     <string name="settings_automatic">Automatic sync</string>
     <string name="settings_optimise">Optimise photos</string>
     <string name="settings_auto_optimise">Optimise automatically</string>

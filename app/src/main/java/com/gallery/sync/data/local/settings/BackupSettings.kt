@@ -11,6 +11,8 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.gallery.sync.data.local.entity.AlbumMode
+import com.gallery.sync.domain.backup.MediaAge
+import com.gallery.sync.domain.backup.OptimiseMode
 import com.gallery.sync.domain.backup.VideoQuality
 import com.gallery.sync.domain.backup.CloudDeletionGrace
 import com.gallery.sync.domain.backup.CloudDeletionPolicy
@@ -29,7 +31,24 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 data class BackupPreferences(
     val isAutomaticEnabled: Boolean = true,
     val allowMeteredNetwork: Boolean = false,
-    val isAutoOptimiseEnabled: Boolean = false,
+    /**
+     * The master switch: may this app make smaller local copies at all?
+     *
+     * Ian's first question in the Settings section, 28 Aug 2026 - *"Do you want Gallery Sync to
+     * Optimize your photos and video to save space"*. Off until asked, because it is the only
+     * setting here that changes files on the phone.
+     *
+     * Replaces `isAutoOptimiseEnabled`, which was photo-only and conflated two questions: whether to
+     * optimise at all, and whether to do it without asking. Those are now this and
+     * [photoOptimiseMode] / [videoOptimiseMode].
+     */
+    val isOptimiseEnabled: Boolean = false,
+    /** Whether photos are optimised on their own, or on a tap. */
+    val photoOptimiseMode: OptimiseMode = OptimiseMode.DEFAULT,
+    /** How old a photo must be before it may be optimised. Per file - see [MediaAge]. */
+    val photoOptimiseAge: MediaAge = MediaAge.DEFAULT,
+    /** Whether video is optimised on its own, or on a tap. */
+    val videoOptimiseMode: OptimiseMode = OptimiseMode.DEFAULT,
     val defaultAlbumMode: AlbumMode = AlbumMode.DEFAULT,
     /**
      * Folder in OneDrive that **new** uploads go into.
@@ -143,7 +162,16 @@ data class BackupPreferences(
      * would suggest. Ian compared all four sweep outputs on the Fold's inner display and could not
      * tell them apart.
      */
-    val videoQuality: VideoQuality = VideoQuality.DEFAULT
+    val videoQuality: VideoQuality = VideoQuality.DEFAULT,
+    /**
+     * How old a clip must be before it may be optimised. See [MediaAge].
+     *
+     * Defaults to a year, the cautious end. Gates the local optimise and **never** the upload - a
+     * clip is sent to OneDrive the moment it qualifies whatever its age, because a threshold that
+     * held new video out of the cloud would rebuild the founding failure while wearing the name of
+     * the fix.
+     */
+    val videoOptimiseAge: MediaAge = MediaAge.DEFAULT
 )
 
 /**
@@ -166,7 +194,10 @@ class BackupSettings @Inject constructor(
         BackupPreferences(
             isAutomaticEnabled = stored[KEY_AUTOMATIC] ?: true,
             allowMeteredNetwork = stored[KEY_ALLOW_METERED] ?: false,
-            isAutoOptimiseEnabled = stored[KEY_AUTO_OPTIMISE] ?: false,
+            isOptimiseEnabled = stored[KEY_OPTIMISE_ENABLED] ?: false,
+            photoOptimiseMode = OptimiseMode.fromNameOrDefault(stored[KEY_PHOTO_OPTIMISE_MODE]),
+            photoOptimiseAge = MediaAge.fromNameOrDefault(stored[KEY_PHOTO_OPTIMISE_AGE]),
+            videoOptimiseMode = OptimiseMode.fromNameOrDefault(stored[KEY_VIDEO_OPTIMISE_MODE]),
             defaultAlbumMode = stored[KEY_DEFAULT_ALBUM_MODE]
                 ?.let { runCatching { AlbumMode.valueOf(it) }.getOrNull() }
                 ?.takeIf { it in AlbumMode.canBeDefault }
@@ -197,7 +228,8 @@ class BackupSettings @Inject constructor(
             uploadInterruptedAtEpochMillis = stored[KEY_INTERRUPTED_AT] ?: 0L,
             runBaselineBytes = stored[KEY_RUN_BASELINE] ?: 0L,
             archiveDelayedUntilEpochMillis = stored[KEY_ARCHIVE_DELAYED_UNTIL] ?: 0L,
-            videoQuality = VideoQuality.fromNameOrDefault(stored[KEY_VIDEO_QUALITY])
+            videoQuality = VideoQuality.fromNameOrDefault(stored[KEY_VIDEO_QUALITY]),
+            videoOptimiseAge = MediaAge.fromNameOrDefault(stored[KEY_VIDEO_OPTIMISE_AGE])
         )
     }
 
@@ -237,9 +269,31 @@ class BackupSettings @Inject constructor(
         context.dataStore.edit { it[KEY_INTERRUPTED_AT] = millis }
     }
 
-    /** How hard to shrink video. See [VideoQuality]. */
+    /** How hard to optimise video. See [VideoQuality]. */
     suspend fun setVideoQuality(quality: VideoQuality) {
         context.dataStore.edit { it[KEY_VIDEO_QUALITY] = quality.name }
+    }
+
+    /** How old a clip must be before it may be optimised. See [MediaAge]. */
+    suspend fun setVideoOptimiseAge(age: MediaAge) {
+        context.dataStore.edit { it[KEY_VIDEO_OPTIMISE_AGE] = age.name }
+    }
+
+    /** The master switch for making smaller local copies at all. */
+    suspend fun setOptimiseEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[KEY_OPTIMISE_ENABLED] = enabled }
+    }
+
+    suspend fun setPhotoOptimiseMode(mode: OptimiseMode) {
+        context.dataStore.edit { it[KEY_PHOTO_OPTIMISE_MODE] = mode.name }
+    }
+
+    suspend fun setPhotoOptimiseAge(age: MediaAge) {
+        context.dataStore.edit { it[KEY_PHOTO_OPTIMISE_AGE] = age.name }
+    }
+
+    suspend fun setVideoOptimiseMode(mode: OptimiseMode) {
+        context.dataStore.edit { it[KEY_VIDEO_OPTIMISE_MODE] = mode.name }
     }
 
     /**
@@ -273,18 +327,6 @@ class BackupSettings @Inject constructor(
 
     suspend fun setAllowMeteredNetwork(allowed: Boolean) {
         context.dataStore.edit { it[KEY_ALLOW_METERED] = allowed }
-    }
-
-    /**
-     * Whether photos may be optimised without being asked each time.
-     *
-     * Off by default, like the others. Turning it on cannot make optimising fully unattended —
-     * Android requires a confirmation dialog for every batch, and that dialog can only be raised
-     * from an Activity. What it changes is that the app asks when there is something to do, rather
-     * than waiting to be found.
-     */
-    suspend fun setAutoOptimiseEnabled(enabled: Boolean) {
-        context.dataStore.edit { it[KEY_AUTO_OPTIMISE] = enabled }
     }
 
     suspend fun setDefaultAlbumMode(mode: AlbumMode) {
@@ -344,7 +386,13 @@ class BackupSettings @Inject constructor(
     private companion object {
         val KEY_AUTOMATIC = booleanPreferencesKey("automatic_backup_enabled")
         val KEY_ALLOW_METERED = booleanPreferencesKey("allow_metered_network")
-        val KEY_AUTO_OPTIMISE = booleanPreferencesKey("auto_optimise_enabled")
+        // New key rather than reusing auto_optimise_enabled. That one meant "optimise photos
+        // without asking", and this means "optimise at all" - a stored true would silently answer a
+        // broader question than the user was asked, and now covers video as well.
+        val KEY_OPTIMISE_ENABLED = booleanPreferencesKey("optimise_enabled")
+        val KEY_PHOTO_OPTIMISE_MODE = stringPreferencesKey("photo_optimise_mode")
+        val KEY_PHOTO_OPTIMISE_AGE = stringPreferencesKey("photo_optimise_age")
+        val KEY_VIDEO_OPTIMISE_MODE = stringPreferencesKey("video_optimise_mode")
         val KEY_DEFAULT_ALBUM_MODE = stringPreferencesKey("default_album_mode")
         val KEY_DESTINATION_ROOT = stringPreferencesKey("destination_root")
         val KEY_FIRST_BACKUP_HOUR = intPreferencesKey("first_backup_start_hour")
@@ -360,5 +408,6 @@ class BackupSettings @Inject constructor(
         val KEY_RUN_BASELINE = longPreferencesKey("run_baseline_bytes")
         val KEY_ARCHIVE_DELAYED_UNTIL = longPreferencesKey("archive_delayed_until")
         val KEY_VIDEO_QUALITY = stringPreferencesKey("video_quality")
+        val KEY_VIDEO_OPTIMISE_AGE = stringPreferencesKey("video_optimise_age")
     }
 }

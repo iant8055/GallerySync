@@ -26,6 +26,7 @@ import com.gallery.sync.domain.backup.AlbumCloudClaim
 import com.gallery.sync.domain.backup.BackupEngine
 import com.gallery.sync.domain.backup.CloudConfirmation
 import com.gallery.sync.domain.backup.ReconcileWithCloud
+import com.gallery.sync.domain.backup.OptimiseMode
 import com.gallery.sync.domain.backup.StopReason
 import com.gallery.sync.util.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -427,7 +428,8 @@ class BackupViewModel @Inject constructor(
             settings.preferences.collect { prefs ->
                 _state.value = _state.value.copy(
                     isAutomaticEnabled = prefs.isAutomaticEnabled,
-                    isAutoOptimiseEnabled = prefs.isAutoOptimiseEnabled,
+                    isAutoOptimiseEnabled = prefs.isOptimiseEnabled &&
+                        prefs.photoOptimiseMode == OptimiseMode.Auto,
                     allowMeteredNetwork = prefs.allowMeteredNetwork,
                     showEmptyCloudFolders = prefs.showEmptyCloudFolders,
                     isPaused = prefs.isPaused,
@@ -718,8 +720,18 @@ class BackupViewModel @Inject constructor(
         viewModelScope.launch { settings.setShowEmptyCloudFolders(show) }
     }
 
+    /**
+     * The old single photo switch, expressed through the two settings that replaced it.
+     *
+     * Kept so existing callers keep working while the new Settings section is built. It sets the
+     * master switch and puts photos in Auto, which is what this control used to mean - "optimise
+     * photos without asking me each time".
+     */
     fun setAutoOptimiseEnabled(enabled: Boolean) {
-        viewModelScope.launch { settings.setAutoOptimiseEnabled(enabled) }
+        viewModelScope.launch {
+            settings.setOptimiseEnabled(enabled)
+            if (enabled) settings.setPhotoOptimiseMode(OptimiseMode.Auto)
+        }
     }
 
     /**
