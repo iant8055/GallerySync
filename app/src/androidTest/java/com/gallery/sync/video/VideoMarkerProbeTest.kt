@@ -19,7 +19,11 @@ import androidx.media3.transformer.Transformer
 import androidx.test.platform.app.InstrumentationRegistry
 import com.gallery.sync.data.local.media.ProxyKind
 import com.gallery.sync.data.local.media.ProxyMarker
+import com.gallery.sync.data.local.media.TranscodeResult
+import com.gallery.sync.data.local.media.VideoTranscoder
 import com.google.common.collect.ImmutableList
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Assume.assumeTrue
 import org.junit.Test
 import java.io.File
@@ -28,25 +32,24 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 /**
- * Does Option A actually work? Settles the video proxy-marker question on hardware before any
- * production code is written for it.
+ * Guards the video proxy marker end to end, on a real device.
  *
- * The plan the commit left open assumed the transcode would write an MP4 `©wrt` atom that
- * [MediaMetadataRetriever.METADATA_KEY_WRITER] reads. Media3's muxer cannot emit `©wrt`; it can emit
- * a custom `mdta` key/value ([MdtaMetadataEntry]). This probe writes the marker as an mdta entry via
- * the muxer's [InAppMp4Muxer.MetadataProvider] hook, then checks three things and logs each:
+ * The mechanism it rests on was settled here on the Fold 4 and Moto G, 29 Aug 2026: Media3's muxer
+ * cannot emit an MP4 `©wrt` atom, so the marker is written as a custom `mdta` key/value
+ * ([MdtaMetadataEntry]) through the muxer's [InAppMp4Muxer.MetadataProvider] hook, and read back by
+ * [ProxyMarker] walking the `moov` box — no `MediaMetadataRetriever`, which cannot see an `mdta` key,
+ * and no `media3-exoplayer`. `moov` sits before `mdat`, so the alternative of appending a `©wrt` box
+ * afterward would have meant rewriting every chunk offset; it was rejected.
  *
- *  - **R4** — the *current* [ProxyMarker.isProxy] (which reads `©wrt`) still returns false, and MMR's
- *    WRITER key is null. Confirms the read side has to change: an mdta marker is invisible to it.
- *  - **R2/read** — a small, dependency-free `moov/meta/keys+ilst` walk finds the key and value.
- *    Confirms Option A's read side needs no `media3-exoplayer`, just a parser.
- *  - **R5** — the top-level box order (moov before or after mdat), which decides whether the
- *    rejected Option B was even cheap.
+ * Two tests: [transcoderStampsTheClipItProduces] drives the shipping [VideoTranscoder] and confirms
+ * [ProxyMarker] then recognises its output; [mdtaMarkerIsMuxedAndReadWithoutMmr] muxes the marker
+ * directly to keep the mechanism findings visible — the box order, and that the retired
+ * `MediaMetadataRetriever` path still cannot see the marker.
  *
- * Nothing is asserted that pins a device; the transcode failing is the only hard failure. Push the
- * sample first, then run just this class:
+ * The sample rides in the test APK's assets, and everything stays in the app cache dir, so no storage
+ * permission is in play — scoped storage otherwise denies Media3's FileDataSource a raw `/sdcard`
+ * path. Run just this class:
  * ```
- * adb -s <serial> push marker-probe-input.mp4 /sdcard/Download/marker-probe-input.mp4
  * adb -s <serial> shell am instrument -w -e class \
  *   com.gallery.sync.video.VideoMarkerProbeTest \
  *   com.gallery.sync.test/androidx.test.runner.AndroidJUnitRunner
@@ -57,17 +60,39 @@ class VideoMarkerProbeTest {
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
     private val marker = ProxyMarker(context)
 
-    @Test
-    fun mdtaMarkerSurvivesTheMuxAndIsReadableWithoutMmr() {
-        // Everything stays in the app's cache dir, so no storage permission is in play — scoped
-        // storage otherwise denies Media3's FileDataSource a raw /sdcard path. The sample rides in
-        // the test APK's assets.
-        val input = File(context.cacheDir, "marker-probe-input.mp4")
+    private fun sampleInCache(): File = File(context.cacheDir, "marker-probe-input.mp4").also { dst ->
         InstrumentationRegistry.getInstrumentation().context.assets
             .open("marker-probe-input.mp4").use { asset ->
-                input.outputStream().use { asset.copyTo(it) }
+                dst.outputStream().use { asset.copyTo(it) }
             }
-        assumeTrue("sample asset did not materialise", input.exists() && input.length() > 0)
+    }
+
+    /** The shipping path: [VideoTranscoder] stamps as it muxes, [ProxyMarker] recognises the result. */
+    @Test
+    fun transcoderStampsTheClipItProduces() = kotlinx.coroutines.runBlocking {
+        val input = sampleInCache()
+        assumeTrue("sample did not materialise", input.exists() && input.length() > 0)
+
+        val transcoder = VideoTranscoder(context, marker, kotlinx.coroutines.Dispatchers.IO)
+        val result = transcoder.transcode(Uri.fromFile(input), input.name)
+        Log.i(TAG, "transcode result = $result")
+
+        // The 720p sample downscales on every device here; a phone that somehow refuses it is not
+        // evidence of a marker regression.
+        assumeTrue("transcode did not produce a file: $result", result is TranscodeResult.Created)
+        val produced = (result as TranscodeResult.Created).file
+
+        val kind = marker.kindOf(Uri.fromFile(produced))
+        Log.i(TAG, "transcoder output ${produced.length()} bytes, kindOf = $kind")
+        assertTrue("a freshly transcoded clip must read back as a proxy", marker.isProxy(Uri.fromFile(produced)))
+        assertEquals("and specifically as a transcoded video", ProxyKind.VideoTranscoded, kind)
+    }
+
+    /** The mechanism, kept visible: marker muxed directly, box order and the retired MMR path logged. */
+    @Test
+    fun mdtaMarkerIsMuxedAndReadWithoutMmr() {
+        val input = sampleInCache()
+        assumeTrue("sample did not materialise", input.exists() && input.length() > 0)
 
         val expected = marker.videoStampValue(ProxyKind.VideoTranscoded)
         val output = File(context.cacheDir, "marker-probe-output.mp4").also { it.delete() }
@@ -77,8 +102,8 @@ class VideoMarkerProbeTest {
         assumeTrue("transcode produced nothing", output.exists() && output.length() > 0)
         Log.i(TAG, "OUTPUT ${output.length()} bytes at ${output.absolutePath}")
 
-        // R4 — the read side we ship today cannot see an mdta marker.
-        val proxyByCurrent = marker.isProxy(Uri.fromFile(output))
+        // The production reader now sees the mdta marker; MediaMetadataRetriever still cannot.
+        val detected = marker.isProxy(Uri.fromFile(output))
         val writerViaMmr = MediaMetadataRetriever().let { r ->
             try {
                 r.setDataSource(output.absolutePath)
@@ -87,37 +112,22 @@ class VideoMarkerProbeTest {
                 r.release()
             }
         }
-        Log.i(TAG, "R4 current ProxyMarker.isProxy = $proxyByCurrent (expect false)")
-        Log.i(TAG, "R4 MMR METADATA_KEY_WRITER = ${writerViaMmr ?: "<null>"} (expect <null>)")
+        Log.i(TAG, "ProxyMarker.isProxy = $detected (expect true)")
+        Log.i(TAG, "MMR METADATA_KEY_WRITER = ${writerViaMmr ?: "<null>"} (expect <null>, mdta is invisible to it)")
 
-        // R2 — a dependency-free walk of the box tree.
+        // The dependency-free walk, kept as corroboration of the shipping reader.
         val bytes = output.readBytes()
         val order = topLevelBoxTypes(bytes)
         val keyPresent = String(bytes, Charsets.ISO_8859_1).contains(MDTA_KEY)
         val recoveredValue = readMdtaStringValue(bytes)
 
-        Log.i(TAG, "R2 mdta key '$MDTA_KEY' present in file = $keyPresent")
-        Log.i(TAG, "R2 recovered mdta value = ${recoveredValue ?: "<none>"} (expect '$expected')")
-        Log.i(TAG, "R2 verdict = ${if (recoveredValue == expected) "MATCH" else "MISMATCH"}")
+        Log.i(TAG, "mdta key '$MDTA_KEY' present = $keyPresent, recovered value = ${recoveredValue ?: "<none>"}")
+        Log.i(TAG, "top-level box order = $order")
 
-        // R5 — moov relative to mdat decides Option B's cost.
-        Log.i(TAG, "R5 top-level box order = $order")
-        val moov = order.indexOf("moov")
-        val mdat = order.indexOf("mdat")
-        Log.i(
-            TAG,
-            "R5 verdict = " + when {
-                moov < 0 || mdat < 0 -> "INDETERMINATE (moov=$moov mdat=$mdat)"
-                moov > mdat -> "moov AFTER mdat — a ©wrt append would need no offset fixups"
-                else -> "moov BEFORE mdat — a ©wrt append would have to rewrite chunk offsets"
-            }
-        )
-
-        Log.i(
-            TAG,
-            "SUMMARY optionA_write=${keyPresent} optionA_read=${recoveredValue == expected} " +
-                "currentReadFails=${!proxyByCurrent && writerViaMmr == null}"
-        )
+        assertTrue("marker must survive the mux", keyPresent)
+        assertEquals("and read back exactly", expected, recoveredValue)
+        assertTrue("production reader must detect it", detected)
+        assertEquals("MMR must remain blind to the mdta marker", null, writerViaMmr)
     }
 
     private fun transcodeWithMarker(input: File, output: File, markerValue: String) {

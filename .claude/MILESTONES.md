@@ -2819,6 +2819,24 @@ verdict — write, read, and the `[ftyp, moov, free, mdat]` order all identical 
 behaviour, not one skin's. `media3-container` was added for `MdtaMetadataEntry`, provisional like the
 rest of media3 here.
 
+### 29 Aug 2026 — the video marker, built and verified end to end
+
+Option A is now the code. `VideoTranscoder` stamps the clip as it muxes — an `MdtaMetadataEntry` under
+`ProxyMarker.MDTA_KEY` (`com.gallery.sync.proxy`) added through `InAppMp4Muxer.Factory`'s metadata
+hook — and `ProxyMarker.videoStamp` reads it back by seeking to the `moov` box and scanning it, with
+no `MediaMetadataRetriever` and no `media3-exoplayer`. The shared key lives as one constant so writer
+and reader cannot drift.
+
+`VideoMarkerProbeTest` now runs the shipping path, not just the mechanism: it drives the real
+`VideoTranscoder` and asserts `ProxyMarker` then reads the output back as `VideoTranscoded`.
+**Verified on both devices, 29 Aug 2026** — Fold 4 (1.93 MB → 839 KB) and Moto G (→ 920 KB), each
+detected correctly.
+
+**One real bug fell out of building the test.** `ProxyMarker.isVideo` decided the MIME type only from
+`ContentResolver.getType`, which returns null for a `file://` uri — so a video handed in by file path
+was routed down the photo (EXIF) path and its marker was lost. It now falls back to the extension.
+Restore uses file uris, so this was not merely a test artefact.
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have

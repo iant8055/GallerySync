@@ -5,6 +5,7 @@ import android.media.MediaMetadataRetriever
 import android.net.Uri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MimeTypes
+import androidx.media3.container.MdtaMetadataEntry
 import androidx.media3.effect.Presentation
 import androidx.media3.transformer.Composition
 import androidx.media3.transformer.EditedMediaItem
@@ -12,6 +13,7 @@ import androidx.media3.transformer.EditedMediaItemSequence
 import androidx.media3.transformer.Effects
 import androidx.media3.transformer.ExportException
 import androidx.media3.transformer.ExportResult
+import androidx.media3.transformer.InAppMp4Muxer
 import androidx.media3.transformer.Transformer
 import com.gallery.sync.di.IoDispatcher
 import com.gallery.sync.domain.backup.VideoQuality
@@ -174,6 +176,21 @@ class VideoTranscoder @Inject constructor(
             suspendCancellableCoroutine { continuation ->
                 val transformer = Transformer.Builder(context)
                     .setVideoMimeType(MimeTypes.VIDEO_H264)
+                    // Stamp the clip as a proxy as the container is muxed — the only moment an MP4's
+                    // metadata can be set. Written as an mdta key so the reader needs no
+                    // MediaMetadataRetriever; see ProxyMarker and VideoMarkerProbeTest.
+                    .setMuxerFactory(
+                        InAppMp4Muxer.Factory { entries ->
+                            entries.add(
+                                MdtaMetadataEntry(
+                                    ProxyMarker.MDTA_KEY,
+                                    marker.videoStampValue(ProxyKind.VideoTranscoded)
+                                        .toByteArray(Charsets.UTF_8),
+                                    MdtaMetadataEntry.TYPE_INDICATOR_STRING
+                                )
+                            )
+                        }
+                    )
                     .addListener(object : Transformer.Listener {
                         override fun onCompleted(composition: Composition, result: ExportResult) {
                             if (continuation.isActive) {
