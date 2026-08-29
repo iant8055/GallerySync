@@ -2733,6 +2733,45 @@ but "the two effects partly cancel" is not a measurement.
 speed. The shape of the curve should hold, since it comes from bitrate rather than scene content; the
 numbers on it are this clip's and should not be quoted as the feature's.
 
+### 29 Aug 2026 — the wizard and Settings need a rewrite, and here is the inventory
+
+Ian, having watched the Gate 2 copy go through four revisions in one evening: *"both the Wizard and
+Settings will need a complete rewrite."* He is right, and the reason is not that the writing is bad.
+**The model changed underneath the copy.** Video optimising, a master switch, per-medium modes, an
+age vocabulary and a quality setting all arrived on 28 Aug; the screens still describe the app as it
+was that morning.
+
+Written down now so the rewrite starts from an inventory rather than a reading of every string.
+
+**Copy that is now false, not merely dated:**
+
+- `settings_auto_optimise_on` — *"Android still asks you to confirm each batch — it does not allow
+  this to happen unattended."* Untrue since 26 Aug, when the proxy write moved to the SAF tree grant.
+  `ProxyApplier` picks by `safWriter.covers(paths)`: unattended inside a granted tree, a tap outside
+  one. The string states the worse case as the only case.
+- `wizard_auto_optimise_body` — same claim, same problem, on the screen users actually meet.
+- Three strings still promise video is never touched: `proxy_videos_excluded`,
+  `library_free_space_detail`, and the video line in `settings_optimise_explainer`. All were true on
+  27 Aug.
+- `LibraryEstimate` counts photos only, so any byte figure it produces now understates by roughly
+  eight times. Gate 2 quotes no number at all rather than a wrong one, which is a stopgap.
+
+**Structural, rather than wrong:**
+
+- **Two spellings.** The wizard says *Optimize* — Ian's words, kept verbatim at his request — and
+  everything else says *Optimise*. One of them has to move.
+- **`settings_optimise` is photo-only** and predates the master switch. The new model is
+  `isOptimiseEnabled` plus per-medium mode, age and quality, and Settings has no home for any of it.
+- **`settings_auto_optimise_off`** describes a manual tap that the new `OptimiseMode.Manual`
+  supersedes.
+- The wizard's optimise panel asks a question — *ask me first, or tell me* — that the master switch
+  and mode now answer better.
+
+**The thing to hold on to while rewriting.** Every screen in this app that has caused trouble caused
+it by describing a mechanism rather than an outcome, or by describing yesterday's mechanism. The copy
+that has survived — the Archive confirmation, Gate 2's numbers, "N verified in OneDrive" — says what
+the user gets and where their files are. The copy that keeps breaking explains how Android works.
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have
