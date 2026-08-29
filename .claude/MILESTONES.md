@@ -248,6 +248,72 @@ Verified on hardware: sign-in completes and the real drive lists.
       first run. Only automatic runs are gated — "Sync now" is never held, because someone who asked
       has already decided this is a good moment. The gate lifts for good once the backlog clears.
 
+## Optimising: two independent areas — do not conflate them
+
+Stated by Ian, 29 Aug 2026, after an agent repeatedly welded these together. **They are separate. One
+does not set, read, or imply the other.** Written here exactly as specified so future runs build to
+this and not to a guess.
+
+### The invariant that binds all of it
+
+**Album modes (Off / Backup / Sync / Archive) are set ONLY by the user, per album.** Nothing else
+ever writes an album's mode — not the install wizard, not the optimise settings, not a worker. Every
+sentence below rests on this.
+
+### Area 1 — the initial-install choice (the four modes)
+
+- **Present ONLY at initial install.** It is a one-time choice, not a stored setting.
+- **Acts ONLY on the files currently on the device** at install time. A one-time bulk action over the
+  existing library.
+- **Has NO effect on Area 2** (the optimise settings tree) and **does NOT set album modes.**
+
+The four options, verbatim:
+
+1. Check cloud storage and back up everything that isn't already backed up.
+2. All of #1 — plus optimise **all** files on the phone, for **maximum** storage saving.
+3. All of #1 — but optimise **only newly backed-up files** (ones that were not already in cloud
+   storage), for **moderate** storage saving.
+4. Check cloud storage but do **not** back up any new files — no storage savings. The user will
+   manually select which albums to Backup/Sync afterward.
+
+- **If #2 OR #3 is chosen**, the user is then asked the optimisation **level: High / Medium / Low**,
+  mirroring the same three levels in Settings (High 480p · Medium 720p · Low 1080p). This level is
+  used only for the one-time bulk optimise and **does not persist into Settings.**
+
+This is the guided first run — see TASK-014.
+
+### Area 2 — the ongoing optimise settings (after install)
+
+- **One global settings tree**, establishing how photos and videos are optimised from install onward.
+  It is **not** a per-album setting.
+- **Applies ONLY to albums the user has set to Sync.** Backup never optimises. Archive never
+  optimises. Off does nothing. The candidate queries already enforce this (`videoOptimiseCandidates`
+  and the photo equivalent only pick files in Sync-mode albums).
+- **Does NOT set album modes**, and is **not** touched by the Area 1 install choice.
+
+The tree, exactly:
+
+```
+isOptimiseEnabled     master switch, off until asked
+  optimisePhotos      Y / N
+  photoOptimiseMode   Auto | Manual
+  photoOptimiseAge    straight away · 1hr · 12hr · 1 day · 1 week
+  optimiseVideo       Y / N
+  videoOptimiseMode   Auto | Manual
+  videoOptimiseAge    same five
+  videoQuality        High 480p · Medium 720p · Low 1080p
+```
+
+See TASK-012 for where this lives in the Settings screen.
+
+### Not yet specified — do not invent
+
+- Whether Area 1's bulk optimise covers photos as well as video, and how the video-shaped H/M/L level
+  applies to photos (photo proxies are a fixed size elsewhere in this doc). Not stated.
+- The exact mechanism by which #3 identifies "newly backed up, not already in cloud." Presumed to be
+  the files uploaded during this install's own backup pass, but not confirmed. Confirm with Ian before
+  building either.
+
 ## v0.3.0 — Space management
 The milestone that delivers the actual product: the phone stops filling up, and the existing gallery
 keeps working.
