@@ -2632,7 +2632,36 @@ of 1080p costs about ten seconds, against fifteen seconds for thirty-one seconds
 `/sdcard/Download/transcode-samples/` to be watched, because whether 8.7 Mbps is distinguishable from
 30 on a phone screen is the entire decision and only eyes can make it.
 
-*How far it generalises.* Two reasons to hold the 71% loosely.
+**Re-run on daylight footage, and the numbers moved a lot.** Ian picked a replacement — 1080×1920
+portrait, 18.0 s, 38.4 MB, **~17.1 Mbps**, which is an ordinary phone bitrate rather than the
+fireworks clip's 30.
+
+| Target | Out | Saved | Dark clip said |
+|---|---|---|---|
+| **1080p, re-encode only** | 20.2 MB | **47%** | 71% |
+| 720p | 10.3 MB | **73%** | 86% |
+| 540p | 6.3 MB | **84%** | 92% |
+| 480p | 4.8 MB | **88%** | 94% |
+
+**Every figure was flattered, worst at the top: 71% was really 47%.** Two causes compounding — the
+near-black frames were cheap to encode, and the source bitrate was nearly double. Content-dependence
+is not a footnote on this measurement, it is most of the variance.
+
+**The shape survives; the conclusion shifts.** Re-encoding alone still returns about half with no
+resolution loss, but it no longer dominates the way it appeared to. The 1080→720 step is now worth a
+real 26 points, where against the dark clip it looked like a marginal 15 on top of an already-huge
+saving. Below 720p the returns still collapse: 540p adds 11, 480p adds 4.
+
+**So there are two defensible settings, not four.** Re-encode at 1080p for about half, or 720p for
+about three-quarters. 540 and 480 spend a great deal of picture for very little space, and offering
+them mostly invites people to pick badly.
+
+Speed remains negligible — 0.11–0.19× realtime, an 18-second clip in 2–3.4 seconds.
+
+Outputs on the Fold at `/sdcard/Download/transcode-samples/`. **The comparison that matters is now
+1080p against 720p**, because that is the actual decision.
+
+*The dark-clip caveat, kept for the record.* Two reasons it was held loosely, both confirmed:
 
 30 Mbps is a high source bitrate; a phone recording 1080p at a more typical 17 Mbps has less fat to
 trim.
