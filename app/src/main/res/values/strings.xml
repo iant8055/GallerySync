@@ -592,9 +592,9 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
 
     <!-- Gate 2: what to do with the library already on the phone. -->
     <string name="library_title">What about the photos already on this phone?</string>
-    <string name="library_per_album">Check OneDrive only, choose albums later</string>
+    <string name="library_per_album">Check Cloud Storage but do not back up any new files - no storage savings. You will manually select which Albums to backup/Sync</string>
     <string name="library_per_album_detail">No space saved. You choose which albums to back up or sync yourself, on the Album Modes tab.</string>
-    <string name="library_back_up_all">Back up everything not already in OneDrive</string>
+    <string name="library_back_up_all">Check Cloud Storage and back up everything that isn\'t already backed up</string>
     <string name="library_back_up_all_detail">Uploads whatever OneDrive does not already have. Nothing on your phone changes and no space is freed.</string>
     <!--
         Ian's middle option, 28 Aug 2026: "we back them up first and leave an opt file behind."
@@ -604,9 +604,9 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
         outstanding, measured - so this option can touch two percent of a library while sounding
         substantial. Saying what it leaves alone is what stops the honest choice looking broken.
     -->
-    <string name="library_optimise_new">Back up, then optimise only the new — moderate saving</string>
+    <string name="library_optimise_new">All #1 - but only Optimize newly backed up files - for moderate storage saving</string>
     <string name="library_optimise_new_detail">%1$d of %2$d files are not backed up yet.</string>
-    <string name="library_free_space">Back up, then optimise everything — maximum saving</string>
+    <string name="library_free_space">All #1 - plus Optimize All files on phone for maximum storage saving</string>
     <!-- Photo-heavy library: the saving is worth leading with. -->
     <string name="library_free_space_detail">Photos are replaced by smaller copies that still open in your gallery. Frees about %1$s. Video is left untouched.</string>
     <!--

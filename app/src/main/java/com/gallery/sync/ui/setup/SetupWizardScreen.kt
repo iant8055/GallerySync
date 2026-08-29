@@ -365,9 +365,12 @@ private fun LibraryChoiceStep(
         // user has watched the app work, is the largest irreversible action the product can take,
         // chosen at the moment they know least about it. It stays a per-album decision with its own
         // confirmation.
-        LibraryChoice.entries.forEach { choice ->
+        // Numbered, because the wording back-references them: options 2 and 3 read "All #1 - plus
+        // ...". Ian wrote them that way and asked for them verbatim, and the references only mean
+        // anything if the numbers are on the screen.
+        LibraryChoice.entries.forEachIndexed { index, choice ->
             val selected = state.libraryChoice == choice
-            val label = stringResource(labelOf(choice))
+            val label = "${index + 1}. ${stringResource(labelOf(choice))}"
             if (selected) {
                 Button(onClick = { onSelect(choice) }, modifier = Modifier.fillMaxWidth()) {
                     Text(label)
