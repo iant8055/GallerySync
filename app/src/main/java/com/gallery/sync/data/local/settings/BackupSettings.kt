@@ -11,6 +11,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.gallery.sync.data.local.entity.AlbumMode
+import com.gallery.sync.domain.backup.VideoQuality
 import com.gallery.sync.domain.backup.CloudDeletionGrace
 import com.gallery.sync.domain.backup.CloudDeletionPolicy
 import com.gallery.sync.domain.backup.FirstBackupWindow
@@ -134,7 +135,15 @@ data class BackupPreferences(
      * exit warning anyway, and the snooze they had just set did nothing. A delay that does not
      * survive leaving is not a delay.
      */
-    val archiveDelayedUntilEpochMillis: Long = 0L
+    val archiveDelayedUntilEpochMillis: Long = 0L,
+    /**
+     * How hard to shrink video. See [com.gallery.sync.domain.backup.VideoQuality].
+     *
+     * Defaults to High - 480p - because that is what the evidence supports rather than what caution
+     * would suggest. Ian compared all four sweep outputs on the Fold's inner display and could not
+     * tell them apart.
+     */
+    val videoQuality: VideoQuality = VideoQuality.DEFAULT
 )
 
 /**
@@ -187,7 +196,8 @@ class BackupSettings @Inject constructor(
             isPaused = stored[KEY_PAUSED] ?: false,
             uploadInterruptedAtEpochMillis = stored[KEY_INTERRUPTED_AT] ?: 0L,
             runBaselineBytes = stored[KEY_RUN_BASELINE] ?: 0L,
-            archiveDelayedUntilEpochMillis = stored[KEY_ARCHIVE_DELAYED_UNTIL] ?: 0L
+            archiveDelayedUntilEpochMillis = stored[KEY_ARCHIVE_DELAYED_UNTIL] ?: 0L,
+            videoQuality = VideoQuality.fromNameOrDefault(stored[KEY_VIDEO_QUALITY])
         )
     }
 
@@ -225,6 +235,11 @@ class BackupSettings @Inject constructor(
     /** Stamps the moment a run was interrupted, so a later resume can judge the held session. */
     suspend fun setUploadInterruptedAt(millis: Long) {
         context.dataStore.edit { it[KEY_INTERRUPTED_AT] = millis }
+    }
+
+    /** How hard to shrink video. See [VideoQuality]. */
+    suspend fun setVideoQuality(quality: VideoQuality) {
+        context.dataStore.edit { it[KEY_VIDEO_QUALITY] = quality.name }
     }
 
     /**
@@ -344,5 +359,6 @@ class BackupSettings @Inject constructor(
         val KEY_INTERRUPTED_AT = longPreferencesKey("upload_interrupted_at")
         val KEY_RUN_BASELINE = longPreferencesKey("run_baseline_bytes")
         val KEY_ARCHIVE_DELAYED_UNTIL = longPreferencesKey("archive_delayed_until")
+        val KEY_VIDEO_QUALITY = stringPreferencesKey("video_quality")
     }
 }

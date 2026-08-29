@@ -19,6 +19,38 @@
     <string name="settings_show_empty_folders_on">Restore lists every folder in your backup folders, including ones with nothing in them.</string>
     <string name="settings_show_empty_folders_off">Restore lists only folders that have something in them to bring back.</string>
     <string name="settings_open_onedrive_detail">Restore covers the folders GallerySync backs up to. For everything else in your OneDrive, open OneDrive.</string>
+    <!--
+        Video optimising, added 28 Aug 2026, and both halves of the wording were Ian's.
+
+        "We'll have to be careful how or what we label this as" - because "High" alone means
+        saves-the-most and therefore lowest-quality, and a settings screen is where a word ends up
+        alone. What makes High/Medium/Low safe is that each option carries its outcome and its
+        saving, so none of them is ever a bare adjective.
+
+        Then: "it is the word shrink that needs our careful attention - how do we carefully relate
+        what we are actually doing to the video". Shrink failed twice over. It does not distinguish
+        file size from resolution, and it hints at something being cut - when shortening a clip is
+        the one thing this never does, and the reason TASK-013 rejects truncation outright.
+
+        "Optimise" because the app already does this exact operation to photos and calls it that.
+        One mechanism should not have two verbs, and the safety story is identical: a smaller copy
+        here, the full-quality original still in OneDrive. The detail line carries the honesty, the
+        same way settings_optimise_explainer does for photos.
+
+        The percentages are measured, not estimated - an 18-second daylight clip at 1080x1920,
+        ~17 Mbps, on the Fold 4. They come from VideoQuality.approximateSavingPercent so this screen
+        cannot drift from the code. They vary with content: a first sweep on a dark, sped-up clip
+        overstated every one of them by up to 24 points.
+    -->
+    <string name="settings_video_quality">Optimise video</string>
+    <string name="settings_video_quality_detail">Old video in Sync albums is replaced by a smaller copy on this phone. The full-quality original stays in OneDrive and can be fetched back whenever you want.</string>
+    <string name="video_quality_high">High</string>
+    <string name="video_quality_high_detail">Smallest files — 480p, saves about %1$d%%</string>
+    <string name="video_quality_medium">Medium</string>
+    <string name="video_quality_medium_detail">Balanced — 720p, saves about %1$d%%</string>
+    <string name="video_quality_low">Low</string>
+    <string name="video_quality_low_detail">Best quality — 1080p kept, saves about %1$d%%</string>
+
     <string name="settings_automatic">Automatic sync</string>
     <string name="settings_optimise">Optimise photos</string>
     <string name="settings_auto_optimise">Optimise automatically</string>
