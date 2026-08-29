@@ -2265,6 +2265,21 @@ re-uploads do not replace it — the folder listing went 10 names, then 11, agai
 attempt files a renamed sibling beside the bad item while the original name still resolves to zero. The
 name is occupied by something empty and nothing reclaims it.
 
+**The requeue is proven, 28 Aug 2026, on the case Ian built by hand.** He deleted `PauseTest` from
+OneDrive, set the album to Archive, and pressed Check these files. The ledger still held eight
+`UPLOADED` rows with item ids pointing at deleted objects, so `nextPending` could not see a single one
+of them — the exact condition that made the earlier run finish in 600 ms having uploaded nothing.
+
+```
+listed 'MotoG/Gallery/PauseTest': 8 files      <- was 0 before the run
+confirmStillInCloud: 8 confirmed, 0 no longer in OneDrive, 0 could not be checked
+validate: 8 confirmed, 0 could not be archived
+```
+
+1.07 GB of video re-uploaded and every file verified. Ian: *"all 8 files validated."* This is the
+behaviour he asked for at the outset — *"if a file isn't on OneDrive then it should be uploaded there
+as part of the Archiving process"* — working for the first time.
+
 **Open, and worth answering before anything else in Archive:**
 - How does an item reach OneDrive at zero bytes while the row records a matching size? The album is
   `PauseTest`, used for the 28 Aug pause/resume work, so an interrupted resumable session is the first
@@ -2351,6 +2366,89 @@ otherwise stack full drive walks on top of each other from a few tab switches; a
 **"Checking OneDrive…"** and disables while it runs, since a control that looks idle for a minute
 invites a second press. `refresh()` is deliberately left alone — several callers want only the device
 counts, and a rebuild after a mode change has no business walking OneDrive.
+
+### 28 Aug 2026 — the trash request is the platform's, not Samsung's
+
+**Moto G 2026, stock Android 16, Google Photos — the first trash request ever run on a non-Samsung
+handset.** `PauseTest`, eight videos, 1.07 GB, switched to Archive and taken all the way through.
+
+```
+archive: 8 files removed from this phone
+-rw-rw---- 163707204  .trashed-1790554145-20241020_124036.mp4
+-rw-rw---- 149944718  .trashed-1790554145-20250606_221541.mp4
+… all eight, renamed in place, byte sizes unchanged
+du -sh  ->  1.0G
+```
+
+Expiry `1790554145` decodes to **28 Sept 2026 — 31 days**, against the Fold 4's `1790483890` at
+27 Sept. MediaStore no longer lists them: a `content query` for `bucket_display_name='PauseTest'`
+returns nothing, which is the owner-scoping noted on 27 Aug and also why our own scan stops seeing the
+album.
+
+**What this settles.** CLAUDE.md carried the caveat *"a different handset or One UI version may still
+behave differently"* — reasonable while the only evidence came from one Samsung device. Two vendors,
+two Android skins, identical behaviour: rename in place, bytes retained, ~30-day expiry. **The trash
+request is the platform's behaviour and not Samsung's.** It is still not a promise the UI should make
+unconditionally, because the population is two devices, but the shape of the answer is no longer in
+doubt.
+
+**It also confirms the consent copy Ian wrote the same evening.** *"Archived files will be moved to
+your phone's Recycle Bin. Please empty your Recycle Bin to free up storage."* The second sentence is
+the one this measurement earns: 1.0 GB is still sitting in `DCIM/PauseTest` after the removal, and it
+comes back when the bin is emptied or the 31 days run out, never on the tap.
+
+**Confirmed by eye, minutes later.** Ian: *"checked Files — all 8 are in the Trash."* So on stock
+Android the trashed files are visible and recoverable through the **Files** app's Trash, not through
+Google Photos. That completes the chain on a second vendor: renamed on disk, bytes retained, listed
+in a user-facing trash, recoverable for 31 days.
+
+**One consequence for the copy.** The Archive confirmation says *"moved to your phone's Recycle
+Bin"* — which is Samsung's name for it. On this handset the place the user actually finds them is
+the Files app's **Trash**. Same mechanism, different label per vendor, and the sentence currently
+names one vendor's. Worth a vendor-neutral wording; flagged, not changed, because the copy is Ian's.
+
+### 28 Aug 2026 — Restore asks about folders, and the deletion guard is left alone
+
+Ian, after an archive of eight files left the Restore tab offering none of them: *"Restore should only
+offer files that are NOT on the phone."* Two decisions settled the shape.
+
+**A proxied file does not count as on the phone.** The 2048px copy is here; the full-quality original
+is not, so proxies stay listed. Restore keeps two populations and one verb.
+
+**A copy in a different album does not count either.** This is the case that started it: eight videos
+archived out of `PauseTest` while byte-identical copies sat in `BudgetVideo`. Ian's call is per folder
+— a copy in an unrelated album is not an answer to "get that album back".
+
+**The trap in that second decision, and why it did not get built the obvious way.** "Has this file
+left the phone?" is recorded in `localMissingSinceEpochMillis`, set by a **content** test that ignores
+folders — and that column is what `cloudDeletionCandidates` keys on. Making the marking stricter would
+have been a two-line change and would have quietly widened what is eligible for **deletion from
+OneDrive**: every file with a duplicate elsewhere would have become a deletion candidate after the
+grace period.
+
+So the column keeps the cautious, album-blind answer and Restore asks its own question, in
+`RestoreScope` + `BackupEngine.filesNotOnThePhone`, computed from a live scan on entry to the tab. The
+two readings now sit side by side with a comment each explaining why they differ. Being wrong in
+Restore costs a redundant download; being wrong in the other costs a cloud copy.
+
+**Scope stays "what this app uploaded"**, not everything in the drive — Ian's 27 Aug rule, and what
+keeps the tab from becoming the cloud file browser the design principle rules out.
+
+**No pulling files back out of the trash.** Considered and rejected by Ian: *"always pull from the
+cloud despite the cost."* The shortcut was real — an archived file inside its 30 days could be
+untrashed with `createTrashRequest(..., false)` in a second instead of re-downloading a gigabyte — but
+it depends on state the app does not control. The user can empty the bin at any moment, the window
+expires, and `owner_package_name` on these rows is not ours (`com.android.shell` on the rig, the
+camera app on a real phone), so the URIs would have to be remembered at removal time and might not
+still resolve. One reliable path beats two, one of which sometimes works.
+
+A consequence worth knowing: a file restored while its trashed original is still in the bin means the
+user briefly holds both, and the trashed one keeps its bytes until the bin is emptied.
+
+**Verified in unit tests, not yet on hardware.** Five `RestoreScopeTest` cases including the
+duplicate-in-another-album case and the empty-scan guard — an empty device scan returns nothing rather
+than offering the entire library. 289 tests green. The Moto was locked when the build landed, so the
+tab has not been seen with these rules.
 
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 

@@ -444,14 +444,11 @@ private fun ArchivePrompt(
                 )
             }
 
-            // CLAUDE.md: never tell the user a local removal is recoverable. The guarantee the app
-            // may state is the verified cloud copy, which the lines above are about. This warning
-            // has now travelled with the removal control through three screens and must keep doing
-            // so.
-            Text(
-                text = stringResource(R.string.backup_move_trash_note),
-                style = MaterialTheme.typography.bodySmall
-            )
+            // The trash caveat that used to sit here is gone, 28 Aug 2026. It warned that a local
+            // removal "may be permanent on the phone" — disproved on both handsets, three runs, and
+            // finally by Ian finding all eight files in the Moto's Files app. What was worth keeping
+            // from it, that the space does not return until the bin is emptied, moved into the
+            // sentence above rather than qualifying it from underneath.
 
             Text(
                 text = stringResource(R.string.archive_prompt_question),

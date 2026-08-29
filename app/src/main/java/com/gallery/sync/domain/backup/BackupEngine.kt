@@ -680,6 +680,41 @@ class BackupEngine @Inject constructor(
      * follows from a mode the user set and from nothing else.
      */
     /**
+     * What OneDrive holds that is not in the folder it belongs to on this phone.
+     *
+     * The download half of the Restore tab. Asked per folder rather than by content alone — see
+     * [RestoreScope] for why that is a different question from the one the deletion guard asks, and
+     * why the two must not share an answer.
+     *
+     * Scoped to what this app uploaded: a row exists only because this device sent the file. A photo
+     * put in OneDrive from a PC is not offered, which is Ian's rule from 27 Aug 2026 — *"if the user
+     * wants a straight download they can use OneDrive"* — and what keeps this tab from becoming the
+     * cloud file browser the design principle rules out.
+     *
+     * Computed from a live scan on every call rather than from a stored flag. It costs about half a
+     * second against 3,335 files, and the alternative is a second persisted notion of "gone" sitting
+     * next to the one that guards cloud deletion, free to drift from it.
+     */
+    suspend fun filesNotOnThePhone(): List<BackupEntryEntity> = withContext(dispatcher) {
+        if (scanner.access() == MediaAccess.NONE) {
+            Logger.w(TAG, "filesNotOnThePhone: no media access")
+            return@withContext emptyList()
+        }
+
+        val present = scanner.scanEverything().mapTo(HashSet()) {
+            RestoreScope.signature(it.album, it.displayName, it.sizeBytes)
+        }
+
+        RestoreScope.notOnTheDevice(
+            candidates = entryDao.fetchableFromCloud(),
+            presentOnDevice = present,
+            signatureOf = { RestoreScope.signature(it.album, it.displayName, it.sizeBytes) }
+        ).also {
+            Logger.d(TAG, "filesNotOnThePhone: ${it.size} files are in OneDrive but not in their folder")
+        }
+    }
+
+    /**
      * Marks files for upload again, for ones the drive turns out not to have.
      *
      * Archive's validation treats "not in OneDrive" as work rather than as a verdict, and backs the

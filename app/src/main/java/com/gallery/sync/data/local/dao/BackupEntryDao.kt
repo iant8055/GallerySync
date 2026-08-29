@@ -582,17 +582,35 @@ interface BackupEntryDao {
      *
      * `remoteItemId` is required for the same reason it is in [restorableProxies]: without it there
      * is nothing to fetch, and offering the row would be a promise the app cannot keep.
+     *
+     * ### It no longer asks whether the file is on the phone
+     *
+     * That clause was `localMissingSinceEpochMillis IS NOT NULL`, and it made this list depend on a
+     * column whose real job is guarding cloud deletion. The two questions are not the same one:
+     * `localMissing` is set by a **content** test that ignores which folder a file is in, so an
+     * album archived while byte-identical copies sit in another folder was never marked — and the
+     * Restore tab offered nothing. Observed on the Moto G, 28 Aug 2026, on eight files Ian had just
+     * archived.
+     *
+     * Making that column stricter would have been the obvious fix and the wrong one: it is what
+     * `cloudDeletionCandidates` keys on, so a looser reading of "gone" would put files in line to be
+     * removed from OneDrive. Deletion keeps the cautious, album-blind answer; Restore now asks its
+     * own question, per folder, in `BackupEngine.filesNotOnThePhone`. Ian, 28 Aug 2026, choosing
+     * per-folder for Restore: a copy in an unrelated album is not an answer to "get that album
+     * back".
      */
     @Query(
         """
         SELECT * FROM backup_entries
-        WHERE localMissingSinceEpochMillis IS NOT NULL
+        WHERE state = :uploaded
+          AND isProxied = 0
           AND remoteItemId IS NOT NULL
+          AND remoteItemId != ''
           AND remoteSizeBytes IS NOT NULL
         ORDER BY album, displayName
         """
     )
-    suspend fun downloadableFiles(): List<BackupEntryEntity>
+    suspend fun fetchableFromCloud(uploaded: BackupState = BackupState.UPLOADED): List<BackupEntryEntity>
 
     /**
      * Moves a row onto the file that has just replaced it, in one statement.

@@ -131,9 +131,17 @@ This is absolute and applies to every file, in every location, without exception
   the Recycle Bin or the 30 days elapse, never on the tap. Any UI saying a removal "frees up X" is
   describing what happens after the bin is emptied, and must say so.
 
-  A different handset or One UI version may still behave differently. The guarantee that always
-  holds is the verified cloud copy — remote confirmation plus a matching byte size — and that
-  remains what the UI may promise unconditionally.
+  **Confirmed on a second vendor, 28 Aug 2026.** Moto G 2026, stock Android 16: eight videos archived,
+  all eight renamed in place, byte sizes unchanged, `du` still reporting 1.0G, expiry 28 Sept —
+  31 days. Ian found all eight in the **Files** app's Trash. Two vendors and two skins give the
+  identical answer, so this is the platform's behaviour rather than Samsung's.
+
+  **The trash has a different name on each vendor** — Samsung Gallery's *Recycle Bin*, the Files
+  app's *Trash*. UI copy naming one of them is wrong on the other.
+
+  Two devices is still not every device, and the guarantee that always holds is the verified cloud
+  copy — remote confirmation plus a matching byte size — which remains what the UI may promise
+  unconditionally.
 - Remotely this means Graph `DELETE /me/drive/items/{id}`, which moves to the recycle bin.
   Never anything that bypasses it.
 - Removing a row from the local ledger or index is bookkeeping and is not a deletion — but

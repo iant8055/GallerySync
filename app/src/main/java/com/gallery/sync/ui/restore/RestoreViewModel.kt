@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.entity.BackupEntryEntity
+import com.gallery.sync.domain.backup.BackupEngine
 import com.gallery.sync.domain.backup.DownloadMissingFile
 import com.gallery.sync.domain.backup.RestoreInPlaceResult
 import com.gallery.sync.domain.backup.RestoreProxyInPlace
@@ -120,6 +121,7 @@ data class RestoreUiState(
 @HiltViewModel
 class RestoreViewModel @Inject constructor(
     private val entryDao: BackupEntryDao,
+    private val engine: BackupEngine,
     private val restorer: RestoreProxyInPlace,
     private val downloader: DownloadMissingFile
 ) : ViewModel() {
@@ -133,13 +135,22 @@ class RestoreViewModel @Inject constructor(
         refresh()
     }
 
-    /** Re-reads the ledger. Two queries, no network, no scan — cheap enough to run on every entry. */
+    /**
+     * Re-reads what can be brought back. One query plus one device scan, no network.
+     *
+     * The scan is new as of 28 Aug 2026 and is the price of asking about folders rather than about
+     * content — roughly half a second against 3,335 files, paid on entry to the tab.
+     */
     fun refresh() {
         if (_state.value.running) return
         viewModelScope.launch {
             _state.value = _state.value.copy(loading = true)
+            // Two populations, one verb: what this app shrank, and what is in OneDrive but not in
+            // its folder here. The second is asked of the engine rather than of a stored column,
+            // because "gone" means something stricter here than it does to the deletion guard —
+            // see RestoreScope.
             val rows = entryDao.restorableProxies().map { RestoreRow(it, RowKind.Restore) } +
-                entryDao.downloadableFiles().map { RestoreRow(it, RowKind.Download) }
+                engine.filesNotOnThePhone().map { RestoreRow(it, RowKind.Download) }
             val ids = rows.mapTo(HashSet()) { it.id }
             _state.value = _state.value.copy(
                 rows = rows.sortedWith(compareBy({ it.album.lowercase() }, { it.displayName })),

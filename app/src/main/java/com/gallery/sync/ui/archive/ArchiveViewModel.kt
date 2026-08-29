@@ -284,6 +284,26 @@ class ArchiveViewModel @Inject constructor(
             // those is a list of things that do not exist. What survives is the count and the
             // bytes, which is what the screen actually needs to report.
             val removed = settled.removed
+
+            // Tell the ledger the files have gone, before re-reading anything.
+            //
+            // `refreshLedger` is the only thing that stamps `localMissingSinceEpochMillis`, and the
+            // Restore tab's download half selects on exactly that column — so until it runs, the app
+            // still believes every archived file is on the phone and the one screen that could fetch
+            // them back cannot see them. It ran at the start of a backup run and nowhere near this
+            // path.
+            //
+            // Found by Ian immediately after the first successful archive on the Moto G, 28 Aug 2026:
+            // eight files trashed, and a Restore tab offering none of them. The rows were intact and
+            // correct in every other respect — state UPLOADED, remote id, matching size — and simply
+            // had nobody to tell them the local copy was gone.
+            //
+            // A full rescan rather than marking the removed ids directly: this is the same diff the
+            // engine already does, it costs about half a second against 3,335 files, and a second
+            // implementation of "what is no longer on this phone" is exactly the kind of thing that
+            // drifts from the first.
+            engine.refreshLedger()
+
             val remaining = engine.filesInArchiveAlbums()
             _state.value = _state.value.copy(
                 plan = ArchivePlan(entries = remaining.map { ArchiveEntry(it) }),

@@ -16,20 +16,28 @@ import javax.inject.Singleton
  * Uses [MediaStore.createTrashRequest], never a delete — this app never issues a permanent-delete
  * call.
  *
- * ### Recoverability is NOT guaranteed, and the UI must not claim it is
+ * ### The trash is reached, on every device tried so far
  *
- * Observed on a Galaxy Z Fold 4: the request removed the files outright rather than leaving them
- * recoverable. Observed on the *same handset* on 25 Aug 2026: a 461 MB video was renamed to
- * `.trashed-<expiry>-<name>`, intact, with a 30-day expiry, and was visible in Samsung Gallery's
- * Recycle Bin. Same device, same API, opposite outcomes.
+ * **The "removed the files outright" observation that used to head this comment is withdrawn.** It
+ * was almost certainly a conflation with `DocumentsContract.deleteDocument`, a permanent SAF delete
+ * that genuinely does leave nothing behind and is forbidden by CLAUDE.md. Four runs since have all
+ * behaved identically:
  *
- * **Why is not known.** An earlier version of this comment said Samsung routes the request through
- * Gallery's Recycle Bin and that a user setting governs it. Ian checked on 25 Aug 2026: there is no
- * such setting. That explanation is withdrawn; the observations stand and the cause does not.
+ * - Fold 4, 25 Aug 2026 — one file, 461 MB, renamed and in Samsung Gallery's Recycle Bin
+ * - Fold 4, 27 Aug 2026 — 51 files, album `Anne`, same, 30-day expiry
+ * - Moto G, 28 Aug 2026 — 8 files, 1.07 GB, renamed in place, Ian found all eight in the Files
+ *   app's Trash, expiry 31 days
  *
- * So the guarantee this feature actually rests on is **not** the trash. It is that nothing is ever
- * eligible unless OneDrive has confirmed the file and reported a matching byte size. The cloud copy
- * is the safety net; the trash is a bonus that may or may not exist on a given run.
+ * Two vendors and two skins, so this is the platform's behaviour rather than Samsung's. The file is
+ * renamed to `.trashed-<expiry>-<name>`, keeps its bytes, and expires after about a month.
+ *
+ * **Keeping its bytes is the part the UI has to say out loud.** `du` was unchanged across a removal
+ * on both handsets: archiving frees nothing at the moment it runs, and the space returns when the
+ * user empties the bin or the expiry passes. This app never empties it for them.
+ *
+ * Two devices is still not every device, so the guarantee this feature *rests* on remains the cloud
+ * copy: nothing is eligible unless OneDrive has confirmed the file and reported a matching byte
+ * size. The trash is what the user recovers from; the cloud copy is what makes the removal safe.
  *
  * Android shows its own confirmation listing the files, so the user always sees what is about to
  * happen and can refuse.

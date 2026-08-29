@@ -152,12 +152,6 @@
         it, and saying otherwise would be a lie they discover later.
     -->
 
-    <!--
-        The whole sentence is a plural, not a plural noun dropped into a fixed template — the verb
-        and pronoun have to agree too ("1 file … is … it" vs "8 files … are … them"). Languages
-        with more than two plural forms, or with gendered pronouns, break even harder on that.
-    -->
-    <string name="backup_move_trash_note">Your OneDrive copy is checked first and is never touched. On some phones the local copy goes to your gallery\'s Recently deleted; on others it is removed straight away, so treat this as permanent on the phone.</string>
     <string name="backup_automatic">Sync automatically</string>
     <string name="backup_automatic_on">New photos sync shortly after you take them.</string>
     <string name="backup_automatic_off">Nothing syncs unless you tap Sync now.</string>
@@ -259,6 +253,11 @@
 
         If an age gate is built later the clause comes back. Until then it must not be implied.
 
+        Named "Trash/Recycle Bin" rather than either alone, by Ian on 28 Aug 2026, once the same
+        removal had been watched on two vendors: Samsung Gallery calls it the Recycle Bin, the
+        stock Files app calls it Trash, and the mechanism underneath is identical. Naming one of
+        them sends half the users looking for something that is not there.
+
         Rewritten by Ian, 28 Aug 2026, to three plain steps: what Archive checks, where the files go,
         and what the user must do to actually get the space back. The last of those is the one the app
         could not previously say - a trashed file keeps its bytes for 30 days, measured on the Fold 4
@@ -274,7 +273,7 @@
         stops being visible; note that the folder itself is never deleted (27 Aug correction in
         MILESTONES), so the case it described can still occur.
     -->
-    <string name="archive_confirm_body">Archive will verify all files are uploaded to the cloud.\n\nArchived files will be moved to your phone\'s Recycle Bin.\n\nPlease empty your Recycle Bin to free up storage.</string>
+    <string name="archive_confirm_body">Archive will verify all files are uploaded to the cloud.\n\nArchived files will be moved to your phone\'s Trash/Recycle Bin.\n\nPlease empty your Trash/Recycle Bin to free up storage.</string>
     <string name="archive_confirm_accept">Archive</string>
     <string name="archive_confirm_cancel">Cancel</string>
 
@@ -302,7 +301,7 @@
     <string name="archive_unsupported">This version of Android has no media trash, so removing local copies is not offered here.</string>
 
     <string name="archive_state_backing_up">Backing up…</string>
-    <string name="archive_state_removing">Moving to Recycle Bin…</string>
+    <string name="archive_state_removing">Moving to Trash/Recycle Bin…</string>
     <string name="archive_state_removed">Removed from this phone</string>
     <string name="archive_failed_unchecked">Could not check OneDrive — staying on your phone</string>
     <string name="archive_failed_not_backed_up">Not in OneDrive — staying on your phone</string>
@@ -316,9 +315,21 @@
 
     <!-- The prompt. Ian's wording, with the numbers filled in. -->
     <string name="archive_prompt_all_title">All files validated</string>
-    <string name="archive_prompt_all_body">All files are confirmed in OneDrive. Archiving them will free %1$s on your phone.</string>
+    <!--
+        Says where the space goes, not just how much. "Will free %1$s" was arithmetic that fails
+        the filesystem: a trashed file keeps its bytes for the full ~30 days, measured twice —
+        18.6 MB unchanged in DCIM/Anne after 51 files were trashed (Fold 4, 27 Aug 2026), and
+        1.0 GB unchanged in DCIM/PauseTest after 8 (Moto G, 28 Aug). The space returns when the
+        user empties the bin, and now the sentence says so.
+
+        This absorbed backup_move_trash_note, which used to sit underneath warning that a removal
+        might be permanent. That warning was disproved on both handsets and removed on 28 Aug;
+        what was worth keeping from it is the clause about emptying, which belongs in the sentence
+        making the claim rather than in a footnote qualifying it.
+    -->
+    <string name="archive_prompt_all_body">All files are confirmed in OneDrive. Archiving them moves the local copies to your phone\'s Trash/Recycle Bin, and frees %1$s once you empty it.</string>
     <string name="archive_prompt_partial_title">%1$s validated</string>
-    <string name="archive_prompt_partial_body">%1$s could not be confirmed and will stay on your phone. Archiving the confirmed ones will free %2$s.</string>
+    <string name="archive_prompt_partial_body">%1$s could not be confirmed and will stay on your phone. Archiving the confirmed ones moves them to your phone\'s Trash/Recycle Bin, and frees %2$s once you empty it.</string>
     <string name="archive_prompt_question">Do you want to continue?</string>
     <string name="archive_prompt_yes">Yes</string>
     <string name="archive_prompt_no">No</string>
@@ -589,13 +600,13 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
     <string name="topic_archive_title">Archive</string>
     <string name="topic_archive_body">Archive takes an album off your phone once every file in it is confirmed in OneDrive. It is a standing instruction: anything you add to that album later is covered by the same choice.
 
-The files go to your gallery’s recycle bin, where you can put them back. The space they used does not come back until you empty that bin yourself — this app never empties it for you.</string>
+The files go to your phone’s Trash/Recycle Bin, where you can put them back. The space they used does not come back until you empty that bin yourself — this app never empties it for you.</string>
     <string name="topic_archive_ack">I understand — Archive takes these files off my phone</string>
 
     <string name="topic_promise_title">What we can promise</string>
     <string name="topic_promise_body">Before anything is removed or shrunk, OneDrive has to confirm it holds the file and report the same size as the copy on your phone. That check is the guarantee, and nothing skips it.
 
-Local removals go to your gallery’s recycle bin and can be restored for 30 days. We have seen that hold on the phones we tested, but we cannot promise it for every phone — the verified cloud copy is the part that always holds.</string>
+Local removals go to your phone’s Trash/Recycle Bin and can be restored for 30 days. We have seen that hold on the phones we tested, but we cannot promise it for every phone — the verified cloud copy is the part that always holds.</string>
 
     <!--
         The disclaimer, and it is deliberately not boilerplate. Added 28 Aug 2026, the day a file
