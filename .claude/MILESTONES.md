@@ -2652,9 +2652,32 @@ resolution loss, but it no longer dominates the way it appeared to. The 1080→7
 real 26 points, where against the dark clip it looked like a marginal 15 on top of an already-huge
 saving. Below 720p the returns still collapse: 540p adds 11, 480p adds 4.
 
-**So there are two defensible settings, not four.** Re-encode at 1080p for about half, or 720p for
-about three-quarters. 540 and 480 spend a great deal of picture for very little space, and offering
-them mostly invites people to pick badly.
+**Then Ian watched them, and the numbers stopped being the argument.** *"Even the 480p at 4.77 MB is
+a good looking clip — I can't tell the difference in the quality between them."*
+
+That overturns the paragraph this replaced, which recommended two settings on the grounds that 540 and
+480 spend too much picture for too little space. They do not, on this clip, on a phone screen. **The
+useful setting is the aggressive one, and the saving is 88% rather than 47%.**
+
+**What that does to the product is the real point.** Gate 2 records the Fold 8 as ~16 GB of photos
+against ~130 GB of video, with photo proxying reclaiming about 14 GB — under 10% of the library, which
+is why the wording there leads with what *stays*. At 88%, that video becomes roughly 15 GB and frees
+about **115 GB**. Eight times what the photo lever can reach, aimed at the part of a library that
+actually fills a phone.
+
+It also confirms the premise the video decisions were built on rather than upsetting it. This file has
+said since 19 Aug that old video is *for watching* and that editing from a degraded clip caps the
+export — which is precisely why only old video is touched and retrieval covers the rare edit. "I
+cannot tell the difference watching it" is the criterion that argument assumed, now tested rather than
+asserted.
+
+**Before this is built on, three things should be checked, because one viewing is one viewing:**
+- **The largest screen it will be seen on.** The Fold's inner display is 7.6 inches; 480p upscales
+  about 2.5× there, and that is the hardest case a phone offers.
+- **A high-motion, detailed clip.** Content dependence has moved these numbers twice already, and
+  fine texture with fast panning is where low resolution shows first.
+- **That the export cap is still understood.** A downscaled clip edited in CapCut exports at that
+  resolution permanently. Nothing here changes that; it is what the age gate exists for.
 
 Speed remains negligible — 0.11–0.19× realtime, an 18-second clip in 2–3.4 seconds.
 
