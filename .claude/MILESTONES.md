@@ -2554,8 +2554,19 @@ configuration outright, and the vendor codec table says why:
     <Limit name="size" min="16x16" max="2560x1440" />
 ```
 
-**1440p is the ceiling — this phone cannot decode 4K HEVC either.** So downscaling is not slow on a
-mid-range device, it is impossible, and no amount of patience or charging changes that.
+**1440p is the ceiling, and it is not an HEVC quirk** — `c2.mtk.avc.decoder` and
+`c2.mtk.vp9.decoder` declare the same 2560×1440, and the software fallbacks are worse at 1920×1088.
+So downscaling is not slow on this device, it is impossible, and no amount of patience or charging
+changes that.
+
+**Measured versus declared, and the difference matters.** The 8K failure is measured: the decoder was
+handed the file and threw. That 4K would also fail is *inferred* from the table above and has not been
+run — worth stating plainly rather than leaving as a fact nobody checked, which is the failure mode
+this file exists to prevent.
+
+The phone is coherent on its own terms, and Ian said as much: it is an inexpensive handset, its camera
+records 1080p, and it holds no 4K content of its own. A 1440p ceiling is a sensible thing to build for
+that price. The problem is not the phone.
 
 **That makes the feature device-dependent, and it needs a capability check before it is offered.**
 Query `MediaCodecInfo.VideoCapabilities` for the input's codec and resolution and only offer
