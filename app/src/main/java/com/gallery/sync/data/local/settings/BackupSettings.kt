@@ -44,11 +44,21 @@ data class BackupPreferences(
      * [photoOptimiseMode] / [videoOptimiseMode].
      */
     val isOptimiseEnabled: Boolean = false,
-    /** Whether photos are optimised on their own, or on a tap. */
+    /**
+     * Optimise photos at all?
+     *
+     * Ian's structure, and it is deliberately a plain yes/no rather than a third value on
+     * [OptimiseMode]: *"do you want to opt video - Y / N. If Y how do you want - Man / Aut. Simple
+     * as that."* One question per line, each only asked when the one above it was answered yes.
+     */
+    val optimisePhotos: Boolean = true,
+    /** Whether photos are optimised on their own, or on a tap. Only asked when [optimisePhotos]. */
     val photoOptimiseMode: OptimiseMode = OptimiseMode.DEFAULT,
     /** How old a photo must be before it may be optimised. Per file - see [MediaAge]. */
     val photoOptimiseAge: MediaAge = MediaAge.DEFAULT,
-    /** Whether video is optimised on its own, or on a tap. */
+    /** Optimise video at all? See [optimisePhotos]. */
+    val optimiseVideo: Boolean = true,
+    /** Whether video is optimised on its own, or on a tap. Only asked when [optimiseVideo]. */
     val videoOptimiseMode: OptimiseMode = OptimiseMode.DEFAULT,
     val defaultAlbumMode: AlbumMode = AlbumMode.DEFAULT,
     /**
@@ -203,8 +213,10 @@ class BackupSettings @Inject constructor(
             isAutomaticEnabled = stored[KEY_AUTOMATIC] ?: true,
             allowMeteredNetwork = stored[KEY_ALLOW_METERED] ?: false,
             isOptimiseEnabled = stored[KEY_OPTIMISE_ENABLED] ?: false,
+            optimisePhotos = stored[KEY_OPTIMISE_PHOTOS] ?: true,
             photoOptimiseMode = OptimiseMode.fromNameOrDefault(stored[KEY_PHOTO_OPTIMISE_MODE]),
             photoOptimiseAge = MediaAge.fromNameOrDefault(stored[KEY_PHOTO_OPTIMISE_AGE]),
+            optimiseVideo = stored[KEY_OPTIMISE_VIDEO] ?: true,
             videoOptimiseMode = OptimiseMode.fromNameOrDefault(stored[KEY_VIDEO_OPTIMISE_MODE]),
             defaultAlbumMode = stored[KEY_DEFAULT_ALBUM_MODE]
                 ?.let { runCatching { AlbumMode.valueOf(it) }.getOrNull() }
@@ -296,6 +308,14 @@ class BackupSettings @Inject constructor(
     /** The master switch for making smaller local copies at all. */
     suspend fun setOptimiseEnabled(enabled: Boolean) {
         context.dataStore.edit { it[KEY_OPTIMISE_ENABLED] = enabled }
+    }
+
+    suspend fun setOptimisePhotos(enabled: Boolean) {
+        context.dataStore.edit { it[KEY_OPTIMISE_PHOTOS] = enabled }
+    }
+
+    suspend fun setOptimiseVideo(enabled: Boolean) {
+        context.dataStore.edit { it[KEY_OPTIMISE_VIDEO] = enabled }
     }
 
     suspend fun setPhotoOptimiseMode(mode: OptimiseMode) {
@@ -404,6 +424,8 @@ class BackupSettings @Inject constructor(
         // without asking", and this means "optimise at all" - a stored true would silently answer a
         // broader question than the user was asked, and now covers video as well.
         val KEY_OPTIMISE_ENABLED = booleanPreferencesKey("optimise_enabled")
+        val KEY_OPTIMISE_PHOTOS = booleanPreferencesKey("optimise_photos")
+        val KEY_OPTIMISE_VIDEO = booleanPreferencesKey("optimise_video")
         val KEY_PHOTO_OPTIMISE_MODE = stringPreferencesKey("photo_optimise_mode")
         val KEY_PHOTO_OPTIMISE_AGE = stringPreferencesKey("photo_optimise_age")
         val KEY_VIDEO_OPTIMISE_MODE = stringPreferencesKey("video_optimise_mode")

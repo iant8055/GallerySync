@@ -9,9 +9,9 @@ sizes, chunk alignment — are excluded.
 
 | | |
 |---|---|
-| Persisted settings | **25** |
+| Persisted settings | **27** |
 | Wizard steps | **19** |
-| Decided, never built | **7** |
+| Decided, never built | **6** |
 | Resolved — not settings after all | **2** |
 | Removed or superseded | **6** |
 
@@ -74,8 +74,10 @@ Three DataStores. `backup_settings` holds 23 keys; theme and granted folders liv
 | Run baseline bytes | `run_baseline_bytes` | `0` | *internal* |
 | Archive snooze until | `archive_delayed_until` | `0` | Archive prompt — Delay |
 | **Optimise enabled** (master) | `optimise_enabled` | `false` | **No UI yet** |
+| **Optimise photos?** | `optimise_photos` | `true` | **No UI yet** |
 | **Photo optimise mode** | `photo_optimise_mode` | `Auto` | **No UI yet** |
 | **Photo optimise age** | `photo_optimise_age` | `OneDay` | **No UI yet** |
+| **Optimise video?** | `optimise_video` | `true` | **No UI yet** |
 | **Video optimise mode** | `video_optimise_mode` | `Auto` | **No UI yet** |
 | **Video optimise age** | `video_optimise_age` | `OneDay` | **No UI yet** |
 | **Video quality** | `video_quality` | `High` (480p) | **No UI yet** |
@@ -83,8 +85,23 @@ Three DataStores. `backup_settings` holds 23 keys; theme and granted folders liv
 | Theme | `theme_mode` · *appearance_settings* | `SYSTEM` | Settings |
 | Granted source folders | `granted_tree_uris` · *media_scope* | empty | Settings + Gate 1 |
 
-Six of the seven optimise settings built on 28 Aug have no way to be changed. They are honoured, and
-invisible.
+Eight of the nine optimise settings have no way to be changed. They are honoured, and invisible —
+the Settings section that asks about them is the piece still to build.
+
+The shape they answer to is Ian's, 28-29 Aug:
+
+```
+Do you want Gallery Sync to optimise your photos and video to save space?   Y / N
+  Optimise photos?                                     Y / N
+    How?                                               Manual / Auto
+    When?          Straight away · 1h · 12h · 1 day · 1 week
+  Optimise video?                                      Y / N
+    How?                                               Manual / Auto
+    When?          Straight away · 1h · 12h · 1 day · 1 week
+    Quality?       High 480p · Medium 720p · Low 1080p
+```
+
+Each line is only asked when the one above it was answered yes.
 
 ---
 
@@ -95,7 +112,6 @@ Ordered by how much their absence changes what the app does.
 | Setting | Decided | Intended default | Status |
 |---|---|---|---|
 | ~~**Archive minimum age**~~ | 19 Aug · TASK-012 | ~~1 month~~ | **Superseded** — Archive is manual |
-| **Sync scope** — two toggles, photos and video · *gates optimising, not upload* | 19 Aug, revised 29 Aug | both on | Not built |
 | **Space saved per album** — freed so far, and what the mode could free | 19 Aug · TASK-011 | — | Not built |
 | **Retry failed items** from the UI | v0.2 backlog | — | Not built |
 | ~~**Storage floor**~~ — see above | 18 Aug · TASK-011 | ~~20 GB~~ | **Not a user setting** — resolved |
