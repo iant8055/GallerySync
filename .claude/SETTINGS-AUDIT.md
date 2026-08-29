@@ -11,28 +11,38 @@ sizes, chunk alignment — are excluded.
 |---|---|
 | Persisted settings | **25** |
 | Wizard steps | **19** |
-| Decided, never built | **9** |
+| Decided, never built | **7** |
+| Resolved — not settings after all | **2** |
 | Removed or superseded | **6** |
 
 ---
 
-## Two things worth acting on
+## Resolved since this was written
 
-### 1. Archive has no minimum age, and one was decided
+**The storage floor is not a user setting.** Ian, 29 Aug: *"storage floor has become an internal
+coding issue — nothing the user needs to set."* The app still needs to know free space so it does not
+start work it cannot finish — a restore needs room for the file it is fetching — but there is no
+floor to choose, no notification, and no worker managing to a target. TASK-011's entire notification
+apparatus went with it, and `POST_NOTIFICATIONS` with that.
 
-Settled on 19 Aug 2026 — **Immediately · 1 week · 1 month · 1 year, defaulting to 1 month** — with
-the reasoning recorded in TASK-012: *"Nothing recent is swept up unless you ask for it."* TASK-011
-refers to it twice as an existing parameter.
+**The Archive age is superseded, not overlooked.** It was specified on 19 Aug for a design in which
+Archive ran as a *nightly scheduled pass* — TASK-012 has the WorkManager plumbing, the overnight
+hour, `setRequiresCharging(true)`, and a section worrying about whether the window is guaranteed. An
+unattended sweep needs an age gate; a manual one does not. Archive shipped on 27 Aug as a tab with a
+summons, a file list you read, your tap, and Android's own dialog — and it **cannot** run unattended,
+because `createTrashRequest` only launches from an Activity.
 
-**It was never built.** `redundantLocalCopies()` has no age predicate, so setting an album to Archive
-today offers a photo taken five minutes ago as soon as it verifies. Every other protection holds —
-the verified cloud copy, the mode as consent, your tap, Android's own dialog — but the one meant to
-keep *recent* files out of the sweep is absent.
+Ian, 29 Aug: *"the user is manually Archiving — and they know what/when they want to do it."* Right,
+and the protection is stronger than the age would have been: every removal is chosen, at a moment of
+the user's choosing, against a list in front of them. The clause was removed from the consent dialog
+on 25 Aug when it was found describing a gate that did not exist; the gate itself should stay
+unbuilt unless Archive ever gains an unattended mode.
 
-This is the largest gap in the list, because it is the only one where the missing setting changes
-what leaves the phone.
+---
 
-### 2. A debug probe is still in the Settings screen
+## Still worth acting on
+
+### A debug probe is still in the Settings screen
 
 `SafGrowProbeSection()` renders at `SettingsScreen.kt:363`. Added 27 Aug to answer whether a tree
 grant lets a file grow; it does, and the answer is in MILESTONES. Both earlier research probes were
@@ -84,11 +94,11 @@ Ordered by how much their absence changes what the app does.
 
 | Setting | Decided | Intended default | Status |
 |---|---|---|---|
-| **Archive minimum age** — which files an Archive album may remove | 19 Aug · TASK-012 | 1 month | **Absent — no age gate at all** |
+| ~~**Archive minimum age**~~ | 19 Aug · TASK-012 | ~~1 month~~ | **Superseded** — Archive is manual |
 | **Sync scope** — Photos only / Video only / Both | 19 Aug · TASK-011 | Both | Not built |
 | **Space saved per album** — freed so far, and what the mode could free | 19 Aug · TASK-011 | — | Not built |
 | **Retry failed items** from the UI | v0.2 backlog | — | Not built |
-| **Storage floor** — free-space target the worker maintains | 18 Aug · TASK-011 | 20 GB | Descoped by Ian, 28 Aug |
+| ~~**Storage floor**~~ — see above | 18 Aug · TASK-011 | ~~20 GB~~ | **Not a user setting** — resolved |
 | **Language** | 19 Aug | English | Deferred — only one option exists |
 | **Sync frequency** | v0.5 | — | Not built |
 | **Account management** | v0.5 | — | Not built |

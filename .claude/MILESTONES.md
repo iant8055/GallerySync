@@ -262,11 +262,15 @@ keeps working.
       EXIF marker, verified across square and 16:9 at orientation=90.
 - [x] **Stop offering photos that can never shrink.** Schema 5 records a file examined and found
       already small enough, so the candidate count reaches zero instead of sticking.
-- [ ] **Storage budget.** User sets a free-space floor, default 20 GB, with an enforced minimum so it
+- [x] **Storage budget — resolved as an internal concern, 29 Aug 2026.** Ian: *"storage floor has
+      become an internal coding issue — nothing the user needs to set."* The app still reads free
+      space so it does not begin work it cannot finish — a restore needs room for the file it fetches
+      — but there is no floor to choose, no worker managing to a target, and no notification. The
+      original specification, kept for the reasoning it contains, was: ~~User sets a free-space floor, default 20 GB, with an enforced minimum so it
       stays clear of Android's low-storage threshold — below that the backup worker stops running and
       nothing new becomes eligible. Proxying is the only lever; nothing is deleted. If it cannot
       reach the floor it stops and says so. Notifies when free space drops below the floor, which is
-      also how it asks for the next batch of write consent. See TASK-011.
+      also how it asks for the next batch of write consent. See TASK-011.~~
 - [ ] **Album modes in the UI.** Schema 4 carries Off/Backup/Sync/Archive; the screen is still a
       switch. See TASK-012.
 - [ ] **Running count of space saved, per album and in total.** Each album row says what has already
