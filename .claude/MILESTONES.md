@@ -2445,10 +2445,21 @@ still resolve. One reliable path beats two, one of which sometimes works.
 A consequence worth knowing: a file restored while its trashed original is still in the bin means the
 user briefly holds both, and the trashed one keeps its bytes until the bin is emptied.
 
-**Verified in unit tests, not yet on hardware.** Five `RestoreScopeTest` cases including the
-duplicate-in-another-album case and the empty-scan guard — an empty device scan returns nothing rather
-than offering the entire library. 289 tests green. The Moto was locked when the build landed, so the
-tab has not been seen with these rules.
+**Verified on the Moto, minutes after the commit that called it unverified.** The tab reads:
+
+```
+Folders to Restore: 1
+PauseTest — 8 files · 1.1 GB
+0 to restore · 8 to download
+```
+
+The eight archived videos are offered despite byte-identical copies sitting in `BudgetVideo`, which is
+exactly the case the per-folder rule was built for. `0 to restore` is correct rather than empty: no
+file on this device is proxied, so that half has nothing to show — the two populations reporting
+separately is what makes the row readable.
+
+Backed by five `RestoreScopeTest` cases, including the duplicate-in-another-album case and the
+empty-scan guard, which returns nothing rather than offering the entire library. 289 tests green.
 
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
