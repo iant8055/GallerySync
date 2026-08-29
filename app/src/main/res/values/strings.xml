@@ -74,8 +74,8 @@
     <string name="settings_automatic">Automatic sync</string>
     <string name="settings_optimise">Optimise photos</string>
     <string name="settings_auto_optimise">Optimise automatically</string>
-    <string name="settings_auto_optimise_on">Offered as soon as photos are verified. Android still asks you to confirm each batch — it does not allow this to happen unattended.</string>
-    <string name="settings_auto_optimise_off">Photos are only optimised when you tap Optimise.</string>
+    <string name="settings_auto_optimise_on">Photos and video are optimised on their own, once they are verified in OneDrive and old enough.</string>
+    <string name="settings_auto_optimise_off">Nothing is optimised until you tap Optimise.</string>
 
     <!--
         "Optimise" rather than "compress" or "shrink": the photo stays in the gallery and stays
@@ -87,7 +87,7 @@
         <item quantity="other">%1$d photos can be optimised. Smaller copies stay on the phone and the full-size originals stay in OneDrive.</item>
     </plurals>
     <string name="proxy_action">Optimise %1$s of photos</string>
-    <string name="proxy_videos_excluded">Videos are never optimised — a lower-quality clip would fail quietly inside an editor.</string>
+    <string name="proxy_videos_excluded">Video is optimised separately, and only clips older than the age you set.</string>
     <string name="settings_optimise_explainer">Optimising replaces the copy on this phone with a smaller version — about 2048 pixels on the long edge, roughly a tenth of the size. The photo stays in your gallery and opens normally in every app, and carries a small cloud badge so you can tell which are optimised. The full-quality original stays in OneDrive, untouched.</string>
     <string name="proxy_none_nothing_synced">Nothing to optimise yet. A photo can only be optimised once it is verified in OneDrive — set an album to Sync in Album Modes, then run a sync.</string>
     <string name="proxy_none_all_done">Every eligible photo is already optimised.</string>
@@ -608,7 +608,7 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
     <string name="library_optimise_new_detail">%1$d of %2$d files are not backed up yet.</string>
     <string name="library_free_space">All #1 - plus Optimize All files on phone for maximum storage saving</string>
     <!-- Photo-heavy library: the saving is worth leading with. -->
-    <string name="library_free_space_detail">Photos are replaced by smaller copies that still open in your gallery. Frees about %1$s. Video is left untouched.</string>
+    <string name="library_free_space_detail">Photos and video are replaced by smaller copies that still open in your gallery. Frees about %1$s.</string>
     <!--
         Video-heavy library: leads with what stays. Only photos shrink, so on a library that is
         mostly video "free space" invites someone to expect most of it back.
@@ -697,7 +697,7 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="topic_getting_back_body">The Restore tab lists what this app has shrunk on this phone and puts the full-size original back in place, in its own folder, under its own name. Stopping partway costs nothing and you can run it again.</string>
 
     <string name="topic_optimising_title">Optimising photos</string>
-    <string name="topic_optimising_body">A photo is replaced by a smaller version while the full-size original stays in OneDrive. It keeps working everywhere on your phone and you can fetch the original back whenever you want. Video is never optimised — a degraded clip fails quietly inside an editor and you would only find out on export.</string>
+    <string name="topic_optimising_body">A photo or video is replaced by a smaller version while the full-quality original stays in OneDrive. It keeps working everywhere on your phone and you can fetch the original back whenever you want. Only files older than the age you set are touched, so nothing you shot today is affected unless you ask for it.</string>
     <string name="topic_optimising_ack">I understand — optimised photos are smaller until I fetch the original</string>
 
     <string name="topic_deleting_title">When you delete a photo from this phone</string>
@@ -739,7 +739,7 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
          description of each choice survives rather than two that drift. -->
     <string name="wizard_default_mode_body">When a new album appears on your phone later, this is what happens to it. You can change any album at any time.</string>
 
-    <string name="wizard_auto_optimise_body">Optimising shrinks photos already safe in OneDrive. Android needs you to approve each batch either way — this only decides whether the app asks when there is something to do, or waits to be opened.</string>
+    <string name="wizard_auto_optimise_body">Optimising replaces photos and video already safe in OneDrive with smaller copies on this phone. This decides whether that happens on its own or waits for you to ask.</string>
     <string name="wizard_optimise_ask_first">Wait until I open the app</string>
     <string name="wizard_optimise_automatic">Tell me when there is something to optimise</string>
 

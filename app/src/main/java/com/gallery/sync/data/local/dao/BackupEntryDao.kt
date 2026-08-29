@@ -729,6 +729,63 @@ interface BackupEntryDao {
     ): List<BackupEntryEntity>
 
     /**
+     * Video whose local copy can be replaced by a smaller one.
+     *
+     * A separate query from [proxyCandidates] rather than a widening of it, exactly as TASK-013
+     * asked: *"proxying photos and transcoding video have different costs and different schedules,
+     * and one query returning both would hide that."* A photo proxy is under a second; a clip is
+     * seconds to minutes and wants charge.
+     *
+     * The predicates, and what each is protecting:
+     *
+     * - **Verified in the cloud** — `state = UPLOADED` and `remoteSizeBytes = sizeBytes`. The same
+     *   bar as every destructive operation in this app, and the reason a smaller local copy is safe
+     *   to make at all.
+     * - **Not already proxied, not already declined.** `isProxySkipped` carries "examined, cannot
+     *   shrink", which for video also covers "this phone cannot decode it" — permanent facts that
+     *   must stop the candidate count sticking above zero.
+     * - **Old enough**, per file, against `dateModifiedEpochSeconds`. See `MediaAge`.
+     * - **Backed up after the cutoff**, which is how Gate 2's *optimise only the new* keeps a
+     *   library the user already owns at full size. Zero means no cutoff. See `OptimiseCutoff`.
+     * - **In a Sync album.** The mode is the consent, and `modeOverride` wins over it so a clip just
+     *   restored at full quality is not immediately shrunk again.
+     *
+     * Largest first: most space returned for the fewest clips touched, which is also the fewest
+     * chances to get something wrong.
+     */
+    @Query(
+        """
+        SELECT * FROM backup_entries
+        WHERE state = :uploaded
+          AND isVideo = 1
+          AND remoteSizeBytes IS NOT NULL
+          AND remoteSizeBytes = sizeBytes
+          AND isProxied = 0
+          AND isProxySkipped = 0
+          AND dateModifiedEpochSeconds <= :modifiedBeforeEpochSeconds
+          AND (:cutoffMillis = 0 OR uploadedAtEpochMillis >= :cutoffMillis)
+          AND (
+              modeOverride = :syncMode
+              OR (
+                  modeOverride IS NULL
+                  AND album IN (
+                      SELECT albumName FROM album_preferences WHERE mode = :syncMode
+                  )
+              )
+          )
+        ORDER BY sizeBytes DESC
+        LIMIT :limit
+        """
+    )
+    suspend fun videoOptimiseCandidates(
+        modifiedBeforeEpochSeconds: Long,
+        cutoffMillis: Long,
+        limit: Int = 50,
+        uploaded: BackupState = BackupState.UPLOADED,
+        syncMode: AlbumMode = AlbumMode.SYNC
+    ): List<BackupEntryEntity>
+
+    /**
      * Per-album totals, so each row can say whether it is completely safe.
      *
      * **Counted over files still on the phone.** The card puts these beside a file count taken from

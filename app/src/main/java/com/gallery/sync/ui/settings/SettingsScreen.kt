@@ -360,7 +360,6 @@ fun SettingsScreen(
         // that actually holds the grant.
         if (BuildConfig.DEBUG) {
             HorizontalDivider()
-            SafGrowProbeSection()
         }
 
     }
