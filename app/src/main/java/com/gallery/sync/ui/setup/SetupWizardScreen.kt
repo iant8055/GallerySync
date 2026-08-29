@@ -524,30 +524,27 @@ private fun formatHour(hour: Int): String = when {
  * The same strings the Settings route uses. One description of each choice, not two.
  */
 /**
- * What each option would actually do, in this library's own numbers.
+ * A number under one option, and nothing under the other three.
  *
- * Null where there is nothing useful to add - the per-album choice explains itself, and a sentence
- * for its own sake is noise on the most consequential screen in the app.
+ * The labels say what each choice does; only "optimise only the new" needs a figure, because how
+ * much it touches is the entire difference between it and the option above. On a typical install
+ * most of the library is already in OneDrive - 8,482 files reducing to 206 outstanding, measured -
+ * so without the count it reads as the same choice and then does almost nothing.
+ *
+ * Everything else went, at Ian's instruction: a paragraph under each of four options is verbiage on
+ * the screen someone meets before they have seen the app do anything.
  */
 @Composable
 private fun detailOf(choice: LibraryChoice, state: ReconcileUiState): String? {
+    if (choice != LibraryChoice.BACK_UP_AND_OPTIMISE_NEW) return null
     val result = state.result ?: return null
+
     val outstanding = result.outstanding.files
-    val total = result.backedUp.files + outstanding
-
-    return when (choice) {
-        LibraryChoice.CHOOSE_PER_ALBUM -> stringResource(R.string.library_per_album_detail)
-
-        LibraryChoice.BACK_UP_EVERYTHING -> stringResource(R.string.library_back_up_all_detail)
-
-        LibraryChoice.BACK_UP_AND_OPTIMISE_NEW ->
-            stringResource(R.string.library_optimise_new_detail, outstanding, total)
-
-        // Deliberately without a byte figure for now. LibraryEstimate still assumes only photos
-        // shrink, which stopped being true when video optimising was built, and quoting a number
-        // that understates the saving eightfold would be worse than quoting none.
-        LibraryChoice.BACK_UP_AND_FREE_SPACE -> stringResource(R.string.library_free_space_detail_plain)
-    }
+    return stringResource(
+        R.string.library_optimise_new_detail,
+        outstanding,
+        result.backedUp.files + outstanding
+    )
 }
 
 @StringRes
