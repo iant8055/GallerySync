@@ -67,6 +67,19 @@ ksp {
 }
 
 dependencies {
+
+    // Media3, for the TASK-013 transcode measurement — and provisionally, since that measurement is
+    // what decides whether video downscaling gets built at all. If the number says no, this comes
+    // straight back out.
+    //
+    // It has to be `implementation` rather than androidTest, which was tried first and does not
+    // work: Transformer needs an application context, the instrumentation context has none, and the
+    // GLSL shaders it loads are assets that must live in the same APK as the context it is given.
+    // Test-only placement satisfies neither half.
+    implementation(libs.androidx.media3.transformer)
+    implementation(libs.androidx.media3.effect)
+    implementation(libs.androidx.media3.common)
+
     implementation(platform(libs.androidx.compose.bom))
     implementation(platform(libs.okhttp.bom))
 
@@ -131,6 +144,7 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.kotlinx.coroutines.test)
     androidTestImplementation(libs.androidx.room.testing)
+
 
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)

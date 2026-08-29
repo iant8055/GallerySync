@@ -2505,6 +2505,75 @@ describe what the code did rather than what it should do.
 file to read as zero at the moment of upload. The unit test asserts the thing that matters — nothing
 reaches the network — and 290 tests pass.
 
+### 28 Aug 2026 — the 8K transcode cost, measured at last
+
+TASK-013 has been blocked since 19 Aug on one sentence in this file: *"Needs Media3 Transformer and a
+transcode cost measured on real 8K footage before committing."* Ian shot a clip for it tonight —
+`20260828_210759.mp4`, **7680×4320 HEVC, 31.1 s, 312.8 MB, 80 Mbps, HDR10+ with a PQ transfer**.
+
+**Galaxy Z Fold 4, 8K HDR → 1080p SDR H.264:**
+
+```
+TRANSCODE OK: 312.8 MB in, 31.8 MB out (9.8x smaller),
+15.63s for 31.1s of footage, ratio 0.50x realtime
+```
+
+**Twice as fast as playback, and 9.8× smaller** — within a whisker of the ~10× the photo proxies
+achieve, which makes the two levers comparable for the first time. A minute of 8K costs about thirty
+seconds of transcoding. The encoder ran in hardware at 1920×1080, 24 fps, 6.96 Mbps.
+
+**On this evidence the feature is affordable.** That is the thing that was unknown.
+
+**Three failures on the way, each worth keeping.**
+
+*H.264 cannot carry HDR10.* The first run failed with `ERROR_CODE_VIDEO_FRAME_PROCESSING_FAILED`
+against a target of H.264 while Transformer defaulted to `HDR_MODE_KEEP_HDR`. Samsung's 8K is PQ with
+HDR10+ metadata, so that combination is a contradiction — reported as a generic frame-processing
+error, with the cause three `Caused by` levels down. Fixed by tone-mapping to SDR, which is also the
+right product choice: a downscaled clip is for watching, and SDR H.264 plays everywhere. **It is a
+quality decision as well as a size one, and the UI should not pretend otherwise.**
+
+*Media3 cannot be an androidTest-only dependency.* Two constraints meet and only a real dependency
+satisfies both: Transformer needs an application context, which the instrumentation context does not
+have; and it loads its GLSL shaders as assets from whichever context it is handed, so those assets
+must sit in the same APK. Test-only placement fails one way or the other. Media3 is now an
+`implementation` dependency, provisionally — the measurement that would have justified deferring it
+is the one that needed it present.
+
+*`adb pull` was never the problem.* Ian tried several times and failed each time. Git Bash's MSYS
+layer rewrites any argument starting with `/`, so `/storage/emulated/0/...` silently became
+`C:/Program Files/Git/storage/...` and adb reported a file that does not exist. `MSYS_NO_PATHCONV=1`,
+or a doubled leading slash, or PowerShell. The file then pulled in 7.8 s at 38 MB/s. **Worth
+remembering for every adb path argument, not just pull.**
+
+**Moto G 2026: it cannot decode the file at all.** `c2.mtk.hevc.decoder` rejected the 7680×4320
+configuration outright, and the vendor codec table says why:
+
+```xml
+<MediaCodec name="c2.mtk.hevc.decoder" type="video/hevc">
+    <Limit name="size" min="16x16" max="2560x1440" />
+```
+
+**1440p is the ceiling — this phone cannot decode 4K HEVC either.** So downscaling is not slow on a
+mid-range device, it is impossible, and no amount of patience or charging changes that.
+
+**That makes the feature device-dependent, and it needs a capability check before it is offered.**
+Query `MediaCodecInfo.VideoCapabilities` for the input's codec and resolution and only offer
+downscaling where the decoder supports it. Without that, a user gets an unexplained failure on
+exactly the largest files they most wanted shrunk.
+
+The obvious objection — *a phone that cannot decode 8K probably cannot shoot it either, so who cares*
+— does not hold **for this app in particular**. GallerySync moves files between devices through
+OneDrive. Footage shot on a Fold and restored onto a Moto is the ordinary case, not the exotic one,
+and it is precisely the case where the phone holds video its own hardware cannot process.
+
+**What is still unmeasured**, and none of it is small:
+- **One clip, 31 seconds, from cold.** Sustained transcoding heats a phone; 0.5× realtime is a
+  cold-start figure and a ten-minute clip may not hold it.
+- **Battery cost**, entirely unmeasured. Charging-only blunts this, but the number should exist.
+- **Where the real ceiling is on the devices that can do it.** The Fold managed 8K; nothing has
+  established what a mid-range phone that *can* decode 4K costs to transcode it.
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have
