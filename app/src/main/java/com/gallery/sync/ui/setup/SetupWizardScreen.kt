@@ -377,6 +377,23 @@ private fun LibraryChoiceStep(
                     Text(label)
                 }
             }
+
+            // The detail under each option, added 28 Aug 2026.
+            //
+            // This step showed bare labels until now, so every word of the estimate written on
+            // 25 Aug - the wording that stops "free space" over-promising on a video library - lived
+            // only in ReconcileScreen, which nothing renders. The screen users actually meet offered
+            // "Back up and free space" with no indication of how much, or of what it leaves behind.
+            //
+            // It matters most for the new middle option, whose whole honesty is the two counts: on a
+            // typical install it touches a couple of percent of the library.
+            detailOf(choice, state)?.let { detail ->
+                Text(
+                    text = detail,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }
@@ -506,10 +523,38 @@ private fun formatHour(hour: Int): String = when {
 /**
  * The same strings the Settings route uses. One description of each choice, not two.
  */
+/**
+ * What each option would actually do, in this library's own numbers.
+ *
+ * Null where there is nothing useful to add - the per-album choice explains itself, and a sentence
+ * for its own sake is noise on the most consequential screen in the app.
+ */
+@Composable
+private fun detailOf(choice: LibraryChoice, state: ReconcileUiState): String? {
+    val result = state.result ?: return null
+    val outstanding = result.outstanding.files
+    val total = result.backedUp.files + outstanding
+
+    return when (choice) {
+        LibraryChoice.CHOOSE_PER_ALBUM -> stringResource(R.string.library_per_album_detail)
+
+        LibraryChoice.BACK_UP_EVERYTHING -> stringResource(R.string.library_back_up_all_detail)
+
+        LibraryChoice.BACK_UP_AND_OPTIMISE_NEW ->
+            stringResource(R.string.library_optimise_new_detail, outstanding, total)
+
+        // Deliberately without a byte figure for now. LibraryEstimate still assumes only photos
+        // shrink, which stopped being true when video optimising was built, and quoting a number
+        // that understates the saving eightfold would be worse than quoting none.
+        LibraryChoice.BACK_UP_AND_FREE_SPACE -> stringResource(R.string.library_free_space_detail_plain)
+    }
+}
+
 @StringRes
 private fun labelOf(choice: LibraryChoice): Int = when (choice) {
     LibraryChoice.CHOOSE_PER_ALBUM -> R.string.library_per_album
     LibraryChoice.BACK_UP_EVERYTHING -> R.string.library_back_up_all
+    LibraryChoice.BACK_UP_AND_OPTIMISE_NEW -> R.string.library_optimise_new
     LibraryChoice.BACK_UP_AND_FREE_SPACE -> R.string.library_free_space
 }
 

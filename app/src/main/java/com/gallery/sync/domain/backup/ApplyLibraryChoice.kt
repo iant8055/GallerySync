@@ -1,6 +1,7 @@
 package com.gallery.sync.domain.backup
 
 import com.gallery.sync.data.local.dao.AlbumPreferenceDao
+import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.data.local.entity.AlbumPreferenceEntity
 import com.gallery.sync.data.local.media.MediaScanner
 import com.gallery.sync.di.IoDispatcher
@@ -33,6 +34,7 @@ import javax.inject.Singleton
 class ApplyLibraryChoice @Inject constructor(
     private val scanner: MediaScanner,
     private val albumDao: AlbumPreferenceDao,
+    private val settings: BackupSettings,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
 ) {
 
@@ -58,6 +60,15 @@ class ApplyLibraryChoice @Inject constructor(
         // REPLACE, which is correct here and only here: this is an explicit bulk instruction, so
         // overwriting an earlier per-album choice is what the user just asked for.
         albumDao.setPreferences(albums.map { AlbumPreferenceEntity(it, mode) })
+
+        // The cutoff, which is what tells BACK_UP_AND_OPTIMISE_NEW apart from BACK_UP_AND_FREE_SPACE.
+        // Both set every album to Sync; only the first leaves what is already in OneDrive at full
+        // size, and it does that by recording the moment rather than by a mode - see OptimiseCutoff.
+        //
+        // Written for every choice, not only that one, so a user changing their mind gets the new
+        // answer rather than the old cutoff quietly surviving.
+        settings.setOptimiseCutoff(choice.cutoffFor(System.currentTimeMillis()))
+
         Logger.i(TAG, "set ${albums.size} albums to $mode")
         albums.size
     }

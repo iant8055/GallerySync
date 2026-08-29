@@ -8,6 +8,11 @@ import com.gallery.sync.data.local.entity.AlbumMode
  * The highest-regret moment in the app — one choice applied to thousands of files, made by someone
  * who has not yet watched the app do anything.
  *
+ * **Four options, not the three Ian listed.** He asked for optimise-everything, optimise-only-the-new,
+ * and choose-per-album. [BACK_UP_EVERYTHING] is kept alongside them because dropping it would remove
+ * the only way to say "back it all up and change nothing on my phone" — today the safest choice on
+ * the screen, and the one a cautious user reaches for first.
+ *
  * **[ARCHIVE][AlbumMode.ARCHIVE] is deliberately absent and must stay absent.** Setting every album
  * to Archive in a wizard is the largest irreversible thing this product can do, chosen at the moment
  * the user knows least about it, and before v0.4 retrieval exists to undo it. Archive stays a
@@ -24,11 +29,33 @@ enum class LibraryChoice(val mode: AlbumMode?) {
     /** Every album in scope to Backup. Nothing local changes and nothing is freed. */
     BACK_UP_EVERYTHING(mode = AlbumMode.BACKUP),
 
-    /** Every album in scope to Sync. Photos get proxied; video is left whole. */
+    /**
+     * Back up everything, but only make smaller copies of what was not already backed up.
+     *
+     * Ian's middle option, 28 Aug 2026: *"we back them up first and leave an opt file behind."* The
+     * albums all go to Sync so new files are handled from here on, and [OptimiseCutoff] keeps the
+     * thousands already in OneDrive at full size on the phone.
+     *
+     * The cautious choice, and the one for somebody unwilling to have a library they already own
+     * rewritten in a single overnight pass. **It frees little on a typical install** — most of a real
+     * library is already in the cloud — which is why the screen has to show both counts.
+     */
+    BACK_UP_AND_OPTIMISE_NEW(mode = AlbumMode.SYNC),
+
+    /** Every album in scope to Sync, and everything eligible gets a smaller local copy. */
     BACK_UP_AND_FREE_SPACE(mode = AlbumMode.SYNC);
 
-    /** Whether choosing this starts uploading. Both non-default choices do. */
+    /** Whether choosing this starts uploading. Every non-default choice does. */
     val uploads: Boolean get() = mode?.uploads == true
+
+    /**
+     * The moment before which already-uploaded files are left alone.
+     *
+     * Only [BACK_UP_AND_OPTIMISE_NEW] sets one; every other choice either optimises everything
+     * eligible or optimises nothing, and neither needs a cutoff.
+     */
+    fun cutoffFor(now: Long): Long =
+        if (this == BACK_UP_AND_OPTIMISE_NEW) now else OptimiseCutoff.EVERYTHING
 }
 
 /**

@@ -180,6 +180,8 @@ fun ReconcileScreen(
             applying = state.applyingLibraryChoice,
             photoBytes = result.photos.bytes,
             videoBytes = result.videos.bytes,
+            outstandingFiles = result.outstanding.files,
+            totalFiles = result.backedUp.files + result.outstanding.files,
             onSelected = viewModel::setLibraryChoice,
             onApply = viewModel::applyLibraryChoice
         )
@@ -255,6 +257,10 @@ private fun LibrarySection(
     applying: Boolean,
     photoBytes: Long,
     videoBytes: Long,
+    /** Files not yet in OneDrive - what BACK_UP_AND_OPTIMISE_NEW would actually touch. */
+    outstandingFiles: Int,
+    /** Everything in scope, so the middle option can be shown against what it leaves alone. */
+    totalFiles: Int,
     onSelected: (LibraryChoice) -> Unit,
     onApply: () -> Unit
 ) {
@@ -277,6 +283,17 @@ private fun LibrarySection(
                     LibraryChoice.BACK_UP_EVERYTHING ->
                         stringResource(R.string.library_back_up_all_detail)
 
+                    // Both counts, deliberately. On a typical install most of the library is already
+                    // in OneDrive - Samsung's own sync put it there - so this option can touch a
+                    // couple of percent of a library while sounding substantial. Showing what it
+                    // leaves alone is what stops the honest option looking broken.
+                    LibraryChoice.BACK_UP_AND_OPTIMISE_NEW ->
+                        stringResource(
+                            R.string.library_optimise_new_detail,
+                            outstandingFiles,
+                            totalFiles
+                        )
+
                     // Only photos shrink. On a library that is mostly video, saying "frees space"
                     // without saying how little invites someone to expect most of it back — so the
                     // wording leads with what stays instead.
@@ -298,6 +315,9 @@ private fun LibrarySection(
                     label = when (choice) {
                         LibraryChoice.CHOOSE_PER_ALBUM -> stringResource(R.string.library_per_album)
                         LibraryChoice.BACK_UP_EVERYTHING -> stringResource(R.string.library_back_up_all)
+                        LibraryChoice.BACK_UP_AND_OPTIMISE_NEW ->
+                            stringResource(R.string.library_optimise_new)
+
                         LibraryChoice.BACK_UP_AND_FREE_SPACE -> stringResource(R.string.library_free_space)
                     },
                     detail = detail,

@@ -12,6 +12,7 @@ import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.domain.backup.MediaAge
+import com.gallery.sync.domain.backup.OptimiseCutoff
 import com.gallery.sync.domain.backup.OptimiseMode
 import com.gallery.sync.domain.backup.VideoQuality
 import com.gallery.sync.domain.backup.CloudDeletionGrace
@@ -164,6 +165,13 @@ data class BackupPreferences(
      */
     val videoQuality: VideoQuality = VideoQuality.DEFAULT,
     /**
+     * Files backed up before this moment are left at full size on the phone.
+     *
+     * Zero means no cutoff, which is the ordinary case. Set only by Gate 2's
+     * "optimise only the new" - see [com.gallery.sync.domain.backup.OptimiseCutoff].
+     */
+    val optimiseCutoffEpochMillis: Long = OptimiseCutoff.EVERYTHING,
+    /**
      * How old a clip must be before it may be optimised. See [MediaAge].
      *
      * Defaults to a year, the cautious end. Gates the local optimise and **never** the upload - a
@@ -229,6 +237,7 @@ class BackupSettings @Inject constructor(
             runBaselineBytes = stored[KEY_RUN_BASELINE] ?: 0L,
             archiveDelayedUntilEpochMillis = stored[KEY_ARCHIVE_DELAYED_UNTIL] ?: 0L,
             videoQuality = VideoQuality.fromNameOrDefault(stored[KEY_VIDEO_QUALITY]),
+            optimiseCutoffEpochMillis = stored[KEY_OPTIMISE_CUTOFF] ?: OptimiseCutoff.EVERYTHING,
             videoOptimiseAge = MediaAge.fromNameOrDefault(stored[KEY_VIDEO_OPTIMISE_AGE])
         )
     }
@@ -277,6 +286,11 @@ class BackupSettings @Inject constructor(
     /** How old a clip must be before it may be optimised. See [MediaAge]. */
     suspend fun setVideoOptimiseAge(age: MediaAge) {
         context.dataStore.edit { it[KEY_VIDEO_OPTIMISE_AGE] = age.name }
+    }
+
+    /** Files backed up before this are left alone. See [OptimiseCutoff]. */
+    suspend fun setOptimiseCutoff(millis: Long) {
+        context.dataStore.edit { it[KEY_OPTIMISE_CUTOFF] = millis }
     }
 
     /** The master switch for making smaller local copies at all. */
@@ -408,6 +422,7 @@ class BackupSettings @Inject constructor(
         val KEY_RUN_BASELINE = longPreferencesKey("run_baseline_bytes")
         val KEY_ARCHIVE_DELAYED_UNTIL = longPreferencesKey("archive_delayed_until")
         val KEY_VIDEO_QUALITY = stringPreferencesKey("video_quality")
+        val KEY_OPTIMISE_CUTOFF = longPreferencesKey("optimise_cutoff")
         val KEY_VIDEO_OPTIMISE_AGE = stringPreferencesKey("video_optimise_age")
     }
 }
