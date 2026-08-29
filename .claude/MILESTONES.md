@@ -2573,10 +2573,22 @@ Query `MediaCodecInfo.VideoCapabilities` for the input's codec and resolution an
 downscaling where the decoder supports it. Without that, a user gets an unexplained failure on
 exactly the largest files they most wanted shrunk.
 
-The obvious objection — *a phone that cannot decode 8K probably cannot shoot it either, so who cares*
-— does not hold **for this app in particular**. GallerySync moves files between devices through
-OneDrive. Footage shot on a Fold and restored onto a Moto is the ordinary case, not the exotic one,
-and it is precisely the case where the phone holds video its own hardware cannot process.
+**An earlier version of this entry argued the cross-device case was ordinary. Ian disagreed and was
+right.** The claim was that GallerySync moves files between phones through OneDrive, so footage shot
+on a Fold and restored onto a Moto is routine. It is not, and the reason is a decision made hours
+earlier the same evening: **Restore is scoped to what this app uploaded from this device.** Anything
+it offers back was on that phone before, so the phone could handle it. The case cannot arise through
+Restore at all.
+
+**And the feature turns out to be self-limiting**, which is the more useful observation. The 9.8×
+saving comes from 8K being enormous to begin with; a phone that only shoots 1080p produces footage
+barely worth downscaling. Capability and benefit scale together — the phones that generate video worth
+shrinking are the phones that can shrink it.
+
+**So the capability check is insurance, not a load-bearing part of the design.** The one path where it
+still matters is TASK-014's initial bulk download onto a *different* handset, which is deliberately
+not Restore, and which means moving to a less capable phone. A thin edge, worth a guard because a
+guard is cheap, and not the justification the feature rests on.
 
 **What is still unmeasured**, and none of it is small:
 - **One clip, 31 seconds, from cold.** Sustained transcoding heats a phone; 0.5× realtime is a
