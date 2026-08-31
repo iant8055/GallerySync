@@ -17,6 +17,7 @@ import com.gallery.sync.domain.backup.FirstBackupWindow
 import com.gallery.sync.domain.backup.OptimiseMode
 import com.gallery.sync.domain.backup.ReconcileWithCloud
 import com.gallery.sync.domain.backup.RemoteRoots
+import com.gallery.sync.domain.backup.VideoQuality
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -87,6 +88,8 @@ data class ReconcileUiState(
     val allowMeteredNetwork: Boolean = false,
     val defaultAlbumMode: AlbumMode = AlbumMode.DEFAULT,
     val isAutoOptimiseEnabled: Boolean = false,
+    val optimiseVideo: Boolean = true,
+    val videoQuality: VideoQuality = VideoQuality.DEFAULT,
     val cloudDeletionPolicy: CloudDeletionPolicy = CloudDeletionPolicy.DEFAULT
 ) {
     /**
@@ -186,6 +189,8 @@ class ReconcileViewModel @Inject constructor(
                     defaultAlbumMode = prefs.defaultAlbumMode,
                     isAutoOptimiseEnabled = prefs.isOptimiseEnabled &&
                         prefs.photoOptimiseMode == OptimiseMode.Auto,
+                    optimiseVideo = prefs.optimiseVideo,
+                    videoQuality = prefs.videoQuality,
                     cloudDeletionPolicy = prefs.cloudDeletionPolicy,
                     // Recomputed whenever a setting changes, so moving the start time updates the
                     // "waiting until" line immediately rather than at the next run.
@@ -233,6 +238,14 @@ class ReconcileViewModel @Inject constructor(
             settings.setOptimiseEnabled(enabled)
             if (enabled) settings.setPhotoOptimiseMode(OptimiseMode.Auto)
         }
+    }
+
+    fun setOptimiseVideo(enabled: Boolean) {
+        viewModelScope.launch { settings.setOptimiseVideo(enabled) }
+    }
+
+    fun setVideoQuality(quality: VideoQuality) {
+        viewModelScope.launch { settings.setVideoQuality(quality) }
     }
 
     fun setCloudDeletionPolicy(policy: CloudDeletionPolicy) {

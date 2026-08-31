@@ -60,6 +60,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
 import com.gallery.sync.domain.backup.LibraryChoice
 import com.gallery.sync.ui.common.formatBytes
+import com.gallery.sync.domain.backup.VideoQuality
 import com.gallery.sync.ui.signin.SignInUiState
 import com.gallery.sync.ui.signin.SignInViewModel
 
@@ -174,7 +175,12 @@ fun SetupTour(
                     )
                     7 -> OptimizationContent(
                         optimisePhotos = state.isAutoOptimiseEnabled,
-                        onOptimisePhotosChanged = viewModel::setAutoOptimiseEnabled
+                        onOptimisePhotosChanged = viewModel::setAutoOptimiseEnabled,
+                        optimiseVideo = state.optimiseVideo,
+                        onOptimiseVideoChanged = viewModel::setOptimiseVideo,
+                        videoQuality = state.videoQuality,
+                        onVideoQualityChanged = viewModel::setVideoQuality,
+                        state = state
                     )
                     8 -> BackupDelayContent(state = state)
                     9 -> BackupProgressContent()
@@ -483,10 +489,22 @@ private fun labelOf(choice: LibraryChoice): Int = when (choice) {
 @Composable
 private fun OptimizationContent(
     optimisePhotos: Boolean,
-    onOptimisePhotosChanged: (Boolean) -> Unit
+    onOptimisePhotosChanged: (Boolean) -> Unit,
+    optimiseVideo: Boolean,
+    onOptimiseVideoChanged: (Boolean) -> Unit,
+    videoQuality: VideoQuality,
+    onVideoQualityChanged: (VideoQuality) -> Unit,
+    state: ReconcileUiState
 ) {
-    var localChecked by rememberSaveable { mutableStateOf(optimisePhotos) }
-    if (localChecked != optimisePhotos) localChecked = optimisePhotos
+    var localPhotoChecked by rememberSaveable { mutableStateOf(optimisePhotos) }
+    if (localPhotoChecked != optimisePhotos) localPhotoChecked = optimisePhotos
+    var localVideoChecked by rememberSaveable { mutableStateOf(optimiseVideo) }
+    if (localVideoChecked != optimiseVideo) localVideoChecked = optimiseVideo
+
+    val context = LocalContext.current
+    val result = state.result
+    val totalPhotoBytes = result?.photosOutstanding?.bytes ?: 0L
+    val totalVideoBytes = result?.videosOutstanding?.bytes ?: 0L
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
@@ -498,6 +516,9 @@ private fun OptimizationContent(
             style = MaterialTheme.typography.bodyMedium
         )
 
+        HorizontalDivider()
+
+        // Photos toggle
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -511,9 +532,9 @@ private fun OptimizationContent(
                 modifier = Modifier.weight(1f)
             )
             Switch(
-                checked = localChecked,
+                checked = localPhotoChecked,
                 onCheckedChange = { value ->
-                    localChecked = value
+                    localPhotoChecked = value
                     onOptimisePhotosChanged(value)
                 },
                 colors = SwitchDefaults.colors(
@@ -521,6 +542,132 @@ private fun OptimizationContent(
                     uncheckedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             )
+        }
+
+        if (localPhotoChecked && totalPhotoBytes > 0) {
+            Text(
+                text = stringResource(
+                    R.string.tour_optimise_photos_saving,
+                    formatBytes(context, totalPhotoBytes)
+                ),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        HorizontalDivider()
+
+        // Videos toggle
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                stringResource(R.string.settings_optimise_videos),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.weight(1f)
+            )
+            Switch(
+                checked = localVideoChecked,
+                onCheckedChange = { value ->
+                    localVideoChecked = value
+                    onOptimiseVideoChanged(value)
+                },
+                colors = SwitchDefaults.colors(
+                    uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    uncheckedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            )
+        }
+
+        // Video quality selector — shown when video optimization is on
+        AnimatedVisibility(
+            visible = localVideoChecked,
+            enter = expandVertically(),
+            exit = shrinkVertically()
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = stringResource(R.string.tour_optimise_video_quality),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                VideoQuality.entries.forEach { quality ->
+                    val isSelected = videoQuality == quality
+                    val label = stringResource(
+                        when (quality) {
+                            VideoQuality.High -> R.string.video_quality_high
+                            VideoQuality.Medium -> R.string.video_quality_medium
+                            VideoQuality.Low -> R.string.video_quality_low
+                        }
+                    )
+                    val detail = stringResource(
+                        when (quality) {
+                            VideoQuality.High -> R.string.video_quality_high_detail
+                            VideoQuality.Medium -> R.string.video_quality_medium_detail
+                            VideoQuality.Low -> R.string.video_quality_low_detail
+                        },
+                        quality.approximateSavingPercent
+                    )
+                    if (isSelected) {
+                        Button(
+                            onClick = { onVideoQualityChanged(quality) },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column {
+                                Text(label, fontWeight = FontWeight.Bold)
+                                Text(detail, style = MaterialTheme.typography.bodySmall)
+                            }
+                        }
+                    } else {
+                        OutlinedButton(
+                            onClick = { onVideoQualityChanged(quality) },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Column {
+                                Text(label)
+                                Text(detail, style = MaterialTheme.typography.bodySmall)
+                            }
+                        }
+                    }
+                }
+
+                if (totalVideoBytes > 0) {
+                    val savingBytes = totalVideoBytes * videoQuality.approximateSavingPercent / 100
+                    Text(
+                        text = stringResource(
+                            R.string.tour_optimise_video_saving,
+                            formatBytes(context, savingBytes),
+                            videoQuality.approximateSavingPercent
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+        }
+
+        // Total savings
+        if ((localPhotoChecked || localVideoChecked) && result != null) {
+            HorizontalDivider()
+            val photoSaving = if (localPhotoChecked) totalPhotoBytes else 0L
+            val videoSaving = if (localVideoChecked)
+                totalVideoBytes * videoQuality.approximateSavingPercent / 100 else 0L
+            val total = photoSaving + videoSaving
+            if (total > 0) {
+                Text(
+                    text = stringResource(
+                        R.string.tour_optimise_total_saving,
+                        formatBytes(context, total)
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
         }
 
         Text(

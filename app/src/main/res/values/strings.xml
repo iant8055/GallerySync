@@ -752,7 +752,7 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="wizard_next">Next</string>
     <string name="wizard_back">Back</string>
     <string name="wizard_skip">Skip setup</string>
-    <string name="wizard_finish">Finish</string>
+    <string name="wizard_finish">Close</string>
 
     <string name="wizard_sources_title">Choose your folders</string>
     <string name="wizard_sources_body">Pick the folders holding the photos and videos you want looked after. DCIM is where most phones put the camera. You can add or remove folders later, and removing one only hides its albums — nothing is forgotten and nothing is deleted.</string>
@@ -837,7 +837,7 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_description_help">Help — tap the (?) icon on any section header for an explanation</string>
 
     <string name="tour_install_title">What we\'ll set up</string>
-    <string name="tour_install_body">We need two things to get started:</string>
+    <string name="tour_install_body">There are four simple steps to get you started.</string>
     <string name="tour_install_select_gallery">Select the folders on your phone with photos and videos</string>
     <string name="tour_install_grant_gallery">Grant access so GallerySync can read them</string>
     <string name="tour_install_select_cloud">Select where backups go in OneDrive</string>
@@ -858,8 +858,12 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_backup_title">Choose your backup plan</string>
 
     <string name="tour_optimise_title">Optimization Settings</string>
-    <string name="tour_optimise_body">Optimization replaces photos already safe in OneDrive with smaller copies on this phone, freeing storage. You can fine-tune this later in Settings.</string>
+    <string name="tour_optimise_body">Optimization allows you to free up storage space on your phone while still being able to see all your photos and videos on your Gallery.</string>
     <string name="tour_optimise_note">These settings can be changed at any time in the Settings tab.</string>
+    <string name="tour_optimise_photos_saving">Estimated photo savings: %1$s</string>
+    <string name="tour_optimise_video_saving">Estimated video savings: %1$s (%2$d%% reduction)</string>
+    <string name="tour_optimise_total_saving">Total estimated savings: %1$s</string>
+    <string name="tour_optimise_video_quality">How much to shrink video</string>
 
     <string name="tour_delay_title">Ready to back up</string>
     <string name="tour_delay_summary">You have %1$d files (%2$s) to back up.</string>
