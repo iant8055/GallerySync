@@ -314,7 +314,14 @@ private fun LocalGalleryContent(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(directory.displayName, style = MaterialTheme.typography.bodyLarge)
+                val volumeLabel = if (directory.volume == "primary")
+                    stringResource(R.string.volume_internal)
+                else
+                    directory.volume
+                Text(
+                    stringResource(R.string.sources_full_path, volumeLabel, directory.relativePath),
+                    style = MaterialTheme.typography.bodyLarge
+                )
                 TextButton(onClick = { onRemove(directory.treeUri) }) {
                     Text(stringResource(R.string.wizard_sources_remove))
                 }
