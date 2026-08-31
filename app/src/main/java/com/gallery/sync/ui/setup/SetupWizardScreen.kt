@@ -586,7 +586,7 @@ private fun WizardControls(
             Button(onClick = onNext, enabled = !blocked) {
                 Text(
                     when {
-                        isLast -> stringResource(R.string.wizard_finish)
+                        isLast -> stringResource(R.string.wizard_close_label)
                         acknowledgeLabel != null -> stringResource(acknowledgeLabel)
                         else -> stringResource(R.string.wizard_next)
                     }

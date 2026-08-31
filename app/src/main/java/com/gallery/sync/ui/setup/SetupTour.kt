@@ -129,17 +129,22 @@ fun SetupTour(
             alignment = Alignment.Center,
             properties = PopupProperties(focusable = true)
         ) {
+            val backupComplete = state.hasCompletedFirstBackup
+
             TourBubble(
                 stepNumber = step,
                 canAdvance = canAdvance(),
                 isLast = step == TOTAL_STEPS,
+                lastButtonLabel = if (backupComplete)
+                    stringResource(R.string.wizard_finish_label)
+                else
+                    stringResource(R.string.wizard_close_label),
                 onNext = {
                     if (step == TOTAL_STEPS) {
                         viewModel.completeSetup()
                         onComplete()
                     } else {
                         var next = step + 1
-                        // Skip optimization step if not applicable
                         if (next == 7 && !showOptimization) next = 8
                         step = next
                     }
@@ -183,7 +188,7 @@ fun SetupTour(
                         state = state
                     )
                     8 -> BackupDelayContent(state = state)
-                    9 -> BackupProgressContent()
+                    9 -> BackupProgressContent(backupComplete = backupComplete)
                 }
             }
         }
@@ -195,6 +200,7 @@ private fun TourBubble(
     stepNumber: Int,
     canAdvance: Boolean,
     isLast: Boolean,
+    lastButtonLabel: String = "",
     onNext: () -> Unit,
     onBack: () -> Unit,
     content: @Composable () -> Unit
@@ -239,7 +245,7 @@ private fun TourBubble(
 
                 Button(onClick = onNext, enabled = canAdvance) {
                     Text(
-                        if (isLast) stringResource(R.string.wizard_finish)
+                        if (isLast) lastButtonLabel
                         else stringResource(R.string.wizard_next)
                     )
                 }
@@ -729,7 +735,7 @@ private fun BackupDelayContent(state: ReconcileUiState) {
 // ── Step 9: Backup Progress ─────────────────────────────────────────────────
 
 @Composable
-private fun BackupProgressContent() {
+private fun BackupProgressContent(backupComplete: Boolean = false) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -742,7 +748,8 @@ private fun BackupProgressContent() {
         )
 
         Text(
-            text = stringResource(R.string.tour_progress_body),
+            text = if (backupComplete) stringResource(R.string.tour_progress_complete)
+            else stringResource(R.string.tour_progress_body),
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.fillMaxWidth()
         )

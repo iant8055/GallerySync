@@ -752,7 +752,8 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="wizard_next">Next</string>
     <string name="wizard_back">Back</string>
     <string name="wizard_skip">Skip setup</string>
-    <string name="wizard_finish">Close</string>
+    <string name="wizard_close_label">Close</string>
+    <string name="wizard_finish_label">Finish</string>
 
     <string name="wizard_sources_title">Choose your folders</string>
     <string name="wizard_sources_body">Pick the folders holding the photos and videos you want looked after. DCIM is where most phones put the camera. You can add or remove folders later, and removing one only hides its albums — nothing is forgotten and nothing is deleted.</string>
@@ -872,7 +873,8 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_delay_note">Backup runs in the background. You can close the app and it will continue.</string>
 
     <string name="tour_progress_title">Backup Progress</string>
-    <string name="tour_progress_body">Once backup starts, this is where you\'ll see progress. The backup runs in the background — you can use your phone normally.</string>
+    <string name="tour_progress_body">Your backup is running. The backup runs in the background — you can use your phone normally.</string>
     <string name="tour_progress_waiting">Waiting to start</string>
-    <string name="tour_progress_note">You can check progress any time by opening the app. Tap Finish to complete setup.</string>
+    <string name="tour_progress_complete">Congratulations your backup has finished successfully and has been verified. Press Finish.</string>
+    <string name="tour_progress_note">You can check progress any time by opening the app.</string>
 </resources>
