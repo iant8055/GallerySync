@@ -84,10 +84,28 @@ class MainActivity : ComponentActivity() {
 private fun GallerySyncApp(modifier: Modifier = Modifier) {
     val signInViewModel: SignInViewModel = hiltViewModel()
     val signInState by signInViewModel.state.collectAsStateWithLifecycle()
+    val setupViewModel: ReconcileViewModel = hiltViewModel()
+    val setupState by setupViewModel.state.collectAsStateWithLifecycle()
 
-    when (val current = signInState) {
-        is SignInUiState.SignedIn -> SignedInOrSetup(
-            accountName = current.accountName,
+    if (!setupState.setupDecisionReady) {
+        Box(modifier.fillMaxSize())
+        return
+    }
+
+    val needsSetup = !setupState.hasCompletedSetup || !setupState.hasSources
+
+    when {
+        needsSetup -> SignedInApp(
+            accountName = (signInState as? SignInUiState.SignedIn)?.accountName ?: "",
+            onSignOut = signInViewModel::signOut,
+            showTour = true,
+            setupViewModel = setupViewModel,
+            signInViewModel = signInViewModel,
+            modifier = modifier
+        )
+
+        signInState is SignInUiState.SignedIn -> SignedInApp(
+            accountName = (signInState as SignInUiState.SignedIn).accountName,
             onSignOut = signInViewModel::signOut,
             modifier = modifier
         )
@@ -95,43 +113,6 @@ private fun GallerySyncApp(modifier: Modifier = Modifier) {
         else -> SignInScreen(
             modifier = modifier,
             viewModel = signInViewModel
-        )
-    }
-}
-
-/**
- * Guided setup, or the app, depending on whether the gates have been answered.
- *
- * The wizard runs when setup has not been completed **or** when no source folder is granted. The
- * second condition is what makes it a gate rather than a tour: with nothing granted the scan
- * returns nothing, and every screen behind here describes an empty library. Two of two fresh
- * installs — Fold 4 on 26 Aug 2026, Moto G on 28 Aug — reached an Albums tab reporting no
- * albums and offering a Rescan that could not succeed, which is the state this prevents.
- *
- * Nothing is shown until preferences have been read once. The wizard is deliberately impossible to
- * miss, so showing it to someone who finished setup long ago is the one failure worth a frame of
- * blankness to avoid.
- */
-@Composable
-private fun SignedInOrSetup(
-    accountName: String,
-    onSignOut: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val setupViewModel: ReconcileViewModel = hiltViewModel()
-    val setupState by setupViewModel.state.collectAsStateWithLifecycle()
-
-    val needsSetup = !setupState.hasCompletedSetup || !setupState.hasSources
-
-    when {
-        !setupState.setupDecisionReady -> Box(modifier.fillMaxSize())
-
-        else -> SignedInApp(
-            accountName = accountName,
-            onSignOut = onSignOut,
-            showTour = needsSetup,
-            setupViewModel = setupViewModel,
-            modifier = modifier
         )
     }
 }
@@ -147,6 +128,7 @@ private fun SignedInApp(
     onSignOut: () -> Unit,
     showTour: Boolean = false,
     setupViewModel: ReconcileViewModel? = null,
+    signInViewModel: SignInViewModel? = null,
     modifier: Modifier = Modifier
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
@@ -220,6 +202,7 @@ private fun SignedInApp(
             if (showTour && setupViewModel != null) {
                 SetupTour(
                     viewModel = setupViewModel,
+                    signInViewModel = signInViewModel,
                     onComplete = { /* state updates drive recomposition — tour disappears */ }
                 )
             }

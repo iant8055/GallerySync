@@ -2,6 +2,7 @@ package com.gallery.sync.ui.setup
 
 import android.Manifest
 import android.os.Build
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -59,6 +60,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
 import com.gallery.sync.domain.backup.LibraryChoice
 import com.gallery.sync.ui.common.formatBytes
+import com.gallery.sync.ui.signin.SignInUiState
+import com.gallery.sync.ui.signin.SignInViewModel
 
 private const val TOTAL_STEPS = 9
 
@@ -71,6 +74,7 @@ private const val TOTAL_STEPS = 9
 @Composable
 fun SetupTour(
     viewModel: ReconcileViewModel,
+    signInViewModel: SignInViewModel? = null,
     onComplete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -101,8 +105,13 @@ fun SetupTour(
     val showOptimization = state.libraryChoice == LibraryChoice.BACK_UP_AND_FREE_SPACE ||
         state.libraryChoice == LibraryChoice.BACK_UP_AND_OPTIMISE_NEW
 
+    val signInState = signInViewModel?.state?.collectAsStateWithLifecycle()
+    val isSignedIn = signInState?.value is SignInUiState.SignedIn
+    val activity = LocalActivity.current
+
     fun canAdvance(): Boolean = when (step) {
         4 -> state.hasSources
+        5 -> isSignedIn
         else -> true
     }
 
@@ -153,6 +162,10 @@ fun SetupTour(
                     )
                     5 -> CloudStorageContent(
                         state = state,
+                        isSignedIn = isSignedIn,
+                        onSignIn = {
+                            activity?.let { signInViewModel?.signIn(it) }
+                        },
                         onChangeDestination = viewModel::openDestinationChooser
                     )
                     6 -> BackupOptionsContent(
@@ -367,6 +380,8 @@ private fun LocalGalleryContent(
 @Composable
 private fun CloudStorageContent(
     state: ReconcileUiState,
+    isSignedIn: Boolean,
+    onSignIn: () -> Unit,
     onChangeDestination: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -379,29 +394,35 @@ private fun CloudStorageContent(
             style = MaterialTheme.typography.bodyMedium
         )
 
-        Text(
-            text = stringResource(R.string.tour_cloud_signed_in),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.primary
-        )
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Text(
-                    text = stringResource(R.string.tour_cloud_destination),
-                    style = MaterialTheme.typography.labelMedium
-                )
-                Text(
-                    text = state.destinationRoot,
-                    style = MaterialTheme.typography.bodyLarge
-                )
+        if (!isSignedIn) {
+            Button(onClick = onSignIn) {
+                Text(stringResource(R.string.sign_in_action))
             }
-            TextButton(onClick = onChangeDestination) {
-                Text(stringResource(R.string.tour_cloud_change))
+        } else {
+            Text(
+                text = stringResource(R.string.tour_cloud_signed_in),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = stringResource(R.string.tour_cloud_destination),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                    Text(
+                        text = state.destinationRoot,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+                TextButton(onClick = onChangeDestination) {
+                    Text(stringResource(R.string.tour_cloud_change))
+                }
             }
         }
     }
