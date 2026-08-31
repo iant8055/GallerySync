@@ -38,7 +38,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.ui.backup.BackupScreen
 import com.gallery.sync.ui.settings.SettingsScreen
 import com.gallery.sync.ui.setup.ReconcileViewModel
-import com.gallery.sync.ui.setup.SetupWizardScreen
+import com.gallery.sync.ui.setup.SetupTour
 import com.gallery.sync.ui.signin.SignInScreen
 import com.gallery.sync.ui.signin.SignInUiState
 import com.gallery.sync.ui.signin.SignInViewModel
@@ -121,16 +121,16 @@ private fun SignedInOrSetup(
     val setupViewModel: ReconcileViewModel = hiltViewModel()
     val setupState by setupViewModel.state.collectAsStateWithLifecycle()
 
-    when {
-        // Every input, not some of them. See ReconcileUiState.setupDecisionReady.
-        !setupState.setupDecisionReady -> Box(modifier.fillMaxSize())
+    val needsSetup = !setupState.hasCompletedSetup || !setupState.hasSources
 
-        !setupState.hasCompletedSetup || !setupState.hasSources ->
-            SetupWizardScreen(modifier = modifier, viewModel = setupViewModel)
+    when {
+        !setupState.setupDecisionReady -> Box(modifier.fillMaxSize())
 
         else -> SignedInApp(
             accountName = accountName,
             onSignOut = onSignOut,
+            showTour = needsSetup,
+            setupViewModel = setupViewModel,
             modifier = modifier
         )
     }
@@ -145,6 +145,8 @@ private fun SignedInOrSetup(
 private fun SignedInApp(
     accountName: String,
     onSignOut: () -> Unit,
+    showTour: Boolean = false,
+    setupViewModel: ReconcileViewModel? = null,
     modifier: Modifier = Modifier
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
@@ -213,6 +215,13 @@ private fun SignedInApp(
                 1 -> RestoreScreen()
                 2 -> ArchiveScreen()
                 else -> SettingsScreen(accountName = accountName, onSignOut = onSignOut)
+            }
+
+            if (showTour && setupViewModel != null) {
+                SetupTour(
+                    viewModel = setupViewModel,
+                    onComplete = { /* state updates drive recomposition — tour disappears */ }
+                )
             }
         }
 

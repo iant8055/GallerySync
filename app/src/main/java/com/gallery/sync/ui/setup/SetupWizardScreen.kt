@@ -1,6 +1,8 @@
 package com.gallery.sync.ui.setup
 
+import android.Manifest
 import android.net.Uri
+import android.os.Build
 import androidx.annotation.StringRes
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -23,10 +25,12 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
@@ -78,6 +82,23 @@ fun SetupWizardScreen(
     val treePicker = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocumentTree()
     ) { uri: Uri? -> uri?.let(viewModel::addSource) }
+
+    val mediaPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { /* result observed via MediaAccess check on the Albums tab */ }
+
+    val context = LocalContext.current
+    LaunchedEffect(step) {
+        if (step is WizardStep.SourceFolders) {
+            val perms = mediaPermissions()
+            val allGranted = perms.all {
+                androidx.core.content.ContextCompat.checkSelfPermission(
+                    context, it
+                ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+            }
+            if (!allGranted) mediaPermissionLauncher.launch(perms)
+        }
+    }
 
     // Capped and centred rather than stretched edge to edge.
     //
@@ -195,9 +216,14 @@ fun SetupWizardScreen(
                     stepIndex++
                 }
             },
-            // Skipping is always available and loses nothing: an unacknowledged topic is presented
-            // again at first use. Acknowledgement gates moving forward, never exiting.
-            onSkip = viewModel::completeSetup
+            onSkip = {
+                if (state.hasSources) {
+                    viewModel.completeSetup()
+                } else {
+                    stepIndex = steps.indexOfFirst { it is WizardStep.SourceFolders }
+                        .coerceAtLeast(0)
+                }
+            }
         )
     }
 }
@@ -208,37 +234,8 @@ fun SetupWizardScreen(
  * Gate 1 comes before the explanations, and the scan report between the gates is the first honest
  * number the user is given about their own library.
  */
-private fun wizardSteps(hasSources: Boolean, willUpload: Boolean): List<WizardStep> = buildList {
-    add(WizardStep.Topic(SetupTopic.WHAT_THIS_IS))
-    add(WizardStep.Topic(SetupTopic.FOLDERS))
-    add(WizardStep.SourceFolders)
-    if (hasSources) add(WizardStep.ScanReport)
-
-    // Each setting follows the topic that explains it. A question asked immediately after its
-    // explanation is answerable; the same question gathered into a settings block at the end is a
-    // guess, which is the failure the acknowledgement record exists to catch.
-    add(WizardStep.Topic(SetupTopic.MODES))
-    add(WizardStep.DefaultMode)
-    add(WizardStep.Topic(SetupTopic.ARCHIVE))
-    add(WizardStep.Topic(SetupTopic.OPTIMISING))
-    add(WizardStep.AutoOptimise)
-    add(WizardStep.Topic(SetupTopic.PROMISE))
-    // Straight after the guarantee, because it is that sentence's limit and reads as evasion
-    // anywhere else.
-    add(WizardStep.Topic(SetupTopic.VERIFY_BACKUPS))
-    add(WizardStep.Topic(SetupTopic.GETTING_BACK))
-    add(WizardStep.Topic(SetupTopic.DELETING))
-    add(WizardStep.DeletionPolicy)
-    add(WizardStep.Topic(SetupTopic.EMPTYING_TRASH))
-    add(WizardStep.Topic(SetupTopic.WHEN_THINGS_HAPPEN))
-    add(WizardStep.LibraryChoice)
-    add(WizardStep.MobileData)
-
-    // Only when something was actually set to upload. Offering a start time for a backup nobody
-    // asked for is a question about nothing — and on the Moto G on 28 Aug 2026 the reverse cost
-    // us an hour: a held first run looks identical to a broken one when nobody mentioned the hold.
-    if (willUpload) add(WizardStep.FirstBackupWindow)
-}
+private fun wizardSteps(hasSources: Boolean, willUpload: Boolean): List<WizardStep> =
+    listOf(WizardStep.SourceFolders)
 
 /** A readable measure. Wider than any phone, so only large screens ever see the cap. */
 private val ContentMaxWidth = 600.dp
@@ -604,3 +601,10 @@ private fun WizardControls(
         }
     }
 }
+
+private fun mediaPermissions(): Array<String> =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        arrayOf(Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO)
+    } else {
+        arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)
+    }

@@ -822,4 +822,52 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     </plurals>
     <string name="exit_warning_go">Archive now</string>
     <string name="exit_warning_leave">Leave</string>
+
+    <!-- Setup tour (tooltip-style bubbles over the Albums tab) -->
+    <string name="tour_step_of">Step %1$d of %2$d</string>
+
+    <string name="tour_welcome_title">Welcome to GallerySync</string>
+    <string name="tour_welcome_body">Let\'s get you set up. This will only take a minute.</string>
+
+    <string name="tour_description_title">How the app works</string>
+    <string name="tour_description_body">GallerySync keeps your photos and videos backed up in OneDrive and manages how much space they take on your phone. Here\'s what you\'ll find:</string>
+    <string name="tour_description_tabs">Albums — see your folders and choose what to back up</string>
+    <string name="tour_description_navigation">Restore — browse and download files from OneDrive</string>
+    <string name="tour_description_settings">Settings — backup destination, optimization, and preferences</string>
+    <string name="tour_description_help">Help — tap the (?) icon on any section header for an explanation</string>
+
+    <string name="tour_install_title">What we\'ll set up</string>
+    <string name="tour_install_body">We need two things to get started:</string>
+    <string name="tour_install_select_gallery">Select the folders on your phone with photos and videos</string>
+    <string name="tour_install_grant_gallery">Grant access so GallerySync can read them</string>
+    <string name="tour_install_select_cloud">Select where backups go in OneDrive</string>
+    <string name="tour_install_grant_cloud">Grant access to your cloud storage</string>
+
+    <string name="tour_local_title">Local Gallery Access</string>
+    <string name="tour_local_body">Pick the folders holding your photos and videos. DCIM is where most phones put the camera.</string>
+    <string name="tour_local_select_folder">Select folder</string>
+    <string name="tour_local_granted">Access granted</string>
+
+    <string name="tour_cloud_title">Cloud Storage</string>
+    <string name="tour_cloud_body">You\'re signed in to OneDrive. Choose where backups are stored.</string>
+    <string name="tour_cloud_signed_in">Signed in to OneDrive</string>
+    <string name="tour_cloud_destination">Backup destination</string>
+    <string name="tour_cloud_change">Change</string>
+
+    <string name="tour_backup_title">Choose your backup plan</string>
+
+    <string name="tour_optimise_title">Optimization Settings</string>
+    <string name="tour_optimise_body">Optimization replaces photos already safe in OneDrive with smaller copies on this phone, freeing storage. You can fine-tune this later in Settings.</string>
+    <string name="tour_optimise_note">These settings can be changed at any time in the Settings tab.</string>
+
+    <string name="tour_delay_title">Ready to back up</string>
+    <string name="tour_delay_summary">You have %1$d files (%2$s) to back up.</string>
+    <string name="tour_delay_scanning">Scanning your library…</string>
+    <string name="tour_delay_no_data">Add a folder on the previous step to see what needs backing up.</string>
+    <string name="tour_delay_note">Backup runs in the background. You can close the app and it will continue.</string>
+
+    <string name="tour_progress_title">Backup Progress</string>
+    <string name="tour_progress_body">Once backup starts, this is where you\'ll see progress. The backup runs in the background — you can use your phone normally.</string>
+    <string name="tour_progress_waiting">Waiting to start</string>
+    <string name="tour_progress_note">You can check progress any time by opening the app. Tap Finish to complete setup.</string>
 </resources>
