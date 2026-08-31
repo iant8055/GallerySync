@@ -57,7 +57,7 @@ data class ReconcileUiState(
     /** Set when a picked tree could not be used, so the screen can say why. */
     val directoryRefused: Boolean = false,
     /** Gate 2, as currently selected. Not applied until the user says so. */
-    val libraryChoice: LibraryChoice = LibraryChoice.CHOOSE_PER_ALBUM,
+    val libraryChoice: LibraryChoice = LibraryChoice.BACK_UP_EVERYTHING,
     /** Albums changed by the last apply, for the confirmation line. Null before any apply. */
     val libraryApplied: Int? = null,
     val applyingLibraryChoice: Boolean = false,
@@ -88,7 +88,7 @@ data class ReconcileUiState(
     val allowMeteredNetwork: Boolean = false,
     val defaultAlbumMode: AlbumMode = AlbumMode.DEFAULT,
     val isAutoOptimiseEnabled: Boolean = false,
-    val optimiseVideo: Boolean = true,
+    val optimiseVideo: Boolean = false,
     val videoQuality: VideoQuality = VideoQuality.DEFAULT,
     val cloudDeletionPolicy: CloudDeletionPolicy = CloudDeletionPolicy.DEFAULT
 ) {

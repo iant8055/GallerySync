@@ -57,7 +57,7 @@ data class BackupPreferences(
     /** How old a photo must be before it may be optimised. Per file - see [MediaAge]. */
     val photoOptimiseAge: MediaAge = MediaAge.DEFAULT,
     /** Optimise video at all? See [optimisePhotos]. */
-    val optimiseVideo: Boolean = true,
+    val optimiseVideo: Boolean = false,
     /** Whether video is optimised on its own, or on a tap. Only asked when [optimiseVideo]. */
     val videoOptimiseMode: OptimiseMode = OptimiseMode.DEFAULT,
     val defaultAlbumMode: AlbumMode = AlbumMode.DEFAULT,
@@ -216,7 +216,7 @@ class BackupSettings @Inject constructor(
             optimisePhotos = stored[KEY_OPTIMISE_PHOTOS] ?: true,
             photoOptimiseMode = OptimiseMode.fromNameOrDefault(stored[KEY_PHOTO_OPTIMISE_MODE]),
             photoOptimiseAge = MediaAge.fromNameOrDefault(stored[KEY_PHOTO_OPTIMISE_AGE]),
-            optimiseVideo = stored[KEY_OPTIMISE_VIDEO] ?: true,
+            optimiseVideo = stored[KEY_OPTIMISE_VIDEO] ?: false,
             videoOptimiseMode = OptimiseMode.fromNameOrDefault(stored[KEY_VIDEO_OPTIMISE_MODE]),
             defaultAlbumMode = stored[KEY_DEFAULT_ALBUM_MODE]
                 ?.let { runCatching { AlbumMode.valueOf(it) }.getOrNull() }
