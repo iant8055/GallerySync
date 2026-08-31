@@ -485,6 +485,9 @@ private fun OptimizationContent(
     optimisePhotos: Boolean,
     onOptimisePhotosChanged: (Boolean) -> Unit
 ) {
+    var localChecked by rememberSaveable { mutableStateOf(optimisePhotos) }
+    if (localChecked != optimisePhotos) localChecked = optimisePhotos
+
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
             text = stringResource(R.string.tour_optimise_title),
@@ -496,17 +499,23 @@ private fun OptimizationContent(
         )
 
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 stringResource(R.string.settings_optimise_photos),
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.weight(1f)
             )
             Switch(
-                checked = optimisePhotos,
-                onCheckedChange = onOptimisePhotosChanged,
+                checked = localChecked,
+                onCheckedChange = { value ->
+                    localChecked = value
+                    onOptimisePhotosChanged(value)
+                },
                 colors = SwitchDefaults.colors(
                     uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     uncheckedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant
