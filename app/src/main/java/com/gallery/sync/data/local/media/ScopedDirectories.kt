@@ -25,7 +25,9 @@ data class GrantedDirectory(
     /** The tree URI, kept so the grant can be released when the folder is removed. */
     val treeUri: String,
     /** Path relative to the volume root, e.g. `DCIM/Camera`. Comparable to `RELATIVE_PATH`. */
-    val relativePath: String
+    val relativePath: String,
+    /** Volume ID from the SAF tree document ID — `primary` for internal storage. */
+    val volume: String = "primary"
 ) {
     val displayName: String get() = TreeScope.displayNameOf(relativePath)
 }
@@ -143,8 +145,9 @@ class ScopedDirectories @Inject constructor(
     private fun toDirectory(treeUri: Uri): GrantedDirectory? {
         val documentId = runCatching { DocumentsContract.getTreeDocumentId(treeUri) }.getOrNull()
             ?: return null
+        val volume = documentId.substringBefore(':', missingDelimiterValue = "primary")
         val path = TreeScope.pathFromTreeDocumentId(documentId) ?: return null
-        return GrantedDirectory(treeUri = treeUri.toString(), relativePath = path)
+        return GrantedDirectory(treeUri = treeUri.toString(), relativePath = path, volume = volume)
     }
 
     private companion object {

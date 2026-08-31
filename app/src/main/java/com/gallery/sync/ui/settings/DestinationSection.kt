@@ -67,6 +67,10 @@ fun DestinationSection(
     ) {
         // Naming the folder is not the point — "OneDrive/Samsung Gallery/DCIM" means nothing on its
         // own, while "change it and those already-found files stop being found" is a real decision.
+        Text(
+            text = stringResource(R.string.destination_title),
+            style = MaterialTheme.typography.bodyLarge
+        )
         LabelWithAction(
             action = {
                 OutlinedButton(onClick = viewModel::openDestinationChooser) {
@@ -74,20 +78,10 @@ fun DestinationSection(
                 }
             }
         ) {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(
-                    text = stringResource(R.string.destination_current, state.destinationRoot),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                // Only true while the destination still is where Samsung put things. Said once the
-                // user has moved it, this would be a lie about why the numbers exist.
-                if (state.destinationRoot == RemoteRoots.SAMSUNG_GALLERY) {
-                    Text(
-                        text = stringResource(R.string.destination_why),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
+            Text(
+                text = stringResource(R.string.destination_current, state.destinationRoot),
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
     }
 

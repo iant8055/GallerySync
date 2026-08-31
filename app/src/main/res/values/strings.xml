@@ -8,6 +8,10 @@
     <string name="tab_settings">Settings</string>
 
     <!-- Settings sections -->
+    <string name="settings_general">General</string>
+    <string name="settings_albums">Albums</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_language_detail">Coming soon</string>
     <string name="settings_appearance">Appearance</string>
     <string name="theme_system">System</string>
     <string name="theme_light">Light</string>
@@ -67,10 +71,42 @@
     <string name="settings_video_age_detail">Only affects the copy on this phone. Video is backed up to OneDrive straight away whatever this is set to.</string>
     <string name="media_age_immediately">Straight away</string>
     <string name="media_age_immediately_warning">Reaches clips shot today. They stay in your gallery and still play, but editing one starts from the smaller copy until you fetch the original back.</string>
+    <string name="media_age_one_hour">1 hour</string>
+    <string name="media_age_twelve_hours">12 hours</string>
+    <string name="media_age_one_day">1 day</string>
     <string name="media_age_one_week">1 week</string>
     <string name="media_age_one_month">1 month</string>
     <string name="media_age_one_year">1 year</string>
 
+    <string name="settings_backup">Backup</string>
+    <string name="settings_sync">Sync</string>
+    <string name="settings_sync_folders">Sync folders</string>
+    <string name="settings_restore">Restore</string>
+    <string name="settings_archive">Archive</string>
+
+    <!-- Section help tooltips -->
+    <string name="help_general">Settings that apply across the whole app — appearance, network, and language.</string>
+    <string name="help_albums">Which folders to watch, what happens to cloud copies when you delete from this phone, and the default mode for new albums.</string>
+    <string name="help_backup">Your OneDrive account and the folder where backups are stored. Changing the folder does not affect files already backed up.</string>
+    <string name="help_sync">Optimise photos and videos to save storage. Files are only changed after they are verified in OneDrive.</string>
+    <string name="help_restore">Browse and download files from OneDrive that are not currently on this phone.</string>
+    <string name="help_archive">Remove local copies after they are confirmed in OneDrive. Files go to your phone\'s trash, not permanently deleted.</string>
+
+    <string name="settings_optimise_master">Optimise photos and video</string>
+    <string name="settings_optimise_master_on">Photos and video in Sync albums are replaced by smaller copies once verified in OneDrive and old enough.</string>
+    <string name="settings_optimise_master_off">Nothing is optimised. Photos and video stay at full size on this phone.</string>
+    <string name="settings_optimise_photos">Optimise photos</string>
+    <string name="settings_optimise_photos_on">Photos in Sync albums are optimised for storage.</string>
+    <string name="settings_optimise_photos_off">Photos are left at full size.</string>
+    <string name="settings_optimise_videos">Optimise video</string>
+    <string name="settings_optimise_videos_on">Video in Sync albums is optimised.</string>
+    <string name="settings_optimise_videos_off">Video is left at full size.</string>
+    <string name="settings_optimise_mode">Mode</string>
+    <string name="settings_optimise_mode_auto">Automatic</string>
+    <string name="settings_optimise_mode_manual">Manual</string>
+    <string name="settings_older_than">Older than</string>
+    <string name="settings_quality">Quality</string>
+    <string name="settings_photo_age">Optimise photos older than</string>
     <string name="settings_automatic">Automatic sync</string>
     <string name="settings_optimise">Optimise photos</string>
     <string name="settings_auto_optimise">Optimise automatically</string>
@@ -429,7 +465,7 @@
     <string name="archive_ready_action">Remove from this phone</string>
 
     <!-- Deletion sync: what happens to the OneDrive copy when a file leaves the phone. -->
-    <string name="deletion_title">When you delete a photo from this phone</string>
+    <string name="deletion_title">When you delete a photo/video from this phone</string>
     <string name="deletion_leave">Leave the OneDrive copy</string>
     <string name="deletion_leave_detail">Nothing is ever removed from OneDrive. Deleting on your phone only frees space here.</string>
     <string name="deletion_ask">Ask me about the OneDrive copy</string>
@@ -565,6 +601,9 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
         already backed up or what mode an album was set to.
     -->
     <string name="sources_remove_note">Removing a folder stops it being watched. Nothing already backed up is lost, and adding it again restores its settings.</string>
+    <string name="sources_help_title">About folders</string>
+    <string name="sources_full_path">%1$s / %2$s</string>
+    <string name="volume_internal">Internal storage</string>
     <string name="sources_count">%1$s in this folder</string>
 
     <!-- First-run reconciliation: what OneDrive already holds. -->
@@ -619,8 +658,8 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
     <string name="library_first_run_warning">This starts your first backup, which is the long one. It runs at the time set below.</string>
 
     <!-- Destination folder. -->
-    <string name="destination_title">Where future backups go</string>
-    <string name="destination_current">%1$s</string>
+    <string name="destination_title">Current folder location</string>
+    <string name="destination_current">OneDrive / %1$s</string>
     <string name="destination_why">This is where Samsung already put yours, which is how the files above were found.</string>
     <string name="destination_change">Change</string>
     <string name="destination_dialog_title">Where new backups go</string>

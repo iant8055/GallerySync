@@ -113,6 +113,14 @@ object SignalIcons {
         listOf("m6 9 6 6 6-6")
     }
 
+    val Help: ImageVector = stroked("help") {
+        listOf(
+            "M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z",
+            "M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3",
+            "M12 17h.01"
+        )
+    }
+
     /** A folder row leads somewhere. */
     val ChevronRight: ImageVector = stroked("chevronRight") {
         listOf("m9 18 6-6-6-6")

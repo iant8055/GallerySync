@@ -53,24 +53,22 @@ fun DeletionSection(
     LaunchedEffect(Unit) { viewModel.refresh() }
 
     Column(
-        modifier = modifier.fillMaxWidth().padding(16.dp),
+        modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
             text = stringResource(R.string.deletion_title),
-            style = MaterialTheme.typography.titleMedium
+            style = MaterialTheme.typography.bodyLarge
         )
 
         Column(Modifier.selectableGroup()) {
             PolicyRow(
                 label = stringResource(R.string.deletion_leave),
-                detail = stringResource(R.string.deletion_leave_detail),
                 selected = state.policy == CloudDeletionPolicy.LEAVE,
                 onSelect = { viewModel.setPolicy(CloudDeletionPolicy.LEAVE) }
             )
             PolicyRow(
                 label = stringResource(R.string.deletion_ask),
-                detail = stringResource(R.string.deletion_ask_detail),
                 selected = state.policy == CloudDeletionPolicy.ASK,
                 onSelect = { viewModel.setPolicy(CloudDeletionPolicy.ASK) }
             )
@@ -238,7 +236,6 @@ private fun OutcomeLines(outcome: com.gallery.sync.domain.backup.DeletionOutcome
 @Composable
 private fun PolicyRow(
     label: String,
-    detail: String,
     selected: Boolean,
     onSelect: () -> Unit
 ) {
@@ -247,13 +244,11 @@ private fun PolicyRow(
             .fillMaxWidth()
             .selectable(selected = selected, onClick = onSelect, role = Role.RadioButton)
             .padding(vertical = 8.dp),
+        verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         RadioButton(selected = selected, onClick = null)
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            Text(label, style = MaterialTheme.typography.bodyLarge)
-            Text(detail, style = MaterialTheme.typography.bodySmall)
-        }
+        Text(label, style = MaterialTheme.typography.bodyLarge)
     }
 }
 

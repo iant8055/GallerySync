@@ -26,8 +26,10 @@ import com.gallery.sync.domain.backup.AlbumCloudClaim
 import com.gallery.sync.domain.backup.BackupEngine
 import com.gallery.sync.domain.backup.CloudConfirmation
 import com.gallery.sync.domain.backup.ReconcileWithCloud
+import com.gallery.sync.domain.backup.MediaAge
 import com.gallery.sync.domain.backup.OptimiseMode
 import com.gallery.sync.domain.backup.StopReason
+import com.gallery.sync.domain.backup.VideoQuality
 import com.gallery.sync.util.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -201,6 +203,15 @@ data class BackupUiState(
     val isAutoOptimiseEnabled: Boolean = false,
     /** Allow automatic runs on mobile data, not just Wi-Fi. */
     val allowMeteredNetwork: Boolean = false,
+    val isOptimiseEnabled: Boolean = false,
+    val optimisePhotos: Boolean = true,
+    val photoOptimiseMode: OptimiseMode = OptimiseMode.DEFAULT,
+    val photoOptimiseAge: MediaAge = MediaAge.DEFAULT,
+    val optimiseVideo: Boolean = true,
+    val videoOptimiseMode: OptimiseMode = OptimiseMode.DEFAULT,
+    val videoOptimiseAge: MediaAge = MediaAge.DEFAULT,
+    val videoQuality: VideoQuality = VideoQuality.DEFAULT,
+    val hasCompletedFirstBackup: Boolean = false,
     /**
      * Albums set to Archive that have files confirmed in OneDrive and still on the phone.
      *
@@ -435,7 +446,16 @@ class BackupViewModel @Inject constructor(
                     isPaused = prefs.isPaused,
                     runBaselineBytes = prefs.runBaselineBytes,
                     defaultAlbumMode = prefs.defaultAlbumMode,
-                    archiveDelayedUntilEpochMillis = prefs.archiveDelayedUntilEpochMillis
+                    archiveDelayedUntilEpochMillis = prefs.archiveDelayedUntilEpochMillis,
+                    isOptimiseEnabled = prefs.isOptimiseEnabled,
+                    optimisePhotos = prefs.optimisePhotos,
+                    photoOptimiseMode = prefs.photoOptimiseMode,
+                    photoOptimiseAge = prefs.photoOptimiseAge,
+                    optimiseVideo = prefs.optimiseVideo,
+                    videoOptimiseMode = prefs.videoOptimiseMode,
+                    videoOptimiseAge = prefs.videoOptimiseAge,
+                    videoQuality = prefs.videoQuality,
+                    hasCompletedFirstBackup = prefs.hasCompletedFirstBackup
                 )
             }
         }
@@ -732,6 +752,38 @@ class BackupViewModel @Inject constructor(
             settings.setOptimiseEnabled(enabled)
             if (enabled) settings.setPhotoOptimiseMode(OptimiseMode.Auto)
         }
+    }
+
+    fun setOptimiseEnabled(enabled: Boolean) {
+        viewModelScope.launch { settings.setOptimiseEnabled(enabled) }
+    }
+
+    fun setOptimisePhotos(enabled: Boolean) {
+        viewModelScope.launch { settings.setOptimisePhotos(enabled) }
+    }
+
+    fun setPhotoOptimiseMode(mode: OptimiseMode) {
+        viewModelScope.launch { settings.setPhotoOptimiseMode(mode) }
+    }
+
+    fun setPhotoOptimiseAge(age: MediaAge) {
+        viewModelScope.launch { settings.setPhotoOptimiseAge(age) }
+    }
+
+    fun setOptimiseVideo(enabled: Boolean) {
+        viewModelScope.launch { settings.setOptimiseVideo(enabled) }
+    }
+
+    fun setVideoOptimiseMode(mode: OptimiseMode) {
+        viewModelScope.launch { settings.setVideoOptimiseMode(mode) }
+    }
+
+    fun setVideoOptimiseAge(age: MediaAge) {
+        viewModelScope.launch { settings.setVideoOptimiseAge(age) }
+    }
+
+    fun setVideoQuality(quality: VideoQuality) {
+        viewModelScope.launch { settings.setVideoQuality(quality) }
     }
 
     /**
