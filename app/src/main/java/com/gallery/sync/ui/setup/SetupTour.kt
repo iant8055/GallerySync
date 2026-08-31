@@ -35,6 +35,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -81,16 +82,19 @@ fun SetupTour(
     ) { uri: Uri? -> uri?.let(viewModel::addSource) }
 
     val context = LocalContext.current
+    var mediaGranted by rememberSaveable {
+        mutableStateOf(
+            mediaPermissions().all {
+                ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+            }
+        )
+    }
     val mediaPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
-    ) { /* Albums tab picks up the grant via its own check */ }
+    ) { results -> if (results.values.all { it }) mediaGranted = true }
 
     fun requestMediaPermission() {
-        val perms = mediaPermissions()
-        val allGranted = perms.all {
-            ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
-        }
-        if (!allGranted) mediaPermissionLauncher.launch(perms)
+        if (!mediaGranted) mediaPermissionLauncher.launch(mediaPermissions())
     }
 
     // Compute effective step count — step 7 only shows if optimization was chosen
@@ -142,6 +146,7 @@ fun SetupTour(
                     3 -> InstallationStepsContent()
                     4 -> LocalGalleryContent(
                         state = state,
+                        hasMediaPermission = mediaGranted,
                         onPickFolder = { treePicker.launch(null) },
                         onGrantMediaAccess = ::requestMediaPermission,
                         onRemove = viewModel::removeSource
@@ -287,15 +292,11 @@ private fun InstallationStepsContent() {
 @Composable
 private fun LocalGalleryContent(
     state: ReconcileUiState,
+    hasMediaPermission: Boolean,
     onPickFolder: () -> Unit,
     onGrantMediaAccess: () -> Unit,
     onRemove: (String) -> Unit
 ) {
-    val context = LocalContext.current
-    val hasMediaPermission = mediaPermissions().all {
-        ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
-    }
-
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
             text = stringResource(R.string.tour_local_title),
@@ -328,15 +329,20 @@ private fun LocalGalleryContent(
             )
         }
 
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            OutlinedButton(onClick = onPickFolder) {
-                Text(stringResource(R.string.tour_local_select_folder))
+        Button(onClick = onPickFolder) {
+            Text(stringResource(R.string.tour_local_select_folder))
+        }
+
+        if (!hasMediaPermission) {
+            OutlinedButton(onClick = onGrantMediaAccess) {
+                Text(stringResource(R.string.permission_grant_action))
             }
-            if (!hasMediaPermission) {
-                Button(onClick = onGrantMediaAccess) {
-                    Text(stringResource(R.string.permission_grant_action))
-                }
-            }
+        } else if (!state.hasSources) {
+            Text(
+                text = stringResource(R.string.tour_local_media_granted),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
 
         if (state.hasSources && hasMediaPermission) {

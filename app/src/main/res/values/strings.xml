@@ -846,7 +846,8 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_local_title">Local Gallery Access</string>
     <string name="tour_local_body">Pick the folders holding your photos and videos. DCIM is where most phones put the camera.</string>
     <string name="tour_local_select_folder">Select folder</string>
-    <string name="tour_local_granted">Access granted</string>
+    <string name="tour_local_media_granted">Photo access granted — now select a folder</string>
+    <string name="tour_local_granted">All set</string>
 
     <string name="tour_cloud_title">Cloud Storage</string>
     <string name="tour_cloud_body">You\'re signed in to OneDrive. Choose where backups are stored.</string>
