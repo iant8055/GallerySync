@@ -851,7 +851,6 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_discover_body">We found these folders containing your photos and videos. Check the ones you want to include in backup.</string>
     <string name="tour_discover_scanning">Scanning your photos and videos…</string>
     <string name="tour_discover_none_found">No media folders found on this device.</string>
-    <string name="tour_discover_granting">Granting access to folder %1$d of %2$d…</string>
 
     <string name="tour_local_title">Local Gallery Access</string>
     <string name="tour_local_body">Pick the folders holding your photos and videos. DCIM is where most phones save your pictures and videos.</string>

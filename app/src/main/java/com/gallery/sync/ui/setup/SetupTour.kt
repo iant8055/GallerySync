@@ -62,7 +62,6 @@ import androidx.compose.ui.window.PopupProperties
 import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.provider.DocumentsContract
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -108,10 +107,6 @@ fun SetupTour(
         ActivityResultContracts.OpenDocumentTree()
     ) { uri: Uri? -> uri?.let(viewModel::addSource) }
 
-    val grantPicker = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocumentTree()
-    ) { uri: Uri? -> viewModel.onDirectoryGrantResult(uri) }
-
     val context = LocalContext.current
     var mediaGranted by rememberSaveable {
         mutableStateOf(
@@ -137,7 +132,7 @@ fun SetupTour(
     val activity = LocalActivity.current
 
     fun canAdvance(): Boolean = when (step) {
-        4 -> state.directoryChecks.values.any { it } && !state.grantingDirectories
+        4 -> state.directoryChecks.values.any { it }
         5 -> isSignedIn
         else -> true
     }
@@ -148,36 +143,20 @@ fun SetupTour(
         if (step == TOTAL_STEPS) viewModel.startBackupAndObserve()
     }
 
-    // Discover directories when media permission is granted and we're on step 4
+    // Request media permission automatically when arriving at step 4, then discover
     LaunchedEffect(mediaGranted, step) {
-        if (mediaGranted && step == 4 && state.discoveredDirectories.isEmpty() && !state.discoveryRunning) {
+        if (step == 4 && !mediaGranted) {
+            requestMediaPermission()
+        } else if (mediaGranted && step == 4 && state.discoveredDirectories.isEmpty() && !state.discoveryRunning) {
             viewModel.discoverDirectories()
-        }
-    }
-
-    // Launch the SAF picker when pendingGrantDirectory changes
-    LaunchedEffect(state.pendingGrantDirectory) {
-        state.pendingGrantDirectory?.let { dirName ->
-            val initialUri = DocumentsContract.buildDocumentUri(
-                "com.android.externalstorage.documents",
-                "primary:$dirName"
-            )
-            grantPicker.launch(initialUri)
-        }
-    }
-
-    // Auto-advance from step 4 when the grant flow finishes and we have sources
-    LaunchedEffect(state.grantingDirectories, state.hasSources) {
-        if (step == 4 && !state.grantingDirectories && state.hasSources &&
-            state.grantedSoFar > 0) {
-            step = 5
         }
     }
 
     val onNext: () -> Unit = {
         when {
             step == 4 -> {
-                viewModel.startDirectoryGrants()
+                viewModel.saveSelectedDirectories()
+                step = 5
             }
             step == TOTAL_STEPS -> {
                 viewModel.completeSetup()
@@ -633,23 +612,6 @@ private fun DirectoryDiscoveryContent(
                 )
             }
 
-            if (state.grantingDirectories) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(top = 4.dp)
-                ) {
-                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-                    Text(
-                        text = stringResource(
-                            R.string.tour_discover_granting,
-                            state.grantedSoFar + 1,
-                            state.grantTotal
-                        ),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
         }
     }
 }

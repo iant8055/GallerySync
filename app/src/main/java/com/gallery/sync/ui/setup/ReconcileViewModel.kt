@@ -107,15 +107,7 @@ data class ReconcileUiState(
     /** Whether directory discovery is running. */
     val discoveryRunning: Boolean = false,
     /** Which directories the user has checked. Key = directory name, value = checked. */
-    val directoryChecks: Map<String, Boolean> = emptyMap(),
-    /** The directory name the SAF picker should open for next, or null if idle. */
-    val pendingGrantDirectory: String? = null,
-    /** Whether the sequential SAF grant flow is in progress. */
-    val grantingDirectories: Boolean = false,
-    /** Total directories to grant in the current flow. */
-    val grantTotal: Int = 0,
-    /** How many grants have been processed (confirmed or skipped) so far. */
-    val grantedSoFar: Int = 0
+    val directoryChecks: Map<String, Boolean> = emptyMap()
 ) {
     /**
      * Whether Gate 1 has been answered.
@@ -124,7 +116,7 @@ data class ReconcileUiState(
      * a screen reporting zero outstanding files would announce that everything is already backed up
      * — which is false, and false in the direction that stops someone acting.
      */
-    val hasSources: Boolean get() = directories.isNotEmpty()
+    val hasSources: Boolean get() = directories.isNotEmpty() || directoryChecks.values.any { it }
 
     /**
      * Whether enough is known to decide between the wizard and the app.
@@ -161,7 +153,6 @@ class ReconcileViewModel @Inject constructor(
     private val _state = MutableStateFlow(ReconcileUiState())
     val state: StateFlow<ReconcileUiState> = _state.asStateFlow()
 
-    private val grantQueue = ArrayDeque<String>()
 
     private var job: Job? = null
 
@@ -409,71 +400,17 @@ class ReconcileViewModel @Inject constructor(
     }
 
     /**
-     * Starts the sequential SAF grant flow for all checked directories.
+     * Saves the user's checked directories and marks Gate 1 as answered.
      *
-     * Skips directories that are already covered by an existing grant. Sets
-     * [ReconcileUiState.pendingGrantDirectory] to trigger the SAF picker in the composable.
+     * No SAF picker needed — the runtime media permission already grants read access to all
+     * photos and videos. The selected directory names scope the scan via [TreeScope.isInScope].
      */
-    fun startDirectoryGrants() {
+    fun saveSelectedDirectories() {
         viewModelScope.launch {
-            val currentDirs = sources.current()
-            val alreadyGranted = currentDirs.map { it.relativePath.trim('/') }.toSet()
-
-            val toGrant = _state.value.directoryChecks
+            val selected = _state.value.directoryChecks
                 .filter { (_, checked) -> checked }
                 .keys
-                .filter { name ->
-                    // Not already covered by an existing grant
-                    !alreadyGranted.any { granted ->
-                        granted == name || granted.startsWith("$name/") || name.startsWith("$granted/")
-                    }
-                }
-                .sorted()
-
-            if (toGrant.isEmpty()) {
-                // Everything is already granted — just advance
-                return@launch
-            }
-
-            grantQueue.clear()
-            grantQueue.addAll(toGrant)
-            _state.value = _state.value.copy(
-                grantingDirectories = true,
-                grantTotal = toGrant.size,
-                grantedSoFar = 0,
-                pendingGrantDirectory = grantQueue.removeFirst()
-            )
-        }
-    }
-
-    /**
-     * Processes the result of one SAF picker in the grant flow.
-     *
-     * If the user confirmed, the grant is stored. Either way, the next directory is popped
-     * from the queue. When the queue is empty the flow ends.
-     */
-    fun onDirectoryGrantResult(treeUri: Uri?) {
-        viewModelScope.launch {
-            if (treeUri != null) {
-                val added = sources.add(treeUri)
-                if (!added) {
-                    Logger.w("ReconcileVM", "grant flow: refused a tree")
-                }
-            }
-            // Whether confirmed or cancelled, move to next
-            val nextCount = _state.value.grantedSoFar + 1
-            if (grantQueue.isEmpty()) {
-                _state.value = _state.value.copy(
-                    grantingDirectories = false,
-                    pendingGrantDirectory = null,
-                    grantedSoFar = nextCount
-                )
-            } else {
-                _state.value = _state.value.copy(
-                    grantedSoFar = nextCount,
-                    pendingGrantDirectory = grantQueue.removeFirst()
-                )
-            }
+            sources.saveSelectedDirectories(selected)
         }
     }
 

@@ -62,12 +62,43 @@ class ScopedDirectories @Inject constructor(
     /** Just the paths, for [TreeScope.isInScope]. */
     val scope: Flow<List<String>> = directories.map { dirs -> dirs.map { it.relativePath } }
 
-    suspend fun currentScope(): List<String> = scope.first()
+    /**
+     * Directory names the user selected in the wizard (e.g. "DCIM", "Pictures").
+     *
+     * These provide read-only scoping via the media permission the wizard already requests.
+     * SAF tree grants are separate and only needed later for write operations (proxying).
+     * When SAF grants exist they take priority; selected directories act as the fallback.
+     */
+    val selectedDirectories: Flow<Set<String>> =
+        context.scopeDataStore.data.map { it[KEY_SELECTED_DIRS].orEmpty() }
+
+    /**
+     * The effective scope: SAF grant paths if any exist, otherwise selected directory names.
+     *
+     * SAF grants carry write access, so they take priority when present. The selected directories
+     * from the wizard are a lighter alternative that only needs the media runtime permission.
+     */
+    suspend fun currentScope(): List<String> {
+        val safScope = scope.first()
+        if (safScope.isNotEmpty()) return safScope
+        return selectedDirectories.first().toList()
+    }
 
     suspend fun current(): List<GrantedDirectory> = directories.first()
 
-    /** Whether anything has been granted. The engine has nothing correct to do until it has. */
-    suspend fun hasAny(): Boolean = current().isNotEmpty()
+    /** Whether anything has been granted or selected. The engine has nothing correct to do until it has. */
+    suspend fun hasAny(): Boolean = current().isNotEmpty() || selectedDirectories.first().isNotEmpty()
+
+    /**
+     * Stores the directory names the user checked in the wizard.
+     *
+     * These are top-level MediaStore directories (e.g. "DCIM", "Pictures") that scope the scan
+     * using the runtime media permission alone — no SAF picker needed.
+     */
+    suspend fun saveSelectedDirectories(names: Set<String>) {
+        context.scopeDataStore.edit { prefs -> prefs[KEY_SELECTED_DIRS] = names }
+        Logger.i(TAG, "selected directories: $names")
+    }
 
     /**
      * Records a folder the user picked, taking read and write permission that survives a reboot.
@@ -153,5 +184,6 @@ class ScopedDirectories @Inject constructor(
     private companion object {
         const val TAG = "ScopedDirs"
         val KEY_TREES = stringSetPreferencesKey("granted_tree_uris")
+        val KEY_SELECTED_DIRS = stringSetPreferencesKey("selected_directories")
     }
 }
