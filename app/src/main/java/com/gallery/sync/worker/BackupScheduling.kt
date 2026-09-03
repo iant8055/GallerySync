@@ -43,6 +43,9 @@ object BackupScheduling {
     /** Marks a run as user-initiated. Carried into every continuation of that chain. */
     const val KEY_MANUAL = "manual"
 
+    /** Upload all albums regardless of album modes. Used by the wizard on fresh installs. */
+    const val KEY_ALL_ALBUMS = "all_albums"
+
     /** Turns automatic backup on. Safe to call repeatedly. */
     fun enable(workManager: WorkManager, allowMeteredNetwork: Boolean) {
         enqueueContentTriggered(workManager, allowMeteredNetwork)
@@ -113,11 +116,17 @@ object BackupScheduling {
     fun enqueueContinuation(
         workManager: WorkManager,
         allowMeteredNetwork: Boolean,
-        manual: Boolean = false
+        manual: Boolean = false,
+        allAlbums: Boolean = false
     ) {
         val request = OneTimeWorkRequestBuilder<BackupWorker>()
             .setConstraints(constraints(allowMeteredNetwork))
-            .setInputData(Data.Builder().putBoolean(KEY_MANUAL, manual).build())
+            .setInputData(
+                Data.Builder()
+                    .putBoolean(KEY_MANUAL, manual)
+                    .putBoolean(KEY_ALL_ALBUMS, allAlbums)
+                    .build()
+            )
             .build()
 
         // A manual chain continues under its own name, so Stop cancels the whole chain with one
@@ -137,8 +146,12 @@ object BackupScheduling {
      * mobile data" is a separate choice the user made and a tap on Sync now is not a licence to
      * spend their data plan.
      */
-    fun enqueueManualRun(workManager: WorkManager, allowMeteredNetwork: Boolean) {
-        enqueueContinuation(workManager, allowMeteredNetwork, manual = true)
+    fun enqueueManualRun(
+        workManager: WorkManager,
+        allowMeteredNetwork: Boolean,
+        allAlbums: Boolean = false
+    ) {
+        enqueueContinuation(workManager, allowMeteredNetwork, manual = true, allAlbums = allAlbums)
     }
 
     /** Stops a manual chain, including whatever batch it is in the middle of. */

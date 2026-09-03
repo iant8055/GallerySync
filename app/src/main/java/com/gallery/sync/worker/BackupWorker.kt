@@ -111,7 +111,8 @@ class BackupWorker @AssistedInject constructor(
             return Result.success()
         }
 
-        val result = engine.uploadPending { progress ->
+        val allAlbums = inputData.getBoolean(BackupScheduling.KEY_ALL_ALBUMS, false)
+        val result = engine.uploadPending(allAlbums = allAlbums) { progress ->
             setProgressAsync(
                 Data.Builder()
                     .putInt(PROGRESS_COMPLETED, progress.completed)
@@ -148,7 +149,8 @@ class BackupWorker @AssistedInject constructor(
             BackupScheduling.enqueueContinuation(
                 WorkManager.getInstance(applicationContext),
                 preferences.allowMeteredNetwork,
-                manual = manual
+                manual = manual,
+                allAlbums = allAlbums
             )
         }
 

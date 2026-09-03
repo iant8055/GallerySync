@@ -189,7 +189,15 @@ data class BackupPreferences(
      * held new video out of the cloud would rebuild the founding failure while wearing the name of
      * the fix.
      */
-    val videoOptimiseAge: MediaAge = MediaAge.DEFAULT
+    val videoOptimiseAge: MediaAge = MediaAge.DEFAULT,
+    /**
+     * The wizard step the user was on when the app last closed, or 0 if no wizard is in progress.
+     *
+     * Persisted so that relaunching the app during a Step 9 backup resumes at Step 9 rather than
+     * restarting the wizard from scratch. Cleared when the user finishes or skips setup.
+     */
+    val wizardStep: Int = 0,
+    val wizardBackupTotal: Int = 0
 )
 
 /**
@@ -250,7 +258,9 @@ class BackupSettings @Inject constructor(
             archiveDelayedUntilEpochMillis = stored[KEY_ARCHIVE_DELAYED_UNTIL] ?: 0L,
             videoQuality = VideoQuality.fromNameOrDefault(stored[KEY_VIDEO_QUALITY]),
             optimiseCutoffEpochMillis = stored[KEY_OPTIMISE_CUTOFF] ?: OptimiseCutoff.EVERYTHING,
-            videoOptimiseAge = MediaAge.fromNameOrDefault(stored[KEY_VIDEO_OPTIMISE_AGE])
+            videoOptimiseAge = MediaAge.fromNameOrDefault(stored[KEY_VIDEO_OPTIMISE_AGE]),
+            wizardStep = stored[KEY_WIZARD_STEP] ?: 0,
+            wizardBackupTotal = stored[KEY_WIZARD_BACKUP_TOTAL] ?: 0
         )
     }
 
@@ -346,7 +356,21 @@ class BackupSettings @Inject constructor(
 
     /** Marks guided setup finished. Skipping counts — the tour is optional, the gates are not. */
     suspend fun setSetupCompleted(completed: Boolean) {
-        context.dataStore.edit { it[KEY_SETUP_COMPLETE] = completed }
+        context.dataStore.edit {
+            it[KEY_SETUP_COMPLETE] = completed
+            if (completed) {
+                it[KEY_WIZARD_STEP] = 0
+                it[KEY_WIZARD_BACKUP_TOTAL] = 0
+            }
+        }
+    }
+
+    suspend fun setWizardStep(step: Int) {
+        context.dataStore.edit { it[KEY_WIZARD_STEP] = step }
+    }
+
+    suspend fun setWizardBackupTotal(total: Int) {
+        context.dataStore.edit { it[KEY_WIZARD_BACKUP_TOTAL] = total }
     }
 
     suspend fun acknowledgeTopic(key: String) {
@@ -446,5 +470,7 @@ class BackupSettings @Inject constructor(
         val KEY_VIDEO_QUALITY = stringPreferencesKey("video_quality")
         val KEY_OPTIMISE_CUTOFF = longPreferencesKey("optimise_cutoff")
         val KEY_VIDEO_OPTIMISE_AGE = stringPreferencesKey("video_optimise_age")
+        val KEY_WIZARD_STEP = intPreferencesKey("wizard_step")
+        val KEY_WIZARD_BACKUP_TOTAL = intPreferencesKey("wizard_backup_total")
     }
 }

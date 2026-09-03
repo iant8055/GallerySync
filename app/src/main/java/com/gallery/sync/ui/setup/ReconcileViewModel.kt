@@ -23,6 +23,8 @@ import com.gallery.sync.domain.backup.ReconcileWithCloud
 import com.gallery.sync.domain.backup.RemoteRoots
 import com.gallery.sync.domain.backup.VideoQuality
 import com.gallery.sync.util.Logger
+import com.gallery.sync.worker.BackupScheduling
+import androidx.work.WorkManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
@@ -107,7 +109,9 @@ data class ReconcileUiState(
     /** Whether directory discovery is running. */
     val discoveryRunning: Boolean = false,
     /** Which directories the user has checked. Key = directory name, value = checked. */
-    val directoryChecks: Map<String, Boolean> = emptyMap()
+    val directoryChecks: Map<String, Boolean> = emptyMap(),
+    /** Persisted wizard step — non-zero means the wizard was interrupted and should resume here. */
+    val wizardStep: Int = 0
 ) {
     /**
      * Whether Gate 1 has been answered.
@@ -149,6 +153,8 @@ class ReconcileViewModel @Inject constructor(
     private val backupEngine: BackupEngine,
     private val scanner: MediaScanner
 ) : ViewModel() {
+
+    private val workManager = WorkManager.getInstance(context)
 
     private val _state = MutableStateFlow(ReconcileUiState())
     val state: StateFlow<ReconcileUiState> = _state.asStateFlow()
@@ -213,8 +219,7 @@ class ReconcileViewModel @Inject constructor(
                     optimiseVideo = prefs.optimiseVideo,
                     videoQuality = prefs.videoQuality,
                     cloudDeletionPolicy = prefs.cloudDeletionPolicy,
-                    // Recomputed whenever a setting changes, so moving the start time updates the
-                    // "waiting until" line immediately rather than at the next run.
+                    wizardStep = prefs.wizardStep,
                     firstBackupHold = if (prefs.hasCompletedFirstBackup) {
                         null
                     } else {
@@ -273,66 +278,80 @@ class ReconcileViewModel @Inject constructor(
         viewModelScope.launch { settings.setCloudDeletionPolicy(policy) }
     }
 
+    fun saveWizardStep(step: Int) {
+        viewModelScope.launch { settings.setWizardStep(step) }
+    }
+
     /** Ends guided setup, whether it was completed or skipped. */
     fun completeSetup() {
         viewModelScope.launch { settings.setSetupCompleted(true) }
     }
 
-    fun startBackupAndObserve() {
+    fun startBackupWorker() {
         viewModelScope.launch {
+            settings.setWizardStep(TOTAL_STEPS)
+
             _state.value = _state.value.copy(backupRunning = true, backupCurrentFile = "")
 
             backupEngine.refreshLedger()
             val requeued = backupEngine.reconcileAndRequeue()
-            Logger.i("SetupTour", "reconcileAndRequeue: $requeued files requeued")
+            Logger.i(TAG, "reconcileAndRequeue: $requeued files requeued")
 
-            val grandTotal = backupEngine.outstandingCount()
+            val grandTotal = backupEngine.outstandingCountAll()
+            settings.setWizardBackupTotal(grandTotal)
             _state.value = _state.value.copy(backupTotal = grandTotal)
-            Logger.i("SetupTour", "total pending: $grandTotal")
+            Logger.i(TAG, "total pending: $grandTotal")
 
-            var done = 0
-            var batch = 1
-            var networkRetries = 0
-            while (true) {
-                val result = backupEngine.uploadPending(allAlbums = false) { progress ->
-                    _state.value = _state.value.copy(
-                        backupRunning = true,
-                        backupCompleted = done + progress.completed,
-                        backupTotal = grandTotal,
-                        backupCurrentFile = progress.currentFile
-                    )
-                }
-                done += result.uploaded + result.skipped + result.pruned
-                Logger.i(
-                    "SetupTour",
-                    "batch $batch: ${result.uploaded} uploaded, ${result.skipped} skipped, " +
-                        "${result.remaining} remaining, stopped=${result.stoppedBecause}"
+            if (grandTotal == 0) {
+                _state.value = _state.value.copy(
+                    backupRunning = false,
+                    backupFinished = true
                 )
-
-                if (result.remaining == 0) break
-
-                if (result.stoppedBecause != null) {
-                    if (result.stoppedBecause == com.gallery.sync.domain.backup.StopReason.NETWORK &&
-                        networkRetries < 3
-                    ) {
-                        networkRetries++
-                        Logger.i("SetupTour", "network error, retry $networkRetries after 5s")
-                        kotlinx.coroutines.delay(5000)
-                        continue
-                    }
-                    Logger.w("SetupTour", "stopping: ${result.stoppedBecause}")
-                    break
-                }
-                networkRetries = 0
-                batch++
+                return@launch
             }
 
-            _state.value = _state.value.copy(
-                backupRunning = false,
-                backupFinished = true,
-                backupCompleted = done,
-                backupTotal = if (grandTotal > 0) grandTotal else done
-            )
+            val prefs = settings.current()
+            BackupScheduling.enqueueManualRun(workManager, prefs.allowMeteredNetwork, allAlbums = true)
+            observeBackupWorker(grandTotal)
+        }
+    }
+
+    fun observeBackupWorker(knownTotal: Int = 0) {
+        viewModelScope.launch {
+            val savedTotal = settings.current().wizardBackupTotal
+            val total = when {
+                knownTotal > 0 -> knownTotal
+                savedTotal > 0 -> savedTotal
+                else -> backupEngine.outstandingCountAll()
+            }
+
+            _state.value = _state.value.copy(backupRunning = true, backupTotal = total)
+
+            var highWater = _state.value.backupCompleted
+
+            while (true) {
+                val remaining = backupEngine.outstandingCountAll()
+                val completed = (total - remaining).coerceAtLeast(0)
+
+                if (completed > highWater) highWater = completed
+
+                if (remaining == 0) {
+                    _state.value = _state.value.copy(
+                        backupRunning = false,
+                        backupFinished = true,
+                        backupTotal = total,
+                        backupCompleted = total
+                    )
+                    return@launch
+                }
+
+                _state.value = _state.value.copy(
+                    backupCompleted = highWater,
+                    backupTotal = total
+                )
+
+                kotlinx.coroutines.delay(3000)
+            }
         }
     }
 
@@ -480,5 +499,10 @@ class ReconcileViewModel @Inject constructor(
     override fun onCleared() {
         job?.cancel()
         super.onCleared()
+    }
+
+    private companion object {
+        const val TAG = "ReconcileVM"
+        const val TOTAL_STEPS = 9
     }
 }

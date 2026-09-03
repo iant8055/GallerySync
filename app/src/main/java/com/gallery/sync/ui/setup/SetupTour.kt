@@ -99,7 +99,17 @@ fun SetupTour(
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    var step by rememberSaveable { mutableIntStateOf(1) }
+
+    // Resume at persisted step if the wizard was interrupted during backup
+    val resumeStep = state.wizardStep
+    var step by rememberSaveable { mutableIntStateOf(if (resumeStep == TOTAL_STEPS) TOTAL_STEPS else 1) }
+
+    // On relaunch, if the persisted step is 9, jump there and re-observe the worker
+    LaunchedEffect(resumeStep) {
+        if (resumeStep == TOTAL_STEPS && step != TOTAL_STEPS) {
+            step = TOTAL_STEPS
+        }
+    }
 
     LaunchedEffect(step) { onStepChanged(step) }
 
@@ -137,10 +147,16 @@ fun SetupTour(
         else -> true
     }
 
-    val backupComplete = state.hasCompletedFirstBackup
+    val backupComplete = state.backupFinished
 
     LaunchedEffect(step) {
-        if (step == TOTAL_STEPS) viewModel.startBackupAndObserve()
+        if (step == TOTAL_STEPS) {
+            if (resumeStep == TOTAL_STEPS) {
+                viewModel.observeBackupWorker()
+            } else {
+                viewModel.startBackupWorker()
+            }
+        }
     }
 
     // Request media permission automatically when arriving at step 4, then discover
@@ -159,7 +175,9 @@ fun SetupTour(
                 step = 5
             }
             step == TOTAL_STEPS -> {
-                viewModel.completeSetup()
+                if (backupComplete) {
+                    viewModel.completeSetup()
+                }
                 onComplete()
             }
             else -> {
