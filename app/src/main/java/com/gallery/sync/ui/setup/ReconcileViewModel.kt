@@ -1,7 +1,9 @@
 package com.gallery.sync.ui.setup
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gallery.sync.domain.backup.BackupEngine
 import com.gallery.sync.domain.backup.CloudReconciliation
 import com.gallery.sync.data.local.settings.BackupSettings
 import android.net.Uri
@@ -18,7 +20,9 @@ import com.gallery.sync.domain.backup.OptimiseMode
 import com.gallery.sync.domain.backup.ReconcileWithCloud
 import com.gallery.sync.domain.backup.RemoteRoots
 import com.gallery.sync.domain.backup.VideoQuality
+import com.gallery.sync.util.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -90,7 +94,12 @@ data class ReconcileUiState(
     val isAutoOptimiseEnabled: Boolean = false,
     val optimiseVideo: Boolean = false,
     val videoQuality: VideoQuality = VideoQuality.DEFAULT,
-    val cloudDeletionPolicy: CloudDeletionPolicy = CloudDeletionPolicy.DEFAULT
+    val cloudDeletionPolicy: CloudDeletionPolicy = CloudDeletionPolicy.DEFAULT,
+    val backupCompleted: Int = 0,
+    val backupTotal: Int = 0,
+    val backupCurrentFile: String = "",
+    val backupRunning: Boolean = false,
+    val backupFinished: Boolean = false
 ) {
     /**
      * Whether Gate 1 has been answered.
@@ -123,11 +132,13 @@ data class ReconcileUiState(
 
 @HiltViewModel
 class ReconcileViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val reconcile: ReconcileWithCloud,
     private val settings: BackupSettings,
     private val charging: ChargingState,
     private val sources: ScopedDirectories,
-    private val applyChoice: ApplyLibraryChoice
+    private val applyChoice: ApplyLibraryChoice,
+    private val backupEngine: BackupEngine
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ReconcileUiState())
@@ -255,6 +266,64 @@ class ReconcileViewModel @Inject constructor(
     /** Ends guided setup, whether it was completed or skipped. */
     fun completeSetup() {
         viewModelScope.launch { settings.setSetupCompleted(true) }
+    }
+
+    fun startBackupAndObserve() {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(backupRunning = true, backupCurrentFile = "")
+
+            backupEngine.refreshLedger()
+            val requeued = backupEngine.reconcileAndRequeue()
+            Logger.i("SetupTour", "reconcileAndRequeue: $requeued files requeued")
+
+            val grandTotal = backupEngine.outstandingCountAll()
+            _state.value = _state.value.copy(backupTotal = grandTotal)
+            Logger.i("SetupTour", "total pending: $grandTotal")
+
+            var done = 0
+            var batch = 1
+            var networkRetries = 0
+            while (true) {
+                val result = backupEngine.uploadPending(allAlbums = true) { progress ->
+                    _state.value = _state.value.copy(
+                        backupRunning = true,
+                        backupCompleted = done + progress.completed,
+                        backupTotal = grandTotal,
+                        backupCurrentFile = progress.currentFile
+                    )
+                }
+                done += result.uploaded + result.skipped + result.pruned
+                Logger.i(
+                    "SetupTour",
+                    "batch $batch: ${result.uploaded} uploaded, ${result.skipped} skipped, " +
+                        "${result.remaining} remaining, stopped=${result.stoppedBecause}"
+                )
+
+                if (result.remaining == 0) break
+
+                if (result.stoppedBecause != null) {
+                    if (result.stoppedBecause == com.gallery.sync.domain.backup.StopReason.NETWORK &&
+                        networkRetries < 3
+                    ) {
+                        networkRetries++
+                        Logger.i("SetupTour", "network error, retry $networkRetries after 5s")
+                        kotlinx.coroutines.delay(5000)
+                        continue
+                    }
+                    Logger.w("SetupTour", "stopping: ${result.stoppedBecause}")
+                    break
+                }
+                networkRetries = 0
+                batch++
+            }
+
+            _state.value = _state.value.copy(
+                backupRunning = false,
+                backupFinished = true,
+                backupCompleted = done,
+                backupTotal = if (grandTotal > 0) grandTotal else done
+            )
+        }
     }
 
     /** Selects a Gate 2 option without acting on it. Applying is a separate, deliberate tap. */

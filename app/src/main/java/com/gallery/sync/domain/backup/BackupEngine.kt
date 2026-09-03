@@ -413,6 +413,51 @@ class BackupEngine @Inject constructor(
         entryDao.countPendingInSelectedAlbums()
     }
 
+    suspend fun outstandingCountAll(): Int = withContext(dispatcher) {
+        entryDao.countPendingAll()
+    }
+
+    /**
+     * Compares every UPLOADED ledger entry against what OneDrive actually holds, and requeues
+     * anything that is missing.
+     *
+     * This is the setup wizard's cloud check: it trusts the drive, not the ledger, because the
+     * ledger records what was once sent and the drive records what is there now. A folder deleted
+     * from OneDrive by hand leaves ledger rows insisting the files are safe — this is the only
+     * path that corrects them.
+     *
+     * Returns the number of entries requeued.
+     */
+    suspend fun reconcileAndRequeue(): Int = withContext(dispatcher) {
+        val uploadedEntries = entryDao.uploadedEntries()
+        if (uploadedEntries.isEmpty()) return@withContext 0
+
+        val albumGroups = uploadedEntries.groupBy { it.album }
+        val toRequeue = mutableListOf<Long>()
+
+        for ((album, entries) in albumGroups) {
+            val remoteIndex = remoteIndexFor(album) ?: continue
+
+            for (entry in entries) {
+                val expected = if (entry.isProxied && entry.remoteSizeBytes != null) {
+                    entry.remoteSizeBytes
+                } else {
+                    entry.sizeBytes
+                }
+                val ref = remoteIndex[entry.displayName]
+                if (ref == null || ref.sizeBytes != expected) {
+                    toRequeue += entry.mediaStoreId
+                }
+            }
+        }
+
+        if (toRequeue.isNotEmpty()) {
+            toRequeue.chunked(SQL_BATCH).forEach { entryDao.requeueForUpload(it) }
+            Logger.i(TAG, "reconcileAndRequeue: ${toRequeue.size} files requeued for upload")
+        }
+        toRequeue.size
+    }
+
     /**
      * Uploads up to [limit] outstanding files, and no more than roughly [maxBytes] of them.
      *
@@ -431,6 +476,7 @@ class BackupEngine @Inject constructor(
     suspend fun uploadPending(
         limit: Int = DEFAULT_BATCH,
         maxBytes: Long = DEFAULT_BATCH_BYTES,
+        allAlbums: Boolean = false,
         onProgress: (BackupProgress) -> Unit = {}
     ): BackupRunResult =
         withContext(dispatcher) {
@@ -443,8 +489,11 @@ class BackupEngine @Inject constructor(
                 )
             }
 
-            val pending = entryDao.nextPending(limit = limit, maxAttempts = MAX_ATTEMPTS)
-                .let { candidates -> withinByteBudget(candidates, maxBytes) }
+            val pending = if (allAlbums) {
+                entryDao.nextPendingAll(limit = limit, maxAttempts = MAX_ATTEMPTS)
+            } else {
+                entryDao.nextPending(limit = limit, maxAttempts = MAX_ATTEMPTS)
+            }.let { candidates -> withinByteBudget(candidates, maxBytes) }
             var uploaded = 0
             var failed = 0
             var skipped = 0
@@ -649,7 +698,7 @@ class BackupEngine @Inject constructor(
                             return@withContext BackupRunResult(
                                 uploaded = uploaded,
                                 failed = failed,
-                                remaining = entryDao.countPendingInSelectedAlbums(),
+                                remaining = if (allAlbums) entryDao.countPendingAll() else entryDao.countPendingInSelectedAlbums(),
                                 skipped = skipped,
                                 deferred = deferred,
                                 pruned = pruned,
@@ -667,7 +716,7 @@ class BackupEngine @Inject constructor(
                 failed = failed,
                 // A real count. This previously reused nextPending with a limit of 1, so it could
                 // only ever report 0 or 1 — "1 still to go" actually meant "at least one".
-                remaining = entryDao.countPendingInSelectedAlbums(),
+                remaining = if (allAlbums) entryDao.countPendingAll() else entryDao.countPendingInSelectedAlbums(),
                 skipped = skipped,
                 deferred = deferred,
                 pruned = pruned

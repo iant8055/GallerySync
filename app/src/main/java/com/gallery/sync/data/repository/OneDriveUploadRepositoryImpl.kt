@@ -16,6 +16,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.EOFException
 import java.io.FileNotFoundException
 import java.io.IOException
 import javax.inject.Inject
@@ -100,6 +101,12 @@ class OneDriveUploadRepositoryImpl @Inject constructor(
             // one deleted photo.
             Logger.w(TAG, "upload: local file is gone, skipping this one")
             DataResult.Failure(RemoteError.LocalFileMissing)
+        } catch (e: EOFException) {
+            // The local file is shorter than sizeBytes claims — truncated, corrupt, or mid-write.
+            // A per-file problem, not a network one: letting it fall through to IOException would
+            // stop the entire run over one bad photo.
+            Logger.w(TAG, "upload: local file truncated, skipping: ${e.message}")
+            DataResult.Failure(RemoteError.Unknown(e))
         } catch (e: IOException) {
             Logger.w(TAG, "upload: network failure", e)
             DataResult.Failure(RemoteError.Network)

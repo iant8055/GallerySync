@@ -95,7 +95,7 @@ private fun GallerySyncApp(modifier: Modifier = Modifier) {
     val needsSetup = !setupState.hasCompletedSetup || !setupState.hasSources
 
     when {
-        needsSetup -> SignedInApp(
+        needsSetup || signInState !is SignInUiState.SignedIn -> SignedInApp(
             accountName = (signInState as? SignInUiState.SignedIn)?.accountName ?: "",
             onSignOut = signInViewModel::signOut,
             showTour = true,
@@ -104,15 +104,10 @@ private fun GallerySyncApp(modifier: Modifier = Modifier) {
             modifier = modifier
         )
 
-        signInState is SignInUiState.SignedIn -> SignedInApp(
+        else -> SignedInApp(
             accountName = (signInState as SignInUiState.SignedIn).accountName,
             onSignOut = signInViewModel::signOut,
             modifier = modifier
-        )
-
-        else -> SignInScreen(
-            modifier = modifier,
-            viewModel = signInViewModel
         )
     }
 }
@@ -190,6 +185,9 @@ private fun SignedInApp(
         )
     }
 
+    var tourStep by remember { mutableIntStateOf(1) }
+    val hideNavBar = showTour && tourStep == 1
+
     Column(modifier = modifier.fillMaxSize()) {
         Box(modifier = Modifier.weight(1f)) {
             when (selectedTab) {
@@ -203,16 +201,20 @@ private fun SignedInApp(
                 SetupTour(
                     viewModel = setupViewModel,
                     signInViewModel = signInViewModel,
-                    onComplete = { /* state updates drive recomposition — tour disappears */ }
+                    onComplete = { activity?.finish() },
+                    onSwitchTab = { selectedTab = it },
+                    onStepChanged = { tourStep = it }
                 )
             }
         }
 
-        SignalNavBar(
-            destinations = destinations,
-            selected = selectedTab,
-            onSelect = { selectedTab = it },
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
+        if (!hideNavBar) {
+            SignalNavBar(
+                destinations = destinations,
+                selected = selectedTab,
+                onSelect = { selectedTab = it },
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+        }
     }
 }

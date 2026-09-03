@@ -97,7 +97,7 @@ fun SettingsScreen(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
+            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 80.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
 
@@ -347,18 +347,16 @@ fun SettingsScreen(
         HorizontalDivider()
 
         // ── Restart Setup Wizard ─────────────────────────────────────────────
-        if (!state.hasCompletedFirstBackup) {
-            Text(
-                text = stringResource(R.string.settings_setup),
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Text(
-                text = stringResource(R.string.settings_setup_detail),
-                style = MaterialTheme.typography.bodySmall
-            )
-            OutlinedButton(onClick = viewModel::restartSetup) {
-                Text(stringResource(R.string.settings_setup_action))
-            }
+        Text(
+            text = stringResource(R.string.settings_setup),
+            style = MaterialTheme.typography.bodyLarge
+        )
+        Text(
+            text = stringResource(R.string.settings_setup_detail),
+            style = MaterialTheme.typography.bodySmall
+        )
+        OutlinedButton(onClick = viewModel::restartSetup) {
+            Text(stringResource(R.string.settings_setup_action))
         }
     }
 }

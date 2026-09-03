@@ -213,6 +213,9 @@ interface BackupEntryDao {
     )
     suspend fun uploadedKeys(uploaded: BackupState = BackupState.UPLOADED): List<UploadedKey>
 
+    @Query("SELECT * FROM backup_entries WHERE state = :uploaded")
+    suspend fun uploadedEntries(uploaded: BackupState = BackupState.UPLOADED): List<BackupEntryEntity>
+
     /**
      * Every key the ledger holds for a file it still intends to upload.
      *
@@ -364,6 +367,24 @@ interface BackupEntryDao {
         pending: BackupState = BackupState.PENDING,
         failed: BackupState = BackupState.FAILED
     )
+
+    @Query(
+        """
+        SELECT * FROM backup_entries
+        WHERE state != :uploaded
+          AND attemptCount < :maxAttempts
+        ORDER BY dateModifiedEpochSeconds DESC
+        LIMIT :limit
+        """
+    )
+    suspend fun nextPendingAll(
+        limit: Int,
+        maxAttempts: Int,
+        uploaded: BackupState = BackupState.UPLOADED
+    ): List<BackupEntryEntity>
+
+    @Query("SELECT COUNT(*) FROM backup_entries WHERE state != :uploaded")
+    suspend fun countPendingAll(uploaded: BackupState = BackupState.UPLOADED): Int
 
     @Query("SELECT COUNT(*) FROM backup_entries WHERE state = :state")
     fun observeCount(state: BackupState): Flow<Int>

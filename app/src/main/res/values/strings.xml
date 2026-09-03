@@ -48,12 +48,12 @@
     -->
     <string name="settings_video_quality">Optimise video</string>
     <string name="settings_video_quality_detail">Old video in Sync albums is replaced by a smaller copy on this phone. The full-quality original stays in OneDrive and can be fetched back whenever you want.</string>
-    <string name="video_quality_high">High</string>
-    <string name="video_quality_high_detail">Smallest files — 480p, saves about %1$d%%</string>
-    <string name="video_quality_medium">Medium</string>
-    <string name="video_quality_medium_detail">Balanced — 720p, saves about %1$d%%</string>
-    <string name="video_quality_low">Low</string>
-    <string name="video_quality_low_detail">Best quality — 1080p kept, saves about %1$d%%</string>
+    <string name="video_quality_high">High — 480p</string>
+    <string name="video_quality_high_detail">Saves about %1$d%%</string>
+    <string name="video_quality_medium">Medium — 720p</string>
+    <string name="video_quality_medium_detail">Saves about %1$d%%</string>
+    <string name="video_quality_low">Low — 1080p</string>
+    <string name="video_quality_low_detail">Saves about %1$d%%</string>
 
     <!--
         The age gate. Ian, 19 Aug 2026: four values, shared with the Archive age so the app has one
@@ -828,14 +828,17 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_step_of">Step %1$d of %2$d</string>
 
     <string name="tour_welcome_title">Welcome to GallerySync</string>
-    <string name="tour_welcome_body">Let\'s get you set up. This will only take a minute.</string>
+    <string name="tour_welcome_body">Take a quick peek at the navigation and features.</string>
+    <string name="tour_take_tour">Take a tour</string>
 
     <string name="tour_description_title">How the app works</string>
     <string name="tour_description_body">GallerySync keeps your photos and videos backed up in OneDrive and manages how much space they take on your phone. Here\'s what you\'ll find:</string>
-    <string name="tour_description_tabs">Albums — see your folders and choose what to back up</string>
-    <string name="tour_description_navigation">Restore — browse and download files from OneDrive</string>
-    <string name="tour_description_settings">Settings — backup destination, optimization, and preferences</string>
-    <string name="tour_description_help">Help — tap the (?) icon on any section header for an explanation</string>
+    <string name="tour_description_tabs">See your folders and choose what to back up</string>
+    <string name="tour_description_navigation">Browse and download files from OneDrive</string>
+    <string name="tour_description_archive">Review files verified in the cloud and free up space</string>
+    <string name="tour_description_settings">Backup destination, optimization, and preferences</string>
+    <string name="tour_description_help">Guides, tips, and answers to common questions</string>
+    <string name="tab_help">Help</string>
 
     <string name="tour_install_title">What we\'ll set up</string>
     <string name="tour_install_body">There are four simple steps to get you started.</string>
@@ -864,17 +867,23 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_optimise_photos_saving">Estimated photo savings: %1$s</string>
     <string name="tour_optimise_video_saving">Estimated video savings: %1$s (%2$d%% reduction)</string>
     <string name="tour_optimise_total_saving">Total estimated savings: %1$s</string>
-    <string name="tour_optimise_video_quality">How much to shrink video</string>
+    <string name="tour_optimise_video_quality">Video optimization level</string>
 
     <string name="tour_delay_title">Ready to back up</string>
-    <string name="tour_delay_summary">You have %1$d files (%2$s) to back up.</string>
+    <string name="tour_delay_backup_size">You have selected %1$s to back up</string>
+    <string name="tour_delay_saving_size">You will save %1$s in local storage</string>
     <string name="tour_delay_scanning">Scanning your library…</string>
-    <string name="tour_delay_no_data">Add a folder on the previous step to see what needs backing up.</string>
-    <string name="tour_delay_note">Backup runs in the background. You can close the app and it will continue.</string>
+    <string name="tour_delay_when">Do you want to perform backup now?</string>
+    <string name="tour_delay_right_now">Right now</string>
+    <string name="tour_delay_later">Start in %1$d hours</string>
+    <string name="tour_delay_hours_label">Delay</string>
+    <string name="tour_delay_security">For the security of your data, the app will be unavailable until a backup has been successfully completed and verified.</string>
 
     <string name="tour_progress_title">Backup Progress</string>
     <string name="tour_progress_body">Your backup is running. The backup runs in the background — you can use your phone normally.</string>
     <string name="tour_progress_waiting">Waiting to start</string>
+    <string name="tour_progress_scanning">Scanning your library…</string>
+    <string name="tour_progress_uploading">Uploading %1$d of %2$d</string>
     <string name="tour_progress_complete">Congratulations your backup has finished successfully and has been verified. Press Finish.</string>
     <string name="tour_progress_note">You can check progress any time by opening the app.</string>
 </resources>
