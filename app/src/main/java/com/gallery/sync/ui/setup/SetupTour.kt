@@ -535,13 +535,13 @@ private fun InstallationStepsContent() {
         )
         Text(
             text = stringResource(R.string.tour_install_body),
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyLarge
         )
 
         BulletItem(stringResource(R.string.tour_install_select_gallery))
         BulletItem(stringResource(R.string.tour_install_grant_gallery))
-        BulletItem(stringResource(R.string.tour_install_select_cloud))
         BulletItem(stringResource(R.string.tour_install_grant_cloud))
+        BulletItem(stringResource(R.string.tour_install_select_cloud))
     }
 }
 
@@ -1704,8 +1704,8 @@ private fun BulletItem(text: String) {
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.padding(start = 8.dp)
     ) {
-        Text("•", style = MaterialTheme.typography.bodyMedium)
-        Text(text, style = MaterialTheme.typography.bodyMedium)
+        Text("•", style = MaterialTheme.typography.bodyLarge)
+        Text(text, style = MaterialTheme.typography.bodyLarge)
     }
 }
 

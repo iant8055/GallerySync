@@ -842,10 +842,10 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
 
     <string name="tour_install_title">What we\'ll set up</string>
     <string name="tour_install_body">There are four simple steps to get you started.</string>
-    <string name="tour_install_select_gallery">Select the folders on your phone with photos and videos</string>
-    <string name="tour_install_grant_gallery">Grant access so GallerySync can read them</string>
-    <string name="tour_install_select_cloud">Select where backups go in OneDrive</string>
+    <string name="tour_install_select_gallery">Select the folders on your phone you want to include in backup</string>
+    <string name="tour_install_grant_gallery">Grant access to individual directories</string>
     <string name="tour_install_grant_cloud">Grant access to your cloud storage</string>
+    <string name="tour_install_select_cloud">Select where backups go in OneDrive</string>
 
     <string name="tour_local_title">Local Gallery Access</string>
     <string name="tour_local_body">Pick the folders holding your photos and videos. DCIM is where most phones save your pictures and videos.</string>
