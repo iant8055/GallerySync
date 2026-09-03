@@ -45,6 +45,22 @@ data class MediaAlbum(
     val videoCount: Int = 0
 )
 
+/** A top-level directory on the device containing media files, discovered by scanning MediaStore. */
+data class DiscoveredDirectory(
+    /** Top-level directory name, e.g. "DCIM", "Pictures", "Download". */
+    val name: String,
+    /** Number of distinct sub-folders (albums) within this directory. */
+    val albumCount: Int,
+    /** Number of photo files. */
+    val photoCount: Int,
+    /** Number of video files. */
+    val videoCount: Int,
+    /** Total size of all files in bytes. */
+    val totalBytes: Long
+) {
+    val totalFiles: Int get() = photoCount + videoCount
+}
+
 /** How much of the user's media the app is currently allowed to see. */
 enum class MediaAccess {
 

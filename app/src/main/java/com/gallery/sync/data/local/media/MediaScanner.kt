@@ -94,6 +94,46 @@ class MediaScanner @Inject constructor(
         items.sortedByDescending { it.dateModifiedEpochSeconds }
     }
 
+    /**
+     * Discovers top-level media directories by scanning all of MediaStore (unscoped).
+     *
+     * Groups every photo and video by the first segment of its `RELATIVE_PATH` (e.g. "DCIM",
+     * "Pictures", "Download"). Excludes hidden directories (starting with ".") and directories
+     * with zero media files.
+     *
+     * This is NOT scoped to granted folders — it reads everything MediaStore returns, because
+     * the point is to show the user what exists so they can choose what to grant.
+     */
+    suspend fun discoverDirectories(): List<DiscoveredDirectory> = withContext(dispatcher) {
+        if (access() == MediaAccess.NONE) {
+            Logger.w(TAG, "discoverDirectories: no media permission")
+            return@withContext emptyList()
+        }
+
+        val allItems = scanEverything()
+
+        allItems
+            .filter { it.relativePath != null }
+            .groupBy { item ->
+                // First segment of relativePath: "DCIM/Camera/" -> "DCIM"
+                item.relativePath!!.trim('/').substringBefore('/')
+            }
+            .filter { (name, _) ->
+                name.isNotEmpty() && !name.startsWith(".")
+            }
+            .map { (name, items) ->
+                DiscoveredDirectory(
+                    name = name,
+                    albumCount = items.map { it.album }.distinct().size,
+                    photoCount = items.count { !it.isVideo },
+                    videoCount = items.count { it.isVideo },
+                    totalBytes = items.sumOf { it.sizeBytes }
+                )
+            }
+            .sortedByDescending { it.totalFiles }
+            .also { Logger.d(TAG, "discoverDirectories: ${it.size} directories found") }
+    }
+
     /** Albums with their item count and total size, for the backup selection UI. */
     suspend fun scanAlbums(): List<MediaAlbum> = withContext(dispatcher) {
         scanAll()

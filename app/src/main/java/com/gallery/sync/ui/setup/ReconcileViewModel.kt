@@ -3,6 +3,8 @@ package com.gallery.sync.ui.setup
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gallery.sync.data.local.media.DiscoveredDirectory
+import com.gallery.sync.data.local.media.MediaScanner
 import com.gallery.sync.domain.backup.BackupEngine
 import com.gallery.sync.domain.backup.CloudReconciliation
 import com.gallery.sync.data.local.settings.BackupSettings
@@ -99,7 +101,21 @@ data class ReconcileUiState(
     val backupTotal: Int = 0,
     val backupCurrentFile: String = "",
     val backupRunning: Boolean = false,
-    val backupFinished: Boolean = false
+    val backupFinished: Boolean = false,
+    /** Directories found by scanning MediaStore, before any grants. */
+    val discoveredDirectories: List<DiscoveredDirectory> = emptyList(),
+    /** Whether directory discovery is running. */
+    val discoveryRunning: Boolean = false,
+    /** Which directories the user has checked. Key = directory name, value = checked. */
+    val directoryChecks: Map<String, Boolean> = emptyMap(),
+    /** The directory name the SAF picker should open for next, or null if idle. */
+    val pendingGrantDirectory: String? = null,
+    /** Whether the sequential SAF grant flow is in progress. */
+    val grantingDirectories: Boolean = false,
+    /** Total directories to grant in the current flow. */
+    val grantTotal: Int = 0,
+    /** How many grants have been processed (confirmed or skipped) so far. */
+    val grantedSoFar: Int = 0
 ) {
     /**
      * Whether Gate 1 has been answered.
@@ -138,11 +154,14 @@ class ReconcileViewModel @Inject constructor(
     private val charging: ChargingState,
     private val sources: ScopedDirectories,
     private val applyChoice: ApplyLibraryChoice,
-    private val backupEngine: BackupEngine
+    private val backupEngine: BackupEngine,
+    private val scanner: MediaScanner
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ReconcileUiState())
     val state: StateFlow<ReconcileUiState> = _state.asStateFlow()
+
+    private val grantQueue = ArrayDeque<String>()
 
     private var job: Job? = null
 
@@ -276,7 +295,7 @@ class ReconcileViewModel @Inject constructor(
             val requeued = backupEngine.reconcileAndRequeue()
             Logger.i("SetupTour", "reconcileAndRequeue: $requeued files requeued")
 
-            val grandTotal = backupEngine.outstandingCountAll()
+            val grandTotal = backupEngine.outstandingCount()
             _state.value = _state.value.copy(backupTotal = grandTotal)
             Logger.i("SetupTour", "total pending: $grandTotal")
 
@@ -284,7 +303,7 @@ class ReconcileViewModel @Inject constructor(
             var batch = 1
             var networkRetries = 0
             while (true) {
-                val result = backupEngine.uploadPending(allAlbums = true) { progress ->
+                val result = backupEngine.uploadPending(allAlbums = false) { progress ->
                     _state.value = _state.value.copy(
                         backupRunning = true,
                         backupCompleted = done + progress.completed,
@@ -359,6 +378,102 @@ class ReconcileViewModel @Inject constructor(
             // Observed on hardware 25 Aug 2026: the folder appeared only after a restart.
             val added = sources.add(treeUri)
             _state.value = _state.value.copy(directoryRefused = !added)
+        }
+    }
+
+    /** Scans MediaStore for all media directories and pre-checks the obvious ones. */
+    fun discoverDirectories() {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(discoveryRunning = true)
+            val dirs = scanner.discoverDirectories()
+
+            // Pre-check heuristic: DCIM and Pictures always, plus anything with 50+ files
+            val defaultChecked = setOf("DCIM", "Pictures")
+            val checks = dirs.associate { dir ->
+                dir.name to (dir.name in defaultChecked || dir.totalFiles >= 50)
+            }
+
+            _state.value = _state.value.copy(
+                discoveredDirectories = dirs,
+                directoryChecks = checks,
+                discoveryRunning = false
+            )
+        }
+    }
+
+    /** Toggles a directory's checked state. */
+    fun toggleDirectoryCheck(name: String) {
+        val current = _state.value.directoryChecks.toMutableMap()
+        current[name] = !(current[name] ?: false)
+        _state.value = _state.value.copy(directoryChecks = current)
+    }
+
+    /**
+     * Starts the sequential SAF grant flow for all checked directories.
+     *
+     * Skips directories that are already covered by an existing grant. Sets
+     * [ReconcileUiState.pendingGrantDirectory] to trigger the SAF picker in the composable.
+     */
+    fun startDirectoryGrants() {
+        viewModelScope.launch {
+            val currentDirs = sources.current()
+            val alreadyGranted = currentDirs.map { it.relativePath.trim('/') }.toSet()
+
+            val toGrant = _state.value.directoryChecks
+                .filter { (_, checked) -> checked }
+                .keys
+                .filter { name ->
+                    // Not already covered by an existing grant
+                    !alreadyGranted.any { granted ->
+                        granted == name || granted.startsWith("$name/") || name.startsWith("$granted/")
+                    }
+                }
+                .sorted()
+
+            if (toGrant.isEmpty()) {
+                // Everything is already granted — just advance
+                return@launch
+            }
+
+            grantQueue.clear()
+            grantQueue.addAll(toGrant)
+            _state.value = _state.value.copy(
+                grantingDirectories = true,
+                grantTotal = toGrant.size,
+                grantedSoFar = 0,
+                pendingGrantDirectory = grantQueue.removeFirst()
+            )
+        }
+    }
+
+    /**
+     * Processes the result of one SAF picker in the grant flow.
+     *
+     * If the user confirmed, the grant is stored. Either way, the next directory is popped
+     * from the queue. When the queue is empty the flow ends.
+     */
+    fun onDirectoryGrantResult(treeUri: Uri?) {
+        viewModelScope.launch {
+            if (treeUri != null) {
+                val added = sources.add(treeUri)
+                if (!added) {
+                    Logger.w("ReconcileVM", "grant flow: refused a tree")
+                }
+            }
+            // Whether confirmed or cancelled, move to next
+            val nextCount = _state.value.grantedSoFar + 1
+            if (grantQueue.isEmpty()) {
+                _state.value = _state.value.copy(
+                    grantingDirectories = false,
+                    pendingGrantDirectory = null,
+                    grantedSoFar = nextCount
+                )
+            } else {
+                _state.value = _state.value.copy(
+                    grantedSoFar = nextCount,
+                    pendingGrantDirectory = grantQueue.removeFirst()
+                )
+            }
         }
     }
 

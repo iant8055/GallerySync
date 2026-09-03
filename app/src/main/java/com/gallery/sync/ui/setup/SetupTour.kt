@@ -28,6 +28,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -61,6 +62,7 @@ import androidx.compose.ui.window.PopupProperties
 import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.provider.DocumentsContract
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -69,6 +71,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.LocalTime
 import com.gallery.sync.R
+import com.gallery.sync.data.local.media.DiscoveredDirectory
 import com.gallery.sync.domain.backup.LibraryChoice
 import com.gallery.sync.ui.common.formatBytes
 import com.gallery.sync.domain.backup.VideoQuality
@@ -105,6 +108,10 @@ fun SetupTour(
         ActivityResultContracts.OpenDocumentTree()
     ) { uri: Uri? -> uri?.let(viewModel::addSource) }
 
+    val grantPicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocumentTree()
+    ) { uri: Uri? -> viewModel.onDirectoryGrantResult(uri) }
+
     val context = LocalContext.current
     var mediaGranted by rememberSaveable {
         mutableStateOf(
@@ -130,7 +137,7 @@ fun SetupTour(
     val activity = LocalActivity.current
 
     fun canAdvance(): Boolean = when (step) {
-        4 -> state.hasSources
+        4 -> state.directoryChecks.values.any { it } && !state.grantingDirectories
         5 -> isSignedIn
         else -> true
     }
@@ -141,14 +148,46 @@ fun SetupTour(
         if (step == TOTAL_STEPS) viewModel.startBackupAndObserve()
     }
 
+    // Discover directories when media permission is granted and we're on step 4
+    LaunchedEffect(mediaGranted, step) {
+        if (mediaGranted && step == 4 && state.discoveredDirectories.isEmpty() && !state.discoveryRunning) {
+            viewModel.discoverDirectories()
+        }
+    }
+
+    // Launch the SAF picker when pendingGrantDirectory changes
+    LaunchedEffect(state.pendingGrantDirectory) {
+        state.pendingGrantDirectory?.let { dirName ->
+            val initialUri = DocumentsContract.buildDocumentUri(
+                "com.android.externalstorage.documents",
+                "primary:$dirName"
+            )
+            grantPicker.launch(initialUri)
+        }
+    }
+
+    // Auto-advance from step 4 when the grant flow finishes and we have sources
+    LaunchedEffect(state.grantingDirectories, state.hasSources) {
+        if (step == 4 && !state.grantingDirectories && state.hasSources &&
+            state.grantedSoFar > 0) {
+            step = 5
+        }
+    }
+
     val onNext: () -> Unit = {
-        if (step == TOTAL_STEPS) {
-            viewModel.completeSetup()
-            onComplete()
-        } else {
-            var next = step + 1
-            if (next == 7 && !showOptimization) next = 8
-            step = next
+        when {
+            step == 4 -> {
+                viewModel.startDirectoryGrants()
+            }
+            step == TOTAL_STEPS -> {
+                viewModel.completeSetup()
+                onComplete()
+            }
+            else -> {
+                var next = step + 1
+                if (next == 7 && !showOptimization) next = 8
+                step = next
+            }
         }
     }
     val onBack: () -> Unit = {
@@ -213,12 +252,11 @@ fun SetupTour(
                 ) {
                     when (step) {
                         3 -> InstallationStepsContent()
-                        4 -> LocalGalleryContent(
+                        4 -> DirectoryDiscoveryContent(
                             state = state,
                             hasMediaPermission = mediaGranted,
-                            onPickFolder = { treePicker.launch(null) },
                             onGrantMediaAccess = ::requestMediaPermission,
-                            onRemove = viewModel::removeSource
+                            onToggleDirectory = viewModel::toggleDirectoryCheck
                         )
                         5 -> CloudStorageContent(
                             state = state,
@@ -548,73 +586,111 @@ private fun InstallationStepsContent() {
 // ── Step 4: Local Gallery Access ────────────────────────────────────────────
 
 @Composable
-private fun LocalGalleryContent(
+private fun DirectoryDiscoveryContent(
     state: ReconcileUiState,
     hasMediaPermission: Boolean,
-    onPickFolder: () -> Unit,
     onGrantMediaAccess: () -> Unit,
-    onRemove: (String) -> Unit
+    onToggleDirectory: (String) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
-            text = stringResource(R.string.tour_local_title),
+            text = stringResource(R.string.tour_discover_title),
             style = MaterialTheme.typography.titleLarge
         )
         Text(
-            text = stringResource(R.string.tour_local_body),
+            text = stringResource(R.string.tour_discover_body),
             style = MaterialTheme.typography.bodyMedium
         )
-
-        // Folder list
-        state.directories.forEach { directory ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                val volumeLabel = if (directory.volume == "primary")
-                    stringResource(R.string.volume_internal)
-                else
-                    directory.volume
-                Text(
-                    stringResource(R.string.sources_full_path, volumeLabel, directory.relativePath),
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                TextButton(onClick = { onRemove(directory.treeUri) }) {
-                    Text(stringResource(R.string.wizard_sources_remove))
-                }
-            }
-        }
-
-        if (state.directoryRefused) {
-            Text(
-                text = stringResource(R.string.wizard_sources_refused),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.error
-            )
-        }
-
-        Button(onClick = onPickFolder) {
-            Text(stringResource(R.string.tour_local_select_folder))
-        }
 
         if (!hasMediaPermission) {
             OutlinedButton(onClick = onGrantMediaAccess) {
                 Text(stringResource(R.string.permission_grant_action))
             }
-        } else if (!state.hasSources) {
+        } else if (state.discoveryRunning) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                Text(
+                    text = stringResource(R.string.tour_discover_scanning),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        } else if (state.discoveredDirectories.isEmpty()) {
             Text(
-                text = stringResource(R.string.tour_local_media_granted),
+                text = stringResource(R.string.tour_discover_none_found),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-        }
+        } else {
+            state.discoveredDirectories.forEach { dir ->
+                val checked = state.directoryChecks[dir.name] ?: false
+                DirectoryRow(
+                    directory = dir,
+                    checked = checked,
+                    onToggle = { onToggleDirectory(dir.name) }
+                )
+            }
 
-        if (state.hasSources && hasMediaPermission) {
+            if (state.grantingDirectories) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(top = 4.dp)
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                    Text(
+                        text = stringResource(
+                            R.string.tour_discover_granting,
+                            state.grantedSoFar + 1,
+                            state.grantTotal
+                        ),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DirectoryRow(
+    directory: DiscoveredDirectory,
+    checked: Boolean,
+    onToggle: () -> Unit
+) {
+    val context = LocalContext.current
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onToggle),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Checkbox(
+            checked = checked,
+            onCheckedChange = { onToggle() }
+        )
+        Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = stringResource(R.string.tour_local_granted),
+                text = directory.name,
+                style = MaterialTheme.typography.bodyLarge
+            )
+            val line1 = buildString {
+                append(directory.albumCount)
+                append(if (directory.albumCount == 1) " folder, " else " folders, ")
+                append(formatFileCount(directory.photoCount, directory.videoCount))
+            }
+            Text(
+                text = line1,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = formatBytes(context, directory.totalBytes),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
@@ -1708,6 +1784,15 @@ private fun BulletItem(text: String) {
         Text(text, style = MaterialTheme.typography.bodyLarge)
     }
 }
+
+private fun formatFileCount(photos: Int, videos: Int): String = when {
+    photos > 0 && videos > 0 -> "${pluralCount(photos, "photo")}, ${pluralCount(videos, "video")}"
+    videos == 0 -> pluralCount(photos, "photo")
+    else -> pluralCount(videos, "video")
+}
+
+private fun pluralCount(n: Int, singular: String): String =
+    if (n == 1) "1 $singular" else "$n ${singular}s"
 
 private fun mediaPermissions(): Array<String> =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
