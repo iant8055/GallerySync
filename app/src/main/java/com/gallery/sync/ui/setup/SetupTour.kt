@@ -115,7 +115,50 @@ fun SetupTour(
 
     val treePicker = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocumentTree()
-    ) { uri: Uri? -> uri?.let(viewModel::addSource) }
+    ) { uri: Uri? -> viewModel.onSafGrantReceived(uri) }
+
+    var safWalkStarted by rememberSaveable { mutableStateOf(false) }
+
+    val proxyLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            viewModel.applyWizardProxies()
+        }
+    }
+
+    val videoProxyLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            viewModel.applyWizardVideoOptimise()
+        }
+    }
+
+    // After backup finishes, trigger one-time photo optimise if the library choice calls for it
+    LaunchedEffect(state.backupFinished, state.optimiseCandidateCount) {
+        if (state.backupFinished && state.optimiseCandidateCount > 0 && !state.optimiseRunning && !state.optimiseFinished) {
+            val sender = viewModel.buildWizardProxyRequest()
+            if (sender != null) {
+                proxyLauncher.launch(
+                    androidx.activity.result.IntentSenderRequest.Builder(sender).build()
+                )
+            }
+        }
+    }
+
+    // After photo optimise finishes (or was skipped), trigger video optimise
+    LaunchedEffect(state.backupFinished, state.optimiseFinished, state.optimiseCandidateCount, state.videoCandidateCount) {
+        val photosDone = state.optimiseCandidateCount == 0 || state.optimiseFinished
+        if (state.backupFinished && photosDone && state.videoCandidateCount > 0 && !state.videoOptimiseRunning && !state.videoOptimiseFinished) {
+            val sender = viewModel.buildWizardVideoRequest()
+            if (sender != null) {
+                videoProxyLauncher.launch(
+                    androidx.activity.result.IntentSenderRequest.Builder(sender).build()
+                )
+            }
+        }
+    }
 
     val context = LocalContext.current
     var mediaGranted by rememberSaveable {
@@ -147,7 +190,9 @@ fun SetupTour(
         else -> true
     }
 
-    val backupComplete = state.backupFinished
+    val backupComplete = state.backupFinished &&
+        (state.optimiseCandidateCount == 0 || state.optimiseFinished) &&
+        (state.videoCandidateCount == 0 || state.videoOptimiseFinished)
 
     LaunchedEffect(step) {
         if (step == TOTAL_STEPS) {
@@ -168,11 +213,33 @@ fun SetupTour(
         }
     }
 
+    // Walk through SAF tree pickers for each checked directory
+    LaunchedEffect(state.safGrantQueue, safWalkStarted) {
+        if (safWalkStarted && state.safGrantQueue.isNotEmpty()) {
+            val dir = state.safGrantQueue.first()
+            val initialUri = android.provider.DocumentsContract.buildDocumentUri(
+                "com.android.externalstorage.documents",
+                "primary:$dir"
+            )
+            treePicker.launch(initialUri)
+        } else if (safWalkStarted && state.safGrantQueue.isEmpty()) {
+            safWalkStarted = false
+            step = 5
+        }
+    }
+
     val onNext: () -> Unit = {
         when {
             step == 4 -> {
                 viewModel.saveSelectedDirectories()
-                step = 5
+                if (viewModel.buildSafGrantQueue()) {
+                    safWalkStarted = true
+                } else {
+                    step = 5
+                }
+            }
+            step == 6 -> {
+                step = if (showOptimization) 7 else 8
             }
             step == TOTAL_STEPS -> {
                 if (backupComplete) {

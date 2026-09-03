@@ -113,7 +113,29 @@ data class ReconcileUiState(
     /** Persisted wizard step — non-zero means the wizard was interrupted and should resume here. */
     val wizardStep: Int = 0,
     /** Whether the user selected directories in the wizard (separate from SAF grants). */
-    val hasSelectedDirectories: Boolean = false
+    val hasSelectedDirectories: Boolean = false,
+    /** Directories still needing SAF grants during the wizard walk. */
+    val safGrantQueue: List<String> = emptyList(),
+    /** Photos eligible for the wizard's one-time bulk optimise. */
+    val optimiseCandidateCount: Int = 0,
+    /** Whether the one-time optimise pass is running. */
+    val optimiseRunning: Boolean = false,
+    /** How many files were optimised in the one-time pass. */
+    val optimisedCount: Int = 0,
+    /** Bytes reclaimed by the one-time pass. */
+    val optimisedBytes: Long = 0L,
+    /** Whether the one-time pass finished. */
+    val optimiseFinished: Boolean = false,
+    /** Videos eligible for the wizard's one-time bulk optimise. */
+    val videoCandidateCount: Int = 0,
+    /** Whether video optimisation is running. */
+    val videoOptimiseRunning: Boolean = false,
+    /** How many videos were optimised. */
+    val videoOptimisedCount: Int = 0,
+    /** Bytes reclaimed by video optimisation. */
+    val videoOptimisedBytes: Long = 0L,
+    /** Whether video optimisation finished. */
+    val videoOptimiseFinished: Boolean = false
 ) {
     /**
      * Whether Gate 1 has been answered.
@@ -153,7 +175,9 @@ class ReconcileViewModel @Inject constructor(
     private val sources: ScopedDirectories,
     private val applyChoice: ApplyLibraryChoice,
     private val backupEngine: BackupEngine,
-    private val scanner: MediaScanner
+    private val scanner: MediaScanner,
+    private val proxyApplier: com.gallery.sync.data.local.media.ProxyApplier,
+    private val videoOptimiser: com.gallery.sync.data.local.media.VideoOptimiser
 ) : ViewModel() {
 
     private val workManager = WorkManager.getInstance(context)
@@ -291,6 +315,85 @@ class ReconcileViewModel @Inject constructor(
         viewModelScope.launch { settings.setWizardStep(step) }
     }
 
+    private var pendingProxyCandidates: List<com.gallery.sync.data.local.entity.BackupEntryEntity> = emptyList()
+
+    /**
+     * Builds a write request for the one-time bulk optimise, or returns null if the SAF grant
+     * already covers the files (in which case it applies immediately).
+     */
+    suspend fun buildWizardProxyRequest(): android.content.IntentSender? {
+        pendingProxyCandidates = proxyApplier.candidatesAll()
+        if (pendingProxyCandidates.isEmpty()) return null
+
+        if (!proxyApplier.needsWriteRequest(pendingProxyCandidates)) {
+            Logger.i(TAG, "optimising ${pendingProxyCandidates.size} files through the tree grant")
+            applyWizardProxies()
+            return null
+        }
+
+        return proxyApplier.createWriteRequest(pendingProxyCandidates)
+    }
+
+    fun applyWizardProxies() {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(optimiseRunning = true)
+            val outcome = proxyApplier.apply(pendingProxyCandidates)
+            val (count, bytes) = when (outcome) {
+                is com.gallery.sync.data.local.media.ProxyOutcome.Completed -> outcome.proxiedCount to outcome.bytesReclaimed
+                is com.gallery.sync.data.local.media.ProxyOutcome.Stopped -> outcome.proxiedCount to outcome.bytesReclaimed
+                else -> 0 to 0L
+            }
+            _state.value = _state.value.copy(
+                optimiseRunning = false,
+                optimiseFinished = true,
+                optimisedCount = count,
+                optimisedBytes = bytes
+            )
+            Logger.i(TAG, "wizard optimise: $count files, ${bytes / 1024 / 1024} MB reclaimed")
+        }
+    }
+
+    private var pendingVideoCandidates: List<com.gallery.sync.data.local.entity.BackupEntryEntity> = emptyList()
+
+    /**
+     * Builds a write request for the wizard's one-time video optimise, or returns null if the
+     * SAF grant already covers the files (in which case it runs immediately).
+     */
+    suspend fun buildWizardVideoRequest(): android.content.IntentSender? {
+        pendingVideoCandidates = videoOptimiser.wizardCandidates()
+        if (pendingVideoCandidates.isEmpty()) {
+            _state.value = _state.value.copy(videoOptimiseFinished = true)
+            return null
+        }
+
+        if (!proxyApplier.needsWriteRequest(pendingVideoCandidates)) {
+            Logger.i(TAG, "optimising ${pendingVideoCandidates.size} videos through the tree grant")
+            applyWizardVideoOptimise()
+            return null
+        }
+
+        return proxyApplier.createWriteRequest(pendingVideoCandidates)
+    }
+
+    fun applyWizardVideoOptimise() {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(videoOptimiseRunning = true)
+            val quality = _state.value.videoQuality
+            val result = videoOptimiser.runForWizard(quality)
+            _state.value = _state.value.copy(
+                videoOptimiseRunning = false,
+                videoOptimiseFinished = true,
+                videoOptimisedCount = result.optimised,
+                videoOptimisedBytes = result.reclaimedBytes
+            )
+            Logger.i(
+                TAG,
+                "wizard video optimise: ${result.optimised} clips, " +
+                    "${result.reclaimedBytes / 1024 / 1024} MB reclaimed"
+            )
+        }
+    }
+
     /** Ends guided setup, whether it was completed or skipped. */
     fun completeSetup() {
         viewModelScope.launch { settings.setSetupCompleted(true) }
@@ -345,11 +448,21 @@ class ReconcileViewModel @Inject constructor(
                 if (completed > highWater) highWater = completed
 
                 if (remaining == 0) {
+                    val shouldOptimise = _state.value.libraryChoice.mode?.proxiesPhotos == true
+                    val photoCandidates = if (shouldOptimise) {
+                        proxyApplier.candidatesAll()
+                    } else emptyList()
+                    val videoCandidates = if (shouldOptimise) {
+                        videoOptimiser.wizardCandidates()
+                    } else emptyList()
+                    val videoCount = videoCandidates.size
                     _state.value = _state.value.copy(
                         backupRunning = false,
                         backupFinished = true,
                         backupTotal = total,
-                        backupCompleted = total
+                        backupCompleted = total,
+                        optimiseCandidateCount = photoCandidates.size,
+                        videoCandidateCount = videoCount
                     )
                     return@launch
                 }
@@ -439,6 +552,41 @@ class ReconcileViewModel @Inject constructor(
                 .filter { (_, checked) -> checked }
                 .keys
             sources.saveSelectedDirectories(selected)
+        }
+    }
+
+    /**
+     * Builds the queue of directories that need SAF grants for write access.
+     *
+     * Returns true if there are directories to walk. False means all checked directories are
+     * already covered by existing grants (or none were checked).
+     */
+    fun buildSafGrantQueue(): Boolean {
+        val checked = _state.value.directoryChecks.filter { it.value }.keys
+        val covered = _state.value.directories.map { it.relativePath }
+        val needed = checked.filter { dir ->
+            covered.none { it.startsWith(dir) || dir.startsWith(it) }
+        }
+        _state.value = _state.value.copy(safGrantQueue = needed.toList())
+        return needed.isNotEmpty()
+    }
+
+    /**
+     * Processes one SAF grant result and advances the queue.
+     *
+     * Called from the treePicker callback after the user picks a folder or cancels.
+     * A cancelled pick (null URI) skips that directory — the user can add it later from Settings.
+     */
+    fun onSafGrantReceived(uri: android.net.Uri?) {
+        viewModelScope.launch {
+            if (uri != null) {
+                val added = sources.add(uri)
+                _state.value = _state.value.copy(directoryRefused = !added)
+            }
+            val queue = _state.value.safGrantQueue
+            _state.value = _state.value.copy(
+                safGrantQueue = if (queue.size > 1) queue.drop(1) else emptyList()
+            )
         }
     }
 

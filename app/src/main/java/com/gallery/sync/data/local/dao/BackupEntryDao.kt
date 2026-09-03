@@ -750,6 +750,28 @@ interface BackupEntryDao {
     ): List<BackupEntryEntity>
 
     /**
+     * All photos eligible for proxying, regardless of album mode.
+     *
+     * Used by the install wizard's one-time bulk optimise (Area 1), which acts on the files
+     * currently on the phone and is not governed by album modes.
+     */
+    @Query(
+        """
+        SELECT * FROM backup_entries
+        WHERE state = :uploaded
+          AND remoteSizeBytes IS NOT NULL
+          AND remoteSizeBytes = sizeBytes
+          AND isProxied = 0
+          AND isProxySkipped = 0
+          AND isVideo = 0
+        ORDER BY sizeBytes DESC
+        """
+    )
+    suspend fun proxyCandidatesAll(
+        uploaded: BackupState = BackupState.UPLOADED
+    ): List<BackupEntryEntity>
+
+    /**
      * Video whose local copy can be replaced by a smaller one.
      *
      * A separate query from [proxyCandidates] rather than a widening of it, exactly as TASK-013
@@ -804,6 +826,30 @@ interface BackupEntryDao {
         limit: Int = 50,
         uploaded: BackupState = BackupState.UPLOADED,
         syncMode: AlbumMode = AlbumMode.SYNC
+    ): List<BackupEntryEntity>
+
+    /**
+     * All verified videos eligible for optimising, regardless of album mode, age, or cutoff.
+     *
+     * Used by the install wizard's one-time bulk optimise (Area 1), which acts on every verified
+     * video on the phone and is not governed by album modes or ongoing settings.
+     */
+    @Query(
+        """
+        SELECT * FROM backup_entries
+        WHERE state = :uploaded
+          AND isVideo = 1
+          AND remoteSizeBytes IS NOT NULL
+          AND remoteSizeBytes = sizeBytes
+          AND isProxied = 0
+          AND isProxySkipped = 0
+        ORDER BY sizeBytes DESC
+        LIMIT :limit
+        """
+    )
+    suspend fun videoOptimiseCandidatesAll(
+        uploaded: BackupState = BackupState.UPLOADED,
+        limit: Int = 500
     ): List<BackupEntryEntity>
 
     /**

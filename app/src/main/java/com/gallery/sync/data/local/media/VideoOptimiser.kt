@@ -1,5 +1,7 @@
 package com.gallery.sync.data.local.media
 
+import android.content.ContentResolver
+import android.content.Context
 import android.net.Uri
 import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.entity.BackupEntryEntity
@@ -7,6 +9,7 @@ import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.di.IoDispatcher
 import com.gallery.sync.domain.backup.MediaAge
 import com.gallery.sync.util.Logger
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
@@ -57,12 +60,111 @@ data class VideoOptimiseResult(
  */
 @Singleton
 class VideoOptimiser @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val entryDao: BackupEntryDao,
     private val transcoder: VideoTranscoder,
     private val safWriter: SafMediaWriter,
     private val settings: BackupSettings,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
 ) {
+
+    private val resolver: ContentResolver get() = context.contentResolver
+
+    /**
+     * All verified videos regardless of album mode — for the wizard's one-time pass.
+     */
+    suspend fun wizardCandidates(): List<BackupEntryEntity> = withContext(dispatcher) {
+        entryDao.videoOptimiseCandidatesAll()
+    }
+
+    /**
+     * One-time bulk optimise for the install wizard (Area 1).
+     *
+     * Ignores Area 2 settings gates (isOptimiseEnabled, optimiseVideo, age, cutoff) and album
+     * modes — the library choice on step 6 is the only gate. Uses the quality the user chose on
+     * step 7.
+     *
+     * Unlike the ongoing [run], this falls back to ContentResolver when SAF does not cover a
+     * file. The wizard acquires a write request up front (one dialog for all videos), so the
+     * ContentResolver path works for everything the SAF grant does not reach.
+     */
+    suspend fun runForWizard(
+        quality: com.gallery.sync.domain.backup.VideoQuality,
+        limit: Int = WIZARD_LIMIT
+    ): VideoOptimiseResult = withContext(dispatcher) {
+        val candidates = entryDao.videoOptimiseCandidatesAll(limit = limit)
+
+        if (candidates.isEmpty()) {
+            Logger.d(TAG, "wizard: no video is eligible for optimising")
+            return@withContext VideoOptimiseResult()
+        }
+
+        Logger.i(TAG, "wizard: optimising up to ${candidates.size} clips at $quality")
+
+        var result = VideoOptimiseResult()
+        for (entry in candidates) {
+            coroutineContext.ensureActive()
+            result = optimiseForWizard(entry, quality, result)
+        }
+
+        Logger.i(
+            TAG,
+            "wizard video optimising finished: ${result.optimised} optimised, " +
+                "${result.reclaimedBytes} bytes reclaimed, ${result.skipped} not worth it, " +
+                "${result.failed} failed, ${result.notCovered} outside a granted folder"
+        )
+        result
+    }
+
+    private suspend fun optimiseForWizard(
+        entry: BackupEntryEntity,
+        quality: com.gallery.sync.domain.backup.VideoQuality,
+        running: VideoOptimiseResult
+    ): VideoOptimiseResult {
+        val uri = Uri.parse(entry.contentUri)
+
+        return when (val outcome = transcoder.transcode(uri, entry.displayName, quality)) {
+            is TranscodeResult.NotWorthwhile -> {
+                Logger.d(TAG, "${entry.displayName}: ${outcome.reason}")
+                entryDao.markProxySkipped(entry.id)
+                running.copy(skipped = running.skipped + 1)
+            }
+
+            is TranscodeResult.Failed -> {
+                Logger.w(TAG, "${entry.displayName} failed to transcode: ${outcome.reason}")
+                running.copy(failed = running.failed + 1)
+            }
+
+            is TranscodeResult.Created -> {
+                val wrote = safWriter.writeTruncating(uri) { out ->
+                    outcome.file.inputStream().use { it.copyTo(out) }
+                } || runCatching {
+                    resolver.openOutputStream(uri, "wt")?.use { out ->
+                        outcome.file.inputStream().use { it.copyTo(out) }
+                        true
+                    } ?: false
+                }.getOrElse { false }
+
+                outcome.file.delete()
+
+                if (!wrote) {
+                    Logger.w(TAG, "could not write the smaller copy of ${entry.displayName}")
+                    return running.copy(failed = running.failed + 1)
+                }
+
+                entryDao.markProxied(entry.id, outcome.sizeBytes)
+                val reclaimed = (entry.sizeBytes - outcome.sizeBytes).coerceAtLeast(0)
+                Logger.i(
+                    TAG,
+                    "optimised ${entry.displayName}: ${entry.sizeBytes} -> ${outcome.sizeBytes} bytes"
+                )
+                running.copy(
+                    optimised = running.optimised + 1,
+                    reclaimedBytes = running.reclaimedBytes + reclaimed
+                )
+            }
+        }
+    }
 
     /**
      * Optimises what is eligible right now, or explains why it did nothing.
@@ -206,5 +308,8 @@ class VideoOptimiser @Inject constructor(
          * achieves nothing. Ten at roughly 0.15x realtime is a few minutes of work.
          */
         const val DEFAULT_LIMIT = 10
+
+        /** Wizard pass handles more clips since it runs with the user watching. */
+        const val WIZARD_LIMIT = 500
     }
 }

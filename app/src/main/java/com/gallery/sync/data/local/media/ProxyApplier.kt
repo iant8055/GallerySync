@@ -82,10 +82,18 @@ class ProxyApplier @Inject constructor(
      * The rows are left in place rather than deleted. A file that is gone locally but present in
      * OneDrive is still genuinely backed up, and forgetting it would understate what is verified.
      */
-    suspend fun candidates(): List<BackupEntryEntity> = withContext(dispatcher) {
-        if (!isSupported()) return@withContext emptyList()
+    suspend fun candidates(): List<BackupEntryEntity> = candidatesFrom(entryDao.proxyCandidates())
 
-        val recorded = entryDao.proxyCandidates()
+    /**
+     * All verified photos regardless of album mode — for the install wizard's one-time bulk
+     * optimise (Area 1), which is not governed by album modes.
+     */
+    suspend fun candidatesAll(): List<BackupEntryEntity> = candidatesFrom(entryDao.proxyCandidatesAll())
+
+    private suspend fun candidatesFrom(
+        recorded: List<BackupEntryEntity>
+    ): List<BackupEntryEntity> = withContext(dispatcher) {
+        if (!isSupported()) return@withContext emptyList()
         val live = recorded.filter { stillOnDevice(Uri.parse(it.contentUri)) }
 
         val missing = recorded.size - live.size
