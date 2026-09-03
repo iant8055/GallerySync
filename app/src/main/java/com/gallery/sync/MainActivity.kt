@@ -201,7 +201,7 @@ private fun SignedInApp(
                 SetupTour(
                     viewModel = setupViewModel,
                     signInViewModel = signInViewModel,
-                    onComplete = { activity?.finish() },
+                    onComplete = { },
                     onSwitchTab = { selectedTab = it },
                     onStepChanged = { tourStep = it }
                 )

@@ -111,7 +111,9 @@ data class ReconcileUiState(
     /** Which directories the user has checked. Key = directory name, value = checked. */
     val directoryChecks: Map<String, Boolean> = emptyMap(),
     /** Persisted wizard step — non-zero means the wizard was interrupted and should resume here. */
-    val wizardStep: Int = 0
+    val wizardStep: Int = 0,
+    /** Whether the user selected directories in the wizard (separate from SAF grants). */
+    val hasSelectedDirectories: Boolean = false
 ) {
     /**
      * Whether Gate 1 has been answered.
@@ -120,7 +122,7 @@ data class ReconcileUiState(
      * a screen reporting zero outstanding files would announce that everything is already backed up
      * — which is false, and false in the direction that stops someone acting.
      */
-    val hasSources: Boolean get() = directories.isNotEmpty() || directoryChecks.values.any { it }
+    val hasSources: Boolean get() = directories.isNotEmpty() || hasSelectedDirectories || directoryChecks.values.any { it }
 
     /**
      * Whether enough is known to decide between the wizard and the app.
@@ -186,13 +188,20 @@ class ReconcileViewModel @Inject constructor(
             // Grants can be revoked outside the app. Checking once at start keeps the list from
             // claiming a folder is watched when nothing in it is readable any more.
             sources.forgetRevokedGrants()
+
+            // Selected directories (from the wizard) also count as sources. Checked before
+            // the first emission of sourcesLoaded so the setup decision has all facts at once
+            // and the wizard does not flash for a frame.
+            val hasSelected = sources.selectedDirectories.first().isNotEmpty()
+
             sources.directories.collect { dirs ->
-                // Any change to the granted set makes the current figures wrong: a new folder brings
-                // albums they knew nothing about, and a removed one leaves them overstated. Deciding
-                // that here rather than in each caller means no path can forget to re-check.
                 val changed = _state.value.directories.map { it.treeUri }.toSet() !=
                     dirs.map { it.treeUri }.toSet()
-                _state.value = _state.value.copy(directories = dirs, sourcesLoaded = true)
+                _state.value = _state.value.copy(
+                    directories = dirs,
+                    sourcesLoaded = true,
+                    hasSelectedDirectories = hasSelected
+                )
 
                 if (!changed) return@collect
                 if (dirs.isEmpty()) {
