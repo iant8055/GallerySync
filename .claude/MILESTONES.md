@@ -3367,6 +3367,37 @@ uploaded.
 - **Language dropdown** — **answered 19 Aug 2026:** it belongs in a first-run wizard alongside
   permissions, cloud choice and defaults. Ship English only behind it. See TASK-012.
 
+  **Scoped 4 Sept 2026, then shelved by Ian to revisit later.** Recorded so the survey does not have
+  to be done twice.
+
+  - **The groundwork is largely done.** 509 strings and 9 plurals are already externalised —
+    527 translatable units, **4,054 words**, 22.4k characters. Byte and time formatting already goes
+    through `Locale.getDefault()`, and `android:supportsRtl="true"` is already set.
+  - **About 30 strings are still hardcoded, and nearly all sit in one place:** the tour's mockups —
+    the imitation Albums, Restore, Archive and Settings screens drawn behind the wizard cards. They
+    read as screenshots but are live Compose, so they would ship English inside a translated app.
+    Either extract them or give the mockups less text. The rest are `AlbumDetailScreen`'s status
+    labels plus one each in `SetupWizardScreen` and `DeletionSection`.
+  - **One real platform decision.** `MainActivity` extends `ComponentActivity` and **AppCompat is not
+    a dependency**. `LocaleManager` is API 33+ against a minSdk of 26, so system-integrated per-app
+    language means adding AppCompat and changing that base class; the alternative is an in-app-only
+    picker with no system integration and the edge cases owned here. Either way needs
+    `res/xml/locales_config.xml` and `android:localeConfig`.
+  - **Text expansion is a live risk on this app, not a theoretical one.** 4 Sept produced two layout
+    defects from text not fitting — the video-quality buttons and the delay chips — and both were in
+    English. German and French run about 30% longer, and the narrowest surface is the Fold 4 cover
+    screen at 344dp. **Run the `en-XA` pseudolocale before any money reaches a translator**: it
+    inflates every string ~40% and would have caught both of those before a device did.
+  - **Some copy is safety-critical and must not be treated as UI chrome.** TASK-012 already says it —
+    a mistranslated mode explanation is the one that costs somebody their photos. 32 units run to 25+
+    words (longest 92) and that is where those live. A translation must not promise recoverability
+    the English never promised, which is a CLAUDE.md constraint rather than a style preference. The
+    vendor-trash naming problem ("Recycle Bin" on Samsung, "Trash" in Files) is unresolved in English
+    and multiplies per locale.
+  - **Suggested order:** extract the hardcoded strings (worth doing regardless), then the locale
+    mechanism and picker with English only behind it, then the pseudolocale pass, then the first real
+    locale with the safety-critical copy reviewed separately.
+
 **Known and unbuilt**
 - **Album selections are device-only.** The one part of the ledger that cannot be rebuilt from
   OneDrive or from the files, so a phone move loses them. Needs a new remote write path.
