@@ -1,6 +1,8 @@
 package com.gallery.sync.ui.settings
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -183,8 +185,17 @@ private fun Breadcrumbs(
     state: FolderPickerUiState,
     onUpTo: (Int) -> Unit
 ) {
+    // The path scrolls rather than wrapping. A dialog is narrow and a drive path is not bounded,
+    // so wrapping broke folder names mid-word — "DCIM" rendered as "DCI / M" — and got worse with
+    // every level. Scrolled to the end on each move, because the folder you are standing in is the
+    // one you need to see.
+    val scroll = rememberScrollState()
+    LaunchedEffect(state.crumbs.size) { scroll.animateScrollTo(scroll.maxValue) }
+
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(scroll),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -206,15 +217,19 @@ private fun Breadcrumbs(
             text = stringResource(R.string.picker_root),
             style = MaterialTheme.typography.labelLarge,
             fontWeight = if (state.atRoot) FontWeight.Bold else FontWeight.Normal,
+            maxLines = 1,
+            softWrap = false,
             modifier = Modifier.clickable(enabled = !state.atRoot) { onUpTo(0) }
         )
         state.crumbs.forEachIndexed { index, crumb ->
             val last = index == state.crumbs.lastIndex
-            Text(">", style = MaterialTheme.typography.labelLarge)
+            Text(">", style = MaterialTheme.typography.labelLarge, maxLines = 1)
             Text(
                 text = crumb.name,
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = if (last) FontWeight.Bold else FontWeight.Normal,
+                maxLines = 1,
+                softWrap = false,
                 modifier = Modifier.clickable(enabled = !last) { onUpTo(index + 1) }
             )
         }

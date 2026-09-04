@@ -221,6 +221,12 @@ fun SetupTour(
     // The screen used to be told only whether the *upload* had finished, so it hit 100%, said
     // "Press Finish", and sat there through an optimise it could not describe and a button that
     // was still labelled Close.
+    // Choosing to back up manually makes step 8 the last step: there is no backup to watch, so the
+    // wizard ends there. Derived once and used by the button label, the branch that acts on it, and
+    // the check for whether Back should still be offered — three places that must agree.
+    val skipsBackupStep = !state.libraryChoice.uploads
+    val lastStep = if (skipsBackupStep) TOTAL_STEPS - 1 else TOTAL_STEPS
+
     val photosOptimised = state.optimiseCandidateCount == 0 || state.optimiseFinished
     val videoOptimised = state.videoCandidateCount == 0 || state.videoOptimiseFinished
     val backupPhase = when {
@@ -279,9 +285,33 @@ fun SetupTour(
                 step = if (showOptimization) 7 else 8
             }
             step == TOTAL_STEPS -> {
+                // Two buttons, two actions, one branch — which is how they got confused.
+                //
+                // Finish means setup is done: record it and put the wizard away, leaving the user
+                // in the app. Close means the backup is still going and the user is leaving; it
+                // closes the app, and the WorkManager chain carries on without it.
+                //
+                // Both used to run through onComplete. aee7125 made that activity.finish(), which
+                // was right for Close and wrong for Finish — it killed the app on a completed
+                // setup. b6e60f2 fixed Finish by emptying the lambda and took Close with it, so
+                // Close did nothing at all until 3 Sept.
                 if (backupComplete) {
                     viewModel.completeSetup()
+                    onComplete()
+                } else {
+                    activity?.finish()
                 }
+            }
+            // Choosing to do it manually skips the backup step entirely and opens the app.
+            //
+            // CHOOSE_PER_ALBUM is "check cloud storage but do not back up any new files", and step 9
+            // did it anyway: `outstandingCountAll` counts every unuploaded row with no regard for
+            // album mode, and the run it enqueues passes `allAlbums = true`, which routes the worker
+            // past mode filtering on purpose. So the one choice that exists to prevent an upload
+            // started one. Setup is complete for this user — there is nothing left for the wizard
+            // to hold them for.
+            step == lastStep && skipsBackupStep -> {
+                viewModel.completeSetup()
                 onComplete()
             }
             else -> {
@@ -347,8 +377,10 @@ fun SetupTour(
                 TourBubble(
                     stepNumber = step,
                     canAdvance = canAdvance(),
-                    isLast = step == TOTAL_STEPS,
-                    lastButtonLabel = if (backupComplete)
+                    isLast = step == lastStep,
+                    // Finish means "setup is done, open the app". That is true on step 8 for a
+                    // manual backup, and on step 9 only once everything has uploaded and optimised.
+                    lastButtonLabel = if (backupComplete || skipsBackupStep)
                         stringResource(R.string.wizard_finish_label)
                     else
                         stringResource(R.string.wizard_close_label),

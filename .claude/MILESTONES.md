@@ -2957,6 +2957,50 @@ needs a counter at all.
 observed for one run. So the dispatch delay before the first byte is not a one-off; it recurs at every
 batch boundary, seven times for 157 files.
 
+### 4 Sept 2026 — the app does not open until the backup is done, and Close is not a dismissal
+
+Stated by Ian: **the user should not have access to the full app until the backup and optimising are
+complete, unless they chose to back up manually.** The wizard is a gate, not a tour you can step out
+of, and three things had to change for that to hold.
+
+**Close closes the app; Finish opens it.** They had been one branch through one `onComplete`, which
+is how they kept trading each other's behaviour — `aee7125` made it `activity.finish()` (right for
+Close, wrong for Finish, which killed the app on a completed setup), `b6e60f2` emptied the lambda to
+fix Finish and left Close inert, and the 3 Sept fix made Close dismiss into the app, which breaks the
+rule above. They are now separate: Finish records setup and hands over the app; Close ends the app
+while the WorkManager chain runs on without it. Reopening lands on step 9 re-attached to that chain —
+watched working on the Moto G, 3 Sept, after a Recents swipe killed the process mid-run.
+
+**Finish appears only when everything is done.** Already gated on `backupComplete`, which since the
+phase change means uploaded *and* photos optimised *and* video optimised. It read as early only
+because the ring's own text was driven by `state.backupFinished` — the upload alone — so it said
+"Finish" while video was still transcoding.
+
+**Choosing to back up manually now ends the wizard at step 8.** `CHOOSE_PER_ALBUM` is *"check cloud
+storage but do not back up any new files"*, and `LibraryChoice.uploads` returns false for it — but
+nothing at step 9 read that. `outstandingCountAll()` is `SELECT COUNT(*) WHERE state != UPLOADED`
+with no album-mode filter, and the run it enqueued passed `allAlbums = true`, which routes the worker
+past mode filtering deliberately. **So the one choice that exists to prevent an upload started one.**
+
+Step 8 is now the last step for that user: the button reads Finish, setup is recorded, and the app
+opens. One derived value — `lastStep` — decides it, and the button label, the branch that acts on it
+and `isLast` all read the same value so they cannot drift apart the way Close and Finish did.
+
+Note what this does **not** do: files already uploaded by the old behaviour stay in OneDrive. Nothing
+here removes them, and nothing should.
+
+**Known and unfixed:** the step counter still reads "Step 8 of 9" on that final card, because
+`TOTAL_STEPS` is a constant in the string. The same wrinkle already existed for step 7 when there is
+no optimisation to configure. A counter that reflects the steps *this* user will actually see is the
+fix, and it is a separate change.
+
+**The OneDrive picker's path scrolls rather than wraps.** A dialog is narrow and a drive path is not
+bounded, so `OneDrive > Samsung Gallery > DCIM` broke mid-word into "DCI / M" and would have got worse
+with depth. Every crumb is now one line with no soft wrap, the row scrolls, and it scrolls to the end
+on each move because the folder you are standing in is the one you need to see. A back button was
+added beside the crumbs — jumping via a crumb already worked, but the common move is backing out of
+the folder you just opened.
+
 ### 3 Sept 2026 — a withdrawn claim, and the instrument that caused it
 
 **`dumpsys uri-grants` does not exist on the Moto G.** It returns `Can't find service: uri-grants`, and
