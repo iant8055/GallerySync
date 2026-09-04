@@ -838,7 +838,6 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="exit_warning_leave">Leave</string>
 
     <!-- Setup tour (tooltip-style bubbles over the Albums tab) -->
-    <string name="tour_step_of">Step %1$d of %2$d</string>
 
     <string name="tour_welcome_title">Welcome to GallerySync</string>
     <string name="tour_welcome_body">Take a quick peek at the navigation and features.</string>

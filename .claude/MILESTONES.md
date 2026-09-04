@@ -2989,22 +2989,21 @@ and `isLast` all read the same value so they cannot drift apart the way Close an
 Note what this does **not** do: files already uploaded by the old behaviour stay in OneDrive. Nothing
 here removes them, and nothing should.
 
-**Resolved the same day.** The counter now describes the steps *this* user is shown — nine less one
-for optimising when there is nothing to configure, less one more for the backup when they chose to do
-it manually — so no card claims a step that will never arrive. Both conditional steps are derived from
-the same values the flow itself branches on, so the counter cannot drift from the wizard.
+**Resolved by deletion, the same day.** The counter was first made truthful — derived from the steps
+this user is actually shown, nine less one for optimising when there is nothing to configure and less
+one more for the backup when they chose to do it manually. That worked, and it was still the wrong
+answer. Ian: *"It was only added so we could talk efficiently about the steps."* It was scaffolding for
+a conversation, not something a user needs, and **every counter is now gone** — the step number, and
+the per-card count inside step 2 that had briefly read "(1/6)" through "(6/6)".
 
-One consequence is worth knowing rather than hiding: **the total can grow mid-wizard**, because step 7
-depends on a choice made on step 6. Someone who picks an optimising option goes from "of 8" to "of 9".
-That is mildly odd and it is still the honest option; the alternative is promising nine and delivering
-eight, which is what was wrong in the first place. Removing it entirely would need step 7 to stop being
-conditional, which is a design question and not a counter question.
+Two arguments were made for keeping it and both were wrong. That a first-run flow owes the user a
+sense of how much is left: the wizard is nine short screens with a Next button, and nobody is lost in
+it. And that it stays useful while we iterate: it is useful to *us*, which is exactly the reason to
+take it out before it ships. `tour_step_of` and `TourBubble`'s suffix parameter went with it rather
+than being left dead, and `stepNumber` survives only to decide whether Back is offered.
 
-**The per-card count inside step 2 is gone.** It briefly read "(1/6)" through "(6/6)" — correct, after
-the intro bubble turned out to be an uncounted sixth screen — but Ian's judgement is that two counters
-on one card read badly, and he is right: the step number already says where you are, and the cards are
-one step's worth of explanation rather than six things to get through. The suffix parameter went with
-it rather than being left dead on `TourBubble`.
+The conditional-steps problem dissolved with it. There is no longer anything that can promise nine
+steps and deliver eight, and no total that grows mid-wizard when a choice on step 6 adds step 7.
 
 **The OneDrive picker's path scrolls rather than wraps.** A dialog is narrow and a drive path is not
 bounded, so `OneDrive > Samsung Gallery > DCIM` broke mid-word into "DCI / M" and would have got worse
