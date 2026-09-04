@@ -3098,6 +3098,102 @@ two cameras honestly produce the same filename, but silently creating `Backups 1
 Browse sits **beside** the text field, not instead of it. Typing a known path beats walking ninety
 albums to reach it, and the field still works when the network does not.
 
+### 4 Sept 2026 — the wizard's optimise numbers, measured twice, and five defects around them
+
+**Moto G 2026, stock Android 16, `ZT422CTZQV`.** A 155-file fixture in `DCIM` — 150 camera photos at
+642,867,972 bytes and 5 clips at 613,900,657 — restored byte-identical between runs, so the two runs
+are directly comparable.
+
+**The savings card showed nothing at all, and the cause was ordering.** The reconcile fires from the
+directories flow, which settles at step 4; sign-in is step 5. With no token every album listing fails,
+so `ReconciliationRules.tallyAlbum` files each album under `unchecked` rather than `outstanding` —
+correct on its own terms, and fatal downstream, because every figure on the optimise and summary cards
+is computed from `photosOutstanding` and `videosOutstanding`. `album_cloud_status` said so plainly:
+three rows, all written 12:07:17, all `couldNotCheck = 1`, `missingFiles = 0`. Nothing re-ran the check
+after sign-in. It does now, and the same table then read `couldNotCheck = 0` with 50 + 100 + 5 = 155
+missing — every file in the fixture.
+
+The deeper fault was that a blank card is indistinguishable from a zero. Both tallies read zero whether
+the library is fully backed up or the drive was unreachable, and the card now names which, the same way
+`reconcile_incomplete` does. **Never let "could not ask" render as an answer.**
+
+**The measured savings, against what the app promised.**
+
+| | assumed | measured | |
+|---|---|---|---|
+| Photos (2048px proxy) | 70% | **83.5%** | 642,867,972 → 105,800,737, *identical to the byte across both runs* |
+| Video High (480p) | 90% | **84.5%** | over-promises |
+| Video Medium (720p) | 75% | **75.4 / 75.7 / 76.3%** | three clips, accurate |
+
+`ProxyGenerator.APPROXIMATE_SAVING_PERCENT` was added at 70 from the 9-file run recorded above, whose
+album was full of small images; a camera roll proxies far harder, and **all 150 photos here were over
+2048px so none were skipped** — the skip rate is the figure that swings, not the ratio. 70 should become
+about 80. Video **Medium is sound and High is not**; High is the one that over-promises, which is the
+worse direction, and it is Ian's recorded figure so it stands until he moves it.
+
+Ian caught the photo error from outside the code: the card offered to save 1.2 GB out of a 1.26 GB
+folder, which is the whole library and change. It had been quoting `totalPhotoBytes` whole — a claim
+that every photo comes back as zero bytes.
+
+**155 files before, 155 after, no rename, no `.trashed*`.** Proxying shortens in place and removes
+nothing.
+
+**The delayed start was stored and then ignored.** The chips wrote `firstBackupStartHour` and
+`FirstBackupWindow` gated on it correctly — but the wizard enqueues a **manual** run, and manual runs
+are exempt from that window by design ("Sync now goes straight to the engine"). Reaching step 9 also
+called `startBackupWorker()` unconditionally, with no `startNow` check, and nothing anywhere called
+`setInitialDelay`. So "Start in 1 hour" uploaded immediately.
+
+Now the delay is an absolute due time (the hour-of-day form could not express real minutes: chosen at
+13:25 it meant 14:00, i.e. 35 minutes) handed to WorkManager, which owns it from then on. Verified in
+WorkManager's own table: `gallery-sync-backup-manual`, ENQUEUED, `initial_delay = 3,549,487`. `SYNC NOW`
+replaced it — same row, RUNNING, delay 0.
+
+**Back from the progress card cancelled the running upload.** Arming a delay re-enqueues the manual
+chain, and `enqueueContinuation` uses `ExistingWorkPolicy.REPLACE`, so navigating back mid-run and
+choosing a delay killed the upload in flight — observed stopping dead at 9 of 155, which looked like a
+hang rather than a cancellation. Found by Ian, by pressing Back.
+
+Aborting a run is now a **feature rather than a side effect**: the control reads `Cancel` while a run is
+moving bytes, raises a confirmation, and `abortBackup()` cancels the chain, cancels the polling loop
+and returns the wizard to the settings cards. Cancelling the WorkManager chain alone was not enough —
+`observeBackupWorker` runs a `while(true)` loop writing counts back into state, so the screen would
+reset and then watch the old numbers reappear a poll later. `setFirstBackupDelay` also refuses outright
+while a run is under way, because the UI fix closes the route we know about and a second route would be
+silent.
+
+**Two things Close does not do, one fixed and one open.**
+
+`finish()` destroyed the activity but left the task in Recents as a live-looking card, which is what
+minimising looks like — `finishAndRemoveTask()` now. The process is deliberately left alive: the upload
+runs inside it.
+
+**The open one: the optimise passes die with the wizard.** Uploading survives Close because it is a
+WorkManager chain; `applyWizardProxies` and `applyWizardVideoOptimise` run in `viewModelScope`, which is
+cleared with the activity. Closing during the video pass left three clips transcoded and two untouched,
+and nothing resumed them — the album modes were all `Off` by then, so the ongoing Sync-only path could
+not pick them up either. The card says "You can check progress any time by opening the app", which is
+true of the upload and not of this. **Unfixed.** Either move the passes into a worker or say plainly
+that optimising needs the app open.
+
+**A counter that went backwards.** Reopening mid-phase recomputes the *remaining* candidates, so after
+two clips were done the ring read "0 of 3" where it had read "2 of 5" — each number true, the pair of
+them reading as work undone. Both passes now offset by `BackupEntryDao.countProxied`, so the count
+describes the phase rather than the attempt.
+
+**One layout fault, twice.** `ButtonDefaults.ContentPadding` spends 24dp a side, which is most of what a
+button gets when three or six share a dialog. It broke "High — 480p" into "Medi / um / — / 720p" and
+clipped the last delay chip off the card edge. Both rows now carry trimmed content padding, `maxLines =
+1` and `softWrap = false`; the delay label moved above its row to free the width. Worth remembering as a
+shape of bug rather than two incidents: **a row of weighted buttons in a dialog has far less room than
+it looks, and Compose wraps rather than shrinks.**
+
+**Also seen, not chased.** After proxying, album rows read "0 of 50 verified in OneDrive" while the hero
+above them says "Everything here is backed up". The reconcile matches on name *and* byte size, and a
+proxy no longer matches its full-size original, so the row is describing the check honestly while
+reading as though the backup evaporated. The ledger still holds `remoteSizeBytes = sizeBytes` from
+upload time, so the information to say it properly is there.
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have

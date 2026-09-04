@@ -11,6 +11,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,6 +27,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 
 import androidx.compose.material3.CardDefaults
@@ -51,10 +53,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -63,6 +67,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import kotlin.math.roundToInt
 import androidx.compose.ui.graphics.BlendMode
@@ -87,9 +92,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import java.time.LocalTime
 import com.gallery.sync.R
 import com.gallery.sync.data.local.media.DiscoveredDirectory
+import com.gallery.sync.data.local.media.ProxyGenerator
 import com.gallery.sync.domain.backup.LibraryChoice
 import com.gallery.sync.ui.common.formatBytes
 import com.gallery.sync.domain.backup.VideoQuality
@@ -101,6 +106,23 @@ import com.gallery.sync.ui.signin.SignInUiState
 import com.gallery.sync.ui.signin.SignInViewModel
 
 private const val TOTAL_STEPS = 9
+
+/**
+ * Content padding for the three video-quality buttons.
+ *
+ * `ButtonDefaults.ContentPadding` spends 24dp a side, which is most of the ~90dp each button gets
+ * when three of them share a dialog. Trimming it to 4dp is what leaves room for the label; the
+ * vertical figure is Material's own.
+ */
+private val QualityButtonPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp)
+
+/**
+ * Content padding for the six delay chips.
+ *
+ * Zero a side, because six of them share the card's width and the content is one or two digits.
+ * Material's default would spend 288dp on padding alone across the row.
+ */
+private val DelayChipPadding = PaddingValues(horizontal = 0.dp, vertical = 8.dp)
 
 /**
  * Guided setup as tooltip-style bubbles overlaying the Albums tab.
@@ -210,6 +232,34 @@ fun SetupTour(
     val isSignedIn = signInState?.value is SignInUiState.SignedIn
     val activity = LocalActivity.current
 
+    // Re-check the drive once there is an account to check it with.
+    //
+    // The reconcile fires from the directories flow, which settles at step 4 — one step *before*
+    // sign-in at step 5. With no token every listing fails, so `ReconciliationRules.tallyAlbum`
+    // files each album under `unchecked` rather than `outstanding`. That is the correct call on its
+    // own terms — "could not check" is not "not backed up" — but it leaves `photosOutstanding` and
+    // `videosOutstanding` at zero, and every figure downstream is computed from those two. Step 7
+    // then offers optimising with no sizes against it and step 8 quotes an empty backup.
+    //
+    // Confirmed on the Moto G, 4 Sept 2026: `album_cloud_status` held three rows, all written
+    // 12:07:17, all `couldNotCheck = 1`, while the card sat there with both switches on and nothing
+    // to show for them.
+    //
+    // Once per sign-in, not once per recomposition: `start()` cancels the run in flight and blanks
+    // the result, so a re-entrant call would keep the wizard permanently mid-check.
+    var reconciledAfterSignIn by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(isSignedIn) {
+        if (!isSignedIn) {
+            // Signing out invalidates the figures as surely as never having signed in. Arming the
+            // flag again means a user who switches account mid-setup gets the new drive's answer
+            // rather than the old one's.
+            reconciledAfterSignIn = false
+        } else if (!reconciledAfterSignIn) {
+            reconciledAfterSignIn = true
+            viewModel.start()
+        }
+    }
+
     fun canAdvance(): Boolean = when (step) {
         4 -> state.directoryChecks.values.any { it }
         5 -> isSignedIn
@@ -229,7 +279,28 @@ fun SetupTour(
 
     val photosOptimised = state.optimiseCandidateCount == 0 || state.optimiseFinished
     val videoOptimised = state.videoCandidateCount == 0 || state.videoOptimiseFinished
+
+    // The delayed start, counted in real time.
+    //
+    // The due instant lives in the DataStore rather than here, so closing the wizard or losing the
+    // process does not silently cancel the wait — a delay whose whole purpose is that the user
+    // walks away must survive the user walking away.
+    val startAt = state.firstBackupStartAtEpochMillis
+    var nowMillis by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(startAt) {
+        // Ticks only while something is waiting on it, and stops at zero rather than spinning for
+        // the rest of the session.
+        while (startAt != null && System.currentTimeMillis() < startAt) {
+            nowMillis = System.currentTimeMillis()
+            delay(1000)
+        }
+        nowMillis = System.currentTimeMillis()
+    }
+    val remainingMillis = if (startAt == null) 0L else (startAt - nowMillis).coerceAtLeast(0L)
+    val waitingForDelay = startAt != null && remainingMillis > 0L
+
     val backupPhase = when {
+        waitingForDelay -> WizardBackupPhase.WAITING
         !state.backupFinished -> WizardBackupPhase.UPLOADING
         !photosOptimised -> WizardBackupPhase.OPTIMISING_PHOTOS
         !videoOptimised -> WizardBackupPhase.OPTIMISING_VIDEO
@@ -237,13 +308,17 @@ fun SetupTour(
     }
     val backupComplete = backupPhase == WizardBackupPhase.DONE
 
-    LaunchedEffect(step) {
-        if (step == TOTAL_STEPS) {
-            if (resumeStep == TOTAL_STEPS) {
-                viewModel.observeBackupWorker()
-            } else {
-                viewModel.startBackupWorker()
-            }
+    // A pending delay is handed to WorkManager, which owns it from then on: it fires with the app
+    // closed, killed, or sitting on this card. The countdown here only draws what WorkManager is
+    // already committed to, which is why expiry watches rather than enqueues — starting again would
+    // replace a chain that may already be uploading.
+    LaunchedEffect(step, waitingForDelay) {
+        if (step != TOTAL_STEPS) return@LaunchedEffect
+        when {
+            waitingForDelay -> viewModel.scheduleDelayedBackup()
+            startAt != null -> viewModel.onDelayElapsed()
+            resumeStep == TOTAL_STEPS -> viewModel.observeBackupWorker()
+            else -> viewModel.startBackupWorker()
         }
     }
 
@@ -299,7 +374,16 @@ fun SetupTour(
                     viewModel.completeSetup()
                     onComplete()
                 } else {
-                    activity?.finish()
+                    // `finishAndRemoveTask`, not `finish`. Ian, 4 Sept 2026: Close "doesn't
+                    // actually close the app — it just minimizes it". Checked on the Moto G and he
+                    // is right in the way that matters: `finish()` did destroy the activity, but
+                    // the task stayed in Recents as a live-looking card, which is what minimising
+                    // looks like. Removing the task is what the word Close promises.
+                    //
+                    // The process is deliberately left alone. The upload runs inside it, so killing
+                    // it here would stop the very thing Close exists to leave running — the whole
+                    // point of this button is that the user departs and the backup does not.
+                    activity?.finishAndRemoveTask()
                 }
             }
             // Choosing to do it manually skips the backup step entirely and opens the app.
@@ -325,6 +409,20 @@ fun SetupTour(
         var prev = step - 1
         if (prev == 7 && !showOptimization) prev = 6
         if (prev >= 1) step = prev
+    }
+
+    // Back out of a run in progress — deliberately, and only deliberately.
+    //
+    // Ian, 4 Sept 2026: a user may well want to stop and change a setting once they see what the
+    // backup is actually doing. That is a reasonable thing to want, and the earlier defect was never
+    // that Back existed — it was that Back silently cancelled the upload as a side effect of
+    // re-arming a delay. The difference between a feature and that bug is the confirmation.
+    var confirmAbort by rememberSaveable { mutableStateOf(false) }
+    val runInProgress = step == TOTAL_STEPS &&
+        backupPhase != WizardBackupPhase.WAITING &&
+        backupPhase != WizardBackupPhase.DONE
+    val onBackRequest: () -> Unit = {
+        if (runInProgress) confirmAbort = true else onBack()
     }
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -384,8 +482,20 @@ fun SetupTour(
                         stringResource(R.string.wizard_finish_label)
                     else
                         stringResource(R.string.wizard_close_label),
+                    // No way back once bytes are moving. Ian, 4 Sept 2026: Back from the progress
+                    // card returned to the delay card, where arming a delay re-enqueued the manual
+                    // chain under `ExistingWorkPolicy.REPLACE` — which cancels the run in flight.
+                    // Observed stopping a live upload dead at 9 of 155 files.
+                    //
+                    // Waiting is the one progress state Back still makes sense from: nothing has
+                    // started, and changing your mind about an hour's delay is a reasonable thing
+                    // to want.
+                    // Offered right up until the run finishes, where the only thing left is Finish.
+                    canGoBack = step != TOTAL_STEPS ||
+                        backupPhase != WizardBackupPhase.DONE,
+                    backLabel = if (runInProgress) stringResource(R.string.wizard_cancel) else "",
                     onNext = onNext,
-                    onBack = onBack
+                    onBack = onBackRequest
                 ) {
                     when (step) {
                         3 -> InstallationStepsContent()
@@ -418,7 +528,8 @@ fun SetupTour(
                         )
                         8 -> BackupDelayContent(
                             state = state,
-                            onStartHourSelected = viewModel::setFirstBackupStartHour
+                            onDelaySelected = viewModel::setFirstBackupDelay,
+                            onStartNowSelected = viewModel::clearFirstBackupDelay
                         )
                         9 -> BackupProgressContent(
                             completed = state.backupCompleted,
@@ -427,11 +538,38 @@ fun SetupTour(
                             isRunning = state.backupRunning,
                             phase = backupPhase,
                             optimiseDone = state.optimiseProgressDone,
-                            optimiseTotal = state.optimiseProgressTotal
+                            optimiseTotal = state.optimiseProgressTotal,
+                            remainingMillis = remainingMillis,
+                            delayTotalMillis = state.firstBackupDelayMillis ?: 0L,
+                            onSyncNow = viewModel::startBackupNow
                         )
                     }
                 }
             }
+        }
+
+        if (confirmAbort) {
+            AlertDialog(
+                onDismissRequest = { confirmAbort = false },
+                title = { Text(stringResource(R.string.abort_backup_title)) },
+                text = { Text(stringResource(R.string.abort_backup_body)) },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            confirmAbort = false
+                            viewModel.abortBackup()
+                            step = TOTAL_STEPS - 1
+                        }
+                    ) {
+                        Text(stringResource(R.string.abort_backup_confirm))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { confirmAbort = false }) {
+                        Text(stringResource(R.string.abort_backup_keep))
+                    }
+                }
+            )
         }
 
         if (state.choosingDestination) {
@@ -453,6 +591,15 @@ private fun TourBubble(
     canAdvance: Boolean,
     isLast: Boolean,
     lastButtonLabel: String = "",
+    /** False withdraws Back entirely, for a step there is no going back from. */
+    canGoBack: Boolean = true,
+    /**
+     * What the back control says.
+     *
+     * "Cancel" while a backup is running, because there the button stops work rather than retracing
+     * a step, and a control labelled Back should not be the one that halts an upload.
+     */
+    backLabel: String = "",
     onNext: () -> Unit,
     onBack: () -> Unit,
     content: @Composable () -> Unit
@@ -480,9 +627,9 @@ private fun TourBubble(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (stepNumber > 1) {
+                if (stepNumber > 1 && canGoBack) {
                     TextButton(onClick = onBack) {
-                        Text(stringResource(R.string.wizard_back))
+                        Text(backLabel.ifEmpty { stringResource(R.string.wizard_back) })
                     }
                 } else {
                     Spacer(Modifier)
@@ -1021,6 +1168,25 @@ private fun OptimizationContent(
     val totalPhotoBytes = result?.photosOutstanding?.bytes ?: 0L
     val totalVideoBytes = result?.videosOutstanding?.bytes ?: 0L
 
+    // What proxying gives back, not what the photos weigh.
+    //
+    // Until 4 Sept 2026 this quoted `totalPhotoBytes` whole — a claim that every photo comes back
+    // as zero bytes. Ian caught it from the outside: the card offered to save 1.2 GB out of a 1.26 GB
+    // DCIM, which is the whole library and change. A proxy is a smaller file, not an absent one.
+    val photoSavingBytes = totalPhotoBytes * ProxyGenerator.APPROXIMATE_SAVING_PERCENT / 100
+
+    // Why the estimate is missing, when it is missing.
+    //
+    // Both tallies read zero whether the library is fully backed up or the drive was unreachable,
+    // and those want opposite things said about them. Anything the card cannot compute it now
+    // names; the one thing it must never do is leave the space blank and let the user decide for
+    // themselves what a switch with no figure under it means.
+    val stillChecking = state.running || result == null
+    val albumsUnchecked = result?.albumsUnchecked ?: 0
+    val nothingOutstanding = totalPhotoBytes == 0L && totalVideoBytes == 0L
+    val estimateUnavailable = !stillChecking && nothingOutstanding && albumsUnchecked > 0
+    val nothingLeftToSend = !stillChecking && nothingOutstanding && albumsUnchecked == 0
+
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
             text = stringResource(R.string.tour_optimise_title),
@@ -1059,11 +1225,11 @@ private fun OptimizationContent(
             )
         }
 
-        if (localPhotoChecked && totalPhotoBytes > 0) {
+        if (localPhotoChecked && photoSavingBytes > 0) {
             Text(
                 text = stringResource(
                     R.string.tour_optimise_photos_saving,
-                    formatBytes(context, totalPhotoBytes)
+                    formatBytes(context, photoSavingBytes)
                 ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary
@@ -1110,32 +1276,65 @@ private fun OptimizationContent(
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
+                // The name alone, never "High — 480p".
+                //
+                // Three buttons share the dialog's width, so each gets about a third of it — under
+                // 100dp on the Fold's 344dp cover screen, and not much more on the Moto G. The
+                // combined label does not fit in that, and Compose does not shrink it: it wraps
+                // wherever it happens to land, which on 4 Sept 2026 produced "Medi / um / — / 720p"
+                // and "Low / — / 1080 / p" stacked four lines high.
+                //
+                // Ian dropped the resolution from the buttons on 4 Sept 2026, having seen them fixed
+                // with it. Worth knowing what that spends: `VideoQuality`'s own note argues no option
+                // should be a bare adjective, since "High" on its own reads as high *quality* when it
+                // means high *shrinking*. What still answers that is the heading — "Video optimization
+                // level" names the axis before the options are read — and the saving line underneath,
+                // which gives the selected level a figure. The resolutions remain on the Settings
+                // dropdown, where there is a full row to draw them on.
+                //
+                // `softWrap = false` stays regardless: one word is what fits, and only if nothing is
+                // allowed to break it.
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     VideoQuality.entries.forEach { quality ->
                         val isSelected = videoQuality == quality
-                        val label = stringResource(
+                        val name = stringResource(
                             when (quality) {
-                                VideoQuality.High -> R.string.video_quality_high
-                                VideoQuality.Medium -> R.string.video_quality_medium
-                                VideoQuality.Low -> R.string.video_quality_low
+                                VideoQuality.High -> R.string.video_quality_high_name
+                                VideoQuality.Medium -> R.string.video_quality_medium_name
+                                VideoQuality.Low -> R.string.video_quality_low_name
                             }
                         )
                         if (isSelected) {
                             Button(
                                 onClick = { onVideoQualityChanged(quality) },
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
+                                shape = MaterialTheme.shapes.medium,
+                                contentPadding = QualityButtonPadding
                             ) {
-                                Text(label, fontWeight = FontWeight.Bold)
+                                Text(
+                                    text = name,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    softWrap = false
+                                )
                             }
                         } else {
                             OutlinedButton(
                                 onClick = { onVideoQualityChanged(quality) },
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f),
+                                shape = MaterialTheme.shapes.medium,
+                                contentPadding = QualityButtonPadding
                             ) {
-                                Text(label)
+                                Text(
+                                    text = name,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    maxLines = 1,
+                                    softWrap = false
+                                )
                             }
                         }
                     }
@@ -1146,8 +1345,7 @@ private fun OptimizationContent(
                     Text(
                         text = stringResource(
                             R.string.tour_optimise_video_saving,
-                            formatBytes(context, savingBytes),
-                            videoQuality.approximateSavingPercent
+                            formatBytes(context, savingBytes)
                         ),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary
@@ -1156,22 +1354,55 @@ private fun OptimizationContent(
             }
         }
 
-        // Total savings
-        if ((localPhotoChecked || localVideoChecked) && result != null) {
+        // Total savings, or why there is no total to give
+        if (localPhotoChecked || localVideoChecked) {
             HorizontalDivider()
-            val photoSaving = if (localPhotoChecked) totalPhotoBytes else 0L
+            val photoSaving = if (localPhotoChecked) photoSavingBytes else 0L
             val videoSaving = if (localVideoChecked)
                 totalVideoBytes * videoQuality.approximateSavingPercent / 100 else 0L
             val total = photoSaving + videoSaving
-            if (total > 0) {
-                Text(
-                    text = stringResource(
-                        R.string.tour_optimise_total_saving,
-                        formatBytes(context, total)
-                    ),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+
+            when {
+                total > 0 -> {
+                    Text(
+                        text = stringResource(
+                            R.string.tour_optimise_total_saving,
+                            formatBytes(context, total)
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    // A partial check gives a real figure that is only part of the answer. Say the
+                    // figure is a floor rather than quietly under-promising.
+                    if (albumsUnchecked > 0) {
+                        Text(
+                            text = stringResource(
+                                R.string.tour_optimise_incomplete,
+                                albumsUnchecked
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                stillChecking -> Text(
+                    text = stringResource(R.string.tour_optimise_checking),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                estimateUnavailable -> Text(
+                    text = stringResource(R.string.tour_optimise_unchecked),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                nothingLeftToSend -> Text(
+                    text = stringResource(R.string.tour_optimise_nothing),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -1189,7 +1420,8 @@ private fun OptimizationContent(
 @Composable
 private fun BackupDelayContent(
     state: ReconcileUiState,
-    onStartHourSelected: (Int) -> Unit
+    onDelaySelected: (Int) -> Unit,
+    onStartNowSelected: () -> Unit
 ) {
     val result = state.result
     val context = LocalContext.current
@@ -1197,7 +1429,9 @@ private fun BackupDelayContent(
     val totalBackupBytes = result?.outstanding?.bytes ?: 0L
 
     val photoSaving = if (state.isAutoOptimiseEnabled)
-        (result?.photosOutstanding?.bytes ?: 0L) else 0L
+        (result?.photosOutstanding?.bytes ?: 0L) *
+            ProxyGenerator.APPROXIMATE_SAVING_PERCENT / 100
+    else 0L
     val videoSaving = if (state.optimiseVideo)
         (result?.videosOutstanding?.bytes ?: 0L) * state.videoQuality.approximateSavingPercent / 100
     else 0L
@@ -1255,22 +1489,14 @@ private fun BackupDelayContent(
 
         if (startNow) {
             Button(
-                onClick = {
-                    startNow = true
-                    val currentHour = LocalTime.now().hour
-                    onStartHourSelected(currentHour)
-                },
+                onClick = { startNow = true; onStartNowSelected() },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(stringResource(R.string.tour_delay_right_now))
             }
         } else {
             OutlinedButton(
-                onClick = {
-                    startNow = true
-                    val currentHour = LocalTime.now().hour
-                    onStartHourSelected(currentHour)
-                },
+                onClick = { startNow = true; onStartNowSelected() },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(stringResource(R.string.tour_delay_right_now))
@@ -1282,18 +1508,22 @@ private fun BackupDelayContent(
                 onClick = {},
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(stringResource(R.string.tour_delay_later, delayHours))
+                Text(
+                    pluralStringResource(
+                        R.plurals.tour_delay_later, delayHours, delayHours
+                    )
+                )
             }
         } else {
             OutlinedButton(
-                onClick = {
-                    startNow = false
-                    val targetHour = (LocalTime.now().hour + delayHours) % 24
-                    onStartHourSelected(targetHour)
-                },
+                onClick = { startNow = false; onDelaySelected(delayHours) },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(stringResource(R.string.tour_delay_later, delayHours))
+                Text(
+                    pluralStringResource(
+                        R.plurals.tour_delay_later, delayHours, delayHours
+                    )
+                )
             }
         }
 
@@ -1302,34 +1532,55 @@ private fun BackupDelayContent(
             enter = expandVertically(),
             exit = shrinkVertically()
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            // Six chips need the whole width, so the label sits above them rather than beside.
+            //
+            // Sharing one row with "Delay" left each chip about 55dp against the 48dp that
+            // `ButtonDefaults.ContentPadding` spends on horizontal padding alone. Seen on the Moto G,
+            // 4 Sept 2026: "12" and "24" broke across two lines mid-number and the last chip was
+            // clipped by the edge of the card. Same failure as the video-quality buttons, one row
+            // further down the wizard.
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     stringResource(R.string.tour_delay_hours_label),
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-                listOf(1, 2, 4, 8, 12, 24).forEach { hours ->
-                    val isSelected = delayHours == hours
-                    if (isSelected) {
-                        Button(
-                            onClick = {},
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("$hours")
-                        }
-                    } else {
-                        OutlinedButton(
-                            onClick = {
-                                delayHours = hours
-                                val targetHour = (LocalTime.now().hour + hours) % 24
-                                onStartHourSelected(targetHour)
-                            },
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("$hours")
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    listOf(1, 2, 4, 8, 12, 24).forEach { hours ->
+                        val isSelected = delayHours == hours
+                        if (isSelected) {
+                            Button(
+                                onClick = {},
+                                modifier = Modifier.weight(1f),
+                                shape = MaterialTheme.shapes.medium,
+                                contentPadding = DelayChipPadding
+                            ) {
+                                Text(
+                                    text = "$hours",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    softWrap = false
+                                )
+                            }
+                        } else {
+                            OutlinedButton(
+                                onClick = { delayHours = hours; onDelaySelected(hours) },
+                                modifier = Modifier.weight(1f),
+                                shape = MaterialTheme.shapes.medium,
+                                contentPadding = DelayChipPadding
+                            ) {
+                                Text(
+                                    text = "$hours",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    maxLines = 1,
+                                    softWrap = false
+                                )
+                            }
                         }
                     }
                 }
@@ -1356,18 +1607,44 @@ private fun BackupProgressContent(
     isRunning: Boolean,
     phase: WizardBackupPhase,
     optimiseDone: Int,
-    optimiseTotal: Int
+    optimiseTotal: Int,
+    remainingMillis: Long,
+    delayTotalMillis: Long,
+    onSyncNow: () -> Unit
 ) {
     val uploading = phase == WizardBackupPhase.UPLOADING
-    // Uploading is the only phase with a count to divide. Optimising holds the ring full rather
-    // than resetting it — the bytes are already safe in OneDrive by then, and a bar that fell back
-    // to zero would read as the backup coming undone.
+    val waiting = phase == WizardBackupPhase.WAITING
+    // Each pass drives the ring from its own counters, so it fills three times: upload, photos,
+    // video.
+    //
+    // It used to pin at 100% through both optimise passes, on the reasoning that the bytes were
+    // already safe in OneDrive and a bar dropping back to zero would read as the backup coming
+    // undone. Ian asked for the reset on 4 Sept 2026, after watching a run sit at a full ring for
+    // four minutes with no sense of how far through it was.
+    //
+    // What makes the reset safe now is the label directly beneath it. When the ring says
+    // "Optimising photos / 85 of 150", a half-full ring plainly measures the photo pass rather than
+    // the backup — the ambiguity the old comment guarded against was created by the bare word
+    // "Optimising", and naming the phase is what removed it.
+    //
+    // `applyWizardProxies` and `applyWizardVideoOptimise` each zero `optimiseProgress*` on entry, so
+    // the video pass starts from empty rather than inheriting where the photos finished.
     val percent = when {
-        !uploading -> 100
-        total > 0 -> ((completed * 100) / total).coerceIn(0, 100)
+        phase == WizardBackupPhase.DONE -> 100
+        uploading && total > 0 -> ((completed * 100) / total).coerceIn(0, 100)
+        uploading -> 0
+        optimiseTotal > 0 -> ((optimiseDone * 100) / optimiseTotal).coerceIn(0, 100)
+        // Counted but not started, or started but not yet counted: an empty ring is honest, and it
+        // fills within a file or two.
         else -> 0
     }
-    val sweepAngle = percent * 3.6f
+    // Waiting depletes rather than fills: a countdown that emptied into the start of the upload,
+    // which then fills again, reads as a timer running out and a job beginning.
+    val countdownFraction =
+        if (waiting && delayTotalMillis > 0L) {
+            (remainingMillis.toFloat() / delayTotalMillis).coerceIn(0f, 1f)
+        } else 0f
+    val sweepAngle = if (waiting) countdownFraction * 360f else percent * 3.6f
 
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -1383,6 +1660,7 @@ private fun BackupProgressContent(
         Text(
             text = stringResource(
                 when (phase) {
+                    WizardBackupPhase.WAITING -> R.string.tour_progress_waiting_body
                     WizardBackupPhase.UPLOADING -> R.string.tour_progress_body
                     WizardBackupPhase.OPTIMISING_PHOTOS -> R.string.tour_progress_optimising_photos
                     WizardBackupPhase.OPTIMISING_VIDEO -> R.string.tour_progress_optimising_video
@@ -1406,31 +1684,68 @@ private fun BackupProgressContent(
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = "$percent%",
+                    text = if (waiting) formatCountdown(remainingMillis) else "$percent%",
                     style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.Bold
                 )
+                // What the phase is, and underneath it how far through. Ian, 4 Sept 2026: the
+                // count belongs on its own line rather than run together with the name — the ring
+                // is 180dp wide and "Optimising photos 85 of 150" would wrap awkwardly inside it.
+                val ringLabel = when {
+                    waiting -> stringResource(R.string.tour_progress_until_start)
+                    phase == WizardBackupPhase.DONE ->
+                        stringResource(R.string.wizard_finish_label)
+                    phase == WizardBackupPhase.OPTIMISING_PHOTOS ->
+                        stringResource(R.string.tour_progress_optimising_photos_label)
+                    phase == WizardBackupPhase.OPTIMISING_VIDEO ->
+                        stringResource(R.string.tour_progress_optimising_video_label)
+                    // Nothing has landed yet: the count would read "0 of 155" through
+                    // WorkManager's start-up, the whole first upload and the poll lag behind it,
+                    // which looks stuck rather than busy.
+                    total > 0 && completed == 0 && isRunning ->
+                        stringResource(R.string.tour_progress_starting)
+                    total > 0 -> stringResource(
+                        R.string.tour_progress_uploading, completed, total
+                    )
+                    isRunning -> stringResource(R.string.tour_progress_scanning)
+                    else -> stringResource(R.string.tour_progress_waiting)
+                }
+
+                // No total yet means the phase has started but the batch has not been counted.
+                // "0 of 0" would be worse than saying nothing, so the line is simply absent.
+                val ringCount = when {
+                    phase != WizardBackupPhase.OPTIMISING_PHOTOS &&
+                        phase != WizardBackupPhase.OPTIMISING_VIDEO -> null
+                    optimiseTotal > 0 -> stringResource(
+                        R.string.tour_progress_count, optimiseDone, optimiseTotal
+                    )
+                    else -> null
+                }
+
                 Text(
-                    text = when {
-                        phase == WizardBackupPhase.DONE ->
-                            stringResource(R.string.wizard_finish_label)
-                        // No total yet means the phase has started but the batch has not been
-                        // counted. "0 of 0" would be worse than saying nothing.
-                        phase != WizardBackupPhase.UPLOADING && optimiseTotal > 0 ->
-                            stringResource(
-                                R.string.tour_progress_optimising_count, optimiseDone, optimiseTotal
-                            )
-                        phase != WizardBackupPhase.UPLOADING ->
-                            stringResource(R.string.tour_progress_optimising)
-                        total > 0 -> stringResource(
-                            R.string.tour_progress_uploading, completed, total
-                        )
-                        isRunning -> stringResource(R.string.tour_progress_scanning)
-                        else -> stringResource(R.string.tour_progress_waiting)
-                    },
+                    text = ringLabel,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface
                 )
+                if (ringCount != null) {
+                    Text(
+                        text = ringCount,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+        }
+
+        // The escape hatch. A delay is a preference, not a commitment, and the user who set it an
+        // hour ago is the same one now looking at the phone deciding they would rather get on with
+        // it. Starting clears the stored due time, so the countdown does not fire again behind it.
+        if (waiting) {
+            Button(
+                onClick = onSyncNow,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(stringResource(R.string.tour_progress_sync_now))
             }
         }
 
@@ -2020,7 +2335,32 @@ private fun MockSectionHeader(
 }
 
 /** Which of step 9's three phases is running. See where it is derived, in the tour body. */
-private enum class WizardBackupPhase { UPLOADING, OPTIMISING_PHOTOS, OPTIMISING_VIDEO, DONE }
+/**
+ * `h:mm:ss` once past an hour, `m:ss` below it.
+ *
+ * Seconds are shown throughout, because a countdown whose largest unit is minutes looks frozen for
+ * a minute at a time — the thing this screen exists to avoid.
+ */
+private fun formatCountdown(millis: Long): String {
+    val totalSeconds = millis / 1000
+    val hours = totalSeconds / 3600
+    val minutes = (totalSeconds % 3600) / 60
+    val seconds = totalSeconds % 60
+    return if (hours > 0) {
+        "%d:%02d:%02d".format(hours, minutes, seconds)
+    } else {
+        "%d:%02d".format(minutes, seconds)
+    }
+}
+
+private enum class WizardBackupPhase {
+    /** A delay was chosen and has not elapsed. Nothing is enqueued yet. */
+    WAITING,
+    UPLOADING,
+    OPTIMISING_PHOTOS,
+    OPTIMISING_VIDEO,
+    DONE
+}
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 

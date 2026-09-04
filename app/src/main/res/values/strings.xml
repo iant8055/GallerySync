@@ -764,6 +764,7 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <!-- Guided first run. -->
     <string name="wizard_next">Next</string>
     <string name="wizard_back">Back</string>
+    <string name="wizard_cancel">Cancel</string>
     <string name="wizard_skip">Skip setup</string>
     <string name="wizard_close_label">Close</string>
     <string name="wizard_finish_label">Finish</string>
@@ -886,9 +887,30 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_optimise_body">Optimization allows you to free up storage space on your phone while still being able to see all your photos and videos on your Gallery.</string>
     <string name="tour_optimise_note">These settings can be changed at any time in the Settings tab.</string>
     <string name="tour_optimise_photos_saving">Estimated photo savings: %1$s</string>
-    <string name="tour_optimise_video_saving">Estimated video savings: %1$s (%2$d%% reduction)</string>
+    <string name="tour_optimise_video_saving">Estimated video savings: %1$s</string>
     <string name="tour_optimise_total_saving">Total estimated savings: %1$s</string>
     <string name="tour_optimise_video_quality">Video optimization level</string>
+    <!--
+        The estimate is computed from the reconcile's outstanding tallies, and those read zero for
+        two very different reasons: nothing is left to send, or the drive could not be listed and
+        every file went to `unchecked`. The card says which one it is. Before 4 Sept 2026 it drew
+        nothing at all, so a user who turned both switches on saw a blank gap where the figure goes
+        and no reason for it. Same principle as `reconcile_incomplete` — never let "could not ask"
+        render as an answer.
+    -->
+    <string name="tour_optimise_checking">Checking OneDrive to work out what this would save…</string>
+    <string name="tour_optimise_unchecked">OneDrive could not be checked just now, so there is no saving to estimate yet. These settings still apply — they act on whatever the first backup sends.</string>
+    <string name="tour_optimise_incomplete">Could not check %1$d of your albums, so the real saving is likely to be larger than this.</string>
+    <string name="tour_optimise_nothing">Everything on this phone is already in OneDrive, so there is nothing new to optimize yet.</string>
+    <!--
+        Split from video_quality_high and friends because the wizard's three side-by-side buttons
+        have room for the name and nothing else. The combined "High — 480p" label is still what the
+        Settings dropdown uses, where there is a full row to draw it on, and it is the only place the
+        resolutions now appear.
+    -->
+    <string name="video_quality_high_name">High</string>
+    <string name="video_quality_medium_name">Medium</string>
+    <string name="video_quality_low_name">Low</string>
 
     <string name="tour_delay_title">Ready to back up</string>
     <string name="tour_delay_backup_size">You have selected %1$s to back up</string>
@@ -896,19 +918,70 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_delay_scanning">Scanning your library…</string>
     <string name="tour_delay_when">Do you want to perform backup now?</string>
     <string name="tour_delay_right_now">Right now</string>
-    <string name="tour_delay_later">Start in %1$d hours</string>
+    <!-- Was a plain string, so a one-hour delay read "Start in 1 hours". -->
+    <plurals name="tour_delay_later">
+        <item quantity="one">Start in %1$d hour</item>
+        <item quantity="other">Start in %1$d hours</item>
+    </plurals>
     <string name="tour_delay_hours_label">Delay</string>
     <string name="tour_delay_security">For the security of your data, the app will be unavailable until a backup has been successfully completed and verified.</string>
 
     <string name="tour_progress_title">Backup Progress</string>
     <string name="tour_progress_body">Your backup is running. The backup runs in the background — you can use your phone normally.</string>
     <string name="tour_progress_waiting">Waiting to start</string>
+    <!--
+        The delayed start, added 4 Sept 2026. Before this the delay was stored and then ignored: the
+        wizard enqueued a *manual* run, and manual runs are exempt from the first-backup window by
+        design, so "Start in 1 hour" began uploading immediately.
+
+        The card counts down in real minutes rather than to the top of an hour, and offers a way out
+        — a delay is a preference, not a commitment.
+    -->
+    <string name="tour_progress_waiting_body">Your backup starts on its own when the countdown ends, even if you close the app. Or start it now.</string>
+    <string name="tour_progress_until_start">until backup starts</string>
+    <string name="tour_progress_sync_now">SYNC NOW</string>
     <string name="tour_progress_scanning">Scanning your library…</string>
     <string name="tour_progress_uploading">Uploading %1$d of %2$d</string>
+    <!--
+        Shown while the total is known but nothing has completed yet. Asked for by Ian, 4 Sept 2026:
+        the ring sat on "0 of 155" long enough to look stuck.
+
+        Deliberately not "Checking files" — the checking is already over by this point, the reconcile
+        having produced the 155. What actually fills the gap is WorkManager starting the job, the
+        first file uploading in full, and up to 3s of `observeBackupWorker` poll lag before the count
+        catches up. "Starting upload" is the one description true of all three.
+    -->
+    <string name="tour_progress_starting">Starting upload…</string>
+    <!--
+        The ring's own label, which says which half of the run is on screen. Ian, 4 Sept 2026: the
+        two optimise phases both read a bare "Optimising", so the ring gave no way to tell the photo
+        pass from the video one — while the body text above it was already naming them.
+
+        Kept as two pairs rather than one string plus a noun, because a count reads differently in
+        other languages and splicing "photos" into "Optimising %1$d of %2$d" would not survive
+        translation.
+    -->
     <string name="tour_progress_optimising">Optimising</string>
     <string name="tour_progress_optimising_count">Optimising %1$d of %2$d</string>
+    <string name="tour_progress_optimising_photos_label">Optimising photos</string>
+    <string name="tour_progress_optimising_video_label">Optimising video</string>
+    <!-- The count on its own line under the phase name. Bare, so either name can sit above it. -->
+    <string name="tour_progress_count">%1$d of %2$d</string>
     <string name="tour_progress_optimising_photos">Upload finished and verified. Now optimising your photos: they stay in your gallery and stay usable, and the full-size originals stay in OneDrive.</string>
     <string name="tour_progress_optimising_video">Upload finished and verified. Now optimising your videos: nothing is cut, they stay in your gallery, and the full-size originals stay in OneDrive.</string>
     <string name="tour_progress_complete">Congratulations your backup has finished successfully and has been verified. Press Finish.</string>
     <string name="tour_progress_note">You can check progress any time by opening the app.</string>
+    <!--
+        Stopping a run in progress, so settings can be changed. Asked for by Ian, 4 Sept 2026.
+
+        The body says what survives, because the honest answer is "almost everything" and a user who
+        fears losing an hour of uploading will sit through a backup they wanted to change. Nothing is
+        deleted and nothing is re-sent: the ledger keeps what OneDrive already holds. Photos already
+        proxied stay proxied, which is why the copy says the originals are safe rather than claiming
+        the run is undone.
+    -->
+    <string name="abort_backup_title">Stop the backup?</string>
+    <string name="abort_backup_body">Uploading stops so you can change your settings. Files already in OneDrive stay there, and starting again picks up where this left off rather than sending them twice. Nothing is deleted. Photos already optimised stay optimised, with their full-size originals in OneDrive.</string>
+    <string name="abort_backup_confirm">Stop and go back</string>
+    <string name="abort_backup_keep">Keep backing up</string>
 </resources>

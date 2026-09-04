@@ -75,6 +75,24 @@ data class BackupPreferences(
     /** Whether that first run waits for the phone to be plugged in. On by default. */
     val firstBackupRequiresCharging: Boolean = true,
     /**
+     * Exact instant the wizard's delayed first backup is due, or null when it starts immediately.
+     *
+     * An absolute timestamp rather than [firstBackupStartHour]'s hour-of-day, because the wizard
+     * counts down in real minutes. "Start in 1 hour" chosen at 13:25 means 14:25, where the
+     * hour-of-day form could only say "14:00" and would have meant 35 minutes.
+     *
+     * Persisted rather than held in the composable so the countdown survives the wizard being
+     * closed and the process being killed — the whole point of a delay is that the user goes away.
+     */
+    val firstBackupStartAtEpochMillis: Long? = null,
+    /**
+     * How long the delay was when it was chosen, so the countdown ring has a denominator.
+     *
+     * Kept beside the due time rather than derived from it: the ring needs to know it is showing
+     * one hour of sixty minutes remaining, not merely that sixty minutes remain.
+     */
+    val firstBackupDelayMillis: Long? = null,
+    /**
      * Whether the backlog has been cleared once.
      *
      * The window gates the *first* upload, which is the only one large enough to matter. Once the
@@ -253,6 +271,8 @@ class BackupSettings @Inject constructor(
                 ?.takeIf { it in FirstBackupWindow.SELECTABLE_HOURS }
                 ?: FirstBackupWindow.DEFAULT_START_HOUR,
             firstBackupRequiresCharging = stored[KEY_FIRST_BACKUP_CHARGING] ?: true,
+            firstBackupStartAtEpochMillis = stored[KEY_FIRST_BACKUP_START_AT],
+            firstBackupDelayMillis = stored[KEY_FIRST_BACKUP_DELAY],
             hasCompletedFirstBackup = stored[KEY_FIRST_BACKUP_DONE] ?: false,
             // An unreadable value falls back to LEAVE, never to ASK. A corrupt preference must not
             // be able to arm the one feature that removes a user's last copy.
@@ -465,6 +485,24 @@ class BackupSettings @Inject constructor(
     }
 
     /**
+     * Arms, or clears, the wizard's delayed start.
+     *
+     * Null removes the key rather than storing a sentinel, so "no delay pending" and "delay due at
+     * epoch zero" cannot be confused.
+     */
+    suspend fun setFirstBackupStartAt(epochMillis: Long?, delayMillis: Long? = null) {
+        context.dataStore.edit { prefs ->
+            if (epochMillis == null) {
+                prefs.remove(KEY_FIRST_BACKUP_START_AT)
+                prefs.remove(KEY_FIRST_BACKUP_DELAY)
+            } else {
+                prefs[KEY_FIRST_BACKUP_START_AT] = epochMillis
+                if (delayMillis != null) prefs[KEY_FIRST_BACKUP_DELAY] = delayMillis
+            }
+        }
+    }
+
+    /**
      * Records that the backlog has been cleared, lifting the overnight window for good.
      *
      * One-way on purpose. Flipping this back would re-impose an overnight wait on someone whose
@@ -503,6 +541,8 @@ class BackupSettings @Inject constructor(
         val KEY_DESTINATION_ROOT = stringPreferencesKey("destination_root")
         val KEY_FIRST_BACKUP_HOUR = intPreferencesKey("first_backup_start_hour")
         val KEY_FIRST_BACKUP_CHARGING = booleanPreferencesKey("first_backup_requires_charging")
+        val KEY_FIRST_BACKUP_START_AT = longPreferencesKey("first_backup_start_at")
+        val KEY_FIRST_BACKUP_DELAY = longPreferencesKey("first_backup_delay_millis")
         val KEY_FIRST_BACKUP_DONE = booleanPreferencesKey("first_backup_completed")
         val KEY_CLOUD_DELETION_POLICY = stringPreferencesKey("cloud_deletion_policy")
         val KEY_CLOUD_DELETION_GRACE = intPreferencesKey("cloud_deletion_grace_days")

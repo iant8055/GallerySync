@@ -545,6 +545,17 @@ interface BackupEntryDao {
      * matches. Without this the scanner sees each proxy as a brand-new file and uploads it beside
      * the original it was made from.
      */
+    /**
+     * How many of one kind are already proxied.
+     *
+     * The optimise phases use it as an offset so their counter describes the whole phase rather than
+     * the current attempt. Closing the wizard part-way through and reopening it recomputes the
+     * *remaining* candidates, so without this the screen went from "2 of 5" to "0 of 3" — each
+     * number true, the pair of them reading as progress lost.
+     */
+    @Query("SELECT COUNT(*) FROM backup_entries WHERE isProxied = 1 AND isVideo = :video")
+    suspend fun countProxied(video: Boolean): Int
+
     @Query("SELECT mediaStoreId FROM backup_entries WHERE isProxied = 1")
     suspend fun proxiedMediaStoreIds(): List<Long>
 

@@ -117,10 +117,12 @@ object BackupScheduling {
         workManager: WorkManager,
         allowMeteredNetwork: Boolean,
         manual: Boolean = false,
-        allAlbums: Boolean = false
+        allAlbums: Boolean = false,
+        initialDelayMillis: Long = 0L
     ) {
         val request = OneTimeWorkRequestBuilder<BackupWorker>()
             .setConstraints(constraints(allowMeteredNetwork))
+            .apply { if (initialDelayMillis > 0L) setInitialDelay(initialDelayMillis, TimeUnit.MILLISECONDS) }
             .setInputData(
                 Data.Builder()
                     .putBoolean(KEY_MANUAL, manual)
@@ -152,6 +154,34 @@ object BackupScheduling {
         allAlbums: Boolean = false
     ) {
         enqueueContinuation(workManager, allowMeteredNetwork, manual = true, allAlbums = allAlbums)
+    }
+
+    /**
+     * The wizard's delayed first backup.
+     *
+     * Held by WorkManager rather than by a timer in the wizard, so it fires whether or not the app
+     * is running. A countdown that only advances while someone watches it is not a delay, it is a
+     * progress bar with extra steps.
+     *
+     * Still a manual run: the user picked this moment, which is exactly what the first-backup
+     * window's manual exemption is for. Network and battery constraints continue to apply.
+     *
+     * Enqueued under [MANUAL_WORK] with `REPLACE`, so re-arming, "Sync now" and a plain manual run
+     * all supersede a pending one rather than stacking a second chain behind it.
+     */
+    fun enqueueDelayedManualRun(
+        workManager: WorkManager,
+        allowMeteredNetwork: Boolean,
+        delayMillis: Long,
+        allAlbums: Boolean = false
+    ) {
+        enqueueContinuation(
+            workManager,
+            allowMeteredNetwork,
+            manual = true,
+            allAlbums = allAlbums,
+            initialDelayMillis = delayMillis
+        )
     }
 
     /** Stops a manual chain, including whatever batch it is in the middle of. */

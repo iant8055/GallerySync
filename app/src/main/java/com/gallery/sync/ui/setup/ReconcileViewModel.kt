@@ -56,6 +56,10 @@ data class ReconcileUiState(
     val destinationRejected: Boolean = false,
     val firstBackupStartHour: Int = FirstBackupWindow.DEFAULT_START_HOUR,
     val firstBackupRequiresCharging: Boolean = true,
+    /** When the wizard's delayed first backup is due, or null when there is no delay pending. */
+    val firstBackupStartAtEpochMillis: Long? = null,
+    /** The chosen delay's full length, so the countdown ring has a denominator. */
+    val firstBackupDelayMillis: Long? = null,
     /** Once true the window no longer applies and the section explains why it is gone. */
     val hasCompletedFirstBackup: Boolean = false,
     /** What is currently holding the first run, or null if nothing is. */
@@ -186,7 +190,8 @@ class ReconcileViewModel @Inject constructor(
     private val backupEngine: BackupEngine,
     private val scanner: MediaScanner,
     private val proxyApplier: com.gallery.sync.data.local.media.ProxyApplier,
-    private val videoOptimiser: com.gallery.sync.data.local.media.VideoOptimiser
+    private val videoOptimiser: com.gallery.sync.data.local.media.VideoOptimiser,
+    private val entryDao: com.gallery.sync.data.local.dao.BackupEntryDao
 ) : ViewModel() {
 
     private val workManager = WorkManager.getInstance(context)
@@ -196,6 +201,15 @@ class ReconcileViewModel @Inject constructor(
 
 
     private var job: Job? = null
+
+    /**
+     * The progress-polling loop, held so an abort can stop it.
+     *
+     * Cancelling the WorkManager chain is not enough on its own: this loop keeps reading the ledger
+     * and writing counts back into the state, so an abort without it would reset the screen and then
+     * watch the old numbers reappear a poll later.
+     */
+    private var backupObserverJob: Job? = null
 
     init {
         viewModelScope.launch {
@@ -263,6 +277,8 @@ class ReconcileViewModel @Inject constructor(
                     destinationRoot = prefs.destinationRoot,
                     firstBackupStartHour = prefs.firstBackupStartHour,
                     firstBackupRequiresCharging = prefs.firstBackupRequiresCharging,
+                    firstBackupStartAtEpochMillis = prefs.firstBackupStartAtEpochMillis,
+                    firstBackupDelayMillis = prefs.firstBackupDelayMillis,
                     hasCompletedFirstBackup = prefs.hasCompletedFirstBackup,
                     acknowledgedTopics = prefs.acknowledgedTopics,
                     hasCompletedSetup = prefs.hasCompletedSetup,
@@ -364,10 +380,14 @@ class ReconcileViewModel @Inject constructor(
                 optimiseProgressDone = 0,
                 optimiseProgressTotal = 0
             )
+            // Counted across the whole phase, not this attempt. Reopening the wizard part-way
+            // through recomputes the *remaining* candidates, so an un-offset counter fell from
+            // "2 of 5" back to "0 of 3" — both true, the pair of them reading as work undone.
+            val alreadyDone = entryDao.countProxied(video = false)
             val outcome = proxyApplier.apply(pendingProxyCandidates) { done, total ->
                 _state.value = _state.value.copy(
-                    optimiseProgressDone = done,
-                    optimiseProgressTotal = total
+                    optimiseProgressDone = alreadyDone + done,
+                    optimiseProgressTotal = alreadyDone + total
                 )
             }
             val (count, bytes) = when (outcome) {
@@ -415,10 +435,14 @@ class ReconcileViewModel @Inject constructor(
                 optimiseProgressTotal = 0
             )
             val quality = _state.value.videoQuality
+            // See applyWizardProxies: the offset keeps the count describing the phase, not the
+            // attempt. Ian saw this one directly — closing during the video pass and reopening
+            // showed "0 of 3" after two clips were already done.
+            val alreadyDone = entryDao.countProxied(video = true)
             val result = videoOptimiser.runForWizard(quality) { done, total ->
                 _state.value = _state.value.copy(
-                    optimiseProgressDone = done,
-                    optimiseProgressTotal = total
+                    optimiseProgressDone = alreadyDone + done,
+                    optimiseProgressTotal = alreadyDone + total
                 )
             }
             _state.value = _state.value.copy(
@@ -438,6 +462,140 @@ class ReconcileViewModel @Inject constructor(
     /** Ends guided setup, whether it was completed or skipped. */
     fun completeSetup() {
         viewModelScope.launch { settings.setSetupCompleted(true) }
+    }
+
+    /**
+     * Arms the wizard's delayed start, [hours] from now to the minute.
+     *
+     * Deliberately not routed through `setFirstBackupStartHour`: that stores an hour of day, so a
+     * delay chosen at 13:25 would land on 14:00 and be 35 minutes rather than the hour asked for.
+     */
+    fun setFirstBackupDelay(hours: Int) {
+        viewModelScope.launch {
+            // Never over the top of a run already moving bytes. Arming re-enqueues the manual chain
+            // with REPLACE, so without this a delay chosen after the upload began would cancel it —
+            // which is exactly what happened on 4 Sept 2026, stopping a live run at 9 of 155.
+            //
+            // Withdrawing Back from the progress card closes the route that reached this; the guard
+            // stays because a second route would be silent, and what it costs is nothing.
+            val current = _state.value
+            if (current.backupRunning || current.backupCompleted > 0 || current.backupFinished) {
+                Logger.w(TAG, "ignoring delay request: backup already under way")
+                return@launch
+            }
+            val delayMillis = hours * 60L * 60L * 1000L
+            settings.setFirstBackupStartAt(
+                epochMillis = System.currentTimeMillis() + delayMillis,
+                delayMillis = delayMillis
+            )
+        }
+    }
+
+    /**
+     * Cancels any pending delay and uploads now — what the wizard's "Sync now" does.
+     *
+     * The delay is cleared before the worker is enqueued, so a process death between the two leaves
+     * a run that starts immediately rather than a countdown that has already fired.
+     */
+    /** Drops a pending delay without starting anything — the wizard's "Right now" choice. */
+    fun clearFirstBackupDelay() {
+        viewModelScope.launch {
+            settings.setFirstBackupStartAt(null)
+            // Cancels a chain armed by an earlier visit to this card. Without this, changing your
+            // mind back to "Right now" would leave the old delayed run queued and it would fire
+            // later on its own.
+            BackupScheduling.cancelManualRun(workManager)
+        }
+    }
+
+    /**
+     * Hands the pending delay to WorkManager, so it fires with the app closed or killed.
+     *
+     * Called when the wizard reaches the progress card with a delay still outstanding, and again on
+     * every return to it — the delay is recomputed from the stored due time each time, so a process
+     * restart re-arms the correct remainder rather than starting the clock over.
+     *
+     * The ledger prep happens here rather than at expiry because the countdown card needs the total
+     * to have something to say, and because the work has to be queued before the app goes away.
+     */
+    fun scheduleDelayedBackup() {
+        viewModelScope.launch {
+            val startAt = settings.current().firstBackupStartAtEpochMillis ?: return@launch
+            val remaining = startAt - System.currentTimeMillis()
+            if (remaining <= 0L) return@launch
+
+            settings.setWizardStep(TOTAL_STEPS)
+            backupEngine.refreshLedger()
+            backupEngine.reconcileAndRequeue()
+            val grandTotal = backupEngine.outstandingCountAll()
+            settings.setWizardBackupTotal(grandTotal)
+            _state.value = _state.value.copy(backupTotal = grandTotal)
+
+            val prefs = settings.current()
+            BackupScheduling.enqueueDelayedManualRun(
+                workManager = workManager,
+                allowMeteredNetwork = prefs.allowMeteredNetwork,
+                delayMillis = remaining,
+                allAlbums = true
+            )
+            Logger.i(TAG, "delayed first backup armed: ${remaining}ms, $grandTotal pending")
+        }
+    }
+
+    /**
+     * The countdown has run out. The work is already queued, so this only clears the due time and
+     * starts watching — enqueueing again here would replace a chain that may already be uploading.
+     */
+    fun onDelayElapsed() {
+        viewModelScope.launch {
+            settings.setFirstBackupStartAt(null)
+            observeBackupWorker()
+        }
+    }
+
+    fun startBackupNow() {
+        viewModelScope.launch {
+            settings.setFirstBackupStartAt(null)
+            startBackupWorker()
+        }
+    }
+
+    /**
+     * Stops the run and puts the wizard back where settings can be changed.
+     *
+     * Deliberate, and reached only through a confirmation — the accidental version of this is the
+     * defect it grew out of, where Back re-armed a delay and silently cancelled a live upload.
+     *
+     * **Nothing uploaded is undone.** Files already in OneDrive stay there and the ledger keeps
+     * saying so, so restarting resumes rather than re-sending. Photos already replaced by proxies
+     * stay proxied: their originals are in the cloud, which is the same guarantee they had a moment
+     * earlier. Aborting stops work, it does not reverse it, and it never removes anything.
+     */
+    fun abortBackup() {
+        backupObserverJob?.cancel()
+        backupObserverJob = null
+        viewModelScope.launch {
+            BackupScheduling.cancelManualRun(workManager)
+            settings.setFirstBackupStartAt(null)
+            settings.setWizardBackupTotal(0)
+            settings.setWizardStep(TOTAL_STEPS - 1)
+            _state.value = _state.value.copy(
+                backupRunning = false,
+                backupFinished = false,
+                backupCompleted = 0,
+                backupTotal = 0,
+                backupCurrentFile = "",
+                optimiseRunning = false,
+                optimiseFinished = false,
+                optimiseCandidateCount = 0,
+                optimiseProgressDone = 0,
+                optimiseProgressTotal = 0,
+                videoOptimiseRunning = false,
+                videoOptimiseFinished = false,
+                videoCandidateCount = 0
+            )
+            Logger.i(TAG, "backup aborted by user; wizard returned to settings")
+        }
     }
 
     fun startBackupWorker() {
@@ -470,7 +628,8 @@ class ReconcileViewModel @Inject constructor(
     }
 
     fun observeBackupWorker(knownTotal: Int = 0) {
-        viewModelScope.launch {
+        backupObserverJob?.cancel()
+        backupObserverJob = viewModelScope.launch {
             val savedTotal = settings.current().wizardBackupTotal
             val total = when {
                 knownTotal > 0 -> knownTotal

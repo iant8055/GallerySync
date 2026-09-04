@@ -204,10 +204,30 @@ class ProxyGenerator @Inject constructor(
 
         private const val TAG = "ProxyGenerator"
 
-        /** Long edge of the proxy. Roughly a tenth the bytes, still good for viewing and sharing. */
+        /** Long edge of the proxy. Much the smaller file, still good for viewing and sharing. */
         const val TARGET_LONG_EDGE_PX = 2048
 
         const val JPEG_QUALITY = 90
+
+        /**
+         * What proxying saved on the photos it actually replaced, as a percentage of the original.
+         *
+         * Measured, not guessed, and the figures are from this project's own run of 53 files
+         * recorded in MILESTONES: 3.77 MB to 0.93 (75%), 3.25 to 1.10 (66%), 1.28 to 0.38 (70%).
+         * 70 is the middle of that and deliberately not the best of it.
+         *
+         * **It is an over-estimate of what a whole library gives back**, and any screen using it
+         * must say "estimated". Two things pull the real figure down. A proxy still occupies bytes —
+         * the earlier note here said "roughly a tenth", which no measurement supports and which is
+         * how the wizard came to promise 100% of every photo back. And a photo already under
+         * [TARGET_LONG_EDGE_PX] is skipped outright for no saving at all: 44 of those 53 files were,
+         * because the album was full of small images. A camera roll skews the other way, so the
+         * skipped share swings widely and cannot be known before the files are examined.
+         *
+         * Exists for the same reason as `VideoQuality.approximateSavingPercent`: so no screen
+         * invents its own number and the two cannot drift.
+         */
+        const val APPROXIMATE_SAVING_PERCENT = 70
 
         /**
          * Largest power-of-two sample size that still leaves the image at or above [target].
