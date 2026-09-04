@@ -3,6 +3,7 @@ package com.gallery.sync.domain.repository
 import com.gallery.sync.data.remote.onedrive.ResumableSession
 import com.gallery.sync.data.remote.onedrive.UploadSource
 import com.gallery.sync.domain.model.DataResult
+import com.gallery.sync.domain.model.RemoteMediaNode
 import com.gallery.sync.domain.model.UploadedItem
 import java.io.File
 
@@ -47,6 +48,21 @@ interface OneDriveUploadRepository {
         existingSession: ResumableSession? = null,
         onSessionCreated: suspend (ResumableSession) -> Unit = {}
     ): DataResult<UploadedItem>
+
+    /**
+     * Creates one folder, named [name], inside [parentFolderId] — or under the drive root when that
+     * is `null`.
+     *
+     * Here rather than on `OneDriveRepository` because that interface is documented read-only and
+     * this writes. It is the one write the destination picker needs: browsing alone cannot offer a
+     * folder that does not exist yet, and the destination has always been allowed to name one.
+     *
+     * Fails rather than renaming when the name is taken — see `CreateFolderRequestDto`.
+     */
+    suspend fun createFolder(
+        parentFolderId: String?,
+        name: String
+    ): DataResult<RemoteMediaNode.Folder>
 
     /**
      * Abandons a resumable session so Graph releases the chunks staged against it.

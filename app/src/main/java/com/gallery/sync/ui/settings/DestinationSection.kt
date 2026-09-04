@@ -136,6 +136,21 @@ fun DestinationDialog(
     onDismiss: () -> Unit
 ) {
     var typed by rememberSaveable(current) { mutableStateOf(current) }
+    var browsing by rememberSaveable { mutableStateOf(false) }
+
+    // Browsing is offered beside the field rather than replacing it. Someone who knows the path
+    // types it in one go; walking ninety albums to reach a folder you can name is worse, and the
+    // field keeps working when the network does not.
+    if (browsing) {
+        OneDriveFolderPicker(
+            onPick = { picked ->
+                typed = picked
+                browsing = false
+            },
+            onDismiss = { browsing = false }
+        )
+        return
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -166,6 +181,9 @@ fun DestinationDialog(
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error
                     )
+                }
+                OutlinedButton(onClick = { browsing = true }) {
+                    Text(stringResource(R.string.destination_browse), maxLines = 1)
                 }
                 if (typed != RemoteRoots.DEFAULT_DESTINATION) {
                     TextButton(onClick = { typed = RemoteRoots.DEFAULT_DESTINATION }) {

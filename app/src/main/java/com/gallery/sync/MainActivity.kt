@@ -29,6 +29,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -186,7 +187,18 @@ private fun SignedInApp(
     }
 
     var tourStep by remember { mutableIntStateOf(1) }
-    val hideNavBar = showTour && tourStep == 1
+
+    // Close on the last step puts the wizard away for this session without claiming setup finished.
+    // It had nowhere to record that — `onComplete` was an empty lambda, so Close did nothing at all
+    // and the only way out of step 9 was to wait for the backup. Finish only appeared to work
+    // because completing setup makes the parent stop rendering the tour.
+    //
+    // Deliberately not persisted: the backup carries on in WorkManager, setup is still unfinished,
+    // and the wizard is owed on the next launch — where it resumes at step 9 and re-attaches to the
+    // running job.
+    var tourDismissed by rememberSaveable { mutableStateOf(false) }
+    val tourVisible = showTour && !tourDismissed
+    val hideNavBar = tourVisible && tourStep == 1
 
     Column(modifier = modifier.fillMaxSize()) {
         Box(modifier = Modifier.weight(1f)) {
@@ -197,11 +209,11 @@ private fun SignedInApp(
                 else -> SettingsScreen(accountName = accountName, onSignOut = onSignOut)
             }
 
-            if (showTour && setupViewModel != null) {
+            if (tourVisible && setupViewModel != null) {
                 SetupTour(
                     viewModel = setupViewModel,
                     signInViewModel = signInViewModel,
-                    onComplete = { },
+                    onComplete = { tourDismissed = true },
                     onSwitchTab = { selectedTab = it },
                     onStepChanged = { tourStep = it }
                 )
@@ -209,10 +221,13 @@ private fun SignedInApp(
         }
 
         if (!hideNavBar) {
+            // Inert while the tour runs. The bar has to stay visible because step 2 points at it,
+            // but it sits below the tour rather than under it, so taps were reaching it and
+            // switching the tab behind the card.
             SignalNavBar(
                 destinations = destinations,
                 selected = selectedTab,
-                onSelect = { selectedTab = it },
+                onSelect = { if (!tourVisible) selectedTab = it },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
         }

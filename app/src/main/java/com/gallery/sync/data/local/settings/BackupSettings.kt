@@ -286,6 +286,33 @@ class BackupSettings @Inject constructor(
         context.dataStore.data.first()[KEY_SETUP_COMPLETE] != null
 
     /**
+     * Whether a wizard has ever been started on this install.
+     *
+     * The upgrade backfill needs this because "holds a granted tree" stopped being proof of a
+     * pre-existing install the moment the wizard began taking grants of its own. Someone at step 5
+     * has grants and no setup decision, and looks identical to an upgrading user — so the backfill
+     * declared their half-finished setup complete and dropped them on the tabs with every album
+     * Off. Seen on the Moto G, 3 Sept 2026, after the app was reinstalled mid-wizard; a crash,
+     * a force-stop or the system reclaiming memory does the same thing.
+     */
+    suspend fun hasStartedWizard(): Boolean =
+        (context.dataStore.data.first()[KEY_WIZARD_STEP] ?: 0) > 0
+
+    /**
+     * Whether the one-time upgrade backfill has already run on this install.
+     *
+     * Persisted rather than held in memory because the original was "one shot, at construction"
+     * — true only until something reconstructed the ViewModel, which is exactly what a restart
+     * does. A flag on disk is the only version of "once" that survives the process dying.
+     */
+    suspend fun hasCheckedUpgradeBackfill(): Boolean =
+        context.dataStore.data.first()[KEY_BACKFILL_CHECKED] == true
+
+    suspend fun markUpgradeBackfillChecked() {
+        context.dataStore.edit { it[KEY_BACKFILL_CHECKED] = true }
+    }
+
+    /**
      * Records what the current run set out to move, so progress can be a proportion of it.
      *
      * Never lowered while a run is live — files added midway raise it, so the reported progress
@@ -463,6 +490,7 @@ class BackupSettings @Inject constructor(
         val KEY_SHOW_EMPTY_FOLDERS = booleanPreferencesKey("show_empty_cloud_folders")
         val KEY_ACKNOWLEDGED_TOPICS = stringSetPreferencesKey("acknowledged_topics")
         val KEY_SETUP_COMPLETE = booleanPreferencesKey("setup_complete")
+        val KEY_BACKFILL_CHECKED = booleanPreferencesKey("upgrade_backfill_checked")
         val KEY_PAUSED = booleanPreferencesKey("backup_paused")
         val KEY_INTERRUPTED_AT = longPreferencesKey("upload_interrupted_at")
         val KEY_RUN_BASELINE = longPreferencesKey("run_baseline_bytes")

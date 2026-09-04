@@ -15,10 +15,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -27,33 +27,53 @@ import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.RichTooltip
+
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import kotlin.math.roundToInt
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -66,7 +86,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import java.time.LocalTime
 import com.gallery.sync.R
@@ -111,7 +130,14 @@ fun SetupTour(
         }
     }
 
-    LaunchedEffect(step) { onStepChanged(step) }
+    // Recorded as it goes, not only at the backup step. The upgrade backfill needs to be able to
+    // tell "holds grants because the wizard took them" from "holds grants because this install
+    // predates the wizard", and the step is the only thing that says which. Resume is unaffected:
+    // anything other than the final step still opens at step 1.
+    LaunchedEffect(step) {
+        onStepChanged(step)
+        viewModel.saveWizardStep(step)
+    }
 
     val treePicker = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocumentTree()
@@ -190,9 +216,20 @@ fun SetupTour(
         else -> true
     }
 
-    val backupComplete = state.backupFinished &&
-        (state.optimiseCandidateCount == 0 || state.optimiseFinished) &&
-        (state.videoCandidateCount == 0 || state.videoOptimiseFinished)
+    // Step 9 is three phases, not one. Uploading ends, and then photo proxies and video proxies
+    // run — usually with no dialog at all, because the SAF tree grant already covers the files.
+    // The screen used to be told only whether the *upload* had finished, so it hit 100%, said
+    // "Press Finish", and sat there through an optimise it could not describe and a button that
+    // was still labelled Close.
+    val photosOptimised = state.optimiseCandidateCount == 0 || state.optimiseFinished
+    val videoOptimised = state.videoCandidateCount == 0 || state.videoOptimiseFinished
+    val backupPhase = when {
+        !state.backupFinished -> WizardBackupPhase.UPLOADING
+        !photosOptimised -> WizardBackupPhase.OPTIMISING_PHOTOS
+        !videoOptimised -> WizardBackupPhase.OPTIMISING_VIDEO
+        else -> WizardBackupPhase.DONE
+    }
+    val backupComplete = backupPhase == WizardBackupPhase.DONE
 
     LaunchedEffect(step) {
         if (step == TOTAL_STEPS) {
@@ -204,11 +241,11 @@ fun SetupTour(
         }
     }
 
-    // Request media permission automatically when arriving at step 4, then discover
+    // Discover once permission is in hand. The request itself is **not** fired on arrival: the
+    // system dialog cannot be reworded, so landing on it cold is the whole reason it reads as
+    // unexplained. Step 4 states the case first and the user raises the dialog from the card.
     LaunchedEffect(mediaGranted, step) {
-        if (step == 4 && !mediaGranted) {
-            requestMediaPermission()
-        } else if (mediaGranted && step == 4 && state.discoveredDirectories.isEmpty() && !state.discoveryRunning) {
+        if (mediaGranted && step == 4 && state.discoveredDirectories.isEmpty() && !state.discoveryRunning) {
             viewModel.discoverDirectories()
         }
     }
@@ -263,6 +300,10 @@ fun SetupTour(
     Box(modifier = modifier.fillMaxSize()) {
         // Fully opaque background — the user hasn't set anything up yet so there is
         // nothing worth showing behind the tour.
+        //
+        // This never comes off. Lifting it for the Help card put the live Settings screen behind
+        // a wizard card on 3 Sept 2026: real controls, reachable through the gaps around the card,
+        // including the deletion behaviour and the default album mode. A tour shows mockups.
         Box(
             Modifier
                 .fillMaxSize()
@@ -352,7 +393,9 @@ fun SetupTour(
                             total = state.backupTotal,
                             currentFile = state.backupCurrentFile,
                             isRunning = state.backupRunning,
-                            isFinished = state.backupFinished
+                            phase = backupPhase,
+                            optimiseDone = state.optimiseProgressDone,
+                            optimiseTotal = state.optimiseProgressTotal
                         )
                     }
                 }
@@ -400,7 +443,7 @@ private fun TourBubble(
             Text(
                 text = stringResource(R.string.tour_step_of, stepNumber, TOTAL_STEPS),
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurface
             )
 
             content()
@@ -435,6 +478,7 @@ private fun TourBubble(
 
 // ── Step 2: Tab tooltips pointing at the nav bar ───────────────────────────
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TabTooltipsStep(
     stepNumber: Int,
@@ -464,7 +508,17 @@ private fun TabTooltipsStep(
     val tabIndex = subStep - 1
     val currentTab = tabs.getOrNull(tabIndex)
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    // Where the mockup put the help button the Help card points at, and where this overlay sits,
+    // so the two can be expressed in the same coordinates.
+    var helpIconInRoot by remember { mutableStateOf<Rect?>(null) }
+    var overlayOrigin by remember { mutableStateOf(Offset.Zero) }
+    val spotlight = helpIconInRoot?.translate(-overlayOrigin.x, -overlayOrigin.y)
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .onGloballyPositioned { overlayOrigin = it.positionInRoot() }
+    ) {
         if (subStep == 0) {
             AlbumsMockup()
             Box(
@@ -499,21 +553,71 @@ private fun TabTooltipsStep(
                 }
             }
         } else if (currentTab != null) {
+            // Help sits on the settings mockup, because that is where the help buttons it is
+            // describing live. A mockup and not the real tab — see the root background above.
+            val isHelp = currentTab.tabIndex < 0
+
             // Mockup background — shows what the app looks like when populated
             when (tabIndex) {
                 0 -> AlbumsMockup()
                 1 -> RestoreMockup()
                 2 -> ArchiveMockup()
                 3 -> SettingsMockup()
-                else -> AlbumsMockup()
+                else -> SettingsMockup(onHelpIconPositioned = { helpIconInRoot = it })
             }
 
-            // Scrim so the card pops over the mockup
-            Box(
+            // Scrim so the card pops over the mockup. On the Help card it is punched through at
+            // the help button and ringed, so the tooltip below reads as having come from pressing
+            // it rather than from nowhere.
+            val scrimColor = MaterialTheme.colorScheme.scrim.copy(alpha = 0.4f)
+            val stencilColor = MaterialTheme.colorScheme.scrim
+            val ringColor = MaterialTheme.colorScheme.primary
+            val ringWidth = with(LocalDensity.current) { 3.dp.toPx() }
+            Canvas(
                 Modifier
                     .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.4f))
-            )
+                    .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+            ) {
+                drawRect(scrimColor)
+                if (isHelp) {
+                    spotlight?.let { rect ->
+                        val radius = rect.maxDimension * 0.85f
+                        drawCircle(stencilColor, radius, rect.center, blendMode = BlendMode.Clear)
+                        drawCircle(ringColor, radius, rect.center, style = Stroke(ringWidth))
+                    }
+                }
+            }
+
+            // One real help bubble, open, anchored on the ringed button so it is obvious what
+            // raised it. Same RichTooltip the section headers use, so the tour cannot drift from
+            // what the app actually shows.
+            if (isHelp && spotlight != null) {
+                val helpTooltipState = rememberTooltipState(isPersistent = true)
+                LaunchedEffect(Unit) { helpTooltipState.show() }
+
+                Box(
+                    modifier = Modifier
+                        .offset { IntOffset(spotlight.left.roundToInt(), spotlight.top.roundToInt()) }
+                        .size(with(LocalDensity.current) { spotlight.maxDimension.toDp() })
+                ) {
+                    TooltipBox(
+                        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
+                        tooltip = {
+                            RichTooltip(
+                                colors = TooltipDefaults.richTooltipColors(
+                                    contentColor = MaterialTheme.colorScheme.onSurface
+                                )
+                            ) {
+                                Text(stringResource(R.string.help_backup))
+                            }
+                        },
+                        state = helpTooltipState,
+                        enableUserInput = false
+                    ) {
+                        Spacer(Modifier.fillMaxSize())
+                    }
+                }
+            }
 
             // Card positioned above its nav tab (or centred for Help)
             Column(
@@ -531,10 +635,10 @@ private fun TabTooltipsStep(
                         Spacer(Modifier.weight(1f))
                     }
                     Column(
-                        modifier = Modifier.weight(2.5f),
+                        modifier = Modifier.weight(if (isHelp) 4.5f else 3.95f),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        OutlinedCard(
+                        Surface(
                             onClick = {
                                 if (subStep < totalCards) {
                                     subStep++
@@ -546,32 +650,32 @@ private fun TabTooltipsStep(
                                     onNext()
                                 }
                             },
-                            border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
-                            colors = CardDefaults.outlinedCardColors(
-                                containerColor = MaterialTheme.colorScheme.surface
-                            )
+                            shape = MaterialTheme.shapes.large,
+                            color = MaterialTheme.colorScheme.surface,
+                            tonalElevation = 6.dp,
+                            shadowElevation = 8.dp
                         ) {
                             Column(
-                                modifier = Modifier.padding(24.dp),
+                                modifier = Modifier.padding(30.dp),
                                 horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                                verticalArrangement = Arrangement.spacedBy(15.dp)
                             ) {
                                 Text(
                                     text = stringResource(
                                         R.string.tour_step_of, stepNumber, TOTAL_STEPS
                                     ) + "  ($subStep/$totalCards)",
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
                                 Icon(
                                     imageVector = currentTab.icon,
                                     contentDescription = null,
-                                    modifier = Modifier.size(48.dp),
+                                    modifier = Modifier.size(60.dp),
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                                 Text(
                                     text = stringResource(currentTab.labelRes),
-                                    style = MaterialTheme.typography.titleLarge,
+                                    style = MaterialTheme.typography.headlineSmall,
                                     fontWeight = FontWeight.Bold,
                                     textAlign = TextAlign.Center
                                 )
@@ -579,7 +683,7 @@ private fun TabTooltipsStep(
                                     text = stringResource(currentTab.descRes),
                                     style = MaterialTheme.typography.bodyLarge,
                                     textAlign = TextAlign.Center,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
                                 Button(
                                     onClick = {
@@ -598,7 +702,28 @@ private fun TabTooltipsStep(
                                 }
                             }
                         }
-                        if (tabIndex <= 3) {
+                    }
+                    if (tabIndex <= 3) {
+                        val remaining = 3 - tabIndex
+                        if (remaining > 0) {
+                            Spacer(Modifier.weight(remaining.toFloat()))
+                        }
+                    } else {
+                        Spacer(Modifier.weight(1f))
+                    }
+                }
+
+                // The arrow keeps the weights the card used to have, so it still points at the tab
+                // rather than drifting inward with the wider card above it.
+                if (tabIndex <= 3) {
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        if (tabIndex > 0) {
+                            Spacer(Modifier.weight(tabIndex.toFloat()))
+                        }
+                        Box(
+                            modifier = Modifier.weight(2.5f),
+                            contentAlignment = Alignment.TopCenter
+                        ) {
                             Canvas(modifier = Modifier.size(20.dp)) {
                                 val path = androidx.compose.ui.graphics.Path().apply {
                                     moveTo(0f, 0f)
@@ -609,14 +734,10 @@ private fun TabTooltipsStep(
                                 drawPath(path, color = arrowColor)
                             }
                         }
-                    }
-                    if (tabIndex <= 3) {
                         val remaining = 3 - tabIndex
                         if (remaining > 0) {
                             Spacer(Modifier.weight(remaining.toFloat()))
                         }
-                    } else {
-                        Spacer(Modifier.weight(1f))
                     }
                 }
 
@@ -640,6 +761,10 @@ private fun InstallationStepsContent() {
             style = MaterialTheme.typography.bodyLarge
         )
 
+        // Listed in the order they actually happen, and naming both grants separately: the two
+        // system dialogs look alike and cannot be reworded, so this is the only place the
+        // difference between searching and changing can be made before they appear.
+        BulletItem(stringResource(R.string.tour_install_search))
         BulletItem(stringResource(R.string.tour_install_select_gallery))
         BulletItem(stringResource(R.string.tour_install_grant_gallery))
         BulletItem(stringResource(R.string.tour_install_grant_cloud))
@@ -658,17 +783,21 @@ private fun DirectoryDiscoveryContent(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
-            text = stringResource(R.string.tour_discover_title),
+            text = stringResource(
+                if (hasMediaPermission) R.string.tour_discover_title else R.string.tour_search_title
+            ),
             style = MaterialTheme.typography.titleLarge
         )
         Text(
-            text = stringResource(R.string.tour_discover_body),
+            text = stringResource(
+                if (hasMediaPermission) R.string.tour_discover_body else R.string.tour_search_body
+            ),
             style = MaterialTheme.typography.bodyMedium
         )
 
         if (!hasMediaPermission) {
-            OutlinedButton(onClick = onGrantMediaAccess) {
-                Text(stringResource(R.string.permission_grant_action))
+            Button(onClick = onGrantMediaAccess) {
+                Text(stringResource(R.string.tour_search_action))
             }
         } else if (state.discoveryRunning) {
             Row(
@@ -685,7 +814,7 @@ private fun DirectoryDiscoveryContent(
             Text(
                 text = stringResource(R.string.tour_discover_none_found),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurface
             )
         } else {
             state.discoveredDirectories.forEach { dir ->
@@ -732,12 +861,12 @@ private fun DirectoryRow(
             Text(
                 text = line1,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = formatBytes(context, directory.totalBytes),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     }
@@ -773,12 +902,15 @@ private fun CloudStorageContent(
                 color = MaterialTheme.colorScheme.primary
             )
 
+            // The path takes the slack and the button keeps its own width. SpaceBetween let a
+            // long destination squeeze the button until "Change" rendered as "Chang" — a button
+            // narrower than its own label, which is how a truncated label happens at all.
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = stringResource(R.string.tour_cloud_destination),
                         style = MaterialTheme.typography.labelMedium
@@ -788,8 +920,10 @@ private fun CloudStorageContent(
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
-                TextButton(onClick = onChangeDestination) {
-                    Text(stringResource(R.string.tour_cloud_change))
+                // Filled, not outlined. Outlined read as a label with a box round it here, next to
+                // two lines of plain text; filled is unambiguous.
+                Button(onClick = onChangeDestination) {
+                    Text(stringResource(R.string.tour_cloud_change), maxLines = 1)
                 }
             }
         }
@@ -955,7 +1089,7 @@ private fun OptimizationContent(
                 Text(
                     text = stringResource(R.string.tour_optimise_video_quality),
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -1026,7 +1160,7 @@ private fun OptimizationContent(
         Text(
             text = stringResource(R.string.tour_optimise_note),
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
@@ -1188,7 +1322,7 @@ private fun BackupDelayContent(
         Text(
             text = stringResource(R.string.tour_delay_security),
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
@@ -1201,10 +1335,19 @@ private fun BackupProgressContent(
     total: Int,
     currentFile: String,
     isRunning: Boolean,
-    isFinished: Boolean
+    phase: WizardBackupPhase,
+    optimiseDone: Int,
+    optimiseTotal: Int
 ) {
-    val percent = if (total > 0) ((completed * 100) / total).coerceIn(0, 100)
-    else if (isFinished) 100 else 0
+    val uploading = phase == WizardBackupPhase.UPLOADING
+    // Uploading is the only phase with a count to divide. Optimising holds the ring full rather
+    // than resetting it — the bytes are already safe in OneDrive by then, and a bar that fell back
+    // to zero would read as the backup coming undone.
+    val percent = when {
+        !uploading -> 100
+        total > 0 -> ((completed * 100) / total).coerceIn(0, 100)
+        else -> 0
+    }
     val sweepAngle = percent * 3.6f
 
     Column(
@@ -1219,8 +1362,14 @@ private fun BackupProgressContent(
         )
 
         Text(
-            text = if (isFinished) stringResource(R.string.tour_progress_complete)
-            else stringResource(R.string.tour_progress_body),
+            text = stringResource(
+                when (phase) {
+                    WizardBackupPhase.UPLOADING -> R.string.tour_progress_body
+                    WizardBackupPhase.OPTIMISING_PHOTOS -> R.string.tour_progress_optimising_photos
+                    WizardBackupPhase.OPTIMISING_VIDEO -> R.string.tour_progress_optimising_video
+                    WizardBackupPhase.DONE -> R.string.tour_progress_complete
+                }
+            ),
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.fillMaxWidth()
         )
@@ -1244,7 +1393,16 @@ private fun BackupProgressContent(
                 )
                 Text(
                     text = when {
-                        isFinished -> stringResource(R.string.wizard_finish_label)
+                        phase == WizardBackupPhase.DONE ->
+                            stringResource(R.string.wizard_finish_label)
+                        // No total yet means the phase has started but the batch has not been
+                        // counted. "0 of 0" would be worse than saying nothing.
+                        phase != WizardBackupPhase.UPLOADING && optimiseTotal > 0 ->
+                            stringResource(
+                                R.string.tour_progress_optimising_count, optimiseDone, optimiseTotal
+                            )
+                        phase != WizardBackupPhase.UPLOADING ->
+                            stringResource(R.string.tour_progress_optimising)
                         total > 0 -> stringResource(
                             R.string.tour_progress_uploading, completed, total
                         )
@@ -1252,7 +1410,7 @@ private fun BackupProgressContent(
                         else -> stringResource(R.string.tour_progress_waiting)
                     },
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
         }
@@ -1260,7 +1418,7 @@ private fun BackupProgressContent(
         Text(
             text = stringResource(R.string.tour_progress_note),
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = MaterialTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
         )
@@ -1702,7 +1860,9 @@ private fun MockArchiveRow(name: String, size: String, confirmed: Boolean) {
 }
 
 @Composable
-private fun SettingsMockup() {
+private fun SettingsMockup(
+    onHelpIconPositioned: ((Rect) -> Unit)? = null
+) {
     val signal = LocalGallerySyncColors.current
 
     Column(
@@ -1713,11 +1873,7 @@ private fun SettingsMockup() {
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         // General section
-        Text(
-            text = "General",
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.primary
-        )
+        MockSectionHeader("General")
         Row(
             Modifier.fillMaxWidth(),
             Arrangement.SpaceBetween,
@@ -1743,11 +1899,7 @@ private fun SettingsMockup() {
         HorizontalDivider()
 
         // Backup section
-        Text(
-            text = "Backup",
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.primary
-        )
+        MockSectionHeader("Backup", onHelpPositioned = onHelpIconPositioned)
         Row(
             Modifier.fillMaxWidth(),
             Arrangement.SpaceBetween,
@@ -1779,11 +1931,7 @@ private fun SettingsMockup() {
         HorizontalDivider()
 
         // Sync section
-        Text(
-            text = "Sync",
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.primary
-        )
+        MockSectionHeader("Sync")
         Row(
             Modifier.fillMaxWidth(),
             Arrangement.SpaceBetween,
@@ -1818,6 +1966,42 @@ private fun SettingsMockup() {
         }
     }
 }
+
+/**
+ * A section header as Settings draws it, help button included.
+ *
+ * Inert — this is a mockup, and the tour must never put a live control behind a wizard card. The
+ * button is here because step 2's Help card points at it; [onHelpPositioned] reports where it
+ * landed so the tour can ring it and hang the tooltip off it.
+ */
+@Composable
+private fun MockSectionHeader(
+    title: String,
+    onHelpPositioned: ((Rect) -> Unit)? = null
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Icon(
+            imageVector = SignalIcons.Help,
+            contentDescription = null,
+            modifier = Modifier
+                .size(24.dp)
+                .onGloballyPositioned { coords ->
+                    onHelpPositioned?.invoke(coords.boundsInRoot())
+                }
+        )
+    }
+}
+
+/** Which of step 9's three phases is running. See where it is derived, in the tour body. */
+private enum class WizardBackupPhase { UPLOADING, OPTIMISING_PHOTOS, OPTIMISING_VIDEO, DONE }
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 

@@ -90,7 +90,8 @@ class VideoOptimiser @Inject constructor(
      */
     suspend fun runForWizard(
         quality: com.gallery.sync.domain.backup.VideoQuality,
-        limit: Int = WIZARD_LIMIT
+        limit: Int = WIZARD_LIMIT,
+        onProgress: (done: Int, total: Int) -> Unit = { _, _ -> }
     ): VideoOptimiseResult = withContext(dispatcher) {
         val candidates = entryDao.videoOptimiseCandidatesAll(limit = limit)
 
@@ -102,9 +103,14 @@ class VideoOptimiser @Inject constructor(
         Logger.i(TAG, "wizard: optimising up to ${candidates.size} clips at $quality")
 
         var result = VideoOptimiseResult()
-        for (entry in candidates) {
+        // Reported per clip, because a transcode is tens of seconds and the wizard sits on this
+        // phase for minutes. The batch total is only known here, so it is handed out with each
+        // step rather than asked for separately.
+        onProgress(0, candidates.size)
+        for ((index, entry) in candidates.withIndex()) {
             coroutineContext.ensureActive()
             result = optimiseForWizard(entry, quality, result)
+            onProgress(index + 1, candidates.size)
         }
 
         Logger.i(

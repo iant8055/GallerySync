@@ -135,7 +135,16 @@ data class ReconcileUiState(
     /** Bytes reclaimed by video optimisation. */
     val videoOptimisedBytes: Long = 0L,
     /** Whether video optimisation finished. */
-    val videoOptimiseFinished: Boolean = false
+    val videoOptimiseFinished: Boolean = false,
+    /**
+     * How far through the optimise phase that is currently running, and how many it has to do.
+     *
+     * One pair rather than two, because photos and video never run at once — the wizard's phase
+     * says which of them these numbers describe. Zero total means no count is known yet, and the
+     * screen shows the phase without a number rather than "0 of 0".
+     */
+    val optimiseProgressDone: Int = 0,
+    val optimiseProgressTotal: Int = 0
 ) {
     /**
      * Whether Gate 1 has been answered.
@@ -201,11 +210,24 @@ class ReconcileViewModel @Inject constructor(
             // stores an explicit false, and an earlier version of this checked the value instead —
             // so reopening the app undid the request and returned the user to the tabs.
             //
-            // One shot, at construction. A fresh install has no grants at this moment, so it is not
-            // backfilled — and when that user later grants a folder from inside the wizard, this
-            // has long since run and cannot cut the tour short.
-            if (!settings.hasSetupDecision() && sources.directories.first().isNotEmpty()) {
-                settings.setSetupCompleted(true)
+            // Once per install, recorded on disk. It used to be "one shot, at construction",
+            // which is only once until something reconstructs this — and a reinstall, a crash,
+            // a force-stop or the system reclaiming memory all do.
+            //
+            // It also has to skip anyone mid-wizard. "Holds a granted tree" stopped being proof of
+            // a pre-existing install once the wizard began taking grants at step 4: a user at
+            // step 5 has grants and no setup decision and is indistinguishable from an upgrade.
+            // On the Moto G, 3 Sept 2026, that user had their half-finished setup declared
+            // complete and was dropped on the tabs with every album Off, never seeing the library
+            // choice, the optimise step or the first backup.
+            if (!settings.hasCheckedUpgradeBackfill()) {
+                val looksLikeUpgrade = !settings.hasSetupDecision() &&
+                    !settings.hasStartedWizard() &&
+                    sources.directories.first().isNotEmpty()
+                if (looksLikeUpgrade) {
+                    settings.setSetupCompleted(true)
+                }
+                settings.markUpgradeBackfillChecked()
             }
             _state.value = _state.value.copy(migrationChecked = true)
 
@@ -336,8 +358,17 @@ class ReconcileViewModel @Inject constructor(
 
     fun applyWizardProxies() {
         viewModelScope.launch {
-            _state.value = _state.value.copy(optimiseRunning = true)
-            val outcome = proxyApplier.apply(pendingProxyCandidates)
+            _state.value = _state.value.copy(
+                optimiseRunning = true,
+                optimiseProgressDone = 0,
+                optimiseProgressTotal = 0
+            )
+            val outcome = proxyApplier.apply(pendingProxyCandidates) { done, total ->
+                _state.value = _state.value.copy(
+                    optimiseProgressDone = done,
+                    optimiseProgressTotal = total
+                )
+            }
             val (count, bytes) = when (outcome) {
                 is com.gallery.sync.data.local.media.ProxyOutcome.Completed -> outcome.proxiedCount to outcome.bytesReclaimed
                 is com.gallery.sync.data.local.media.ProxyOutcome.Stopped -> outcome.proxiedCount to outcome.bytesReclaimed
@@ -377,9 +408,18 @@ class ReconcileViewModel @Inject constructor(
 
     fun applyWizardVideoOptimise() {
         viewModelScope.launch {
-            _state.value = _state.value.copy(videoOptimiseRunning = true)
+            _state.value = _state.value.copy(
+                videoOptimiseRunning = true,
+                optimiseProgressDone = 0,
+                optimiseProgressTotal = 0
+            )
             val quality = _state.value.videoQuality
-            val result = videoOptimiser.runForWizard(quality)
+            val result = videoOptimiser.runForWizard(quality) { done, total ->
+                _state.value = _state.value.copy(
+                    optimiseProgressDone = done,
+                    optimiseProgressTotal = total
+                )
+            }
             _state.value = _state.value.copy(
                 videoOptimiseRunning = false,
                 videoOptimiseFinished = true,

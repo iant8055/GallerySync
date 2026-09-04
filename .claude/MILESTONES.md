@@ -2909,6 +2909,104 @@ detected correctly.
 was routed down the photo (EXIF) path and its marker was lost. It now falls back to the extension.
 Restore uses file uris, so this was not merely a test artefact.
 
+### 3 Sept 2026 — a wizard run on the Moto G, and three defects it surfaced
+
+A full first-run pass on the Moto G, stock Android 16, clean install. Two folders granted (DCIM,
+Pictures), signed in, 157 files uploaded, then photo and video optimising. The wizard reached the end,
+so the flow works — but three separate defects turned up along the way and all three are now fixed.
+
+**Setup was marked complete without being completed.** `ReconcileViewModel` carried an upgrade
+backfill: no setup decision recorded plus a granted tree means an install that predates the wizard, so
+mark setup done rather than dropping an existing user into the tour. Its comment argued a fresh
+install could never hit it — *"a fresh install has no grants at this moment"* — which is true only of
+the **first** construction of the ViewModel. Reinstalling over a run mid-wizard killed the process; on
+relaunch the grants from step 4 were there, no decision had been written, and it declared setup
+finished. The user lands on the tabs with every album Off, never seeing the library choice, the
+optimise step or the first backup. A crash, a force-stop, or the system reclaiming memory does the
+same thing.
+
+Fixed twice over: the backfill now records on disk that it ran (`upgrade_backfill_checked`), so "once"
+survives the process dying; and it skips anyone with a wizard in progress. That second half needed
+`saveWizardStep` to actually be called — it existed but had no caller, so `wizard_step` only ever held
+0 or 9. The tour now records each step as it advances. Resume behaviour is unchanged: anything other
+than the final step still opens at step 1.
+
+**Close on step 9 did nothing.** Three states across three commits: `e6a0794` left `onComplete` empty
+and relied on state changes to make the tour disappear; `aee7125` made it `activity?.finish()`, which
+killed the app; `b6e60f2` fixed that by making it empty again. Empty works for **Finish**, because
+`completeSetup()` changes state and the parent stops drawing the tour — but Close deliberately does
+not complete setup, so nothing changed and the button was inert. The only way out of step 9 was to
+wait. Close now sets a session-local `tourDismissed`: the wizard goes away, setup stays unfinished, the
+WorkManager chain keeps running, and the next launch resumes at step 9 and re-attaches to the job
+rather than enqueuing a second one.
+
+**Step 9 lied during optimising.** `BackupProgressContent` was told only whether the *upload* had
+finished, so the moment uploads ended the ring hit 100% and the body read *"Congratulations… Press
+Finish"* — while the phone was still transcoding video and the button still said Close. It is now
+three phases (uploading, optimising photos, optimising video, done), derived once, with `backupComplete`
+defined as `phase == DONE` so the label and the copy cannot disagree. Both optimisers report per-file
+progress through a new `onProgress(done, total)`, so the phase shows "Optimising 4 of 9" rather than
+sitting silent for minutes.
+
+**Video transcode cost, measured on 1080p.** Three clips on the Moto G: 284 MB → 67 MB, 98 MB → 24 MB,
+80 MB → 19 MB, all 1080p → 720p, at roughly 20–27 seconds each. Not the 8K figure the transcode item is
+gated on, but it is the first real cost from the wizard's own path, and it is why the optimise phase
+needs a counter at all.
+
+**The upload runs in batches of 25**, each a separate WorkManager execution — two distinct work ids
+observed for one run. So the dispatch delay before the first byte is not a one-off; it recurs at every
+batch boundary, seven times for 157 files.
+
+### 3 Sept 2026 — a withdrawn claim, and the instrument that caused it
+
+**`dumpsys uri-grants` does not exist on the Moto G.** It returns `Can't find service: uri-grants`, and
+an unchecked `grep -c` over that empty output reads as zero. On the strength of it this log's author
+reported that a wizard run had persisted **no** SAF grants and called the cancel-skips-silently bug
+*confirmed on hardware*. Both claims are withdrawn. The app's own store had two live grants —
+`primary%3ADCIM` and `primary%3APictures` — and `forgetRevokedGrants()` prunes anything the system no
+longer honours on every start, so their survival is positive evidence they are held.
+
+The reliable check is `run-as com.gallery.sync cat files/datastore/media_scope.preferences_pb`, which
+lists `granted_tree_uris` directly. This is the second time on this project that a silent instrument
+has been read as data — see the `content query` row counts of 28 Aug. **An empty result from a tool
+that never ran is not a measurement.**
+
+### 3 Sept 2026 — three SAF picker defects, found by reading, not yet fixed
+
+None of these are demonstrated on hardware — see the withdrawal above — but all three are plain in the
+source and are recorded so they are not lost.
+
+1. **The picker opens in the wrong place.** `EXTRA_INITIAL_URI` on `ACTION_OPEN_DOCUMENT_TREE` wants a
+   *tree* uri; `SetupTour` builds one with `DocumentsContract.buildDocumentUri`. A document uri is
+   ignored, so the picker lands wherever it was last rather than on the folder being asked for —
+   observed opening on `Documents` when it had asked for `DCIM`. Note the Moto G's document provider is
+   **Files by Google**, not the stock DocumentsUI, so behaviour may differ again on the Fold.
+2. **Cancelling skips a folder silently.** `onSafGrantReceived` drops the head of `safGrantQueue`
+   whether or not a uri came back, and `directoryRefused` is only set when a uri arrived and was
+   rejected. Cancel the dialog and the wizard advances reporting nothing wrong.
+3. **The returned tree is never checked against the one requested.** Navigate into a subfolder and
+   `USE THIS FOLDER` grants that subfolder while the parent is ticked off the queue. Nothing loses
+   data — the tree grant is for proxying and restore, never deletion — but optimising later has no
+   write path and no explanation.
+
+### 3 Sept 2026 — the OneDrive destination can be browsed instead of typed
+
+The destination was a text field, which required knowing the drive's folder layout. SAF is the wrong
+tool for it: the OneDrive app publishes a DocumentsProvider, but it hands back a tree uri that cannot
+be turned into the Graph path the uploader needs, and it only exists if that app is installed.
+
+Built in-app instead, on what `OneDriveRepository` already exposed — `listRoot`, `listFolder`,
+`listNextPage` — with folders picked out of the pages by type. **Folders only**, so a page can come
+back empty while more remains (a folder of a thousand photos and one subfolder pages several times
+before the subfolder appears); the picker says "Show more" rather than showing an empty list that is a
+lie. `createFolder` is new, on `OneDriveUploadRepository` rather than the read-only interface, and it
+uses `conflictBehavior: fail` — the opposite of uploads, and deliberately: an upload renames because
+two cameras honestly produce the same filename, but silently creating `Backups 1` beside an existing
+`Backups` and pointing the destination at the empty one is a trap.
+
+Browse sits **beside** the text field, not instead of it. Typing a known path beats walking ninety
+albums to reach it, and the field still works when the network does not.
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have

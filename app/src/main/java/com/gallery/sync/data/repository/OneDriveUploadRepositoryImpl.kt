@@ -2,6 +2,9 @@ package com.gallery.sync.data.repository
 
 import com.gallery.sync.data.remote.auth.OneDriveTokenProvider
 import com.gallery.sync.data.remote.onedrive.ChunkedUploader
+import com.gallery.sync.data.remote.onedrive.GraphUploadService
+import com.gallery.sync.data.remote.onedrive.dto.CreateFolderRequestDto
+import com.gallery.sync.data.remote.onedrive.toRemoteMediaNode
 import com.gallery.sync.data.remote.onedrive.FileUploadSource
 import com.gallery.sync.data.remote.onedrive.ResumableSession
 import com.gallery.sync.data.remote.onedrive.UploadOutcome
@@ -9,6 +12,7 @@ import com.gallery.sync.data.remote.onedrive.UploadSource
 import com.gallery.sync.di.IoDispatcher
 import com.gallery.sync.domain.model.DataResult
 import com.gallery.sync.domain.model.RemoteError
+import com.gallery.sync.domain.model.RemoteMediaNode
 import com.gallery.sync.domain.model.UploadedItem
 import com.gallery.sync.domain.repository.OneDriveUploadRepository
 import com.gallery.sync.util.Logger
@@ -31,6 +35,7 @@ import javax.inject.Singleton
 @Singleton
 class OneDriveUploadRepositoryImpl @Inject constructor(
     private val uploader: ChunkedUploader,
+    private val uploadService: GraphUploadService,
     private val tokenProvider: OneDriveTokenProvider,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
 ) : OneDriveUploadRepository {
@@ -140,7 +145,59 @@ class OneDriveUploadRepositoryImpl @Inject constructor(
     private companion object {
         const val TAG = "OneDriveUpload"
         const val HTTP_UNAUTHORIZED = 401
+        const val HTTP_CONFLICT = 409
         const val HTTP_INSUFFICIENT_STORAGE = 507
+    }
+
+    override suspend fun createFolder(
+        parentFolderId: String?,
+        name: String
+    ): DataResult<RemoteMediaNode.Folder> = withContext(dispatcher) {
+
+        if (tokenProvider.getAccessToken() == null) {
+            Logger.w(TAG, "createFolder: no access token, skipping network call")
+            return@withContext DataResult.Failure(RemoteError.NoToken)
+        }
+
+        val body = CreateFolderRequestDto(name = name)
+        try {
+            val response = if (parentFolderId == null) {
+                uploadService.createFolderInRoot(body)
+            } else {
+                uploadService.createFolderInFolder(parentFolderId, body)
+            }
+
+            val item = response.body()
+            when {
+                response.code() == HTTP_UNAUTHORIZED -> DataResult.Failure(RemoteError.Unauthorized)
+
+                // Graph's answer to conflictBehavior=fail. Reported as its own error so the picker
+                // can say the name is taken instead of "something went wrong".
+                response.code() == HTTP_CONFLICT ->
+                    DataResult.Failure(RemoteError.Unknown(IOException("name already taken")))
+
+                !response.isSuccessful || item == null ->
+                    DataResult.Failure(RemoteError.Unknown(IOException("HTTP ${'$'}{response.code()}")))
+
+                else -> {
+                    val node = item.toRemoteMediaNode()
+                    if (node is RemoteMediaNode.Folder) {
+                        DataResult.Success(node)
+                    } else {
+                        // Graph answered with something that is not a folder. Nothing sane to do
+                        // with it, and guessing would put the destination somewhere unintended.
+                        DataResult.Failure(
+                            RemoteError.Unknown(IOException("created item is not a folder"))
+                        )
+                    }
+                }
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: IOException) {
+            Logger.w(TAG, "createFolder: network failure")
+            DataResult.Failure(RemoteError.Network)
+        }
     }
 
     override suspend fun cancelUploadSession(uploadUrl: String) {

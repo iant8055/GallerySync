@@ -1,7 +1,9 @@
 package com.gallery.sync.data.remote.onedrive
 
+import com.gallery.sync.data.remote.onedrive.dto.CreateFolderRequestDto
 import com.gallery.sync.data.remote.onedrive.dto.CreateUploadSessionRequestDto
 import com.gallery.sync.data.remote.onedrive.dto.UploadSessionDto
+import com.gallery.sync.data.remote.onedrive.dto.GraphDriveItemDto
 import com.gallery.sync.data.remote.onedrive.dto.UploadedItemDto
 import okhttp3.RequestBody
 import retrofit2.Response
@@ -22,6 +24,24 @@ import retrofit2.http.Path
  * instead of a folder tree.
  */
 interface GraphUploadService {
+
+    /**
+     * Creates one folder directly under the drive root.
+     *
+     * Separate from [createFolderInFolder] because the root has no item id to address, and Graph
+     * offers no single form that covers both.
+     */
+    @POST("me/drive/root/children")
+    suspend fun createFolderInRoot(
+        @Body body: CreateFolderRequestDto
+    ): Response<GraphDriveItemDto>
+
+    /** Creates one folder inside the folder identified by [itemId]. */
+    @POST("me/drive/items/{itemId}/children")
+    suspend fun createFolderInFolder(
+        @Path("itemId") itemId: String,
+        @Body body: CreateFolderRequestDto
+    ): Response<GraphDriveItemDto>
 
     @POST("me/drive/root:/{path}:/createUploadSession")
     suspend fun createUploadSession(

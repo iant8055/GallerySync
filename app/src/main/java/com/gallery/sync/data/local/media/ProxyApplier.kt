@@ -168,7 +168,10 @@ class ProxyApplier @Inject constructor(
     /**
      * Replaces each entry's local file with a proxy. Call only after the write request was granted.
      */
-    suspend fun apply(entries: List<BackupEntryEntity>): ProxyOutcome = withContext(dispatcher) {
+    suspend fun apply(
+        entries: List<BackupEntryEntity>,
+        onProgress: (done: Int, total: Int) -> Unit = { _, _ -> }
+    ): ProxyOutcome = withContext(dispatcher) {
         if (!isSupported()) return@withContext ProxyOutcome.NotSupported
         if (entries.isEmpty()) return@withContext ProxyOutcome.NothingToDo
 
@@ -176,7 +179,11 @@ class ProxyApplier @Inject constructor(
         var skipped = 0
         var reclaimed = 0L
 
-        for (entry in entries) {
+        // Reported per file so a caller can say how far through it is. A photo is quick, but a
+        // whole library of them is not, and the wizard has no other way to tell.
+        onProgress(0, entries.size)
+        for ((index, entry) in entries.withIndex()) {
+            onProgress(index, entries.size)
             when (val result = proxyWithRetries(entry)) {
                 is FileResult.Replaced -> {
                     proxied++

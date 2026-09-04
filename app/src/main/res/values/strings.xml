@@ -661,6 +661,19 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
     <string name="destination_title">Current folder location</string>
     <string name="destination_current">OneDrive / %1$s</string>
     <string name="destination_why">This is where Samsung already put yours, which is how the files above were found.</string>
+    <string name="destination_browse">Browse…</string>
+    <string name="picker_title">Choose a folder</string>
+    <string name="picker_root">OneDrive</string>
+    <string name="picker_back">Up one folder</string>
+    <string name="picker_use">Use this folder</string>
+    <string name="picker_new_folder">New folder</string>
+    <string name="picker_new_folder_name">Folder name</string>
+    <string name="picker_create">Create</string>
+    <string name="picker_create_failed">Could not create that folder. The name may already be taken.</string>
+    <string name="picker_empty">No folders here.</string>
+    <string name="picker_show_more">Show more</string>
+    <string name="picker_failed">Could not reach OneDrive.</string>
+    <string name="picker_retry">Try again</string>
     <string name="destination_change">Change</string>
     <string name="destination_dialog_title">Where new backups go</string>
     <string name="destination_label">Folder in OneDrive</string>
@@ -837,18 +850,22 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_description_navigation">Browse and download files from OneDrive</string>
     <string name="tour_description_archive">Review files verified in the cloud and free up space</string>
     <string name="tour_description_settings">Backup destination, optimization, and preferences</string>
-    <string name="tour_description_help">Guides, tips, and answers to common questions</string>
+    <string name="tour_description_help">Just press the (?) to get guides, tips, and answers to common questions</string>
     <string name="tab_help">Help</string>
 
     <string name="tour_install_title">What we\'ll set up</string>
-    <string name="tour_install_body">There are four simple steps to get you started.</string>
-    <string name="tour_install_select_gallery">Select the folders on your phone you want to include in backup</string>
-    <string name="tour_install_grant_gallery">Grant access to individual directories</string>
+    <string name="tour_install_body">There are five simple steps to get you started.</string>
+    <string name="tour_install_search">Give permission to search this phone for photos and videos</string>
+    <string name="tour_install_select_gallery">Choose which of the folders it finds you want backed up</string>
+    <string name="tour_install_grant_gallery">Give permission to change files in those folders</string>
     <string name="tour_install_grant_cloud">Grant access to your cloud storage</string>
     <string name="tour_install_select_cloud">Select where backups go in OneDrive</string>
 
+    <string name="tour_search_title">Let GallerySync search this phone</string>
+    <string name="tour_search_body">First, permission to search. GallerySync needs to find where your photos and videos are located on your device.</string>
+    <string name="tour_search_action">Give search permission</string>
     <string name="tour_discover_title">Choose folders to back up</string>
-    <string name="tour_discover_body">We found these folders containing your photos and videos. Check the ones you want to include in backup.</string>
+    <string name="tour_discover_body">The search found these folders. Check the ones you want backed up. Press next to give GallerySync specific permission to use these folders.</string>
     <string name="tour_discover_scanning">Scanning your photos and videos…</string>
     <string name="tour_discover_none_found">No media folders found on this device.</string>
 
@@ -889,6 +906,10 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_progress_waiting">Waiting to start</string>
     <string name="tour_progress_scanning">Scanning your library…</string>
     <string name="tour_progress_uploading">Uploading %1$d of %2$d</string>
+    <string name="tour_progress_optimising">Optimising</string>
+    <string name="tour_progress_optimising_count">Optimising %1$d of %2$d</string>
+    <string name="tour_progress_optimising_photos">Upload finished and verified. Now optimising your photos: they stay in your gallery and stay usable, and the full-size originals stay in OneDrive.</string>
+    <string name="tour_progress_optimising_video">Upload finished and verified. Now optimising your videos: nothing is cut, they stay in your gallery, and the full-size originals stay in OneDrive.</string>
     <string name="tour_progress_complete">Congratulations your backup has finished successfully and has been verified. Press Finish.</string>
     <string name="tour_progress_note">You can check progress any time by opening the app.</string>
 </resources>
