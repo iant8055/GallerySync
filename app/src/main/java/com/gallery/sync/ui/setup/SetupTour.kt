@@ -227,6 +227,17 @@ fun SetupTour(
     val skipsBackupStep = !state.libraryChoice.uploads
     val lastStep = if (skipsBackupStep) TOTAL_STEPS - 1 else TOTAL_STEPS
 
+    // The counter names the steps *this* user gets, not the nine the constant describes. Two of the
+    // nine are conditional — 7 is skipped when there is no optimising to configure, 9 when they
+    // chose to back up manually — so a fixed total told someone on their last card "Step 8 of 9"
+    // and left them waiting for a ninth that never came.
+    val visibleTotal = TOTAL_STEPS -
+        (if (showOptimization) 0 else 1) -
+        (if (skipsBackupStep) 1 else 0)
+    // Step 7 is the only skippable step that can sit *before* the current one, so it is the only
+    // correction the position needs.
+    val visibleStep = step - (if (step > 7 && !showOptimization) 1 else 0)
+
     val photosOptimised = state.optimiseCandidateCount == 0 || state.optimiseFinished
     val videoOptimised = state.videoCandidateCount == 0 || state.videoOptimiseFinished
     val backupPhase = when {
@@ -357,7 +368,8 @@ fun SetupTour(
         } else if (step == 2) {
             // Step 2: individual tooltip cards pointing at the nav bar tabs
             TabTooltipsStep(
-                stepNumber = step,
+                stepNumber = visibleStep,
+                totalSteps = visibleTotal,
                 onNext = onNext,
                 onBack = onBack,
                 onSwitchTab = onSwitchTab
@@ -375,7 +387,8 @@ fun SetupTour(
                 properties = PopupProperties(focusable = true)
             ) {
                 TourBubble(
-                    stepNumber = step,
+                    stepNumber = visibleStep,
+                    totalSteps = visibleTotal,
                     canAdvance = canAdvance(),
                     isLast = step == lastStep,
                     // Finish means "setup is done, open the app". That is true on step 8 for a
@@ -449,6 +462,7 @@ fun SetupTour(
 @Composable
 private fun TourBubble(
     stepNumber: Int,
+    totalSteps: Int,
     canAdvance: Boolean,
     isLast: Boolean,
     lastButtonLabel: String = "",
@@ -473,7 +487,7 @@ private fun TourBubble(
         ) {
             // Step indicator
             Text(
-                text = stringResource(R.string.tour_step_of, stepNumber, TOTAL_STEPS),
+                text = stringResource(R.string.tour_step_of, stepNumber, totalSteps),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -514,6 +528,7 @@ private fun TourBubble(
 @Composable
 private fun TabTooltipsStep(
     stepNumber: Int,
+    totalSteps: Int,
     onNext: () -> Unit,
     onBack: () -> Unit,
     onSwitchTab: (Int) -> Unit
@@ -564,6 +579,7 @@ private fun TabTooltipsStep(
             ) {
                 TourBubble(
                     stepNumber = stepNumber,
+                    totalSteps = totalSteps,
                     canAdvance = true,
                     isLast = false,
                     onNext = {
@@ -694,8 +710,8 @@ private fun TabTooltipsStep(
                             ) {
                                 Text(
                                     text = stringResource(
-                                        R.string.tour_step_of, stepNumber, TOTAL_STEPS
-                                    ) + "  ($subStep/$totalCards)",
+                                        R.string.tour_step_of, stepNumber, totalSteps
+                                    ),
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )

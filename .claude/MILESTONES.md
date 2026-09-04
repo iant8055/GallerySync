@@ -2989,10 +2989,22 @@ and `isLast` all read the same value so they cannot drift apart the way Close an
 Note what this does **not** do: files already uploaded by the old behaviour stay in OneDrive. Nothing
 here removes them, and nothing should.
 
-**Known and unfixed:** the step counter still reads "Step 8 of 9" on that final card, because
-`TOTAL_STEPS` is a constant in the string. The same wrinkle already existed for step 7 when there is
-no optimisation to configure. A counter that reflects the steps *this* user will actually see is the
-fix, and it is a separate change.
+**Resolved the same day.** The counter now describes the steps *this* user is shown — nine less one
+for optimising when there is nothing to configure, less one more for the backup when they chose to do
+it manually — so no card claims a step that will never arrive. Both conditional steps are derived from
+the same values the flow itself branches on, so the counter cannot drift from the wizard.
+
+One consequence is worth knowing rather than hiding: **the total can grow mid-wizard**, because step 7
+depends on a choice made on step 6. Someone who picks an optimising option goes from "of 8" to "of 9".
+That is mildly odd and it is still the honest option; the alternative is promising nine and delivering
+eight, which is what was wrong in the first place. Removing it entirely would need step 7 to stop being
+conditional, which is a design question and not a counter question.
+
+**The per-card count inside step 2 is gone.** It briefly read "(1/6)" through "(6/6)" — correct, after
+the intro bubble turned out to be an uncounted sixth screen — but Ian's judgement is that two counters
+on one card read badly, and he is right: the step number already says where you are, and the cards are
+one step's worth of explanation rather than six things to get through. The suffix parameter went with
+it rather than being left dead on `TourBubble`.
 
 **The OneDrive picker's path scrolls rather than wraps.** A dialog is narrow and a drive path is not
 bounded, so `OneDrive > Samsung Gallery > DCIM` broke mid-word into "DCI / M" and would have got worse
