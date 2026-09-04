@@ -28,6 +28,7 @@ import androidx.work.WorkManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -211,6 +212,9 @@ class ReconcileViewModel @Inject constructor(
      */
     private var backupObserverJob: Job? = null
 
+    /** The optimise-progress loop, held so it can be replaced or stopped rather than stacked. */
+    private var optimiseObserverJob: Job? = null
+
     init {
         viewModelScope.launch {
             // Backfill for installs that predate guided setup.
@@ -373,36 +377,21 @@ class ReconcileViewModel @Inject constructor(
         return proxyApplier.createWriteRequest(pendingProxyCandidates)
     }
 
+    /**
+     * Hands the photo pass to [OptimiseWorker] and watches the ledger for its progress.
+     *
+     * The work used to run here, in `viewModelScope`, which dies with the wizard — closing the app
+     * mid-pass abandoned it with nothing to resume it. The consent dialog still has to come from the
+     * activity, so the wizard asks and the worker acts; the grant is per-URI and persists, which is
+     * what lets it carry on once this screen is gone.
+     */
     fun applyWizardProxies() {
-        viewModelScope.launch {
-            _state.value = _state.value.copy(
-                optimiseRunning = true,
-                optimiseProgressDone = 0,
-                optimiseProgressTotal = 0
-            )
-            // Counted across the whole phase, not this attempt. Reopening the wizard part-way
-            // through recomputes the *remaining* candidates, so an un-offset counter fell from
-            // "2 of 5" back to "0 of 3" — both true, the pair of them reading as work undone.
-            val alreadyDone = entryDao.countProxied(video = false)
-            val outcome = proxyApplier.apply(pendingProxyCandidates) { done, total ->
-                _state.value = _state.value.copy(
-                    optimiseProgressDone = alreadyDone + done,
-                    optimiseProgressTotal = alreadyDone + total
-                )
-            }
-            val (count, bytes) = when (outcome) {
-                is com.gallery.sync.data.local.media.ProxyOutcome.Completed -> outcome.proxiedCount to outcome.bytesReclaimed
-                is com.gallery.sync.data.local.media.ProxyOutcome.Stopped -> outcome.proxiedCount to outcome.bytesReclaimed
-                else -> 0 to 0L
-            }
-            _state.value = _state.value.copy(
-                optimiseRunning = false,
-                optimiseFinished = true,
-                optimisedCount = count,
-                optimisedBytes = bytes
-            )
-            Logger.i(TAG, "wizard optimise: $count files, ${bytes / 1024 / 1024} MB reclaimed")
-        }
+        _state.value = _state.value.copy(
+            optimiseRunning = true
+        )
+        BackupScheduling.enqueueOptimise(workManager, BackupScheduling.PHASE_PHOTOS)
+        Logger.i(TAG, "photo optimise handed to the worker")
+        observeOptimise()
     }
 
     private var pendingVideoCandidates: List<com.gallery.sync.data.local.entity.BackupEntryEntity> = emptyList()
@@ -427,35 +416,60 @@ class ReconcileViewModel @Inject constructor(
         return proxyApplier.createWriteRequest(pendingVideoCandidates)
     }
 
+    /** The video pass, on the same footing as the photo one. See [applyWizardProxies]. */
     fun applyWizardVideoOptimise() {
-        viewModelScope.launch {
-            _state.value = _state.value.copy(
-                videoOptimiseRunning = true,
-                optimiseProgressDone = 0,
-                optimiseProgressTotal = 0
-            )
-            val quality = _state.value.videoQuality
-            // See applyWizardProxies: the offset keeps the count describing the phase, not the
-            // attempt. Ian saw this one directly — closing during the video pass and reopening
-            // showed "0 of 3" after two clips were already done.
-            val alreadyDone = entryDao.countProxied(video = true)
-            val result = videoOptimiser.runForWizard(quality) { done, total ->
+        _state.value = _state.value.copy(
+            videoOptimiseRunning = true
+        )
+        BackupScheduling.enqueueOptimise(workManager, BackupScheduling.PHASE_VIDEO)
+        Logger.i(TAG, "video optimise handed to the worker")
+        observeOptimise()
+    }
+
+    /**
+     * Follows whichever pass is running by reading the ledger, the way the upload is followed.
+     *
+     * Counts describe the phase rather than the attempt — done plus still-eligible — so reopening
+     * the wizard part way through cannot make the number fall backwards.
+     */
+    fun observeOptimise() {
+        optimiseObserverJob?.cancel()
+        optimiseObserverJob = viewModelScope.launch {
+            while (true) {
+                val current = _state.value
+                val video = current.videoOptimiseRunning
+                if (!video && !current.optimiseRunning) return@launch
+
+                val remaining =
+                    if (video) videoOptimiser.wizardCandidates().size
+                    else proxyApplier.candidatesAll().size
+                val done = entryDao.countProxied(video = video)
+
                 _state.value = _state.value.copy(
-                    optimiseProgressDone = alreadyDone + done,
-                    optimiseProgressTotal = alreadyDone + total
+                    optimiseProgressDone = done,
+                    optimiseProgressTotal = done + remaining
                 )
+
+                if (remaining == 0) {
+                    _state.value = if (video) {
+                        _state.value.copy(
+                            videoOptimiseRunning = false,
+                            videoOptimiseFinished = true,
+                            videoOptimisedCount = done
+                        )
+                    } else {
+                        _state.value.copy(
+                            optimiseRunning = false,
+                            optimiseFinished = true,
+                            optimisedCount = done
+                        )
+                    }
+                    Logger.i(TAG, "${if (video) "video" else "photo"} optimise finished: $done")
+                    return@launch
+                }
+
+                delay(1500)
             }
-            _state.value = _state.value.copy(
-                videoOptimiseRunning = false,
-                videoOptimiseFinished = true,
-                videoOptimisedCount = result.optimised,
-                videoOptimisedBytes = result.reclaimedBytes
-            )
-            Logger.i(
-                TAG,
-                "wizard video optimise: ${result.optimised} clips, " +
-                    "${result.reclaimedBytes / 1024 / 1024} MB reclaimed"
-            )
         }
     }
 
@@ -574,8 +588,14 @@ class ReconcileViewModel @Inject constructor(
     fun abortBackup() {
         backupObserverJob?.cancel()
         backupObserverJob = null
+        optimiseObserverJob?.cancel()
+        optimiseObserverJob = null
         viewModelScope.launch {
             BackupScheduling.cancelManualRun(workManager)
+            // Stops the optimise chain as well. Files already proxied stay proxied — their
+            // originals are in OneDrive, which is the guarantee they had a moment earlier — so this
+            // halts remaining work rather than undoing finished work.
+            BackupScheduling.cancelOptimise(workManager)
             settings.setFirstBackupStartAt(null)
             settings.setWizardBackupTotal(0)
             settings.setWizardStep(TOTAL_STEPS - 1)

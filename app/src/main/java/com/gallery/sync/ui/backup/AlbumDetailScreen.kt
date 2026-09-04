@@ -84,7 +84,7 @@ fun AlbumDetailScreen(
                     color = MaterialTheme.colorScheme.primary
                 )
                 if (proxied > 0) Text(
-                    "$proxied optimized",
+                    "$proxied optimised",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.tertiary
                 )
@@ -145,19 +145,32 @@ private fun FileRow(entry: BackupEntryEntity, context: android.content.Context) 
     }
 }
 
+/**
+ * Both facts, because optimised never replaces backed up.
+ *
+ * `isProxied` was tested first and won, so every optimised file read "✓ optimized" and nothing said
+ * it was in the cloud — on precisely the files where that matters most, since a proxy is the case
+ * where the full-resolution image exists *only* in OneDrive. Ian, 4 Sept 2026, reading a folder of
+ * 100 rows: "all the files are labeled as optimized NOT backed up".
+ *
+ * A proxy is only ever written over a file the ledger has verified in the cloud, so the two are not
+ * alternatives — an optimised file is a backed-up file that has also been shortened.
+ */
 @Composable
 private fun BackupEntryEntity.statusLabel(): String = when {
-    isProxied -> "✓ optimized"
+    isProxied && state == BackupState.UPLOADED -> "✓ backed up · optimised"
+    isProxied -> "✓ optimised"
     state == BackupState.UPLOADED -> "✓ backed up"
     state == BackupState.PENDING -> "⟳ pending"
     state == BackupState.FAILED -> "✗ failed"
     else -> "?"
 }
 
+/** Safe is one colour. Uploaded reads primary whether or not it was later optimised. */
 @Composable
 private fun BackupEntryEntity.statusColor() = when {
-    isProxied -> MaterialTheme.colorScheme.tertiary
     state == BackupState.UPLOADED -> MaterialTheme.colorScheme.primary
+    isProxied -> MaterialTheme.colorScheme.tertiary
     state == BackupState.FAILED -> MaterialTheme.colorScheme.error
     else -> MaterialTheme.colorScheme.onSurfaceVariant
 }

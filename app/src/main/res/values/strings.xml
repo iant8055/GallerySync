@@ -203,7 +203,7 @@
         state. Says "in your albums" because files in Off albums are deliberately not counted.
     -->
     <string name="albums_all_backed_up">Everything here is backed up</string>
-    <string name="albums_optimised_summary">%1$d Optimized · %2$s Saved</string>
+    <string name="albums_optimised_summary">%1$d Optimised · %2$s Saved</string>
     <!--
         Files in Archive albums still on the phone — every one of them is scheduled to leave.
         Replaces "waiting to be verified", which compared the ledger's row count against the
@@ -287,7 +287,7 @@
     <string name="album_cloud_unreachable">Could not reach OneDrive when this was last checked</string>
     <string name="album_cloud_all_present">%1$d verified in OneDrive</string>
     <string name="album_cloud_some_missing">%1$d of %2$d verified in OneDrive</string>
-    <string name="album_status_optimized">%1$d optimized</string>
+    <string name="album_status_optimized">%1$d optimised</string>
     <string name="album_status_pending">%1$d pending</string>
     <string name="album_watching">Watching for new files</string>
     <string name="album_not_watching">Not watched — nothing new expected</string>
@@ -643,9 +643,9 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
         outstanding, measured - so this option can touch two percent of a library while sounding
         substantial. Saying what it leaves alone is what stops the honest choice looking broken.
     -->
-    <string name="library_optimise_new">All #1 - but only Optimize newly backed up files - for moderate storage saving</string>
+    <string name="library_optimise_new">All #1 - but only Optimise newly backed up files - for moderate storage saving</string>
     <string name="library_optimise_new_detail">%1$d of %2$d files are not backed up yet.</string>
-    <string name="library_free_space">All #1 - plus Optimize All files on phone for maximum storage saving</string>
+    <string name="library_free_space">All #1 - plus Optimise All files on phone for maximum storage saving</string>
     <!-- Photo-heavy library: the saving is worth leading with. -->
     <string name="library_free_space_detail">Photos and video are replaced by smaller copies that still open in your gallery. Frees about %1$s.</string>
     <!--
@@ -849,7 +849,7 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_description_tabs">See your folders and choose what to back up</string>
     <string name="tour_description_navigation">Browse and download files from OneDrive</string>
     <string name="tour_description_archive">Review files verified in the cloud and free up space</string>
-    <string name="tour_description_settings">Backup destination, optimization, and preferences</string>
+    <string name="tour_description_settings">Backup destination, optimisation, and preferences</string>
     <string name="tour_description_help">Just press the (?) to get guides, tips, and answers to common questions</string>
     <string name="tab_help">Help</string>
 
@@ -883,13 +883,13 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
 
     <string name="tour_backup_title">Choose your backup plan</string>
 
-    <string name="tour_optimise_title">Optimization Settings</string>
-    <string name="tour_optimise_body">Optimization allows you to free up storage space on your phone while still being able to see all your photos and videos on your Gallery.</string>
+    <string name="tour_optimise_title">Optimisation Settings</string>
+    <string name="tour_optimise_body">Optimisation allows you to free up storage space on your phone while still being able to see all your photos and videos on your Gallery.</string>
     <string name="tour_optimise_note">These settings can be changed at any time in the Settings tab.</string>
     <string name="tour_optimise_photos_saving">Estimated photo savings: %1$s</string>
     <string name="tour_optimise_video_saving">Estimated video savings: %1$s</string>
     <string name="tour_optimise_total_saving">Total estimated savings: %1$s</string>
-    <string name="tour_optimise_video_quality">Video optimization level</string>
+    <string name="tour_optimise_video_quality">Video optimisation level</string>
     <!--
         The estimate is computed from the reconcile's outstanding tallies, and those read zero for
         two very different reasons: nothing is left to send, or the drive could not be listed and
@@ -901,7 +901,7 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_optimise_checking">Checking OneDrive to work out what this would save…</string>
     <string name="tour_optimise_unchecked">OneDrive could not be checked just now, so there is no saving to estimate yet. These settings still apply — they act on whatever the first backup sends.</string>
     <string name="tour_optimise_incomplete">Could not check %1$d of your albums, so the real saving is likely to be larger than this.</string>
-    <string name="tour_optimise_nothing">Everything on this phone is already in OneDrive, so there is nothing new to optimize yet.</string>
+    <string name="tour_optimise_nothing">Everything on this phone is already in OneDrive, so there is nothing new to optimise yet.</string>
     <!--
         Split from video_quality_high and friends because the wizard's three side-by-side buttons
         have room for the name and nothing else. The combined "High — 480p" label is still what the

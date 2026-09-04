@@ -42,6 +42,7 @@ class ReconcileWithCloud @Inject constructor(
     private val scanner: MediaScanner,
     private val cloudStatusDao: AlbumCloudStatusDao,
     private val engine: BackupEngine,
+    private val entryDao: com.gallery.sync.data.local.dao.BackupEntryDao,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
 ) {
 
@@ -77,7 +78,14 @@ class ReconcileWithCloud @Inject constructor(
             // is exactly the mistake that reported 8,177 safe files as missing.
             val remoteIndex = engine.remoteIndexFor(album.name)
 
-            val forAlbum = ReconciliationRules.tallyAlbum(local, remoteIndex)
+            // A proxied file is smaller on disk than the original OneDrive holds, so without its
+            // pre-proxy size the size test fails and a verified file counts as missing — the Albums
+            // tab said "2 of 5 verified in OneDrive" for an album whose five were all uploaded, and
+            // the number fell further with every clip optimised.
+            val proxiedOriginals = entryDao.proxiedOriginalSizes(album.name)
+                .associate { it.displayName to it.sizeBytes }
+
+            val forAlbum = ReconciliationRules.tallyAlbum(local, remoteIndex, proxiedOriginals)
 
             // Keep the per-album answer, not just its contribution to the total.
             //

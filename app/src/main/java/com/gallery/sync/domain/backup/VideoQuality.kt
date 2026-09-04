@@ -14,9 +14,15 @@ package com.gallery.sync.domain.backup
  *
  * | | Short side | Measured | Ian's figure |
  * |---|---|---|---|
- * | [High] | 480 | 88% | ~90% |
+ * | [High] | 480 | 88% | ~85% |
  * | [Medium] | 720 | 73% | ~75% |
  * | [Low] | 1080 | 47% | ~50% |
+ *
+ * **Re-measured on five real clips, Moto G, 4 Sept 2026**, and the single-clip sweep had flattered
+ * [High]. Five clips at [High] returned 84.5% against the 90% then claimed — over-promising, which
+ * is the direction that matters, so High is now 85. Three clips at [Medium] returned 75.4, 75.7 and
+ * 76.3%: its 75 needed nothing, the figure it already carried was right. [Low] is still one clip's
+ * measurement and untested at scale.
  *
  * **[Low] does not downscale at all.** A 1080p clip comes back the same size in pixels and about
  * half the size in bytes, because the saving there is bitrate rather than resolution — the source
@@ -55,7 +61,7 @@ enum class VideoQuality(
 ) {
 
     /** 480p. The most aggressive, and indistinguishable from the source on a 7.6-inch display. */
-    High(targetShortSide = 480, approximateSavingPercent = 90),
+    High(targetShortSide = 480, approximateSavingPercent = 85),
 
     /** 720p. */
     Medium(targetShortSide = 720, approximateSavingPercent = 75),

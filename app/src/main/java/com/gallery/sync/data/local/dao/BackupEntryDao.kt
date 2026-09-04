@@ -43,6 +43,12 @@ data class UploadedKey(
     val contentSignature: String get() = RestoredAlbum.contentSignature(displayName, sizeBytes)
 }
 
+/** One proxied file's name and the size OneDrive should still be holding for it. */
+data class ProxiedOriginal(
+    val displayName: String,
+    val sizeBytes: Long
+)
+
 data class AlbumBackupCount(
     val album: String,
     val total: Int,
@@ -555,6 +561,16 @@ interface BackupEntryDao {
      */
     @Query("SELECT COUNT(*) FROM backup_entries WHERE isProxied = 1 AND isVideo = :video")
     suspend fun countProxied(video: Boolean): Int
+
+    /**
+     * Name and pre-proxy size for every proxied file in one album.
+     *
+     * `sizeBytes` keeps the original size when a proxy is written — `localProxySizeBytes` holds the
+     * shrunken one — so this is what OneDrive should still be holding, and the reconcile matches
+     * against it rather than against the file now on disk.
+     */
+    @Query("SELECT displayName, sizeBytes FROM backup_entries WHERE album = :album AND isProxied = 1")
+    suspend fun proxiedOriginalSizes(album: String): List<ProxiedOriginal>
 
     @Query("SELECT mediaStoreId FROM backup_entries WHERE isProxied = 1")
     suspend fun proxiedMediaStoreIds(): List<Long>

@@ -3194,6 +3194,75 @@ proxy no longer matches its full-size original, so the row is describing the che
 reading as though the backup evaporated. The ledger still holds `remoteSizeBytes = sizeBytes` from
 upload time, so the information to say it properly is there.
 
+### 4 Sept 2026 — optimising moved off the wizard's lifetime, and the constants recalibrated
+
+**Moto G 2026, same restored 155-file fixture.** Follows the entry above; read it first.
+
+**The optimise passes now run in [OptimiseWorker].** They used to run in `viewModelScope`, which is
+cleared with the activity, so closing the wizard abandoned them — uploading survived Close because it
+is a WorkManager chain and optimising did not, a difference the card never admitted to. Consent still
+comes from the activity, because `MediaStore.createWriteRequest` can only be raised there; the grant is
+per-URI and persists, which is what lets the worker carry on once the wizard is gone.
+
+Batched at 60 photos and 3 clips with a continuation while work remains, the same shape as
+[BackupWorker] and for the same reason: a transcode is tens of seconds a clip and WorkManager stops a
+worker that runs too long.
+
+**Verified twice over.** WorkManager held a `gallery-sync-optimise` chain with batches succeeding
+individually, and the ledger stepped `14 → 60 → 115 → 150` in batch-sized jumps, so the re-enqueue is
+real rather than one long run. **Ian confirmed closing the app several times during the optimise phase
+and the work continuing** — that half is his observation, not the log's: the watcher polled every 20s
+and never caught the launcher in front, so a close and reopen between polls left no trace. Worth noting
+as an instrumentation lesson, not a doubt about the result.
+
+**The constants, recalibrated against three runs and then checked.**
+
+| | was | now | measured |
+|---|---|---|---|
+| `ProxyGenerator.APPROXIMATE_SAVING_PERCENT` | 70 | **80** | 83.5% |
+| `VideoQuality.High` | 90 | **85** | 84.5% |
+| `VideoQuality.Medium` | 75 | 75 | 75.4 / 75.7 / 76.3% — already right |
+
+Photos returned **105,800,737 bytes on all three runs, identical to the byte**; video landed within
+1,231 bytes of the previous run, which is encoder non-determinism. With the new figures the card
+promised ~514 MB of photos against 537.1 delivered and ~522 MB of video against 518.5 — both now within
+a few percent, and photos under-promising rather than over. Before, the photo figure claimed the entire
+byte count of every photo.
+
+**Two places the app knew a file was safe and said otherwise.** Ian, reading a folder of 100 rows:
+*"all the files are labeled as optimized NOT backed up"*.
+
+`isProxied` was tested first in `statusLabel`, so an optimised file read "✓ optimized" and nothing said
+it was in the cloud — on exactly the files where that matters most, since a proxy is the case where the
+full-resolution image exists **only** in OneDrive. The two were never alternatives: a proxy is written
+only over a file the ledger has verified. The row now reads "✓ backed up · optimized".
+
+At folder level the same fact was lost differently, and Ian's framing is the right one — *"if it can
+say that in the files then it can say it on the folder level"*. The Albums tab read "2 of 5 verified in
+OneDrive" for an album whose five were all uploaded, falling further with every clip optimised, because
+the reconcile matches on name **and byte size** and a proxy is deliberately smaller than the original
+OneDrive holds. `ReconciliationRules.tallyAlbum` now takes the pre-proxy sizes and compares against
+those. Confirmed on the device immediately afterwards: three albums went from 0/50, 0/100 and 2/5 to
+50, 100 and 5 verified, 0 missing.
+
+Note where the sizes come from: `sizeBytes` keeps the **original** when a proxy is written and
+`localProxySizeBytes` holds the shrunken one, so the ledger already knew — nothing new had to be
+recorded, only read.
+
+**Spelling settled: British, everywhere the user can see it.** Ian, 4 Sept 2026, asked whether it had
+been changed globally — it had not, and the app was about 80% `-ise` with an American pocket in the
+wizard card titles ("Optimization Settings") and the album detail rows ("optimized"), so someone moving
+between Settings and the wizard met both. Nine strings and four hardcoded literals moved to `-ise`;
+string *names* (`tour_optimise_*`) were left alone, being invisible to users and pure churn to rename.
+Comments quoting the old label or Ian's own words keep their original spelling, because they are
+describing what was written rather than what is shown.
+
+**A percentage nobody had counted yet was rendering as zero.** Reopening mid-phase builds a fresh view
+model, so `optimiseTotal` is 0 until the first ledger read returns, and the ring announced a confident
+"0%" before jumping to the real figure. It shows "…" until the count exists. The count line beneath it
+already followed this rule — *"0 of 0 would be worse than saying nothing"* — and the headline simply was
+not covered by it. **The same rule keeps having to be applied in one more place: unknown is not zero.**
+
 ## targetSdk — researched 19 Aug 2026, resolved in favour of 37
 
 CLAUDE.md said 35 while the build file said 37. **35 was the stale one**, and keeping it would have

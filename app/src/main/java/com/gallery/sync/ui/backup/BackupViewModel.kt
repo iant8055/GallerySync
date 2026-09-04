@@ -122,7 +122,7 @@ data class AlbumRow(
      * Archive ran to completion: the mode is set, the ledger remembers files, none are still here.
      *
      * Rendered as its own line rather than through the usual counts, which would describe files
-     * that are no longer on the phone — "1 backed up · 12 optimized" over an album holding nothing.
+     * that are no longer on the phone — "1 backed up · 12 optimised" over an album holding nothing.
      */
     val isArchivedAndEmpty: Boolean
         get() = mode == AlbumMode.ARCHIVE && itemCount == 0 && everBackedUpCount > 0

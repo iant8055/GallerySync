@@ -143,7 +143,19 @@ internal object ReconciliationRules {
      */
     fun tallyAlbum(
         local: List<LocalMediaItem>,
-        remoteIndex: Map<String, RemoteFileRef>?
+        remoteIndex: Map<String, RemoteFileRef>?,
+        /**
+         * Display name to the size the file had when it was uploaded, for files since replaced by a
+         * proxy. Empty for an album that has none.
+         *
+         * A proxy is deliberately smaller than what OneDrive holds, so comparing the shrunken local
+         * file against the full-size original fails the size test and the file drops out of the
+         * verified count — reported on the Albums tab as "2 of 5 verified in OneDrive" for an album
+         * where all five were uploaded and verified, and falling further with every clip optimised.
+         * Ian, 4 Sept 2026. Matching against the recorded original restores the comparison the size
+         * test was written to make.
+         */
+        proxiedOriginalSizes: Map<String, Long> = emptyMap()
     ): CloudReconciliation {
         if (remoteIndex == null) {
             return CloudReconciliation(
@@ -159,7 +171,11 @@ internal object ReconciliationRules {
 
         for (item in local) {
             val one = MediaTally(1, item.sizeBytes)
-            val isBackedUp = remoteIndex[item.displayName]?.sizeBytes == item.sizeBytes
+            // The size we expect OneDrive to hold: the original, which for a proxied file is no
+            // longer the size on disk. Unproxied files are unaffected — the map has no entry and the
+            // comparison is the one it always was.
+            val expectedRemoteSize = proxiedOriginalSizes[item.displayName] ?: item.sizeBytes
+            val isBackedUp = remoteIndex[item.displayName]?.sizeBytes == expectedRemoteSize
 
             when {
                 item.isVideo && isBackedUp -> videosBackedUp += one

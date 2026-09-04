@@ -212,9 +212,15 @@ class ProxyGenerator @Inject constructor(
         /**
          * What proxying saved on the photos it actually replaced, as a percentage of the original.
          *
-         * Measured, not guessed, and the figures are from this project's own run of 53 files
-         * recorded in MILESTONES: 3.77 MB to 0.93 (75%), 3.25 to 1.10 (66%), 1.28 to 0.38 (70%).
-         * 70 is the middle of that and deliberately not the best of it.
+         * Measured, not guessed. Two sources, and they disagree because their content does.
+         *
+         * The 53-file run recorded in MILESTONES gave 75 / 66 / 70% on an album of small images.
+         * The 150-photo camera roll of 4 Sept 2026 gave **83.5%**, and gave it twice — 642,867,972
+         * bytes down to 105,800,737, identical to the byte across two runs on a restored fixture.
+         *
+         * 80 sits between them and below the camera-roll figure, so the estimate still promises
+         * less than a phone full of camera photos actually returns. It began at 70, which came from
+         * the smaller-image run alone and under-promised by 87 MB on a 1.26 GB folder.
          *
          * **It is an over-estimate of what a whole library gives back**, and any screen using it
          * must say "estimated". Two things pull the real figure down. A proxy still occupies bytes —
@@ -227,7 +233,7 @@ class ProxyGenerator @Inject constructor(
          * Exists for the same reason as `VideoQuality.approximateSavingPercent`: so no screen
          * invents its own number and the two cannot drift.
          */
-        const val APPROXIMATE_SAVING_PERCENT = 70
+        const val APPROXIMATE_SAVING_PERCENT = 80
 
         /**
          * Largest power-of-two sample size that still leaves the image at or above [target].

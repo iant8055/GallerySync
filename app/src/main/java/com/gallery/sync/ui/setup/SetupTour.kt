@@ -1683,8 +1683,22 @@ private fun BackupProgressContent(
                 drawArc(progressColor, -90f, sweepAngle, false, style = stroke)
             }
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                // A percentage nobody has counted yet is not zero.
+                //
+                // Reopening mid-phase builds a fresh view model, so `optimiseTotal` is 0 until the
+                // first ledger read returns and the ring announced a confident "0%" before jumping
+                // to the truth. Ian, 4 Sept 2026. Same rule the count line below already follows:
+                // say nothing rather than say zero.
+                val countPending = !waiting &&
+                    phase != WizardBackupPhase.UPLOADING &&
+                    phase != WizardBackupPhase.DONE &&
+                    optimiseTotal == 0
                 Text(
-                    text = if (waiting) formatCountdown(remainingMillis) else "$percent%",
+                    text = when {
+                        waiting -> formatCountdown(remainingMillis)
+                        countPending -> "…"
+                        else -> "$percent%"
+                    },
                     style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.Bold
                 )

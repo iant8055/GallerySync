@@ -39,9 +39,13 @@ object BackupScheduling {
      * what keeps them out of the first-backup window.
      */
     const val MANUAL_WORK = "gallery-sync-backup-manual"
+    const val OPTIMISE_WORK = "gallery-sync-optimise"
 
     /** Marks a run as user-initiated. Carried into every continuation of that chain. */
     const val KEY_MANUAL = "manual"
+    const val KEY_OPTIMISE_PHASE = "optimise_phase"
+    const val PHASE_PHOTOS = "photos"
+    const val PHASE_VIDEO = "video"
 
     /** Upload all albums regardless of album modes. Used by the wizard on fresh installs. */
     const val KEY_ALL_ALBUMS = "all_albums"
@@ -182,6 +186,39 @@ object BackupScheduling {
             allAlbums = allAlbums,
             initialDelayMillis = delayMillis
         )
+    }
+
+    /**
+     * Runs one optimise phase in the background.
+     *
+     * Its own unique chain, kept apart from the backup one: an abort should stop uploading without
+     * abandoning proxies half-written, and the two run at different times over different files.
+     *
+     * `APPEND_OR_REPLACE` rather than `REPLACE`, so the video phase queues behind the photo phase
+     * instead of cancelling it — the wizard enqueues them as each consent is granted, and the second
+     * must not discard the first.
+     */
+    fun enqueueOptimise(workManager: WorkManager, phase: String) {
+        val request = OneTimeWorkRequestBuilder<OptimiseWorker>()
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiresBatteryNotLow(true)
+                    .setRequiresStorageNotLow(true)
+                    .build()
+            )
+            .setInputData(Data.Builder().putString(KEY_OPTIMISE_PHASE, phase).build())
+            .build()
+
+        workManager.enqueueUniqueWork(
+            OPTIMISE_WORK,
+            ExistingWorkPolicy.APPEND_OR_REPLACE,
+            request
+        )
+    }
+
+    /** Stops the optimise chain. Files already proxied stay proxied; nothing is undone. */
+    fun cancelOptimise(workManager: WorkManager) {
+        workManager.cancelUniqueWork(OPTIMISE_WORK)
     }
 
     /** Stops a manual chain, including whatever batch it is in the middle of. */
