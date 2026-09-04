@@ -11,6 +11,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.gallery.sync.data.local.entity.AlbumMode
+import com.gallery.sync.domain.backup.LibraryChoice
 import com.gallery.sync.domain.backup.MediaAge
 import com.gallery.sync.domain.backup.OptimiseCutoff
 import com.gallery.sync.domain.backup.OptimiseMode
@@ -175,6 +176,18 @@ data class BackupPreferences(
      */
     val videoQuality: VideoQuality = VideoQuality.DEFAULT,
     /**
+     * The one-time install choice, kept so the wizard survives its own process ending.
+     *
+     * It used to live only in `ReconcileUiState`. Closing the wizard mid-backup — which is the
+     * ordinary way to leave a long first run — took the process with it, and the choice came back
+     * as the default. The optimise pass at the end of step 9 then found nothing to do and said
+     * nothing about it. Moto G, 4 Sept 2026, closed at 40%%: no photo and no video was optimised.
+     *
+     * This is Area 1 and nothing else. It does not touch album modes, which only the user sets,
+     * and it does not touch the ongoing optimise settings.
+     */
+    val libraryChoice: LibraryChoice = LibraryChoice.DEFAULT,
+    /**
      * Files backed up before this moment are left at full size on the phone.
      *
      * Zero means no cutoff, which is the ordinary case. Set only by Gate 2's
@@ -257,6 +270,7 @@ class BackupSettings @Inject constructor(
             runBaselineBytes = stored[KEY_RUN_BASELINE] ?: 0L,
             archiveDelayedUntilEpochMillis = stored[KEY_ARCHIVE_DELAYED_UNTIL] ?: 0L,
             videoQuality = VideoQuality.fromNameOrDefault(stored[KEY_VIDEO_QUALITY]),
+            libraryChoice = LibraryChoice.fromNameOrDefault(stored[KEY_LIBRARY_CHOICE]),
             optimiseCutoffEpochMillis = stored[KEY_OPTIMISE_CUTOFF] ?: OptimiseCutoff.EVERYTHING,
             videoOptimiseAge = MediaAge.fromNameOrDefault(stored[KEY_VIDEO_OPTIMISE_AGE]),
             wizardStep = stored[KEY_WIZARD_STEP] ?: 0,
@@ -330,6 +344,11 @@ class BackupSettings @Inject constructor(
     /** How hard to optimise video. See [VideoQuality]. */
     suspend fun setVideoQuality(quality: VideoQuality) {
         context.dataStore.edit { it[KEY_VIDEO_QUALITY] = quality.name }
+    }
+
+    /** Records the install choice so it outlives the wizard's own process. */
+    suspend fun setLibraryChoice(choice: LibraryChoice) {
+        context.dataStore.edit { it[KEY_LIBRARY_CHOICE] = choice.name }
     }
 
     /** How old a clip must be before it may be optimised. See [MediaAge]. */
@@ -496,6 +515,7 @@ class BackupSettings @Inject constructor(
         val KEY_RUN_BASELINE = longPreferencesKey("run_baseline_bytes")
         val KEY_ARCHIVE_DELAYED_UNTIL = longPreferencesKey("archive_delayed_until")
         val KEY_VIDEO_QUALITY = stringPreferencesKey("video_quality")
+        val KEY_LIBRARY_CHOICE = stringPreferencesKey("library_choice")
         val KEY_OPTIMISE_CUTOFF = longPreferencesKey("optimise_cutoff")
         val KEY_VIDEO_OPTIMISE_AGE = stringPreferencesKey("video_optimise_age")
         val KEY_WIZARD_STEP = intPreferencesKey("wizard_step")

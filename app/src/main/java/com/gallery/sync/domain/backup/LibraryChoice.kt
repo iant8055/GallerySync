@@ -72,6 +72,19 @@ enum class LibraryChoice(val mode: AlbumMode?) {
      */
     fun cutoffFor(now: Long): Long =
         if (this == BACK_UP_AND_OPTIMISE_NEW) now else OptimiseCutoff.EVERYTHING
+
+    companion object {
+
+        /** What an install has chosen until the user says otherwise. */
+        val DEFAULT = BACK_UP_EVERYTHING
+
+        /**
+         * Read back by name, never by ordinal, so inserting a choice later cannot silently
+         * reinterpret one somebody already made. Same reasoning as [VideoQuality].
+         */
+        fun fromNameOrDefault(name: String?): LibraryChoice =
+            entries.firstOrNull { it.name == name } ?: DEFAULT
+    }
 }
 
 /**

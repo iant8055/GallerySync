@@ -273,6 +273,7 @@ class ReconcileViewModel @Inject constructor(
                         prefs.photoOptimiseMode == OptimiseMode.Auto,
                     optimiseVideo = prefs.optimiseVideo,
                     videoQuality = prefs.videoQuality,
+                    libraryChoice = prefs.libraryChoice,
                     cloudDeletionPolicy = prefs.cloudDeletionPolicy,
                     wizardStep = prefs.wizardStep,
                     firstBackupHold = if (prefs.hasCompletedFirstBackup) {
@@ -519,6 +520,9 @@ class ReconcileViewModel @Inject constructor(
 
     /** Selects a Gate 2 option without acting on it. Applying is a separate, deliberate tap. */
     fun setLibraryChoice(choice: LibraryChoice) {
+        // Written through, not just held. Closing the wizard mid-backup ends the process, and this
+        // is what step 9 reads to decide whether anything gets optimised when the upload finishes.
+        viewModelScope.launch { settings.setLibraryChoice(choice) }
         _state.value = _state.value.copy(libraryChoice = choice, libraryApplied = null)
     }
 

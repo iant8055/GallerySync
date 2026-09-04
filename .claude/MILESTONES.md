@@ -2957,6 +2957,42 @@ needs a counter at all.
 observed for one run. So the dispatch delay before the first byte is not a one-off; it recurs at every
 batch boundary, seven times for 157 files.
 
+### 4 Sept 2026 — Close reset the install choice, and nothing was optimised
+
+**Close must not stop or reset anything.** Stated by Ian, repeatedly, and this is what broke it.
+
+A full run on the Moto G: 155 files uploaded, the wizard closed at 40% and reopened at 48%, and when
+the upload finished **not one photo or video was optimised** — no attempt, no failure, no log line.
+
+The install choice lived only in `ReconcileUiState.libraryChoice`. Nothing wrote it to disk. Closing
+the wizard mid-backup ends the process, so the ViewModel came back holding the default —
+`BACK_UP_EVERYTHING`, which does not optimise — and step 9's pass collected zero candidates:
+
+```kotlin
+val shouldOptimise = _state.value.libraryChoice.mode?.proxiesPhotos == true
+val photoCandidates = if (shouldOptimise) proxyApplier.candidatesAll() else emptyList()
+val videoCandidates = if (shouldOptimise) videoOptimiser.wizardCandidates() else emptyList()
+```
+
+With no candidates, `backupComplete` went true immediately and Finish appeared, so the wizard reported
+success for a run that had silently skipped half of what the user asked for.
+
+**The weakness is old; making Close work is what exposed it.** Until 3 Sept, Close did nothing at all,
+so the process stayed alive through step 9 and the choice was never lost. Giving Close its proper
+behaviour turned process death mid-backup from impossible into the ordinary way to leave, and this was
+the first thing to fall through. Worth remembering when anything else is found to be in-memory-only:
+the wizard now expects to die and come back.
+
+Fixed by persisting it — `library_choice` in `BackupSettings`, read back by name via
+`LibraryChoice.fromNameOrDefault` so inserting a fifth choice later cannot reinterpret one already
+made. Video quality was already persisted; the install choice was the only part of steps 6 and 7 that
+was not.
+
+**This is Area 1 and nothing else.** It writes no album mode — those are the user's alone — and it does
+not touch the ongoing optimise settings. An earlier attempt to explain the same symptom by pointing at
+`applyLibraryChoice` not being called from the tour was wrong on exactly that point: the tour is right
+not to call it, and albums reading Off after an initial backup is correct.
+
 ### 4 Sept 2026 — the app does not open until the backup is done, and Close is not a dismissal
 
 Stated by Ian: **the user should not have access to the full app until the backup and optimising are
