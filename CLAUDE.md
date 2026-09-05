@@ -162,6 +162,25 @@ text at all. That is a shipped-to-users bug, not a cosmetic one.
   `adb shell "cmd uimode night yes"` and `… night no`. Compiling proves nothing here.
 - The same applies to anything drawn rather than composed — icons, custom canvas, overlays.
 
+### Album modes are set only by the user — nothing else writes them
+Ian has corrected this more than once, most recently 4 Sept 2026. It is here, in the file that always
+loads, because a memory file recording the same rule did not stop it recurring.
+
+Three areas, fully independent:
+
+1. **The install wizard's four modes.** One-time, at install. Acts only on files already on the
+   device. Does **not** set album modes and does **not** write the Settings optimise tree.
+2. **The ongoing optimise settings.** Global, not per-album. Applies only to Sync albums — Backup and
+   Archive never optimise. Does **not** set album modes.
+3. **Album modes** (Off / Backup / Sync / Archive). Set **only** by the user, per album.
+
+**Albums reading `Off` after an initial backup is correct**, not a bug — the first backup runs with
+`allAlbums = true` and deliberately ignores modes. Do not "fix" it.
+
+**The test that saves the most time: any explanation requiring the install choice to write album
+modes is wrong by construction.** If a theory needs two of these areas to touch, discard the theory
+rather than checking it. That shape has been the error every time.
+
 ### Do not add a foreground service
 Tried and removed the same evening, 4 Sept 2026. **Do not propose it again without new evidence that
 defeats the measurement below.** It is an obvious-looking answer to "the backup stops when the user
