@@ -12,6 +12,7 @@ import android.net.Uri
 import com.gallery.sync.data.local.media.GrantedDirectory
 import com.gallery.sync.data.local.media.ScopedDirectories
 import com.gallery.sync.util.ChargingState
+import com.gallery.sync.util.RecentsCard
 import com.gallery.sync.domain.backup.ApplyLibraryChoice
 import com.gallery.sync.domain.backup.FirstBackupHold
 import com.gallery.sync.domain.backup.LibraryChoice
@@ -192,7 +193,8 @@ class ReconcileViewModel @Inject constructor(
     private val scanner: MediaScanner,
     private val proxyApplier: com.gallery.sync.data.local.media.ProxyApplier,
     private val videoOptimiser: com.gallery.sync.data.local.media.VideoOptimiser,
-    private val entryDao: com.gallery.sync.data.local.dao.BackupEntryDao
+    private val entryDao: com.gallery.sync.data.local.dao.BackupEntryDao,
+    private val recentsCard: RecentsCard
 ) : ViewModel() {
 
     private val workManager = WorkManager.getInstance(context)
@@ -737,6 +739,7 @@ class ReconcileViewModel @Inject constructor(
                         optimiseCandidateCount = photoCandidates.size,
                         videoCandidateCount = videoCount
                     )
+
                     return@launch
                 }
 
@@ -748,6 +751,21 @@ class ReconcileViewModel @Inject constructor(
                 kotlinx.coroutines.delay(3000)
             }
         }
+    }
+
+    /**
+     * Hides or restores the app's Recents card, following the wizard's own state.
+     *
+     * Driven from one derived condition rather than sprinkled through the paths that start and stop
+     * work, because the failure that matters is a flag left set: an app missing from Recents with
+     * nothing running to explain it is worse than the swipe it was protecting against. Entering the
+     * backup phase hides it, finishing or aborting restores it, and every launch restores it before
+     * this is consulted again.
+     *
+     * See [RecentsCard] for why the card is worth removing at all.
+     */
+    fun setRecentsCardHidden(hidden: Boolean) {
+        if (hidden) recentsCard.hide() else recentsCard.show()
     }
 
     /** Selects a Gate 2 option without acting on it. Applying is a separate, deliberate tap. */

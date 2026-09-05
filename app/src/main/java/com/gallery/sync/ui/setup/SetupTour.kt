@@ -322,6 +322,15 @@ fun SetupTour(
     }
     val backupComplete = backupPhase == WizardBackupPhase.DONE
 
+    // No card in Recents while the first backup is running, because a swipe there kills the process
+    // and stops Android dispatching this app's jobs until someone opens it again — the one case a
+    // foreground service could not fix either. Bounded to this phase and driven by the same state
+    // the card reads, so it cannot be left set by a path that forgot to clear it. MainActivity
+    // restores it on every launch as the net for a crash mid-run. See RecentsCard.
+    LaunchedEffect(step, backupComplete) {
+        viewModel.setRecentsCardHidden(step == TOTAL_STEPS && !backupComplete)
+    }
+
     // A pending delay is handed to WorkManager, which owns it from then on: it fires with the app
     // closed, killed, or sitting on this card. The countdown here only draws what WorkManager is
     // already committed to, which is why expiry watches rather than enqueues — starting again would

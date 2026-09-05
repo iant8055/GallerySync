@@ -46,13 +46,26 @@ import com.gallery.sync.ui.signin.SignInViewModel
 import com.gallery.sync.data.local.settings.ThemeMode
 import com.gallery.sync.ui.theme.GallerySyncTheme
 import com.gallery.sync.ui.theme.ThemeViewModel
+import com.gallery.sync.util.RecentsCard
+import javax.inject.Inject
 import dagger.hilt.android.AndroidEntryPoint
 import java.time.Instant
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject lateinit var recentsCard: RecentsCard
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // The net for a flag left set. The wizard hides this app's Recents card while the first
+        // backup runs and restores it when that finishes, but a process killed mid-run has nothing
+        // left to do the restoring, and an app permanently missing from Recents with no explanation
+        // is worse than the swipe it was protecting against. Every launch clears it; the wizard
+        // sets it again a moment later if the backup is genuinely still going.
+        recentsCard.show()
+
         enableEdgeToEdge()
         setContent {
             // Read before anything is drawn, so the app opens in the theme the user chose rather
