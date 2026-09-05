@@ -3516,3 +3516,139 @@ delay has no run in flight to hold up. Routes worth investigating: `setExpedited
   matched the `(12345 bytes)` at the end of every log line, and then on reading a local filename —
   `..._1 (1).mp4`, which is what the file is actually called on disk — as a server-side rename. Both
   wrong, both stated confidently, and Ian caught both.
+
+---
+
+### 5 Sept 2026 — the upload half honoured "walk away" and the optimise half never had
+
+Reported by Ian: a four-hour delayed start set the previous evening *"did not start — when I opened
+the phone the Backup started."* The premise turned out to be wrong, and the real defect was one step
+further on. Everything below is from the device: the ledger, WorkManager's own database, file mtimes
+and a logcat capture written to disk.
+
+**The delayed start fired exactly on time.** 230 files uploaded between **02:47:19 and 02:55:48**,
+four hours to the minute after arming. The manual chain's last continuation was enqueued at 02:55:45
+and succeeded, `first_backup_completed` was set, and the 12:04 reconcile found all four albums
+verified with 0 missing. Nothing was wrong with the delay, the window, or the network.
+
+**What never happened was optimising.** Every proxy on disk carried a **12:04 mtime** — the minute the
+phone was woken, nine hours later. The upload→optimise handoff was a `LaunchedEffect` on the wizard's
+progress card, so it only ran while a composition was alive to run it. `BackupWorker` never handed off
+to `OptimiseWorker`; the card did. So a first run left alone did the upload and stopped, and what Ian
+saw on waking was the handoff finally firing, which reads exactly like the backup starting then.
+
+Same class as the 4 Sept defect where optimising died with `viewModelScope`: **work that outlives the
+screen must be owned by something that also does.** That lesson was applied to the passes themselves
+and not to the transition between them.
+
+**Two wrong hypotheses, both killed by one question.** Doze was proposed first and is impossible — the
+phone was plugged in, and neither light nor deep idle engages while charging. Vendor force-stop was
+proposed second and is wrong too: the Moto is stock, the app is in the ACTIVE standby bucket, no appop
+restricts it, and the run demonstrably happened. Asking which handset and whether it was charging cost
+one message and removed both.
+
+#### The fix
+
+- **The handoff moved into the workers.** `BackupWorker` enqueues the photo pass when a chain drains;
+  `OptimiseWorker` queues the video pass when photos drain. [WizardBulkOptimise] is the gate, and it is
+  deliberately narrow: setup not yet complete, `allAlbums` (only the wizard's runs route past album-mode
+  filtering, so a later "Sync now" cannot drag a bulk optimise behind it), and a Gate 2 choice that
+  optimises. It **reads** the install choice and writes no album mode — the two areas stay independent.
+- **Consent is checked where the writing happens.** Both passes bail with a log line when the files sit
+  outside the granted trees, since no worker can raise `createWriteRequest`. Inside a tree — the ordinary
+  case after Gate 1 — there is no dialog and nothing to wait for.
+- **`enqueueOptimiseIfAbsent`, with a per-phase tag.** Two things now start these passes and both are
+  correct, so the second must not append a duplicate. The worker's own continuation still enqueues
+  directly, because its phase is `RUNNING` and carries the tag the check looks for.
+
+#### A second defect, found by testing the first
+
+The 3-minute rehearsal did not run at all, and for an unrelated reason: **Close during arming lost the
+arm.** `scheduleDelayedBackup()` did a ledger refresh and a four-album cloud reconcile *before*
+enqueueing, all inside `viewModelScope`, and Close clears that. The due time was written to the
+DataStore, so the card drew a real countdown over work that did not exist, and `onDelayElapsed` then
+watched an upload that could never begin. Silent in both directions. It survived last night only
+because the app was left open on the card.
+
+- **Armed first, prepared second.** The enqueue is the promise; the totals under it are what the card
+  says while it waits, and losing those to a Close costs a number on a screen rather than the backup.
+- **`onDelayElapsed` asks WorkManager** whether a chain exists rather than assuming one, and starts the
+  run if it does not. A due time and a queued job are written by two different systems and only one of
+  them survives the activity going away mid-arm.
+
+#### Verified unattended, Moto G, 13:19–13:27
+
+```
+13:19:50  delayed first backup armed: 165618ms        <- the remainder, not a restarted clock
+13:25:15  backup run starting (manual)                <- app closed
+13:25:31 / 13:25:34 / 13:25:37   continuations, 67 -> 48 -> 23 remaining
+13:26:30  backup run finished: 21 uploaded, 0 remaining
+13:26:30  upload drained; photo optimise handed to the worker   <- BackupWorker, not the card
+13:26:31  photos: proxying 20 of 20
+13:26:31  photos done; video pass queued                        <- second handoff
+13:26:33  video: optimising up to 3 of 102 at High
+```
+
+71 files uploaded across four batches, then both optimise phases starting themselves. The duplicate
+guard was exercised for real: reopening at 13:26:39 made the card try to start the video pass and it
+was refused with `video optimise already under way`, twice. Without it there would have been two chains
+transcoding the same clips.
+
+**It fired late and that is worth knowing: due 13:22:36, started 13:25:15** — 2m39s after the countdown
+expired. JobScheduler's discretion, not a fault, but a delay is *about* then rather than *at* then, and
+the copy must not promise a time it cannot keep.
+
+#### Decided, not defects
+
+- **The 0% flash on reopening is accepted, and the reason is not taste.** Reopening mid-run shows
+  "starting upload" at 0% for a few seconds until the first ledger read returns — observed while the
+  run was already 41 of 71 in. Ian, 5 Sept: he is content with it **because fixing it before broke
+  other, more critical functionality.**
+
+  That is the whole argument, and the 28 Aug entry *"the percentage, settled in four passes"* is the
+  evidence for it: every attempt to correct this display broke the figures around it — a frozen 21%,
+  a percentage lurching 48→15→48→18→22→67→2 on video, a new album opening at 79% against an hour-old
+  denominator, and a hero flashing to zero on every completed file. What holds now needed three
+  separate mechanisms agreeing (per-file refresh, a floor inside a run, and the baseline closing
+  wherever no work is outstanding), and it holds.
+
+  So the cost of touching it is demonstrated and the benefit is cosmetic. **Do not "fix" this by
+  citing *unknown is not zero*.** That rule stands for the optimise headline, where it was cheap;
+  here the same change has repeatedly cost the accuracy of a number the user actually relies on.
+
+  **The dead end, written out so it is recognisable next time.** The approach that keeps suggesting
+  itself, and was proposed again on 5 Sept before Ian stopped it:
+
+  > *On reopening, show "…" rather than 0% until the first ledger read returns, and suppress the
+  > "starting upload" label for a run that is plainly mid-flight.*
+
+  It sounds free. It is not: Ian's account is that fixing this before **broke other, more critical
+  functionality**. This record does not name that commit — if it is ever identified it belongs here —
+  but the 28 Aug sequence explains why the shape of the change is dangerous rather than the change
+  being unlucky. The figure is a proportion whose numerator and denominator are gathered from
+  different places and refresh at different moments, and every past attempt to make it report "not
+  yet known" disturbed one half of that pair. The symptom moves; what breaks is the progress number
+  the user actually reads.
+
+  If it is ever revisited, the bar is: the three mechanisms from 28 Aug held intact (per-file count
+  refresh, a floor inside a run, the baseline closing wherever no work is outstanding), and hardware
+  verification across a **whole** run rather than its first two seconds — the flash lives in the
+  first two seconds, which is exactly the window a quick check watches and a regression hides behind.
+- **The Recents card was not missing.** It appeared absent after a Close, which briefly looked like the
+  exclusion job being unnecessary — it was an artifact of `install -r` having killed the process and
+  rebuilt the task. A normal icon launch followed by Close leaves the card, so the 4 Sept entry stands
+  and hiding it is still the open job. Ian's framing of why the card matters: it is the route back in to
+  *see the backup actually running*. Reopening does not depend on it — the launcher icon relaunches and
+  the tour resumes on the progress card re-attached to the live chain — but that route only works while
+  the stored wizard step is 9. After an abort it is 8, which starts the wizard at step 1 instead.
+
+#### Method notes
+
+- **The log buffer on this phone rolls in about four minutes.** Two diagnoses nearly went unmade because
+  `logcat -d` no longer held the moment. Capture to a file *before* the test, not after.
+- **WorkManager's database is the authority on what was armed**, and it lives in
+  `no_backup/androidx.work.workdb` rather than `databases/`. `WorkName` maps a unique name to its current
+  spec, so a lost arm is visible as a name still pointing at yesterday's run. Pull it with its `-wal` and
+  `-shm`.
+- **`getWorkInfosForUniqueWorkFlow` needs a tag to be useful** when one unique name carries two phases,
+  which is why the phase tag was added rather than inferring from input data.

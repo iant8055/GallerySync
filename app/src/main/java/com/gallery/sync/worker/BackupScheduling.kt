@@ -256,6 +256,18 @@ object BackupScheduling {
         workManager.cancelUniqueWork(OPTIMISE_WORK)
     }
 
+    /**
+     * Whether a manual chain is queued, waiting out a delay, or running.
+     *
+     * Asked when a countdown reaches zero, because a countdown proves only that a due time was
+     * written: the arming itself can be lost, and watching for a chain that was never queued waits
+     * for ever while the card says it is uploading.
+     */
+    suspend fun manualRunLive(workManager: WorkManager): Boolean =
+        workManager.getWorkInfosForUniqueWorkFlow(MANUAL_WORK)
+            .first()
+            .any { !it.state.isFinished }
+
     /** Stops a manual chain, including whatever batch it is in the middle of. */
     fun cancelManualRun(workManager: WorkManager) {
         workManager.cancelUniqueWork(MANUAL_WORK)

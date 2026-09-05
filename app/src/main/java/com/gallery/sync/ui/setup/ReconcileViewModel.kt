@@ -559,9 +559,29 @@ class ReconcileViewModel @Inject constructor(
      */
     fun scheduleDelayedBackup() {
         viewModelScope.launch {
-            val startAt = settings.current().firstBackupStartAtEpochMillis ?: return@launch
+            val prefs = settings.current()
+            val startAt = prefs.firstBackupStartAtEpochMillis ?: return@launch
             val remaining = startAt - System.currentTimeMillis()
             if (remaining <= 0L) return@launch
+
+            // Armed first, prepared second, and the order is the whole fix.
+            //
+            // The ledger refresh and cloud reconcile below are seconds of network per album, and
+            // they used to sit in front of this call inside `viewModelScope` — which Close clears.
+            // Moto G, 5 Sept 2026: a 3-minute delay chosen and then Closed a second later left
+            // `first_backup_start_at` written, a countdown drawn on the card when the app reopened,
+            // and nothing at all in WorkManager. The failure was silent in both directions, because
+            // everything the user could see said it was armed.
+            //
+            // The enqueue is the promise. The totals underneath it are what the card says while it
+            // waits, and losing those to a Close costs a number on a screen rather than the backup.
+            BackupScheduling.enqueueDelayedManualRun(
+                workManager = workManager,
+                allowMeteredNetwork = prefs.allowMeteredNetwork,
+                delayMillis = remaining,
+                allAlbums = true
+            )
+            Logger.i(TAG, "delayed first backup armed: ${remaining}ms")
 
             settings.setWizardStep(TOTAL_STEPS)
             backupEngine.refreshLedger()
@@ -569,25 +589,33 @@ class ReconcileViewModel @Inject constructor(
             val grandTotal = backupEngine.outstandingCountAll()
             settings.setWizardBackupTotal(grandTotal)
             _state.value = _state.value.copy(backupTotal = grandTotal)
-
-            val prefs = settings.current()
-            BackupScheduling.enqueueDelayedManualRun(
-                workManager = workManager,
-                allowMeteredNetwork = prefs.allowMeteredNetwork,
-                delayMillis = remaining,
-                allAlbums = true
-            )
-            Logger.i(TAG, "delayed first backup armed: ${remaining}ms, $grandTotal pending")
+            Logger.i(TAG, "delayed first backup: $grandTotal pending")
         }
     }
 
     /**
-     * The countdown has run out. The work is already queued, so this only clears the due time and
-     * starts watching — enqueueing again here would replace a chain that may already be uploading.
+     * The countdown has run out. Normally the work is already queued, so this clears the due time
+     * and starts watching — enqueueing again would replace a chain that may already be uploading.
+     *
+     * The exception is a chain that never got armed. A due time and a queued run are written by two
+     * different systems, and only one of them survives the activity going away mid-arm, so this asks
+     * WorkManager rather than assuming. Without the check, a lost arm shows as a card watching an
+     * upload that will never begin — which is exactly how the 5 Sept defect presented.
      */
     fun onDelayElapsed() {
         viewModelScope.launch {
             settings.setFirstBackupStartAt(null)
+
+            if (!BackupScheduling.manualRunLive(workManager)) {
+                Logger.w(TAG, "delay elapsed with no chain queued; starting the run now")
+                val prefs = settings.current()
+                BackupScheduling.enqueueManualRun(
+                    workManager,
+                    prefs.allowMeteredNetwork,
+                    allAlbums = true
+                )
+            }
+
             observeBackupWorker()
         }
     }
