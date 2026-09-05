@@ -8,6 +8,7 @@ import androidx.work.WorkerParameters
 import com.gallery.sync.data.local.media.ProxyApplier
 import com.gallery.sync.data.local.media.VideoOptimiser
 import com.gallery.sync.data.local.settings.BackupSettings
+import com.gallery.sync.domain.backup.WizardBulkOptimise
 import com.gallery.sync.util.Logger
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -62,18 +63,62 @@ class OptimiseWorker @AssistedInject constructor(
 
         // More to do than one batch could hold. Re-enqueued rather than looped, so each run stays
         // inside WorkManager's execution window instead of being killed part way through a file.
+        //
+        // Enqueued directly, not through `enqueueOptimiseIfAbsent`: this phase is `RUNNING` right
+        // now and carries the tag that check looks for, so asking would refuse its own continuation.
         if (remaining > 0) {
             Logger.i(TAG, "$phase: $remaining left, queueing another batch")
             BackupScheduling.enqueueOptimise(WorkManager.getInstance(applicationContext), phase)
+            return Result.success()
+        }
+
+        // The photo pass has drained, so the video pass follows it here rather than on the wizard
+        // card — same reason the upload hands off to us at all. A first run left alone overnight
+        // used to do the upload and stop; both halves now carry themselves.
+        if (phase == BackupScheduling.PHASE_PHOTOS) {
+            handOffToVideo()
         }
 
         return Result.success()
+    }
+
+    private suspend fun handOffToVideo() {
+        val preferences = settings.current()
+        if (!WizardBulkOptimise.shouldContinueToVideo(
+                setupComplete = preferences.hasCompletedSetup,
+                choice = preferences.libraryChoice
+            )
+        ) return
+
+        if (videoOptimiser.wizardCandidates().isEmpty()) {
+            Logger.d(TAG, "photos done; no video eligible")
+            return
+        }
+
+        val started = BackupScheduling.enqueueOptimiseIfAbsent(
+            WorkManager.getInstance(applicationContext),
+            BackupScheduling.PHASE_VIDEO
+        )
+        Logger.i(
+            TAG,
+            if (started) "photos done; video pass queued"
+            else "photos done; video pass already queued"
+        )
     }
 
     private suspend fun runPhotos(): Int {
         val candidates = proxyApplier.candidatesAll()
         if (candidates.isEmpty()) {
             Logger.d(TAG, "photos: nothing eligible")
+            return 0
+        }
+
+        if (proxyApplier.needsWriteRequest(candidates)) {
+            Logger.i(
+                TAG,
+                "photos: ${candidates.size} sit outside the granted trees and need a tap; " +
+                    "left for the wizard"
+            )
             return 0
         }
 
@@ -87,6 +132,15 @@ class OptimiseWorker @AssistedInject constructor(
         val candidates = videoOptimiser.wizardCandidates()
         if (candidates.isEmpty()) {
             Logger.d(TAG, "video: nothing eligible")
+            return 0
+        }
+
+        if (proxyApplier.needsWriteRequest(candidates)) {
+            Logger.i(
+                TAG,
+                "video: ${candidates.size} sit outside the granted trees and need a tap; " +
+                    "left for the wizard"
+            )
             return 0
         }
 

@@ -11,6 +11,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.flow.first
 
 /**
  * Schedules automatic backup.
@@ -206,6 +207,7 @@ object BackupScheduling {
                     .setRequiresStorageNotLow(true)
                     .build()
             )
+            .addTag(optimiseTag(phase))
             .setInputData(Data.Builder().putString(KEY_OPTIMISE_PHASE, phase).build())
             .build()
 
@@ -214,6 +216,39 @@ object BackupScheduling {
             ExistingWorkPolicy.APPEND_OR_REPLACE,
             request
         )
+    }
+
+    /**
+     * Identifies a queued pass by which phase it is, since both share [OPTIMISE_WORK].
+     *
+     * The unique name alone cannot answer "is a photo pass already pending", because
+     * `APPEND_OR_REPLACE` deliberately lets the video pass queue behind the photo one.
+     */
+    fun optimiseTag(phase: String) = "$OPTIMISE_WORK-$phase"
+
+    /**
+     * Starts a phase unless one is already queued or running.
+     *
+     * Two things now start the optimise passes — the worker chain when an unattended first backup
+     * drains, and the wizard card when someone is watching — and both are correct. Without this
+     * check, opening the app during an optimise the worker already began would append a second pass
+     * of the same phase: harmless in outcome, since the second finds the files already proxied, but
+     * it doubles the video transcodes and makes the progress the card reads meaningless.
+     *
+     * Deliberately not used by [OptimiseWorker]'s own continuation: that runs while its phase is
+     * still `RUNNING` and carries the same tag, so it must append rather than ask.
+     *
+     * @return true when a pass was enqueued, false when one was already live.
+     */
+    suspend fun enqueueOptimiseIfAbsent(workManager: WorkManager, phase: String): Boolean {
+        val alreadyLive = workManager.getWorkInfosForUniqueWorkFlow(OPTIMISE_WORK)
+            .first()
+            .any { !it.state.isFinished && optimiseTag(phase) in it.tags }
+
+        if (alreadyLive) return false
+
+        enqueueOptimise(workManager, phase)
+        return true
     }
 
     /** Stops the optimise chain. Files already proxied stay proxied; nothing is undone. */

@@ -389,8 +389,20 @@ class ReconcileViewModel @Inject constructor(
         _state.value = _state.value.copy(
             optimiseRunning = true
         )
-        BackupScheduling.enqueueOptimise(workManager, BackupScheduling.PHASE_PHOTOS)
-        Logger.i(TAG, "photo optimise handed to the worker")
+        // Asks rather than appends: the upload chain now starts this pass by itself when a first
+        // backup drains with nobody watching, so opening the app mid-optimise would otherwise queue
+        // a second photo pass behind the one already running.
+        viewModelScope.launch {
+            val started = BackupScheduling.enqueueOptimiseIfAbsent(
+                workManager,
+                BackupScheduling.PHASE_PHOTOS
+            )
+            Logger.i(
+                TAG,
+                if (started) "photo optimise handed to the worker"
+                else "photo optimise already under way"
+            )
+        }
         observeOptimise()
     }
 
@@ -421,8 +433,18 @@ class ReconcileViewModel @Inject constructor(
         _state.value = _state.value.copy(
             videoOptimiseRunning = true
         )
-        BackupScheduling.enqueueOptimise(workManager, BackupScheduling.PHASE_VIDEO)
-        Logger.i(TAG, "video optimise handed to the worker")
+        // Same reasoning as the photo pass: the worker chain may have queued this already.
+        viewModelScope.launch {
+            val started = BackupScheduling.enqueueOptimiseIfAbsent(
+                workManager,
+                BackupScheduling.PHASE_VIDEO
+            )
+            Logger.i(
+                TAG,
+                if (started) "video optimise handed to the worker"
+                else "video optimise already under way"
+            )
+        }
         observeOptimise()
     }
 

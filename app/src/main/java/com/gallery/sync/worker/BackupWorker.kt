@@ -11,6 +11,7 @@ import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.domain.backup.BackupEngine
 import com.gallery.sync.domain.backup.FirstBackupWindow
 import com.gallery.sync.domain.backup.StopReason
+import com.gallery.sync.domain.backup.WizardBulkOptimise
 import java.time.LocalTime
 import com.gallery.sync.util.ChargingState
 import com.gallery.sync.util.Logger
@@ -152,6 +153,33 @@ class BackupWorker @AssistedInject constructor(
                 manual = manual,
                 allAlbums = allAlbums
             )
+        }
+
+        // Nothing left to upload. During the guided first run, that is the moment the bulk optimise
+        // the user chose has to begin — and it has to begin here rather than on the wizard card,
+        // which only runs while somebody is looking at it. Moto G, 5 Sept 2026: a delayed start
+        // uploaded 230 files by 02:55 and optimised nothing until the phone was woken at 12:04.
+        //
+        // Read fresh rather than reusing `preferences`: a run can outlast the screen, and setup
+        // finishing mid-run must not be answered with a bulk pass nobody is expecting any more.
+        if (result.isComplete) {
+            val now = settings.current()
+            if (WizardBulkOptimise.shouldHandOff(
+                    setupComplete = now.hasCompletedSetup,
+                    allAlbums = allAlbums,
+                    choice = now.libraryChoice
+                )
+            ) {
+                val started = BackupScheduling.enqueueOptimiseIfAbsent(
+                    WorkManager.getInstance(applicationContext),
+                    BackupScheduling.PHASE_PHOTOS
+                )
+                Logger.i(
+                    TAG,
+                    if (started) "upload drained; photo optimise handed to the worker"
+                    else "upload drained; photo optimise already queued"
+                )
+            }
         }
 
         // Carried out of the worker so the screen can say what happened. Without this the UI keeps
