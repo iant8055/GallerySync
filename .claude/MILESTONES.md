@@ -3652,3 +3652,104 @@ the copy must not promise a time it cannot keep.
   `-shm`.
 - **`getWorkInfosForUniqueWorkFlow` needs a tag to be useful** when one unique name carries two phases,
   which is why the phase tag was added rather than inferring from input data.
+
+---
+
+### 5 Sept 2026 — no card to swipe, and the wizard that could not finish
+
+Built the Recents-card exclusion that was the morning's first job, verified it against the three
+questions asked of it, and in doing so found a defect the handoff had introduced earlier the same
+day. All measured on the Moto G.
+
+#### What was built
+
+[RecentsCard] takes the app's card out of Recents while the first backup runs — the runtime
+`ActivityManager.AppTask.setExcludeFromRecents`, not the manifest attribute, because this is a state
+with a beginning and an end. **No card means no swipe target**, which is the only route found that
+closes the unsolved case from 4 Sept: a swipe kills the process and Android then withholds the app's
+jobs until someone opens it, and a delayed start armed before a swipe never fires at all.
+
+One derived condition drives it — `step == TOTAL_STEPS && !backupComplete` — rather than calls
+sprinkled through the paths that start and stop work, because the failure that matters is a flag left
+set. `MainActivity` restores the card on every launch as the net beneath that.
+
+#### The three checks, answered
+
+- **Does excluding trip the kill path?** No. The process survived two Closes and a 230-file run with
+  the card gone; the only `remove task` kill in the window belonged to OneDrive.
+- **Does the flag clear on every exit?** Yes. Restored at the Finish state, and restored on every
+  launch regardless.
+- **Does the exclusion outlive the process?** **Yes** — and this is the one worth knowing. After
+  `am crash`, task #128 still carried `FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS` (`flg=0x10a00000`) with no
+  process alive, and Ian confirmed Recents was empty. So the launch-time restore is not
+  belt-and-braces, it is the only thing that recovers a crash mid-setup.
+
+Two smaller findings. The task id churns on every relaunch — #126, #127, #128, #129, #134 — because
+the launcher will not resume a task it cannot see, so `RecentsCard` applies the flag to every task the
+app owns rather than the current one. And an earlier reading that a finished activity leaves no card
+was **wrong**: it was an artifact of `install -r` rebuilding the task. A normal launch and Close leaves
+a card, so the 4 Sept complaint stands and this work was needed.
+
+#### The defect this surfaced: the wizard could not reach Finish
+
+With every file uploaded and every candidate optimised, the card sat on **"Optimising photos"** with a
+`…` ring and no Finish button. The ledger said 0 photo candidates and 0 video candidates; every
+optimise pass had `SUCCEEDED`; nothing was queued. **The app was gated shut with no work left to do**,
+which is worse than the problem the handoff fixed.
+
+Two causes, both created by moving the handoff into the workers earlier the same day:
+
+- `observeOptimise()` opened with `if (!videoOptimiseRunning && !optimiseRunning) return`. Those flags
+  are set only by `applyWizardProxies()` — the card starting a pass itself. Once the **worker** started
+  the passes, they were false, the observer returned on its first line, and nothing ever cleared the
+  count. It now reads the ledger to decide which phase is live, and terminates when neither is.
+- `buildWizardProxyRequest()` returned null on an empty candidate list without marking the phase
+  finished. Its video twin had always done so. That asymmetry was harmless while the card was the only
+  thing that could drain the list, and fatal once the worker could.
+
+Resuming at step 9 now starts the observer too, which also fixes the frozen "10 of 128" seen earlier
+while the worker was demonstrably transcoding.
+
+**Verified in one launch:** `recents card restored` → `hidden` → `optimising finished: nothing eligible
+remains` → `restored`, task flags back to `0x10000000`, and the card reading **100% · Finish**.
+
+**The lesson generalises beyond this screen.** Moving work into a worker is only half the change: the
+screen that used to own it must be rewritten to *follow* work it did not start. The 4 Sept move of
+optimising into `OptimiseWorker` needed the same thing and got it; this one did not, and the gap
+appeared as an app that could never be opened.
+
+#### A finding about standby buckets, which is not a defect but shapes the product
+
+A wiped install's first delayed run **did not fire for twelve minutes**. Not Doze — the device was
+awake, charging and on Wi-Fi, every constraint satisfied and `Ready: true`. The job record said:
+
+```
+Standby bucket: RARE
+Time since first force batch attempt: -9m42s
+Run time: earliest=-10m8s, latest=none
+```
+
+`pm clear` erases usage history, so the app fell into the **RARE** bucket and JobScheduler
+**force-batched** its ready work. Opening the app dispatched it in **one second**
+(`backup run starting (manual)` at 14:45:23, one second after `recents card restored`), and the job
+record then read `Standby bucket: ACTIVE`. A clean causal result.
+
+**Why this matters beyond the test rig:** GallerySync is designed to be set up and never opened, which
+is exactly how an app earns the RARE bucket. CLAUDE.md says ongoing sync is "uncapped JobScheduler
+work", and that remains true — but **uncapped is not unbatched**. A phone whose owner never opens the
+app will have its sync work bundled and delayed by the system. That deserves measuring on its own
+rather than being filed as an artifact of the wipe.
+
+#### Method notes
+
+- **`pm clear` is the right reset for this project's test protocol**, and the earlier advice against it
+  was wrong. It clears the ledger, the DataStore, the WorkManager database, MSAL's token cache, the
+  runtime permissions **and the persisted SAF tree grant** (verified: `persisted grants = 0`), giving a
+  genuine first-install run. The objection to it — that a wiped ledger re-uploads everything — does not
+  apply, because Ian deletes the OneDrive copies between runs anyway.
+- **Ian resets both sides between runs**: local files restored to full size, cloud copies deleted. So a
+  ledger row count that jumps between runs is the protocol, not an anomaly to chase, and files proxied
+  in an earlier run return as candidates.
+- **`am crash <pkg>` is the way to simulate a crash**; `kill -9` is refused and `am kill` declines a
+  process running a job. Unlike a force-stop it leaves job dispatch intact, which is what makes it the
+  right instrument for "what does a crash leave behind".

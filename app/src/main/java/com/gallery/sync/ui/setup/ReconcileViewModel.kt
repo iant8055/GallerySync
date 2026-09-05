@@ -368,7 +368,16 @@ class ReconcileViewModel @Inject constructor(
      */
     suspend fun buildWizardProxyRequest(): android.content.IntentSender? {
         pendingProxyCandidates = proxyApplier.candidatesAll()
-        if (pendingProxyCandidates.isEmpty()) return null
+        if (pendingProxyCandidates.isEmpty()) {
+            // Marked finished, not silently skipped. The video twin below always did this; the
+            // photo half did not, and it did not matter while the card was the only thing that
+            // started a pass. Once the worker could drain the candidates on its own, an empty list
+            // here meant the card kept a stale count, showed "Optimising photos" with a "…" ring,
+            // and never offered Finish — the user shut out of the app with no work left to do.
+            // Moto G, 5 Sept 2026.
+            _state.value = _state.value.copy(optimiseFinished = true)
+            return null
+        }
 
         if (!proxyApplier.needsWriteRequest(pendingProxyCandidates)) {
             Logger.i(TAG, "optimising ${pendingProxyCandidates.size} files through the tree grant")
@@ -460,35 +469,38 @@ class ReconcileViewModel @Inject constructor(
         optimiseObserverJob?.cancel()
         optimiseObserverJob = viewModelScope.launch {
             while (true) {
-                val current = _state.value
-                val video = current.videoOptimiseRunning
-                if (!video && !current.optimiseRunning) return@launch
-
-                val remaining =
-                    if (video) videoOptimiser.wizardCandidates().size
-                    else proxyApplier.candidatesAll().size
-                val done = entryDao.countProxied(video = video)
+                // Which phase is live is read from the ledger, not from flags this class sets.
+                //
+                // This used to open with `if (!videoOptimiseRunning && !optimiseRunning) return`,
+                // which only ever followed a pass the card had started itself. The worker chain now
+                // starts both passes when an unattended first backup drains, so those flags are
+                // false, the observer returned on its first line, and the wizard sat on "Optimising
+                // photos" with every candidate already done.
+                val photoRemaining = proxyApplier.candidatesAll().size
+                val videoRemaining = videoOptimiser.wizardCandidates().size
+                val onVideo = photoRemaining == 0
+                val remaining = if (onVideo) videoRemaining else photoRemaining
+                val done = entryDao.countProxied(video = onVideo)
 
                 _state.value = _state.value.copy(
+                    optimiseCandidateCount = photoRemaining,
+                    videoCandidateCount = videoRemaining,
+                    optimiseRunning = photoRemaining > 0,
+                    videoOptimiseRunning = onVideo && videoRemaining > 0,
                     optimiseProgressDone = done,
                     optimiseProgressTotal = done + remaining
                 )
 
-                if (remaining == 0) {
-                    _state.value = if (video) {
-                        _state.value.copy(
-                            videoOptimiseRunning = false,
-                            videoOptimiseFinished = true,
-                            videoOptimisedCount = done
-                        )
-                    } else {
-                        _state.value.copy(
-                            optimiseRunning = false,
-                            optimiseFinished = true,
-                            optimisedCount = done
-                        )
-                    }
-                    Logger.i(TAG, "${if (video) "video" else "photo"} optimise finished: $done")
+                if (photoRemaining == 0 && videoRemaining == 0) {
+                    _state.value = _state.value.copy(
+                        optimiseRunning = false,
+                        optimiseFinished = true,
+                        optimisedCount = entryDao.countProxied(video = false),
+                        videoOptimiseRunning = false,
+                        videoOptimiseFinished = true,
+                        videoOptimisedCount = entryDao.countProxied(video = true)
+                    )
+                    Logger.i(TAG, "optimising finished: nothing eligible remains")
                     return@launch
                 }
 
@@ -739,6 +751,13 @@ class ReconcileViewModel @Inject constructor(
                         optimiseCandidateCount = photoCandidates.size,
                         videoCandidateCount = videoCount
                     )
+
+                    // Hand over to the optimise observer rather than stopping here. Reopening the
+                    // wizard mid-pass used to leave the count frozen — "10 of 128" for minutes on
+                    // end while the worker was demonstrably transcoding — because nothing was
+                    // watching a pass this screen had not started. It self-terminates when nothing
+                    // is eligible, so calling it when there is no work to do costs one poll.
+                    if (shouldOptimise) observeOptimise()
 
                     return@launch
                 }
