@@ -3168,6 +3168,11 @@ silent.
 minimising looks like — `finishAndRemoveTask()` now. The process is deliberately left alive: the upload
 runs inside it.
 
+> **WITHDRAWN the same evening, 4 Sept 2026.** The last sentence is false and was never checked.
+> `finishAndRemoveTask()` **kills the process** — `Killing <pid> (setSvc -10000): remove task` — which
+> stopped the upload and left the app force-stopped so its queued work was never dispatched. Reverted
+> to `finish()`. See the evening entry at the end of this file.
+
 **The open one: the optimise passes die with the wizard.** Uploading survives Close because it is a
 WorkManager chain; `applyWizardProxies` and `applyWizardVideoOptimise` run in `viewModelScope`, which is
 cleared with the activity. Closing during the video pass left three clips transcoded and two untouched,
@@ -3412,3 +3417,102 @@ uploaded.
   starts light. Deferred to the visual refresh, which touches that file anyway. See TASK-012.
 - **Six photos in `AaSync` carry the pre-fix sideways badge.** Harmless and marked as proxies. Delete
   locally and re-fetch to tidy.
+
+---
+
+### 4 Sept 2026 (evening) — Close was killing every backup, and a foreground service did not fix it
+
+Five hours of debugging that began with a delayed backup that never fired, and ended with a one-line
+revert, a rejected architecture and a hardware note that should have been written a week ago. Nearly
+all of it was measured on the Moto G; almost none of it was visible in code.
+
+**The regression: `finishAndRemoveTask()`.** Introduced at 14:17 in `3585125` to fix a real complaint
+— Close left a live-looking card in Recents, so it read as minimising. Removing the task fixes that
+and **kills the process**, which was asserted otherwise in both the commit and this file without
+anyone checking. From 14:17 until the revert, pressing Close silently stopped the backup.
+
+Worse than stopping it: Android then treats the app as force-stopped, so its **queued work is never
+dispatched**. WorkManager says so itself on the next launch — `Application was force-stopped,
+rescheduling` — which is why the wizard's delayed start, built in that same commit with the explicit
+promise that "it fires with the app closed", could never have worked. The delay was armed correctly
+every time; nothing was there to run it.
+
+**Why it was not caught.** The 3 Sept entry above verified the right thing the wrong way: *"Reopening
+lands on step 9 re-attached to that chain — watched working after a Recents swipe killed the
+process."* Reopening is exactly the action that clears the force-stopped state, so the test cannot
+distinguish "the chain kept going" from "opening the app restarted it". Both hypotheses predict the
+same observation. The delayed start is the first feature that depends on the app *not* being
+reopened, which is why the flaw surfaced four hours after it shipped.
+
+**Reverted to `finish()`, and measured properly.** Five minutes, app closed, nothing touched:
+
+| Gesture | Process | Uploads in 5 min |
+|---|---|---|
+| **Close** (`finish()`) | alive | **151 files**, continuous |
+| **Swipe out of Recents** | killed, never restarted | **0** |
+
+Close is safe. The card returns to Recents and that is the lesser problem: it is untidy, and the
+alternative silently stops backups. Home is also safe — tested with `KEYCODE_HOME`, process alive ten
+seconds later, no kill line.
+
+**A swipe is not the same as Close, and never was.** Both log `: remove task`, but the swipe is the
+system removing the task and no app-side change affects it. After a swipe the process is gone, the
+manual chain is gone from JobScheduler, and only the content trigger and the 6-hour periodic remain.
+Android logs `Scheduling restart of crashed service ... in 1000ms` and then, twice observed, never
+carries it out.
+
+**The foreground service: built, measured, removed the same evening.** Scoped to the wizard's first
+backup so ongoing sync kept using uncapped JobScheduler work. It started correctly — `isForeground=true`,
+`types=0x00000001`, `uidState: TOP`, no refusal — and a swipe taken while it was up did no harm: the
+upload ran to completion with the task gone. Then:
+
+- **It covers one batch.** Both workers re-enqueue continuations, and those start in the background:
+  `ForegroundServiceStartNotAllowedException ... mAllowStartForeground false`, 21:19:42. `fgs=0` at
+  every subsequent sample.
+- **A swipe with the service down is fatal, as before.** Predicted aloud, then confirmed at 21:56:58
+  — `Killing 20310 (setSvc -10000): remove task`, optimising frozen mid-pass, nothing restarted in
+  the three minutes after.
+- **Android 15 caps `dataSync` at six hours per twenty-four.** Ian: *"This app needs to be running
+  24/7 - not 6 hours out of 24."* It can never be the answer for ongoing sync.
+
+Removed entirely at Ian's instruction, with a hard rule added to CLAUDE.md so it is not proposed
+again. The unsolved case stays unsolved and is now written down rather than assumed away: **a delayed
+start armed before a swipe never fires.** A foreground service cannot fix that one either — a pending
+delay has no run in flight to hold up. Routes worth investigating: `setExpedited` on the continuations
+(quota-limited), or a battery-optimisation exemption.
+
+**Also shipped tonight**
+
+- **A 3-minute delay choice.** The card counted in whole hours, so the shortest delay it could offer
+  was 60 minutes and the feature could not be watched. Minutes end to end now; chips read `3m` through
+  `24h` and wrap at four per row, because seven do not fit one row at any padding. Verified arming to
+  the millisecond: `first_backup_delay_millis = 180000`.
+- **Folders no longer arrive pre-ticked.** The card pre-checked DCIM and Pictures always, plus
+  anything with 50+ files — which on this phone is 17.3 GB across 36 albums, queued on a default
+  nobody chose. Every folder starts off; `canAdvance()` already blocked the step until one is checked,
+  so this asks for a choice rather than silently backing up nothing.
+- **The Fold 4 is gone.** Shipped out 30 Aug 2026, five days before I proposed testing on it, because
+  the hardware table still listed it as a live rig. Corrected there. Two capabilities went with it and
+  neither has a replacement: the **development-only OneDrive account**, so every upload test now costs
+  Ian real cleanup, and the **344dp cover screen**, the only hardware that could prove the compact
+  layout.
+
+**Open, and deliberately not chased tonight**
+
+- **A clean reinstall re-uploads everything.** After a wipe the ledger has no record of which files
+  were proxied, so `refreshLedger` cannot skip them; 230 DCIM files already in OneDrive were queued
+  and re-sent. `conflictBehavior` is `rename`, so nothing is overwritten and no original is at risk —
+  but reinstalling is not a free test reset, and a user who clears app data pays the same cost.
+- **A Graph request that wedged.** After one task-removal kill the restarted worker issued a single
+  `listFolderByPath` GET that never returned and never timed out, against a 30-second read timeout.
+  Seen once. Unexplained.
+
+**Method notes, both earned the hard way**
+
+- **Every reading tonight was contaminated until the reopening was removed.** Both of us kept opening
+  the app within two minutes to see whether it was working, which is the one action that restarts it.
+  The five-minute untouched samples are the only clean data here.
+- **Check the instrument before reporting the finding.** A duplicate-file alarm rested on a regex that
+  matched the `(12345 bytes)` at the end of every log line, and then on reading a local filename —
+  `..._1 (1).mp4`, which is what the file is actually called on disk — as a server-side rename. Both
+  wrong, both stated confidently, and Ian caught both.

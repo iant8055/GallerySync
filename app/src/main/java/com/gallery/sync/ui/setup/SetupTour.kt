@@ -117,12 +117,26 @@ private const val TOTAL_STEPS = 9
 private val QualityButtonPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp)
 
 /**
- * Content padding for the six delay chips.
+ * Content padding for the delay chips.
  *
- * Zero a side, because six of them share the card's width and the content is one or two digits.
- * Material's default would spend 288dp on padding alone across the row.
+ * Zero a side, because four of them share the card's width and the content is two or three
+ * characters. Material's default would spend 192dp on padding alone across the row.
  */
 private val DelayChipPadding = PaddingValues(horizontal = 0.dp, vertical = 8.dp)
+
+/** The delay card counts in minutes; chips at or above this read in hours. */
+private const val MINUTES_PER_HOUR = 60
+
+/**
+ * The delays the card offers, in minutes.
+ *
+ * Three minutes is short enough to sit and watch one start, which is the only way to see the
+ * handover to WorkManager actually happen.
+ */
+private val DelayChoiceMinutes = listOf(3, 60, 120, 240, 480, 720, 1440)
+
+/** Chips per row. Seven no longer fit one row, and four keep every chip the same width. */
+private const val DelayChipsPerRow = 4
 
 /**
  * Guided setup as tooltip-style bubbles overlaying the Albums tab.
@@ -374,16 +388,33 @@ fun SetupTour(
                     viewModel.completeSetup()
                     onComplete()
                 } else {
-                    // `finishAndRemoveTask`, not `finish`. Ian, 4 Sept 2026: Close "doesn't
-                    // actually close the app — it just minimizes it". Checked on the Moto G and he
-                    // is right in the way that matters: `finish()` did destroy the activity, but
-                    // the task stayed in Recents as a live-looking card, which is what minimising
-                    // looks like. Removing the task is what the word Close promises.
+                    // `finish`, not `finishAndRemoveTask`. Reverted 4 Sept 2026, same evening it
+                    // was introduced.
                     //
-                    // The process is deliberately left alone. The upload runs inside it, so killing
-                    // it here would stop the very thing Close exists to leave running — the whole
-                    // point of this button is that the user departs and the backup does not.
-                    activity?.finishAndRemoveTask()
+                    // `finishAndRemoveTask()` was right about the complaint — Ian: Close "doesn't
+                    // actually close the app — it just minimizes it", because `finish()` destroys
+                    // the activity but leaves the task in Recents as a live-looking card. It was
+                    // wrong about the cost, and the comment that stood here asserted the opposite
+                    // of what the device does: "the process is deliberately left alone".
+                    //
+                    // It is not. Measured on the Moto G, 4 Sept 2026: removing the task logs
+                    // `Killing <pid> (setSvc -10000): remove task` — no service holds the process
+                    // up, so it dies mid-upload. Android then treats the app as force-stopped,
+                    // which WorkManager reports on the next launch as "Application was
+                    // force-stopped, rescheduling", and the queued job is never dispatched. A
+                    // delayed backup armed before Close could only ever run once someone reopened
+                    // the app. Five hours of that shipped before it was noticed.
+                    //
+                    // So the card in Recents comes back, and with it the complaint. The card is the
+                    // lesser problem: it is untidy, and the alternative silently stops backups.
+                    //
+                    // Untested and the reason this is a revert rather than a fix: whether removing
+                    // the task by hand kills a process whose activity has already finished. A task
+                    // with no live activity may have nothing to kill, in which case a swipe is
+                    // survivable and this is the whole answer. The 19:18 measurement that looked
+                    // like evidence was Home-then-swipe, with the activity still alive, which does
+                    // not speak to this case at all.
+                    activity?.finish()
                 }
             }
             // Choosing to do it manually skips the backup step entirely and opens the app.
@@ -1438,7 +1469,16 @@ private fun BackupDelayContent(
     val totalSaving = photoSaving + videoSaving
 
     var startNow by rememberSaveable { mutableStateOf(true) }
-    var delayHours by rememberSaveable { mutableIntStateOf(1) }
+    var delayMinutes by rememberSaveable { mutableIntStateOf(MINUTES_PER_HOUR) }
+
+    // Reads "Start in 3 minutes" below the hour and "Start in 2 hours" at or above it, so the
+    // shortest choice does not have to be spelled as a fraction of an hour.
+    val delayLabel = if (delayMinutes < MINUTES_PER_HOUR) {
+        pluralStringResource(R.plurals.tour_delay_later_minutes, delayMinutes, delayMinutes)
+    } else {
+        val hours = delayMinutes / MINUTES_PER_HOUR
+        pluralStringResource(R.plurals.tour_delay_later, hours, hours)
+    }
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
@@ -1508,22 +1548,14 @@ private fun BackupDelayContent(
                 onClick = {},
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    pluralStringResource(
-                        R.plurals.tour_delay_later, delayHours, delayHours
-                    )
-                )
+                Text(delayLabel)
             }
         } else {
             OutlinedButton(
-                onClick = { startNow = false; onDelaySelected(delayHours) },
+                onClick = { startNow = false; onDelaySelected(delayMinutes) },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text(
-                    pluralStringResource(
-                        R.plurals.tour_delay_later, delayHours, delayHours
-                    )
-                )
+                Text(delayLabel)
             }
         }
 
@@ -1532,55 +1564,38 @@ private fun BackupDelayContent(
             enter = expandVertically(),
             exit = shrinkVertically()
         ) {
-            // Six chips need the whole width, so the label sits above them rather than beside.
+            // The chips need the whole width, so the label sits above them rather than beside.
             //
             // Sharing one row with "Delay" left each chip about 55dp against the 48dp that
             // `ButtonDefaults.ContentPadding` spends on horizontal padding alone. Seen on the Moto G,
             // 4 Sept 2026: "12" and "24" broke across two lines mid-number and the last chip was
             // clipped by the edge of the card. Same failure as the video-quality buttons, one row
             // further down the wizard.
+            //
+            // Adding the three-minute choice made seven, which will not fit one row at any padding,
+            // so they wrap at four and the short row is padded to keep every chip one width.
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
                     stringResource(R.string.tour_delay_hours_label),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    listOf(1, 2, 4, 8, 12, 24).forEach { hours ->
-                        val isSelected = delayHours == hours
-                        if (isSelected) {
-                            Button(
-                                onClick = {},
-                                modifier = Modifier.weight(1f),
-                                shape = MaterialTheme.shapes.medium,
-                                contentPadding = DelayChipPadding
-                            ) {
-                                Text(
-                                    text = "$hours",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    maxLines = 1,
-                                    softWrap = false
-                                )
-                            }
-                        } else {
-                            OutlinedButton(
-                                onClick = { delayHours = hours; onDelaySelected(hours) },
-                                modifier = Modifier.weight(1f),
-                                shape = MaterialTheme.shapes.medium,
-                                contentPadding = DelayChipPadding
-                            ) {
-                                Text(
-                                    text = "$hours",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    maxLines = 1,
-                                    softWrap = false
-                                )
-                            }
+                DelayChoiceMinutes.chunked(DelayChipsPerRow).forEach { rowMinutes ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        rowMinutes.forEach { minutes ->
+                            DelayChip(
+                                minutes = minutes,
+                                isSelected = delayMinutes == minutes,
+                                onClick = { delayMinutes = minutes; onDelaySelected(minutes) },
+                                modifier = Modifier.weight(1f)
+                            )
+                        }
+                        repeat(DelayChipsPerRow - rowMinutes.size) {
+                            Spacer(Modifier.weight(1f))
                         }
                     }
                 }
@@ -1594,6 +1609,56 @@ private fun BackupDelayContent(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface
         )
+    }
+}
+
+/**
+ * One delay choice.
+ *
+ * Carries its own unit, because the row mixes minutes and hours and a bare "3" beside a bare "24"
+ * would read as three hours.
+ */
+@Composable
+private fun DelayChip(
+    minutes: Int,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val label = if (minutes < MINUTES_PER_HOUR) {
+        stringResource(R.string.tour_delay_chip_minutes, minutes)
+    } else {
+        stringResource(R.string.tour_delay_chip_hours, minutes / MINUTES_PER_HOUR)
+    }
+    if (isSelected) {
+        Button(
+            onClick = {},
+            modifier = modifier,
+            shape = MaterialTheme.shapes.medium,
+            contentPadding = DelayChipPadding
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                softWrap = false
+            )
+        }
+    } else {
+        OutlinedButton(
+            onClick = onClick,
+            modifier = modifier,
+            shape = MaterialTheme.shapes.medium,
+            contentPadding = DelayChipPadding
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge,
+                maxLines = 1,
+                softWrap = false
+            )
+        }
     }
 }
 

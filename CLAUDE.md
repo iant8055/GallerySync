@@ -162,6 +162,41 @@ text at all. That is a shipped-to-users bug, not a cosmetic one.
   `adb shell "cmd uimode night yes"` and `… night no`. Compiling proves nothing here.
 - The same applies to anything drawn rather than composed — icons, custom canvas, overlays.
 
+### Do not add a foreground service
+Tried and removed the same evening, 4 Sept 2026. **Do not propose it again without new evidence that
+defeats the measurement below.** It is an obvious-looking answer to "the backup stops when the user
+leaves", which is exactly why it needs to be closed off in writing.
+
+What was built: `FOREGROUND_SERVICE` + `FOREGROUND_SERVICE_DATA_SYNC`, a `dataSync` type on
+WorkManager's `SystemForegroundService`, and `setForeground()` from `BackupWorker` and
+`OptimiseWorker`, scoped to the wizard's first backup.
+
+Why it was removed — measured on the Moto G, not reasoned:
+
+- **It covers one batch.** The first run gets it, because the app is visible and `uidState: TOP`
+  makes the start legal. Both workers then re-enqueue a continuation, and those start in the
+  background, where Android refuses:
+  `ForegroundServiceStartNotAllowedException: ... due to mAllowStartForeground false`, logged
+  21:19:42. A first backup is dozens of batches, so it is unprotected for nearly all of it.
+- **A swipe with the service down kills the run exactly as before.** Predicted, then confirmed at
+  21:56:58: `Killing 20310 (setSvc -10000): remove task`, process gone, optimising frozen mid-pass,
+  no restart in the three minutes after.
+- **The cost is real.** Two manifest permissions and a Play Console foreground-service declaration
+  on a first submission, in exchange for a few percent of the window.
+- **Android 15 caps `dataSync` at six hours per twenty-four**, so it can never be the answer for
+  continuous sync. Ian: *"This app needs to be running 24/7 - not 6 hours out of 24."*
+
+**What actually works is `finish()`** — see the Close handler in `SetupTour`. It keeps the process,
+and the WorkManager chain carries on: 151 files in five minutes with the app closed, twice measured.
+Ongoing sync needs no service at all; the content trigger and the periodic net are uncapped
+JobScheduler work.
+
+The unsolved case is a **swipe out of Recents**, which kills the process and stops the app's jobs
+being dispatched until it is next opened — a delayed start armed before a swipe never fires. A
+foreground service does not fix that either, because a pending delay has no run in flight to hold up.
+If that case must be solved, the routes worth investigating are `setExpedited` on the continuations
+(quota-limited) or a battery-optimisation exemption — not this.
+
 ### Other hard rules
 - All file operations on device are cache management, never source-of-truth writes
 - Never store OAuth tokens in SharedPreferences — use EncryptedSharedPreferences
@@ -183,9 +218,20 @@ confident, wrong report that Ian's library was at risk and cost about an hour.
 
 | Device | Serial | What it is |
 |---|---|---|
-| Galaxy Z Fold 4 | `RFCT71H7RSW` | Samsung rig on a **development-only** OneDrive account; contents disposable. Cover screen is **344dp**, the narrowest surface this app runs on, and the only place the compact layout can be proven. Wireless debugging drops whenever it sleeps or folds — USB is steadier. |
+| ~~Galaxy Z Fold 4~~ | ~~`RFCT71H7RSW`~~ | **GONE — shipped out 30 Aug 2026, never available again.** Do not propose testing on it. Left in the table because its serial appears throughout MILESTONES and those observations are still valid; what is no longer valid is treating it as a rig. See below for what went with it. |
 | Moto G 2026 | `ZT422CTZQV` | Stock Android, **Google Photos rather than Samsung Gallery** — so it is where non-Samsung behaviour gets checked. Destination root `MotoG/Gallery`. |
 | Galaxy Z Fold 8 | — | **Ian's real phone.** Never experiment on it. |
+
+**Two capabilities left with the Fold 4, and neither has a replacement.**
+
+- **The disposable OneDrive account.** It was the only account whose contents did not matter. Every
+  test that uploads now runs against a real account on the Moto G, so anything that writes to the
+  cloud costs the user cleanup afterwards. Weigh that before proposing a test that backs up a large
+  folder to prove something — and say what it will cost before starting it.
+- **The 344dp cover screen.** It was the narrowest surface this app runs on and the only place the
+  compact layout could be proven on hardware. There is no device left that can. Compact-width work
+  is now verifiable only in a Compose preview or an emulator, which is weaker evidence, and any
+  claim that a layout works at 344dp must say which of those it rests on.
 
 Wireless debugging assigns a **new port every time it is toggled**, so a remembered address goes
 stale; rediscover with `adb mdns services`. An address in `100.64.0.0/10` means the phone is on

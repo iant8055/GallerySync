@@ -479,12 +479,15 @@ class ReconcileViewModel @Inject constructor(
     }
 
     /**
-     * Arms the wizard's delayed start, [hours] from now to the minute.
+     * Arms the wizard's delayed start, [minutes] from now to the minute.
      *
      * Deliberately not routed through `setFirstBackupStartHour`: that stores an hour of day, so a
      * delay chosen at 13:25 would land on 14:00 and be 35 minutes rather than the hour asked for.
+     *
+     * Counted in minutes rather than hours since 4 Sept 2026, so the card can offer a delay short
+     * enough to sit and watch. The chips still read in hours above the shortest one.
      */
-    fun setFirstBackupDelay(hours: Int) {
+    fun setFirstBackupDelay(minutes: Int) {
         viewModelScope.launch {
             // Never over the top of a run already moving bytes. Arming re-enqueues the manual chain
             // with REPLACE, so without this a delay chosen after the upload began would cancel it —
@@ -497,7 +500,7 @@ class ReconcileViewModel @Inject constructor(
                 Logger.w(TAG, "ignoring delay request: backup already under way")
                 return@launch
             }
-            val delayMillis = hours * 60L * 60L * 1000L
+            val delayMillis = minutes * 60L * 1000L
             settings.setFirstBackupStartAt(
                 epochMillis = System.currentTimeMillis() + delayMillis,
                 delayMillis = delayMillis
@@ -736,17 +739,23 @@ class ReconcileViewModel @Inject constructor(
         }
     }
 
-    /** Scans MediaStore for all media directories and pre-checks the obvious ones. */
+    /** Scans MediaStore for all media directories. Nothing is pre-checked. */
     fun discoverDirectories() {
         viewModelScope.launch {
             _state.value = _state.value.copy(discoveryRunning = true)
             val dirs = scanner.discoverDirectories()
 
-            // Pre-check heuristic: DCIM and Pictures always, plus anything with 50+ files
-            val defaultChecked = setOf("DCIM", "Pictures")
-            val checks = dirs.associate { dir ->
-                dir.name to (dir.name in defaultChecked || dir.totalFiles >= 50)
-            }
+            // Every folder starts off. Ian, 4 Sept 2026.
+            //
+            // The old heuristic ticked DCIM and Pictures always, plus anything with 50+ files. On
+            // the Moto G that is 17.3 GB across 36 albums — and almost all of it is Pictures, which
+            // holds 15 GB to DCIM's 2.3 GB — so the wizard queued the entire library on a default
+            // nobody chose. Which folders leave the phone is the user's decision, and a checkbox
+            // that arrives already ticked is not one they made.
+            //
+            // Safe to start empty because `canAdvance()` blocks step 4 until at least one folder is
+            // checked, so this asks for a choice rather than silently backing up nothing.
+            val checks = dirs.associate { dir -> dir.name to false }
 
             _state.value = _state.value.copy(
                 discoveredDirectories = dirs,

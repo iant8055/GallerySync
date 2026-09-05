@@ -923,6 +923,13 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
         <item quantity="one">Start in %1$d hour</item>
         <item quantity="other">Start in %1$d hours</item>
     </plurals>
+    <plurals name="tour_delay_later_minutes">
+        <item quantity="one">Start in %1$d minute</item>
+        <item quantity="other">Start in %1$d minutes</item>
+    </plurals>
+    <!-- Chip labels carry their unit, because the row mixes minutes and hours. -->
+    <string name="tour_delay_chip_minutes">%1$dm</string>
+    <string name="tour_delay_chip_hours">%1$dh</string>
     <string name="tour_delay_hours_label">Delay</string>
     <string name="tour_delay_security">For the security of your data, the app will be unavailable until a backup has been successfully completed and verified.</string>
 
@@ -984,4 +991,5 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="abort_backup_body">Uploading stops so you can change your settings. Files already in OneDrive stay there, and starting again picks up where this left off rather than sending them twice. Nothing is deleted. Photos already optimised stay optimised, with their full-size originals in OneDrive.</string>
     <string name="abort_backup_confirm">Stop and go back</string>
     <string name="abort_backup_keep">Keep backing up</string>
+
 </resources>
