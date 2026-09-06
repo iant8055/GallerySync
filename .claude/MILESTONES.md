@@ -305,7 +305,10 @@ The tree, exactly:
 isOptimiseEnabled     master switch, off until asked
   optimisePhotos      Y / N
   photoOptimiseMode   Auto | Manual
-  photoOptimiseAge    straight away · 1hr · 12hr · 1 day · 1 week
+  photoOptimiseAge    SHOULD NOT EXIST - see 6 Sept 2026. Ian ruled on 19 Aug (TASK-011) that
+                      "there is no photo age setting and none is wanted"; this line was written
+                      here on 29 Aug in contradiction of that, and the control reached Settings on
+                      30 Aug. Photos are proxied whatever their age. Remove it.
   optimiseVideo       Y / N
   videoOptimiseMode   Auto | Manual
   videoOptimiseAge    same five
@@ -4447,25 +4450,29 @@ needed. An earlier reading of this entry had it the wrong way round.
 This is the three-areas rule in the direction easiest to miss: Area 1 must not reach into Area 2's
 *behaviour* any more than it may write Area 2's settings.
 
-#### Age belongs after the wizard, and the photo setting was doing nothing
+#### Age belongs after the wizard — and photos have no age, by decision
 
 Ian, 6 Sept 2026: *"The initial Wizard should NOT have any age predicate for either photos or videos.
-There should be a setting in the app (after the wizard) to dictate how long a video can age before
+There should be a setting in the app (after the wizard) to dictate how long a **video** can age before
 being available for backing up and optimizing."*
 
 **The wizard was already right** — `proxyCandidatesAll` and `videoOptimiseCandidatesAll` carry no age
 clause, and must not gain one. The install pass acts on the library as it stands.
 
-**The ongoing photo path was wrong, and visibly so.** `photoOptimiseAge` sits on the Settings screen
-(`SettingsScreen.kt:233`) where the user can choose *straight away · 1hr · 12hr · 1 day · 1 week* —
-and `proxyCandidates` had no age predicate, so the control changed nothing. Choosing "1 week" still
-optimised a photo taken this morning. Video's identical setting has always worked.
+**The ongoing video age works and always has.**
 
-Fixed: the clause is on the photo query, `ProxyApplier.candidates()` supplies it from the setting, and
-the arithmetic moved to `MediaAge.thresholdEpochSeconds()` so photos and video cannot answer the
-question differently again — video had a private copy of it.
+**Photos have no age, and that is a decision from 19 Aug 2026** recorded in TASK-011:
 
-**Worth noting how this one hid.** It is not a wrong number or a crash; it is a control that responds,
-persists, and is read by nothing. Nothing in the UI looks broken, and the only way to catch it is to
-set it and then watch what the optimiser actually does. It sat behind a correct-looking settings tree
-that MILESTONES itself documents in full.
+> only the Sync age is limited to video. Photos are proxied whatever their age, because a 2048px proxy
+> leaves the photo in the gallery and costs an edit nothing until the export. **There is no photo age
+> setting and none is wanted.**
+
+**A wrong fix, made and reverted the same evening.** Seeing `photoOptimiseAge` on the Settings screen
+doing nothing, I wired it into `proxyCandidates` — implementing a feature Ian had rejected three weeks
+earlier. Reverted in the next commit. The lesson is the order of the question: *should this control
+exist?* comes before *why doesn't it work?*, and TASK-011 answered it in one grep.
+
+**What is actually wrong is the control.** `photoOptimiseAge` entered the code on 28 Aug (`54f6124`),
+reached the Settings screen on 30 Aug (`f650536`), and was written into the Area 2 tree in this file on
+29 Aug (`c0c9b81`) — all after the 19 Aug decision that none is wanted. It should be removed from
+`BackupSettings`, from `SettingsScreen`, and from the tree above. **Not yet done.**

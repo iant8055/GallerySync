@@ -756,11 +756,14 @@ interface BackupEntryDao {
           AND isProxied = 0
           AND isProxySkipped = 0
           AND isVideo = 0
-          -- Old enough, per file, exactly as the video query has always asked. Added 6 Sept 2026:
-          -- `photoOptimiseAge` was on the Settings screen and read by nothing, so choosing "1 week"
-          -- optimised this morning's photos anyway. No age is asked at install - the wizard's own
-          -- queries carry no such clause - only here, afterwards, where the user's setting governs.
-          AND dateModifiedEpochSeconds <= :modifiedBeforeEpochSeconds
+          -- No age clause, and that is a decision rather than an omission. Ian, 19 Aug 2026,
+          -- TASK-011: "only the Sync age is limited to video. Photos are proxied whatever their
+          -- age, because a 2048px proxy leaves the photo in the gallery and costs an edit nothing
+          -- until the export. There is no photo age setting and none is wanted."
+          --
+          -- Briefly added on 6 Sept 2026 and reverted the same evening: a dead `photoOptimiseAge`
+          -- control on the Settings screen was mistaken for evidence that the query was missing
+          -- something. The control is the thing that should not exist.
           -- The file's own mode wins over its album's. A restored photo is pinned to BACKUP so the
           -- optimiser does not shrink back what the user just pulled down; every other row is null
           -- here and follows its album exactly as before. See TASK-018.
@@ -777,7 +780,6 @@ interface BackupEntryDao {
         """
     )
     suspend fun proxyCandidates(
-        modifiedBeforeEpochSeconds: Long,
         uploaded: BackupState = BackupState.UPLOADED,
         syncMode: AlbumMode = AlbumMode.SYNC
     ): List<BackupEntryEntity>
