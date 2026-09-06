@@ -4115,3 +4115,92 @@ that would in fact have shrunk.
 Related: the wizard's `approximateSavingPercent = 85` is measured on camera-bitrate footage. A library
 of social-media downloads and screen recordings will not come close to it, and today it silently did
 not.
+
+---
+
+### 6 Sept 2026 (afternoon) — the no-op loop caught in the act, and a card that promised 60 MB of 2.26 GB
+
+A full wizard run on the Moto G with the logcat buffer raised first, which is the only reason any of
+this is readable. `pm clear`, local files restored to full size, **OneDrive deliberately left intact**
+so the reconcile would match everything and the run could reach optimising without uploading anything.
+It worked: 8 files uploaded, 378 already there.
+
+#### The instrument fix that made the rest possible
+
+`adb logcat -G 16M` before starting. At the stock 256 KiB nothing above survives two minutes; at 16 MiB
+a 36-minute run fits with room to spare. **Raise the buffer before any run whose logs matter** — it is
+one command and it is the difference between measuring and inferring.
+
+#### 1. The no-op backup loop, confirmed and measured
+
+The 5 Sept hypothesis was right, and the shape is worse than "about once a minute". **20 no-op runs
+across the 36-minute optimise phase**, each a full scan that uploads nothing:
+
+```
+13:34:19.890  backup run starting
+13:34:20.010  scanAll: 386 items across 6 albums within 1 granted folders
+13:34:20.164  refreshLedger: 135 files seen
+13:34:20.171  backup run finished: 0 uploaded, 0 already there, 0 failed, 0 remaining
+```
+
+**The rate tracks the rate of proxy writes, not the clock.** Six of the twenty landed inside the
+85-second photo pass — one every 14 seconds — because photo proxying rewrites 60 files in about 20
+seconds. The video pass writes 3 files per 40 seconds and triggered them far more sparsely:
+
+| Phase | Duration | Files rewritten | No-op runs |
+|---|---|---|---|
+| Photos | 13:26:04 – 13:27:29 | 233 | 6 |
+| Video | 13:27:29 – 14:03:40 | 49 | 14 |
+
+That matters for the fix: **the trigger fires per batch of writes, so the cost scales with how fast the
+app optimises**, and the photo pass is the fast one. Charging makes it free; in RARE on battery it is
+the app spending its ten-minute daily budget on scans that do nothing.
+
+#### 2. The video refusals, measured rather than inferred
+
+The morning's bitrate arithmetic (see the entry above) predicted that "transcode came out no smaller"
+would dominate. The log agrees, and this is now the reason string rather than a reconstruction:
+
+| Reason | Count |
+|---|---|
+| `transcode came out no smaller` | **52** |
+| `already ${w}x${h}, at or under the target` | 9 |
+| `already a proxy` | 3 |
+| **Total refused** | **64** |
+| Transcoded successfully | 49 |
+
+`0 failed` across 38 batches. Where a clip has bitrate to give up the saving is large — 56.6 MB → 8.0 MB,
+50.7 MB → 6.4 MB, 1920x1080 → 854x480 — and where it has not, 52 full transcodes ran and were thrown
+away. **The morning's proposal stands: a source-bitrate pre-check would refuse those before the encode
+rather than after**, which is what the class comment already claims the refusals do.
+
+#### 3. Defect: the Step 7 estimate describes the wrong population
+
+Ian, mid-wizard: *"step 7 lists no information for Photo optimization values."* It is not a rendering
+bug. `OptimizationContent` computes its figures from `result.photosOutstanding` and
+`result.videosOutstanding` — files **not yet in OneDrive** — which `ReconcileScreen` documents as *"what
+`BACK_UP_AND_OPTIMISE_NEW` would actually touch"*. That is option 3's scope, and the card is shown for
+every choice.
+
+Under option 2, `BACK_UP_AND_FREE_SPACE`, optimising runs `proxyCandidatesAll` and
+`videoOptimiseCandidatesAll`, both of which ignore whether this run uploaded the file. So on a library
+already in the cloud:
+
+| | Promised on Step 7 | Actually reclaimed |
+|---|---|---|
+| Photos | *no line at all* | **714 MB** (233 proxied, 40 refused) |
+| Video | 60 MB | **1,602 MB** (49 optimised, 64 refused) |
+| **Total** | **60 MB** | **2,316 MB — 2.26 GB** |
+
+Confirmed on the device afterwards: ledger 386 rows, all uploaded and verified, 3.51 GB → 1.25 GB, and
+`du` independently at 1.2G.
+
+**Off by 38x, on the option whose entire selling point is space saved, in the ordinary case of
+installing on a phone already backed up.** The photo line vanishes rather than reading zero, which is
+the specific thing `SetupTour.kt:1218` says the card must never do: *"the one thing it must never do is
+leave the space blank and let the user decide for themselves what a switch with no figure under it
+means."* The total falls through to *"Everything on this phone is already in OneDrive, so there is
+nothing new to optimise yet"* — which is true of uploads and false of optimising.
+
+The fix is to pick the population from the `LibraryChoice`: outstanding for option 3, everything
+eligible for option 2. Not yet built.
