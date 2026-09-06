@@ -70,3 +70,19 @@ been idle long enough to be in a restrictive bucket. Measured on hardware with t
 raised first (`adb logcat -G 16M` — the stock 256 KiB holds about 97 seconds and will not survive the
 wait), and with the app never brought to the foreground during the test, since doing so is what
 dispatches the job and destroys the measurement.
+
+## One more observation, same day, and it points the same way
+
+Ian watched the Camera album's verified count climb live on the Albums tab — *"1 to 8 verified to 8 of
+8 verified"* — as the photos backed up. **The app was open the whole time**, because watching it is
+what he was doing.
+
+That is a data point on the "works while open" side of the question, from the same device and the same
+batch of photos. Taken with step 6 above, the pair is close to a controlled comparison: identical
+album, identical album mode, identical file types, differing only in whether anyone was looking at the
+app. Worth reproducing deliberately — same photos, once with the app foregrounded and once without —
+before spending time in the code.
+
+Note also what it proves *works*: the reconcile, the per-album tally and the live UI update are all
+correct and prompt under those conditions. Whatever is wrong is upstream of them, in what wakes the
+worker.
