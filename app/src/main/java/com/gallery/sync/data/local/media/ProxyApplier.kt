@@ -84,7 +84,11 @@ class ProxyApplier @Inject constructor(
      * The rows are left in place rather than deleted. A file that is gone locally but present in
      * OneDrive is still genuinely backed up, and forgetting it would understate what is verified.
      */
-    suspend fun candidates(): List<BackupEntryEntity> = candidatesFrom(entryDao.proxyCandidates())
+    suspend fun candidates(): List<BackupEntryEntity> = candidatesFrom(
+        entryDao.proxyCandidates(
+            modifiedBeforeEpochSeconds = settings.current().photoOptimiseAge.thresholdEpochSeconds()
+        )
+    )
 
     /**
      * Photos for the install wizard's one-time bulk optimise (Area 1).

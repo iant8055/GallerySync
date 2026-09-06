@@ -314,8 +314,7 @@ class VideoOptimiser @Inject constructor(
      * yields "now", which lets everything through — including a clip shot this morning, which is
      * the documented cost of that option.
      */
-    private fun cutoffSecondsFor(age: MediaAge): Long =
-        Instant.now().minus(age.duration).epochSecond
+    private fun cutoffSecondsFor(age: MediaAge): Long = age.thresholdEpochSeconds()
 
     private companion object {
         const val TAG = "VideoOptimiser"

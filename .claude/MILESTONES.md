@@ -4446,3 +4446,26 @@ needed. An earlier reading of this entry had it the wrong way round.
 
 This is the three-areas rule in the direction easiest to miss: Area 1 must not reach into Area 2's
 *behaviour* any more than it may write Area 2's settings.
+
+#### Age belongs after the wizard, and the photo setting was doing nothing
+
+Ian, 6 Sept 2026: *"The initial Wizard should NOT have any age predicate for either photos or videos.
+There should be a setting in the app (after the wizard) to dictate how long a video can age before
+being available for backing up and optimizing."*
+
+**The wizard was already right** — `proxyCandidatesAll` and `videoOptimiseCandidatesAll` carry no age
+clause, and must not gain one. The install pass acts on the library as it stands.
+
+**The ongoing photo path was wrong, and visibly so.** `photoOptimiseAge` sits on the Settings screen
+(`SettingsScreen.kt:233`) where the user can choose *straight away · 1hr · 12hr · 1 day · 1 week* —
+and `proxyCandidates` had no age predicate, so the control changed nothing. Choosing "1 week" still
+optimised a photo taken this morning. Video's identical setting has always worked.
+
+Fixed: the clause is on the photo query, `ProxyApplier.candidates()` supplies it from the setting, and
+the arithmetic moved to `MediaAge.thresholdEpochSeconds()` so photos and video cannot answer the
+question differently again — video had a private copy of it.
+
+**Worth noting how this one hid.** It is not a wrong number or a crash; it is a control that responds,
+persists, and is read by nothing. Nothing in the UI looks broken, and the only way to catch it is to
+set it and then watch what the optimiser actually does. It sat behind a correct-looking settings tree
+that MILESTONES itself documents in full.

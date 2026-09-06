@@ -756,6 +756,11 @@ interface BackupEntryDao {
           AND isProxied = 0
           AND isProxySkipped = 0
           AND isVideo = 0
+          -- Old enough, per file, exactly as the video query has always asked. Added 6 Sept 2026:
+          -- `photoOptimiseAge` was on the Settings screen and read by nothing, so choosing "1 week"
+          -- optimised this morning's photos anyway. No age is asked at install - the wizard's own
+          -- queries carry no such clause - only here, afterwards, where the user's setting governs.
+          AND dateModifiedEpochSeconds <= :modifiedBeforeEpochSeconds
           -- The file's own mode wins over its album's. A restored photo is pinned to BACKUP so the
           -- optimiser does not shrink back what the user just pulled down; every other row is null
           -- here and follows its album exactly as before. See TASK-018.
@@ -772,6 +777,7 @@ interface BackupEntryDao {
         """
     )
     suspend fun proxyCandidates(
+        modifiedBeforeEpochSeconds: Long,
         uploaded: BackupState = BackupState.UPLOADED,
         syncMode: AlbumMode = AlbumMode.SYNC
     ): List<BackupEntryEntity>

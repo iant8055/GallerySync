@@ -98,4 +98,14 @@ enum class MediaAge(val duration: Duration) {
         fun fromNameOrDefault(name: String?): MediaAge =
             entries.firstOrNull { it.name == name } ?: DEFAULT
     }
+
+    /**
+     * The `dateModified` a file must be at or below to have waited out this age.
+     *
+     * Shared so photos and video answer it the same way. Video had a private copy and photos had no
+     * age check at all, which is how `photoOptimiseAge` came to be a Settings control that changed
+     * nothing — see the 6 Sept 2026 entry.
+     */
+    fun thresholdEpochSeconds(now: Instant = Instant.now()): Long =
+        now.minus(duration).epochSecond
 }
