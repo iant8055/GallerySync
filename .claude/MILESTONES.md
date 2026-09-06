@@ -4340,5 +4340,15 @@ unchanged. Which is the fix's whole point: the estimate now follows the populati
 optimised, not the one that will be uploaded, so it is immune to exactly this swing. The old code would
 have lurched with it.
 
-**Left open:** whether 64 outstanding is itself correct. Nothing was done to the library between the
-two readings, and 57 files changing category deserves an explanation before the figure is trusted.
+**Answered the same evening, and it was not the instrument.** Ian: *"There were optimized images
+copied in places they were not supposed to be."* The library genuinely held stray proxies, so **64
+outstanding was the accurate figure** and the earlier 7 was the wrong one. The scan being three files
+short is still real evidence that MediaStore lags a bulk copy, and the guard above still stands — but
+the swing itself was the app correctly reporting a messy fixture, not a mis-measurement.
+
+**Which is the actual lesson, and Ian stated it as a standing instruction:** *"It is worth noting to
+ask me if I did anything if there is a size / # of files issue — before you assume the code is wrong."*
+Twice in one day a state change was explained with a code path when the cause was him — album modes
+switching to Sync, and this. He restores fixtures, deletes strays and re-downloads from OneDrive
+between runs, so **the library is not a controlled variable unless he says it is**. One question costs
+a sentence; the wrong hypothesis costs an afternoon.
