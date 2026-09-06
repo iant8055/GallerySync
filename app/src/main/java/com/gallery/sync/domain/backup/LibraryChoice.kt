@@ -76,6 +76,19 @@ enum class LibraryChoice(val mode: AlbumMode?) {
     val optimisesAtInstall: Boolean get() = mode?.proxiesPhotos == true
 
     /**
+     * Whether the install pass acts on the **whole** library rather than only what it just uploaded.
+     *
+     * True for [BACK_UP_AND_FREE_SPACE] alone. Ian, 6 Sept 2026, spelling out the difference: #2
+     * *"optimizes ALL files on phone"*; #3 *"ONLY optimizes files that were actually backed up in
+     * the previous step"*.
+     *
+     * What the *worker* does about it is [cutoffFor]; this exists so a screen estimating the saving
+     * picks the same population the worker will act on — the whole library for #2, and only what is
+     * outstanding for #3.
+     */
+    val optimisesWholeLibrary: Boolean get() = this == BACK_UP_AND_FREE_SPACE
+
+    /**
      * The moment before which already-uploaded files are left alone.
      *
      * Only [BACK_UP_AND_OPTIMISE_NEW] sets one; every other choice either optimises everything

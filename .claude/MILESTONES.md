@@ -4220,6 +4220,13 @@ found.
 - The estimate now reads `CloudReconciliation.photos` / `.videos` — which already documented itself as
   *"Every photo in scope, backed up or not — what proxying could act on"*, so the right number was
   there to be asked for.
+
+  **Corrected the same evening, and this half was wrong when first written.** It applied the whole-
+  library population to **#3 as well as #2**, on the strength of the two behaving identically in the
+  code. They are not supposed to: Ian's design, recorded above under Area 1 on 29 Aug 2026, is that #3
+  optimises only *"newly backed up, not already in cloud"*. So `photosOutstanding` was the correct
+  population for #3 all along, and changing it was a regression introduced while fixing #2. The reason
+  the code looked identical is a separate defect — see the entry below.
 - **`LibraryChoice.optimisesAtInstall`** replaces three copies of `mode?.proxiesPhotos == true`, so the
   screen that estimates the saving and the worker that performs it read one predicate. A unit test
   asserts the two agree for every choice, because nothing caught them disagreeing for a week.
@@ -4352,3 +4359,73 @@ Twice in one day a state change was explained with a code path when the cause wa
 switching to Sync, and this. He restores fixtures, deletes strays and re-downloads from OneDrive
 between runs, so **the library is not a controlled variable unless he says it is**. One question costs
 a sentence; the wrong hypothesis costs an afternoon.
+
+---
+
+### 6 Sept 2026 (night) — option 3 has not existed since 31 August
+
+Found by Ian reading the delay card after choosing #1: *"why the savings if I'm just uploading and not
+optimizing?"* The card was the symptom; the cause is older and larger.
+
+#### What Gate 2 is supposed to do — Ian, restated 6 Sept
+
+| | Verify local against OneDrive | Upload what is missing | Optimise |
+|---|---|---|---|
+| **#2** `BACK_UP_AND_FREE_SPACE` | yes | yes | **all files on the phone** |
+| **#3** `BACK_UP_AND_OPTIMISE_NEW` | yes | yes | **only what this run actually backed up** |
+
+This is not new. It is the Area 1 design recorded here on 29 Aug 2026, and Ian had tested both options
+and *seen the differing file counts* — in Step 7's output and on the device after each run.
+
+#### Why they became identical, traced
+
+`e6a0794`, **31 Aug 2026**, *"replace wizard with 9-step tooltip tour overlay"*, swapped `MainActivity`
+from `SetupWizardScreen` to the new `SetupTour`. It did not carry over the `applyLibraryChoice()` call,
+and git's pickaxe confirms `SetupTour.kt` has never contained that string.
+
+`ApplyLibraryChoice` is the only caller of `settings.setOptimiseCutoff(...)`, and the cutoff is the only
+thing separating #3 from #2 — its own comment says so. Orphaning it meant **the cutoff was never
+written**, so `optimiseCutoffEpochMillis` stayed at `EVERYTHING` for every install from that day. And
+even had it been written, `proxyCandidatesAll` and `videoOptimiseCandidatesAll` took no cutoff
+parameter at all.
+
+**Why it went unseen for six days.** The class was left in the tree rather than deleted, so nothing
+looked amputated. A dropped call throws nothing. The visible half of Gate 2 kept working — four
+options, `library_choice` persisted, `WizardBulkOptimise` still reading the choice to decide *whether*
+to optimise. Only the *scope* was lost. And on a fresh library with an empty cloud, #2 and #3 genuinely
+are identical, which is the case a wipe-and-reinstall protocol tests most often. The commit's own note
+reads *"Verified on Moto G in both light and dark mode"* — a visual check cannot catch a behaviour that
+is never invoked.
+
+#### The fix
+
+- **`proxyCandidatesAll` and `videoOptimiseCandidatesAll`** carry
+  `AND (:cutoffMillis = 0 OR uploadedAtEpochMillis >= :cutoffMillis)` — the same clause and sentinel the
+  ongoing video query already used, so the two cannot drift.
+- **`ProxyApplier` and `VideoOptimiser` read the cutoff themselves.** Thirteen call sites between them;
+  a parameter each would have to remember is one that a call site eventually gets wrong, which is the
+  failure this area has already had twice.
+- **`setLibraryChoice` writes the cutoff**, recorded when Gate 2 is answered. Nothing uploads between
+  then and the first batch, and answering again with a different option must produce the new cutoff
+  rather than leave the old one standing.
+- **Both wizard cards pick their population from the choice**: whole library for #2, outstanding for #3,
+  nothing at all for #1 and #4.
+
+**The cutoff rather than the reconcile's outstanding set**, deliberately. Ian's words are *"only
+optimizes files that were actually backed up in the previous step"* — `uploadedAtEpochMillis >= cutoff`
+is what this run actually uploaded, where the outstanding set would also include files that were
+missing and then failed to upload.
+
+**No album mode is written anywhere in this.** Only the cutoff was rescued out of `ApplyLibraryChoice`;
+the bulk mode write stays dead, which is the requirement.
+
+#### The dead code is a trap, not just clutter
+
+`ApplyLibraryChoice.kt`, `SetupWizardScreen.kt` and `ReconcileScreen.kt` have been unreachable since
+31 Aug — `SetupWizardScreen.kt:385` even says *"only in ReconcileScreen, which nothing renders"*. They
+still read as the live wizard. `ApplyLibraryChoice` is a class named for the install choice whose body
+sets every album's mode in bulk, and **it is what makes agents keep concluding the wizard writes album
+modes** — the error CLAUDE.md calls wrong by construction, and which recurred in this very session at
+13:00. Ian, on why that rule is in the always-loaded file: *"I had to repeat and repeat those
+instructions to you as you over and over tried to make the wizard change album modes."* Deleting the
+three files removes the temptation permanently. Not yet done.

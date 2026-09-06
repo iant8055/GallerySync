@@ -74,7 +74,7 @@ class VideoOptimiser @Inject constructor(
      * All verified videos regardless of album mode — for the wizard's one-time pass.
      */
     suspend fun wizardCandidates(): List<BackupEntryEntity> = withContext(dispatcher) {
-        entryDao.videoOptimiseCandidatesAll()
+        entryDao.videoOptimiseCandidatesAll(settings.current().optimiseCutoffEpochMillis)
     }
 
     /**
@@ -93,7 +93,10 @@ class VideoOptimiser @Inject constructor(
         limit: Int = WIZARD_LIMIT,
         onProgress: (done: Int, total: Int) -> Unit = { _, _ -> }
     ): VideoOptimiseResult = withContext(dispatcher) {
-        val candidates = entryDao.videoOptimiseCandidatesAll(limit = limit)
+        val candidates = entryDao.videoOptimiseCandidatesAll(
+            cutoffMillis = settings.current().optimiseCutoffEpochMillis,
+            limit = limit
+        )
 
         if (candidates.isEmpty()) {
             Logger.d(TAG, "wizard: no video is eligible for optimising")

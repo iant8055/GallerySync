@@ -10,6 +10,7 @@ import android.provider.MediaStore
 import androidx.exifinterface.media.ExifInterface
 import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.entity.BackupEntryEntity
+import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.di.IoDispatcher
 import com.gallery.sync.util.Logger
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -63,6 +64,7 @@ class ProxyApplier @Inject constructor(
     @ApplicationContext private val context: Context,
     private val generator: ProxyGenerator,
     private val entryDao: BackupEntryDao,
+    private val settings: BackupSettings,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
 ) {
 
@@ -85,10 +87,19 @@ class ProxyApplier @Inject constructor(
     suspend fun candidates(): List<BackupEntryEntity> = candidatesFrom(entryDao.proxyCandidates())
 
     /**
-     * All verified photos regardless of album mode — for the install wizard's one-time bulk
-     * optimise (Area 1), which is not governed by album modes.
+     * Photos for the install wizard's one-time bulk optimise (Area 1).
+     *
+     * Not governed by album modes or by the age threshold — but **is** governed by the optimise
+     * cutoff, which is the whole of the difference between Gate 2's #2 and #3. Ian, 6 Sept 2026,
+     * on what each must do: #2 *"optimizes ALL files on phone"*, #3 *"ONLY optimizes files that
+     * were actually backed up in the previous step"*.
+     *
+     * Read here rather than passed in. There are seven call sites, and a parameter every one of
+     * them had to remember would be a parameter one of them eventually got wrong — which is the
+     * failure this whole area has already had twice.
      */
-    suspend fun candidatesAll(): List<BackupEntryEntity> = candidatesFrom(entryDao.proxyCandidatesAll())
+    suspend fun candidatesAll(): List<BackupEntryEntity> =
+        candidatesFrom(entryDao.proxyCandidatesAll(settings.current().optimiseCutoffEpochMillis))
 
     private suspend fun candidatesFrom(
         recorded: List<BackupEntryEntity>

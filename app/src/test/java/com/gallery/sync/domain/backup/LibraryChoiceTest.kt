@@ -112,4 +112,44 @@ class LibraryChoiceTest {
             )
         }
     }
+
+    /**
+     * The two choices that run no install-time optimise, so no wizard card may promise a saving.
+     *
+     * Step 8 promised one anyway until 6 Sept 2026, gated on the optimise switches alone — Ian,
+     * having chosen #1: *"why the savings if I'm just uploading and not optimizing?"*
+     */
+    @Test
+    fun theChoicesThatUploadOnlyPromiseNoSaving() {
+        assertFalse(LibraryChoice.BACK_UP_EVERYTHING.optimisesAtInstall)
+        assertFalse(LibraryChoice.CHOOSE_PER_ALBUM.optimisesAtInstall)
+    }
+
+    /**
+     * #2 and #3 must not be the same install. Ian, 6 Sept 2026: #2 *"optimizes ALL files on
+     * phone"*; #3 *"ONLY optimizes files that were actually backed up in the previous step"*.
+     *
+     * They *were* the same until that day, because the cutoff that separates them was written only
+     * by `ApplyLibraryChoice` — reachable from two screens that nothing renders.
+     */
+    @Test
+    fun onlyFreeSpaceOptimisesTheWholeLibrary() {
+        assertTrue(LibraryChoice.BACK_UP_AND_FREE_SPACE.optimisesWholeLibrary)
+        assertFalse(LibraryChoice.BACK_UP_AND_OPTIMISE_NEW.optimisesWholeLibrary)
+        assertFalse(LibraryChoice.BACK_UP_EVERYTHING.optimisesWholeLibrary)
+        assertFalse(LibraryChoice.CHOOSE_PER_ALBUM.optimisesWholeLibrary)
+    }
+
+    /** The cutoff is the mechanism behind that, and it must line up with the flag. */
+    @Test
+    fun theCutoffMatchesTheWholeLibraryFlag() {
+        val now = 1_788_000_000_000L
+        LibraryChoice.entries.forEach { choice ->
+            val actsOnEverything = choice.cutoffFor(now) == OptimiseCutoff.EVERYTHING
+            if (choice.optimisesAtInstall) {
+                assertEquals(choice.name, choice.optimisesWholeLibrary, actsOnEverything)
+            }
+        }
+        assertEquals(now, LibraryChoice.BACK_UP_AND_OPTIMISE_NEW.cutoffFor(now))
+    }
 }

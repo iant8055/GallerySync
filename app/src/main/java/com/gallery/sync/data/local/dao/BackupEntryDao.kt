@@ -791,10 +791,15 @@ interface BackupEntryDao {
           AND isProxied = 0
           AND isProxySkipped = 0
           AND isVideo = 0
+          -- Gate 2 #3, and the only thing separating it from #2. Zero means every verified photo;
+          -- a timestamp means only what this run uploaded. Same clause and same sentinel as the
+          -- ongoing video query below, so the two cannot drift.
+          AND (:cutoffMillis = 0 OR uploadedAtEpochMillis >= :cutoffMillis)
         ORDER BY sizeBytes DESC
         """
     )
     suspend fun proxyCandidatesAll(
+        cutoffMillis: Long,
         uploaded: BackupState = BackupState.UPLOADED
     ): List<BackupEntryEntity>
 
@@ -870,11 +875,15 @@ interface BackupEntryDao {
           AND remoteSizeBytes = sizeBytes
           AND isProxied = 0
           AND isProxySkipped = 0
+          -- See the note on the photo query above: zero is every verified clip, a timestamp is
+          -- only what this run uploaded.
+          AND (:cutoffMillis = 0 OR uploadedAtEpochMillis >= :cutoffMillis)
         ORDER BY sizeBytes DESC
         LIMIT :limit
         """
     )
     suspend fun videoOptimiseCandidatesAll(
+        cutoffMillis: Long,
         uploaded: BackupState = BackupState.UPLOADED,
         limit: Int = 500
     ): List<BackupEntryEntity>

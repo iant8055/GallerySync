@@ -1220,9 +1220,21 @@ private fun OptimizationContent(
     //
     // `CloudReconciliation.photos` already documents itself as "what proxying could act on", so the
     // right number was there to be asked for.
-    val optimisesAtInstall = state.libraryChoice.optimisesAtInstall
-    val totalPhotoBytes = if (optimisesAtInstall) result?.photos?.bytes ?: 0L else 0L
-    val totalVideoBytes = if (optimisesAtInstall) result?.videos?.bytes ?: 0L else 0L
+    // #2 acts on the whole library; #3 acts only on what this run uploads, which is `outstanding`;
+    // #1 and #4 optimise nothing at install, so there is no figure to give. See
+    // `LibraryChoice.optimisesWholeLibrary`.
+    val choice = state.libraryChoice
+    val totalPhotoBytes = when {
+        !choice.optimisesAtInstall -> 0L
+        choice.optimisesWholeLibrary -> result?.photos?.bytes ?: 0L
+        else -> result?.photosOutstanding?.bytes ?: 0L
+    }
+    val totalVideoBytes = when {
+        !choice.optimisesAtInstall -> 0L
+        choice.optimisesWholeLibrary -> result?.videos?.bytes ?: 0L
+        else -> result?.videosOutstanding?.bytes ?: 0L
+    }
+    val optimisesAtInstall = choice.optimisesAtInstall
 
     // What proxying gives back, not what the photos weigh.
     //
@@ -1492,14 +1504,43 @@ private fun BackupDelayContent(
     val result = state.result
     val context = LocalContext.current
 
+    // What this run will send. Outstanding is the right population here and the only place it is:
+    // the card is describing an upload, and an upload is exactly the files OneDrive does not
+    // already hold.
     val totalBackupBytes = result?.outstanding?.bytes ?: 0L
 
+    // What this run will reclaim, which is a different question and was being answered with the
+    // wrong one twice over. Found by Ian, 6 Sept 2026, reading the card after choosing #1: "why the
+    // savings if I'm just uploading and not optimizing?"
+    //
+    //  - **The switches are not the gate.** They say whether optimising is wanted; the *choice*
+    //    says whether any of it runs at install. #1 and #4 run no optimise pass at all —
+    //    `WizardBulkOptimise.shouldHandOff` is false for both — so the card was promising a saving
+    //    nothing would deliver, on the last screen before the user commits to the run.
+    //  - **Outstanding is the wrong population**, exactly as it was on Step 7: the install pass
+    //    reads `candidatesAll()` and `wizardCandidates()`, neither of which asks whether this run
+    //    uploaded the file. On a library already in OneDrive that under-reports to nearly nothing.
+    //
+    // Note the two faults pointed opposite ways — #1 over-promised, #2 under-reported — which is
+    // why neither showed up as an obviously silly number.
+    // Same population rule as Step 7: whole library for #2, only what this run uploads for #3,
+    // nothing for #1 and #4.
+    val choice = state.libraryChoice
+    val photoPool = when {
+        !choice.optimisesAtInstall -> 0L
+        choice.optimisesWholeLibrary -> result?.photos?.bytes ?: 0L
+        else -> result?.photosOutstanding?.bytes ?: 0L
+    }
+    val videoPool = when {
+        !choice.optimisesAtInstall -> 0L
+        choice.optimisesWholeLibrary -> result?.videos?.bytes ?: 0L
+        else -> result?.videosOutstanding?.bytes ?: 0L
+    }
     val photoSaving = if (state.isAutoOptimiseEnabled)
-        (result?.photosOutstanding?.bytes ?: 0L) *
-            ProxyGenerator.APPROXIMATE_SAVING_PERCENT / 100
+        photoPool * ProxyGenerator.APPROXIMATE_SAVING_PERCENT / 100
     else 0L
     val videoSaving = if (state.optimiseVideo)
-        (result?.videosOutstanding?.bytes ?: 0L) * state.videoQuality.approximateSavingPercent / 100
+        videoPool * state.videoQuality.approximateSavingPercent / 100
     else 0L
     val totalSaving = photoSaving + videoSaving
 

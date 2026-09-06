@@ -791,7 +791,20 @@ class ReconcileViewModel @Inject constructor(
     fun setLibraryChoice(choice: LibraryChoice) {
         // Written through, not just held. Closing the wizard mid-backup ends the process, and this
         // is what step 9 reads to decide whether anything gets optimised when the upload finishes.
-        viewModelScope.launch { settings.setLibraryChoice(choice) }
+        //
+        // The cutoff goes with it, and until 6 Sept 2026 nothing wrote one. Its only caller was
+        // `ApplyLibraryChoice`, which is reachable from `SetupWizardScreen` and `ReconcileScreen` —
+        // and nothing renders either, so in the app users actually meet the cutoff stayed at
+        // `EVERYTHING` for every choice. That is why #3 behaved exactly like #2: it is the cutoff,
+        // and nothing else, that tells them apart.
+        //
+        // Recorded now rather than when the run starts, because nothing uploads between answering
+        // Gate 2 and the first batch, and answering again with a different option must produce the
+        // new cutoff rather than leave the old one standing.
+        viewModelScope.launch {
+            settings.setLibraryChoice(choice)
+            settings.setOptimiseCutoff(choice.cutoffFor(System.currentTimeMillis()))
+        }
         _state.value = _state.value.copy(libraryChoice = choice, libraryApplied = null)
     }
 
