@@ -3753,3 +3753,197 @@ rather than being filed as an artifact of the wipe.
 - **`am crash <pkg>` is the way to simulate a crash**; `kill -9` is refused and `am kill` declines a
   process running a job. Unlike a force-stop it leaves job dispatch intact, which is what makes it the
   right instrument for "what does a crash leave behind".
+
+---
+
+### 5 Sept 2026 (afternoon) — the standby bucket, and a delay held for 26 minutes
+
+Chasing why a delayed start fired late produced the most consequential finding of the day, and it is
+about the platform rather than this app. Moto G, awake, charging, unmetered Wi-Fi throughout.
+
+**A user-scheduled job sat ready and undispatched for 26 minutes 42 seconds.** Armed 15:35:09, due
+15:38:04, still not run at 16:04. Every constraint satisfied the whole time, and JobScheduler said so:
+
+```
+Standby bucket: RARE
+Time since first force batch attempt: -13m30s
+Run time: earliest=-14m21s, latest=none
+Ready: true (job=true user=true !restricted=true !pending=true !active=true ...)
+```
+
+It moved only when Ian opened the app: bucket 40 → 10 (`reason=u-si`) at 16:04:46, and
+`backup run starting (manual)` one second later. **Three times today** the same sequence — held in
+RARE, dispatched within a second of a human touching the phone.
+
+#### Why it is in RARE at all, which is not the documented path
+
+This device's thresholds, read from `dumpsys usagestats`:
+
+```
+mElapsedThresholds = [0, 12h, 24h, 48h, 8 days]
+mScreenThresholds  = [0,  0,  1h,  2h,  6h]
+                      ACTIVE  WORKING_SET  FREQUENT  RARE  RESTRICTED
+```
+
+So the ordinary decay into RARE takes about **48 hours** of disuse. That is not what happened. The
+bucket history shows repeated demotions with `reason=s` — **forced by system** — landing seconds after
+the app left the foreground:
+
+```
+15:34:40  bucket=10  reason=u-si
+15:35:36  bucket=40  reason=s      <- six seconds after Close
+```
+
+`am set-standby-bucket active` did not survive either: forced to 10 (`reason=f`) at 14:41:34, back to
+40 (`reason=s`) at 14:41:35.
+
+**The trigger is idleness, not a timer.** Three observations agree:
+
+| When | What had just happened | Result |
+|---|---|---|
+| 15:35:36 | Close, with only a pending delay armed and nothing running | RARE after **6 seconds** |
+| 16:07 → 16:38 | upload chain running with the app closed | stayed **ACTIVE** for 31 minutes |
+| 17:31:55 | last optimise batch finished at 17:31:51 | RARE after **4 seconds** |
+
+So a running chain holds the app at ACTIVE, and the demotion lands within seconds of it having nothing
+left to run. The exposure is precisely the gap *between* runs — where a delayed start, the content
+trigger and the six-hourly net all live — while a backup already moving is safe. That is the good news
+and the bad news in one: the first backup is fine once it starts, and everything that has to *start*
+is what gets batched.
+
+#### Why this is a product finding and not a test artifact
+
+`pm clear` drops the app into RARE, so the wiped-install protocol makes it easy to hit. But the deeper
+point stands without the wipe: **GallerySync is designed to be set up and never opened, which is
+exactly how an app earns this bucket.** CLAUDE.md's "ongoing sync is uncapped JobScheduler work"
+remains true, and needs a rider — **uncapped is not unbatched**. 26 minutes is a floor, not a ceiling:
+the run ended because we ended it.
+
+What this does not touch: a chain already running was never interrupted. 622 files and 11.4 GB uploaded
+with the app closed, at a steady ~4.6 MB/s, then the photo pass (455 proxied) and the video pass
+starting themselves — all unattended, all with no Recents card.
+
+**The Albums tab was correct at this scale, which matters more than it sounds.** Ian checked every
+album's backup and optimise figures after the run and found them all as expected — with **464 of 622
+files proxied**. That is the 4 Sept `ReconciliationRules.tallyAlbum` fix under real load: the reconcile
+matches on name *and byte size*, and a proxy is deliberately smaller than the copy OneDrive holds, so
+before that fix an optimised album under-reported its own verified count and fell further with every
+file optimised. It was fixed against three albums; this run put 464 proxies through it.
+
+**Next measurement, and it wants no attention:** arm a delay, leave the phone genuinely alone
+overnight, and read the dispatch time off the ledger in the morning. That gives the ceiling, and
+answers the same question for new photos arriving in the steady state.
+
+#### Solved by exemption — measured, same evening
+
+The power allowlist fixes it completely. Same phone, same 230-file fixture, same charger and Wi-Fi,
+**Adaptive Battery on in both runs**, one variable changed:
+
+| | Standby bucket | Delay due | Run started | Late by |
+|---|---|---|---|---|
+| Baseline, afternoon | RARE (40) | 15:38:04 | never, until the app was opened at 16:04:46 | **26m42s+** |
+| Exempted, evening | EXEMPTED (5) | 19:18:33 | `19:18:33.483` | **0.5s** |
+
+The exemption came from `dumpsys deviceidle whitelist +com.gallery.sync`, which is precisely what
+`REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` grants in production — so this measures the shippable lever
+rather than a debug switch. The bucket went to 5 with `reason=d` at 19:11:08 and **never left it**,
+where an unexempted app was demoted to RARE within six seconds of Close three times that afternoon.
+
+Note what this does *not* need: Adaptive Battery stayed on, because it is on by default for every user
+and no product can ask them to turn a system-wide battery feature off.
+
+**One device-specific finding that shapes how we would ask.** This Moto has **no per-app
+"Unrestricted" battery option** — only an "Allow background usage" checkbox, already ticked, and a
+phone-wide Adaptive Battery toggle. So the vendor UI does not expose the allowlist the way stock
+Android's three-way battery setting does, and pointing users at "set the app to Unrestricted" is advice
+that does not match what they will see on this handset.
+
+#### The remedies, and what each costs
+
+- **The user setting the app to Unrestricted by hand** costs nothing and touches no Play policy. Worth
+  testing whether it stops the `reason=s` demotions — if it does, this is vendor battery management
+  and a documented setup step is a real answer.
+- **`REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`** — the app raising the exemption dialog itself — is a
+  restricted-use permission with a published acceptable-use list, and a photo backup app is not
+  obviously on it. That is a Play-listing decision and a CLAUDE.md escalation, not a code change.
+- **`ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS`**, which opens the battery settings screen and lets
+  the user do it, needs no permission and no declaration. The middle route most sync apps take.
+
+#### Instrument notes, both earned today
+
+- **A file count and a completed-byte total both flatline during a large file**, because each only
+  moves when a file finishes. A 1.5 GB upload froze both for six minutes on a perfectly healthy
+  transfer, and that is what "stuck at 9 of 622" was. The honest live signal is WorkManager's own
+  `WorkProgress` row, which carries the in-flight file name, `currentSent` and a percent — read it from
+  `no_backup/androidx.work.workdb` and decode the `abef` blob.
+- **`dumpsys usagestats | grep STANDBY_BUCKET_CHANGED package=<pkg>`** gives the bucket history with
+  reasons, which is what separates a timeout demotion (`t`) from a system-forced one (`s`) from usage
+  (`u-*`). Without the reason code this looks like ordinary standby and gets dismissed.
+
+---
+
+### 5 Sept 2026 (evening) — what the bucket actually costs, and a loop the app inflicts on itself
+
+Research against the platform documentation, after the exemption result, plus one defect the same run
+surfaced.
+
+#### The quota table, which reframes the whole problem
+
+Per-bucket limits, from [Power management resource limits](https://developer.android.com/topic/performance/power/power-details):
+
+| Bucket | Regular jobs | Alarms |
+|---|---|---|
+| Active | 20 min per rolling hour | no limit |
+| Working set | 10 min per 4 hours | 10/hour |
+| Frequent | 10 min per 12 hours | 2/hour |
+| **Rare** | **10 min per rolling 24 hours** | **1/hour** |
+| Restricted | once daily, 10 min | 1/day |
+
+Ten minutes of job runtime a day would make this app impossible — **except that charging supersedes
+it**: *"a device in the charging state is given unrestricted resource access regardless of its app
+standby bucket"*, with no execution limits (outside the restricted bucket) and no network restrictions.
+
+**So today's 26-minute hold was not the quota.** The phone was charging throughout. What we measured is
+*dispatch latency* — the force-batching of a ready job — which charging does **not** relax. Two separate
+mechanisms, and only one of them bites while plugged in. That narrows the problem sharply: the first
+backup already requires charging by default, so its throughput is safe once it starts. Getting it to
+*start* is the whole issue.
+
+#### Routes that avoid the restricted permission
+
+- **`AlarmManager.setAndAllowWhileIdle()` for the delayed start.** No permission for the inexact
+  variant, fires in Doze, and even in RARE an app gets one alarm per hour — unlimited while charging.
+  It replaces the one mechanism measured unreliable, and it is what the Doze/Standby guide recommends.
+- **User-initiated data transfer jobs** (`setUserInitiated(true)`, API 34+) for the first backup and
+  Sync now. **Exempt from the ordinary job quotas**, and `RUN_USER_INITIATED_JOBS` is a normal
+  permission rather than a restricted-use one. The cost is real: **no Jetpack library supports them**,
+  so it means JobScheduler directly beside our WorkManager engine, plus a fallback path for minSdk 26.
+- **FCM high-priority messages** are Google's first recommendation and are not available to us — there
+  is no server in this product.
+
+**On `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`:** the acceptable-use table's *task automation* row reads
+"App's core function is scheduling automated actions, such as for instant messaging, voice calling, or
+**new photo management**", which is closer to this app than first assumed. It is an argument a reviewer
+might accept, not a certainty, and not one to discover the answer to on a first submission. Ian's
+instruction, 5 Sept: find workarounds rather than request the exemption.
+
+#### Defect: optimising triggers no-op backup runs
+
+Observed during the exemption run, once a minute through the whole optimise phase:
+
+```
+19:34:06  backup run starting
+19:34:06  scanAll: 230 items across 4 albums
+19:34:06  refreshLedger: 190 files seen
+19:34:06  backup run finished: 0 uploaded, 0 already there, 0 remaining
+```
+
+**The app is reacting to its own writes.** `ProxyApplier` rewrites a file, MediaStore changes, the
+content trigger fires, `BackupWorker` wakes, scans 230 items, finds nothing to upload, re-arms the
+trigger — and the next batch of proxies fires it again. No network, about 600 ms a time.
+
+Harmless while charging. On battery in RARE it is not: those wakeups would spend the app's entire
+ten-minute daily job budget on scans that upload nothing, so **the app would starve itself precisely
+while doing the work that saves the user space**. Worth fixing at the trigger — either suppressing the
+content trigger while an optimise chain is live, or recognising the URIs we just wrote — rather than
+anywhere downstream.
