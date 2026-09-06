@@ -4429,3 +4429,20 @@ modes** — the error CLAUDE.md calls wrong by construction, and which recurred 
 13:00. Ian, on why that rule is in the always-loaded file: *"I had to repeat and repeat those
 instructions to you as you over and over tried to make the wizard change album modes."* Deleting the
 three files removes the temptation permanently. Not yet done.
+
+#### The install choice governs the one-time pass and nothing after it
+
+Ian, 6 Sept 2026: *"Once this ONE TIME backup has been completed the user then sets their preference
+for how the backup/sync works going forward."*
+
+So the cutoff belongs to the wizard's pass alone. `VideoOptimiser.run` — the **ongoing** path — was
+reading `optimiseCutoffEpochMillis` too, which meant a #3 install left videos already in OneDrive
+permanently exempt from optimising, months later, under a choice made once at install. It now passes
+`OptimiseCutoff.EVERYTHING`, and the cutoff is read only by the two wizard queries.
+
+Note which half was the defect. The photo query never read the cutoff, and **that was correct** — the
+asymmetry was video reaching for something it should not have had, not photos missing something they
+needed. An earlier reading of this entry had it the wrong way round.
+
+This is the three-areas rule in the direction easiest to miss: Area 1 must not reach into Area 2's
+*behaviour* any more than it may write Area 2's settings.

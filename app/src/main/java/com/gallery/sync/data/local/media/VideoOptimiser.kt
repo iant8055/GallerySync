@@ -8,6 +8,7 @@ import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.di.IoDispatcher
 import com.gallery.sync.domain.backup.MediaAge
+import com.gallery.sync.domain.backup.OptimiseCutoff
 import com.gallery.sync.util.Logger
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
@@ -179,8 +180,18 @@ class VideoOptimiser @Inject constructor(
      * Optimises what is eligible right now, or explains why it did nothing.
      *
      * Reads every gate itself rather than taking them as parameters: the master switch, the video
-     * toggle, the age and the cutoff. A caller that had to assemble those correctly would be a
-     * second place for them to be assembled wrongly.
+     * toggle and the age. A caller that had to assemble those correctly would be a second place for
+     * them to be assembled wrongly.
+     *
+     * **No optimise cutoff here.** Ian, 6 Sept 2026: *"Once this ONE TIME backup has been completed
+     * the user then sets their preference for how the backup/sync works going forward."* The install
+     * choice governs the one-time pass and nothing after it, so a cutoff written by Gate 2 must not
+     * still be narrowing what the ongoing pass will touch months later. Until this date it did, and
+     * only for video — the photo query never read it — so a #3 install left videos already in
+     * OneDrive permanently exempt while their photos were optimised as normal.
+     *
+     * This is CLAUDE.md's three-areas rule in the direction that is easiest to miss: Area 1 must not
+     * reach into Area 2's behaviour any more than it may write Area 2's settings.
      */
     suspend fun run(limit: Int = DEFAULT_LIMIT): VideoOptimiseResult = withContext(dispatcher) {
         val prefs = settings.current()
@@ -192,7 +203,7 @@ class VideoOptimiser @Inject constructor(
 
         val candidates = entryDao.videoOptimiseCandidates(
             modifiedBeforeEpochSeconds = cutoffSecondsFor(prefs.videoOptimiseAge),
-            cutoffMillis = prefs.optimiseCutoffEpochMillis,
+            cutoffMillis = OptimiseCutoff.EVERYTHING,
             limit = limit
         )
 
