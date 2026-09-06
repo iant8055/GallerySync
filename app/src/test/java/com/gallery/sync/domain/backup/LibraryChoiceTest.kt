@@ -85,4 +85,31 @@ class LibraryChoiceTest {
     fun anEmptyLibraryIsNotDescribedAsMarginal() {
         assertFalse(LibraryEstimate.isSavingMarginal(photoBytes = 0, videoBytes = 0))
     }
+
+    /**
+     * The predicate Step 7's estimate and `OptimiseWorker` both read.
+     *
+     * Pinned because they disagreed on 6 Sept 2026 and nothing caught it: the card described the
+     * outstanding population for every choice, while the worker optimised everything eligible. A
+     * `BACK_UP_AND_FREE_SPACE` install promised 60 MB and reclaimed 2.26 GB.
+     */
+    @Test
+    fun onlyTheTwoOptimisingChoicesOptimiseAtInstall() {
+        assertFalse(LibraryChoice.BACK_UP_EVERYTHING.optimisesAtInstall)
+        assertTrue(LibraryChoice.BACK_UP_AND_FREE_SPACE.optimisesAtInstall)
+        assertTrue(LibraryChoice.BACK_UP_AND_OPTIMISE_NEW.optimisesAtInstall)
+        assertFalse(LibraryChoice.CHOOSE_PER_ALBUM.optimisesAtInstall)
+    }
+
+    /** It must stay the same question `WizardBulkOptimise` asks, or the two can drift apart again. */
+    @Test
+    fun theEstimateAndTheWorkerAgreeOnEveryChoice() {
+        LibraryChoice.entries.forEach { choice ->
+            assertEquals(
+                choice.name,
+                choice.optimisesAtInstall,
+                WizardBulkOptimise.shouldContinueToVideo(setupComplete = false, choice = choice)
+            )
+        }
+    }
 }

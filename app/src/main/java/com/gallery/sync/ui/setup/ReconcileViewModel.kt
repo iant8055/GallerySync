@@ -735,7 +735,7 @@ class ReconcileViewModel @Inject constructor(
                 if (completed > highWater) highWater = completed
 
                 if (remaining == 0) {
-                    val shouldOptimise = _state.value.libraryChoice.mode?.proxiesPhotos == true
+                    val shouldOptimise = _state.value.libraryChoice.optimisesAtInstall
                     val photoCandidates = if (shouldOptimise) {
                         proxyApplier.candidatesAll()
                     } else emptyList()

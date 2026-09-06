@@ -40,7 +40,7 @@ object WizardBulkOptimise {
         setupComplete: Boolean,
         allAlbums: Boolean,
         choice: LibraryChoice
-    ): Boolean = !setupComplete && allAlbums && choice.mode?.proxiesPhotos == true
+    ): Boolean = !setupComplete && allAlbums && choice.optimisesAtInstall
 
     /**
      * Whether a drained photo pass should be followed by the video one.
@@ -53,5 +53,5 @@ object WizardBulkOptimise {
     fun shouldContinueToVideo(
         setupComplete: Boolean,
         choice: LibraryChoice
-    ): Boolean = !setupComplete && choice.mode?.proxiesPhotos == true
+    ): Boolean = !setupComplete && choice.optimisesAtInstall
 }

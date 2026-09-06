@@ -1205,8 +1205,24 @@ private fun OptimizationContent(
 
     val context = LocalContext.current
     val result = state.result
-    val totalPhotoBytes = result?.photosOutstanding?.bytes ?: 0L
-    val totalVideoBytes = result?.videosOutstanding?.bytes ?: 0L
+
+    // Which population this card is describing, and why it is not the outstanding one.
+    //
+    // Until 6 Sept 2026 both tallies read `…Outstanding` — files not yet in OneDrive. That is the
+    // population `BACK_UP_AND_OPTIMISE_NEW` is described against, and this card is shown for every
+    // choice. `BACK_UP_AND_FREE_SPACE` optimises everything eligible, through `candidatesAll()` and
+    // `wizardCandidates()`, neither of which asks whether this run uploaded the file.
+    //
+    // Measured on the Moto G that day, on a library already in OneDrive: the card offered 60 MB with
+    // no photo line at all, and the run reclaimed 2.26 GB — 714 MB of photos and 1,602 MB of video.
+    // Off by 38x, on the option whose whole selling point is space saved, in the ordinary case of
+    // installing on a phone that is already backed up.
+    //
+    // `CloudReconciliation.photos` already documents itself as "what proxying could act on", so the
+    // right number was there to be asked for.
+    val optimisesAtInstall = state.libraryChoice.optimisesAtInstall
+    val totalPhotoBytes = if (optimisesAtInstall) result?.photos?.bytes ?: 0L else 0L
+    val totalVideoBytes = if (optimisesAtInstall) result?.videos?.bytes ?: 0L else 0L
 
     // What proxying gives back, not what the photos weigh.
     //
@@ -1223,9 +1239,13 @@ private fun OptimizationContent(
     // themselves what a switch with no figure under it means.
     val stillChecking = state.running || result == null
     val albumsUnchecked = result?.albumsUnchecked ?: 0
-    val nothingOutstanding = totalPhotoBytes == 0L && totalVideoBytes == 0L
-    val estimateUnavailable = !stillChecking && nothingOutstanding && albumsUnchecked > 0
-    val nothingLeftToSend = !stillChecking && nothingOutstanding && albumsUnchecked == 0
+    val nothingToOptimise = totalPhotoBytes == 0L && totalVideoBytes == 0L
+    val estimateUnavailable = !stillChecking && nothingToOptimise && albumsUnchecked > 0
+    // Nothing will be optimised at install because the choice does not ask for it — #1 and #4. The
+    // switches still matter, since they govern albums the user later sets to Sync, so the card says
+    // that rather than quoting a figure of zero or falling through to silence.
+    val laterOnly = !optimisesAtInstall
+    val nothingLeftToSend = !stillChecking && nothingToOptimise && albumsUnchecked == 0 && !laterOnly
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
@@ -1441,6 +1461,12 @@ private fun OptimizationContent(
 
                 nothingLeftToSend -> Text(
                     text = stringResource(R.string.tour_optimise_nothing),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                laterOnly -> Text(
+                    text = stringResource(R.string.tour_optimise_later_only),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

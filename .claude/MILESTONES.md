@@ -4204,3 +4204,73 @@ nothing new to optimise yet"* — which is true of uploads and false of optimisi
 
 The fix is to pick the population from the `LibraryChoice`: outstanding for option 3, everything
 eligible for option 2. Not yet built.
+
+---
+
+### 6 Sept 2026 (evening) — two fixes, and a third that the data refused
+
+Built after the afternoon run, in the order the findings justified rather than the order they were
+found.
+
+#### Fixed: Step 7 described a population the worker does not use
+
+`OptimizationContent` read `photosOutstanding` / `videosOutstanding` for every choice. That is
+`BACK_UP_AND_OPTIMISE_NEW`'s population, and the card is shown for all four.
+
+- The estimate now reads `CloudReconciliation.photos` / `.videos` — which already documented itself as
+  *"Every photo in scope, backed up or not — what proxying could act on"*, so the right number was
+  there to be asked for.
+- **`LibraryChoice.optimisesAtInstall`** replaces three copies of `mode?.proxiesPhotos == true`, so the
+  screen that estimates the saving and the worker that performs it read one predicate. A unit test
+  asserts the two agree for every choice, because nothing caught them disagreeing for a week.
+- Gate 2's #1 and #4 do not optimise at install at all. They now say so — *"These settings apply to any
+  album you later set to Sync"* — rather than quoting a figure computed from a population they will
+  never touch.
+- `tour_optimise_nothing` was reworded. It read *"Everything on this phone is already in OneDrive, so
+  there is nothing new to optimise yet"*, which is true of uploads and false of optimising — a
+  fully-backed-up library is the best placed to optimise, not the worst.
+
+#### Fixed: the app no longer scans the library because it rewrote it
+
+`BackupWorker` declines a run when `triggeredContentUris`/`triggeredContentAuthorities` is non-empty
+*and* the optimise chain is live — the wake it caused itself. Authorities as well as URIs, because
+Android reports the authority alone when a trigger's URI list overflows, which a burst of proxy writes
+is exactly what would do.
+
+**Declined rather than disarmed**, and that choice is the point. Suppressing the trigger for the
+duration of the chain needs something to re-arm it afterwards, and a chain that dies would leave the
+app blind to new photos until the six-hourly net noticed. This keeps the watch armed exactly as before
+and drops only the scan. Liveness is asked of WorkManager through a new `BackupScheduling.
+optimiseChainLive`, a sibling of `manualRunLive`, rather than a flag that a killed process would leave
+stuck — a stuck flag here would silence the content trigger permanently.
+
+#### Not built: the video bitrate pre-check, because the measurement says no
+
+The morning's proposal was to refuse a low-bitrate clip *before* spending the transcode. Tested against
+the afternoon's 54 clips, and **the groups overlap on every discriminant tried**:
+
+| | Refused (came out no smaller) | Shrank |
+|---|---|---|
+| Source bitrate | 0.20 – **2.98** Mbps | **1.95** – 18.35 Mbps |
+| Source ÷ estimated 480p target | median 1.59, **max 6.69** | **min 3.35**, median 13.17 |
+
+The medians are far apart, so a cut would catch most of the waste — but there is a genuine band where
+both outcomes occur. A cut placed safely below the lowest success (3.35) still catches about 21 of 24,
+which is tempting until two things are weighed:
+
+- **The target-bitrate model is unvalidated.** It assumes 30fps and guesses at
+  `DefaultEncoderFactory`'s heuristic rather than reading it. A 60fps clip is wrong by a factor of two,
+  which is wider than the whole overlap band.
+- **A wrong refusal is permanent.** `NotWorthwhile` writes `isProxySkipped`, and the clip is never
+  offered again. That is a one-way door on a file the user wanted shrunk, spent to save a transcode.
+
+**What would settle it:** read Media3's actual bitrate heuristic and the per-clip frame rate rather
+than assuming either, then test the rule against a second library. Until then the waste stands — 52
+transcodes per install on a library like this one, bounded, self-limiting, and only at install.
+
+#### Verification status, stated plainly
+
+Compiles, full unit suite passes, installs, launches, `logcat -b crash -d` empty. **Neither fix is yet
+verified on hardware**, because both need a fresh wizard run: Step 7 wants a restored fixture so the
+outstanding tallies are zero and the before/after is unambiguous, and the trigger guard wants a live
+optimise chain to decline. One run covers both.

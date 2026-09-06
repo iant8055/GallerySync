@@ -901,7 +901,20 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_optimise_checking">Checking OneDrive to work out what this would save…</string>
     <string name="tour_optimise_unchecked">OneDrive could not be checked just now, so there is no saving to estimate yet. These settings still apply — they act on whatever the first backup sends.</string>
     <string name="tour_optimise_incomplete">Could not check %1$d of your albums, so the real saving is likely to be larger than this.</string>
-    <string name="tour_optimise_nothing">Everything on this phone is already in OneDrive, so there is nothing new to optimise yet.</string>
+    <!--
+        Reworded 6 Sept 2026, with the population it describes. It used to read "Everything on this
+        phone is already in OneDrive, so there is nothing new to optimise yet" — true of *uploads*
+        and false of *optimising*, which is what a fully-backed-up library is best placed to do. Now
+        the tallies count every photo and video in scope, so this fires only when there genuinely is
+        no media in the chosen folders.
+    -->
+    <string name="tour_optimise_nothing">No photos or videos were found in the folders you chose, so there is nothing to optimise.</string>
+    <!--
+        Gate 2's #1 and #4 do not run the install-time optimise at all, so there is no figure to
+        quote. The switches are still worth setting, because they govern any album the user later
+        puts on Sync — saying so beats a bare "0 MB", which reads as a broken estimate.
+    -->
+    <string name="tour_optimise_later_only">These settings apply to any album you later set to Sync. This install will not optimise anything on its own.</string>
     <!--
         Split from video_quality_high and friends because the wizard's three side-by-side buttons
         have room for the name and nothing else. The combined "High — 480p" label is still what the

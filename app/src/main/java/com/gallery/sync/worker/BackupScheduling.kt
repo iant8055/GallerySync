@@ -251,6 +251,19 @@ object BackupScheduling {
         return true
     }
 
+    /**
+     * Whether the optimise chain is queued or running, in any phase.
+     *
+     * Read by [BackupWorker] to tell a content trigger it raised itself from a real one: optimising
+     * rewrites files, MediaStore reports the rewrites, and the trigger fires on the app's own work.
+     * Unlike [enqueueOptimiseIfAbsent] this asks about the whole chain rather than one phase, since
+     * the caller does not care which pass is running - only that one is.
+     */
+    suspend fun optimiseChainLive(workManager: WorkManager): Boolean =
+        workManager.getWorkInfosForUniqueWorkFlow(OPTIMISE_WORK)
+            .first()
+            .any { !it.state.isFinished }
+
     /** Stops the optimise chain. Files already proxied stay proxied; nothing is undone. */
     fun cancelOptimise(workManager: WorkManager) {
         workManager.cancelUniqueWork(OPTIMISE_WORK)

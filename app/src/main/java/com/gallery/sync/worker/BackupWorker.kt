@@ -54,6 +54,35 @@ class BackupWorker @AssistedInject constructor(
             return Result.success()
         }
 
+        // A wake this app caused itself.
+        //
+        // Optimising rewrites files in place, MediaStore reports each rewrite as a change, and the
+        // content trigger fires - so a backup run wakes, scans every granted folder, finds nothing
+        // to upload, re-arms, and the next batch of proxies does it again. Measured on the Moto G,
+        // 6 Sept 2026: twenty such runs across one 36-minute optimise pass, six of them inside the
+        // 85-second photo pass, because that pass rewrites sixty files at a time. The rate tracks
+        // how fast the app is optimising, not the clock.
+        //
+        // It looks cheap at 386 files and is not at 6,371: the scan walks every item in every
+        // granted folder, and in RARE those wakes come out of a ten-minute daily job budget spent
+        // entirely on scans that upload nothing - the app starving itself precisely while doing the
+        // work that saves the user space.
+        //
+        // Declined rather than disarmed, deliberately. Suppressing the trigger for the duration of
+        // the chain would need something to re-arm it afterwards, and an optimise chain that dies
+        // would leave the app blind to new photos until the six-hourly net noticed. This keeps the
+        // watch armed exactly as before and drops only the scan.
+        //
+        // Authorities as well as URIs: Android reports the authority alone when a trigger's URI
+        // list overflows, and a burst of proxy writes is what would overflow it.
+        val selfTriggered = triggeredContentUris.isNotEmpty() ||
+            triggeredContentAuthorities.isNotEmpty()
+        if (selfTriggered && optimiseChainIsLive()) {
+            Logger.i(TAG, "backup run declined: our own optimise writes triggered it")
+            rearmContentTrigger(preferences)
+            return Result.success()
+        }
+
         // Before a byte moves. A session held since an interruption more than ten minutes ago is
         // dropped, so the file starts clean rather than resuming against local bytes that may have
         // changed in the meantime.
@@ -228,6 +257,20 @@ class BackupWorker @AssistedInject constructor(
      * unarmed — is covered twice already: `enable()` runs at application start, and the 6-hourly
      * periodic pass catches whatever a missed trigger dropped.
      */
+    /**
+     * Whether the install-time optimise chain is still running or queued.
+     *
+     * Asked of WorkManager rather than tracked in settings, so it cannot go stale: a chain killed
+     * with the process leaves no flag behind to clear, and a stuck flag here would silence the
+     * content trigger permanently.
+     *
+     * Any failure answers false. Declining a real backup is the worse mistake of the two, and a
+     * false answer only costs the scan this exists to avoid.
+     */
+    private suspend fun optimiseChainIsLive(): Boolean = runCatching {
+        BackupScheduling.optimiseChainLive(WorkManager.getInstance(applicationContext))
+    }.getOrDefault(false)
+
     private suspend fun rearmContentTrigger(preferences: BackupPreferences) {
         if (!preferences.isAutomaticEnabled) return
         BackupScheduling.enqueueContentTriggered(

@@ -65,6 +65,17 @@ enum class LibraryChoice(val mode: AlbumMode?) {
     val uploads: Boolean get() = mode?.uploads == true
 
     /**
+     * Whether choosing this runs the wizard's one-time bulk optimise — Gate 2's #2 and #3.
+     *
+     * Named here rather than spelled `mode?.proxiesPhotos == true` at each call site, because the
+     * screen that *estimates* the saving and the worker that *performs* it must not be able to
+     * disagree about which choices optimise. They did until 6 Sept 2026: Step 7 quoted the
+     * outstanding tallies — the population only #3 was ever described against — while the worker
+     * optimised everything eligible, so a #2 install promised 60 MB and reclaimed 2.26 GB.
+     */
+    val optimisesAtInstall: Boolean get() = mode?.proxiesPhotos == true
+
+    /**
      * The moment before which already-uploaded files are left alone.
      *
      * Only [BACK_UP_AND_OPTIMISE_NEW] sets one; every other choice either optimises everything
