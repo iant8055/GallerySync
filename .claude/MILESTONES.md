@@ -4268,9 +4268,36 @@ which is tempting until two things are weighed:
 than assuming either, then test the rule against a second library. Until then the waste stands — 52
 transcodes per install on a library like this one, bounded, self-limiting, and only at install.
 
-#### Verification status, stated plainly
+#### Verified on hardware, both of them
 
-Compiles, full unit suite passes, installs, launches, `logcat -b crash -d` empty. **Neither fix is yet
-verified on hardware**, because both need a fresh wizard run: Step 7 wants a restored fixture so the
-outstanding tallies are zero and the before/after is unambiguous, and the trigger guard wants a live
-optimise chain to decline. One run covers both.
+**The trigger guard**, on the 15:12 run — the same phases that produced twenty no-op scans in the
+afternoon:
+
+| Photo pass | Afternoon (before) | After |
+|---|---|---|
+| Duration | 85 s | 81 s |
+| No-op scans | **6** | **0** |
+| Declines logged | — | **6** |
+
+Across the whole run: **16 declines, 0 no-op scans, 0 files uploaded.** One-for-one — the same triggers
+arrive and each is declined instead of scanning the library, with the watch still armed. That is the
+design intent, measured rather than argued.
+
+**The Step 7 estimate**, captured on a restored fixture (311 files, 2.6 GB local, 7 outstanding):
+
+| Line | Predicted | Actual | Old build would have shown |
+|---|---|---|---|
+| Estimated photo savings | ~702 MB | **718 MB** | ~16 MB |
+| Estimated video savings | ~1.6 GB | **1.6 GB** | *no line at all* |
+| Total estimated savings | ~2.2 GB | **2.3 GB** | ~16 MB |
+
+The video line is the unambiguous half: outstanding videos were zero, so the old code had nothing to
+draw it from. Screenshot taken at Step 7 before any upload, so nothing about the run could have
+influenced it.
+
+**One instrument note.** The phone dropped its adb connection mid-check and the advertised mDNS port
+was stale — `adb connect` refused on the port `adb mdns services` was still publishing. Toggling
+Wireless debugging off and on restored it, and the device then reconnected on both transports by
+itself. CLAUDE.md already warns the port changes on every toggle; what this adds is that **the mDNS
+record can outlive the port**, so a refused connection on a freshly-discovered address is not evidence
+the phone is gone.
