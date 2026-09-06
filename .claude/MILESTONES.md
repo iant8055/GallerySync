@@ -4301,3 +4301,44 @@ Wireless debugging off and on restored it, and the device then reconnected on bo
 itself. CLAUDE.md already warns the port changes on every toggle; what this adds is that **the mDNS
 record can outlive the port**, so a refused connection on a freshly-discovered address is not evidence
 the phone is gone.
+
+---
+
+### 6 Sept 2026 (late) — MediaStore lags a bulk copy, and a reconcile taken too early is wrong
+
+Found by accident while confirming the Step 7 fix, and it bears on the whole day's method.
+
+The wizard sat at Step 7 across a phone restart. Nothing was touched but the power button, and the
+reconcile came back different:
+
+| | Files scanned | Already in OneDrive | Outstanding |
+|---|---|---|---|
+| Before the reboot | 311 | 304 | **7** |
+| After the reboot | **314** | 250 | **64** |
+
+**314 is the true count** — Ian, checking local `DCIM` directly. So the pre-reboot scan was three files
+short and, on the evidence of the outstanding column, holding stale sizes for many more. Both figures
+came from the same app on the same library minutes apart; the earlier one was simply asking a
+MediaStore that had not caught up with a bulk file copy.
+
+**Why it matters beyond this run.** Every fixture test in this project restores files by copying them
+in, then immediately clears the app and reads what the reconcile says. That is precisely the window
+where MediaStore is stale, and the reconcile compares **name and size** against OneDrive — so stale
+sizes produce wrong answers in both directions: files reported missing that are present, and files
+reported present that no longer match. The "a clean reinstall re-uploads everything" defect turns on
+exactly this comparison, so some of its behaviour may be measurement rather than mechanism.
+
+**What to do about it:** after restoring a fixture, force the index and check the count before trusting
+any reconcile — the file count against `ls`/`du` is the cheap tell, as it was here. A figure that
+disagrees with the disk is the instrument, not the app. This is the same lesson as the 28 Aug entry
+about `content query` returning three different row counts in one session, arriving from a new
+direction: **when an instrument disagrees with the evidence, doubt the instrument.**
+
+**It does not disturb the Step 7 verification.** That screenshot was taken against the 311-file scan,
+and after the reboot — with outstanding swinging 7 → 64 — the card still read 718 MB / 1.6 GB / 2.3 GB,
+unchanged. Which is the fix's whole point: the estimate now follows the population that will be
+optimised, not the one that will be uploaded, so it is immune to exactly this swing. The old code would
+have lurched with it.
+
+**Left open:** whether 64 outstanding is itself correct. Nothing was done to the library between the
+two readings, and 57 files changing category deserves an explanation before the figure is trusted.
