@@ -3947,3 +3947,171 @@ ten-minute daily job budget on scans that upload nothing, so **the app would sta
 while doing the work that saves the user space**. Worth fixing at the trigger — either suppressing the
 content trigger while an optimise chain is live, or recognising the URIs we just wrote — rather than
 anywhere downstream.
+
+---
+
+### 6 Sept 2026 (overnight) — the first clean unattended delayed start
+
+The counterpart to yesterday's 26-minute hold: the same mechanism, left alone overnight on the Moto G,
+and it fired on time and ran the whole way through with nobody watching. Charging throughout, and no
+reboot — `uptime` 1d 23:57 when this was read.
+
+| | |
+|---|---|
+| Delay armed | 00:44:34, `first_backup_delay_millis` = 4 h |
+| Due | 04:44:34 |
+| App last on screen | 00:45:00, and **never reopened** — usagestats shows no `ACTIVITY_RESUMED` until after the run |
+| First upload completed | 04:50:34 |
+| Last upload completed | 04:59:28 |
+
+**Under six minutes from due to the first completed upload**, and that figure includes worker start plus
+the first file's transfer, so the dispatch latency itself is smaller than it. Against 26 minutes 42
+seconds yesterday afternoon, and against three separate holds that only moved when Ian touched the
+phone. One night is one sample and the bucket demotion is idleness-triggered rather than scheduled, so
+this does not retire the finding above — but the delayed start now has a clean run to its name.
+
+**The backup**: 303 files, 2.58 GB, in 8 minutes 54 seconds. No errors, `attemptCount` 0 on every row,
+no retries. All 303 carry a `remoteItemId` *and* `remoteSizeBytes == sizeBytes` — the `verifiedInCloud()`
+bar met for every file, not merely for most of them.
+
+**Optimising followed on its own**, 04:59:28 → 05:28:08, 26 chained `OptimiseWorker` runs with the app
+closed: 255 proxied, 48 recorded not-worth-proxying. Local footprint 2.58 GB → 0.73 GB, and `du` agrees
+independently at 748 MB across `DCIM`. About 1.85 GB genuinely reclaimed — proxying shortens in place,
+so unlike a trashed file that space is back immediately.
+
+Nothing was removed: all six albums read `OFF`, and no row has `localMissingSinceEpochMillis` set.
+
+#### Reading a run whose logs are gone
+
+The logcat buffer held nothing from the run, for a reason worth knowing on its own — see the buffer
+note below. The whole reconstruction came from state on disk instead, which is worth recording as a
+method:
+
+- **`backup_entries`, read with its `-wal` and `-shm`**, gives the minute-by-minute upload histogram
+  from `uploadedAtEpochMillis`, the error and attempt columns, and the cloud-verification check.
+- **`files/datastore/backup_settings.preferences_pb`** holds `first_backup_start_at` and
+  `first_backup_delay_millis`, which is the only surviving record of *when the delay was due*.
+  WorkManager had already pruned the delayed-start `WorkSpec`.
+- **`dumpsys usagestats`** fixes when the app was last on screen, which is what makes "unattended"
+  a measurement rather than an assumption.
+
+#### Two things this run did not settle
+
+- **The no-op backup loop** from the 5 Sept evening entry does not appear in `androidx.work.workdb` —
+  but unique work keeps only its latest row, so absence there is not evidence of absence. It needs a
+  live logcat during an optimise pass.
+- **28 videos in `Funny stuff`, up to 43 MB each, came back `NotWorthwhile`** while 31 videos elsewhere
+  proxied down from as little as 3 MB. The 20 photos skipped alongside them average 0.5 MB and are
+  obviously correct. **Answered the same day — see the entry below.**
+
+#### The reconcile, watched by eye at 12:14
+
+Ian opened the app after the run and **watched the verification figures update on screen** — the check
+this entry had so far only inferred from the ledger. `album_cloud_status`, written 12:14:51–12:14:56:
+
+| Album | Verified | Missing | Could not check |
+|---|---|---|---|
+| BudgetMixed | 50 | 0 | 0 |
+| BudgetPhotos | 100 | 0 | 0 |
+| Camping | 39 | 0 | 0 |
+| Car Show | 34 | 0 | 0 |
+| Funny stuff | 75 | 0 | 0 |
+| PauseTest | 5 | 0 | 0 |
+
+303 of 303, nothing missing, nothing unverifiable — and **255 of the 303 are proxies**, deliberately
+smaller than the copies OneDrive holds. That is the 4 Sept `ReconciliationRules.tallyAlbum` fix under a
+*majority*-proxied library, a harder case than the 464-of-622 run on 5 Sept, and this time watched
+happening rather than read afterwards.
+
+#### Instrument: this device's logcat holds about 97 seconds
+
+Measured 6 Sept, and it invalidates a plan written earlier in this same entry.
+
+```
+main: ring buffer is 256 KiB (242 KiB consumed, 877 KiB readable)
+```
+
+At 12:22 the main buffer spanned **12:20:25 → 12:22:02**. Ordinary UI activity — `BufferQueueProducer`
+and `SurfaceFlinger` chatter — churns it in under two minutes, so the 12:14 reconcile had already aged
+out seven minutes later, and the overnight run never stood a chance.
+
+**This is not a logging defect.** The installed build is `DEBUGGABLE` and `isLoggable` never gates
+INFO, so `Logger.i` was emitting the whole time. The lines were simply evicted.
+
+The consequence: **"catch it in a live logcat" is not a plan on this device** unless logcat is already
+streaming to a file before the run starts. Raise the buffer first — `adb -s ZT422CTZQV logcat -G 16M`
+per buffer, until reboot, or `setprop persist.logd.size 16M` to persist it — or redirect to a file and
+accept that a rolled buffer is the default outcome otherwise. The no-op-backup-loop question from the
+5 Sept evening entry is blocked on exactly this.
+
+---
+
+### 6 Sept 2026 — why 28 clips were "not worth proxying", and why the answer is bitrate
+
+Ian, looking at the overnight figures: *"I can not tell what the threshold is for when the app
+optimizes or doesn't for the video files."* Neither could the ledger, so this is what it turned out to
+be. **The intuitive threshold — file size — plays no part whatsoever.**
+
+#### There are two thresholds, and they sit either side of the encode
+
+**Before decoding**, `VideoTranscoder.transcode()` refuses on the short edge:
+
+```kotlin
+if (source.shortSide in 1..quality.targetShortSide)   // 480 at the default High
+    return NotWorthwhile("already ${w}x${h}, at or under the target")
+```
+
+**After encoding**, `validate()` throws the output away if `created.sizeBytes >= source.sizeBytes`.
+
+Of the 28: **4 were refused on the short edge** (218, 346, 368, 384). The other **24 got a full
+transcode and then had it discarded**.
+
+#### The bitrate table, which is the actual finding
+
+Every one of the 24 was already between **0.20 and 2.98 Mbps**, most of them under 1.5:
+
+| File | WxH | Short | MB | Secs | Mbps |
+|---|---|---|---|---|---|
+| Screen_Recording_20260421_171340_YouTube.mp4 | 1074x832 | 832 | 43.1 | 313 | 1.16 |
+| Screen_Recording_20260521_233124_YouTube.mp4 | 1080x1298 | 1080 | 35.1 | 199 | 1.48 |
+| Screen_Recording_20260125_145925_Instagram.mp4 | 694x686 | 686 | 29.8 | 178 | 1.41 |
+| Screen_Recording_20251201_144658_YouTube.mp4 | 1080x620 | 620 | 21.6 | 135 | 1.34 |
+| 75be685608807b53e5a56521ff96d260.mp4 | 576x1024 | 576 | 11.7 | 170 | 0.58 |
+| ed5d6e4ca70a2df30667360f2d2d7052.mp4 | 576x694 | 576 | 0.5 | 20 | 0.20 |
+
+The app sets **no explicit bitrate** — `Transformer` is built with a MIME type and a `Presentation`,
+and Media3's `DefaultEncoderFactory` chooses the rate. For a 480p target that lands in the same
+1.5–2 Mbps band these sources already occupy, and 576 → 480 on the short edge sheds only about 30% of
+the pixels. There is nothing to win, and the validate check correctly says so.
+
+**So the 43 MB clip was skipped for being long, not for being big** — 313 seconds at 1.16 Mbps. The 31
+clips that did proxy were ordinary phone video at a camera's bitrate. **Size is a red herring; the
+axis is bitrate, and secondarily the short edge.**
+
+#### Ruled out rather than assumed
+
+- **"Already a proxy."** Every MP4 in the folder was grepped for the `GallerySync proxy` marker.
+  Exactly 18 carry it, and they are precisely the 18 that transcoded — so none of the 28 was a
+  leftover from an earlier run, and the fixture reset is not implicated.
+- **"This phone cannot decode it."** All 24 have even dimensions and sit far inside the software AVC
+  decoder's 1920x1088, and `VideoCapability.canDecode` polls every decoder rather than the default.
+
+#### What is inference, and what would settle it
+
+The bitrate arithmetic is strong but it is **not the log line**. `VideoOptimiser` records the reason at
+`Logger.d`, and this device's 97-second logcat buffer had evicted it hours before anyone looked. To
+settle it: raise the buffer, clear `isProxySkipped` on two or three of these rows, and run the pass
+again — the reason string is then read directly rather than reconstructed.
+
+#### The product question it raises
+
+**24 full transcodes were spent to produce nothing.** Self-limiting, because `markProxySkipped` is
+permanent and they are never offered again — but the class comment says *"Every refusal is decided
+before a frame is decoded. Starting a transcode is the expensive act and all of these answers are
+cheap."* A source-bitrate check belongs in that same set of cheap answers, since duration and size are
+both already in hand before anything is decoded. Worth weighing against the risk of refusing a clip
+that would in fact have shrunk.
+
+Related: the wizard's `approximateSavingPercent = 85` is measured on camera-bitrate footage. A library
+of social-media downloads and screen recordings will not come close to it, and today it silently did
+not.
