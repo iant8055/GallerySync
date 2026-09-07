@@ -15,6 +15,9 @@ and v0.4 (retrieval) are for. That is a broken product no matter how well the ba
 - **The Sept 30 date is a personal deadline, not a release deadline.** Ian's own library still needs
   protecting when Samsung's sync stops. Backup alone covers that.
 - **v0.3 can be built properly rather than rushed**, since no store listing depends on it.
+- **Strip the testing affordances before submission.** *Run setup again* (Settings → Setup) is a test
+  tool and will not ship; it goes as soon as the wizard is settled, which is expected to be well
+  before submission — see "The wizard and the Settings tab are independent" below.
 
 Cutover rule: run alongside Samsung's sync for at least two weeks before trusting this alone.
 
@@ -274,9 +277,19 @@ other side.
 the explanation is wrong by construction. Discard it rather than checking it — the same test the
 optimising areas below already carry.
 
-Note that the Settings tab's own copy for *Run setup again* reads "It opens on your current settings,
-changes no album on its own, and does not ask you to re-confirm anything you have already read." That
-copy is not a spec and does not create an obligation on the wizard.
+**The *Run setup again* button in Settings is a testing affordance and WILL NOT SHIP.** Stated by Ian,
+7 Sept 2026. It exists so the wizard can be re-entered on a device without wiping app data, which is
+the only practical way to exercise the flow repeatedly. Consequences:
+
+- **Do not treat its copy as product copy.** It currently reads "It opens on your current settings,
+  changes no album on its own, and does not ask you to re-confirm anything you have already read" —
+  that string is not a spec, creates no obligation on the wizard, and is not worth correcting.
+- **Do not build on it, test against it, or polish it.** No user-facing behaviour may depend on the
+  wizard being re-enterable after setup completes.
+- **It goes away once the wizard is settled.** Ian, 7 Sept 2026: *"Once we finally get the Wizard set
+  that setting will go away."* The trigger is the wizard work being finished, not the submission date
+  — it is simply that the wizard is still being iterated on, and re-entering it is how that is done.
+  It must be gone by the Play Store submission regardless; tracked under the release gate above.
 
 ## Optimising: two independent areas — do not conflate them
 

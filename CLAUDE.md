@@ -192,6 +192,12 @@ Do not file any of it, do not fix it, and do not report it as an inconsistency t
 explanation you are building requires one of these surfaces to write the other, the explanation is
 wrong — discard it rather than checking it.
 
+**Settings → *Run setup again* is a testing affordance and will not ship** (Ian, 7 Sept 2026). It is
+there so the wizard can be re-entered without wiping app data while the wizard is still being
+iterated on, and *"once we finally get the Wizard set that setting will go away"*. Do not build on it,
+test against it, or correct its copy, and never let user-facing behaviour depend on the wizard being
+re-enterable.
+
 ### Album modes are set only by the user — nothing else writes them
 Ian has corrected this more than once, most recently 4 Sept 2026. It is here, in the file that always
 loads, because a memory file recording the same rule did not stop it recurring.
