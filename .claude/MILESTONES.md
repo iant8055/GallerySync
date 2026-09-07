@@ -4571,3 +4571,53 @@ good.** The Gate 2 #2-vs-#3 distinction was not separately re-measured in that p
 **27 strings are now orphaned** — the 26 `topic_*` and `wizard_skip`. Left in `strings.xml` by decision:
 unused string resources are inert, and Ian ruled against rehoming `topic_promise_body`'s prose absent any
 consequence to leaving it.
+
+
+### 7 Sept 2026 (afternoon) — one folder, two albums, and a default that rewrote files unasked
+
+Both found by Ian on the Moto G during wizard testing, after the clean install at 13:14.
+
+**`Camera` and `camera` are the same directory.** Same inode — `45845` for both — and identical
+listings of the same eight files. Android's emulated storage is case-insensitive but case-preserving;
+MediaStore records the literal path the writing app supplied and derives `BUCKET_DISPLAY_NAME` from
+it. The fixture folder was made as `camera`; the Moto's camera app writes `DCIM/Camera`. Ids 5188–5191
+carry bucket `camera`, ids 5192–5194 carry `Camera`, and **`bucket_id` is `-1739773001` for every one
+of them**, because Android derives that from the lower-cased path.
+
+GallerySync keys albums on the display name (`MediaScanner.kt:165`), and `album_preferences` is
+`PRIMARY KEY(albumName)` on TEXT with BINARY collation, so the spellings never collide. Result: two
+albums, two `album_cloud_status` rows, `Camera` 3 files and `camera` 12.
+
+**Why it matters more than the count being wrong.** One physical folder can hold two album modes. Set
+`Camera` to Archive and leave `camera` Off and archiving removes three files and leaves twelve, split
+along which app wrote each file — so every new camera capture joins the Archive half on its own. That
+is the membership rule in CLAUDE.md exactly: what an Archive album contains must not widen under a
+choice made earlier.
+
+Specced as **TASK-023**, not started. `BUCKET_ID` is the clean key, but it is a Room migration and so
+Ian's call, and the merge rule for two rows holding different modes has to be his too — the safe
+answer is least-destructive-wins, and picking it silently is not on. Whether OneDrive already holds
+one folder or two under the two spellings is **unverified**.
+
+**Not caused by TASK-022.** The `Camera` rows are timestamped 13:53:46 onward, the first video shot
+after that afternoon's clean install; the fixture had only ever contained `camera` before.
+
+**Optimise photos defaulted On — fixed** (`03fdc48`). `isOptimiseEnabled` is off by default so nothing
+was optimising, but the Settings screen showed the switch on while nothing happened, and the video
+row's handler clears the master only `if (!optimisePhotos)`. Turning video on and off again therefore
+left the master on with photos still marked wanted, and photo optimising began having never been asked
+for — a default rewriting files nobody opted into. Changed in three places: the field, its DataStore
+read fallback, and the transient UI state in `BackupViewModel`.
+
+`DEFAULTS.md` had no entry for `optimisePhotos` at all — the existing entry covers the automatic
+master, and the per-medium switches were added later without one. That absence is why it drifted, so
+both `optimisePhotos` and `optimiseVideo` are documented there now.
+
+**Still to check on device:** the Settings switch has not been *looked* at since the fix. A fresh
+DataStore holds only `upgrade_backfill_checked` and `wizard_step`, so `optimise_photos` is absent and
+the code default is what applies — but on a fresh install Settings sits behind the tour with the nav
+bar inert, so confirming the pixels needs the wizard walked first.
+
+**Also noted, unfixed:** OkHttp logs full response bodies at INFO. Reading a run means wading through
+complete Graph JSON — every file name, size and hash — which buries the app's own `GallerySync/*`
+lines and puts file names and drive IDs in a buffer. Worth dropping to `BASIC` before release.
