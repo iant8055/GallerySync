@@ -277,12 +277,22 @@ confident, wrong report that Ian's library was at risk and cost about an hour.
 | Moto G 2026 | `ZT422CTZQV` | Stock Android, **Google Photos rather than Samsung Gallery** — so it is where non-Samsung behaviour gets checked. Destination root `MotoG/Gallery`. |
 | Galaxy Z Fold 8 | — | **Ian's real phone.** Never experiment on it. |
 
-**Two capabilities left with the Fold 4, and neither has a replacement.**
+**The Moto G's OneDrive account is a test account. So is everything on the phone.**
 
-- **The disposable OneDrive account.** It was the only account whose contents did not matter. Every
-  test that uploads now runs against a real account on the Moto G, so anything that writes to the
-  cloud costs the user cleanup afterwards. Weigh that before proposing a test that backs up a large
-  folder to prove something — and say what it will cost before starting it.
+Stated by Ian, 7 Sept 2026. **The account the Moto G uploads to exists only for testing, and every
+photo and video on that device was put there to be test data.** Nothing in either place is real, and
+nothing in either place needs protecting.
+
+So a test that uploads is cheap. Propose one freely, run large backups, fill the account — there is
+no cleanup cost to weigh and no need to ask permission before writing to that account. The care
+belongs to the **Galaxy Z Fold 8**, Ian's real phone, which is never experimented on.
+
+**This corrects what this file said until 7 Sept 2026** — that the only disposable account left with
+the Fold 4 and that Moto G uploads therefore cost Ian cleanup. That was wrong, and it made every
+upload test read as expensive when none of them are. Do not reinstate it.
+
+**One capability did leave with the Fold 4, and it has no replacement.**
+
 - **The 344dp cover screen.** It was the narrowest surface this app runs on and the only place the
   compact layout could be proven on hardware. There is no device left that can. Compact-width work
   is now verifiable only in a Compose preview or an emulator, which is weaker evidence, and any
