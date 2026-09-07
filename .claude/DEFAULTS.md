@@ -72,6 +72,37 @@ than "do it silently".
 
 ---
 
+### Optimise photos — **off**
+`optimisePhotos = false` · [BackupSettings.kt:64](../app/src/main/java/com/gallery/sync/data/local/settings/BackupSettings.kt)
+
+**If untouched:** the Sync section shows Optimise photos off, and no photo is a proxy candidate.
+
+**Why off:** it is the switch that says "yes, rewrite my photos smaller". Every default that rewrites
+a file is off, and this is one of them.
+
+**It was `true` until 7 Sept 2026**, found by Ian reading the Settings screen. Recorded here because
+this file had no entry for it, and that absence is why it drifted — the entry below covered the
+*automatic* master only, and the per-medium switches were added later without one.
+
+**Why it was not merely cosmetic.** The master (`isOptimiseEnabled`) is off by default, so nothing
+optimised. But the screen showed the switch on while nothing was happening, and the video row's
+handler clears the master only `if (!optimisePhotos)`. Turning video on and then off again therefore
+left the master on with photos still marked wanted — and photo optimising started, having never been
+asked for. Fixing the default closes that path too.
+
+**Cost of leaving it off:** no photo proxies, so the photo half of the space saving is unclaimed
+until the user asks for it.
+
+---
+
+### Optimise video — **off**
+`optimiseVideo = false` · [BackupSettings.kt:70](../app/src/main/java/com/gallery/sync/data/local/settings/BackupSettings.kt)
+
+**If untouched:** no video is transcoded. Always was off; recorded here for symmetry with the entry
+above, so a future reader does not have to infer the pair from one of them.
+
+---
+
 ### Default mode for new albums — **Off**
 `defaultAlbumMode = AlbumMode.DEFAULT` = `OFF` · [AlbumMode.kt:77](../app/src/main/java/com/gallery/sync/data/local/entity/AlbumMode.kt)
 

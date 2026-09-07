@@ -51,7 +51,17 @@ data class BackupPreferences(
      * [OptimiseMode]: *"do you want to opt video - Y / N. If Y how do you want - Man / Aut. Simple
      * as that."* One question per line, each only asked when the one above it was answered yes.
      */
-    val optimisePhotos: Boolean = true,
+    /**
+     * **Off by default**, like every other setting that rewrites a file. Corrected 7 Sept 2026
+     * after Ian found it reading On out of the box.
+     *
+     * It defaulting On was not merely cosmetic. `isOptimiseEnabled` is off by default, so nothing
+     * optimised — but the Settings screen showed the switch On while nothing was happening, and
+     * the video row's handler clears the master only `if (!optimisePhotos)`. So turning video on
+     * and off again left the master on with photos still marked wanted, and photo optimising
+     * began having never been asked for. See DEFAULTS.md.
+     */
+    val optimisePhotos: Boolean = false,
     /** Whether photos are optimised on their own, or on a tap. Only asked when [optimisePhotos]. */
     val photoOptimiseMode: OptimiseMode = OptimiseMode.DEFAULT,
     /** How old a photo must be before it may be optimised. Per file - see [MediaAge]. */
@@ -237,7 +247,7 @@ class BackupSettings @Inject constructor(
             isAutomaticEnabled = stored[KEY_AUTOMATIC] ?: true,
             allowMeteredNetwork = stored[KEY_ALLOW_METERED] ?: false,
             isOptimiseEnabled = stored[KEY_OPTIMISE_ENABLED] ?: false,
-            optimisePhotos = stored[KEY_OPTIMISE_PHOTOS] ?: true,
+            optimisePhotos = stored[KEY_OPTIMISE_PHOTOS] ?: false,
             photoOptimiseMode = OptimiseMode.fromNameOrDefault(stored[KEY_PHOTO_OPTIMISE_MODE]),
             photoOptimiseAge = MediaAge.fromNameOrDefault(stored[KEY_PHOTO_OPTIMISE_AGE]),
             optimiseVideo = stored[KEY_OPTIMISE_VIDEO] ?: false,

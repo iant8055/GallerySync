@@ -204,7 +204,7 @@ data class BackupUiState(
     /** Allow automatic runs on mobile data, not just Wi-Fi. */
     val allowMeteredNetwork: Boolean = false,
     val isOptimiseEnabled: Boolean = false,
-    val optimisePhotos: Boolean = true,
+    val optimisePhotos: Boolean = false,
     val photoOptimiseMode: OptimiseMode = OptimiseMode.DEFAULT,
     val photoOptimiseAge: MediaAge = MediaAge.DEFAULT,
     val optimiseVideo: Boolean = true,
