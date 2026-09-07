@@ -130,7 +130,8 @@ class LibraryChoiceTest {
      * phone"*; #3 *"ONLY optimizes files that were actually backed up in the previous step"*.
      *
      * They *were* the same until that day, because the cutoff that separates them was written only
-     * by `ApplyLibraryChoice` — reachable from two screens that nothing renders.
+     * by a bulk applier reachable from two screens that nothing rendered. Both were deleted in
+     * TASK-022; `ReconcileViewModel.setLibraryChoice` is now the only writer.
      */
     @Test
     fun onlyFreeSpaceOptimisesTheWholeLibrary() {

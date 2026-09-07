@@ -48,11 +48,14 @@ import java.time.Instant
  * "entire back catalogue". `proxyCandidates` joins on `album_preferences WHERE mode = SYNC`, so
  * nothing outside a Sync album is ever a candidate.
  *
- * That is a real limit and not quite a reassuring one. Gate 2's *"Back up and free space"* maps to
- * `AlbumMode.SYNC` and `ApplyLibraryChoice` applies it to **every album at once**, with `REPLACE`.
- * So the whole-library case is one tap away at setup, taken by someone who has not yet met this
+ * That is a real limit and not quite a reassuring one. Gate 2's *"Back up and free space"* sets the
+ * optimise cutoff to `EVERYTHING`, so every file in a Sync album is in range from the first sweep.
+ * The whole-library case is one tap away at setup, taken by someone who has not yet met this
  * setting — which is an argument for the first sweep being announced rather than for the age value
  * being expected to restrain it.
+ *
+ * Note what that tap does *not* do: no install choice writes an album's mode, only the user does.
+ * The bulk mode writer that once existed was deleted with the orphaned wizard in TASK-022.
  *
  * ### Measured against modification time
  *

@@ -37,6 +37,31 @@ is harmless.
 **Verify with a real wizard run**, not just a build. The edit is in the live wizard's ViewModel and a
 constructor change touches Hilt injection; a mistake breaks the most exercised path in the app.
 
+### Part A was widened, and done — 7 Sept 2026
+
+Ian applied Chesterton's Fence before approving the deletion, and it changed the scope. The three files
+were not the whole story: `SetupWizardScreen.kt:208` was the only caller anywhere of `acknowledgeTopic()`,
+so deleting it would have orphaned `SetupTopic`, `ReconcileViewModel.acknowledgeTopic`,
+`BackupSettings.acknowledgeTopic`, `KEY_ACKNOWLEDGED_TOPICS` and `acknowledgedTopics` — a designed
+mechanism, left looking purposeful and unreachable. Exactly the `ApplyLibraryChoice` trap this task exists
+to remove.
+
+Both of that mechanism's remaining reasons were retired by Ian on the day: the Help screen (TASK-017) was
+superseded by the approved (?) tooltips, and the just-in-time prompt was premised on a Skip button the tour
+no longer has. So **`SetupTopic.kt` and the whole acknowledgement chain went too** — four files, 1,236
+deletions, 14 insertions.
+
+Not touched, deliberately: `settings.setOptimiseCutoff(...)` in `setLibraryChoice`, and the Archive
+confirmation in `BackupScreen`, which never used the acknowledgement record and is what CLAUDE.md's consent
+rule actually rests on.
+
+**27 strings are now unreferenced** — 26 `topic_*` plus `wizard_skip`. Left in place: unused string
+resources are inert, and Ian ruled against rehoming `topic_promise_body` absent a consequence.
+
+Verified: compile + Hilt/KSP, 315/315 unit tests, `assembleDebug`, clean install on the Moto G with an
+empty crash buffer and the wizard entering at step 1, then **Ian walked the wizard on the device and
+reported it good**.
+
 ## Part B — remove `photoOptimiseAge`
 
 Ian ruled on 19 Aug 2026, TASK-011: *"only the Sync age is limited to video. Photos are proxied

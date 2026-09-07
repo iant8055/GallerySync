@@ -2184,6 +2184,14 @@ panels advance only on a named acknowledgement — *"I understand — Archive ta
 — recorded per topic in `BackupSettings.acknowledgedTopics`. The topic strings are the single source the
 Help screen (TASK-017) will read, so the wizard and Help cannot drift.
 
+> **Withdrawn 7 Sept 2026.** None of that survives. `SetupTour` replaced the eighteen-panel wizard on
+> 31 Aug (`e6a0794`) with hardcoded bubble text and never carried the acknowledgement across, so nothing
+> has written an acknowledgement since. TASK-017's Help screen was superseded by the approved (?) tooltip
+> decision, and the just-in-time prompt was premised on a Skip button that no longer exists. `SetupTopic`,
+> `acknowledgedTopics` and `KEY_ACKNOWLEDGED_TOPICS` were deleted in TASK-022 — see the entry at the end
+> of this file. Do not rebuild the acknowledgement gate: the Archive confirmation in `BackupScreen` is
+> what CLAUDE.md requires, and it is independent of all of this.
+
 **Verified on the Fold 4 in both themes.** Dark mode is correct — dark container, light body text, no
 hardcoded colours. The migration was checked first: an install with granted folders lands on its tabs with
 every album and mode intact, not in the wizard.
@@ -4519,3 +4527,47 @@ exist?* comes before *why doesn't it work?*, and TASK-011 answered it in one gre
 reached the Settings screen on 30 Aug (`f650536`), and was written into the Area 2 tree in this file on
 29 Aug (`c0c9b81`) — all after the 19 Aug decision that none is wanted. It should be removed from
 `BackupSettings`, from `SettingsScreen`, and from the tree above. **Not yet done.**
+
+
+### 7 Sept 2026 — TASK-022 Part A, and a fence checked before it came down
+
+**Three orphaned files deleted, plus a fourth found by asking why the fence was there.**
+`ApplyLibraryChoice.kt`, `SetupWizardScreen.kt` and `ReconcileScreen.kt` had been unreachable since
+`e6a0794` (31 Aug). `SetupTopic.kt` went with them — 1,236 deletions against 14 insertions.
+
+**Chesterton's Fence, applied at Ian's instruction, changed the scope.** The spec called this a pure
+removal. It was not. `SetupWizardScreen.kt:208` was the **only caller anywhere** of
+`acknowledgeTopic()`, and behind that one line sat a fully-built chain nothing else touched:
+`ReconcileViewModel.acknowledgeTopic` and its `acknowledgedTopics` state, `BackupSettings.acknowledgeTopic`,
+`KEY_ACKNOWLEDGED_TOPICS`, and the 26-value `SetupTopic` enum whose KDoc claimed three consumers — the
+first-run bubbles, the Help screen, and a just-in-time prompt. Only the first was ever wired, and it was
+the dead one.
+
+Ian retired both remaining reasons: **the (?) tooltips were an approved decision, replacing the Help
+menu** (so TASK-017 is superseded), and **the just-in-time prompt was premised on a Skip button the tour
+no longer has**. The code agreed — `R.string.wizard_skip` was referenced by exactly one file, the dead
+wizard. Only then was the chain removed.
+
+**What deleting it does not touch.** The Archive confirmation is independent: `ArchiveConfirmDialog` at
+`BackupScreen.kt:745`, raised unconditionally, never consulting the acknowledgement record. CLAUDE.md's
+consent rule is satisfied without any of the deleted code. TASK-014's stronger precondition — a destructive
+mode cannot be chosen before its explanation is acknowledged — is now permanently unenforceable, and had
+been unenforced in practice since 31 Aug.
+
+**One substantive correction fell out of it.** `MediaAge.kt:52` claimed Gate 2's *"Back up and free space"*
+maps to `AlbumMode.SYNC` and that `ApplyLibraryChoice` *"applies it to every album at once, with REPLACE"*.
+Wrong twice: the class is gone, and no install choice writes an album mode. It now attributes the
+whole-library reach to the optimise cutoff, which is what actually causes it.
+
+**`setOptimiseCutoff` survived, deliberately.** `ReconcileViewModel.setLibraryChoice` writes it one line
+from a deletion, and it is the only thing separating Gate 2 #3 from #2 — the defect fixed on 6 Sept.
+
+**Verified.** `compileDebugKotlin` and `compileDebugUnitTestKotlin` pass including Hilt/KSP codegen, which
+was the real risk in a constructor change. Unit suite 315/315, 0 failures. `assembleDebug` packaged.
+Clean install on the Moto G at 13:14:55 (`firstInstallTime` == `lastUpdateTime`, so genuinely fresh), crash
+buffer empty on launch, wizard entering at step 1. **Ian walked the wizard on the device and reported it
+good.** The Gate 2 #2-vs-#3 distinction was not separately re-measured in that pass.
+
+**27 strings are now orphaned** — the 26 `topic_*` and `wizard_skip`. Left in `strings.xml` by decision:
+unused string resources are inert, and Ian ruled against rehoming `topic_promise_body`'s prose absent any
+consequence to leaving it.

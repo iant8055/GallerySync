@@ -8,7 +8,6 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.domain.backup.LibraryChoice
@@ -119,20 +118,6 @@ data class BackupPreferences(
      * expects a folder to be there needs a way to confirm it is.
      */
     val showEmptyCloudFolders: Boolean = false,
-    /**
-     * Setup topics whose explanation the user has explicitly acknowledged.
-     *
-     * Holds [com.gallery.sync.domain.setup.SetupTopic.key] values. This records that the
-     * explanation was *put in front of them and deliberately dismissed* — not that they consented
-     * to anything, and not that they understood it. Choosing Archive for an album still raises its
-     * own confirmation; the two must never be collapsed, because one is "I know what this does" and
-     * the other is "do it to this album".
-     *
-     * Per topic rather than per tour, so that adding an eleventh topic later does not re-run setup
-     * for everyone, and someone who read the Archive explanation during the tour is not shown it
-     * again at first use.
-     */
-    val acknowledgedTopics: Set<String> = emptySet(),
     /**
      * Whether guided setup has been finished or deliberately skipped.
      *
@@ -283,7 +268,6 @@ class BackupSettings @Inject constructor(
                 ?.takeIf { it in CloudDeletionGrace.SELECTABLE_DAYS }
                 ?: CloudDeletionGrace.DEFAULT_DAYS,
             showEmptyCloudFolders = stored[KEY_SHOW_EMPTY_FOLDERS] ?: false,
-            acknowledgedTopics = stored[KEY_ACKNOWLEDGED_TOPICS] ?: emptySet(),
             hasCompletedSetup = stored[KEY_SETUP_COMPLETE] ?: false,
             isPaused = stored[KEY_PAUSED] ?: false,
             uploadInterruptedAtEpochMillis = stored[KEY_INTERRUPTED_AT] ?: 0L,
@@ -439,12 +423,6 @@ class BackupSettings @Inject constructor(
         context.dataStore.edit { it[KEY_WIZARD_BACKUP_TOTAL] = total }
     }
 
-    suspend fun acknowledgeTopic(key: String) {
-        context.dataStore.edit {
-            it[KEY_ACKNOWLEDGED_TOPICS] = (it[KEY_ACKNOWLEDGED_TOPICS] ?: emptySet()) + key
-        }
-    }
-
     suspend fun setAutomaticEnabled(enabled: Boolean) {
         context.dataStore.edit { it[KEY_AUTOMATIC] = enabled }
     }
@@ -547,7 +525,6 @@ class BackupSettings @Inject constructor(
         val KEY_CLOUD_DELETION_POLICY = stringPreferencesKey("cloud_deletion_policy")
         val KEY_CLOUD_DELETION_GRACE = intPreferencesKey("cloud_deletion_grace_days")
         val KEY_SHOW_EMPTY_FOLDERS = booleanPreferencesKey("show_empty_cloud_folders")
-        val KEY_ACKNOWLEDGED_TOPICS = stringSetPreferencesKey("acknowledged_topics")
         val KEY_SETUP_COMPLETE = booleanPreferencesKey("setup_complete")
         val KEY_BACKFILL_CHECKED = booleanPreferencesKey("upgrade_backfill_checked")
         val KEY_PAUSED = booleanPreferencesKey("backup_paused")

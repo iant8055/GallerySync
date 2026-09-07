@@ -1,5 +1,18 @@
 # TASK-017 — A Help screen, for the rules that are not obvious
 
+> ## SUPERSEDED — 7 Sept 2026. Do not build this.
+>
+> Ian: *"the (?) for HELP was an approved decision - we moved away from an actual HELP menu."* The
+> per-section (?) tooltips in Settings are the answer to this task, not a violation of it — note that
+> the "Not in scope" list below rules out per-control help icons, and **that exclusion is the stale
+> half**, overtaken by the decision.
+>
+> Consequence: `SetupTopic` had no remaining consumer, and was deleted with the orphaned wizard in
+> TASK-022. The rules this task wanted a home for are still real; they now live in the (?) tooltips
+> and in the Archive confirmation dialog. Left in full below because the six-rule table is a good
+> record of what needs explaining.
+
+
 Milestone: v0.3 — space management
 Requested by: Ian, 27 Aug 2026
 Origin: cutting the "Still watched. Anything added here is archived too." line from the archived

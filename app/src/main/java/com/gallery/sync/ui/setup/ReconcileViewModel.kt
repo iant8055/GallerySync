@@ -13,7 +13,6 @@ import com.gallery.sync.data.local.media.GrantedDirectory
 import com.gallery.sync.data.local.media.ScopedDirectories
 import com.gallery.sync.util.ChargingState
 import com.gallery.sync.util.RecentsCard
-import com.gallery.sync.domain.backup.ApplyLibraryChoice
 import com.gallery.sync.domain.backup.FirstBackupHold
 import com.gallery.sync.domain.backup.LibraryChoice
 import com.gallery.sync.data.local.entity.AlbumMode
@@ -72,11 +71,6 @@ data class ReconcileUiState(
     val directoryRefused: Boolean = false,
     /** Gate 2, as currently selected. Not applied until the user says so. */
     val libraryChoice: LibraryChoice = LibraryChoice.BACK_UP_EVERYTHING,
-    /** Albums changed by the last apply, for the confirmation line. Null before any apply. */
-    val libraryApplied: Int? = null,
-    val applyingLibraryChoice: Boolean = false,
-    /** Setup topics already acknowledged. Survives a skip, and is never cleared. */
-    val acknowledgedTopics: Set<String> = emptySet(),
     val hasCompletedSetup: Boolean = false,
     /**
      * Whether stored preferences have been read at least once.
@@ -188,7 +182,6 @@ class ReconcileViewModel @Inject constructor(
     private val settings: BackupSettings,
     private val charging: ChargingState,
     private val sources: ScopedDirectories,
-    private val applyChoice: ApplyLibraryChoice,
     private val backupEngine: BackupEngine,
     private val scanner: MediaScanner,
     private val proxyApplier: com.gallery.sync.data.local.media.ProxyApplier,
@@ -286,7 +279,6 @@ class ReconcileViewModel @Inject constructor(
                     firstBackupStartAtEpochMillis = prefs.firstBackupStartAtEpochMillis,
                     firstBackupDelayMillis = prefs.firstBackupDelayMillis,
                     hasCompletedFirstBackup = prefs.hasCompletedFirstBackup,
-                    acknowledgedTopics = prefs.acknowledgedTopics,
                     hasCompletedSetup = prefs.hasCompletedSetup,
                     settingsLoaded = true,
                     allowMeteredNetwork = prefs.allowMeteredNetwork,
@@ -311,15 +303,6 @@ class ReconcileViewModel @Inject constructor(
                 )
             }
         }
-    }
-
-    /**
-     * Records that a topic's explanation was acknowledged.
-     *
-     * Not consent to anything. Choosing Archive for an album still raises its own confirmation.
-     */
-    fun acknowledgeTopic(key: String) {
-        viewModelScope.launch { settings.acknowledgeTopic(key) }
     }
 
     fun setAllowMeteredNetwork(allowed: Boolean) {
@@ -792,11 +775,11 @@ class ReconcileViewModel @Inject constructor(
         // Written through, not just held. Closing the wizard mid-backup ends the process, and this
         // is what step 9 reads to decide whether anything gets optimised when the upload finishes.
         //
-        // The cutoff goes with it, and until 6 Sept 2026 nothing wrote one. Its only caller was
-        // `ApplyLibraryChoice`, which is reachable from `SetupWizardScreen` and `ReconcileScreen` —
-        // and nothing renders either, so in the app users actually meet the cutoff stayed at
-        // `EVERYTHING` for every choice. That is why #3 behaved exactly like #2: it is the cutoff,
-        // and nothing else, that tells them apart.
+        // The cutoff goes with it, and until 6 Sept 2026 nothing wrote one. Its only caller was a
+        // bulk applier reachable from two screens that nothing rendered, so in the app users
+        // actually meet the cutoff stayed at `EVERYTHING` for every choice. That is why #3 behaved
+        // exactly like #2: it is the cutoff, and nothing else, that tells them apart. Those screens
+        // and that applier were deleted in TASK-022, so this write is now the only source.
         //
         // Recorded now rather than when the run starts, because nothing uploads between answering
         // Gate 2 and the first batch, and answering again with a different option must produce the
@@ -805,24 +788,7 @@ class ReconcileViewModel @Inject constructor(
             settings.setLibraryChoice(choice)
             settings.setOptimiseCutoff(choice.cutoffFor(System.currentTimeMillis()))
         }
-        _state.value = _state.value.copy(libraryChoice = choice, libraryApplied = null)
-    }
-
-    /**
-     * Applies the selected option to every in-scope album.
-     *
-     * The suspending call completes before the state is read — see the note on [addSource] for what
-     * happens when it does not.
-     */
-    fun applyLibraryChoice() {
-        viewModelScope.launch {
-            _state.value = _state.value.copy(applyingLibraryChoice = true)
-            val changed = applyChoice.apply(_state.value.libraryChoice)
-            _state.value = _state.value.copy(
-                applyingLibraryChoice = false,
-                libraryApplied = changed
-            )
-        }
+        _state.value = _state.value.copy(libraryChoice = choice)
     }
 
     /** Records a folder the user picked. The re-check follows from the grant list changing. */
