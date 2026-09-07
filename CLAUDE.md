@@ -162,6 +162,36 @@ text at all. That is a shipped-to-users bug, not a cosmetic one.
   `adb shell "cmd uimode night yes"` and `… night no`. Compiling proves nothing here.
 - The same applies to anything drawn rather than composed — icons, custom canvas, overlays.
 
+### The wizard and the Settings tab are independent — in both directions
+
+## **SETTINGS HAS NO EFFECT ON THE WIZARD**
+
+## **THE WIZARD HAS NO EFFECT ON THE SETTINGS**
+
+Stated by Ian, 7 Sept 2026, after a report treated the wizard's cards as though they were supposed to
+mirror the Settings tab and flagged the differences as defects.
+
+Two separate surfaces. The wizard collects its own answers and is not a view onto Settings; Settings
+is not a record of what the wizard was told. Neither reads the other and neither writes the other.
+
+Not a bug, in the Settings → wizard direction:
+
+- **"Choose folders to back up" opening with nothing checked**, even when Settings lists a folder
+  under *Folders to back up* and the SAF tree grant is already held.
+- **A wizard card naming a different backup destination from the one the Settings tab shows.**
+- **A wizard toggle sitting differently from its Settings counterpart.**
+
+Not a bug, in the wizard → Settings direction:
+
+- **Settings unchanged after the wizard has been answered.** The wizard's four modes do not write the
+  Settings optimise tree — the rule immediately below has always said so, and this is the same fact
+  stated from the other side.
+- **A wizard answer that leaves no trace in Settings at all.**
+
+Do not file any of it, do not fix it, and do not report it as an inconsistency to reconcile. If an
+explanation you are building requires one of these surfaces to write the other, the explanation is
+wrong — discard it rather than checking it.
+
 ### Album modes are set only by the user — nothing else writes them
 Ian has corrected this more than once, most recently 4 Sept 2026. It is here, in the file that always
 loads, because a memory file recording the same rule did not stop it recurring.

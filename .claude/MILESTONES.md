@@ -248,6 +248,36 @@ Verified on hardware: sign-in completes and the real drive lists.
       first run. Only automatic runs are gated — "Sync now" is never held, because someone who asked
       has already decided this is a good moment. The gate lifts for good once the backlog clears.
 
+## The wizard and the Settings tab are independent — in both directions
+
+Stated by Ian in capitals, 7 Sept 2026: **SETTINGS HAS NO EFFECT ON THE WIZARD**, and **THE WIZARD
+HAS NO EFFECT ON THE SETTINGS**. Also its own section in CLAUDE.md, because the same shape of error
+had just recurred in a third place.
+
+Two separate surfaces. The wizard collects its own answers and is not a view onto Settings; Settings
+is not a record of what the wizard was told. Neither reads the other and neither writes the other.
+
+**What prompted it.** A wizard walk on the Moto G (`ZT422CTZQV`) on 7 Sept 2026 produced a report
+listing two differences as defects. Both were struck:
+
+- *Choose folders to back up* opened with **no folder checked**, while the Settings tab listed
+  `Internal storage / DCIM` under *Folders to back up* and the SAF tree grant was already held.
+- The wizard's Cloud Storage card named the destination `Samsung Gallery/DCIM`, while the Settings
+  tab read `OneDrive / GallerySync`. (The Graph calls in the same session went to
+  `/me/drive/root:/Samsung Gallery/DCIM/...`.)
+
+Neither is an inconsistency to reconcile. The same holds in the other direction: **Settings unchanged
+after the wizard has been answered is correct** — which is the Area 1 rule below, stated from the
+other side.
+
+**The test.** If an explanation you are building requires one of these surfaces to write the other,
+the explanation is wrong by construction. Discard it rather than checking it — the same test the
+optimising areas below already carry.
+
+Note that the Settings tab's own copy for *Run setup again* reads "It opens on your current settings,
+changes no album on its own, and does not ask you to re-confirm anything you have already read." That
+copy is not a spec and does not create an obligation on the wizard.
+
 ## Optimising: two independent areas — do not conflate them
 
 Stated by Ian, 29 Aug 2026, after an agent repeatedly welded these together. **They are separate. One
