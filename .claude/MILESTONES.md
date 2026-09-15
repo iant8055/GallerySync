@@ -4736,3 +4736,32 @@ exactly when it is the one thing the user needs to read.
 
 Not a pop-up, and it cannot be one without a notification: while `CHARGING` is unmet the job never
 starts, so no app code runs at the due time. `POST_NOTIFICATIONS` was ruled out on 28 Aug.
+
+#### Fixed: the card waits until the backup begins, not until the countdown ends
+
+The stored due time now stays set past zero and is cleared only when `observeBackupWorker` sees the
+backup begin — a manual batch in `RUNNING`, or a file landed, or nothing outstanding. The card's
+`WAITING` phase follows the stored due time rather than the clock, and at zero the ring reads
+*"0:00 · Waiting to start"* instead of *"0:00 until backup starts"*. The plug-in line and SYNC NOW stay
+up for the whole wait.
+
+Verified on the Moto G from a clean install (12:27:28), unplugged, 3-minute delay, Close; opened at
+12:44 on battery, well past due: *"0:00 · Waiting to start"*, plug-in line, SYNC NOW — checked in dark
+and light — with the job on `Unsatisfied: CHARGING` and no run started. Plugged in at 12:47:39 with
+the app open; `backup run starting (manual)` the same second and the card switched to *"Uploading 10
+of 256"*.
+
+**The countdown starts on the chip, not on Next — defect, found by Ian in the same run.** Tapping a
+delay chip calls `setFirstBackupDelay`, which stores *now + delay* at once, so time spent reading the
+card comes off the delay: armed with 161.8 s, 173.3 s and 176.9 s of a 180 s choice.
+
+**Decided by Ian, 15 Sept 2026 — a deliberate start overrides the charger.** SYNC NOW on the countdown
+card, and *Right now*, start the backup immediately whatever the battery state; only the automatic
+start at the end of a delay waits for charging. The bold line is reworded to say it is about the start
+*on its own*, so it no longer contradicts the button beneath it. Unplugging mid-backup — pause or carry
+on — is still open.
+
+**An instrument note.** One minute past due on an asleep, unplugged phone, the job still showed
+`TIMING_DELAY` unsatisfied. JobScheduler's delay uses a non-waking alarm, so the constraint is only
+re-evaluated when the phone next wakes. Harmless here — `CHARGING` was unmet anyway, and plugging in
+wakes the phone — but a stale `TIMING_DELAY` in a dump is not evidence the countdown failed.

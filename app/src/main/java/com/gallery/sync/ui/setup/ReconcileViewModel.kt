@@ -591,8 +591,14 @@ class ReconcileViewModel @Inject constructor(
     }
 
     /**
-     * The countdown has run out. Normally the work is already queued, so this clears the due time
-     * and starts watching — enqueueing again would replace a chain that may already be uploading.
+     * The countdown has run out. Normally the work is already queued, so this starts watching —
+     * enqueueing again would replace a chain that may already be uploading.
+     *
+     * **The due time is not cleared here.** It stays until [observeBackupWorker] sees the backup
+     * actually begin, because reaching zero is not starting: the job then waits for the charger, and
+     * for up to half an hour of Android's batching on top. The card reads the stored due time to
+     * know it is still waiting. Clearing it at zero is what made the card announce "Your backup is
+     * running" on a phone that was waiting to be plugged in — Moto G, 15 Sept 2026.
      *
      * The exception is a chain that never got armed. A due time and a queued run are written by two
      * different systems, and only one of them survives the activity going away mid-arm, so this asks
@@ -601,8 +607,6 @@ class ReconcileViewModel @Inject constructor(
      */
     fun onDelayElapsed() {
         viewModelScope.launch {
-            settings.setFirstBackupStartAt(null)
-
             if (!BackupScheduling.manualRunLive(workManager)) {
                 Logger.w(TAG, "delay elapsed with no chain queued; starting the run now")
                 val prefs = settings.current()
@@ -719,6 +723,16 @@ class ReconcileViewModel @Inject constructor(
                 val completed = (total - remaining).coerceAtLeast(0)
 
                 if (completed > highWater) highWater = completed
+
+                // A delayed start is over once the backup has visibly begun: a batch executing, or
+                // a file already landed (a batch can finish between two polls). Until then the due
+                // time stays stored and the card keeps saying it is waiting. See onDelayElapsed.
+                if (_state.value.firstBackupStartAtEpochMillis != null &&
+                    (remaining == 0 || highWater > 0 ||
+                        BackupScheduling.manualRunExecuting(workManager))
+                ) {
+                    settings.setFirstBackupStartAt(null)
+                }
 
                 if (remaining == 0) {
                     val shouldOptimise = _state.value.libraryChoice.optimisesAtInstall

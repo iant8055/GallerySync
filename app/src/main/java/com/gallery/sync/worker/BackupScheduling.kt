@@ -9,6 +9,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.flow.first
@@ -297,6 +298,18 @@ object BackupScheduling {
         workManager.getWorkInfosForUniqueWorkFlow(MANUAL_WORK)
             .first()
             .any { !it.state.isFinished }
+
+    /**
+     * Whether a batch of the manual chain is executing right now, as opposed to queued.
+     *
+     * The difference matters after a delay ends: the job can sit queued for the charger, or for up
+     * to half an hour of Android's batching, and a card that treats "queued" as "running" tells the
+     * user their backup is under way while nothing is happening. Moto G, 15 Sept 2026.
+     */
+    suspend fun manualRunExecuting(workManager: WorkManager): Boolean =
+        workManager.getWorkInfosForUniqueWorkFlow(MANUAL_WORK)
+            .first()
+            .any { it.state == WorkInfo.State.RUNNING }
 
     /** Stops a manual chain, including whatever batch it is in the middle of. */
     fun cancelManualRun(workManager: WorkManager) {

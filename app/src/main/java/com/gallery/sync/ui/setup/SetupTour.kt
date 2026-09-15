@@ -311,7 +311,13 @@ fun SetupTour(
         nowMillis = System.currentTimeMillis()
     }
     val remainingMillis = if (startAt == null) 0L else (startAt - nowMillis).coerceAtLeast(0L)
-    val waitingForDelay = startAt != null && remainingMillis > 0L
+    // Two different things since 15 Sept 2026. The countdown ends at zero; the wait does not. After
+    // zero the job still waits for the charger, and for up to half an hour of Android's batching,
+    // and the stored due time is kept until the backup is seen to begin (see onDelayElapsed). The
+    // card stays on "waiting" for all of it - it used to switch to "Your backup is running" at zero,
+    // on a phone that was waiting to be plugged in.
+    val countingDown = startAt != null && remainingMillis > 0L
+    val waitingForDelay = startAt != null
 
     val backupPhase = when {
         waitingForDelay -> WizardBackupPhase.WAITING
@@ -335,10 +341,10 @@ fun SetupTour(
     // closed, killed, or sitting on this card. The countdown here only draws what WorkManager is
     // already committed to, which is why expiry watches rather than enqueues — starting again would
     // replace a chain that may already be uploading.
-    LaunchedEffect(step, waitingForDelay) {
+    LaunchedEffect(step, countingDown) {
         if (step != TOTAL_STEPS) return@LaunchedEffect
         when {
-            waitingForDelay -> viewModel.scheduleDelayedBackup()
+            countingDown -> viewModel.scheduleDelayedBackup()
             startAt != null -> viewModel.onDelayElapsed()
             resumeStep == TOTAL_STEPS -> viewModel.observeBackupWorker()
             else -> viewModel.startBackupWorker()
@@ -1866,6 +1872,9 @@ private fun BackupProgressContent(
                 // count belongs on its own line rather than run together with the name — the ring
                 // is 180dp wide and "Optimising photos 85 of 150" would wrap awkwardly inside it.
                 val ringLabel = when {
+                    // At zero the wait is for the charger or for Android, not the clock, so
+                    // "0:00 until backup starts" would be promising something that just failed.
+                    waiting && remainingMillis == 0L -> stringResource(R.string.tour_progress_waiting)
                     waiting -> stringResource(R.string.tour_progress_until_start)
                     phase == WizardBackupPhase.DONE ->
                         stringResource(R.string.wizard_finish_label)
