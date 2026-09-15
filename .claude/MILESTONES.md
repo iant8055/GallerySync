@@ -4939,3 +4939,33 @@ caused by switching the theme from adb at the same moment — not a defect, but 
 
 The picker's *Back* takes two presses when it opens inside a folder: the first goes up a level. That
 is DocumentsUI, not the app.
+
+### 15 Sept 2026 (evening) — the tour's backdrops are drawn as a phone again
+
+Ian, with the concept art the tour was built from: the backdrops behind the step 2 cards were meant to
+look like a phone, and did not. The welcome card is an image of a phone, frame and all; every backdrop
+after it was drawn edge to edge, so the tour changed register at step 2.
+
+**Nothing regressed — the frame never existed in code.** The tour was added on 31 Aug (`e6a0794`)
+drawing the real tabs behind its cards, and `aee7125` replaced those with the drawn mockups on 3 Sept,
+inside a 1,194-line commit whose message does not mention it. No image has ever been committed except
+`welcome_screen.png`, and the concept art was never in the repo. The reason the mockups exist is worth
+keeping: lifting the opaque background for the Help card on 3 Sept put the **live** Settings screen
+behind a wizard card, with real controls reachable round the edges of it.
+
+What was built: `PhoneScreenBackdrop` draws a solid dark bezel with the screen cut out of it, corner
+radius 36dp, an 8dp body and a camera dot — the bezel colour is a new `phoneFrame` token in
+`GallerySyncColors`, dark in both themes for the same reason the nav bar is.
+
+**The bar of tabs is drawn inside the frame**, as the app's own `SignalNavBar` with its taps dropped,
+so the picture cannot drift from the bar it is a picture of. `MainActivity` now hides the real bar for
+the whole tour rather than only on the welcome step; it used to stay visible because the cards point at
+it, which is exactly what left it stranded outside the frame when the frame arrived. The cards and
+their arrows are inset by the frame so the weights still divide the width the drawn bar occupies, and
+the card leaves room measured from the drawn bar rather than the 60dp that was assumed.
+
+A first attempt framed only the backdrop and left the real bar below it — Ian: *"that looks awful"*,
+and it was, so it was reverted rather than kept. Verified on the Moto G in light and dark: Albums,
+Restore, Settings and Help each show the framed phone with its own tab lit, and each arrow lands on its
+pill. The Settings arrow sits a few pixels left of centre — the weights approximate tab centres, as
+they always have.

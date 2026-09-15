@@ -66,7 +66,16 @@ data class GallerySyncColors(
      * The bar is dark in both themes; only how far it lifts off the background changes.
      */
     val navContainer: Color,
-    val onNavContainer: Color
+    val onNavContainer: Color,
+
+    /**
+     * The bezel the tour draws its backdrops inside, so each one reads as a picture of a phone
+     * rather than as the screen you are on.
+     *
+     * Dark in both themes for the same reason the nav bar is: a phone's frame is dark, and a bezel
+     * that inverts under a dark theme reads as a white ring round the screen.
+     */
+    val phoneFrame: Color
 )
 
 private val SignalLight = GallerySyncColors(
@@ -83,7 +92,8 @@ private val SignalLight = GallerySyncColors(
     offContainer = SignalSurfaceVariantLight,
     onOffContainer = SignalOnSurfaceVariantLight,
     navContainer = SignalNavLight,
-    onNavContainer = SignalOnNav
+    onNavContainer = SignalOnNav,
+    phoneFrame = SignalNavLight
 )
 
 private val SignalDark = GallerySyncColors(
@@ -103,7 +113,8 @@ private val SignalDark = GallerySyncColors(
     onOffContainer = SignalOnOffDark,
     // Lifted off the near-black ground so the bar still reads as floating rather than as a hole.
     navContainer = SignalNavDark,
-    onNavContainer = SignalOnNav
+    onNavContainer = SignalOnNav,
+    phoneFrame = SignalNavDark
 )
 
 internal fun signalColors(darkTheme: Boolean): GallerySyncColors =

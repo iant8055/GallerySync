@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.GenericShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -81,6 +82,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
@@ -99,7 +101,9 @@ import com.gallery.sync.domain.backup.LibraryChoice
 import com.gallery.sync.ui.common.formatBytes
 import com.gallery.sync.domain.backup.VideoQuality
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.gallery.sync.ui.common.NavDestination
 import com.gallery.sync.ui.common.SignalIcons
+import com.gallery.sync.ui.common.SignalNavBar
 import com.gallery.sync.ui.theme.LocalGallerySyncColors
 import com.gallery.sync.ui.settings.DestinationDialog
 import com.gallery.sync.ui.signin.SignInUiState
@@ -528,7 +532,7 @@ fun SetupTour(
             )
         } else {
             // Steps 3+: Albums mockup behind the bubble
-            AlbumsMockup()
+            PhoneScreenBackdrop(navSelected = 0) { AlbumsMockup() }
             Box(
                 Modifier
                     .fillMaxSize()
@@ -759,6 +763,8 @@ private fun TabTooltipsStep(
     // so the two can be expressed in the same coordinates.
     var helpIconInRoot by remember { mutableStateOf<Rect?>(null) }
     var overlayOrigin by remember { mutableStateOf(Offset.Zero) }
+    // How tall the bar drawn inside the frame came out, so the card sits above it rather than on it.
+    var navBarHeight by remember { mutableStateOf(72.dp) }
     val spotlight = helpIconInRoot?.translate(-overlayOrigin.x, -overlayOrigin.y)
 
     Box(
@@ -767,7 +773,7 @@ private fun TabTooltipsStep(
             .onGloballyPositioned { overlayOrigin = it.positionInRoot() }
     ) {
         if (subStep == 0) {
-            AlbumsMockup()
+            PhoneScreenBackdrop(navSelected = 0) { AlbumsMockup() }
             Box(
                 Modifier
                     .fillMaxSize()
@@ -805,12 +811,18 @@ private fun TabTooltipsStep(
             val isHelp = currentTab.tabIndex < 0
 
             // Mockup background — shows what the app looks like when populated
-            when (tabIndex) {
-                0 -> AlbumsMockup()
-                1 -> RestoreMockup()
-                2 -> ArchiveMockup()
-                3 -> SettingsMockup()
-                else -> SettingsMockup(onHelpIconPositioned = { helpIconInRoot = it })
+            // Help has no tab of its own: it sits on the Settings mockup, so Settings stays lit.
+            PhoneScreenBackdrop(
+                navSelected = if (isHelp) 3 else tabIndex,
+                onNavBarHeight = { navBarHeight = it }
+            ) {
+                when (tabIndex) {
+                    0 -> AlbumsMockup()
+                    1 -> RestoreMockup()
+                    2 -> ArchiveMockup()
+                    3 -> SettingsMockup()
+                    else -> SettingsMockup(onHelpIconPositioned = { helpIconInRoot = it })
+                }
             }
 
             // Scrim so the card pops over the mockup. On the Help card it is punched through at
@@ -870,7 +882,9 @@ private fun TabTooltipsStep(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 12.dp),
+                    // Inset to the frame, so the weights below still divide the same width the
+                    // drawn bar occupies and each card keeps pointing at its own tab.
+                    .padding(horizontal = 12.dp + PhoneFrameInset + PhoneFrameWidth),
                 verticalArrangement = Arrangement.Bottom
             ) {
                 Row(modifier = Modifier.fillMaxWidth()) {
@@ -981,7 +995,8 @@ private fun TabTooltipsStep(
                     }
                 }
 
-                Spacer(Modifier.height(60.dp))
+                // Room for the bar drawn inside the frame, measured rather than assumed.
+                Spacer(Modifier.height(navBarHeight + PhoneFrameInset + PhoneFrameWidth))
             }
         }
     }
@@ -2036,6 +2051,84 @@ private fun BackupProgressContent(
         )
     }
 }
+
+/**
+ * A tour backdrop drawn as a picture of a phone: frame, screen, and the bar of tabs inside it.
+ *
+ * The welcome card is an image of a phone and every backdrop after it was drawn edge to edge, so the
+ * tour changed register at step 2. Ian, 15 Sept 2026, with the concept art the backdrops were meant
+ * to match. A frame also says "this is a picture of the app", which is the same thing the opaque
+ * background says: a tour shows mockups, never live controls.
+ *
+ * **The bar of tabs is drawn here, inside the frame.** It is the app's own [SignalNavBar] with its
+ * taps dropped, so the picture cannot drift from the bar it is a picture of. The real bar is hidden
+ * for the whole tour — `MainActivity` used to keep it visible because the step 2 cards point at it,
+ * which left it stranded outside the frame.
+ *
+ * [onNavBarHeight] reports how tall the drawn bar came out, so the card above can leave room for it
+ * rather than guess.
+ */
+@Composable
+private fun PhoneScreenBackdrop(
+    navSelected: Int,
+    onNavBarHeight: (Dp) -> Unit = {},
+    content: @Composable () -> Unit
+) {
+    val density = LocalDensity.current
+    val destinations = listOf(
+        NavDestination(SignalIcons.Albums, stringResource(R.string.tab_backup)),
+        NavDestination(SignalIcons.Restore, stringResource(R.string.tab_retrieve)),
+        NavDestination(SignalIcons.CloudCheck, stringResource(R.string.tab_setup)),
+        NavDestination(SignalIcons.Settings, stringResource(R.string.tab_settings))
+    )
+
+    val signal = LocalGallerySyncColors.current
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(PhoneFrameInset)
+            // The bezel itself: a solid dark body with the screen cut out of it, which is what the
+            // concept art shows. A hairline border read as a box drawn round the card instead.
+            .clip(RoundedCornerShape(PhoneFrameCorner))
+            .background(signal.phoneFrame)
+            .padding(PhoneFrameWidth)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(PhoneFrameCorner - PhoneFrameWidth))
+                .background(MaterialTheme.colorScheme.background)
+        ) {
+            Box(modifier = Modifier.weight(1f)) { content() }
+            SignalNavBar(
+                destinations = destinations,
+                selected = navSelected,
+                onSelect = {},
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .onGloballyPositioned {
+                        onNavBarHeight(with(density) { it.size.height.toDp() })
+                    }
+            )
+        }
+
+        // The camera, which is most of what makes a rounded rectangle read as a phone.
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .padding(top = 8.dp)
+                .size(10.dp)
+                .clip(CircleShape)
+                .background(signal.phoneFrame)
+        )
+    }
+}
+
+/** Frame geometry, shared so the cards above can line up with the tabs drawn inside it. */
+private val PhoneFrameInset = 10.dp
+private val PhoneFrameWidth = 8.dp
+private val PhoneFrameCorner = 36.dp
 
 // ── Tab Mockups (decorative backgrounds for Step 2 cards) ──────────────────
 

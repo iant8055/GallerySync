@@ -211,7 +211,7 @@ private fun SignedInApp(
     // running job.
     var tourDismissed by rememberSaveable { mutableStateOf(false) }
     val tourVisible = showTour && !tourDismissed
-    val hideNavBar = tourVisible && tourStep == 1
+    val hideNavBar = tourVisible
 
     Column(modifier = modifier.fillMaxSize()) {
         Box(modifier = Modifier.weight(1f)) {
@@ -234,9 +234,9 @@ private fun SignedInApp(
         }
 
         if (!hideNavBar) {
-            // Inert while the tour runs. The bar has to stay visible because step 2 points at it,
-            // but it sits below the tour rather than under it, so taps were reaching it and
-            // switching the tab behind the card.
+            // Hidden for the whole tour since 15 Sept 2026. It used to stay visible because the
+            // step 2 cards point at it — but the tour now draws the same bar inside its phone
+            // frame, and the real one sat below the frame, outside the picture.
             SignalNavBar(
                 destinations = destinations,
                 selected = selectedTab,
