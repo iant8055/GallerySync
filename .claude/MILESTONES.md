@@ -4867,3 +4867,46 @@ recognised all 8 as backed-up proxies (`isProxied = 1`) and sent nothing — onl
 the card stops short of its total and jumps to done. On a real phone this is the reinstall case, the
 same root as "a clean reinstall re-uploads everything"; `ReconciliationRules` would need the proxy
 marker to fix it.
+
+### 15 Sept 2026 (evening) — the folder picker, verified: what is backed up is not what was ticked
+
+The three SAF picker defects recorded on 3 Sept ("found by reading, not yet fixed") were checked on the
+Moto G before any fix, at Ian's request. One does not reproduce; the other two do, and are worse than
+recorded, because of a fact the 3 Sept entry did not have.
+
+**The scan scope is the granted trees whenever any exist.** `ScopedDirectories.currentScope()` returns
+the SAF grants if there are any, and falls back to the wizard's ticked folder names only when there
+are none. So the picker does not merely decide what can be *optimised* — it decides what is *backed
+up*, and a tick without a grant counts for nothing once any other folder has one.
+
+- **"The picker opens in the wrong place" — does not reproduce.** The document URI the wizard builds
+  (`buildDocumentUri(…, "primary:DCIM")`) opened DocumentsUI directly on DCIM, and on Pictures, from a
+  closed picker. The tree form did the same. One launch *was* delivered to a still-open picker
+  instance (*"intent has been delivered to currently running top-most instance"*), which may be what
+  3 Sept saw. Left unchanged.
+- **Cancel skips silently — confirmed.** Both pickers cancelled: the wizard went on to Cloud Storage
+  with no grants and no word. The scan then falls back to the ticked names, so everything is backed up
+  and nothing can ever be optimised, unannounced.
+- **Cancel one, grant another — confirmed, and the worst case.** DCIM and Pictures ticked; DCIM
+  cancelled, Pictures granted. Before the grant: `scanAll: 257 items across 8 albums`. After it:
+  `scanAll: 10 items across 1 albums within 1 granted folders`. **DCIM's 247 files dropped out of the
+  backup** with DCIM still ticked (`selected_directories: DCIM, Pictures`) and nothing on screen.
+- **Unticking does not narrow either.** An earlier run granted both, then unticked Pictures:
+  `selected directories: [DCIM]`, but the scan stayed at 257 items within 2 granted folders — a
+  folder the user removed stayed in the backup because its grant was still held.
+- **Found by reading the same code:** `buildSafGrantQueue` decides a folder is already covered with a
+  bare `startsWith`, so a held grant on `DCIM/Camera` counts as covering all of `DCIM` and the picker is
+  never shown for it; `TreeScope.isInScope` has the correct boundary check and was not used.
+
+This is the album-membership rule in CLAUDE.md from a different side: which files are backed up — and
+so, later, which an Archive or Sync album contains — changed without the user choosing it.
+
+**Also found, separate:** the folder counts on *Choose folders to back up* are taken once and never
+refreshed. Ian added eight screenshots, went back to the card, and it still read two; MediaStore held
+all ten. Discovery runs only while the list is empty.
+
+**Decided:** the wizard enforces the grant rather than the engine changing what it scans (Ian, no
+preference between the two; `TreeScope`'s "one grant, two jobs" is the documented design). A cancel or
+a wrong pick stops the walk and says so, with Try again or Skip; Skip unticks the folder and says it is
+left out of the backup; a subfolder asks whether to use the whole folder or keep only the subfolder;
+an unrelated folder is never granted, so it cannot widen the backup.
