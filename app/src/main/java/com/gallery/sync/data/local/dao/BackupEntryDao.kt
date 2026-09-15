@@ -223,6 +223,21 @@ interface BackupEntryDao {
     suspend fun uploadedEntries(uploaded: BackupState = BackupState.UPLOADED): List<BackupEntryEntity>
 
     /**
+     * Files that reached OneDrive at or after [sinceMillis] — what a run has actually sent.
+     *
+     * Counts real uploads only because the skip-existing path records a found file's OneDrive
+     * arrival date rather than the moment it was found (15 Sept 2026). Before that, every skip
+     * would have counted.
+     */
+    @Query(
+        "SELECT COUNT(*) FROM backup_entries WHERE state = :uploaded AND uploadedAtEpochMillis >= :sinceMillis"
+    )
+    suspend fun countUploadedSince(
+        sinceMillis: Long,
+        uploaded: BackupState = BackupState.UPLOADED
+    ): Int
+
+    /**
      * Every key the ledger holds for a file it still intends to upload.
      *
      * The counterpart to [uploadedKeys], and needed for a different reason. A row that has been

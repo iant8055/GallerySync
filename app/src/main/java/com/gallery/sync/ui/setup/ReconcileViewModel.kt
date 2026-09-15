@@ -587,10 +587,35 @@ class ReconcileViewModel @Inject constructor(
             backupEngine.refreshLedger()
             backupEngine.reconcileAndRequeue()
             val grandTotal = backupEngine.outstandingCountAll()
-            settings.setWizardBackupTotal(grandTotal)
-            _state.value = _state.value.copy(backupTotal = grandTotal)
-            Logger.i(TAG, "delayed first backup: $grandTotal pending")
+            // Re-entered on every return to the countdown, possibly after a process restart that
+            // has not re-run the cloud check yet. Without a check to count from, keep what the
+            // first arm recorded rather than falling back to the whole ledger.
+            val saved = settings.current()
+            val sendTotal = if (_state.value.result?.isComplete == true || saved.wizardRunStartedAt == 0L) {
+                filesToSend(grandTotal)
+            } else {
+                saved.wizardBackupTotal
+            }
+            val startedAt = saved.wizardRunStartedAt.takeIf { it > 0L } ?: System.currentTimeMillis()
+            settings.setWizardRun(sendTotal, startedAt)
+            _state.value = _state.value.copy(backupTotal = sendTotal)
+            Logger.i(TAG, "delayed first backup: $grandTotal pending, $sendTotal to send")
         }
+    }
+
+    /**
+     * The progress card's denominator: how many files this run will actually send.
+     *
+     * Not the ledger's pending count. On a fresh install every file is pending until the run checks
+     * it against OneDrive, so that count is the whole library — the card read "Uploading 133 of 256"
+     * with two files sent, and Ian took it for the app uploading too much (Moto G, 15 Sept 2026). The
+     * cloud check has already answered the real question, and on a complete check its outstanding
+     * figure is what the run will send. An incomplete check falls back to the ledger: a floor
+     * presented as a total is the mistake [CloudReconciliation.isComplete] exists to prevent.
+     */
+    private fun filesToSend(pendingInLedger: Int): Int {
+        val checked = _state.value.result?.takeIf { it.isComplete } ?: return pendingInLedger
+        return checked.outstanding.files.coerceAtMost(pendingInLedger)
     }
 
     /**
@@ -657,7 +682,7 @@ class ReconcileViewModel @Inject constructor(
             // halts remaining work rather than undoing finished work.
             BackupScheduling.cancelOptimise(workManager)
             settings.setFirstBackupStartAt(null)
-            settings.setWizardBackupTotal(0)
+            settings.setWizardRun(total = 0, startedAt = 0L)
             settings.setWizardStep(TOTAL_STEPS - 1)
             _state.value = _state.value.copy(
                 backupRunning = false,
@@ -680,6 +705,8 @@ class ReconcileViewModel @Inject constructor(
 
     fun startBackupWorker() {
         viewModelScope.launch {
+            // Taken before anything can upload: the card counts files sent since this moment.
+            val runStartedAt = System.currentTimeMillis()
             settings.setWizardStep(TOTAL_STEPS)
 
             _state.value = _state.value.copy(backupRunning = true, backupCurrentFile = "")
@@ -688,10 +715,12 @@ class ReconcileViewModel @Inject constructor(
             val requeued = backupEngine.reconcileAndRequeue()
             Logger.i(TAG, "reconcileAndRequeue: $requeued files requeued")
 
+            // Whether to run at all still follows the ledger — only the card's count changes.
             val grandTotal = backupEngine.outstandingCountAll()
-            settings.setWizardBackupTotal(grandTotal)
-            _state.value = _state.value.copy(backupTotal = grandTotal)
-            Logger.i(TAG, "total pending: $grandTotal")
+            val sendTotal = filesToSend(grandTotal)
+            settings.setWizardRun(sendTotal, runStartedAt)
+            _state.value = _state.value.copy(backupTotal = sendTotal)
+            Logger.i(TAG, "total pending: $grandTotal, to send: $sendTotal")
 
             if (grandTotal == 0) {
                 _state.value = _state.value.copy(
@@ -703,35 +732,48 @@ class ReconcileViewModel @Inject constructor(
 
             val prefs = settings.current()
             BackupScheduling.enqueueManualRun(workManager, prefs.allowMeteredNetwork, allAlbums = true)
-            observeBackupWorker(grandTotal)
+            observeBackupWorker(sendTotal)
         }
     }
 
-    fun observeBackupWorker(knownTotal: Int = 0) {
+    fun observeBackupWorker(knownTotal: Int? = null) {
         backupObserverJob?.cancel()
         backupObserverJob = viewModelScope.launch {
-            val savedTotal = settings.current().wizardBackupTotal
+            val saved = settings.current()
+            val runStartedAt = saved.wizardRunStartedAt
+            // A recorded run carries its own total, zero included: a library already wholly in
+            // OneDrive sends nothing, and must not fall back to counting the ledger.
             val total = when {
-                knownTotal > 0 -> knownTotal
-                savedTotal > 0 -> savedTotal
+                knownTotal != null -> knownTotal
+                runStartedAt > 0L || saved.wizardBackupTotal > 0 -> saved.wizardBackupTotal
                 else -> backupEngine.outstandingCountAll()
             }
 
             _state.value = _state.value.copy(backupRunning = true, backupTotal = total)
 
             var highWater = _state.value.backupCompleted
+            val pendingAtStart = backupEngine.outstandingCountAll()
 
             while (true) {
                 val remaining = backupEngine.outstandingCountAll()
-                val completed = (total - remaining).coerceAtLeast(0)
+                // Files actually sent since the run began. A file found already in OneDrive keeps
+                // its OneDrive arrival date, so it is not counted — it used to be, because done was
+                // "total minus still pending" and a skip leaves the pending count too. Falls back
+                // to that for a run recorded before the start time was kept.
+                val completed = if (runStartedAt > 0L) {
+                    backupEngine.uploadedSince(runStartedAt).coerceAtMost(total)
+                } else {
+                    (total - remaining).coerceAtLeast(0)
+                }
 
                 if (completed > highWater) highWater = completed
 
-                // A delayed start is over once the backup has visibly begun: a batch executing, or
-                // a file already landed (a batch can finish between two polls). Until then the due
-                // time stays stored and the card keeps saying it is waiting. See onDelayElapsed.
+                // A delayed start is over once the backup has visibly begun: a batch executing, a
+                // file landed, or the ledger's pending count moving (a batch of skips can finish
+                // between two polls and send nothing). Until then the due time stays stored and
+                // the card keeps saying it is waiting. See onDelayElapsed.
                 if (_state.value.firstBackupStartAtEpochMillis != null &&
-                    (remaining == 0 || highWater > 0 ||
+                    (remaining == 0 || highWater > 0 || remaining < pendingAtStart ||
                         BackupScheduling.manualRunExecuting(workManager))
                 ) {
                     settings.setFirstBackupStartAt(null)

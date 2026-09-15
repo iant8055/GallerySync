@@ -417,6 +417,11 @@ class BackupEngine @Inject constructor(
         entryDao.countPendingAll()
     }
 
+    /** Files actually sent to OneDrive since [sinceMillis]. See `BackupEntryDao.countUploadedSince`. */
+    suspend fun uploadedSince(sinceMillis: Long): Int = withContext(dispatcher) {
+        entryDao.countUploadedSince(sinceMillis)
+    }
+
     /**
      * Compares every UPLOADED ledger entry against what OneDrive actually holds, and requeues
      * anything that is missing.

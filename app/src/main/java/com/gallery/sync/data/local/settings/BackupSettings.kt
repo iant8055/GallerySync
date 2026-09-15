@@ -224,7 +224,14 @@ data class BackupPreferences(
      * restarting the wizard from scratch. Cleared when the user finishes or skips setup.
      */
     val wizardStep: Int = 0,
-    val wizardBackupTotal: Int = 0
+    /** How many files the wizard's run will actually send — the card's denominator. */
+    val wizardBackupTotal: Int = 0,
+    /**
+     * When the wizard's run began, or 0. The card counts files uploaded since this moment as done,
+     * so a file found already in OneDrive — which keeps its OneDrive arrival date — is not counted
+     * as an upload. Persisted so reopening mid-run keeps counting the same way.
+     */
+    val wizardRunStartedAt: Long = 0L
 )
 
 /**
@@ -288,7 +295,8 @@ class BackupSettings @Inject constructor(
             optimiseCutoffEpochMillis = stored[KEY_OPTIMISE_CUTOFF] ?: OptimiseCutoff.EVERYTHING,
             videoOptimiseAge = MediaAge.fromNameOrDefault(stored[KEY_VIDEO_OPTIMISE_AGE]),
             wizardStep = stored[KEY_WIZARD_STEP] ?: 0,
-            wizardBackupTotal = stored[KEY_WIZARD_BACKUP_TOTAL] ?: 0
+            wizardBackupTotal = stored[KEY_WIZARD_BACKUP_TOTAL] ?: 0,
+            wizardRunStartedAt = stored[KEY_WIZARD_RUN_STARTED_AT] ?: 0L
         )
     }
 
@@ -417,6 +425,7 @@ class BackupSettings @Inject constructor(
             if (completed) {
                 it[KEY_WIZARD_STEP] = 0
                 it[KEY_WIZARD_BACKUP_TOTAL] = 0
+                it[KEY_WIZARD_RUN_STARTED_AT] = 0L
             }
         }
     }
@@ -427,6 +436,14 @@ class BackupSettings @Inject constructor(
 
     suspend fun setWizardBackupTotal(total: Int) {
         context.dataStore.edit { it[KEY_WIZARD_BACKUP_TOTAL] = total }
+    }
+
+    /** Records the wizard run's denominator and start together, so the two cannot disagree. */
+    suspend fun setWizardRun(total: Int, startedAt: Long) {
+        context.dataStore.edit {
+            it[KEY_WIZARD_BACKUP_TOTAL] = total
+            it[KEY_WIZARD_RUN_STARTED_AT] = startedAt
+        }
     }
 
     suspend fun setAutomaticEnabled(enabled: Boolean) {
@@ -542,5 +559,6 @@ class BackupSettings @Inject constructor(
         val KEY_VIDEO_OPTIMISE_AGE = stringPreferencesKey("video_optimise_age")
         val KEY_WIZARD_STEP = intPreferencesKey("wizard_step")
         val KEY_WIZARD_BACKUP_TOTAL = intPreferencesKey("wizard_backup_total")
+        val KEY_WIZARD_RUN_STARTED_AT = longPreferencesKey("wizard_run_started_at")
     }
 }

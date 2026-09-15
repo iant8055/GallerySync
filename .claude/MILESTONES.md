@@ -4845,3 +4845,25 @@ fix 14:34:05, option 3.
   its 5 photos, `BudgetMixed` −32 MB, `PauseTest` −412 MB. The previous run had shrunk all of them.
 
 Two unit tests added on the mapper: `createdDateTime` carried, and absent maps to `0`.
+
+#### Fixed: the progress card counts what is actually sent
+
+The card's denominator is now the cloud check's outstanding count, when the check covered every
+album (`filesToSend`; an incomplete check falls back to the ledger rather than presenting a floor as a
+total). Its numerator is the number of files uploaded since the run began — `countUploadedSince`,
+against a `wizard_run_started_at` persisted beside the total — which counts real uploads only because
+a skipped file now keeps its OneDrive arrival date. Whether the run happens, and when it is done, still
+follow the ledger's pending count; only the display changed.
+
+Verified on the Moto G from a clean install (15:07:39), option 1, after Ian reset the fixture and
+deleted 25 files from OneDrive: *"total pending: 247, to send: 33"*; 165 skips left the card at *"0% ·
+Starting upload…"*; it then read *"Uploading 3 of 33"* and climbed; **25 files sent** (BudgetMixed 10,
+camping 9 photos and 1 video, PauseTest 5); the card went from 25 of 33 to *100% · Finish*.
+
+**Known limit — a proxy is counted as outstanding.** The 8 extra in the 33 were `DCIM/Camera`'s
+photos, proxied by the previous run and outside the fixture Ian restores. The cloud check matches name
+*and* size, so a proxy never matches its full-size original and is tallied as missing. The run itself
+recognised all 8 as backed-up proxies (`isProxied = 1`) and sent nothing — only the count is wrong, so
+the card stops short of its total and jumps to done. On a real phone this is the reinstall case, the
+same root as "a clean reinstall re-uploads everything"; `ReconciliationRules` would need the proxy
+marker to fix it.
