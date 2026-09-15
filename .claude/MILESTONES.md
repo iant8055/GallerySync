@@ -4625,3 +4625,84 @@ walked the wizard on 7 Sept. A fresh DataStore holds only `upgrade_backfill_chec
 **Also noted, unfixed:** OkHttp logs full response bodies at INFO. Reading a run means wading through
 complete Graph JSON — every file name, size and hash — which buries the app's own `GallerySync/*`
 lines and puts file names and drive IDs in a buffer. Worth dropping to `BASIC` before release.
+
+### 15 Sept 2026 — the delayed first backup: the countdown holds, the start waits up to 31 minutes
+
+Moto G (`ZT422CTZQV`), two clean installs of `ba65024`, wizard option 1 with a 3-minute delay, Close
+pressed, app not reopened. Measured with a watcher polling `dumpsys jobscheduler`, `usagestats` and
+`logcat` every 20–30 s.
+
+| | Run A | Run B |
+|---|---|---|
+| Armed | 10:28:59 | 10:53:27 |
+| Due | 10:31:57 | 10:56:24 |
+| Power | battery until 10:30:53, then charging | charging throughout |
+| Last `ACTIVITY_RESUMED` before the start | 10:29:13 pause, then **10:49:50** | **10:53:12**, before arming |
+| Started | 10:49:50.445 | **11:23:39.716** |
+| Late by | 17m53s — **released by Ian opening the app** | **27m15s — unattended** |
+
+Run A does not count as an unattended start: the run began 0.4 s after the app was resumed, with the
+bucket moving to ACTIVE (`reason=u-si`) in the same second. Run B is clean. Together with 5 Sept
+(26m42s+, released by opening) that is three holds of 18–27 minutes on the charger and one on-time
+overnight start (6 Sept).
+
+#### The countdown is not the problem
+
+`TIMING_DELAY` was satisfied on time in both runs. From then on the job read `Ready: true` with **no
+unsatisfied constraint**, network included, and simply was not dispatched. The countdown is held by
+Android, not by the app, so it runs whether the app is open or not.
+
+An in-app timer was proposed and would not work: with the app closed, `dumpsys activity processes`
+showed the process alive but `isFrozen=true` (cached-app freezer). A frozen process runs no code, so a
+countdown inside it stops the moment the user leaves.
+
+#### What holds it: JobScheduler batching for non-active apps
+
+This device's JobScheduler constants:
+
+```
+min_ready_non_active_jobs_count=5
+max_non_active_job_batch_delay_ms=1860000        (31 minutes)
+conn_max_connectivity_job_batch_delay_ms=1860000
+```
+
+A ready job from an app outside the ACTIVE bucket waits until five such jobs are ready system-wide or
+31 minutes pass. GallerySync is in RARE within seconds of Close on a fresh install (`reason=s`, at
+10:29:17 and 10:53:37), and the one-second blips to 10 during Run B (`reason=s`, 10:59:50 and
+11:01:40) did not release it. 27m15s and 26m42s both sit under the 31-minute cap.
+
+#### On battery the app loses network as well
+
+Before Run A's charger went in, `ConnectivityController` reported
+`UID: 10499; Network: 100 (blocked=REASON_APP_BACKGROUND|REASON_APP_STANDBY)`. Plugging in removed
+`REASON_APP_STANDBY` at 10:30:53. How long a delayed start waits on battery is **not measured**.
+
+#### Decided by Ian, 15 Sept 2026 — the first backup requires charging
+
+- **The initial backup runs only while the phone is charging**, and the user is told so.
+- **Setting the delay is never affected by the charging state at that moment.** The user can always
+  choose it; charging is a condition at the moment the delay runs out, and an unplugged phone waits
+  and starts when it is plugged in.
+- **Day-to-day sync does not require charging.** Battery behaviour is still to be tested — TASK-021.
+
+Charging also removes `REASON_APP_STANDBY`, so it leaves only the batching hold to solve.
+
+**The code does not do this yet.** The wizard's delay is `enqueueDelayedManualRun` — a manual run, and
+manual runs skip the first-backup charging check (`BackupWorker.kt:101`, *"the user picked this
+moment"*). The job carries `BATTERY_NOT_LOW`, not `CHARGING`. The requirement belongs on the job the
+wizard enqueues, set by the wizard itself — **not** read from Settings' *First backup needs charging*
+switch, which would have the wizard reading Settings.
+
+**Still for Ian:** does *Start now* follow the same rule, and does unplugging mid-backup pause it?
+
+#### What remains for the delay card
+
+The card promises a start time that Android holds to within about half an hour. Two ways out: say so
+(*"starts within about half an hour of…"*), or move the countdown to an inexact `AlarmManager`
+while-idle alarm (no permission) that starts the backup as an expedited job, which is not batched.
+The second is unmeasured — whether the expedited start gets network, and whether the batches after it
+keep going, are the questions — and is the same research TASK-021 needs.
+
+**Also seen, not chased:** a fresh install logs `backup run starting` (not manual) at 10:27:43, three
+seconds after launch and before the wizard had granted any folder. Presumably the automatic arm at
+application start, finding nothing to do.
