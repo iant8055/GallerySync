@@ -2126,7 +2126,8 @@ private fun PhoneScreenBackdrop(
 }
 
 /** Frame geometry, shared so the cards above can line up with the tabs drawn inside it. */
-private val PhoneFrameInset = 10.dp
+// Room around the outside of the bezel, so the phone sits *on* the tour rather than filling it.
+private val PhoneFrameInset = 18.dp
 private val PhoneFrameWidth = 8.dp
 private val PhoneFrameCorner = 36.dp
 
