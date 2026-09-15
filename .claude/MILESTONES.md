@@ -4778,3 +4778,51 @@ Next, armed with **179,879 ms**; Back then Next again re-armed with **179,876 ms
 times. SYNC NOW started the run 0.1 s after the tap and replaced the delayed job — no job requiring
 `CHARGING` was left queued. The *Right now* route after Back shares the same cancel-and-start path but
 was not tapped through.
+
+### 15 Sept 2026 (afternoon) — Gate 2 #3 optimised the whole library
+
+The test the 7 Sept pass did not run: #2 against #3 on a library mostly in OneDrive. Moto G, test
+account. Run 1 (option 1) finished at 13:43:53 with 0 remaining, so OneDrive held all 254 files. Ian
+then deleted **15 photos from `BudgetMixed` and 5 videos from `PauseTest`** in OneDrive. Clean install
+13:49:43, option 3 chosen — `library_choice = BACK_UP_AND_OPTIMISE_NEW` confirmed in the DataStore.
+
+- **The cloud check was right:** *"234 already in OneDrive, 22 outstanding"* — the 20 plus two new
+  screenshots. `album_cloud_status` put the gaps exactly where Ian made them: `BudgetMixed` 15 missing,
+  `PauseTest` 5, `Screenshots` 2.
+- **The Step 7 card was right:** 52 MB photos, 438 MB video, 491 MB total — consistent with the 22
+  outstanding (80% of ~65 MB of photos; 85% of ~515 MB of video), not the library.
+- **The optimiser was not.** *"photos: proxying 60 of 77 … 17 of 17"* across batches — **176 photos
+  proxied, 22 refused as too small**, i.e. every photo — and *"video: optimising up to 3 of 59"*,
+  every video. Local footprint by `du`: **2.33 GB → 0.71 GB**, every album shrunk, including the five
+  Ian never touched. Ian confirmed by eye that everything was optimised.
+
+**Cause.** On a fresh install the ledger is empty, so a file found already in OneDrive is marked
+backed up during the run by the skip-existing path — which stamped `uploadedAt = now`. The ledger read
+back all 256 rows at 13:56:57–14:00:45, every one after the cutoff written when #3 was chosen. #3's
+test is `uploadedAtEpochMillis >= cutoff`, so every file passed and #3 behaved exactly as #2. The 6
+Sept fix (`f706d9e`) restored the cutoff but not what it is compared against; on an empty cloud, which
+is what a wipe-and-reinstall tests, the two options are identical, so nothing showed it.
+
+**For a real user this rewrites their whole library against the choice they made.** Nothing is lost —
+proxying requires a verified cloud copy and leaves every file in the gallery — but "optimise only new
+files" optimising everything is exactly the kind of widening a user's choice must not undergo.
+
+**Fix, built and awaiting a run:** the skip-existing path (and the recovered-proxy path beside it)
+record Graph's `createdDateTime` — when the file arrived in OneDrive — instead of now. The listing
+already requested the field and the mapper dropped it; it is carried through `RemoteMediaNode.File`
+and `RemoteFileRef`. Files already in OneDrive then date from before the cutoff, and only what this
+run uploads falls after it. No date from Graph records `0`, which #3 treats as old and leaves alone.
+`uploadedAtEpochMillis` is read nowhere but the three cutoff clauses, so nothing else moves.
+
+**Also from this run, not fixed:**
+
+- **The progress ring counts skipped files as uploads.** On a fresh install every file is pending until
+  checked, and one found in OneDrive is ticked off as done — so the card read *"Uploading 133 of 256"*
+  with two files actually sent, and Ian read it as uploading too much. The reconcile had already said
+  22; that is the figure the card should count against.
+- **OkHttp's body logging evicted the evidence.** Graph listings logged in full at INFO filled the 16
+  MB buffer fast enough that `upload: stored` and skip lines were gone within minutes, and a grep read
+  zero on a run that had skipped 131. The database was the reliable instrument. Dropping OkHttp to
+  `BASIC` is now a testing need, not only a release one.
+- **The Optimisation Settings card said** *"These settings can be changed at any time in the Settings
+  tab"* — removed at Ian's request: the wizard and Settings do not touch each other.
