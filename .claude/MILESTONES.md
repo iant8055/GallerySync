@@ -4604,8 +4604,8 @@ after that afternoon's clean install; the fixture had only ever contained `camer
 **Nor by backup — corrected by Ian, 15 Sept 2026:** *"The app did not split the folder into two."* He
 copied a `camera` folder into DCIM and the camera app then wrote new shots to `Camera`, its default.
 The app split, created and renamed nothing; it read MediaStore's two spellings as two albums, which is
-what TASK-023 is about. Absent on the Moto G by 15 Sept — the fixture was reset and every row now
-reads `Camera`.
+what TASK-023 is about. Absent on the Moto G by 15 Sept because Ian renamed the folder in his copied
+files from `camera` to `Camera`; every row now reads `Camera`. The keying is unchanged.
 
 **Optimise photos defaulted On — fixed** (`03fdc48`). `isOptimiseEnabled` is off by default so nothing
 was optimising, but the Settings screen showed the switch on while nothing happened, and the video

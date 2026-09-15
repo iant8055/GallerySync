@@ -19,10 +19,11 @@ It is also a realistic path rather than a test artefact: a user who copies a lib
 phone or a PC, then keeps shooting, reproduces it exactly.
 
 **Not present on the Moto G today.** Checked 15 Sept: one directory, `DCIM/Camera` (inode `49065`,
-reachable under both spellings), and all 15 MediaStore rows carry `bucket_display_name = Camera`. The
-fixture was reset after the 7 Sept afternoon, so the `camera` spelling is gone and the Albums tab
-correctly shows one album. That is the condition being absent, not the code being fixed — keying on
-`BUCKET_DISPLAY_NAME` is unchanged.
+reachable under both spellings), and all 15 MediaStore rows carry `bucket_display_name = Camera`, so
+the Albums tab correctly shows one album. The `camera` spelling went because **Ian renamed the folder
+in his copied files from `camera` to `Camera`**, so both writers now agree. That is the condition being absent, not
+the code being fixed — keying on `BUCKET_DISPLAY_NAME` is unchanged, and a user who never renames
+their copy keeps two albums.
 
 ## What was seen
 
