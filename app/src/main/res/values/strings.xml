@@ -868,6 +868,19 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_discover_body">The search found these folders. Check the ones you want backed up. Press next to give GallerySync specific permission to use these folders.</string>
     <string name="tour_discover_scanning">Scanning your photos and videos…</string>
     <string name="tour_discover_none_found">No media folders found on this device.</string>
+    <!--
+        The picker came back without the folder asked for. 15 Sept 2026: a grant decides what is
+        backed up, not only what can be optimised, so each message says what the choice does to the
+        backup. %1$s is the ticked folder (DCIM), %2$s what was picked instead (DCIM/Camera).
+    -->
+    <string name="tour_grant_cancelled">No access was given to %1$s. GallerySync needs it to back up and optimise the files in %1$s. Skipping leaves %1$s out of the backup.</string>
+    <string name="tour_grant_narrower">You chose %2$s, which is inside %1$s. Only %2$s would be backed up. The rest of %1$s would be left out.</string>
+    <string name="tour_grant_elsewhere">%2$s isn\'t %1$s, so it wasn\'t used. GallerySync needs access to %1$s itself to back it up. Skipping leaves %1$s out of the backup.</string>
+    <string name="tour_grant_unusable">That choice can\'t be used. GallerySync needs access to %1$s itself to back it up. Skipping leaves %1$s out of the backup.</string>
+    <string name="tour_grant_try_again">Try again</string>
+    <string name="tour_grant_skip">Skip %1$s</string>
+    <string name="tour_grant_choose_whole">Choose all of %1$s</string>
+    <string name="tour_grant_keep_narrower">Keep %1$s only</string>
 
     <string name="tour_local_title">Local Gallery Access</string>
     <string name="tour_local_body">Pick the folders holding your photos and videos. DCIM is where most phones save your pictures and videos.</string>

@@ -9,6 +9,7 @@ import com.gallery.sync.domain.backup.BackupEngine
 import com.gallery.sync.domain.backup.CloudReconciliation
 import com.gallery.sync.data.local.settings.BackupSettings
 import android.net.Uri
+import android.provider.DocumentsContract
 import com.gallery.sync.data.local.media.GrantedDirectory
 import com.gallery.sync.data.local.media.ScopedDirectories
 import com.gallery.sync.util.ChargingState
@@ -21,6 +22,7 @@ import com.gallery.sync.domain.backup.FirstBackupWindow
 import com.gallery.sync.domain.backup.OptimiseMode
 import com.gallery.sync.domain.backup.ReconcileWithCloud
 import com.gallery.sync.domain.backup.RemoteRoots
+import com.gallery.sync.domain.backup.TreeScope
 import com.gallery.sync.domain.backup.VideoQuality
 import com.gallery.sync.util.Logger
 import com.gallery.sync.worker.BackupScheduling
@@ -36,6 +38,42 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.LocalTime
 import javax.inject.Inject
+
+/**
+ * A folder the wizard asked the picker for and did not get.
+ *
+ * Matters because the grant is not only the write path for optimising: whenever any folder is
+ * granted, the scan covers granted folders only (`ScopedDirectories.currentScope`). Moto G, 15 Sept
+ * 2026: DCIM and Pictures ticked, DCIM cancelled in the picker, Pictures granted — and DCIM's 247 files
+ * left the backup with DCIM still ticked and nothing on screen. So a pick that does not cover the
+ * folder asked for stops the walk and is put to the user, never absorbed.
+ */
+data class SafGrantIssue(
+    /** The ticked folder the picker was opened for, e.g. `DCIM`. */
+    val requested: String,
+    val kind: Kind,
+    /** The path the user picked instead, when there was one — e.g. `DCIM/Camera`. */
+    val pickedPath: String? = null,
+    /**
+     * The picked tree, held back rather than granted. Only [Kind.NARROWER] carries it, and it is
+     * taken only if the user chooses to keep the narrower folder.
+     */
+    val pickedUri: String? = null
+) {
+    enum class Kind {
+        /** The picker was backed out of. */
+        CANCELLED,
+
+        /** A folder inside the one asked for — granting it would back up that part only. */
+        NARROWER,
+
+        /** A folder outside the one asked for — never granted, since it would widen the backup. */
+        ELSEWHERE,
+
+        /** A tree the app cannot use as a scope, such as a whole volume, or one it could not keep. */
+        UNUSABLE
+    }
+}
 
 /**
  * What the reconciliation step is showing.
@@ -116,6 +154,11 @@ data class ReconcileUiState(
     val hasSelectedDirectories: Boolean = false,
     /** Directories still needing SAF grants during the wizard walk. */
     val safGrantQueue: List<String> = emptyList(),
+    /**
+     * The picker came back without the folder that was asked for, and the walk is paused on it until
+     * the user says what to do. Null while the walk is going normally. See [SafGrantIssue].
+     */
+    val safGrantIssue: SafGrantIssue? = null,
     /** Photos eligible for the wizard's one-time bulk optimise. */
     val optimiseCandidateCount: Int = 0,
     /** Whether the one-time optimise pass is running. */
@@ -867,11 +910,19 @@ class ReconcileViewModel @Inject constructor(
         }
     }
 
-    /** Scans MediaStore for all media directories. Nothing is pre-checked. */
+    /**
+     * Scans MediaStore for all media directories. Nothing is pre-checked.
+     *
+     * Run every time the folder card opens, not once. It used to run only while the list was empty,
+     * so the counts were whatever they had been on the first visit — Ian added eight screenshots,
+     * came back to the card, and it still said two (Moto G, 15 Sept 2026). A folder's tick survives
+     * the recount; only a folder never seen before arrives unticked.
+     */
     fun discoverDirectories() {
         viewModelScope.launch {
             _state.value = _state.value.copy(discoveryRunning = true)
             val dirs = scanner.discoverDirectories()
+            val previous = _state.value.directoryChecks
 
             // Every folder starts off. Ian, 4 Sept 2026.
             //
@@ -883,7 +934,7 @@ class ReconcileViewModel @Inject constructor(
             //
             // Safe to start empty because `canAdvance()` blocks step 4 until at least one folder is
             // checked, so this asks for a choice rather than silently backing up nothing.
-            val checks = dirs.associate { dir -> dir.name to false }
+            val checks = dirs.associate { dir -> dir.name to (previous[dir.name] ?: false) }
 
             _state.value = _state.value.copy(
                 discoveredDirectories = dirs,
@@ -924,30 +975,115 @@ class ReconcileViewModel @Inject constructor(
     fun buildSafGrantQueue(): Boolean {
         val checked = _state.value.directoryChecks.filter { it.value }.keys
         val covered = _state.value.directories.map { it.relativePath }
-        val needed = checked.filter { dir ->
-            covered.none { it.startsWith(dir) || dir.startsWith(it) }
-        }
-        _state.value = _state.value.copy(safGrantQueue = needed.toList())
+        // Covered means granted on that folder or a parent of it. This used a bare `startsWith` both
+        // ways, so a held grant on `DCIM/Camera` counted as covering all of `DCIM` — the picker was
+        // never shown, and the scan (which follows grants) kept only Camera. `DCIM2` would have
+        // matched `DCIM` too. TreeScope has the boundary check for exactly this.
+        val needed = checked.filterNot { dir -> TreeScope.isInScope(dir, covered) }
+        _state.value = _state.value.copy(safGrantQueue = needed.toList(), safGrantIssue = null)
         return needed.isNotEmpty()
     }
 
     /**
-     * Processes one SAF grant result and advances the queue.
+     * Processes one SAF grant result.
      *
-     * Called from the treePicker callback after the user picks a folder or cancels.
-     * A cancelled pick (null URI) skips that directory — the user can add it later from Settings.
+     * The walk advances only when the pick covers the folder asked for — that folder itself, or a
+     * parent of it. Anything else pauses the walk on a [SafGrantIssue] for the user to decide,
+     * because the grant sets what is backed up, not only what can be optimised. Until 15 Sept 2026
+     * this advanced on every result: a cancel skipped the folder without a word, and a subfolder or an
+     * unrelated folder was granted as though it were the one asked for.
      */
-    fun onSafGrantReceived(uri: android.net.Uri?) {
+    fun onSafGrantReceived(uri: Uri?) {
         viewModelScope.launch {
-            if (uri != null) {
-                val added = sources.add(uri)
-                _state.value = _state.value.copy(directoryRefused = !added)
+            val requested = _state.value.safGrantQueue.firstOrNull() ?: return@launch
+            if (uri == null) {
+                pauseWalk(SafGrantIssue(requested, SafGrantIssue.Kind.CANCELLED))
+                return@launch
             }
-            val queue = _state.value.safGrantQueue
-            _state.value = _state.value.copy(
-                safGrantQueue = if (queue.size > 1) queue.drop(1) else emptyList()
-            )
+
+            val picked = runCatching {
+                TreeScope.pathFromTreeDocumentId(DocumentsContract.getTreeDocumentId(uri))
+            }.getOrNull()
+
+            when {
+                picked == null ->
+                    pauseWalk(SafGrantIssue(requested, SafGrantIssue.Kind.UNUSABLE))
+
+                // The folder asked for, or a parent that contains it.
+                TreeScope.isInScope(requested, listOf(picked)) -> {
+                    if (sources.add(uri)) {
+                        Logger.i(TAG, "grant for $requested: $picked")
+                        advanceWalk()
+                    } else {
+                        pauseWalk(SafGrantIssue(requested, SafGrantIssue.Kind.UNUSABLE, picked))
+                    }
+                }
+
+                // Inside the folder asked for. Not granted yet: keeping it narrows the backup to
+                // that part, and the user decides that, not the picker.
+                TreeScope.isInScope(picked, listOf(requested)) ->
+                    pauseWalk(
+                        SafGrantIssue(
+                            requested,
+                            SafGrantIssue.Kind.NARROWER,
+                            pickedPath = picked,
+                            pickedUri = uri.toString()
+                        )
+                    )
+
+                // Somewhere else entirely. Never granted: it would add a folder to the backup
+                // that the user did not tick.
+                else ->
+                    pauseWalk(SafGrantIssue(requested, SafGrantIssue.Kind.ELSEWHERE, picked))
+            }
         }
+    }
+
+    /** Opens the picker again for the same folder. The walk relaunches when the issue clears. */
+    fun retrySafGrant() {
+        _state.value = _state.value.copy(safGrantIssue = null)
+    }
+
+    /**
+     * Leaves the folder out: unticked, so the choice on screen and the backup agree, and the walk
+     * moves on. Said plainly on the card before the tap — this is the user taking a folder out of the
+     * backup, not a formality.
+     */
+    fun skipSafGrant() {
+        val issue = _state.value.safGrantIssue ?: return
+        val checks = _state.value.directoryChecks.toMutableMap()
+        checks[issue.requested] = false
+        _state.value = _state.value.copy(directoryChecks = checks)
+        Logger.i(TAG, "grant for ${issue.requested} skipped; unticked")
+        saveSelectedDirectories()
+        advanceWalk()
+    }
+
+    /** Takes the narrower folder the user picked, after they have been told what it leaves out. */
+    fun keepNarrowerGrant() {
+        val issue = _state.value.safGrantIssue ?: return
+        val uri = issue.pickedUri?.let(Uri::parse) ?: return
+        viewModelScope.launch {
+            if (sources.add(uri)) {
+                Logger.i(TAG, "grant for ${issue.requested}: kept narrower ${issue.pickedPath}")
+                advanceWalk()
+            } else {
+                pauseWalk(issue.copy(kind = SafGrantIssue.Kind.UNUSABLE, pickedUri = null))
+            }
+        }
+    }
+
+    private fun pauseWalk(issue: SafGrantIssue) {
+        Logger.w(TAG, "grant for ${issue.requested}: ${issue.kind} (${issue.pickedPath})")
+        _state.value = _state.value.copy(safGrantIssue = issue)
+    }
+
+    private fun advanceWalk() {
+        val queue = _state.value.safGrantQueue
+        _state.value = _state.value.copy(
+            safGrantQueue = if (queue.size > 1) queue.drop(1) else emptyList(),
+            safGrantIssue = null
+        )
     }
 
     fun removeSource(treeUri: String) {

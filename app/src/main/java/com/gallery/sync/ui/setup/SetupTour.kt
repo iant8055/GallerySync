@@ -354,24 +354,31 @@ fun SetupTour(
     // Discover once permission is in hand. The request itself is **not** fired on arrival: the
     // system dialog cannot be reworded, so landing on it cold is the whole reason it reads as
     // unexplained. Step 4 states the case first and the user raises the dialog from the card.
+    // Recounted on every visit, not only the first — see ReconcileViewModel.discoverDirectories.
     LaunchedEffect(mediaGranted, step) {
-        if (mediaGranted && step == 4 && state.discoveredDirectories.isEmpty() && !state.discoveryRunning) {
+        if (mediaGranted && step == 4 && !state.discoveryRunning) {
             viewModel.discoverDirectories()
         }
     }
 
-    // Walk through SAF tree pickers for each checked directory
-    LaunchedEffect(state.safGrantQueue, safWalkStarted) {
-        if (safWalkStarted && state.safGrantQueue.isNotEmpty()) {
+    // Walk through SAF tree pickers for each checked directory.
+    //
+    // Paused while a pick is waiting on the user (safGrantIssue): the card shows what went wrong and
+    // offers Try again or Skip, and clearing the issue re-runs this for the same folder or the next.
+    LaunchedEffect(state.safGrantQueue, safWalkStarted, state.safGrantIssue) {
+        if (!safWalkStarted || state.safGrantIssue != null) return@LaunchedEffect
+        if (state.safGrantQueue.isNotEmpty()) {
             val dir = state.safGrantQueue.first()
             val initialUri = android.provider.DocumentsContract.buildDocumentUri(
                 "com.android.externalstorage.documents",
                 "primary:$dir"
             )
             treePicker.launch(initialUri)
-        } else if (safWalkStarted && state.safGrantQueue.isEmpty()) {
+        } else {
             safWalkStarted = false
-            step = 5
+            // Every folder skipped leaves nothing to back up, so stay on the folder card rather than
+            // walk on into a cloud check of nothing.
+            if (state.directoryChecks.values.any { it }) step = 5
         }
     }
 
@@ -562,7 +569,10 @@ fun SetupTour(
                             state = state,
                             hasMediaPermission = mediaGranted,
                             onGrantMediaAccess = ::requestMediaPermission,
-                            onToggleDirectory = viewModel::toggleDirectoryCheck
+                            onToggleDirectory = viewModel::toggleDirectoryCheck,
+                            onRetryGrant = viewModel::retrySafGrant,
+                            onSkipGrant = viewModel::skipSafGrant,
+                            onKeepNarrowerGrant = viewModel::keepNarrowerGrant
                         )
                         5 -> CloudStorageContent(
                             state = state,
@@ -1009,7 +1019,10 @@ private fun DirectoryDiscoveryContent(
     state: ReconcileUiState,
     hasMediaPermission: Boolean,
     onGrantMediaAccess: () -> Unit,
-    onToggleDirectory: (String) -> Unit
+    onToggleDirectory: (String) -> Unit,
+    onRetryGrant: () -> Unit,
+    onSkipGrant: () -> Unit,
+    onKeepNarrowerGrant: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
@@ -1024,6 +1037,17 @@ private fun DirectoryDiscoveryContent(
             ),
             style = MaterialTheme.typography.bodyMedium
         )
+
+        // Above the list, not below it: a long folder list would push it off the card, and this is
+        // the one thing on the card that needs an answer before the wizard can go on.
+        state.safGrantIssue?.let { issue ->
+            SafGrantIssueNotice(
+                issue = issue,
+                onRetry = onRetryGrant,
+                onSkip = onSkipGrant,
+                onKeepNarrower = onKeepNarrowerGrant
+            )
+        }
 
         if (!hasMediaPermission) {
             Button(onClick = onGrantMediaAccess) {
@@ -1056,6 +1080,62 @@ private fun DirectoryDiscoveryContent(
                 )
             }
 
+        }
+    }
+}
+
+/**
+ * What the picker returned instead of the folder asked for, and the two ways on.
+ *
+ * Every message says what the choice does to the backup, because that is what it does: the grant
+ * decides which folders are scanned. Buttons are stacked full width — two long labels in a row break
+ * mid-word on a 360dp card, which is how the video-quality and delay rows failed on 4 Sept.
+ */
+@Composable
+private fun SafGrantIssueNotice(
+    issue: SafGrantIssue,
+    onRetry: () -> Unit,
+    onSkip: () -> Unit,
+    onKeepNarrower: () -> Unit
+) {
+    val picked = issue.pickedPath.orEmpty()
+    Surface(
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        shape = MaterialTheme.shapes.medium,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = when (issue.kind) {
+                    SafGrantIssue.Kind.CANCELLED ->
+                        stringResource(R.string.tour_grant_cancelled, issue.requested)
+                    SafGrantIssue.Kind.NARROWER ->
+                        stringResource(R.string.tour_grant_narrower, issue.requested, picked)
+                    SafGrantIssue.Kind.ELSEWHERE ->
+                        stringResource(R.string.tour_grant_elsewhere, issue.requested, picked)
+                    SafGrantIssue.Kind.UNUSABLE ->
+                        stringResource(R.string.tour_grant_unusable, issue.requested)
+                },
+                style = MaterialTheme.typography.bodyMedium
+            )
+            if (issue.kind == SafGrantIssue.Kind.NARROWER) {
+                Button(onClick = onRetry, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.tour_grant_choose_whole, issue.requested))
+                }
+                OutlinedButton(onClick = onKeepNarrower, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.tour_grant_keep_narrower, picked))
+                }
+            } else {
+                Button(onClick = onRetry, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.tour_grant_try_again))
+                }
+                OutlinedButton(onClick = onSkip, modifier = Modifier.fillMaxWidth()) {
+                    Text(stringResource(R.string.tour_grant_skip, issue.requested))
+                }
+            }
         }
     }
 }

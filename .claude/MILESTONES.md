@@ -4910,3 +4910,32 @@ preference between the two; `TreeScope`'s "one grant, two jobs" is the documente
 a wrong pick stops the walk and says so, with Try again or Skip; Skip unticks the folder and says it is
 left out of the backup; a subfolder asks whether to use the whole folder or keep only the subfolder;
 an unrelated folder is never granted, so it cannot widen the backup.
+
+#### Fixed the same evening, verified on the Moto G
+
+The walk now advances only when the pick covers the folder asked for — that folder or a parent. Any
+other result pauses it on a `SafGrantIssue` shown at the top of the folder card, and the pick is not
+granted until the user decides: **cancelled** and **unusable** offer *Try again* or *Skip <folder>*;
+a **narrower** pick offers *Choose all of <folder>* or *Keep <subfolder> only*; a folder **elsewhere**
+is never granted, since it would add something unticked to the backup. *Skip* unticks the folder so
+the ticks, the grants and the scan agree. Coverage uses `TreeScope.isInScope` instead of the two-way
+`startsWith`. If every folder is skipped the wizard stays on the card. The folder counts are recounted
+on every visit, keeping the ticks.
+
+Clean installs of the fix, DCIM and Pictures ticked:
+
+- **Cancel → Try again → subfolder → Choose all of DCIM** (17:53): `CANCELLED`, notice shown; *Try
+  again* reopened the picker on DCIM; `NARROWER (DCIM/Camera)`, then `NARROWER (DCIM/camping)`, each
+  held back ungranted with the subfolder notice; DCIM itself granted with no notice; Pictures granted.
+  Scan: **257 items across 8 albums within 2 granted folders** — against 10 on the unfixed build.
+  Pictures read *10 photos* on the card, the recount working. The notice checked in light and dark.
+- **Skip** (18:01): `CANCELLED` → *Skip DCIM* → `selected directories: [Pictures]`, DCIM unticked on
+  screen; Pictures granted; scan **10 items within 1 granted folder**; stored scope `selected:
+  Pictures`, `granted: Pictures`.
+
+*Keep <subfolder> only* was not tapped through. One *Try again* tap was lost to an activity recreation
+caused by switching the theme from adb at the same moment — not a defect, but a reason not to toggle
+`uimode` while someone is tapping.
+
+The picker's *Back* takes two presses when it opens inside a folder: the first goes up a level. That
+is DocumentsUI, not the app.
