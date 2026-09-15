@@ -763,7 +763,8 @@ interface BackupEntryDao {
           --
           -- Briefly added on 6 Sept 2026 and reverted the same evening: a dead `photoOptimiseAge`
           -- control on the Settings screen was mistaken for evidence that the query was missing
-          -- something. The control is the thing that should not exist.
+          -- something. The control was the thing that should not exist, and TASK-022 Part B
+          -- removed it.
           -- The file's own mode wins over its album's. A restored photo is pinned to BACKUP so the
           -- optimiser does not shrink back what the user just pulled down; every other row is null
           -- here and follows its album exactly as before. See TASK-018.

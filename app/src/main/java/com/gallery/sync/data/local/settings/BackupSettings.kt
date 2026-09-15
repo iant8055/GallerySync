@@ -64,8 +64,9 @@ data class BackupPreferences(
     val optimisePhotos: Boolean = false,
     /** Whether photos are optimised on their own, or on a tap. Only asked when [optimisePhotos]. */
     val photoOptimiseMode: OptimiseMode = OptimiseMode.DEFAULT,
-    /** How old a photo must be before it may be optimised. Per file - see [MediaAge]. */
-    val photoOptimiseAge: MediaAge = MediaAge.DEFAULT,
+    // No photo age. Ian, 19 Aug 2026, TASK-011: "Photos are proxied whatever their age ... There is
+    // no photo age setting and none is wanted." One was added on 28 Aug anyway, governed nothing,
+    // and was removed in TASK-022 Part B. Only video has an age - see [videoOptimiseAge].
     /** Optimise video at all? See [optimisePhotos]. */
     val optimiseVideo: Boolean = false,
     /** Whether video is optimised on its own, or on a tap. Only asked when [optimiseVideo]. */
@@ -249,7 +250,6 @@ class BackupSettings @Inject constructor(
             isOptimiseEnabled = stored[KEY_OPTIMISE_ENABLED] ?: false,
             optimisePhotos = stored[KEY_OPTIMISE_PHOTOS] ?: false,
             photoOptimiseMode = OptimiseMode.fromNameOrDefault(stored[KEY_PHOTO_OPTIMISE_MODE]),
-            photoOptimiseAge = MediaAge.fromNameOrDefault(stored[KEY_PHOTO_OPTIMISE_AGE]),
             optimiseVideo = stored[KEY_OPTIMISE_VIDEO] ?: false,
             videoOptimiseMode = OptimiseMode.fromNameOrDefault(stored[KEY_VIDEO_OPTIMISE_MODE]),
             defaultAlbumMode = stored[KEY_DEFAULT_ALBUM_MODE]
@@ -392,10 +392,6 @@ class BackupSettings @Inject constructor(
         context.dataStore.edit { it[KEY_PHOTO_OPTIMISE_MODE] = mode.name }
     }
 
-    suspend fun setPhotoOptimiseAge(age: MediaAge) {
-        context.dataStore.edit { it[KEY_PHOTO_OPTIMISE_AGE] = age.name }
-    }
-
     suspend fun setVideoOptimiseMode(mode: OptimiseMode) {
         context.dataStore.edit { it[KEY_VIDEO_OPTIMISE_MODE] = mode.name }
     }
@@ -523,7 +519,6 @@ class BackupSettings @Inject constructor(
         val KEY_OPTIMISE_PHOTOS = booleanPreferencesKey("optimise_photos")
         val KEY_OPTIMISE_VIDEO = booleanPreferencesKey("optimise_video")
         val KEY_PHOTO_OPTIMISE_MODE = stringPreferencesKey("photo_optimise_mode")
-        val KEY_PHOTO_OPTIMISE_AGE = stringPreferencesKey("photo_optimise_age")
         val KEY_VIDEO_OPTIMISE_MODE = stringPreferencesKey("video_optimise_mode")
         val KEY_DEFAULT_ALBUM_MODE = stringPreferencesKey("default_album_mode")
         val KEY_DESTINATION_ROOT = stringPreferencesKey("destination_root")

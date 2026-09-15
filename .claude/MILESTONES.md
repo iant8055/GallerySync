@@ -348,10 +348,8 @@ The tree, exactly:
 isOptimiseEnabled     master switch, off until asked
   optimisePhotos      Y / N
   photoOptimiseMode   Auto | Manual
-  photoOptimiseAge    SHOULD NOT EXIST - see 6 Sept 2026. Ian ruled on 19 Aug (TASK-011) that
-                      "there is no photo age setting and none is wanted"; this line was written
-                      here on 29 Aug in contradiction of that, and the control reached Settings on
-                      30 Aug. Photos are proxied whatever their age. Remove it.
+                      (no photo age - photos are proxied whatever their age, TASK-011. One was
+                      added 28-30 Aug in contradiction of that and removed 15 Sept, TASK-022 B)
   optimiseVideo       Y / N
   videoOptimiseMode   Auto | Manual
   videoOptimiseAge    same five
@@ -4526,7 +4524,8 @@ exist?* comes before *why doesn't it work?*, and TASK-011 answered it in one gre
 **What is actually wrong is the control.** `photoOptimiseAge` entered the code on 28 Aug (`54f6124`),
 reached the Settings screen on 30 Aug (`f650536`), and was written into the Area 2 tree in this file on
 29 Aug (`c0c9b81`) — all after the 19 Aug decision that none is wanted. It should be removed from
-`BackupSettings`, from `SettingsScreen`, and from the tree above. **Not yet done.**
+`BackupSettings`, from `SettingsScreen`, and from the tree above. **Done 15 Sept 2026** — TASK-022
+Part B.
 
 
 ### 7 Sept 2026 — TASK-022 Part A, and a fence checked before it came down
@@ -4613,10 +4612,9 @@ read fallback, and the transient UI state in `BackupViewModel`.
 master, and the per-medium switches were added later without one. That absence is why it drifted, so
 both `optimisePhotos` and `optimiseVideo` are documented there now.
 
-**Still to check on device:** the Settings switch has not been *looked* at since the fix. A fresh
-DataStore holds only `upgrade_backfill_checked` and `wizard_step`, so `optimise_photos` is absent and
-the code default is what applies — but on a fresh install Settings sits behind the tour with the nav
-bar inert, so confirming the pixels needs the wizard walked first.
+**Checked on device 15 Sept 2026:** *Optimise photos* reads Off on the Moto G, on an install that had
+walked the wizard on 7 Sept. A fresh DataStore holds only `upgrade_backfill_checked` and
+`wizard_step`, so `optimise_photos` is absent and the code default is what applies.
 
 **Also noted, unfixed:** OkHttp logs full response bodies at INFO. Reading a run means wading through
 complete Graph JSON — every file name, size and hash — which buries the app's own `GallerySync/*`

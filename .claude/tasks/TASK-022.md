@@ -81,3 +81,24 @@ persists, and nothing reads it. Remove it from `SettingsScreen`, `BackupViewMode
 
 Leave `MediaAge.thresholdEpochSeconds()` alone — video uses it, and it replaced a private copy of the
 same arithmetic.
+
+### Part B done — 15 Sept 2026
+
+Removed: `BackupPreferences.photoOptimiseAge`, `KEY_PHOTO_OPTIMISE_AGE`, its read and
+`setPhotoOptimiseAge` in `BackupSettings`; the state field, mapping and setter in `BackupViewModel`;
+the *Older than* dropdown under *Optimise photos* in `SettingsScreen`; the line in the MILESTONES Area 2
+tree. `MediaAge`, `settings_older_than` and the `media_age_*` strings stay — the video row uses all of
+them. Two historical comments (`BackupEntryDao.proxyCandidates`, `MediaAge.thresholdEpochSeconds`)
+reworded to say the control is gone rather than that it should go. SETTINGS-AUDIT annotated.
+
+A `photo_optimise_age` value already stored on a device is left in DataStore, unread. Nothing has
+shipped, so there is no user to migrate, and an unread key is inert.
+
+Verified: compile, 315/315 unit tests, `assembleDebug`, then on the Moto G (`ZT422CTZQV`) — installed
+over the existing app, launched, crash buffer empty. With *Optimise photos* switched on, the photo
+section shows only *Mode*; the *Older than* dropdown is gone and the video row keeps its own. Checked
+in light and dark. Switched back off afterwards, master following it; all three switches read off.
+
+**Left for Ian — copy that still implies a photo age.** `settings_auto_optimise_on` and
+`settings_optimise_master_on` both say photos and video are optimised once *"old enough"*. Only video
+waits. Not changed here because it is product copy, not the control.

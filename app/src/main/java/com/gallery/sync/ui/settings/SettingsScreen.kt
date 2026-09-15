@@ -226,14 +226,6 @@ fun SettingsScreen(
                         )
                     }
                 )
-
-                SettingDropdown(
-                    label = stringResource(R.string.settings_older_than),
-                    options = MediaAge.entries,
-                    selected = state.photoOptimiseAge,
-                    onSelected = viewModel::setPhotoOptimiseAge,
-                    optionLabel = { age -> age.label() }
-                )
             }
         }
 

@@ -206,7 +206,6 @@ data class BackupUiState(
     val isOptimiseEnabled: Boolean = false,
     val optimisePhotos: Boolean = false,
     val photoOptimiseMode: OptimiseMode = OptimiseMode.DEFAULT,
-    val photoOptimiseAge: MediaAge = MediaAge.DEFAULT,
     val optimiseVideo: Boolean = true,
     val videoOptimiseMode: OptimiseMode = OptimiseMode.DEFAULT,
     val videoOptimiseAge: MediaAge = MediaAge.DEFAULT,
@@ -450,7 +449,6 @@ class BackupViewModel @Inject constructor(
                     isOptimiseEnabled = prefs.isOptimiseEnabled,
                     optimisePhotos = prefs.optimisePhotos,
                     photoOptimiseMode = prefs.photoOptimiseMode,
-                    photoOptimiseAge = prefs.photoOptimiseAge,
                     optimiseVideo = prefs.optimiseVideo,
                     videoOptimiseMode = prefs.videoOptimiseMode,
                     videoOptimiseAge = prefs.videoOptimiseAge,
@@ -764,10 +762,6 @@ class BackupViewModel @Inject constructor(
 
     fun setPhotoOptimiseMode(mode: OptimiseMode) {
         viewModelScope.launch { settings.setPhotoOptimiseMode(mode) }
-    }
-
-    fun setPhotoOptimiseAge(age: MediaAge) {
-        viewModelScope.launch { settings.setPhotoOptimiseAge(age) }
     }
 
     fun setOptimiseVideo(enabled: Boolean) {

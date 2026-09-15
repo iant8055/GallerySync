@@ -105,9 +105,10 @@ enum class MediaAge(val duration: Duration) {
     /**
      * The `dateModified` a file must be at or below to have waited out this age.
      *
-     * Shared so photos and video answer it the same way. Video had a private copy and photos had no
-     * age check at all, which is how `photoOptimiseAge` came to be a Settings control that changed
-     * nothing — see the 6 Sept 2026 entry.
+     * Video is the only caller, and that is by decision: photos have no age (TASK-011, 19 Aug 2026).
+     * It replaced a private copy of the same arithmetic in `VideoOptimiser`. A `photoOptimiseAge`
+     * control once sat on the Settings screen changing nothing, and was removed in TASK-022 Part B
+     * rather than wired up — see the 6 Sept 2026 entry in MILESTONES.
      */
     fun thresholdEpochSeconds(now: Instant = Instant.now()): Long =
         now.minus(duration).epochSecond

@@ -38,6 +38,12 @@ the user's choosing, against a list in front of them. The clause was removed fro
 on 25 Aug when it was found describing a gate that did not exist; the gate itself should stay
 unbuilt unless Archive ever gains an unattended mode.
 
+**There is no photo optimise age, and the one listed below is gone.** Ian ruled on 19 Aug, TASK-011:
+*"Photos are proxied whatever their age … There is no photo age setting and none is wanted."* This
+audit recorded `photo_optimise_age` ten days later because the code had gained it on 28 Aug anyway;
+it reached the Settings screen on 30 Aug and never governed anything. Removed 15 Sept 2026 in
+TASK-022 Part B — field, key, setter and dropdown. Only video has an age.
+
 ---
 
 ## Still worth acting on
@@ -76,7 +82,7 @@ Three DataStores. `backup_settings` holds 23 keys; theme and granted folders liv
 | **Optimise enabled** (master) | `optimise_enabled` | `false` | **No UI yet** |
 | **Optimise photos?** | `optimise_photos` | `true` | **No UI yet** |
 | **Photo optimise mode** | `photo_optimise_mode` | `Auto` | **No UI yet** |
-| **Photo optimise age** | `photo_optimise_age` | `OneDay` | **No UI yet** |
+| ~~**Photo optimise age**~~ | ~~`photo_optimise_age`~~ | ~~`OneDay`~~ | **Removed** 15 Sept — see above |
 | **Optimise video?** | `optimise_video` | `true` | **No UI yet** |
 | **Video optimise mode** | `video_optimise_mode` | `Auto` | **No UI yet** |
 | **Video optimise age** | `video_optimise_age` | `OneDay` | **No UI yet** |
@@ -94,7 +100,7 @@ The shape they answer to is Ian's, 28-29 Aug:
 Do you want Gallery Sync to optimise your photos and video to save space?   Y / N
   Optimise photos?                                     Y / N
     How?                                               Manual / Auto
-    When?          Straight away · 1h · 12h · 1 day · 1 week
+                   (no When? - photos have no age, TASK-011)
   Optimise video?                                      Y / N
     How?                                               Manual / Auto
     When?          Straight away · 1h · 12h · 1 day · 1 week
@@ -169,7 +175,7 @@ without.
 | Not asked | Consequence |
 |---|---|
 | **Video quality** | Every user gets 480p without being told, once optimising runs |
-| **Photo / video optimise age** | Defaults to 1 day, never surfaced |
+| **Video optimise age** | Defaults to 1 day, never surfaced. Photos have none |
 | **Archive age** | Does not exist to ask about |
 | **Sync scope** | Does not exist to ask about |
 | **Cloud deletion grace** | Fixed at 7 days, no UI anywhere |
