@@ -59,6 +59,15 @@ sealed interface RemoteMediaNode {
         /** Pixel height, when the provider exposes an image facet for this file. */
         val heightPx: Int?,
         /** Provider change-detection token. */
-        val eTag: String?
+        val eTag: String?,
+        /**
+         * When the provider says this file arrived in the cloud (Graph's `createdDateTime`), or `0`
+         * when it did not say.
+         *
+         * Carried since 15 Sept 2026 so the skip-existing path can record when a file it found was
+         * really backed up, rather than stamping it with the moment it was found — see
+         * `BackupEngine`'s skip path and `LibraryChoice.cutoffFor`.
+         */
+        val createdAtUtc: Long = 0L
     ) : RemoteMediaNode
 }

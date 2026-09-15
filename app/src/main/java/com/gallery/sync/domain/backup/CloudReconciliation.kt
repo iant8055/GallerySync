@@ -24,7 +24,17 @@ data class RemoteFileRef(
      *
      * Defaulted, so reconciliation callers that only care about id and size are untouched.
      */
-    val mimeType: String = "application/octet-stream"
+    val mimeType: String = "application/octet-stream",
+    /**
+     * When OneDrive says the file arrived, or `0` when it did not say.
+     *
+     * The skip-existing path records this as the file's `uploadedAtEpochMillis`. It used to record
+     * *now*, which made every file found already in OneDrive look freshly uploaded — and Gate 2 #3,
+     * "optimise only what this run backed up", tells new from old by exactly that field. Moto G,
+     * 15 Sept 2026: 20 files deleted from OneDrive, #3 chosen, and all 176 photos and 59 videos
+     * were optimised.
+     */
+    val createdAtEpochMillis: Long = 0L
 )
 
 /**

@@ -885,7 +885,6 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
 
     <string name="tour_optimise_title">Optimisation Settings</string>
     <string name="tour_optimise_body">Optimisation allows you to free up storage space on your phone while still being able to see all your photos and videos on your Gallery.</string>
-    <string name="tour_optimise_note">These settings can be changed at any time in the Settings tab.</string>
     <string name="tour_optimise_photos_saving">Estimated photo savings: %1$s</string>
     <string name="tour_optimise_video_saving">Estimated video savings: %1$s</string>
     <string name="tour_optimise_total_saving">Total estimated savings: %1$s</string>

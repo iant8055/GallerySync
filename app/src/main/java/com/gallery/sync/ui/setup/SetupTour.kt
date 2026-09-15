@@ -1509,11 +1509,9 @@ private fun OptimizationContent(
             }
         }
 
-        Text(
-            text = stringResource(R.string.tour_optimise_note),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface
-        )
+        // "These settings can be changed at any time in the Settings tab" stood here until 15 Sept
+        // 2026. Removed by Ian: the wizard and Settings do not touch each other in either
+        // direction, so a card pointing at Settings as where its own answers live was false.
     }
 }
 

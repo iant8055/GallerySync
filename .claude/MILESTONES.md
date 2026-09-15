@@ -4826,3 +4826,22 @@ run uploads falls after it. No date from Graph records `0`, which #3 treats as o
   `BASIC` is now a testing need, not only a release one.
 - **The Optimisation Settings card said** *"These settings can be changed at any time in the Settings
   tab"* — removed at Ian's request: the wizard and Settings do not touch each other.
+
+#### The fix, verified the same afternoon
+
+Fixture reset by Ian, then deleted from OneDrive: **10 photos from `BudgetMixed`, 5 from `camping`, 5
+videos from `PauseTest`**, and he shot new photos into `DCIM/Camera` (8 on disk). Clean install of the
+fix 14:34:05, option 3.
+
+- Cloud check: *"219 already in OneDrive, 30 outstanding"* — exact. The Optimisation Settings card no
+  longer carries the Settings-tab line.
+- Mid-run, with the cutoff at 14:38:14: **165 skipped rows carried OneDrive's own arrival dates from
+  earlier days — all before the cutoff** — and the rows uploaded by the run after it.
+- After the run: **30 rows new** (10 BudgetMixed, 5 camping, 8 Camera, 5 PauseTest, 2 screenshots);
+  **27 optimised** — 23 photos and 4 videos — and **zero optimised files that were not new**. The
+  three new files left alone were refused on merit: a 10 MB low-bitrate clip that transcoded no
+  smaller, and two screenshots too small to shrink.
+- `du`: `budgetphotos`, `car show` and `funny stuff` **byte-for-byte unchanged**; `camping` −20 MB for
+  its 5 photos, `BudgetMixed` −32 MB, `PauseTest` −412 MB. The previous run had shrunk all of them.
+
+Two unit tests added on the mapper: `createdDateTime` carried, and absent maps to `0`.

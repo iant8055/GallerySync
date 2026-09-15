@@ -557,7 +557,12 @@ class BackupEngine @Inject constructor(
                         // to offer almost nothing.
                         remoteItemId = match.id,
                         remoteSizeBytes = entry.sizeBytes,
-                        uploadedAt = System.currentTimeMillis()
+                        // When OneDrive got it, not when we noticed. Stamping *now* here made every
+                        // file already in OneDrive read as uploaded by this run, so Gate 2 #3 —
+                        // "optimise only what this run backed up", which is `uploadedAt >= cutoff` —
+                        // optimised the whole library. Moto G, 15 Sept 2026. `0` when Graph gave no
+                        // date: an unknown arrival is treated as old, so #3 leaves it alone.
+                        uploadedAt = match.createdAtEpochMillis
                     )
                     skipped++
                     continue
@@ -584,7 +589,8 @@ class BackupEngine @Inject constructor(
                         originalSizeBytes = remoteSize!!,
                         proxySizeBytes = entry.sizeBytes,
                         remoteItemId = "",
-                        uploadedAt = System.currentTimeMillis()
+                        // The original's arrival in OneDrive, for the same reason as the skip above.
+                        uploadedAt = remoteMatch?.createdAtEpochMillis ?: 0L
                     )
                     skipped++
                     continue
@@ -1150,7 +1156,7 @@ class BackupEngine @Inject constructor(
             }
         }
         index += page.nodes.filterIsInstance<RemoteMediaNode.File>()
-            .associate { it.name to RemoteFileRef(it.id, it.sizeBytes, it.mimeType) }
+            .associate { it.name to RemoteFileRef(it.id, it.sizeBytes, it.mimeType, it.createdAtUtc) }
 
         var pages = 1
         while (page.nextPageToken != null && pages < MAX_REMOTE_PAGES) {
@@ -1162,7 +1168,7 @@ class BackupEngine @Inject constructor(
                 }
             }
             index += page.nodes.filterIsInstance<RemoteMediaNode.File>()
-            .associate { it.name to RemoteFileRef(it.id, it.sizeBytes, it.mimeType) }
+            .associate { it.name to RemoteFileRef(it.id, it.sizeBytes, it.mimeType, it.createdAtUtc) }
             pages++
         }
 

@@ -43,7 +43,8 @@ fun GraphDriveItemDto.toRemoteMediaNode(): RemoteMediaNode? {
             sizeBytes = size,
             widthPx = image?.width,
             heightPx = image?.height,
-            eTag = eTag
+            eTag = eTag,
+            createdAtUtc = parseIso8601ToEpochMillis(createdDateTime)
         )
 
         else -> null

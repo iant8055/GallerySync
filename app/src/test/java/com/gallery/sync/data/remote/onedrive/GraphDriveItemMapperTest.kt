@@ -126,6 +126,40 @@ class GraphDriveItemMapperTest {
         )
     }
 
+    /**
+     * Added 15 Sept 2026. The skip-existing path records this as the file's upload time, and Gate 2
+     * #3 tells "backed up by this run" from "already in OneDrive" by comparing that time with the
+     * moment #3 was chosen. Dropping it made every file already in the cloud look new.
+     */
+    @Test
+    fun `a file carries when it arrived in the cloud`() {
+        val dto = GraphDriveItemDto(
+            id = "01FILE",
+            name = "IMG_0042.jpg",
+            lastModifiedDateTime = "2024-01-15T10:30:00Z",
+            createdDateTime = "2023-11-02T08:00:00Z",
+            file = GraphFileFacetDto(mimeType = "image/jpeg")
+        )
+
+        val node = dto.toRemoteMediaNode() as RemoteMediaNode.File
+
+        assertEquals(java.time.Instant.parse("2023-11-02T08:00:00Z").toEpochMilli(), node.createdAtUtc)
+    }
+
+    /** No date is treated as an old file: #3 then leaves it alone rather than optimising it. */
+    @Test
+    fun `a file with no createdDateTime arrived at zero`() {
+        val dto = GraphDriveItemDto(
+            id = "01FILE",
+            name = "IMG_0042.jpg",
+            file = GraphFileFacetDto(mimeType = "image/jpeg")
+        )
+
+        val node = dto.toRemoteMediaNode() as RemoteMediaNode.File
+
+        assertEquals(0L, node.createdAtUtc)
+    }
+
     @Test
     fun `a file with no mimeType falls back to application octet-stream`() {
         val dto = GraphDriveItemDto(
