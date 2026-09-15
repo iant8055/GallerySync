@@ -532,12 +532,7 @@ fun SetupTour(
             )
         } else {
             // Steps 3+: Albums mockup behind the bubble
-            PhoneScreenBackdrop(navSelected = 0) { AlbumsMockup() }
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.4f))
-            )
+            DimmedPhoneBackdrop(navSelected = 0) { AlbumsMockup() }
             Popup(
                 alignment = Alignment.Center,
                 properties = PopupProperties(focusable = true)
@@ -765,6 +760,9 @@ private fun TabTooltipsStep(
     var overlayOrigin by remember { mutableStateOf(Offset.Zero) }
     // How tall the bar drawn inside the frame came out, so the card sits above it rather than on it.
     var navBarHeight by remember { mutableStateOf(72.dp) }
+    // Where the phone's screen ended up, so only that is dimmed. Dimming the whole tour left the
+    // bezel as a line between two identical greys.
+    var screenInRoot by remember { mutableStateOf<Rect?>(null) }
     val spotlight = helpIconInRoot?.translate(-overlayOrigin.x, -overlayOrigin.y)
 
     Box(
@@ -773,12 +771,7 @@ private fun TabTooltipsStep(
             .onGloballyPositioned { overlayOrigin = it.positionInRoot() }
     ) {
         if (subStep == 0) {
-            PhoneScreenBackdrop(navSelected = 0) { AlbumsMockup() }
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.4f))
-            )
+            DimmedPhoneBackdrop(navSelected = 0) { AlbumsMockup() }
             Popup(
                 alignment = Alignment.Center,
                 properties = PopupProperties(focusable = true)
@@ -814,7 +807,8 @@ private fun TabTooltipsStep(
             // Help has no tab of its own: it sits on the Settings mockup, so Settings stays lit.
             PhoneScreenBackdrop(
                 navSelected = if (isHelp) 3 else tabIndex,
-                onNavBarHeight = { navBarHeight = it }
+                onNavBarHeight = { navBarHeight = it },
+                onScreenBounds = { screenInRoot = it }
             ) {
                 when (tabIndex) {
                     0 -> AlbumsMockup()
@@ -832,12 +826,17 @@ private fun TabTooltipsStep(
             val stencilColor = MaterialTheme.colorScheme.scrim
             val ringColor = MaterialTheme.colorScheme.primary
             val ringWidth = with(LocalDensity.current) { 3.dp.toPx() }
+            val screen = screenInRoot?.translate(-overlayOrigin.x, -overlayOrigin.y)
             Canvas(
                 Modifier
                     .fillMaxSize()
                     .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
             ) {
-                drawRect(scrimColor)
+                // Over the phone's screen only. The page around the bezel stays as it is, which is
+                // what makes the frame read as an edge rather than as a line on flat grey.
+                if (screen != null) {
+                    drawRect(scrimColor, topLeft = screen.topLeft, size = screen.size)
+                }
                 if (isHelp) {
                     spotlight?.let { rect ->
                         val radius = rect.maxDimension * 0.85f
@@ -2072,6 +2071,7 @@ private fun BackupProgressContent(
 private fun PhoneScreenBackdrop(
     navSelected: Int,
     onNavBarHeight: (Dp) -> Unit = {},
+    onScreenBounds: (Rect) -> Unit = {},
     content: @Composable () -> Unit
 ) {
     val density = LocalDensity.current
@@ -2084,44 +2084,81 @@ private fun PhoneScreenBackdrop(
 
     val signal = LocalGallerySyncColors.current
 
+    Surface(
+        modifier = Modifier.fillMaxSize().padding(PhoneFrameInset),
+        shape = RoundedCornerShape(PhoneFrameCorner),
+        color = signal.phoneFrame,
+        // Lifted off the page, which is what makes the bezel read as the edge of a device rather
+        // than as a line drawn on the background. Ian, 15 Sept 2026: "nothing distinguishes the
+        // inside of the line from the outside" — it was a thin ring between two identical greys,
+        // because the tour dimmed the whole screen. The dimming now stops at the screen below.
+        shadowElevation = 16.dp
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(PhoneFrameWidth)
+                    .clip(RoundedCornerShape(PhoneFrameCorner - PhoneFrameWidth))
+                    .background(MaterialTheme.colorScheme.background)
+                    // Reported so the tour can dim this screen and leave the page around the phone
+                    // alone — see PhoneScreenBackdrop's shadow note.
+                    .onGloballyPositioned { onScreenBounds(it.boundsInRoot()) }
+            ) {
+                Box(modifier = Modifier.weight(1f)) { content() }
+                SignalNavBar(
+                    destinations = destinations,
+                    selected = navSelected,
+                    onSelect = {},
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .onGloballyPositioned {
+                            onNavBarHeight(with(density) { it.size.height.toDp() })
+                        }
+                )
+            }
+
+            // The camera, which is most of what makes a rounded rectangle read as a phone.
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = PhoneFrameWidth + 4.dp)
+                    .size(9.dp)
+                    .clip(CircleShape)
+                    .background(signal.phoneFrame)
+            )
+        }
+    }
+}
+
+/**
+ * [PhoneScreenBackdrop] with the screen dimmed, for the cards that need no spotlight.
+ *
+ * The dimming stops at the screen: dimming the page as well is what left the bezel as a line between
+ * two identical greys. The Help card draws its own, because it punches a hole in it.
+ */
+@Composable
+private fun DimmedPhoneBackdrop(navSelected: Int, content: @Composable () -> Unit) {
+    var screenInRoot by remember { mutableStateOf<Rect?>(null) }
+    var originInRoot by remember { mutableStateOf(Offset.Zero) }
+    val scrimColor = MaterialTheme.colorScheme.scrim.copy(alpha = 0.4f)
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(PhoneFrameInset)
-            // The bezel itself: a solid dark body with the screen cut out of it, which is what the
-            // concept art shows. A hairline border read as a box drawn round the card instead.
-            .clip(RoundedCornerShape(PhoneFrameCorner))
-            .background(signal.phoneFrame)
-            .padding(PhoneFrameWidth)
+            .onGloballyPositioned { originInRoot = it.positionInRoot() }
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(RoundedCornerShape(PhoneFrameCorner - PhoneFrameWidth))
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            Box(modifier = Modifier.weight(1f)) { content() }
-            SignalNavBar(
-                destinations = destinations,
-                selected = navSelected,
-                onSelect = {},
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .onGloballyPositioned {
-                        onNavBarHeight(with(density) { it.size.height.toDp() })
-                    }
-            )
-        }
-
-        // The camera, which is most of what makes a rounded rectangle read as a phone.
-        Box(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 8.dp)
-                .size(10.dp)
-                .clip(CircleShape)
-                .background(signal.phoneFrame)
+        PhoneScreenBackdrop(
+            navSelected = navSelected,
+            onScreenBounds = { screenInRoot = it },
+            content = content
         )
+        val screen = screenInRoot?.translate(-originInRoot.x, -originInRoot.y)
+        if (screen != null) {
+            Canvas(Modifier.fillMaxSize()) {
+                drawRect(scrimColor, topLeft = screen.topLeft, size = screen.size)
+            }
+        }
     }
 }
 

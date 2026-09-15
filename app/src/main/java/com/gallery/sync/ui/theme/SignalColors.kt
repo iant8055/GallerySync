@@ -93,7 +93,7 @@ private val SignalLight = GallerySyncColors(
     onOffContainer = SignalOnSurfaceVariantLight,
     navContainer = SignalNavLight,
     onNavContainer = SignalOnNav,
-    phoneFrame = SignalNavLight
+    phoneFrame = SignalPhoneFrame
 )
 
 private val SignalDark = GallerySyncColors(
@@ -114,7 +114,7 @@ private val SignalDark = GallerySyncColors(
     // Lifted off the near-black ground so the bar still reads as floating rather than as a hole.
     navContainer = SignalNavDark,
     onNavContainer = SignalOnNav,
-    phoneFrame = SignalNavDark
+    phoneFrame = SignalPhoneFrame
 )
 
 internal fun signalColors(darkTheme: Boolean): GallerySyncColors =
