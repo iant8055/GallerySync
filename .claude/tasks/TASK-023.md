@@ -1,9 +1,28 @@
 # TASK-023 — One folder must be one album: album identity is case-sensitive, the filesystem is not
 
 Milestone: v0.3 — space management (blocks nothing, but touches the deletion rules)
-Requested by: Ian, 7 Sept 2026 — *"it appears as though the backup is splitting the Camera folder
+Raised by: Ian, 7 Sept 2026 — *"it appears as though the backup is splitting the Camera folder
 into two different folders"*
 Status: **specced, not started.** Needs Ian's ruling on the migration before any code moves.
+
+## Corrected 15 Sept 2026 — the app split nothing
+
+Ian: *"The app did not split the folder into two."* He had copied a folder named `camera` into DCIM;
+new pictures taken afterwards went to `Camera`, the camera app's default. **Two writers, two spellings.**
+GallerySync created no folder, renamed nothing and moved nothing, on the phone or in OneDrive.
+
+What the app did was *read* MediaStore's two spellings as two albums — and that reading is the whole
+of this task. Nothing below says otherwise, but the quote above reads as though backup caused it, and
+it did not.
+
+It is also a realistic path rather than a test artefact: a user who copies a library over from an old
+phone or a PC, then keeps shooting, reproduces it exactly.
+
+**Not present on the Moto G today.** Checked 15 Sept: one directory, `DCIM/Camera` (inode `49065`,
+reachable under both spellings), and all 15 MediaStore rows carry `bucket_display_name = Camera`. The
+fixture was reset after the 7 Sept afternoon, so the `camera` spelling is gone and the Albums tab
+correctly shows one album. That is the condition being absent, not the code being fixed — keying on
+`BUCKET_DISPLAY_NAME` is unchanged.
 
 ## What was seen
 
