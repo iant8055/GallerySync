@@ -970,8 +970,12 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     -->
     <!-- "when the countdown ends" removed 15 Sept 2026: Android can hold the start well past it. -->
     <string name="tour_progress_waiting_body">Your backup starts on its own, even if you close the app. Backup may start after the set time due to the verification process. Or start it now.</string>
-    <!-- Ian, 15 Sept 2026. True because the delayed run's job requires charging. -->
-    <string name="tour_progress_plug_in">Make sure your phone is plugged in for the backup to start.</string>
+    <!--
+        Ian, 15 Sept 2026. True because the delayed run's job requires charging. "On its own" because
+        SYNC NOW, directly beneath it, starts the backup whatever the battery - Ian's decision the same
+        day that a deliberate start overrides the charger.
+    -->
+    <string name="tour_progress_plug_in">Make sure your phone is plugged in for the backup to start on its own.</string>
     <string name="tour_progress_until_start">until backup starts</string>
     <string name="tour_progress_sync_now">SYNC NOW</string>
     <string name="tour_progress_scanning">Scanning your library…</string>

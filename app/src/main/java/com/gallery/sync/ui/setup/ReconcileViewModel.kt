@@ -498,16 +498,32 @@ class ReconcileViewModel @Inject constructor(
     }
 
     /**
-     * Arms the wizard's delayed start, [minutes] from now to the minute.
+     * Commits the delay card's choice when the user presses Next, then calls [then] to advance.
+     *
+     * [minutes] null is "Right now"; otherwise the delayed start is armed [minutes] from **this
+     * moment** to the minute. Until 15 Sept 2026 the due time was written the instant a chip was
+     * tapped, so time spent reading the card came off the delay — Ian saw a 3-minute choice already
+     * at 2:42 when the countdown appeared, and the arms logged 161.8 s, 173.3 s and 176.9 s of 180.
+     *
+     * **Written before advancing, and the order is the point.** The countdown card decides what to do
+     * from the stored due time the moment it appears: find none and it starts the backup at once. So
+     * the write completes, and state carries the new due time, before [then] moves the wizard on.
      *
      * Deliberately not routed through `setFirstBackupStartHour`: that stores an hour of day, so a
      * delay chosen at 13:25 would land on 14:00 and be 35 minutes rather than the hour asked for.
-     *
-     * Counted in minutes rather than hours since 4 Sept 2026, so the card can offer a delay short
-     * enough to sit and watch. The chips still read in hours above the shortest one.
      */
-    fun setFirstBackupDelay(minutes: Int) {
+    fun commitFirstBackupDelay(minutes: Int?, then: () -> Unit) {
         viewModelScope.launch {
+            if (minutes == null) {
+                settings.setFirstBackupStartAt(null)
+                // Cancels a chain armed by an earlier visit to the countdown card. Without this,
+                // coming back and choosing "Right now" would leave the old delayed run queued, and
+                // it would fire later on its own.
+                BackupScheduling.cancelManualRun(workManager)
+                _state.value = _state.value.copy(firstBackupStartAtEpochMillis = null)
+                then()
+                return@launch
+            }
             // Never over the top of a run already moving bytes. Arming re-enqueues the manual chain
             // with REPLACE, so without this a delay chosen after the upload began would cancel it —
             // which is exactly what happened on 4 Sept 2026, stopping a live run at 9 of 155.
@@ -517,30 +533,17 @@ class ReconcileViewModel @Inject constructor(
             val current = _state.value
             if (current.backupRunning || current.backupCompleted > 0 || current.backupFinished) {
                 Logger.w(TAG, "ignoring delay request: backup already under way")
+                then()
                 return@launch
             }
             val delayMillis = minutes * 60L * 1000L
-            settings.setFirstBackupStartAt(
-                epochMillis = System.currentTimeMillis() + delayMillis,
-                delayMillis = delayMillis
+            val startAt = System.currentTimeMillis() + delayMillis
+            settings.setFirstBackupStartAt(epochMillis = startAt, delayMillis = delayMillis)
+            _state.value = _state.value.copy(
+                firstBackupStartAtEpochMillis = startAt,
+                firstBackupDelayMillis = delayMillis
             )
-        }
-    }
-
-    /**
-     * Cancels any pending delay and uploads now — what the wizard's "Sync now" does.
-     *
-     * The delay is cleared before the worker is enqueued, so a process death between the two leaves
-     * a run that starts immediately rather than a countdown that has already fired.
-     */
-    /** Drops a pending delay without starting anything — the wizard's "Right now" choice. */
-    fun clearFirstBackupDelay() {
-        viewModelScope.launch {
-            settings.setFirstBackupStartAt(null)
-            // Cancels a chain armed by an earlier visit to this card. Without this, changing your
-            // mind back to "Right now" would leave the old delayed run queued and it would fire
-            // later on its own.
-            BackupScheduling.cancelManualRun(workManager)
+            then()
         }
     }
 

@@ -4765,3 +4765,16 @@ on — is still open.
 `TIMING_DELAY` unsatisfied. JobScheduler's delay uses a non-waking alarm, so the constraint is only
 re-evaluated when the phone next wakes. Harmless here — `CHARGING` was unmet anyway, and plugging in
 wakes the phone — but a stale `TIMING_DELAY` in a dump is not evidence the countdown failed.
+
+#### Fixed: the countdown starts on Next
+
+The delay card no longer stores anything while the user chooses. Its selection is held by the wizard,
+and Next calls `commitFirstBackupDelay`, which writes *now + delay* and only then advances — the order
+matters, because the countdown card starts the backup at once if it finds no due time. The bold line
+now reads *"…plugged in for the backup to start on its own"*, per the SYNC NOW decision above.
+
+Verified on the Moto G from a clean install (13:11:34): a 3-minute choice, left for about 30 s before
+Next, armed with **179,879 ms**; Back then Next again re-armed with **179,876 ms** — Ian saw 2:59 both
+times. SYNC NOW started the run 0.1 s after the tap and replaced the delayed job — no job requiring
+`CHARGING` was left queued. The *Right now* route after Back shares the same cancel-and-start path but
+was not tapped through.

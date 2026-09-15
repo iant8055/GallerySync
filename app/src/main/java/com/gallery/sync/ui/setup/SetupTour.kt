@@ -375,6 +375,11 @@ fun SetupTour(
         }
     }
 
+    // The delay card's choice, held here rather than inside the card so Next can commit it. Nothing
+    // is stored while the user is choosing; the countdown starts when they press Next.
+    var delayStartNow by rememberSaveable { mutableStateOf(true) }
+    var delayChoiceMinutes by rememberSaveable { mutableIntStateOf(MINUTES_PER_HOUR) }
+
     val onNext: () -> Unit = {
         when {
             step == 4 -> {
@@ -443,6 +448,14 @@ fun SetupTour(
             step == lastStep && skipsBackupStep -> {
                 viewModel.completeSetup()
                 onComplete()
+            }
+            // The delay card. Its choice is stored now, and only once stored does the wizard move
+            // to the countdown — see ReconcileViewModel.commitFirstBackupDelay for why the order
+            // matters.
+            step == 8 -> {
+                viewModel.commitFirstBackupDelay(
+                    minutes = if (delayStartNow) null else delayChoiceMinutes
+                ) { step = TOTAL_STEPS }
             }
             else -> {
                 var next = step + 1
@@ -574,8 +587,13 @@ fun SetupTour(
                         )
                         8 -> BackupDelayContent(
                             state = state,
-                            onDelaySelected = viewModel::setFirstBackupDelay,
-                            onStartNowSelected = viewModel::clearFirstBackupDelay
+                            startNow = delayStartNow,
+                            delayMinutes = delayChoiceMinutes,
+                            onStartNowSelected = { delayStartNow = true },
+                            onDelaySelected = { minutes ->
+                                delayStartNow = false
+                                delayChoiceMinutes = minutes
+                            }
                         )
                         9 -> BackupProgressContent(
                             completed = state.backupCompleted,
@@ -1504,6 +1522,8 @@ private fun OptimizationContent(
 @Composable
 private fun BackupDelayContent(
     state: ReconcileUiState,
+    startNow: Boolean,
+    delayMinutes: Int,
     onDelaySelected: (Int) -> Unit,
     onStartNowSelected: () -> Unit
 ) {
@@ -1549,9 +1569,6 @@ private fun BackupDelayContent(
         videoPool * state.videoQuality.approximateSavingPercent / 100
     else 0L
     val totalSaving = photoSaving + videoSaving
-
-    var startNow by rememberSaveable { mutableStateOf(true) }
-    var delayMinutes by rememberSaveable { mutableIntStateOf(MINUTES_PER_HOUR) }
 
     // Reads "Start in 3 minutes" below the hour and "Start in 2 hours" at or above it, so the
     // shortest choice does not have to be spelled as a fraction of an hour.
@@ -1611,14 +1628,14 @@ private fun BackupDelayContent(
 
         if (startNow) {
             Button(
-                onClick = { startNow = true; onStartNowSelected() },
+                onClick = onStartNowSelected,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(stringResource(R.string.tour_delay_right_now))
             }
         } else {
             OutlinedButton(
-                onClick = { startNow = true; onStartNowSelected() },
+                onClick = onStartNowSelected,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(stringResource(R.string.tour_delay_right_now))
@@ -1634,7 +1651,7 @@ private fun BackupDelayContent(
             }
         } else {
             OutlinedButton(
-                onClick = { startNow = false; onDelaySelected(delayMinutes) },
+                onClick = { onDelaySelected(delayMinutes) },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(delayLabel)
@@ -1672,7 +1689,7 @@ private fun BackupDelayContent(
                             DelayChip(
                                 minutes = minutes,
                                 isSelected = delayMinutes == minutes,
-                                onClick = { delayMinutes = minutes; onDelaySelected(minutes) },
+                                onClick = { onDelaySelected(minutes) },
                                 modifier = Modifier.weight(1f)
                             )
                         }
