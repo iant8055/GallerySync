@@ -123,10 +123,11 @@ object BackupScheduling {
         allowMeteredNetwork: Boolean,
         manual: Boolean = false,
         allAlbums: Boolean = false,
-        initialDelayMillis: Long = 0L
+        initialDelayMillis: Long = 0L,
+        requiresCharging: Boolean = false
     ) {
         val request = OneTimeWorkRequestBuilder<BackupWorker>()
-            .setConstraints(constraints(allowMeteredNetwork))
+            .setConstraints(constraints(allowMeteredNetwork, requiresCharging))
             .apply { if (initialDelayMillis > 0L) setInitialDelay(initialDelayMillis, TimeUnit.MILLISECONDS) }
             .setInputData(
                 Data.Builder()
@@ -156,9 +157,16 @@ object BackupScheduling {
     fun enqueueManualRun(
         workManager: WorkManager,
         allowMeteredNetwork: Boolean,
-        allAlbums: Boolean = false
+        allAlbums: Boolean = false,
+        requiresCharging: Boolean = false
     ) {
-        enqueueContinuation(workManager, allowMeteredNetwork, manual = true, allAlbums = allAlbums)
+        enqueueContinuation(
+            workManager,
+            allowMeteredNetwork,
+            manual = true,
+            allAlbums = allAlbums,
+            requiresCharging = requiresCharging
+        )
     }
 
     /**
@@ -170,6 +178,14 @@ object BackupScheduling {
      *
      * Still a manual run: the user picked this moment, which is exactly what the first-backup
      * window's manual exemption is for. Network and battery constraints continue to apply.
+     *
+     * **It waits for the charger.** Ian, 15 Sept 2026: the initial backup launches only while the
+     * phone is charging, and the countdown card says so. Setting the delay is never affected by the
+     * charging state at that moment — the requirement sits on this job, so an unplugged phone simply
+     * waits past the due time and starts when it is plugged in. Fixed here rather than read from
+     * Settings' first-backup charging switch, because the wizard does not read Settings. It also
+     * removes the on-battery network block for a rarely used app (`REASON_APP_STANDBY`), measured the
+     * same day. Only the launch: continuations are enqueued by [BackupWorker] without it.
      *
      * Enqueued under [MANUAL_WORK] with `REPLACE`, so re-arming, "Sync now" and a plain manual run
      * all supersede a pending one rather than stacking a second chain behind it.
@@ -185,7 +201,8 @@ object BackupScheduling {
             allowMeteredNetwork,
             manual = true,
             allAlbums = allAlbums,
-            initialDelayMillis = delayMillis
+            initialDelayMillis = delayMillis,
+            requiresCharging = true
         )
     }
 
@@ -286,11 +303,13 @@ object BackupScheduling {
         workManager.cancelUniqueWork(MANUAL_WORK)
     }
 
-    private fun constraints(allowMeteredNetwork: Boolean) = Constraints.Builder()
-        .setRequiredNetworkType(networkType(allowMeteredNetwork))
-        .setRequiresBatteryNotLow(true)
-        .setRequiresStorageNotLow(true)
-        .build()
+    private fun constraints(allowMeteredNetwork: Boolean, requiresCharging: Boolean = false) =
+        Constraints.Builder()
+            .setRequiredNetworkType(networkType(allowMeteredNetwork))
+            .setRequiresBatteryNotLow(true)
+            .setRequiresStorageNotLow(true)
+            .setRequiresCharging(requiresCharging)
+            .build()
 
     /**
      * `CONNECTED` allows mobile data; `UNMETERED` is Wi-Fi and equivalents.

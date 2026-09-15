@@ -944,6 +944,17 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_delay_chip_minutes">%1$dm</string>
     <string name="tour_delay_chip_hours">%1$dh</string>
     <string name="tour_delay_hours_label">Delay</string>
+    <!--
+        Measured 15 Sept 2026 on the Moto G: once the delay ends, Android holds the start for an app
+        the user has not opened recently until five jobs are ready or 31 minutes pass. An unattended
+        start came in 27 minutes late. Ian accepted the wait on condition the user is told here.
+        Only shown with a delay chosen - a start with the app open is not held.
+
+        Ian's wording, and deliberately without a figure: 31 minutes is this device's cap while
+        charging, and nothing measured says another phone, or one on battery, will hold to it. The
+        same sentence closes tour_progress_waiting_body; change both together.
+    -->
+    <string name="tour_delay_late_start">Backup may start after the set time due to the verification process.</string>
     <string name="tour_delay_security">For the security of your data, the app will be unavailable until a backup has been successfully completed and verified.</string>
 
     <string name="tour_progress_title">Backup Progress</string>
@@ -957,7 +968,10 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
         The card counts down in real minutes rather than to the top of an hour, and offers a way out
         — a delay is a preference, not a commitment.
     -->
-    <string name="tour_progress_waiting_body">Your backup starts on its own when the countdown ends, even if you close the app. Or start it now.</string>
+    <!-- "when the countdown ends" removed 15 Sept 2026: Android can hold the start well past it. -->
+    <string name="tour_progress_waiting_body">Your backup starts on its own, even if you close the app. Backup may start after the set time due to the verification process. Or start it now.</string>
+    <!-- Ian, 15 Sept 2026. True because the delayed run's job requires charging. -->
+    <string name="tour_progress_plug_in">Make sure your phone is plugged in for the backup to start.</string>
     <string name="tour_progress_until_start">until backup starts</string>
     <string name="tour_progress_sync_now">SYNC NOW</string>
     <string name="tour_progress_scanning">Scanning your library…</string>

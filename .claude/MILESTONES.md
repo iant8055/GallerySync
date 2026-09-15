@@ -4706,3 +4706,33 @@ keep going, are the questions — and is the same research TASK-021 needs.
 **Also seen, not chased:** a fresh install logs `backup run starting` (not manual) at 10:27:43, three
 seconds after launch and before the wizard had granted any folder. Presumably the automatic arm at
 application start, finding nothing to do.
+
+#### Built and verified the same afternoon — the delayed start waits for the charger
+
+`enqueueDelayedManualRun` now sets `requiresCharging = true`, as does `onDelayElapsed`'s recovery path
+for a lost arm. Continuations and *Sync now* are unchanged, pending Ian's answer above. Copy, all
+Ian's: the delay card says *"Backup may start after the set time due to the verification process"*
+(no figure, deliberately), the countdown card body carries the same sentence in place of *"when the
+countdown ends"*, and a bold line reads *"Make sure your phone is plugged in for the backup to
+start."* Ian saw all three on the Moto G. **Dark mode not yet checked for them.**
+
+Clean install 11:44:41, phone unplugged, 3-minute delay, Close:
+
+| Time | State |
+|---|---|
+| 11:47:58 | armed; the job's required constraints include **`CHARGING`** — the first run ever to carry it |
+| 11:50:19 | due |
+| 11:55:47 | **not started** — `Unsatisfied constraints: CHARGING CONNECTIVITY`, no app open since arming |
+| 12:07:44 | app opened on battery — still not started, `Unsatisfied: CHARGING` only (foreground returned the network) |
+| 12:08:29 | plugged in with the app open — **`backup run starting (manual)` about a second later** |
+
+#### Defect found by it: the reopened card says the backup is running
+
+Opened at 12:07 on battery, past due, the card read *"Your backup is running. The backup runs in the
+background — you can use your phone normally."* with *"0% · Starting upload…"*. Nothing was running.
+The phase is `WAITING` only while `remainingMillis > 0` (`SetupTour.kt:314`); at zero it becomes
+`UPLOADING` whatever the job is doing, and the plug-in line — shown only while waiting — disappears
+exactly when it is the one thing the user needs to read.
+
+Not a pop-up, and it cannot be one without a notification: while `CHARGING` is unmet the job never
+starts, so no app code runs at the due time. `POST_NOTIFICATIONS` was ruled out on 28 Aug.

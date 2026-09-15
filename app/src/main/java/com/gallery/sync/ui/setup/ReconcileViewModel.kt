@@ -606,10 +606,13 @@ class ReconcileViewModel @Inject constructor(
             if (!BackupScheduling.manualRunLive(workManager)) {
                 Logger.w(TAG, "delay elapsed with no chain queued; starting the run now")
                 val prefs = settings.current()
+                // Still the delayed start, so it still waits for the charger - the countdown card
+                // says it will. See BackupScheduling.enqueueDelayedManualRun.
                 BackupScheduling.enqueueManualRun(
                     workManager,
                     prefs.allowMeteredNetwork,
-                    allAlbums = true
+                    allAlbums = true,
+                    requiresCharging = true
                 )
             }
 

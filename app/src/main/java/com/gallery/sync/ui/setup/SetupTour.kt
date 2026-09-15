@@ -1675,6 +1675,14 @@ private fun BackupDelayContent(
                         }
                     }
                 }
+                // Android batches the start of a closed app's work: 27 minutes late, measured
+                // unattended on 15 Sept 2026. Accepted by Ian on condition the card says so, in his
+                // wording and without a figure.
+                Text(
+                    stringResource(R.string.tour_delay_late_start),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
             }
         }
 
@@ -1811,6 +1819,17 @@ private fun BackupProgressContent(
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.fillMaxWidth()
         )
+
+        // The delayed start waits for the charger (Ian, 15 Sept 2026), so the card has to say so -
+        // a countdown reaching zero on an unplugged phone otherwise looks like the app failing.
+        if (waiting) {
+            Text(
+                text = stringResource(R.string.tour_progress_plug_in),
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
 
         Box(
             contentAlignment = Alignment.Center,
