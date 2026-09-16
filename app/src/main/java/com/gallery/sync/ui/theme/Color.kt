@@ -106,6 +106,16 @@ val SignalOnOffDark = Color(0xFFB9BEC4)
  */
 val SignalPhoneFrame = Color(0xFF0B0B0D)
 
+/**
+ * The bands that make the bezel read as the edge of a device rather than a line with round corners.
+ *
+ * Outside in: a thin grey rim, a wider light band catching the light, a dark groove, a light band
+ * again, a thin grey rim, then the black body. Ian, 15 Sept 2026, with a crop of a real phone edge.
+ */
+val SignalPhoneEdgeRim = Color(0xFF6E7278)
+val SignalPhoneEdgeHighlight = Color(0xFFD7DADE)
+val SignalPhoneEdgeGroove = Color(0xFF3A3D42)
+
 /** The floating nav bar: dark in both themes, lifted in dark so it does not read as a hole. */
 val SignalNavLight = Color(0xFF20262D)
 val SignalNavDark = Color(0xFF2A3037)

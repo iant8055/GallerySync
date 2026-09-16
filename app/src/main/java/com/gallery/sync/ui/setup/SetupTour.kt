@@ -10,6 +10,7 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Box
@@ -73,6 +74,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import kotlin.math.roundToInt
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
@@ -2088,8 +2090,19 @@ private fun PhoneScreenBackdrop(
     val signal = LocalGallerySyncColors.current
 
     Surface(
-        modifier = Modifier.fillMaxSize().padding(PhoneFrameInset),
-        shape = RoundedCornerShape(PhoneFrameCorner),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(PhoneFrameInset)
+            // The edge of a device, band by band from the outside in: a thin grey rim, a wider lit
+            // band, a dark groove, the lit band again, a thin rim, and then the black body below.
+            // Ian, 15 Sept 2026, with a crop of a real phone edge — a single dark ring read as a
+            // line with rounded corners, which is what it was.
+            .phoneEdge(1.dp, signal.phoneEdgeRim, PhoneFrameCorner)
+            .phoneEdge(2.dp, signal.phoneEdgeHighlight, PhoneFrameCorner - 1.dp)
+            .phoneEdge(1.5.dp, signal.phoneEdgeGroove, PhoneFrameCorner - 3.dp)
+            .phoneEdge(1.dp, signal.phoneEdgeHighlight, PhoneFrameCorner - 4.5.dp)
+            .phoneEdge(1.dp, signal.phoneEdgeRim, PhoneFrameCorner - 5.5.dp),
+        shape = RoundedCornerShape(PhoneFrameCorner - 6.5.dp),
         color = signal.phoneFrame,
         // Lifted off the page, which is what makes the bezel read as the edge of a device rather
         // than as a line drawn on the background. Ian, 15 Sept 2026: "nothing distinguishes the
@@ -2164,6 +2177,10 @@ private fun DimmedPhoneBackdrop(navSelected: Int, content: @Composable () -> Uni
         }
     }
 }
+
+/** One band of the bezel: a ring of [width] in [color], with the next band drawn inside it. */
+private fun Modifier.phoneEdge(width: Dp, color: Color, corner: Dp): Modifier =
+    this.border(width, color, RoundedCornerShape(corner)).padding(width)
 
 /** Frame geometry, shared so the cards above can line up with the tabs drawn inside it. */
 // Room around the outside of the bezel, so the phone sits *on* the tour rather than filling it.

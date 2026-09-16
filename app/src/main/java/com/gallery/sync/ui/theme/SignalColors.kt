@@ -75,7 +75,12 @@ data class GallerySyncColors(
      * Dark in both themes for the same reason the nav bar is: a phone's frame is dark, and a bezel
      * that inverts under a dark theme reads as a white ring round the screen.
      */
-    val phoneFrame: Color
+    val phoneFrame: Color,
+
+    /** The bezel's outer rim, its lit band and the groove between them. See [SignalPhoneEdgeRim]. */
+    val phoneEdgeRim: Color,
+    val phoneEdgeHighlight: Color,
+    val phoneEdgeGroove: Color
 )
 
 private val SignalLight = GallerySyncColors(
@@ -93,7 +98,10 @@ private val SignalLight = GallerySyncColors(
     onOffContainer = SignalOnSurfaceVariantLight,
     navContainer = SignalNavLight,
     onNavContainer = SignalOnNav,
-    phoneFrame = SignalPhoneFrame
+    phoneFrame = SignalPhoneFrame,
+    phoneEdgeRim = SignalPhoneEdgeRim,
+    phoneEdgeHighlight = SignalPhoneEdgeHighlight,
+    phoneEdgeGroove = SignalPhoneEdgeGroove
 )
 
 private val SignalDark = GallerySyncColors(
@@ -114,7 +122,10 @@ private val SignalDark = GallerySyncColors(
     // Lifted off the near-black ground so the bar still reads as floating rather than as a hole.
     navContainer = SignalNavDark,
     onNavContainer = SignalOnNav,
-    phoneFrame = SignalPhoneFrame
+    phoneFrame = SignalPhoneFrame,
+    phoneEdgeRim = SignalPhoneEdgeRim,
+    phoneEdgeHighlight = SignalPhoneEdgeHighlight,
+    phoneEdgeGroove = SignalPhoneEdgeGroove
 )
 
 internal fun signalColors(darkTheme: Boolean): GallerySyncColors =
