@@ -5006,3 +5006,15 @@ Fixed by passing volume and path as `SourcesSection` does.
 
 Verified on the Moto G in light and dark: all four Step 2 backdrops, the Help ring with its real
 tooltip, and an empty crash buffer.
+
+#### TASK-023, how the two names arose — Ian, 15 Sept 2026
+
+Not one folder the app split in two, and not a naming scheme anyone chose: **`camera` came in with the
+backup folders he copied onto the phone**, and **`Camera` was created by the system when he took new
+photos**. Two folders, as far as he is concerned, arriving separately and differing only in case.
+
+The 7 Sept disk check still stands beside that — same inode for both spellings, identical listings —
+because Android's emulated storage is case-insensitive: the camera app's writes landed in the folder
+already there. Both names are real and were made by different hands; the filesystem merged them and
+MediaStore kept both spellings, which is what the app read as two albums. Do not restate this as "one
+folder showing up as two".

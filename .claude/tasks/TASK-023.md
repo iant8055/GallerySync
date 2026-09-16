@@ -5,6 +5,23 @@ Raised by: Ian, 7 Sept 2026 — *"it appears as though the backup is splitting t
 into two different folders"*
 Status: **specced, not started.** Needs Ian's ruling on the migration before any code moves.
 
+## Where the two names came from — Ian, 15 Sept 2026
+
+Two folders as far as he is concerned, and they arrived separately:
+
+- **`camera`** came in with the backup folders he copied onto the phone as test data.
+- **`Camera`** was created by the system when he took new photos with the camera app.
+
+So this is not the app inventing a second album out of one folder, and not a naming scheme anyone
+chose. It is one folder he supplied and one the system made, whose names differ only in case.
+
+**What the disk check found, and why both are true.** On 7 Sept `ls -di` gave the same inode (`45845`)
+for both spellings and identical listings. Android's emulated storage is case-insensitive and
+case-preserving, so two directories differing only in case cannot both exist: when the camera app
+wrote `DCIM/Camera`, the bytes landed in the folder that was already there. Each name is real, and
+each was created by someone different — the filesystem merged them, and **MediaStore kept both
+spellings**, which is why the app saw two albums. That is the condition the fix has to handle.
+
 ## Corrected 15 Sept 2026 — the app split nothing
 
 Ian: *"The app did not split the folder into two."* He had copied a folder named `camera` into DCIM;
