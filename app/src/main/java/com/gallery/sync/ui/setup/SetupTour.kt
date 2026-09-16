@@ -2090,19 +2090,10 @@ private fun PhoneScreenBackdrop(
     val signal = LocalGallerySyncColors.current
 
     Surface(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(PhoneFrameInset)
-            // The edge of a device, band by band from the outside in: a thin grey rim, a wider lit
-            // band, a dark groove, the lit band again, a thin rim, and then the black body below.
-            // Ian, 15 Sept 2026, with a crop of a real phone edge — a single dark ring read as a
-            // line with rounded corners, which is what it was.
-            .phoneEdge(1.dp, signal.phoneEdgeRim, PhoneFrameCorner)
-            .phoneEdge(2.dp, signal.phoneEdgeHighlight, PhoneFrameCorner - 1.dp)
-            .phoneEdge(1.5.dp, signal.phoneEdgeGroove, PhoneFrameCorner - 3.dp)
-            .phoneEdge(1.dp, signal.phoneEdgeHighlight, PhoneFrameCorner - 4.5.dp)
-            .phoneEdge(1.dp, signal.phoneEdgeRim, PhoneFrameCorner - 5.5.dp),
-        shape = RoundedCornerShape(PhoneFrameCorner - 6.5.dp),
+        modifier = Modifier.fillMaxSize().padding(PhoneFrameInset),
+        shape = RoundedCornerShape(PhoneFrameCorner),
+        // The body is the outermost thing and it is black — the bands sit between it and the screen,
+        // narrowing inward. Built the other way round first, which put the black ring innermost.
         color = signal.phoneFrame,
         // Lifted off the page, which is what makes the bezel read as the edge of a device rather
         // than as a line drawn on the background. Ian, 15 Sept 2026: "nothing distinguishes the
@@ -2110,12 +2101,23 @@ private fun PhoneScreenBackdrop(
         // because the tour dimmed the whole screen. The dimming now stops at the screen below.
         shadowElevation = 16.dp
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                // Inside the black body, the edge of a device band by band, working in towards the
+                // screen: a thin grey rim, a lit band, a dark groove, a wider lit band, a thin rim.
+                // Ian, 15 Sept 2026, with a crop of a real phone edge.
+                .padding(PhoneFrameWidth)
+                .phoneEdge(1.dp, signal.phoneEdgeRim, PhoneFrameCorner - PhoneFrameWidth)
+                .phoneEdge(1.dp, signal.phoneEdgeHighlight, PhoneFrameCorner - PhoneFrameWidth - 1.dp)
+                .phoneEdge(1.5.dp, signal.phoneEdgeGroove, PhoneFrameCorner - PhoneFrameWidth - 2.dp)
+                .phoneEdge(2.dp, signal.phoneEdgeHighlight, PhoneFrameCorner - PhoneFrameWidth - 3.5.dp)
+                .phoneEdge(1.dp, signal.phoneEdgeRim, PhoneFrameCorner - PhoneFrameWidth - 5.5.dp)
+        ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(PhoneFrameWidth)
-                    .clip(RoundedCornerShape(PhoneFrameCorner - PhoneFrameWidth))
+                    .clip(RoundedCornerShape(PhoneFrameCorner - PhoneFrameWidth - 6.5.dp))
                     .background(MaterialTheme.colorScheme.background)
                     // Reported so the tour can dim this screen and leave the page around the phone
                     // alone — see PhoneScreenBackdrop's shadow note.
