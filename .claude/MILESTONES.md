@@ -5138,3 +5138,21 @@ Spec written in TASK-023 (*The fix — spec*), awaiting Ian's approval.
 - **Duplicate ledger rows** for one `mediaStoreId` collapse to the uploaded row, with no deletion anywhere.
 - **Ian, same day: warn even when both were already Off. Spec approved; build started.**
 
+#### TASK-023 — built, 16 Sept 2026
+
+One spelling per folder in the scanner, plus a runtime merge (`AlbumIdentityReconciler`) guarding
+every mode reader. Every merge sets the album to Off and shows a card in the Albums list. 343/343
+unit tests pass.
+
+**Verified on the Moto G:** renaming `camera` to `Camera` on disk merged 4 ledger rows and the Off
+preference into one `Camera` album, and the card read *"Before: camera was Off."* It was readable in
+light and dark, nothing was uploaded, and the crash buffer was empty.
+
+**Built differently from the spec:**
+- Duplicate rows are matched on the full key, not `mediaStoreId`, because MediaStore reuses ids.
+- The card moved into the scrolling list, after landscape pushed Dismiss off the screen.
+
+**Still open:**
+- The Archive merge on a device.
+- The narrow window between the Archive screen's list and Android's trash dialog.
+

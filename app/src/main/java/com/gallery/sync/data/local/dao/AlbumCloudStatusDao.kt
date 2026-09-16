@@ -29,6 +29,17 @@ interface AlbumCloudStatusDao {
     @Query("SELECT * FROM album_cloud_status")
     fun observeAll(): Flow<List<AlbumCloudStatusEntity>>
 
+    /** Names with a stored answer, for spotting one folder stored under two spellings (TASK-023). */
+    @Query("SELECT albumName FROM album_cloud_status")
+    suspend fun albumNames(): List<String>
+
+    /**
+     * Forgets the answer for these names. For a merge: the answer was about a spelling that no longer
+     * exists as an album, and the next reconcile asks again under the merged name.
+     */
+    @Query("DELETE FROM album_cloud_status WHERE albumName IN (:names)")
+    suspend fun deleteAlbums(names: List<String>)
+
     @Query("SELECT * FROM album_cloud_status WHERE albumName = :albumName")
     suspend fun forAlbum(albumName: String): AlbumCloudStatusEntity?
 

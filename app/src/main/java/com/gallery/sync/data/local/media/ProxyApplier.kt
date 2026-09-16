@@ -12,6 +12,7 @@ import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.di.IoDispatcher
+import com.gallery.sync.domain.backup.AlbumIdentityReconciler
 import com.gallery.sync.util.Logger
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
@@ -65,6 +66,7 @@ class ProxyApplier @Inject constructor(
     private val generator: ProxyGenerator,
     private val entryDao: BackupEntryDao,
     private val settings: BackupSettings,
+    private val albumIdentity: AlbumIdentityReconciler,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
 ) {
 
@@ -84,7 +86,11 @@ class ProxyApplier @Inject constructor(
      * The rows are left in place rather than deleted. A file that is gone locally but present in
      * OneDrive is still genuinely backed up, and forgetting it would understate what is verified.
      */
-    suspend fun candidates(): List<BackupEntryEntity> = candidatesFrom(entryDao.proxyCandidates())
+    suspend fun candidates(): List<BackupEntryEntity> {
+        // The candidates are chosen by Sync mode, so one folder's spellings are merged first. TASK-023.
+        albumIdentity.reconcile()
+        return candidatesFrom(entryDao.proxyCandidates())
+    }
 
     /**
      * Photos for the install wizard's one-time bulk optimise (Area 1).

@@ -91,7 +91,25 @@ class MediaScanner @Inject constructor(
         val items = query(imagesCollection(), isVideo = false) + query(videosCollection(), isVideo = true)
 
         // Newest first, so that a run cut short has already protected the most recent photos.
-        items.sortedByDescending { it.dateModifiedEpochSeconds }
+        withOneSpellingPerFolder(items).sortedByDescending { it.dateModifiedEpochSeconds }
+    }
+
+    /**
+     * Gives every item in a folder the same album name, however each writer spelled the folder.
+     *
+     * Done here, beneath every consumer, so nothing downstream can see a folder as two albums.
+     * The stored state that already holds two spellings is merged separately, by
+     * `AlbumIdentityReconciler`. See TASK-023.
+     */
+    private fun withOneSpellingPerFolder(items: List<LocalMediaItem>): List<LocalMediaItem> {
+        val keyOf = { item: LocalMediaItem -> MediaScanRules.folderKeyOf(item.relativePath, item.album) }
+        val canonical = MediaScanRules.canonicalAlbumNames(
+            items.map { MediaScanRules.AlbumSighting(keyOf(it), it.album, it.mediaStoreId) }
+        )
+        return items.map { item ->
+            val name = canonical[keyOf(item)] ?: item.album
+            if (name == item.album) item else item.copy(album = name)
+        }
     }
 
     /**

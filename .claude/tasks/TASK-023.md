@@ -3,7 +3,7 @@
 Milestone: v0.3 — space management (blocks nothing, but touches the deletion rules)
 Raised by: Ian, 7 Sept 2026 — *"it appears as though the backup is splitting the Camera folder
 into two different folders"*
-Status: **spec approved by Ian 16 Sept 2026 — in build.** No schema change and
+Status: **built 16 Sept 2026; the Off-to-Off merge is verified on the Moto G, and the Archive merge is still to test on the device.** No schema change and
 no migration (see *Why not `BUCKET_ID`*).
 
 ## Where the two names came from — Ian, 15 Sept 2026
@@ -189,6 +189,49 @@ Check both themes. Then set Backup on the merged album and confirm `already ther
 ### Answered — Ian, 16 Sept 2026
 
 Warn even when both spellings were already `Off`. **Spec approved; build started.**
+
+## Built — 16 Sept 2026
+
+As specced, with two changes found while building:
+
+- **Duplicate ledger rows are matched on the full key, not on `mediaStoreId`.** `BackupEntryEntity.id`
+  records that MediaStore reuses ids, so an id is not identity. The restore case gives identical keys
+  once the spelling is rewritten, so nothing is lost by this. A test pins it: two different files
+  sharing a reused id are both kept.
+- **The warning card sits in the album list, not above it.** In landscape on the Moto G, the hero
+  filled the fixed area, and a card there pushed the albums and its own Dismiss off the screen. As the
+  list's first item, it scrolls.
+
+**Files:**
+- `MediaScanRules.folderKeyOf` / `canonicalAlbumNames`, applied in `MediaScanner.scanEverything`.
+- `AlbumIdentityRules` (pure planning and warning encoding).
+- `AlbumIdentityReconciler` (Room transaction and `Mutex`).
+- DAO additions: `deleteAlbums`, `albumNames`, `distinctAlbums`, `entriesForAlbums`, `deleteForAlbums`,
+  `replaceAll`.
+- `BackupSettings.albumMergeWarnings` (DataStore string set).
+- Guards in `refreshLedger`, `uploadPending` (mode-gated path), `archiveAlbumNames`,
+  `filesInArchiveAlbums`, `redundantLocalCopies`, `ProxyApplier.candidates`, `VideoOptimiser.run`.
+- The card in `BackupScreen`; `setAlbumMode` clears the warning.
+
+**Tests:** 18 in `AlbumIdentityRulesTest` and 6 new in `MediaScanRulesTest`. The full unit suite is
+343/343.
+
+**Verified on the Moto G** (16:54, installed over the fresh-install state):
+- The folder was renamed on disk from `camera` to `Camera`, with the ledger holding 4 rows under
+  `camera` and its mode Off.
+- The log shows `merged [Camera, camera] into 'Camera': modes were {camera=OFF}, now OFF; 4 ledger
+  rows`.
+- `album_preferences` holds one `Camera|OFF`, and the ledger holds 9 rows under `Camera` (2 uploaded,
+  plus 7 pending including 5 new camera shots). No `camera` rows remain.
+- The Albums tab shows one `Camera` album and the card: *"Before: camera was Off."*
+- Readable in light and dark. Nothing uploaded, empty crash buffer.
+
+**Not verified:** the untested residue is below.
+- **The Archive merge on a device**: `camera` Archive plus a restore after the rename. Needs Ian's taps.
+- **Where the Archive screen can still slip:** if a merge lands after the Archive screen has shown its
+  list and before Android's trash dialog, that batch is still requested. Both of the user's taps
+  (Yes, then Android's dialog) come after seeing the list, so it is not unconsented, but it is not
+  re-checked either.
 
 ## Ruling — the spellings share one mode — Ian, 16 Sept 2026
 

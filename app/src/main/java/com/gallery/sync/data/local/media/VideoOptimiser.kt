@@ -7,6 +7,7 @@ import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.di.IoDispatcher
+import com.gallery.sync.domain.backup.AlbumIdentityReconciler
 import com.gallery.sync.domain.backup.MediaAge
 import com.gallery.sync.domain.backup.OptimiseCutoff
 import com.gallery.sync.util.Logger
@@ -66,6 +67,7 @@ class VideoOptimiser @Inject constructor(
     private val transcoder: VideoTranscoder,
     private val safWriter: SafMediaWriter,
     private val settings: BackupSettings,
+    private val albumIdentity: AlbumIdentityReconciler,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
 ) {
 
@@ -200,6 +202,9 @@ class VideoOptimiser @Inject constructor(
             Logger.d(TAG, "video optimising is switched off")
             return@withContext VideoOptimiseResult()
         }
+
+        // Chosen by Sync mode, so one folder's spellings are merged first. TASK-023.
+        albumIdentity.reconcile()
 
         val candidates = entryDao.videoOptimiseCandidates(
             modifiedBeforeEpochSeconds = cutoffSecondsFor(prefs.videoOptimiseAge),

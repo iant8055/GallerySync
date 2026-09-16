@@ -100,6 +100,7 @@ class BackupEngine @Inject constructor(
     private val repository: OneDriveRepository,
     private val uploadRepository: OneDriveUploadRepository,
     private val proxyMarker: ProxyMarker,
+    private val albumIdentity: AlbumIdentityReconciler,
     @ApplicationContext private val context: Context,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
 ) {
@@ -191,6 +192,10 @@ class BackupEngine @Inject constructor(
             Logger.w(TAG, "refreshLedger: no media access")
             return@withContext null
         }
+
+        // Before anything is inserted or seeded: a row written now under a spelling the merge is
+        // about to retire would split the album again straight away. TASK-023.
+        albumIdentity.reconcile()
 
         // Proxied files are skipped by MediaStore id, because proxying changed their size and so
         // their content key. Without this every proxy is seen as a new file and uploaded beside
@@ -497,6 +502,8 @@ class BackupEngine @Inject constructor(
             val pending = if (allAlbums) {
                 entryDao.nextPendingAll(limit = limit, maxAttempts = MAX_ATTEMPTS)
             } else {
+                // The upload gate reads modes. See AlbumIdentityReconciler for why that waits on it.
+                albumIdentity.reconcile()
                 entryDao.nextPending(limit = limit, maxAttempts = MAX_ATTEMPTS)
             }.let { candidates -> withinByteBudget(candidates, maxBytes) }
             var uploaded = 0
@@ -810,11 +817,16 @@ class BackupEngine @Inject constructor(
      * holding no files means the mode ran to completion — and is still standing.
      */
     suspend fun archiveAlbumNames(): List<String> = withContext(dispatcher) {
+        albumIdentity.reconcile()
         albumDao.albumsInMode(AlbumMode.ARCHIVE).sorted()
     }
 
     suspend fun filesInArchiveAlbums(): List<LocalMediaItem> = withContext(dispatcher) {
         if (scanner.access() == MediaAccess.NONE) return@withContext emptyList()
+
+        // Archive removes files. Its album membership must be settled before it is read, or a file
+        // named for one spelling is caught by the mode of the other. TASK-023.
+        albumIdentity.reconcile()
 
         val archived = albumDao.albumsInMode(AlbumMode.ARCHIVE).toSet()
         if (archived.isEmpty()) {
@@ -837,6 +849,9 @@ class BackupEngine @Inject constructor(
      */
     suspend fun redundantLocalCopies(): List<LocalMediaItem> = withContext(dispatcher) {
         if (scanner.access() == MediaAccess.NONE) return@withContext emptyList()
+
+        // See filesInArchiveAlbums: membership is settled before Archive is read. TASK-023.
+        albumIdentity.reconcile()
 
         // Scoped to albums the user set to Archive. Until 25 Aug 2026 this returned every verified
         // file regardless of mode, so Settings offered to remove files from Backup albums — while

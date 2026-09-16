@@ -11,6 +11,7 @@ import com.gallery.sync.data.local.media.LocalCopyRemover
 import com.gallery.sync.data.local.media.ProxyApplier
 import com.gallery.sync.data.local.media.ProxyOutcome
 import com.gallery.sync.data.local.settings.BackupSettings
+import com.gallery.sync.domain.backup.AlbumMergeWarning
 import com.gallery.sync.worker.BackupScheduling
 import com.gallery.sync.worker.BackupWorker
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -174,6 +175,8 @@ sealed interface BackupStatus {
 data class BackupUiState(
     val access: MediaAccess = MediaAccess.NONE,
     val albums: List<AlbumRow> = emptyList(),
+    /** Albums merged from two spellings of one folder and set Off, not yet dismissed. TASK-023. */
+    val albumMergeWarnings: List<AlbumMergeWarning> = emptyList(),
     val isScanning: Boolean = false,
     val isRunning: Boolean = false,
     val status: BackupStatus? = null,
@@ -459,6 +462,15 @@ class BackupViewModel @Inject constructor(
         }
         observeBackgroundWork()
         observeCloudStatus()
+        viewModelScope.launch {
+            settings.albumMergeWarnings.collect { warnings ->
+                _state.update { it.copy(albumMergeWarnings = warnings) }
+            }
+        }
+    }
+
+    fun dismissAlbumMergeWarning(album: String) {
+        viewModelScope.launch { settings.dismissAlbumMergeWarning(album) }
     }
 
     /**
@@ -711,6 +723,8 @@ class BackupViewModel @Inject constructor(
     fun setAlbumMode(album: String, mode: AlbumMode) {
         viewModelScope.launch {
             albumDao.setPreference(AlbumPreferenceEntity(album, mode))
+            // Choosing a mode is the answer the warning asked for, so it has done its job.
+            settings.dismissAlbumMergeWarning(album)
             _state.value = _state.value.copy(
                 albums = _state.value.albums.map {
                     if (it.name == album) it.copy(mode = mode) else it

@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.domain.backup.LibraryChoice
@@ -17,6 +18,8 @@ import com.gallery.sync.domain.backup.OptimiseMode
 import com.gallery.sync.domain.backup.VideoQuality
 import com.gallery.sync.domain.backup.CloudDeletionGrace
 import com.gallery.sync.domain.backup.CloudDeletionPolicy
+import com.gallery.sync.domain.backup.AlbumIdentityRules
+import com.gallery.sync.domain.backup.AlbumMergeWarning
 import com.gallery.sync.domain.backup.FirstBackupWindow
 import com.gallery.sync.domain.backup.RemoteRoots
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -454,6 +457,43 @@ class BackupSettings @Inject constructor(
         context.dataStore.edit { it[KEY_ALLOW_METERED] = allowed }
     }
 
+    /**
+     * Albums merged from two spellings of one folder and set Off, which the user has not yet seen
+     * through. TASK-023.
+     *
+     * Here rather than in Room, so the warning needs no schema change. Oldest first.
+     */
+    val albumMergeWarnings: Flow<List<AlbumMergeWarning>> = context.dataStore.data.map { stored ->
+        stored[KEY_ALBUM_MERGE_WARNINGS].orEmpty()
+            .mapNotNull(AlbumIdentityRules::decode)
+            .sortedBy { it.atEpochMillis }
+    }
+
+    /** Records warnings, replacing any earlier one for the same album so a card is never shown twice. */
+    suspend fun addAlbumMergeWarnings(warnings: List<AlbumMergeWarning>) {
+        if (warnings.isEmpty()) return
+        val replaced = warnings.mapTo(HashSet()) { AlbumIdentityRules.foldCase(it.albumName) }
+        context.dataStore.edit { prefs ->
+            val kept = prefs[KEY_ALBUM_MERGE_WARNINGS].orEmpty().filter { stored ->
+                val name = AlbumIdentityRules.decode(stored)?.albumName ?: return@filter false
+                AlbumIdentityRules.foldCase(name) !in replaced
+            }
+            prefs[KEY_ALBUM_MERGE_WARNINGS] = (kept + warnings.map(AlbumIdentityRules::encode)).toSet()
+        }
+    }
+
+    /** Clears the warning for an album, on dismissal or when the user chooses its mode. */
+    suspend fun dismissAlbumMergeWarning(albumName: String) {
+        val key = AlbumIdentityRules.foldCase(albumName)
+        context.dataStore.edit { prefs ->
+            val current = prefs[KEY_ALBUM_MERGE_WARNINGS] ?: return@edit
+            prefs[KEY_ALBUM_MERGE_WARNINGS] = current.filterTo(HashSet()) { stored ->
+                val name = AlbumIdentityRules.decode(stored)?.albumName ?: return@filterTo false
+                AlbumIdentityRules.foldCase(name) != key
+            }
+        }
+    }
+
     suspend fun setDefaultAlbumMode(mode: AlbumMode) {
         context.dataStore.edit { it[KEY_DEFAULT_ALBUM_MODE] = mode.name }
     }
@@ -560,5 +600,6 @@ class BackupSettings @Inject constructor(
         val KEY_WIZARD_STEP = intPreferencesKey("wizard_step")
         val KEY_WIZARD_BACKUP_TOTAL = intPreferencesKey("wizard_backup_total")
         val KEY_WIZARD_RUN_STARTED_AT = longPreferencesKey("wizard_run_started_at")
+        val KEY_ALBUM_MERGE_WARNINGS = stringSetPreferencesKey("album_merge_warnings")
     }
 }

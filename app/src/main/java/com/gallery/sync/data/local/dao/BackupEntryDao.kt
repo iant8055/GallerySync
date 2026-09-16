@@ -488,6 +488,26 @@ interface BackupEntryDao {
     @Query("SELECT * FROM backup_entries WHERE id = :id")
     suspend fun find(id: String): BackupEntryEntity?
 
+    /** Every album name the ledger holds, for spotting one folder under two spellings (TASK-023). */
+    @Query("SELECT DISTINCT album FROM backup_entries")
+    suspend fun distinctAlbums(): List<String>
+
+    @Query("SELECT * FROM backup_entries WHERE album IN (:albums)")
+    suspend fun entriesForAlbums(albums: List<String>): List<BackupEntryEntity>
+
+    /**
+     * Removes the rows of these album names, so a merge can write them back under one name.
+     *
+     * Bookkeeping only, and only ever called inside the merge's transaction, which rewrites the same
+     * files at once. Never used to forget a file.
+     */
+    @Query("DELETE FROM backup_entries WHERE album IN (:albums)")
+    suspend fun deleteForAlbums(albums: List<String>)
+
+    /** `REPLACE`, for the merge alone: it is rewriting rows it has just removed. */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun replaceAll(entries: List<BackupEntryEntity>)
+
     /**
      * Forgets one entry, for a file that is no longer on the device.
      *

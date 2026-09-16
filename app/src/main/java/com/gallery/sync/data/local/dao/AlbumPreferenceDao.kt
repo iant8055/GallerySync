@@ -60,6 +60,10 @@ interface AlbumPreferenceDao {
     @Query("SELECT albumName FROM album_preferences WHERE mode = :mode")
     suspend fun albumsInMode(mode: AlbumMode): List<String>
 
+    /** Removes the rows for these names. Only for merging one folder's spellings (TASK-023). */
+    @Query("DELETE FROM album_preferences WHERE albumName IN (:names)")
+    suspend fun deleteAlbums(names: List<String>)
+
     /** The album's chosen mode, or null when the user has never touched it. */
     @Query("SELECT mode FROM album_preferences WHERE albumName = :albumName")
     suspend fun modeOrNull(albumName: String): AlbumMode?

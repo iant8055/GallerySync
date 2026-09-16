@@ -114,4 +114,63 @@ class MediaScanRulesTest {
         }
         assertEquals(MediaAccess.NONE, access)
     }
+
+    // ---------- one spelling per folder (TASK-023) ----------
+
+    @Test
+    fun `a folder key ignores case and slashes`() {
+        assertEquals(
+            MediaScanRules.folderKeyOf("DCIM/camera/", "camera"),
+            MediaScanRules.folderKeyOf("DCIM/Camera/", "Camera")
+        )
+    }
+
+    @Test
+    fun `folders with the same name in different places have different keys`() {
+        assertFalse(
+            MediaScanRules.folderKeyOf("DCIM/Camera/", "Camera") ==
+                MediaScanRules.folderKeyOf("Pictures/camera/", "camera")
+        )
+    }
+
+    @Test
+    fun `below API 29 the key falls back to the name`() {
+        assertEquals("name:camera", MediaScanRules.folderKeyOf(null, "Camera"))
+    }
+
+    @Test
+    fun `a folder with one spelling keeps it`() {
+        val names = MediaScanRules.canonicalAlbumNames(
+            listOf(
+                MediaScanRules.AlbumSighting("dcim/camera", "Camera", 1),
+                MediaScanRules.AlbumSighting("dcim/camera", "Camera", 2)
+            )
+        )
+        assertEquals(mapOf("dcim/camera" to "Camera"), names)
+    }
+
+    @Test
+    fun `a folder with two spellings takes the newest item's`() {
+        // 7 Sept 2026 on the Moto G: copied files under camera, later camera-app shots under Camera.
+        val names = MediaScanRules.canonicalAlbumNames(
+            listOf(
+                MediaScanRules.AlbumSighting("dcim/camera", "camera", 5188),
+                MediaScanRules.AlbumSighting("dcim/camera", "Camera", 5194),
+                MediaScanRules.AlbumSighting("dcim/camera", "camera", 5191)
+            )
+        )
+        assertEquals("Camera", names["dcim/camera"])
+    }
+
+    @Test
+    fun `a renamed copy is its own folder and keeps its own name`() {
+        val names = MediaScanRules.canonicalAlbumNames(
+            listOf(
+                MediaScanRules.AlbumSighting("dcim/camera", "Camera", 1),
+                MediaScanRules.AlbumSighting("dcim/camera (1)", "Camera (1)", 2)
+            )
+        )
+        assertEquals("Camera", names["dcim/camera"])
+        assertEquals("Camera (1)", names["dcim/camera (1)"])
+    }
 }

@@ -69,6 +69,7 @@ import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.media.MediaAccess
 import com.gallery.sync.domain.backup.AlbumCloudClaim
+import com.gallery.sync.domain.backup.AlbumMergeWarning
 import com.gallery.sync.domain.backup.StopReason
 import com.gallery.sync.ui.common.LabelWithAction
 import com.gallery.sync.ui.common.SignalIcons
@@ -358,6 +359,21 @@ private fun AlbumList(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+            // TASK-023. First in the list, because the album it names has just changed mode without
+            // the user choosing it, and that is the one thing this tab must never leave unsaid. In the
+            // list rather than above it: on a landscape phone the hero already fills the fixed area,
+            // and a card there pushed both the albums and its own Dismiss off the screen (Moto G,
+            // 16 Sept 2026).
+            items(
+                items = state.albumMergeWarnings,
+                key = { warning -> "merge-warning:${warning.albumName}" }
+            ) { warning ->
+                AlbumMergeWarningCard(
+                    warning = warning,
+                    onDismiss = { viewModel.dismissAlbumMergeWarning(warning.albumName) }
+                )
+            }
+
             // Split by count into columns that scroll together, not a row-major grid. Each column
             // stays alphabetical top to bottom, so you scan one and ignore the other; row-major
             // would put consecutive albums side by side and make the eye zigzag for every item —
@@ -761,6 +777,64 @@ private fun ArchiveConfirmDialog(
             }
         }
     )
+}
+
+/**
+ * Says that one folder had been stored under more than one name, and that its album is now Off.
+ *
+ * Ian, 16 Sept 2026: any such discrepancy sets the album Off *"then a warning given to the user
+ * regarding the discrepancy and the change in the Album Mode"*, even when every spelling was already
+ * Off. It names the spellings and what each was set to, because "It was Archive" is the part a user
+ * needs in order to choose again.
+ *
+ * Theme tokens only: the error container, with text inheriting its content colour.
+ */
+@Composable
+private fun AlbumMergeWarningCard(warning: AlbumMergeWarning, onDismiss: () -> Unit) {
+    Surface(
+        color = MaterialTheme.colorScheme.errorContainer,
+        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.album_merge_title, warning.albumName),
+                style = MaterialTheme.typography.titleSmall
+            )
+            Text(
+                text = stringResource(R.string.album_merge_body, warning.spellings.joinToString(", ")),
+                style = MaterialTheme.typography.bodyMedium
+            )
+            if (warning.previousModes.isNotEmpty()) {
+                val entries = warning.previousModes.entries
+                    .sortedBy { it.key }
+                    .map { (name, mode) ->
+                        stringResource(R.string.album_merge_previous_entry, name, mode.label())
+                    }
+                Text(
+                    text = stringResource(R.string.album_merge_previous, entries.joinToString(", ")),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+            Text(
+                text = stringResource(R.string.album_merge_choose_again),
+                style = MaterialTheme.typography.bodyMedium
+            )
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.align(Alignment.End),
+                // The card's content colour, not primary: primary is tuned for the plain surface and
+                // is not guaranteed to read on the error container in both themes.
+                colors = ButtonDefaults.textButtonColors(contentColor = LocalContentColor.current)
+            ) {
+                Text(stringResource(R.string.album_merge_dismiss))
+            }
+        }
+    }
 }
 
 /** Turns the typed run status into words. */
