@@ -5018,3 +5018,23 @@ because Android's emulated storage is case-insensitive: the camera app's writes 
 already there. Both names are real and were made by different hands; the filesystem merged them and
 MediaStore kept both spellings, which is what the app read as two albums. Do not restate this as "one
 folder showing up as two".
+
+#### TASK-023, ruling — one mode shared across spellings — Ian, 16 Sept 2026
+
+Ian tried to reproduce the two folders on the Moto G. **Android will not let a second `Camera`/`camera`
+directory exist beside the first**: copying one in produced `camera (1)` / `Camera (1)` instead. That
+confirms the 7 Sept inode check from the other side — there is only ever one directory, and case alone
+cannot make a second.
+
+It does not remove the condition. The split was never two directories; it is MediaStore keeping the
+spelling each *writer* used for the one directory (the copied `camera`, the camera app's `Camera`).
+The camera app writes into the existing folder without renaming, so two spellings can still sit in
+MediaStore under one folder.
+
+**Ruling: the spellings share one album mode.** Every spelling of a folder that differs only in case
+is one album with one mode. A folder that Android renamed on collision, `Camera (1)`, is a genuinely
+separate directory and remains a separate album with its own mode — the shared mode must not reach it.
+
+Still open, and still Ian's: the key (`BUCKET_ID` vs case-folded name — either delivers a shared mode,
+both need a migration) and the merge rule when existing rows for two spellings already hold different
+modes.

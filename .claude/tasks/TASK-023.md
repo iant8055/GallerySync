@@ -42,6 +42,19 @@ in his copied files from `camera` to `Camera`**, so both writers now agree. That
 the code being fixed — keying on `BUCKET_DISPLAY_NAME` is unchanged, and a user who never renames
 their copy keeps two albums.
 
+## Ruling — the spellings share one mode — Ian, 16 Sept 2026
+
+Ian tried to reproduce it: Android will not let a second `Camera`/`camera` directory exist, and a copy
+that collides is renamed `camera (1)` / `Camera (1)`. That agrees with the inode check — one directory,
+always. It does not make the task moot, because the split lives in MediaStore's per-writer spelling,
+not on disk, and the camera app writes into the existing folder without renaming it.
+
+**Decided: all case-only spellings of one folder share a single album mode.** `Camera (1)` is a
+separate directory and stays a separate album — the shared mode must not extend to it.
+
+This settles what the fix must achieve. It leaves decision 1 below (how: `BUCKET_ID` or case-folded
+name) and decision 2 (merge rule for rows already holding different modes) with Ian.
+
 ## What was seen
 
 After a clean install and a wizard run on the Moto G, the ledger held two albums where the phone has
