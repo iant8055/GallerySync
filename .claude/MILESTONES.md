@@ -5086,3 +5086,20 @@ The 18-file album was backed up as `camera`, archived (18 `.trashed-` files), an
   **`camera`** (`parentReference.path = …/DCIM/camera`). The listing grew from 18 to 23. So one
   OneDrive folder now holds files from both albums, under the spelling it had when first created.
   `camera` (Archive) did not act on any of them.
+
+#### "8 optimised photos in Camera, now 1" — explained, nothing optimised today (16 Sept 2026)
+
+Ian emptied the trash, and the Files app then showed one small photo in `Camera` where there had been
+eight. **Nothing was optimised on this install.** No ledger row has `isProxied` or
+`localProxySizeBytes` set, and no optimise log lines appear.
+
+The eight are the burst taken 15 Sept 14:35 (`IMG_20260915_1435*`, 367–601 KB, and Graph reports
+2048×1536, against 4096×3072 for the 21:31 shots). They were **already shrunk when today's clean
+install ran**, left over from the 15 Sept optimise tests and not put back to full size in the reset.
+Two siblings from the same burst, trashed on 15 Sept before the optimiser ran, were 3.2 MB each. With
+an empty ledger, today's first backup uploaded the shrunk bytes as the only OneDrive copy. That is
+expected after `pm clear`: the app has no record that a file is a proxy.
+
+Seven of the eight were in `camera` (Archive) and went to the trash, and Ian's emptying removed them.
+The eighth is `IMG_20260915_143513095_HDR.jpg`, the one restored from OneDrive at 499,165 bytes. So
+8 → 1 is the trash being emptied, not a change of optimisation.
