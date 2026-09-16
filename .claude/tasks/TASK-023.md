@@ -3,7 +3,7 @@
 Milestone: v0.3 — space management (blocks nothing, but touches the deletion rules)
 Raised by: Ian, 7 Sept 2026 — *"it appears as though the backup is splitting the Camera folder
 into two different folders"*
-Status: **fix specced 16 Sept 2026 — awaiting Ian's approval of the spec below.** No schema change and
+Status: **spec approved by Ian 16 Sept 2026 — in build.** No schema change and
 no migration (see *Why not `BUCKET_ID`*).
 
 ## Where the two names came from — Ian, 15 Sept 2026
@@ -106,10 +106,8 @@ more than one stored spelling, or a stored spelling different from the canonical
 - **Target name:** the canonical scan spelling if the folder is on the device. Otherwise, the spelling
   of the most recently written ledger row.
 - **`album_preferences`:** collapse to one row under the target name.
-  - If the group's rows hold **any mode other than `Off`, or differing modes**, write **`Off`** and
-    record a warning.
-  - If every row is already `Off`, write `Off` and record nothing. No mode changed, so there is nothing
-    to warn about. **Open question for Ian, below.**
+  - Write **`Off`** and **always record a warning**, including when every row was already `Off`.
+    Ian, 16 Sept 2026: *"yes warn anyway"*.
 - **`album_cloud_status`:** delete the group's rows. The next reconcile recomputes it; this is bookkeeping.
 - **`backup_entries`:** rewrite `album` and the `id` prefix to the target name.
   - Where two rows then share an id, or share a `mediaStoreId` (the restore case), **keep one**. Prefer,
@@ -162,7 +160,7 @@ nothing to merge) before reading modes, rather than trusting call order.
 - `AlbumIdentityReconciler`:
   - Archive + Off becomes Off with a warning.
   - Backup + Backup becomes Off with a warning.
-  - Off + Off becomes Off with no warning.
+  - Off + Off becomes Off **with** a warning.
   - A single stored spelling that differs from the canonical one is renamed and set to Off with a warning.
   - Duplicate rows for one `mediaStoreId` collapse to the uploaded row, keeping `remoteItemId`.
   - `isProxied` survives the merge.
@@ -188,10 +186,9 @@ Expect:
 
 Check both themes. Then set Backup on the merged album and confirm `already there`, not a re-upload.
 
-### Open question for Ian
+### Answered — Ian, 16 Sept 2026
 
-**When both spellings already read `Off`, should the user still be warned?** Nothing changed mode, so
-the spec merges silently. Your wording was "any discrepancy … a warning", which could mean warn anyway.
+Warn even when both spellings were already `Off`. **Spec approved; build started.**
 
 ## Ruling — the spellings share one mode — Ian, 16 Sept 2026
 

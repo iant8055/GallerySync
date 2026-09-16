@@ -5133,8 +5133,8 @@ Spec written in TASK-023 (*The fix — spec*), awaiting Ian's approval.
   folder name: the spelling of the newest MediaStore row, which MediaProvider writes from the disk.
 - **Merge at runtime.** An `AlbumIdentityReconciler` runs in a transaction at the start of
   `refreshLedger`, and as a guard before anything reads modes.
-- **Discrepancy handling:** a mode other than Off, or differing modes, go to Off with a warning card on
+- **Discrepancy handling:** every merge goes to Off with a warning card on
   the Albums tab, stored in DataStore.
 - **Duplicate ledger rows** for one `mediaStoreId` collapse to the uploaded row, with no deletion anywhere.
-- **Open question for Ian:** warn when both spellings were already Off?
+- **Ian, same day: warn even when both were already Off. Spec approved; build started.**
 
