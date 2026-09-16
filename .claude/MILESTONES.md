@@ -5049,9 +5049,21 @@ modes.
   mode to `Off`, which can never remove a file.
 - **The wizard is untouched by this.** It writes no album modes, and everything starts `Off`, so a
   conflict can only carry a mode the user set afterwards.
-- **Restore is a route that can create the split.** `DownloadMissingFile` writes to
-  `"DCIM/${entry.album}/"` through `MediaStore.insert`. From the code (not yet tested on a device):
-  when the ledger spelling differs from the folder on disk, MediaStore does not rename the folder. The
-  file lands in the existing directory and MediaStore records the ledger's spelling. The `(1)` rename
-  Ian saw is for a colliding *name* (a copied folder, or a file), not for a case-only folder spelling.
-  `RestoreFromCloud` is unaffected: it always writes to `DCIM/Restored`.
+- ~~Restore is a route that can create the split.~~ **Withdrawn the same day by test on the Moto G**:
+
+#### TASK-023, restore across a spelling change — tested on the Moto G, 16 Sept 2026
+
+The 18-file album was backed up as `camera`, archived (18 `.trashed-` files), and the folder renamed to
+`Camera` on disk. Then one file was restored.
+
+- **MediaStore corrected the spelling.** It was inserted with `RELATIVE_PATH = DCIM/camera/` and came
+  back as `DCIM/Camera/`, `bucket_display_name = Camera`. A restore does not create a second MediaStore
+  spelling.
+- **GallerySync split it anyway.** The rescan left two ledger rows for one `mediaStoreId`
+  (`camera/…` UPLOADED, `Camera/…` PENDING) and a new `Camera|OFF` beside `camera|ARCHIVE`. The Albums
+  tab showed `Camera` with 1 file, "1 pending" and "1 verified" at once, and `camera` as "All files
+  Archived". The ledger keeps the name from backup time; the scan uses today's name. This is the
+  TASK-023 defect with no second writer involved.
+- **Not archived again** (`redundantLocalCopies: 0`), only because the split put the file under Off.
+- **OneDrive is case-insensitive**: listing `DCIM/Camera` returned the 18 files whose parent folder is
+  named `camera`. This settles TASK-023 decision 4: one remote folder.

@@ -62,9 +62,35 @@ name) and decision 2 (merge rule for rows already holding different modes) with 
   warned about the discrepancy and the mode change. This is Ian's explicit exception to "modes are set
   only by the user", and it is limited to moving a mode to `Off`.
 - The wizard is unaffected: it writes no modes, and everything starts `Off`.
-- **Restore must not reintroduce a spelling.** `DownloadMissingFile.relativePathFor` builds
-  `DCIM/<ledger album>/`. It must write under the spelling already on the phone, or it recreates the
-  split through MediaStore. From the code, not yet tested on a device.
+- ~~Restore must not reintroduce a spelling.~~ **Withdrawn the same day by test, below.** It was
+  inferred from the code, and MediaStore does the opposite of what was predicted.
+
+## Tested on the Moto G, 16 Sept 2026 — restore across a spelling change
+
+Setup: renamed `DCIM/Camera` to `DCIM/camera` on disk (18 MediaStore rows followed, `bucket_id`
+unchanged at `-1739773001`), `pm clear`, full wizard, first backup recorded 18 files under album
+`camera`. Ian set `camera` to Archive: 18 confirmed, and all 18 became `.trashed-` files. Renamed the
+folder back to `Camera` on disk. Ian then restored `IMG_20260915_143513095_HDR.jpg` from the Restore tab.
+
+- **MediaStore corrects the spelling.** `DownloadMissingFile` inserted with `RELATIVE_PATH =
+  DCIM/camera/`. The row came back as `relative_path = DCIM/Camera/`, `bucket_display_name = Camera`,
+  `_data = …/DCIM/Camera/…`, 499,165 bytes. So a restore does **not** put a second spelling into
+  MediaStore. The platform uses the directory that already exists.
+- **The app splits it anyway, on its own side.** After the Albums tab rescanned, the ledger held two
+  rows for the same `mediaStoreId` 5329: `camera/…` (`UPLOADED`) and `Camera/…` (`PENDING`, no remote
+  id). `album_preferences` gained `Camera|OFF` next to `camera|ARCHIVE`. The Albums tab showed
+  **Camera: 1 file, Off, "1 pending", "1 verified in OneDrive"**, and **camera: Archive, "All files
+  Archived"**. The ledger keeps the album name from backup time, while the scan uses MediaStore's name
+  now. This is the same album-identity defect, reached without any second writer.
+- **The restored file was not archived again.** `redundantLocalCopies: 0`, because the file now
+  belongs to `Camera`, which is Off. That is the safe direction, but only by accident of the split.
+- **OneDrive is case-insensitive too, which answers decision 4.** Reconcile listed
+  `Samsung Gallery/DCIM/Camera` and got the 18 files whose `parentReference.name` is `camera`. The
+  path resolves to the one folder, and reconcile counted all 240 as already in OneDrive.
+
+Under Ian's rule, the merge fix would find `camera` (Archive) and `Camera` (Off) as one folder,
+set it to Off and warn. So restoring into an Archive album whose folder has since changed case ends
+with the album Off.
 
 ## What was seen
 
