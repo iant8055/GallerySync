@@ -4969,3 +4969,19 @@ and it was, so it was reverted rather than kept. Verified on the Moto G in light
 Restore, Settings and Help each show the framed phone with its own tab lit, and each arrow lands on its
 pill. The Settings arrow sits a few pixels left of centre — the weights approximate tab centres, as
 they always have.
+
+#### Four decisions from Ian, 15 Sept 2026 (evening)
+
+- **Unplugging mid-backup does not pause it.** The charger is a condition for the delayed first backup
+  to *launch*, and nothing more; a run already moving bytes carries on. That is what the continuations
+  already do, so nothing was built — it is recorded so it is not "fixed" later.
+- **The 85% video-savings estimate stands.** The Step 7 card keeps it. It is measured on camera
+  footage and will over-promise on screen recordings; Ian accepts that rather than complicating the
+  figure.
+- **The "old enough" copy goes.** `settings_optimise_master_on` and `settings_auto_optimise_on` said
+  photos and video are optimised "once verified in OneDrive **and old enough**" — but photos are
+  proxied whatever their age, and only video has an age, set by its own *Older than* control. Both now
+  end at "verified in OneDrive". The orphaned `settings_photo_age` label went with them.
+- **OkHttp keeps logging bodies for now.** It buries the app's own lines within minutes and should drop
+  to `BASIC` before release, but the full Graph traffic is worth having while backup, sync, archive and
+  delete are still being watched on hardware.

@@ -93,7 +93,12 @@
     <string name="help_archive">Remove local copies after they are confirmed in OneDrive. Files go to your phone\'s trash, not permanently deleted.</string>
 
     <string name="settings_optimise_master">Optimise photos and video</string>
-    <string name="settings_optimise_master_on">Photos and video in Sync albums are replaced by smaller copies once verified in OneDrive and old enough.</string>
+    <!--
+        No age here. Photos are proxied whatever their age (TASK-011) and only video has an age, set
+        by its own "Older than" control — so "and old enough" claimed a wait that photos never do.
+        Removed by Ian, 15 Sept 2026, with the leftover photo-age label below it.
+    -->
+    <string name="settings_optimise_master_on">Photos and video in Sync albums are replaced by smaller copies once verified in OneDrive.</string>
     <string name="settings_optimise_master_off">Nothing is optimised. Photos and video stay at full size on this phone.</string>
     <string name="settings_optimise_photos">Optimise photos</string>
     <string name="settings_optimise_photos_on">Photos in Sync albums are optimised for storage.</string>
@@ -106,11 +111,10 @@
     <string name="settings_optimise_mode_manual">Manual</string>
     <string name="settings_older_than">Older than</string>
     <string name="settings_quality">Quality</string>
-    <string name="settings_photo_age">Optimise photos older than</string>
     <string name="settings_automatic">Automatic sync</string>
     <string name="settings_optimise">Optimise photos</string>
     <string name="settings_auto_optimise">Optimise automatically</string>
-    <string name="settings_auto_optimise_on">Photos and video are optimised on their own, once they are verified in OneDrive and old enough.</string>
+    <string name="settings_auto_optimise_on">Photos and video are optimised on their own, once they are verified in OneDrive.</string>
     <string name="settings_auto_optimise_off">Nothing is optimised until you tap Optimise.</string>
 
     <!--
