@@ -98,6 +98,13 @@ folder back to `Camera` on disk. Ian then restored `IMG_20260915_143513095_HDR.j
   `DCIM/Screenshots` folder that does not exist on disk (the real one is `Pictures/Screenshots`). The
   Files app shows MediaStore's view, not the directory. So "the spelling a file manager shows" cannot be
   the rule for choosing a display name: two views of one phone disagree.
+- **New camera photos follow the disk's spelling.** Ian took 5 photos at 14:53. The Motorola camera
+  (`com.motorola.camera5`) wrote them to `DCIM/Camera/`, and MediaStore recorded `bucket_display_name =
+  Camera`. The content trigger ran a backup at 14:54:04: `5 uploaded, 0 failed`. The uploads went to
+  `…/DCIM/Camera/<name>:/content`, and Graph filed them in the existing folder, which is still named
+  **`camera`** (`parentReference.path = …/DCIM/camera`). The listing grew from 18 to 23. So one
+  OneDrive folder now holds files from both albums, under the spelling it had when first created.
+  `camera` (Archive) did not act on any of them.
 
 Under Ian's rule, the merge fix would find `camera` (Archive) and `Camera` (Off) as one folder,
 set it to Off and warn. So restoring into an Archive album whose folder has since changed case ends
