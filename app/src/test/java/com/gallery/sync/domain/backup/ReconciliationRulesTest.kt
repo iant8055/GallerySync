@@ -57,6 +57,49 @@ class ReconciliationRulesTest {
         assertTrue(result.isComplete)
     }
 
+    /**
+     * The number Ian asked about on 15 Sept 2026: an album whose files were optimised must not read
+     * as unprotected. A proxy is smaller than the original OneDrive holds, so the plain size test
+     * fails and every optimised file drops out of "verified in OneDrive" — the Albums tab said
+     * "2 of 5 verified" for an album whose five were all uploaded (4 Sept 2026). Fixed then with the
+     * recorded original size, and untested until now.
+     */
+    @Test
+    fun anOptimisedFileCountsAsBackedUpAgainstItsOriginalSize() {
+        val local = listOf(item("a.jpg", 180_000), item("b.mp4", 2_000_000, isVideo = true))
+        val remote = mapOf(
+            "a.jpg" to RemoteFileRef("R1", 4_000_000L),
+            "b.mp4" to RemoteFileRef("R2", 60_000_000L)
+        )
+
+        val result = ReconciliationRules.tallyAlbum(
+            local = local,
+            remoteIndex = remote,
+            proxiedOriginalSizes = mapOf("a.jpg" to 4_000_000L, "b.mp4" to 60_000_000L)
+        )
+
+        assertEquals(MediaTally(1, 180_000), result.photosBackedUp)
+        assertEquals(MediaTally(1, 2_000_000), result.videosBackedUp)
+        assertEquals("nothing optimised may read as outstanding", MediaTally.EMPTY, result.outstanding)
+    }
+
+    /**
+     * The other half: with no record of the original — a wiped ledger, so a reinstall — the same
+     * files fall back to the size on disk and read as outstanding. Nothing is re-uploaded (the
+     * engine recognises them by their marker), but the count is pessimistic, and this is the case
+     * that showed up as "of 33" for 25 files on 15 Sept 2026.
+     */
+    @Test
+    fun withoutTheRecordedOriginalAnOptimisedFileReadsAsOutstanding() {
+        val local = listOf(item("a.jpg", 180_000))
+        val remote = mapOf("a.jpg" to RemoteFileRef("R1", 4_000_000L))
+
+        val result = ReconciliationRules.tallyAlbum(local, remote)
+
+        assertEquals(MediaTally(1, 180_000), result.photosOutstanding)
+        assertEquals(MediaTally.EMPTY, result.backedUp)
+    }
+
     @Test
     fun photosAndVideosAreTalliedApart() {
         val local = listOf(
