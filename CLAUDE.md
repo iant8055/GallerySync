@@ -210,6 +210,13 @@ Three areas, fully independent:
    Archive never optimise. Does **not** set album modes.
 3. **Album modes** (Off / Backup / Sync / Archive). Set **only** by the user, per album.
 
+**One exception, made by Ian, 16 Sept 2026 — a folder/album conflict sets the mode to `Off`.** When the
+app finds one folder under two album identities (TASK-023: MediaStore keeps each writer's spelling, so
+`camera` and `Camera` read as two albums over one directory) and they are merged, the merged album's mode
+is set to `Off` and the user is warned that a discrepancy was found and that the mode changed. This is the
+only thing other than the user that may write a mode, and it may only ever write `Off`, which cannot
+remove a file. It does not open the door to anything else setting modes, and the wizard still sets none.
+
 **Albums reading `Off` after an initial backup is correct**, not a bug — the first backup runs with
 `allAlbums = true` and deliberately ignores modes. Do not "fix" it.
 
