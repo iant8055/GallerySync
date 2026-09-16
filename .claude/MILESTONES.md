@@ -5125,3 +5125,16 @@ spelling.
 
 The fix is still needed. The 7 Sept split was real, and the restore test showed the ledger splitting
 an album with no second MediaStore spelling at all.
+
+#### TASK-023 — fix specced, 16 Sept 2026
+
+Spec written in TASK-023 (*The fix — spec*), awaiting Ian's approval.
+- **No `BUCKET_ID` re-key and no Room migration.** Instead, one canonical spelling per case-folded
+  folder name: the spelling of the newest MediaStore row, which MediaProvider writes from the disk.
+- **Merge at runtime.** An `AlbumIdentityReconciler` runs in a transaction at the start of
+  `refreshLedger`, and as a guard before anything reads modes.
+- **Discrepancy handling:** a mode other than Off, or differing modes, go to Off with a warning card on
+  the Albums tab, stored in DataStore.
+- **Duplicate ledger rows** for one `mediaStoreId` collapse to the uploaded row, with no deletion anywhere.
+- **Open question for Ian:** warn when both spellings were already Off?
+

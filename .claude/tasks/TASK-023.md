@@ -3,7 +3,8 @@
 Milestone: v0.3 — space management (blocks nothing, but touches the deletion rules)
 Raised by: Ian, 7 Sept 2026 — *"it appears as though the backup is splitting the Camera folder
 into two different folders"*
-Status: **specced, not started.** Needs Ian's ruling on the migration before any code moves.
+Status: **fix specced 16 Sept 2026 — awaiting Ian's approval of the spec below.** No schema change and
+no migration (see *Why not `BUCKET_ID`*).
 
 ## Where the two names came from — Ian, 15 Sept 2026
 
@@ -41,6 +42,156 @@ the Albums tab correctly shows one album. The `camera` spelling went because **I
 in his copied files from `camera` to `Camera`**, so both writers now agree. That is the condition being absent, not
 the code being fixed — keying on `BUCKET_DISPLAY_NAME` is unchanged, and a user who never renames
 their copy keeps two albums.
+
+## The fix — spec, 16 Sept 2026
+
+### Rulings it implements (Ian, 16 Sept)
+
+1. Every spelling of a folder that differs only in case is **one album with one mode**.
+2. **Any discrepancy sets the merged album to `Off`, and the user is warned** about the discrepancy and
+   the change of mode. This is the CLAUDE.md exception, and it may only ever write `Off`.
+3. The spelling shown is the agent's call.
+4. The wizard is untouched. It writes no modes.
+
+### What the tests showed the fix must cover
+
+- **Two MediaStore spellings over one directory** (7 Sept): two albums straight from the scan.
+- **The ledger and MediaStore disagreeing** (restore test): MediaStore has one spelling, but ledger rows
+  written under the old spelling make a second album, and **one file gets two ledger rows sharing one
+  `remoteItemId`**.
+- A spelling can change **at any time**, for example when the folder is renamed on disk. So the merge is
+  **a runtime step that runs on every scan, not a one-off migration.**
+
+### Why not `BUCKET_ID`
+
+`BUCKET_ID` is the principled key, but the album *name* is load-bearing across the app:
+- the OneDrive path (`remotePathFor(album)`)
+- the ledger id prefix (`backupKeyOf`)
+- `RestoreScope.signature`
+- `DownloadMissingFile.relativePathFor`
+- the Restore and Albums view models
+- 22 `albumName` uses outside the DAOs
+
+Re-keying all of it is a schema migration and a wide rewrite. Folding case onto a single canonical name
+per folder gives exactly Ian's ruling with none of that. OneDrive is case-insensitive too (tested), so a
+canonical name addresses the same remote folder either way.
+
+Deliberately unchanged: albums are still keyed by folder *name*, so `DCIM/Camera` and `Pictures/Camera`
+remain one album, as they are today. That is a separate question and not this task.
+
+### 1. Canonical spelling at the source — `MediaScanner`
+
+After `readAll`, group items by `album.lowercase(Locale.ROOT)`. When a group holds more than one
+spelling, rewrite every item's `album` to the **canonical spelling**: the spelling of the item with the
+**highest `mediaStoreId`** in the group.
+
+Why that one: MediaProvider records the on-disk directory spelling for new inserts. That was observed
+twice on 16 Sept, for a restore into `DCIM/camera/` against a `Camera` folder and for camera-app shots
+into an existing `camera` folder. The newest row is therefore the best available reading of the disk.
+The Files app is not usable, because it showed MediaStore's view, not the disk. `File.listFiles` needs
+all-files access, which this app does not hold.
+
+Put the rule in `MediaScanRules` as a pure function, `canonicalAlbumNames(items)`, so it can be unit
+tested. From then on, every consumer of `scanAll` / `scanEverything` sees one name per folder.
+
+### 2. Merge the stored state — new `AlbumIdentityReconciler` (domain/backup)
+
+Runs **inside one Room transaction**, as the **first step of `BackupEngine.refreshLedger`**, before
+`insertIfNew` or seeding any preference row.
+
+Input: the canonical names from the scan, plus every distinct name in `album_preferences`,
+`album_cloud_status` and `backup_entries.album`. Case-fold them into groups. For every group holding
+more than one stored spelling, or a stored spelling different from the canonical one:
+
+- **Target name:** the canonical scan spelling if the folder is on the device. Otherwise, the spelling
+  of the most recently written ledger row.
+- **`album_preferences`:** collapse to one row under the target name.
+  - If the group's rows hold **any mode other than `Off`, or differing modes**, write **`Off`** and
+    record a warning.
+  - If every row is already `Off`, write `Off` and record nothing. No mode changed, so there is nothing
+    to warn about. **Open question for Ian, below.**
+- **`album_cloud_status`:** delete the group's rows. The next reconcile recomputes it; this is bookkeeping.
+- **`backup_entries`:** rewrite `album` and the `id` prefix to the target name.
+  - Where two rows then share an id, or share a `mediaStoreId` (the restore case), **keep one**. Prefer,
+    in order: `isProxied`, a non-null `remoteItemId`, `UPLOADED` state, then the older
+    `uploadedAtEpochMillis`. Carry over `localProxySizeBytes`, `modeOverride` and
+    `localMissingSinceEpochMillis` from the dropped row when the kept one lacks them.
+  - The dropped row is **ledger bookkeeping only**. Dropping it must never cause a trash request, a Graph
+    `DELETE` or a missing-file flag. Assert this in a test.
+- Log each merge with the Logger utility: names, mode before, mode after.
+
+### 3. Nothing acts on modes before the merge
+
+`filesInArchiveAlbums`, `redundantLocalCopies`, the optimise candidate queries and the upload gate all
+read modes. Each must run **after** the reconciler in the same flow.
+
+The failure this prevents: canonicalisation renames `Camera` items to `camera`, whose preference still
+says Archive, before the merge sets it to `Off`. That would archive new camera shots under a consent
+given for the old spelling, which is exactly the hazard in CLAUDE.md.
+
+Implement this as a guard: those entry points call `reconciler.reconcile()` (cheap when there is
+nothing to merge) before reading modes, rather than trusting call order.
+
+### 4. The warning
+
+- **Storage:** `BackupSettings` DataStore, as a set of pending warnings, each holding
+  `{albumName, spellings, previousModes, atEpochMillis}`. This avoids a schema change.
+- **Display:** a card at the top of the Albums tab, one per affected album. It stays until the user
+  dismisses it or sets a mode for that album. Suggested copy, for Ian to edit:
+
+  > **Camera — mode set to Off.** This folder appeared under two names (`camera`, `Camera`). They are
+  > the same folder, so GallerySync combined them and switched the album to Off rather than guess
+  > which setting you meant. It was Archive. Choose a mode again when ready.
+
+- Theme colours only (CLAUDE.md dark-mode rule). Check both themes on the Moto G.
+- No notification. That would need `POST_NOTIFICATIONS` on API 33+, which is a listing-affecting
+  permission and so Ian's decision. The merge running headless is safe without one, because `Off` removes
+  nothing.
+
+### Not in scope
+
+- Renaming anything on disk or in OneDrive. OneDrive keeps its folder's first spelling (tested:
+  `camera` still holds files uploaded to `DCIM/Camera`).
+- `DCIM/Camera` vs `Pictures/Camera` sharing an album.
+- Why the camera app split the spelling on 7 Sept but not on 16 Sept.
+
+### Tests (app/src/test)
+
+- `MediaScanRules.canonicalAlbumNames`: one spelling is unchanged; two spellings go to the highest
+  `mediaStoreId`; names that differ in more than case (`Camera (1)`) are never merged.
+- `AlbumIdentityReconciler`:
+  - Archive + Off becomes Off with a warning.
+  - Backup + Backup becomes Off with a warning.
+  - Off + Off becomes Off with no warning.
+  - A single stored spelling that differs from the canonical one is renamed and set to Off with a warning.
+  - Duplicate rows for one `mediaStoreId` collapse to the uploaded row, keeping `remoteItemId`.
+  - `isProxied` survives the merge.
+  - Dropping a row makes no call to the trash, Graph `DELETE` or missing-file paths.
+  - Idempotent: a second run changes nothing.
+- Guard ordering: with an unmerged `camera|ARCHIVE` / `Camera` split, `redundantLocalCopies` returns
+  nothing for the `Camera` files.
+
+### Device verification (Moto G)
+
+Re-run the 16 Sept restore scenario, which reliably produces the ledger split:
+1. `DCIM/camera` with files, a clean install and the wizard.
+2. Set `camera` to Archive and let it trash.
+3. Rename the folder on disk to `Camera`.
+4. Restore one file, then open the Albums tab.
+
+Expect:
+- one album, spelled `Camera`, mode Off
+- the warning card naming `camera`/`Camera` and "It was Archive"
+- a single ledger row for the restored file, with its `remoteItemId`
+- nothing new in `.trashed-*`
+- an empty crash buffer
+
+Check both themes. Then set Backup on the merged album and confirm `already there`, not a re-upload.
+
+### Open question for Ian
+
+**When both spellings already read `Off`, should the user still be warned?** Nothing changed mode, so
+the spec merges silently. Your wording was "any discrepancy … a warning", which could mean warn anyway.
 
 ## Ruling — the spellings share one mode — Ian, 16 Sept 2026
 
