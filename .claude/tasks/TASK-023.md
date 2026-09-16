@@ -55,6 +55,17 @@ separate directory and stays a separate album — the shared mode must not exten
 This settles what the fix must achieve. It leaves decision 1 below (how: `BUCKET_ID` or case-folded
 name) and decision 2 (merge rule for rows already holding different modes) with Ian.
 
+## Rulings — Ian, 16 Sept 2026
+
+- **Spelling is the agent's call.** Ian cannot see `BUCKET_ID`, only displayed names.
+- **Supersedes decision 2 below:** on any discrepancy the merged album goes to `Off`, and the user is
+  warned about the discrepancy and the mode change. This is Ian's explicit exception to "modes are set
+  only by the user", and it is limited to moving a mode to `Off`.
+- The wizard is unaffected: it writes no modes, and everything starts `Off`.
+- **Restore must not reintroduce a spelling.** `DownloadMissingFile.relativePathFor` builds
+  `DCIM/<ledger album>/`. It must write under the spelling already on the phone, or it recreates the
+  split through MediaStore. From the code, not yet tested on a device.
+
 ## What was seen
 
 After a clean install and a wizard run on the Moto G, the ledger held two albums where the phone has

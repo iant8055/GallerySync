@@ -5038,3 +5038,20 @@ separate directory and remains a separate album with its own mode — the shared
 Still open, and still Ian's: the key (`BUCKET_ID` vs case-folded name — either delivers a shared mode,
 both need a migration) and the merge rule when existing rows for two spellings already hold different
 modes.
+
+#### TASK-023, rulings on spelling, conflicts and restore — Ian, 16 Sept 2026
+
+- **Spelling: agent's judgement.** Ian sees only the name a UI displays, never `BUCKET_ID`. With no
+  existing folder the camera app creates `DCIM/Camera`.
+- **Any folder/album discrepancy sets the merged album's mode to `Off`, and the user is warned** that
+  a discrepancy was found and that the mode changed. This replaces least-destructive-wins. It is an
+  **explicit exception Ian made to "album modes are set only by the user"**, and it only ever moves a
+  mode to `Off`, which can never remove a file.
+- **The wizard is untouched by this.** It writes no album modes, and everything starts `Off`, so a
+  conflict can only carry a mode the user set afterwards.
+- **Restore is a route that can create the split.** `DownloadMissingFile` writes to
+  `"DCIM/${entry.album}/"` through `MediaStore.insert`. From the code (not yet tested on a device):
+  when the ledger spelling differs from the folder on disk, MediaStore does not rename the folder. The
+  file lands in the existing directory and MediaStore records the ledger's spelling. The `(1)` rename
+  Ian saw is for a colliding *name* (a copied folder, or a file), not for a case-only folder spelling.
+  `RestoreFromCloud` is unaffected: it always writes to `DCIM/Restored`.
