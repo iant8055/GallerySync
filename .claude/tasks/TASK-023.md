@@ -87,6 +87,17 @@ folder back to `Camera` on disk. Ian then restored `IMG_20260915_143513095_HDR.j
 - **OneDrive is case-insensitive too, which answers decision 4.** Reconcile listed
   `Samsung Gallery/DCIM/Camera` and got the 18 files whose `parentReference.name` is `camera`. The
   path resolves to the one folder, and reconcile counted all 240 as already in OneDrive.
+- **Setting `Camera` to Backup uploaded nothing twice.** Ian set it. The backup listed
+  `DCIM/Camera` (18 files, the folder named `camera`), logged `already in OneDrive, not re-uploading`,
+  and finished `0 uploaded, 1 already there`. The `Camera/…` row became UPLOADED with **the same
+  `remoteItemId` as the `camera/…` row**. Two ledger rows now own one OneDrive item, so anything that
+  acts on the cloud copy through one row acts on the other's too. `camera` (Archive) still did not touch
+  the file.
+- **The Files app shows a different spelling from the disk.** At the same moment, `ls` showed
+  `DCIM/Camera`, while Motorola's Files app listed `camera` (38.6 MB, the trashed bytes) and a
+  `DCIM/Screenshots` folder that does not exist on disk (the real one is `Pictures/Screenshots`). The
+  Files app shows MediaStore's view, not the directory. So "the spelling a file manager shows" cannot be
+  the rule for choosing a display name: two views of one phone disagree.
 
 Under Ian's rule, the merge fix would find `camera` (Archive) and `Camera` (Off) as one folder,
 set it to Off and warn. So restoring into an Archive album whose folder has since changed case ends

@@ -5067,3 +5067,15 @@ The 18-file album was backed up as `camera`, archived (18 `.trashed-` files), an
 - **Not archived again** (`redundantLocalCopies: 0`), only because the split put the file under Off.
 - **OneDrive is case-insensitive**: listing `DCIM/Camera` returned the 18 files whose parent folder is
   named `camera`. This settles TASK-023 decision 4: one remote folder.
+
+- **Setting `Camera` to Backup uploaded nothing twice.** Ian set it. The backup listed
+  `DCIM/Camera` (18 files, the folder named `camera`), logged `already in OneDrive, not re-uploading`,
+  and finished `0 uploaded, 1 already there`. The `Camera/…` row became UPLOADED with **the same
+  `remoteItemId` as the `camera/…` row**. Two ledger rows now own one OneDrive item, so anything that
+  acts on the cloud copy through one row acts on the other's too. `camera` (Archive) still did not touch
+  the file.
+- **The Files app shows a different spelling from the disk.** At the same moment, `ls` showed
+  `DCIM/Camera`, while Motorola's Files app listed `camera` (38.6 MB, the trashed bytes) and a
+  `DCIM/Screenshots` folder that does not exist on disk (the real one is `Pictures/Screenshots`). The
+  Files app shows MediaStore's view, not the directory. So "the spelling a file manager shows" cannot be
+  the rule for choosing a display name: two views of one phone disagree.
