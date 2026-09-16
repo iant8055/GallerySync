@@ -5103,3 +5103,25 @@ expected after `pm clear`: the app has no record that a file is a proxy.
 Seven of the eight were in `camera` (Archive) and went to the trash, and Ian's emptying removed them.
 The eighth is `IMG_20260915_143513095_HDR.jpg`, the one restored from OneDrive at 499,165 bytes. So
 8 → 1 is the trash being emptied, not a change of optimisation.
+
+#### TASK-023 — the camera app did NOT split the spelling this time (Moto G, 16 Sept 2026, 16:32)
+
+After Ian cleared OneDrive and cut DCIM below 1 GB, `DCIM/camera` was created with `adb shell mkdir`
+(there was no `Camera` at all), and one photo and one video were copied in with `cp`. After an uninstall,
+reinstall and full wizard, both were uploaded under album `camera`, with all albums Off. Ian then took
+one photo and one video with the Motorola camera app (`com.motorola.camera5` 10.0.40.37).
+
+- Both landed in the existing directory (inode `45910`, the same under either spelling).
+- **MediaStore recorded both as `relative_path = DCIM/camera/`, `bucket_display_name = camera`.** No
+  `Camera` rows exist, and GallerySync shows one album, `camera`, with the two new files PENDING (the
+  album is Off).
+
+**So the 7 Sept split did not reproduce.** The camera app and MediaProvider were both last updated
+3 Sept, before 7 Sept, so a version change does not explain the difference. What differs and is
+untested: how the lowercase folder was created (the 7 Sept fixture was copied onto the phone by Ian;
+today it was `adb mkdir` plus `cp`), and whether `DCIM/Camera` had existed on the phone earlier. Today's
+result agrees with the restore test: when a directory already exists, MediaProvider records its on-disk
+spelling.
+
+The fix is still needed. The 7 Sept split was real, and the restore test showed the ledger splitting
+an album with no second MediaStore spelling at all.

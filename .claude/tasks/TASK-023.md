@@ -110,6 +110,15 @@ Under Ian's rule, the merge fix would find `camera` (Archive) and `Camera` (Off)
 set it to Off and warn. So restoring into an Archive album whose folder has since changed case ends
 with the album Off.
 
+## Camera app into an existing `camera` folder — no split (Moto G, 16 Sept 2026)
+
+`DCIM/camera` was created with `adb mkdir` and `cp`, with no `Camera` on the phone, followed by a clean
+install and the wizard. A photo and a video shot with the Motorola camera app then went to MediaStore
+as `DCIM/camera/`, `bucket_display_name = camera`, giving one album. **The 7 Sept split did not
+reproduce.** The untested differences are how the folder was created (Ian's copy then, adb today) and
+whether `Camera` had existed before. The fix stays needed: see the restore test above, where the ledger
+split an album with no second MediaStore spelling.
+
 ## What was seen
 
 After a clean install and a wizard run on the Moto G, the ledger held two albums where the phone has
