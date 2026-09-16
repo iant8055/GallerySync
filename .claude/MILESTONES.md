@@ -4985,3 +4985,24 @@ they always have.
 - **OkHttp keeps logging bodies for now.** It buries the app's own lines within minutes and should drop
   to `BASIC` before release, but the full Graph traffic is worth having while backup, sync, archive and
   delete are still being watched on hardware.
+
+#### The Settings mockup mirrors the Settings tab — 15 Sept 2026
+
+Ian would rather the tour's Settings backdrop were a screenshot of the real tab; a drawing is the
+nearest thing that survives a screen changing or being translated, so the mockup now **mirrors**
+`SettingsScreen` instead of resembling it: General, Albums, Backup, Sync in that order, the same rows,
+and the same strings read from the same resources. Only the sample values are invented. The switches
+show the real defaults — mobile data off, Optimise photos and video off — so the picture cannot teach a
+setting the app does not ship with; it had shown Optimise photos on since before the 7 Sept default fix.
+
+**The Help card now rings the Albums help button**, not Backup. The longer mockup pushed Backup's
+button down behind the card, hiding the very thing the card points at; the tooltip is `help_albums` to
+match, which is also what the concept art shows.
+
+**A crash, caught by the rule that catches them.** `sources_full_path` is `"%1$s / %2$s"` and the first
+version passed one argument: `MissingFormatArgumentException` on the Settings card, every time. Found
+by launching after install and reading `logcat -b crash`, which is exactly what that habit exists for.
+Fixed by passing volume and path as `SourcesSection` does.
+
+Verified on the Moto G in light and dark: all four Step 2 backdrops, the Help ring with its real
+tooltip, and an empty crash buffer.

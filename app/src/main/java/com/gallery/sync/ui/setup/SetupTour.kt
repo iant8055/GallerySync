@@ -40,6 +40,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RichTooltip
 
 import androidx.compose.material3.Surface
@@ -866,7 +867,9 @@ private fun TabTooltipsStep(
                                     contentColor = MaterialTheme.colorScheme.onSurface
                                 )
                             ) {
-                                Text(stringResource(R.string.help_backup))
+                                // The Albums section's own help text, because that is the button
+                                // the ring is on — the same RichTooltip Settings opens there.
+                                Text(stringResource(R.string.help_albums))
                             }
                         },
                         state = helpTooltipState,
@@ -2602,12 +2605,23 @@ private fun MockArchiveRow(name: String, size: String, confirmed: Boolean) {
     }
 }
 
+/**
+ * The Settings tab as a picture of itself.
+ *
+ * Rebuilt 15 Sept 2026 at Ian's ask — he would rather this were a screenshot of the real tab, and a
+ * drawing is the nearest thing that survives a screen changing or being translated. So it mirrors
+ * `SettingsScreen` rather than resembling it: the same sections in the same order (General, Albums,
+ * Backup, Sync), the same rows, and **the same strings**, read from the same resources. A row that
+ * changes wording there changes here; only the sample values are invented.
+ *
+ * The values are the real defaults — mobile data off, Optimise photos and video off — so the picture
+ * cannot teach a setting the app does not ship with. It used to show Optimise photos on, which stopped
+ * being true when the default was corrected on 7 Sept.
+ */
 @Composable
 private fun SettingsMockup(
     onHelpIconPositioned: ((Rect) -> Unit)? = null
 ) {
-    val signal = LocalGallerySyncColors.current
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -2615,44 +2629,83 @@ private fun SettingsMockup(
             .padding(start = 16.dp, end = 16.dp, top = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        // General section
-        MockSectionHeader("General")
-        Row(
-            Modifier.fillMaxWidth(),
-            Arrangement.SpaceBetween,
-            Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text("Use mobile data", style = MaterialTheme.typography.bodyLarge)
-                Text(
-                    text = "Sync over Wi-Fi only",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Switch(
-                checked = false,
-                onCheckedChange = null,
-                colors = SwitchDefaults.colors(
-                    uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    uncheckedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            )
-        }
+        // ── General ──
+        MockSectionHeader(stringResource(R.string.settings_general))
+        Text(
+            text = stringResource(R.string.settings_language),
+            style = MaterialTheme.typography.bodyLarge
+        )
+        Text(
+            text = stringResource(R.string.settings_language_detail),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        MockDropdownRow(
+            label = stringResource(R.string.settings_appearance),
+            value = stringResource(R.string.theme_system)
+        )
+        MockSwitchRow(
+            label = stringResource(R.string.backup_allow_metered),
+            detail = stringResource(R.string.backup_allow_metered_off),
+            checked = false
+        )
         HorizontalDivider()
 
-        // Backup section
-        MockSectionHeader("Backup", onHelpPositioned = onHelpIconPositioned)
+        // ── Albums ── the section the Help card rings. It was Backup, which this longer mockup
+        // pushed down behind the card, hiding the ring the card is pointing at.
+        MockSectionHeader(
+            stringResource(R.string.settings_albums),
+            onHelpPositioned = onHelpIconPositioned
+        )
+        Text(
+            text = stringResource(R.string.sources_title),
+            style = MaterialTheme.typography.bodyLarge
+        )
         Row(
             Modifier.fillMaxWidth(),
             Arrangement.SpaceBetween,
             Alignment.CenterVertically
         ) {
-            Text("user@outlook.com", style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.weight(1f))
-            OutlinedButton(onClick = {}) {
-                Text("Sign out")
-            }
+            Text(
+                // Two arguments, volume then path — as SourcesSection passes them. One argument
+                // crashed the tour on the Settings card: MissingFormatArgumentException, 15 Sept.
+                text = stringResource(
+                    R.string.sources_full_path,
+                    stringResource(R.string.volume_internal),
+                    "DCIM"
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f)
+            )
+            OutlinedButton(onClick = {}) { Text(stringResource(R.string.sources_remove)) }
+        }
+        Button(onClick = {}) { Text(stringResource(R.string.sources_add)) }
+        Text(
+            text = stringResource(R.string.deletion_title),
+            style = MaterialTheme.typography.bodyLarge
+        )
+        MockRadioRow(stringResource(R.string.deletion_leave), selected = true)
+        MockRadioRow(stringResource(R.string.deletion_ask), selected = false)
+        MockDropdownRow(
+            label = stringResource(R.string.settings_default_mode),
+            value = stringResource(R.string.mode_off)
+        )
+        HorizontalDivider()
+
+        // ── Backup ──
+        MockSectionHeader(stringResource(R.string.settings_backup))
+        Row(
+            Modifier.fillMaxWidth(),
+            Arrangement.SpaceBetween,
+            Alignment.CenterVertically
+        ) {
+            Text(
+                text = "user@outlook.com",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.weight(1f)
+            )
+            OutlinedButton(onClick = {}) { Text(stringResource(R.string.sign_out_action)) }
         }
         Row(
             Modifier.fillMaxWidth(),
@@ -2660,53 +2713,82 @@ private fun SettingsMockup(
             Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Text("Current folder location", style = MaterialTheme.typography.bodyLarge)
                 Text(
-                    text = "OneDrive / GallerySync",
+                    text = stringResource(R.string.destination_title),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = stringResource(R.string.destination_current, "Samsung Gallery/DCIM"),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            OutlinedButton(onClick = {}) {
-                Text("Change")
-            }
+            OutlinedButton(onClick = {}) { Text(stringResource(R.string.destination_change)) }
         }
         HorizontalDivider()
 
-        // Sync section
-        MockSectionHeader("Sync")
-        Row(
-            Modifier.fillMaxWidth(),
-            Arrangement.SpaceBetween,
-            Alignment.CenterVertically
-        ) {
-            Text("Optimise photos", style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.weight(1f))
-            Switch(
-                checked = true,
-                onCheckedChange = null,
-                colors = SwitchDefaults.colors(
-                    uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    uncheckedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant
+        // ── Sync ──
+        MockSectionHeader(stringResource(R.string.settings_sync))
+        MockSwitchRow(stringResource(R.string.settings_optimise_photos), checked = false)
+        MockSwitchRow(stringResource(R.string.settings_optimise_videos), checked = false)
+    }
+}
+
+/** A Settings switch row, inert: label, optional detail beneath, and the switch on the right. */
+@Composable
+private fun MockSwitchRow(label: String, detail: String? = null, checked: Boolean) {
+    Row(
+        Modifier.fillMaxWidth(),
+        Arrangement.SpaceBetween,
+        Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(text = label, style = MaterialTheme.typography.bodyLarge)
+            if (detail != null) {
+                Text(
+                    text = detail,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-            )
+            }
         }
-        Row(
-            Modifier.fillMaxWidth(),
-            Arrangement.SpaceBetween,
-            Alignment.CenterVertically
-        ) {
-            Text("Optimise video", style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.weight(1f))
-            Switch(
-                checked = false,
-                onCheckedChange = null,
-                colors = SwitchDefaults.colors(
-                    uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    uncheckedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+        Switch(
+            checked = checked,
+            onCheckedChange = null,
+            colors = SwitchDefaults.colors(
+                uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                uncheckedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant
             )
-        }
+        )
+    }
+}
+
+/** A Settings dropdown row, inert: label on the left, current value in an outlined button. */
+@Composable
+private fun MockDropdownRow(label: String, value: String) {
+    Row(
+        Modifier.fillMaxWidth(),
+        Arrangement.SpaceBetween,
+        Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.weight(1f)
+        )
+        OutlinedButton(onClick = {}) { Text(value) }
+    }
+}
+
+/** One of the deletion choices, inert. The default — leave the cloud copy — is the one selected. */
+@Composable
+private fun MockRadioRow(label: String, selected: Boolean) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        RadioButton(selected = selected, onClick = null)
+        Text(text = label, style = MaterialTheme.typography.bodyMedium)
     }
 }
 
