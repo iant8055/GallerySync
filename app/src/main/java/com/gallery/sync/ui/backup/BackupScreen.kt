@@ -839,12 +839,14 @@ private fun AlbumMergeWarningCard(warnings: List<AlbumMergeWarning>, onDismiss: 
                 text = stringResource(R.string.album_merge_reassign),
                 style = MaterialTheme.typography.bodyMedium
             )
-            TextButton(
+            // An outlined button rather than bare text, so it reads as something to press. Ian,
+            // 16 Sept 2026. Border and label take the card's content colour: primary is tuned for the
+            // plain surface and is not guaranteed to read on the error container in both themes.
+            OutlinedButton(
                 onClick = onDismiss,
                 modifier = Modifier.align(Alignment.End),
-                // The card's content colour, not primary: primary is tuned for the plain surface and
-                // is not guaranteed to read on the error container in both themes.
-                colors = ButtonDefaults.textButtonColors(contentColor = LocalContentColor.current)
+                border = BorderStroke(1.dp, LocalContentColor.current),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = LocalContentColor.current)
             ) {
                 Text(stringResource(R.string.album_merge_dismiss))
             }
