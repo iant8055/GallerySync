@@ -151,7 +151,10 @@ class ArchiveViewModel @Inject constructor(
 
             _state.value = _state.value.copy(
                 plan = plan.copy(validated = true),
-                phase = ArchivePhase.READY
+                phase = ArchivePhase.READY,
+                // Computed here, not only once removal starts, so the prompt can tell the user the
+                // round count before they tap Yes rather than partway through.
+                batchTotal = localCopyRemover.batch(plan.confirmed).size
             )
             Logger.i(
                 TAG,

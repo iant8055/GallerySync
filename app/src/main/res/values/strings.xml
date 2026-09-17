@@ -442,6 +442,13 @@
     <string name="archive_prompt_all_body">All files are confirmed in OneDrive. Archiving them moves the local copies to your phone\'s Trash/Recycle Bin, and frees %1$s once you empty it.</string>
     <string name="archive_prompt_partial_title">%1$s validated</string>
     <string name="archive_prompt_partial_body">%1$s could not be confirmed and will stay on your phone. Archiving the confirmed ones moves them to your phone\'s Trash/Recycle Bin, and frees %2$s once you empty it.</string>
+    <!--
+        Android caps a single trash request at 2000 files (LocalCopyRemover.MAX_URIS_PER_REQUEST), so
+        a large Archive album needs more than one system dialog. Shown before Yes is tapped so the
+        round count is not a surprise partway through — the running "Batch %1$d of %2$d" text
+        (archive_batch_progress) only appears once removal is already under way.
+    -->
+    <string name="archive_prompt_batches">Android can only ask about 2,000 files at a time, so this will take %1$d separate confirmations.</string>
     <string name="archive_prompt_question">Do you want to continue?</string>
     <string name="archive_prompt_yes">Yes</string>
     <string name="archive_prompt_no">No</string>

@@ -444,6 +444,13 @@ private fun ArchivePrompt(
                 )
             }
 
+            if (state.batchTotal > 1) {
+                Text(
+                    text = stringResource(R.string.archive_prompt_batches, state.batchTotal),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
             // The trash caveat that used to sit here is gone, 28 Aug 2026. It warned that a local
             // removal "may be permanent on the phone" — disproved on both handsets, three runs, and
             // finally by Ian finding all eight files in the Moto's Files app. What was worth keeping
