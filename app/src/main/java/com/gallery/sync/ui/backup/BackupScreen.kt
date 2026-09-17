@@ -983,13 +983,9 @@ private fun HeroDetail(
     // Ian's order, 27 Aug 2026: how many albums and how big, then — for All Albums — the split by
     // mode, then the media breakdown, then whatever that mode is judged on.
     //
-    // Each figure line has its label above it. Ian, 16 Sept 2026.
+    // Each figure line starts with its label, same size, same line. Ian, 16 Sept 2026.
     Text(
-        text = stringResource(R.string.albums_size_label),
-        style = MaterialTheme.typography.labelMedium
-    )
-    Text(
-        text = stringResource(
+        text = stringResource(R.string.albums_size_label) + " " + stringResource(
             R.string.albums_size_summary,
             pluralStringResource(
                 R.plurals.albums_hero_albums,
@@ -1002,11 +998,7 @@ private fun HeroDetail(
     )
     if (modeFilter == null) {
         Text(
-            text = stringResource(R.string.albums_mode_totals_label),
-            style = MaterialTheme.typography.labelMedium
-        )
-        Text(
-            text = stringResource(
+            text = stringResource(R.string.albums_mode_totals_label) + " " + stringResource(
                 R.string.albums_mode_totals,
                 state.backupAlbumCount,
                 state.syncAlbumCount,

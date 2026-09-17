@@ -196,8 +196,8 @@
         sentence inside an album row want different capitalisation.
     -->
     <!-- Labels over the Albums header card figures. Ian, 16 Sept 2026. -->
-    <string name="albums_size_label">Total Album Count/Size</string>
-    <string name="albums_mode_totals_label">Album Mode Count</string>
+    <string name="albums_size_label">Total Album Count/Size:</string>
+    <string name="albums_mode_totals_label">Album Mode Count:</string>
     <plurals name="albums_hero_albums">
         <item quantity="one">%d Album</item>
         <item quantity="other">%d Albums</item>
