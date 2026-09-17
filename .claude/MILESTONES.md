@@ -5153,6 +5153,26 @@ light and dark, nothing was uploaded, and the crash buffer was empty.
 - The card moved into the scrolling list, after landscape pushed Dismiss off the screen.
 
 **Still open:**
-- The Archive merge on a device.
+- ~~The Archive merge on a device.~~ Verified 21:03, below.
 - The narrow window between the Archive screen's list and Android's trash dialog.
 
+#### TASK-023 — the Archive merge verified on the Moto G, 16 Sept 2026 (21:03)
+
+1. `Camera` (9 files) was set to Archive by Ian; all 9 became `.trashed-` files and the ledger flagged
+   them missing.
+2. The folder was renamed on disk to `camera`.
+3. Ian restored two videos (one intended; the second by mistake, which makes no difference) and
+   emptied the trash himself. That emptying, not the app, is why the 7 trashed photos left the disk.
+
+- The restores were inserted as `DCIM/Camera/` and MediaStore recorded `DCIM/camera/`,
+  `bucket_display_name = camera`: the disk's spelling, as before.
+- The log shows `merged [Camera, camera] into 'camera': modes were {Camera=ARCHIVE}, now OFF; 9 ledger
+  rows`. Straight after, `redundantLocalCopies: no album is set to Archive, so nothing is offered`.
+- `album_preferences` holds `camera|OFF`. The ledger holds 9 rows, all under `camera`, all with a
+  remote id. The 2 restored rows are no longer flagged missing, and there are **no duplicate rows**
+  (before the fix, the same restore left two rows for one file).
+- The Albums tab shows a single `camera` album (2 files, Off, 2 verified in OneDrive) and the card
+  *"camera — mode set to Off … (Camera, camera)"*, in the copy Ian edited. The crash buffer is empty
+  and nothing was uploaded or trashed by the app.
+
+**Both device checks have now passed:** the Off-to-Off merge (16:54) and the Archive merge (21:03).

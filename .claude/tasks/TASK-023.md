@@ -3,7 +3,7 @@
 Milestone: v0.3 — space management (blocks nothing, but touches the deletion rules)
 Raised by: Ian, 7 Sept 2026 — *"it appears as though the backup is splitting the Camera folder
 into two different folders"*
-Status: **built 16 Sept 2026; the Off-to-Off merge is verified on the Moto G, and the Archive merge is still to test on the device.** No schema change and
+Status: **built and verified on the Moto G, 16 Sept 2026** (the Off-to-Off merge and the Archive merge). One gap remains open: the Archive screen does not re-check its list before Android's trash dialog. No schema change and
 no migration (see *Why not `BUCKET_ID`*).
 
 ## Where the two names came from — Ian, 15 Sept 2026
@@ -227,7 +227,10 @@ As specced, with two changes found while building:
 - Readable in light and dark. Nothing uploaded, empty crash buffer.
 
 **Not verified:** the untested residue is below.
-- **The Archive merge on a device**: `camera` Archive plus a restore after the rename. Needs Ian's taps.
+- ~~The Archive merge on a device.~~ **Verified 21:03.** `Camera` was Archive; after the trash, a rename
+  to `camera` and two restores, the log shows `modes were {Camera=ARCHIVE}, now OFF; 9 ledger rows`.
+  The result is one `camera` album with no duplicate rows, the card shown, and nothing trashed or
+  uploaded by the app. The 7 photos gone from disk were removed by Ian emptying the trash.
 - **Where the Archive screen can still slip:** if a merge lands after the Archive screen has shown its
   list and before Android's trash dialog, that batch is still requested. Both of the user's taps
   (Yes, then Android's dialog) come after seeing the list, so it is not unconsented, but it is not
