@@ -376,6 +376,7 @@
     <string name="archive_confirm_cancel">Cancel</string>
 
     <!-- TASK-023: one folder stored under more than one spelling, merged and set Off. Copy edited by Ian, 16 Sept 2026. -->
+    <string name="album_merge_heading">DUPLICATE ALBUM NAMES DETECTED</string>
     <string name="album_merge_title">%1$s — mode set to Off</string>
     <string name="album_merge_body">This folder appeared under more than one name (%1$s). They are the same folder, so GallerySync combined them and switched the album to Off.</string>
     <string name="album_merge_choose_again">Choose a mode again when ready.</string>

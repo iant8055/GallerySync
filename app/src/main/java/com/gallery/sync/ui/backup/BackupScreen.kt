@@ -803,6 +803,10 @@ private fun AlbumMergeWarningCard(warning: AlbumMergeWarning, onDismiss: () -> U
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(
+                text = stringResource(R.string.album_merge_heading),
+                style = MaterialTheme.typography.labelLarge
+            )
+            Text(
                 text = stringResource(R.string.album_merge_title, warning.albumName),
                 style = MaterialTheme.typography.titleSmall
             )
