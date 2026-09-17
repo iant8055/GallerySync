@@ -5184,3 +5184,23 @@ under a centred, larger *DUPLICATE ALBUM NAMES DETECTED*, followed by Ian's thre
 clears all rows. Verified on the Moto G in light and dark. It is not verified at 344dp, which no device
 here can show.
 
+#### TASK-023 — card and header polish, and open items, 16 Sept 2026 (evening)
+
+- **Dismiss is an outlined button**, bordered and labelled in the card's content colour.
+- **Albums header card:** *"Total Album Count/Size: 3 Albums · 892 MB"* and *"Album Mode Count: 0 Backup
+  · 0 Sync · 0 Archive · 3 Off"*. Each label sits on its figure's line at the same size (Ian's request).
+- **The warning card vanished once, around 21:18–21:19, and Ian did not dismiss it. The cause is not
+  found.** Only two paths clear it: Dismiss, and `setAlbumMode` for that album. The second fires even
+  when the chosen mode equals the current one, so choosing Off on an Off album clears it with no
+  visible change. That is the leading suspect. It did not reproduce through dark-mode toggles,
+  `install -r`, a launch, closing the app, other apps, or new photos. A watcher polling the DataStore
+  every 3 s saw no clearing after 21:22.
+- **The merged name follows the disk.** At 21:22 the folder was renamed `camera` → `Camera` for the
+  test; the new merge was named `Camera` and its row reads *Camera · camera · Camera*. New camera shots
+  into that folder caused no further merge.
+
+**Open, awaiting Ian:**
+1. Should re-choosing an album's current mode keep its warning, so only a real change or Dismiss clears it?
+2. Should the Archive screen re-check membership before each trash request? Today a merge landing between
+   the list and Android's dialog does not stop that batch.
+
