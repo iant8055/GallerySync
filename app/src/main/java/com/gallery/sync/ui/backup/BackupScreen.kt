@@ -364,14 +364,13 @@ private fun AlbumList(
             // list rather than above it: on a landscape phone the hero already fills the fixed area,
             // and a card there pushed both the albums and its own Dismiss off the screen (Moto G,
             // 16 Sept 2026).
-            items(
-                items = state.albumMergeWarnings,
-                key = { warning -> "merge-warning:${warning.albumName}" }
-            ) { warning ->
-                AlbumMergeWarningCard(
-                    warning = warning,
-                    onDismiss = { viewModel.dismissAlbumMergeWarning(warning.albumName) }
-                )
+            if (state.albumMergeWarnings.isNotEmpty()) {
+                item(key = "merge-warnings") {
+                    AlbumMergeWarningCard(
+                        warnings = state.albumMergeWarnings,
+                        onDismiss = viewModel::dismissAllAlbumMergeWarnings
+                    )
+                }
             }
 
             // Split by count into columns that scroll together, not a row-major grid. Each column
@@ -780,18 +779,16 @@ private fun ArchiveConfirmDialog(
 }
 
 /**
- * Says that one folder had been stored under more than one name, and that its album is now Off.
+ * Lists the albums that were merged from duplicate names, and says each merged album is now Off.
  *
- * Ian, 16 Sept 2026: any such discrepancy sets the album Off *"then a warning given to the user
- * regarding the discrepancy and the change in the Album Mode"*, even when every spelling was already
- * Off. It names the spellings. The previous modes are not shown: Ian removed that line, and the
- * sentence saying the card would not guess, on 16 Sept 2026. They are still recorded in the warning
- * and in the log.
+ * One card for all of them, as a table: Ian's layout, 16 Sept 2026. Every merge sets the album Off,
+ * even when every spelling was already Off (*"yes warn anyway"*), so the card always asks for a mode
+ * to be chosen again. A row leaves the table when its album is given a mode; Dismiss clears them all.
  *
  * Theme tokens only: the error container, with text inheriting its content colour.
  */
 @Composable
-private fun AlbumMergeWarningCard(warning: AlbumMergeWarning, onDismiss: () -> Unit) {
+private fun AlbumMergeWarningCard(warnings: List<AlbumMergeWarning>, onDismiss: () -> Unit) {
     Surface(
         color = MaterialTheme.colorScheme.errorContainer,
         contentColor = MaterialTheme.colorScheme.onErrorContainer,
@@ -800,22 +797,46 @@ private fun AlbumMergeWarningCard(warning: AlbumMergeWarning, onDismiss: () -> U
     ) {
         Column(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Text(
                 text = stringResource(R.string.album_merge_heading),
-                style = MaterialTheme.typography.labelLarge
+                style = MaterialTheme.typography.titleLarge,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
             )
             Text(
-                text = stringResource(R.string.album_merge_title, warning.albumName),
-                style = MaterialTheme.typography.titleSmall
+                text = stringResource(R.string.album_merge_intro),
+                style = MaterialTheme.typography.bodyMedium
             )
+
+            MergeTableRow(
+                first = stringResource(R.string.album_merge_column_first),
+                second = stringResource(R.string.album_merge_column_second),
+                merged = stringResource(R.string.album_merge_column_merged),
+                style = MaterialTheme.typography.labelMedium
+            )
+            warnings.forEach { warning ->
+                // Normally two spellings. Should a folder ever carry three, the second column holds
+                // the rest rather than a row being dropped.
+                MergeTableRow(
+                    first = warning.spellings.getOrElse(0) { "" },
+                    second = warning.spellings.drop(1).joinToString(", "),
+                    merged = warning.albumName,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
             Text(
-                text = stringResource(R.string.album_merge_body, warning.spellings.joinToString(", ")),
+                text = stringResource(R.string.album_merge_merged),
                 style = MaterialTheme.typography.bodyMedium
             )
             Text(
-                text = stringResource(R.string.album_merge_choose_again),
+                text = stringResource(R.string.album_merge_off),
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                text = stringResource(R.string.album_merge_reassign),
                 style = MaterialTheme.typography.bodyMedium
             )
             TextButton(
@@ -828,6 +849,24 @@ private fun AlbumMergeWarningCard(warning: AlbumMergeWarning, onDismiss: () -> U
                 Text(stringResource(R.string.album_merge_dismiss))
             }
         }
+    }
+}
+
+/** Three equal columns, so the headings sit over their names at any width, the 344dp screen included. */
+@Composable
+private fun MergeTableRow(
+    first: String,
+    second: String,
+    merged: String,
+    style: androidx.compose.ui.text.TextStyle
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(first, style = style, modifier = Modifier.weight(1f))
+        Text(second, style = style, modifier = Modifier.weight(1f))
+        Text(merged, style = style, modifier = Modifier.weight(1f))
     }
 }
 

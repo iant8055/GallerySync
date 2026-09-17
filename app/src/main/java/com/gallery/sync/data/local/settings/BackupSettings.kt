@@ -482,7 +482,12 @@ class BackupSettings @Inject constructor(
         }
     }
 
-    /** Clears the warning for an album, on dismissal or when the user chooses its mode. */
+    /** Clears every warning, for the card's Dismiss. */
+    suspend fun dismissAllAlbumMergeWarnings() {
+        context.dataStore.edit { it.remove(KEY_ALBUM_MERGE_WARNINGS) }
+    }
+
+    /** Clears the warning for one album, when the user chooses its mode. */
     suspend fun dismissAlbumMergeWarning(albumName: String) {
         val key = AlbumIdentityRules.foldCase(albumName)
         context.dataStore.edit { prefs ->

@@ -469,8 +469,8 @@ class BackupViewModel @Inject constructor(
         }
     }
 
-    fun dismissAlbumMergeWarning(album: String) {
-        viewModelScope.launch { settings.dismissAlbumMergeWarning(album) }
+    fun dismissAllAlbumMergeWarnings() {
+        viewModelScope.launch { settings.dismissAllAlbumMergeWarnings() }
     }
 
     /**

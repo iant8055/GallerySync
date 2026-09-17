@@ -236,6 +236,18 @@ As specced, with two changes found while building:
   (Yes, then Android's dialog) come after seeing the list, so it is not unconsented, but it is not
   re-checked either.
 
+## The warning card, as Ian laid it out — 16 Sept 2026
+
+- **One card for all merges**, as a table under a centred, larger **DUPLICATE ALBUM NAMES DETECTED**.
+- Columns *Album Name 1 · Album Name 2 · Merged Album Name*, one row per merge. A third spelling, if
+  one ever appears, is listed in column 2.
+- Then: *"These Albums have been merged to avoid confusion." / "The combined Album's mode was switched
+  to OFF." / "Please reassign a Mode to the combined Album."*
+- **Dismiss clears every row.** Choosing a mode for an album removes its row. The previous modes are no
+  longer shown (Ian removed them) but are still stored and logged.
+- Checked on the Moto G in light and dark at phone width. **No 344dp check was possible**: the Fold 4
+  is gone, so the three-column table at that width has not been verified on hardware.
+
 ## Ruling — the spellings share one mode — Ian, 16 Sept 2026
 
 Ian tried to reproduce it: Android will not let a second `Camera`/`camera` directory exist, and a copy

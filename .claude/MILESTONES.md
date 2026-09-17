@@ -5176,3 +5176,11 @@ light and dark, nothing was uploaded, and the crash buffer was empty.
   and nothing was uploaded or trashed by the app.
 
 **Both device checks have now passed:** the Off-to-Off merge (16:54) and the Archive merge (21:03).
+
+#### TASK-023 — warning card redesigned by Ian, 16 Sept 2026
+
+The card is now a single table covering every merge (*Album Name 1 · Album Name 2 · Merged Album Name*)
+under a centred, larger *DUPLICATE ALBUM NAMES DETECTED*, followed by Ian's three sentences. Dismiss
+clears all rows. Verified on the Moto G in light and dark. It is not verified at 344dp, which no device
+here can show.
+
