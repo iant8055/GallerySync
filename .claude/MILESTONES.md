@@ -5200,7 +5200,19 @@ here can show.
   into that folder caused no further merge.
 
 **Open, awaiting Ian:**
-1. Should re-choosing an album's current mode keep its warning, so only a real change or Dismiss clears it?
+1. ~~Should re-choosing an album's current mode keep its warning?~~ **Decided by Ian: only Dismiss removes
+   the warning.** Setting a mode no longer touches it (`BackupViewModel.setAlbumMode`), and the per-album
+   clear is gone from `BackupSettings`.
 2. Should the Archive screen re-check membership before each trash request? Today a merge landing between
    the list and Android's dialog does not stop that batch.
+
+#### TASK-023 — only Dismiss removes the warning (Ian, 16 Sept 2026)
+
+Choosing a mode no longer clears the duplicate-name warning; Dismiss is the only way it goes. This also
+removes the leading suspect for the card vanishing unasked.
+
+The DataStore separators in `AlbumIdentityRules` were raw control characters in the source since the
+first commit. They are now written as `''` / `''`. The bytes are identical, and the
+stored warning on the Moto G still decoded and rendered after install. 343/343 unit tests pass, and the
+crash buffer is empty.
 

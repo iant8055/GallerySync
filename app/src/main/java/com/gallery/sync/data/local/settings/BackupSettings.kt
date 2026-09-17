@@ -458,8 +458,8 @@ class BackupSettings @Inject constructor(
     }
 
     /**
-     * Albums merged from two spellings of one folder and set Off, which the user has not yet seen
-     * through. TASK-023.
+     * Albums merged from two spellings of one folder and set Off, kept until the user presses Dismiss.
+     * TASK-023.
      *
      * Here rather than in Room, so the warning needs no schema change. Oldest first.
      */
@@ -482,21 +482,9 @@ class BackupSettings @Inject constructor(
         }
     }
 
-    /** Clears every warning, for the card's Dismiss. */
+    /** Clears every warning. The card's Dismiss is the only caller, and the only way a warning goes. */
     suspend fun dismissAllAlbumMergeWarnings() {
         context.dataStore.edit { it.remove(KEY_ALBUM_MERGE_WARNINGS) }
-    }
-
-    /** Clears the warning for one album, when the user chooses its mode. */
-    suspend fun dismissAlbumMergeWarning(albumName: String) {
-        val key = AlbumIdentityRules.foldCase(albumName)
-        context.dataStore.edit { prefs ->
-            val current = prefs[KEY_ALBUM_MERGE_WARNINGS] ?: return@edit
-            prefs[KEY_ALBUM_MERGE_WARNINGS] = current.filterTo(HashSet()) { stored ->
-                val name = AlbumIdentityRules.decode(stored)?.albumName ?: return@filterTo false
-                AlbumIdentityRules.foldCase(name) != key
-            }
-        }
     }
 
     suspend fun setDefaultAlbumMode(mode: AlbumMode) {

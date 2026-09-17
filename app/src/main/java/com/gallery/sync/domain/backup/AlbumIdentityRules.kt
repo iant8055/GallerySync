@@ -18,7 +18,7 @@ data class DeviceAlbum(val name: String, val folderKey: String)
  * Tells the user that one folder had been stored under more than one name, and that its album is now
  * Off.
  *
- * Kept until they dismiss it or choose a mode for the album.
+ * Kept until they press Dismiss.
  */
 data class AlbumMergeWarning(
     val albumName: String,
@@ -155,8 +155,8 @@ object AlbumIdentityRules {
 
     // ---------- storage in DataStore, which holds strings ----------
 
-    private const val FIELD = ''
-    private const val ITEM = ''
+    private const val FIELD = '\u001F'
+    private const val ITEM = '\u001E'
 
     /**
      * One warning as a single string.

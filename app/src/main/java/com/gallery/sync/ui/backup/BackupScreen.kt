@@ -783,7 +783,7 @@ private fun ArchiveConfirmDialog(
  *
  * One card for all of them, as a table: Ian's layout, 16 Sept 2026. Every merge sets the album Off,
  * even when every spelling was already Off (*"yes warn anyway"*), so the card always asks for a mode
- * to be chosen again. A row leaves the table when its album is given a mode; Dismiss clears them all.
+ * to be chosen again. Only Dismiss removes it, and it removes every row (Ian, 16 Sept 2026).
  *
  * Theme tokens only: the error container, with text inheriting its content colour.
  */

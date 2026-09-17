@@ -723,8 +723,10 @@ class BackupViewModel @Inject constructor(
     fun setAlbumMode(album: String, mode: AlbumMode) {
         viewModelScope.launch {
             albumDao.setPreference(AlbumPreferenceEntity(album, mode))
-            // Choosing a mode is the answer the warning asked for, so it has done its job.
-            settings.dismissAlbumMergeWarning(album)
+            // Deliberately leaves any duplicate-name warning in place. Only Dismiss removes it (Ian,
+            // 16 Sept 2026). Clearing it here also fired when the chosen mode equalled the current
+            // one, which removed the card with no visible change and is the likeliest cause of the
+            // card vanishing unasked that evening.
             _state.value = _state.value.copy(
                 albums = _state.value.albums.map {
                     if (it.name == album) it.copy(mode = mode) else it
