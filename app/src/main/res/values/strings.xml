@@ -375,11 +375,9 @@
     <string name="archive_confirm_accept">Archive</string>
     <string name="archive_confirm_cancel">Cancel</string>
 
-    <!-- TASK-023: one folder stored under more than one spelling, merged and set Off. Draft copy, Ian to edit. -->
+    <!-- TASK-023: one folder stored under more than one spelling, merged and set Off. Copy edited by Ian, 16 Sept 2026. -->
     <string name="album_merge_title">%1$s — mode set to Off</string>
-    <string name="album_merge_body">This folder appeared under more than one name (%1$s). They are the same folder, so GallerySync combined them and switched the album to Off rather than guess which setting you meant.</string>
-    <string name="album_merge_previous">Before: %1$s.</string>
-    <string name="album_merge_previous_entry">%1$s was %2$s</string>
+    <string name="album_merge_body">This folder appeared under more than one name (%1$s). They are the same folder, so GallerySync combined them and switched the album to Off.</string>
     <string name="album_merge_choose_again">Choose a mode again when ready.</string>
     <string name="album_merge_dismiss">Dismiss</string>
 

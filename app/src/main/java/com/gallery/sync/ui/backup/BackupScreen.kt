@@ -784,8 +784,9 @@ private fun ArchiveConfirmDialog(
  *
  * Ian, 16 Sept 2026: any such discrepancy sets the album Off *"then a warning given to the user
  * regarding the discrepancy and the change in the Album Mode"*, even when every spelling was already
- * Off. It names the spellings and what each was set to, because "It was Archive" is the part a user
- * needs in order to choose again.
+ * Off. It names the spellings. The previous modes are not shown: Ian removed that line, and the
+ * sentence saying the card would not guess, on 16 Sept 2026. They are still recorded in the warning
+ * and in the log.
  *
  * Theme tokens only: the error container, with text inheriting its content colour.
  */
@@ -809,17 +810,6 @@ private fun AlbumMergeWarningCard(warning: AlbumMergeWarning, onDismiss: () -> U
                 text = stringResource(R.string.album_merge_body, warning.spellings.joinToString(", ")),
                 style = MaterialTheme.typography.bodyMedium
             )
-            if (warning.previousModes.isNotEmpty()) {
-                val entries = warning.previousModes.entries
-                    .sortedBy { it.key }
-                    .map { (name, mode) ->
-                        stringResource(R.string.album_merge_previous_entry, name, mode.label())
-                    }
-                Text(
-                    text = stringResource(R.string.album_merge_previous, entries.joinToString(", ")),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
             Text(
                 text = stringResource(R.string.album_merge_choose_again),
                 style = MaterialTheme.typography.bodyMedium
