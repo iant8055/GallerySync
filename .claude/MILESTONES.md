@@ -5336,3 +5336,36 @@ succeeding again once the device is reachable.
 **Still open:** whether a real photo taken *while confirmed RESTRICTED* behaves like the synthetic
 TEST2 probe from 17 Sept (withheld indefinitely) or differently — no new photos were taken overnight
 while the phone was in that state, since Ian was asleep. Worth checking once reconnected.
+
+### 18 Sept 2026 (morning) — a real photo under RESTRICTED synced in ~2 minutes, qualifying yesterday's finding
+
+Ian took one real photo (`IMG_20260918_092230915_HDR.jpg`, 09:22:30) with the bucket confirmed
+`RESTRICTED` at the moment it was taken — the direct test the 17 Sept entry left open. Unlike the
+synthetic `TEST2` probe (created via `adb shell cp` + a manual `MEDIA_SCANNER_SCAN_FILE` broadcast,
+watched 12 minutes with zero dispatch), this one moved:
+
+- `dumpsys jobscheduler`, mid-run: the content-trigger job listed under **Active jobs**, tagged
+  `Standby bucket: RESTRICTED`, `Time since first force batch attempt: -1m29s938ms`, `Changed URIs:
+  content://media/external/images/media/40`.
+- Logcat: `backup run starting` at 09:24:31, `upload: stored` at 09:24:37, `0 remaining` — about
+  **two minutes** from shutter to verified in the cloud, entirely unattended, bucket never left
+  RESTRICTED throughout.
+
+**"Force batch attempt" is a real, named mechanism in the platform's own job dump**, distinct from the
+`once daily, 10 min` quota in the official docs — it appears to periodically force a RESTRICTED app's
+content-trigger job to run regardless of the daily budget, on the order of roughly a minute or two,
+rather than deferring it to the next quota window. The job dump also shows `Has media backup
+exemption=false`, meaning GallerySync isn't using whatever grants that (undocumented, not found in
+public references — worth a deeper platform search if the two-minute figure ever needs to be relied
+on rather than just observed).
+
+**This qualifies, rather than reverses, the 17 Sept finding.** RESTRICTED is still a real, measured
+state this app reaches unusually fast (~10h idle on a fresh install). What changes is the consequence:
+a genuine new photo taken while RESTRICTED did not sit indefinitely — it went out in about the same
+order of magnitude as ordinary background latency, not the many-minutes-to-hours picture the synthetic
+probe suggested. Two explanations are open and not distinguished by this test: either
+the synthetic `TEST2` file would also have gone out shortly after the 12-minute window closed, or the
+`adb shell cp` + manual broadcast method used to create it doesn't generate the same MediaStore
+notification a real camera write does, and so never properly armed the content observer at all. Given
+this result, **the RESTRICTED-bucket case is markedly less urgent than yesterday's entry implied** —
+worth weighing before committing to the user-initiated-data-transfer-jobs architecture fork.
