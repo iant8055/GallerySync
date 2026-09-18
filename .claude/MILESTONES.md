@@ -5291,3 +5291,48 @@ not a bug-fix-with-clear-root-cause, and belongs to Ian per CLAUDE.md's escalati
 
 Test files left in `DCIM/Camera` on the Moto G (test account): `IMG_20260917_201547_TEST.jpg`,
 `IMG_20260917_202459_TEST2.jpg` — both real uploads now, harmless to leave.
+
+### 18 Sept 2026 — TASK-021 overnight: a real batch recovers, the periodic net works, RESTRICTED doesn't let go
+
+Continuation of the 17 Sept reproduction, on the same factory-reset Moto G, with Ian taking real camera
+photos through the evening rather than synthetic files. Three batches, 5 photos + 2 videos each:
+21:38 (used for the wizard's own manual backup, synced immediately), 21:47 (autonomous trigger silent
+for the rest of the session), 22:51–22:52 (arrived while 21:47's batch was still stuck).
+
+**The stuck 21:47 batch recovered — but not on its own.** At 22:53:24, one `BackupWorker` run uploaded
+all 14 outstanding files — the full 21:47 batch *and* the full 22:51 batch — together, ending
+`0 remaining`. The 22:51 batch's arrival woke a trigger that correctly swept up everything outstanding,
+not just the newest file. Whatever consumed the 21:47 batch's own individual trigger earlier never
+actually ran an upload for it; it took an unrelated third event, roughly 66 minutes later, to clear it.
+Bucket was `RARE` throughout this whole window, never `RESTRICTED` — this is not the quota mechanism
+from the 17 Sept entry, and remains unexplained. The one new fact: a later trigger recovers everything
+a missed one left behind, so nothing is silently lost forever so long as *something* eventually fires.
+
+**The periodic 6-hour net fired on schedule and worked.** 03:38:41, unattended, correctly reported
+`0 remaining` since everything was already caught up by then. This is the backstop CLAUDE.md describes
+(`the content trigger and the periodic net are uncapped JobScheduler work`), now confirmed live rather
+than assumed.
+
+**RESTRICTED reached again after ~10 hours of genuine overnight idle — far short of Android's documented
+8-day disuse threshold.** 08:48:21, no interaction since the previous evening. Consistent with a
+fresh-install app (installed that same day, almost no usage history) being judged harder by the
+system's usage predictor than an established app would be — the 8-day figure is for the disuse path;
+this looks like the separate “excessive activity / low confidence” path discussed 17 Sept, now
+reachable from pure idle alone on a new install, not only from heavy test churn.
+
+**`cmd usagestats delete-package-data` does not reset the standby bucket — the 17 Sept mitigation plan
+does not work.** From 08:48 to at least 11:50 (over 3 hours, 13 consecutive 15-minute checks), the
+monitor ran that command every time it found RESTRICTED, and every single time the bucket read
+RESTRICTED again immediately after — `bucket after clear: 45` every time, no exception. The command
+is real and runs without error; it simply is not the lever that controls bucket assignment. Recorded
+so this is not tried again expecting a different result.
+
+**The wireless-debugging session dropped around 12:05**, most likely the device going into deep sleep
+and suspending its own debug service — mdns discovery found nothing afterward. Monitoring paused there,
+resuming once the phone is reconnected. The background poll script is left running; it needs no
+reconnect logic of its own, since each 15-minute cycle re-invokes `adb` fresh and will simply start
+succeeding again once the device is reachable.
+
+**Still open:** whether a real photo taken *while confirmed RESTRICTED* behaves like the synthetic
+TEST2 probe from 17 Sept (withheld indefinitely) or differently — no new photos were taken overnight
+while the phone was in that state, since Ian was asleep. Worth checking once reconnected.
