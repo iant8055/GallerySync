@@ -5460,3 +5460,34 @@ findings applies here too), and whether Ian's real Fold 8 — never used for tes
 speed. Worth checking `dumpsys activity processes` for the exact policy name behind `moto_freezer`'s
 task-removal behavior before scoping a fix, since the fix needed for "an OEM kills backgrounded apps
 fast" is a different shape than the fix needed for "WorkManager mishandles a real force-stop."
+
+### 18 Sept 2026 (afternoon) — the AlarmManager-canary explanation above is withdrawn
+
+The two entries above describe `ForceStopRunnable`'s force-stop detection as an AlarmManager
+`PendingIntent` canary, and blame Motorola's `moto_freezer` for clearing it. **That mechanism is
+wrong and is withdrawn**, checked directly rather than left standing: `dumpsys alarm` shows **zero**
+registered alarms for `com.gallery.sync`, both right after a cold start that concluded *"Found
+unfinished work, scheduling it"* (i.e. did **not** conclude force-stop) and again minutes later.
+If the canary were a real, present alarm, at least one of those checks should have found it. The
+AlarmManager source quoted two entries up was from an old WorkManager release; this app runs
+work-runtime-ktx `2.11.2`, and whatever `ForceStopRunnable` actually keys off in that version is not
+visible in `dumpsys alarm` — not pinned down.
+
+**What still stands, because it's direct observation rather than inferred mechanism:**
+- The `remove task` kill, firing automatically ~70s after an ordinary Home background with no swipe
+  — confirmed straight from the log, nothing withdrawn there.
+- `WM-ForceStopRunnable: Application was force-stopped, rescheduling.` firing immediately after a
+  content-trigger job started, and cancelling that job — also a direct log capture, not an inference.
+- The **inconsistency** across today's four cold starts (two concluded force-stop, two didn't) rules out
+  a deterministic cause like a missing permission throwing every time; no `SecurityException` appears
+  anywhere in the capture.
+- External corroboration: a Google-codelab GitHub issue titled *"Doesn't work when removed from recent
+  tasks,"* reported on Pixel hardware, citing the same `dontkillmyapp.com` class of OEM-vs-WorkManager
+  problem this looks like.
+
+So the honest summary is: **task removal → process restart → WorkManager's force-stop detection
+sometimes wrongly concludes force-stop and cancels real pending work** is solid, evidence-backed and
+reproduced twice. *Why* WorkManager 2.11.2 concludes that, mechanically, is not established — the
+AlarmManager canary theory was the wrong guess at it. A fix does not need that mechanism nailed down
+to be scoped, since the actionable lever is the same either way: keep the process alive longer, or stop
+depending on a content-trigger `WorkSpec` surviving a process restart at all.
