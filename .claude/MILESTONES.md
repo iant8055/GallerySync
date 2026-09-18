@@ -5369,3 +5369,55 @@ the synthetic `TEST2` file would also have gone out shortly after the 12-minute 
 notification a real camera write does, and so never properly armed the content observer at all. Given
 this result, **the RESTRICTED-bucket case is markedly less urgent than yesterday's entry implied** —
 worth weighing before committing to the user-initiated-data-transfer-jobs architecture fork.
+
+### 18 Sept 2026 (late morning) — TASK-021's real cause found: WorkManager's own force-stop detection cancels the content trigger
+
+Second factory reset, same method as 17 Sept, this time with continuous `adb logcat` running to a file
+from before the wizard started — the 17 Sept run lost the critical window to buffer rotation and had
+to reconstruct it from memory and periodic snapshots. This run caught it directly.
+
+**Setup:** wizard backup (7 files) finished and verified at 10:35:29. Camera set to Sync at 10:36:26.
+App backgrounded with Home, never touched again. A second batch (5 photos, 2 videos) taken at ~10:40.
+
+**What happened, in full, from the continuous capture:**
+
+```
+10:41:58.470  ActivityManager: Start proc 13105:com.gallery.sync ... for service SystemJobService
+10:41:59.533  GallerySync/MediaProvid: onCreate: authority=com.gallery.sync.provider
+10:41:59.681  WM-SystemJobService: onStartJob for WorkGenerationalId(workSpecId=e32a2df3-..., generation=0)
+10:41:59.845  WM-ForceStopRunnable: Application was force-stopped, rescheduling.
+10:41:59.856  WM-SystemJobService: onStopJob for WorkGenerationalId(workSpecId=e32a2df3-..., generation=0)
+10:41:59.952  WM-SystemJobScheduler: Scheduling work ID 72961344-... Job ID 1
+10:41:59.977  WM-SystemJobScheduler: Scheduling work ID e32a2df3-... Job ID 5
+10:41:59.983  WM-GreedyScheduler: Ignoring {WorkSpec: e32a2df3-...}. Requires ContentUri triggers.
+10:42:00.083  WM-Processor: Processor cancelling e32a2df3-...
+10:42:00.085  WM-Processor: WorkerWrapper interrupted for e32a2df3-...
+10:42:02.974  ActivityManager: freezing 13105 com.gallery.sync, reason = moto_freezer, adj=915, adjType=cch-empty
+```
+
+**The content-trigger job fired correctly, on the new photos, exactly as designed — and then WorkManager
+cancelled its own job a few hundred milliseconds into running it.** `ForceStopRunnable` runs early on
+every process start and decides whether the app was force-stopped since it last ran, using a canary
+alarm it sets for itself; if that alarm isn't where it expects, it concludes a force-stop happened and
+reschedules — rather than trusts — every WorkSpec, including the one already executing. The
+replacement it schedules is a fresh, inert watch (`Ignoring {WorkSpec: ...}. Requires ContentUri
+triggers.`) that waits for the *next* change; it does not retroactively act on the photos already
+sitting there. `freezing ... reason = moto_freezer` two seconds later, on the same process, is the
+likely trigger: Motorola's own process freezer almost certainly cleared the canary alarm between the
+wizard finishing and this dispatch, which is exactly the condition `ForceStopRunnable` misreads as a
+user-initiated force-stop.
+
+**This is not the RESTRICTED-bucket story from 17–18 Sept — it's a different, more direct cause,
+and it explains everything the bucket theory left open.** The bucket was `RARE` this whole time, not
+`RESTRICTED`. It explains the 32-minute silence after the 17 Sept 21:47 batch, the mystery `MainActivity`
+launch at 22:21 (a fresh process start runs `ForceStopRunnable` again, which is what reset the job's
+tracked constraint history), and why nothing recovered until a *later* trigger arrived and its
+`ForceStopRunnable` pass found a healthy canary that time. It also explains why the manual "Right now"
+path has never failed: it doesn't depend on a content-trigger `WorkSpec` surviving a process gap at all.
+
+**Not yet root-caused further:** what specifically clears WorkManager's canary alarm on this device
+between a normal background and the next dispatch — Motorola's `moto_freezer` is the visible suspect
+in this capture, but isn't proven as the mechanism (as opposed to, say, Doze, or something in
+WorkManager's own alarm handling under a frozen process). Worth reading `ForceStopRunnable.java` and
+searching for known interactions between process freezing/cached-app policies and WorkManager's
+force-stop detection before deciding on a fix.
