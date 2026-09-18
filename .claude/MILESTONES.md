@@ -5585,3 +5585,132 @@ cold-start sync still runs normally with no optimise chain active (`backup run s
 `0 uploaded … 0 remaining`, matching a still-caught-up library). The mid-optimise branch itself wasn't
 separately forced on hardware — low priority, since it reuses an already-tested function under a
 guard shaped exactly like the one `doWork()` has run in production all along.
+
+### 18 Sept 2026 (night) — a documentation review, the privacy pages that were false, and the Settings changes that came out of it
+
+Ian asked for every document, file and earlier session to be reviewed for accuracy, on the grounds that
+the app is near completion. What follows is what that found, what was changed in the same sitting, and
+what was found and deliberately left for Ian.
+
+**Coverage, stated so it is not over-read.** Read in full: `CLAUDE.md`, this file, `DEFAULTS.md`,
+`SETTINGS-AUDIT.md`, the six agent files, the README, all 24 memory files, both Play pages and the
+manifest. Read as headers and status lines only: the 23 task specs (about 5,300 lines). Earlier chat
+sessions: all 27 were listed and keyword-searched (`before release`, `before submission`, `don't
+forget`, `Play Console`, `remind me`, `come back to`, `Fold 8`), and only the newest was read, and only
+its tail. Code: targeted rule checks (logging, hardcoded colours, Java files, deletion APIs, token
+storage, debug affordances), not a line-by-line review.
+
+#### The privacy policy and the deletion page were false
+
+Both were written 17 Aug 2026, before Archive, proxies, transcoding, deletion sync and the folder write
+grants existed, and had not been touched since. Between them they said the app never deletes anything,
+never modifies files on the phone, "only ever adds copies", lets you "browse what is stored" in OneDrive,
+"may cache copies of files you open so they can be used by other apps", and that signing out "immediately
+deletes ... the local index of your files". None of that is true now: Archive moves local files to the
+phone's trash, Optimise replaces photos and video in place, Restore writes originals back, the optional
+*Ask* policy can move OneDrive copies to the OneDrive recycle bin, the ContentProvider is an unexported
+empty skeleton that serves nothing, and `signOut` only calls MSAL's sign-out and clears no table. An
+18 Aug session had already noted that the policy "needs revising before submission"; nothing tracked it.
+
+Both pages were rewritten. The policy now states what the app can change on the phone and in OneDrive,
+that Optimise is off unless turned on (and that first-time setup can run it once across the chosen
+folders), the write access granted through Android's folder picker, that Microsoft is the only network
+destination, that there is no analytics, crash reporting or advertising SDK, and that the app never
+permanently deletes and never empties a trash. The deletion page no longer claims sign-out clears the
+index, and says what removing the app leaves behind. Both are dated 18 Sept 2026.
+
+**They are not published.** The in-app cards read GitHub Pages (`iant8055.github.io/GallerySync/`),
+which serves `main`. Until this commit is pushed, the live pages, and so the app, still show the 17 Aug
+text.
+
+#### Changes made
+
+- **Initial Optimise is Off for both photos and video (Ian).** The stored defaults were already `false`,
+  but `BackupUiState.optimiseVideo` in `BackupViewModel` still started `true` — the same shape as the
+  7 Sept photo defect, which was fixed in three places and missed this one. Now `false` in every layer.
+- **Settings → Setup (*Run setup again*) removed (Ian).** Along with `restartSetup()` and its three
+  strings. CLAUDE.md said this button would not ship; it is gone, so that paragraph is now stale (see
+  below).
+- **Settings → "Optimise automatically" switch removed (Ian).** The Photos and Video switches, each with
+  its own Auto/Manual, remain, as does the manual Optimise button. `BackupViewModel.setAutoOptimiseEnabled`
+  and three strings went with it; nothing else called them. The setup tour keeps its own optimise choice.
+- **Three cards at the foot of Settings.** *Privacy Policy* and *Delete Account Info* open the pages
+  full-screen inside the app (`InAppPage.kt`): a WebView with JavaScript off, no file or content access,
+  no mixed content, and navigation confined to `https://iant8055.github.io/GallerySync/` by
+  `SupportLinks.staysInApp`; anything else opens in the phone's browser. A failed load says so and offers
+  the browser. *Contact Info* opens a native page showing `IanDev@Currently.com`, selectable, with a
+  **Copy address** button. **No mail app is launched** — Ian ruled that out after the first build did.
+  Seven unit tests pin the URL check, including look-alike hosts.
+- **Settings sections reordered:** General, **Backup**, Albums, Sync, Restore, Archive. Backup moved to sit
+  under General.
+- **Section headings are green bands**, edge to edge, title left-aligned and centred top to bottom, in the
+  same green as the heading box on each tab (`heroContainer` / `onHero`). Albums is included although
+  Ian's list omitted it. The first version used `accent`, the bright green of the selected nav pill,
+  which is not the tab heading box; Ian caught it. The dividers that sat above each heading were removed.
+- **`heroContainer` lightened at Ian's request** ("comes off too dark"): light `#003525` → `#0A5238`
+  (new `SignalHeroLight`), dark `#074231` → `#0B5039`. `SignalDeepGreen` is the light theme's Material
+  `primary`, so it was left alone: changing it would have recoloured every button and switch. This
+  changes the hero card on Albums, Restore and Archive and the tour's mockups as well as the Settings bands.
+
+**Verified.** 350/350 unit tests (343 + 7 new), 0 failures. On the Moto G (`ZT422CTZQV`, Android 16), in
+light and dark, crash buffer empty after every install: the section order and bands; the band and the
+Albums hero card sampling to the same pixel in both themes (`(10,82,56)` light, `(11,80,57)` dark); no
+Setup section and no "Optimise automatically" switch; both viewer pages opening, Back and Close working,
+and an external link (the Microsoft consent page) handing off to Chrome; the Contact page in both themes,
+Copy changing to "Copied" and Android's clipboard preview showing the address.
+**Not verified:** the Optimise-video default on a fresh install — the Moto G's stored settings still
+carry its earlier choices, so only the unit level and the code were checked; anything at 344dp; anything
+on Samsung One UI or API 37.
+
+#### Corrections this file needs, found by the review and not yet made
+
+Recorded here rather than edited into the old entries, so the withdrawn text stays visible.
+
+- **The v0.2–v0.4 checkboxes lag the log.** Still unticked: *Album modes in the UI*, *Guided first run*,
+  *Video transcode*, *Restore replaces the proxy*, *Retry failed items*. The v0.4 deletion-sync line
+  still says *"a real cloud deletion has not been performed"*; the 25 Aug entry proves one. Some
+  unticked items are genuinely unbuilt (*space saved per album*, *Sync scope toggles*), so they were not
+  ticked in bulk.
+- **Platform-constraints text is stale:** "Delete and the truncating write are still untested" (and the
+  matching line under *The constraint this narrows*) were both verified on 19 Aug in the entries below them.
+- **4 Sept (evening) says the disposable OneDrive account left with the Fold 4 and every upload test now
+  costs Ian real cleanup.** Corrected 7 Sept in CLAUDE.md only: the Moto G's account and every file on it
+  are test data.
+- **28 Aug says the vendor-neutral trash wording was "flagged, not changed", and that
+  `backup_move_trash_note` is "still unfixed".** Both are resolved in the code: the copy reads
+  "Trash/Recycle Bin", and that string no longer exists.
+- **19 Aug says there are zero uses of `rememberSaveable`.** `SetupTour` now uses it; whether
+  `MainActivity` saves the selected tab is unchecked.
+- **`SETTINGS-AUDIT.md`** said the `SafGrowProbeSection` was still in Settings (removed in `c910a26`),
+  that `optimise_photos` and `optimise_video` default `true`, and that eight of nine optimise settings
+  have no UI. It now carries a banner listing what is stale; its tables are unchanged. **`DEFAULTS.md`**
+  carries a matching note that the "automatic" entry uses a pre-28-Aug name.
+
+#### Found and left for Ian
+
+- **CLAUDE.md is stale in three places.** Its project blurb still names an Android ContentProvider with
+  on-demand download as the core mechanism (the provider is an empty skeleton with a `TODO(v0.2.0)`, and
+  the product is backup, proxies and restore); its *Run setup again* paragraph describes a button that no
+  longer exists; and the monetisation rules refer to gating the ContentProvider. Not edited: it is
+  Ian's rules file.
+- **Settings → Archive shows only "Coming soon"** (it reuses `settings_language_detail`), though Archive
+  is built.
+- **The tour's Settings mockup** was built to mirror the Settings tab and now differs in section order and
+  heading style.
+- **No task tracks Play submission:** the Data-safety form, store listing, signing, a release build
+  (no minify or signing config was found in `app/build.gradle.kts`), and `versionCode` is still 1.
+- **Samsung has not been tested since the Fold 4 left on 30 Aug**, so every September change was verified
+  only on the Moto G, on stock Android with Google Photos. No device on API 37 exists except Ian's real
+  phone, so `targetSdk 37` behaviour is unverified.
+- **The 2-week parallel-run rule** cannot be met in full before Samsung's sync stops on 30 Sept, and no
+  document says what is protecting the Fold 8's library today.
+- Release builds log INFO with file names (`Logger` emits INFO, WARN and ERROR in every build); there are
+  two stale `TODO`s in the source; SignalIcons uses `Color.Black` as an overridden placeholder; there are
+  no `TASK-008` or `TASK-009` spec files; `backup-agent.md` still signs as Sonnet 4.6.
+- Still open from earlier entries: the TASK-023 Archive re-check, the warning card that vanished once, the
+  clean-reinstall re-upload, the wedged Graph GET, and untested proxy recovery.
+- **TASK-021 is closed and needs no battery exemption.** The Doze-whitelist run was a diagnostic to find
+  the mechanism; the fix was verified without it.
+
+The memory files were corrected in the same pass: TASK-021 no longer listed as an open defect, the docs
+map updated, and a note that this file's older checkboxes lag its dated entries.

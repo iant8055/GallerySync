@@ -55,6 +55,14 @@ one. On a phone rarely connected to Wi-Fi, that is indefinite.
 
 ---
 
+> **Checked 18 Sept 2026.** The "automatic" entry below uses the pre-28-Aug name. The real master switch
+> is `isOptimiseEnabled` (default `false`); `isAutoOptimiseEnabled` survives only as a derived UI value
+> (master on **and** photo mode Auto). **Ian, 18 Sept: initial state is Off for both Photos and Video.**
+> The stored defaults were already Off, but `BackupUiState.optimiseVideo` still started as `true` in
+> `BackupViewModel` — the same shape as the 7 Sept photo defect. Corrected 18 Sept; a fresh install now
+> shows both switches Off in every layer (DataStore fallback, `BackupPreferences`, `BackupUiState`,
+> `ReconcileUiState`). Not yet watched on a device.
+
 ### Optimise photos automatically — **off**
 `isAutoOptimiseEnabled = false`
 

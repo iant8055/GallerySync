@@ -1,5 +1,23 @@
 # Settings audit — 29 August 2026
 
+> **Checked against the code 18 Sept 2026 — this is a 29 Aug snapshot and is stale in these places.
+> Where it disagrees with the list below, the code and MILESTONES win.**
+>
+> - **Optimise defaults.** `optimise_photos` and `optimise_video` both default **`false`**, not `true`
+>   (`BackupSettings.kt`; photos fixed 7 Sept, and the transient UI-state copy of the video default in
+>   `BackupViewModel` was still `true` until 18 Sept). Initial state for both is Off — Ian, 18 Sept.
+> - **"No UI yet" is out of date.** Settings now has switches and controls for the master, photos,
+>   video, mode, video age and quality (`SettingsScreen.kt`).
+> - **The debug probe is gone.** `SafGrowProbeSection` was removed in `c910a26`; nothing under
+>   `app/src/main` references it.
+> - **The wizard is the 9-step `SetupTour`**, not the 19-step `SetupWizardScreen` tabulated below,
+>   which was deleted in TASK-022 (7 Sept). The "19 steps" table is history only.
+> - **Settings → Setup (*Run setup again*) was removed 18 Sept 2026** at Ian's instruction.
+> - **Keys added since:** `library_choice`, `optimise_cutoff` (wizard-only), `first_backup_start_at`,
+>   `first_backup_delay_millis`, `wizard_step`, `wizard_backup_total`, `wizard_run_started_at`,
+>   `upgrade_backfill_checked`, `album_merge_warnings`, plus `selected_directories` beside
+>   `granted_tree_uris`. `acknowledged_topics` and `photo_optimise_age` no longer exist.
+
 Every setting the user can change, everything with a default, and every wizard step — plus the ones
 that were decided and never built, and the ones that quietly went away.
 
