@@ -5562,3 +5562,26 @@ testing of the cost caveat in the spec (a cold start for unrelated reasons now a
 check), and confirming behaviour is the same on a device that doesn't reach RESTRICTED or get killed
 this aggressively — both lower priority than the fix itself being correct, which tonight's capture
 settles.
+
+### 18 Sept 2026 (evening, continued) — TASK-021 fix: skip the cold-start scan during a live optimise chain
+
+Ian caught a gap the fix above shipped with, before it went further: the new continuation enqueue in
+`armAutomaticSync()` isn't a content-triggered dispatch, so `BackupWorker`'s existing
+`selfTriggered && optimiseChainIsLive()` guard — the one that stops a content-triggered wake from
+scanning for no reason while an optimise chain is rewriting files — never sees it and can't apply. A
+cold start landing mid-optimise was running an unconditional scan the equivalent content-triggered wake
+would have declined.
+
+**Not the 5 Sept self-triggering loop returning.** That loop was per-*file* — each proxy rewrite fired
+its own content trigger, so a sixty-file batch could wake the app sixty times. The new call fires once
+per cold start, not once per file, so a continuously-running optimise chain inside an already-alive
+process causes no extra wakes at all. The real, narrower cost was one unconditional scan on the specific
+case of a cold start landing while a chain from an earlier process session was still live.
+
+**Fix:** `armAutomaticSync()` now checks `BackupScheduling.optimiseChainLive(workManager)` — the same
+function `doWork()` already uses — before enqueueing the continuation, and skips the scan (not the
+re-arm) when a chain is live. 343/343 unit tests pass. Verified on the Moto G: clean install, no crash,
+cold-start sync still runs normally with no optimise chain active (`backup run starting` →
+`0 uploaded … 0 remaining`, matching a still-caught-up library). The mid-optimise branch itself wasn't
+separately forced on hardware — low priority, since it reuses an already-tested function under a
+guard shaped exactly like the one `doWork()` has run in production all along.
