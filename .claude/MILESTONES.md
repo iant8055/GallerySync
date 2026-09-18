@@ -4937,6 +4937,26 @@ Clean installs of the fix, DCIM and Pictures ticked:
 caused by switching the theme from adb at the same moment — not a defect, but a reason not to toggle
 `uimode` while someone is tapping.
 
+#### *Keep <subfolder> only* — verified on the Moto G, 17 Sept 2026
+
+The one path left untested. `Settings → Run setup again`, `Pictures` ticked (an empty `TestSub`
+subfolder added first, since `Pictures` itself had no nested folder to narrow into), the system picker
+navigated into `TestSub` and `USE THIS FOLDER` tapped there rather than on `Pictures`.
+
+- `ReconcileVM`: `grant for Pictures: NARROWER (Pictures/TestSub)`, then `Choose all of Pictures` /
+  `Keep Pictures/TestSub only` — the same notice as the other two outcomes.
+- Tapping *Keep Pictures/TestSub only* logged `granted Pictures/TestSub` and `grant for Pictures: kept
+  narrower Pictures/TestSub`, and the walk advanced on its own — no third option, no stall.
+- The scope narrowed correctly: `scanAll` read *2 granted folders* (the pre-existing `DCIM` grant from
+  before this run, held independently of what got ticked here, plus the new `Pictures/TestSub` one).
+  All 50 scanned items came from `DCIM`; `TestSub`, empty by construction, contributed nothing — exactly
+  what a correctly scoped grant should do.
+- Crash buffer empty before and after. `TestSub` removed from the device afterward; nothing else in
+  the fixture touched.
+
+All three outcomes of a narrower pick (*Choose all*, *Keep only*, and the notice itself) are now
+verified on hardware.
+
 The picker's *Back* takes two presses when it opens inside a folder: the first goes up a level. That
 is DocumentsUI, not the app.
 
