@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -25,7 +26,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.RichTooltip
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -41,9 +44,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -60,6 +65,7 @@ import com.gallery.sync.ui.common.LabelWithAction
 import com.gallery.sync.ui.common.SignalIcons
 import com.gallery.sync.ui.common.formatBytes
 import com.gallery.sync.ui.retrieve.DeletionSection
+import com.gallery.sync.ui.theme.LocalGallerySyncColors
 import com.gallery.sync.ui.theme.ThemeViewModel
 import kotlinx.coroutines.launch
 
@@ -74,6 +80,8 @@ fun SettingsScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    var page by remember { mutableStateOf<SupportPage?>(null) }
+    var showContact by remember { mutableStateOf(false) }
 
     val proxyLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult()
@@ -97,7 +105,7 @@ fun SettingsScreen(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 80.dp),
+            .padding(start = SettingsGutter, end = SettingsGutter, top = 16.dp, bottom = 80.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
 
@@ -143,28 +151,6 @@ fun SettingsScreen(
             onCheckedChange = viewModel::setAllowMeteredNetwork
         )
 
-        HorizontalDivider()
-
-        // ── Albums ───────────────────────────────────────────────────────────
-        SectionHeader(
-            stringResource(R.string.settings_albums),
-            helpText = stringResource(R.string.help_albums)
-        )
-
-        SourcesSection()
-
-        DeletionSection()
-
-        SettingDropdown(
-            label = stringResource(R.string.settings_default_mode),
-            options = AlbumMode.canBeDefault,
-            selected = state.defaultAlbumMode,
-            onSelected = viewModel::setDefaultAlbumMode,
-            optionLabel = { it.settingsLabel() }
-        )
-
-        HorizontalDivider()
-
         // ── Backup ───────────────────────────────────────────────────────────
         SectionHeader(
             stringResource(R.string.settings_backup),
@@ -184,6 +170,24 @@ fun SettingsScreen(
         }
 
         DestinationSection()
+
+        // ── Albums ───────────────────────────────────────────────────────────
+        SectionHeader(
+            stringResource(R.string.settings_albums),
+            helpText = stringResource(R.string.help_albums)
+        )
+
+        SourcesSection()
+
+        DeletionSection()
+
+        SettingDropdown(
+            label = stringResource(R.string.settings_default_mode),
+            options = AlbumMode.canBeDefault,
+            selected = state.defaultAlbumMode,
+            onSelected = viewModel::setDefaultAlbumMode,
+            optionLabel = { it.settingsLabel() }
+        )
 
         // ── Sync ─────────────────────────────────────────────────────────────
         SectionHeader(
@@ -309,8 +313,6 @@ fun SettingsScreen(
             }
         }
 
-        HorizontalDivider()
-
         // ── Restore ──────────────────────────────────────────────────────────
         SectionHeader(
             stringResource(R.string.settings_restore),
@@ -322,8 +324,6 @@ fun SettingsScreen(
             checked = state.showEmptyCloudFolders,
             onCheckedChange = viewModel::setShowEmptyCloudFolders
         )
-
-        HorizontalDivider()
 
         // ── Archive ──────────────────────────────────────────────────────────
         SectionHeader(
@@ -338,17 +338,45 @@ fun SettingsScreen(
 
         HorizontalDivider()
 
-        // ── Restart Setup Wizard ─────────────────────────────────────────────
-        Text(
-            text = stringResource(R.string.settings_setup),
-            style = MaterialTheme.typography.bodyLarge
+        // ── About: policy, account deletion, contact ─────────────────────────
+        LinkCard(
+            title = stringResource(R.string.settings_privacy_policy),
+            detail = stringResource(R.string.settings_privacy_policy_detail),
+            onClick = { page = SupportPage.PRIVACY_POLICY }
         )
-        Text(
-            text = stringResource(R.string.settings_setup_detail),
-            style = MaterialTheme.typography.bodySmall
+
+        LinkCard(
+            title = stringResource(R.string.settings_delete_account),
+            detail = stringResource(R.string.settings_delete_account_detail),
+            onClick = { page = SupportPage.DELETE_ACCOUNT }
         )
-        OutlinedButton(onClick = viewModel::restartSetup) {
-            Text(stringResource(R.string.settings_setup_action))
+
+        // Opens the in-app Contact page. No mail app is launched — Ian's ruling.
+        LinkCard(
+            title = stringResource(R.string.settings_contact),
+            detail = stringResource(R.string.settings_contact_detail, SupportLinks.CONTACT_EMAIL),
+            onClick = { showContact = true }
+        )
+    }
+
+    page?.let { InAppPageDialog(page = it, onDismiss = { page = null }) }
+    if (showContact) ContactDialog(onDismiss = { showContact = false })
+}
+
+/**
+ * A tappable "about" card that opens one of the in-app pages.
+ *
+ * Colours come from the theme's card defaults, so both light and dark follow the app's theme.
+ */
+@Composable
+private fun LinkCard(title: String, detail: String, onClick: () -> Unit) {
+    OutlinedCard(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(text = title, style = MaterialTheme.typography.bodyLarge)
+            Text(text = detail, style = MaterialTheme.typography.bodySmall)
         }
     }
 }
@@ -362,16 +390,6 @@ private fun OptimiseStatusAndAction(
     proxyLauncher: () -> Unit,
     context: android.content.Context
 ) {
-    SettingSwitch(
-        label = stringResource(R.string.settings_auto_optimise),
-        detail = stringResource(
-            if (state.isAutoOptimiseEnabled) R.string.settings_auto_optimise_on
-            else R.string.settings_auto_optimise_off
-        ),
-        checked = state.isAutoOptimiseEnabled,
-        onCheckedChange = viewModel::setAutoOptimiseEnabled
-    )
-
     when {
         state.proxyCandidateCount == 0 -> Text(
             text = stringResource(
@@ -429,43 +447,70 @@ private fun OptimiseStatusAndAction(
 
 // ── Layout primitives ───────────────────────────────────────────────────────
 
+/** The screen's side padding. Section headings reach past it to the edges of the screen. */
+private val SettingsGutter = 16.dp
+
+/**
+ * A section heading: a band in the same green as the heading box at the top of each tab (the
+ * [com.gallery.sync.ui.common.HeroCard]), edge to edge, with the title left-aligned and centred top
+ * to bottom.
+ *
+ * The colours are [com.gallery.sync.ui.theme.GallerySyncColors.heroContainer] and its paired
+ * `onHero`, exactly what HeroCard uses, so the two are the same green in both themes and the title
+ * and help icon are never a colour picked for one theme only. It is deliberately **not** `accent`,
+ * the bright green of the selected tab in the nav bar.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SectionHeader(title: String, helpText: String? = null) {
-    if (helpText != null) {
-        val tooltipState = rememberTooltipState(isPersistent = true)
-        val scope = rememberCoroutineScope()
+    val signal = LocalGallerySyncColors.current
 
+    Surface(
+        modifier = Modifier.spanScreenWidth(SettingsGutter),
+        color = signal.heroContainer,
+        contentColor = signal.onHero
+    ) {
         Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 56.dp)
+                .padding(horizontal = SettingsGutter),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.primary
-            )
-            TooltipBox(
-                positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
-                tooltip = { RichTooltip { Text(helpText) } },
-                state = tooltipState
-            ) {
-                IconButton(onClick = { scope.launch { tooltipState.show() } }) {
-                    Icon(
-                        imageVector = SignalIcons.Help,
-                        contentDescription = title,
-                        modifier = Modifier.size(24.dp)
-                    )
+            Text(text = title, style = MaterialTheme.typography.headlineSmall)
+
+            if (helpText != null) {
+                val tooltipState = rememberTooltipState(isPersistent = true)
+                val scope = rememberCoroutineScope()
+                TooltipBox(
+                    positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
+                    tooltip = { RichTooltip { Text(helpText) } },
+                    state = tooltipState
+                ) {
+                    IconButton(onClick = { scope.launch { tooltipState.show() } }) {
+                        Icon(
+                            imageVector = SignalIcons.Help,
+                            contentDescription = title,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
             }
         }
-    } else {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.primary
-        )
     }
+}
+
+/**
+ * Widens a child by [gutter] on each side so it spans the full screen width inside a parent that
+ * pads its content by [gutter]. The layout it takes up in the parent is unchanged, so nothing else
+ * in the column moves.
+ */
+private fun Modifier.spanScreenWidth(gutter: Dp): Modifier = layout { measurable, constraints ->
+    val bleed = gutter.roundToPx()
+    val width = constraints.maxWidth + bleed * 2
+    val placeable = measurable.measure(constraints.copy(minWidth = width, maxWidth = width))
+    layout(constraints.maxWidth, placeable.height) { placeable.place(-bleed, 0) }
 }
 
 @Composable

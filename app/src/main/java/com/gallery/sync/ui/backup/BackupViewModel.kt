@@ -209,7 +209,7 @@ data class BackupUiState(
     val isOptimiseEnabled: Boolean = false,
     val optimisePhotos: Boolean = false,
     val photoOptimiseMode: OptimiseMode = OptimiseMode.DEFAULT,
-    val optimiseVideo: Boolean = true,
+    val optimiseVideo: Boolean = false,
     val videoOptimiseMode: OptimiseMode = OptimiseMode.DEFAULT,
     val videoOptimiseAge: MediaAge = MediaAge.DEFAULT,
     val videoQuality: VideoQuality = VideoQuality.DEFAULT,
@@ -754,20 +754,6 @@ class BackupViewModel @Inject constructor(
         viewModelScope.launch { settings.setShowEmptyCloudFolders(show) }
     }
 
-    /**
-     * The old single photo switch, expressed through the two settings that replaced it.
-     *
-     * Kept so existing callers keep working while the new Settings section is built. It sets the
-     * master switch and puts photos in Auto, which is what this control used to mean - "optimise
-     * photos without asking me each time".
-     */
-    fun setAutoOptimiseEnabled(enabled: Boolean) {
-        viewModelScope.launch {
-            settings.setOptimiseEnabled(enabled)
-            if (enabled) settings.setPhotoOptimiseMode(OptimiseMode.Auto)
-        }
-    }
-
     fun setOptimiseEnabled(enabled: Boolean) {
         viewModelScope.launch { settings.setOptimiseEnabled(enabled) }
     }
@@ -794,25 +780,6 @@ class BackupViewModel @Inject constructor(
 
     fun setVideoQuality(quality: VideoQuality) {
         viewModelScope.launch { settings.setVideoQuality(quality) }
-    }
-
-    /**
-     * Reopens guided setup.
-     *
-     * Clears only the completion flag, which is what [com.gallery.sync.MainActivity] reads to
-     * decide between the wizard and the tabs. Deliberately touches nothing else, per TASK-014:
-     *
-     * - **Current values, not defaults.** The wizard reads live preferences, so it opens on what is
-     *   set today. A setup flow that reset the configuration it exists to adjust would be a trap,
-     *   and the destructive settings are the ones it would reset.
-     * - **No silent re-apply.** Gate 2's bulk mode change is UI state starting at "choose per
-     *   album", so walking the flow again changes no album unless the user picks again.
-     * - **Acknowledgements survive.** The record is additive and nothing clears it. Making someone
-     *   re-acknowledge Archive to change a folder would devalue the acknowledgement, which works
-     *   only while it stays rare.
-     */
-    fun restartSetup() {
-        viewModelScope.launch { settings.setSetupCompleted(false) }
     }
 
     /**

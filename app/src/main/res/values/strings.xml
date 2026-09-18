@@ -84,6 +84,21 @@
     <string name="settings_restore">Restore</string>
     <string name="settings_archive">Archive</string>
 
+    <!-- The three link cards at the bottom of Settings. -->
+    <string name="settings_privacy_policy">Privacy Policy</string>
+    <string name="settings_privacy_policy_detail">How Gallery Sync handles your photos, videos and account.</string>
+    <string name="settings_delete_account">Delete Account Info</string>
+    <string name="settings_delete_account_detail">How to sign out, remove the app\'s access to your Microsoft account, and clear its data.</string>
+    <string name="settings_contact">Contact Info</string>
+    <string name="settings_contact_detail">Questions or problems? Email %1$s</string>
+    <string name="contact_page_intro">Questions or problems with Gallery Sync? Write to:</string>
+    <string name="contact_page_copy">Copy address</string>
+    <string name="contact_page_copied">Copied</string>
+    <string name="contact_page_clip_label">Gallery Sync contact</string>
+    <string name="settings_page_close">Close</string>
+    <string name="settings_page_load_failed">This page could not be loaded. Check your connection and try again.</string>
+    <string name="settings_page_open_browser">Open in browser</string>
+
     <!-- Section help tooltips -->
     <string name="help_general">Settings that apply across the whole app — appearance, network, and language.</string>
     <string name="help_albums">Which folders to watch, what happens to cloud copies when you delete from this phone, and the default mode for new albums.</string>
@@ -113,9 +128,6 @@
     <string name="settings_quality">Quality</string>
     <string name="settings_automatic">Automatic sync</string>
     <string name="settings_optimise">Optimise photos</string>
-    <string name="settings_auto_optimise">Optimise automatically</string>
-    <string name="settings_auto_optimise_on">Photos and video are optimised on their own, once they are verified in OneDrive.</string>
-    <string name="settings_auto_optimise_off">Nothing is optimised until you tap Optimise.</string>
 
     <!--
         "Optimise" rather than "compress" or "shrink": the photo stays in the gallery and stays
@@ -832,10 +844,6 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="wizard_charging_body">Should that first run wait until the phone is charging?</string>
     <string name="wizard_charging_required">Only while charging</string>
     <string name="wizard_charging_anytime">Any time</string>
-
-    <string name="settings_setup">Setup</string>
-    <string name="settings_setup_detail">Walk through the introduction again. It opens on your current settings, changes no album on its own, and does not ask you to re-confirm anything you have already read.</string>
-    <string name="settings_setup_action">Run setup again</string>
 
     <!-- The hero's run controls. Pause holds until told otherwise; Stop ends this run and lets
          automatic sync pick up at the next trigger. -->

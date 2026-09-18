@@ -48,11 +48,23 @@ val SignalOnSurfaceVariantDark = Color(0xFF94999E)
 /**
  * The brand green, in both its roles.
  *
- * [SignalDeepGreen] is the hero card in light, where it is the darkest thing on the screen.
- * [SignalBrightGreen] is the hero card in dark, where it is the brightest. The card inverts rather
- * than darkening, so that on either theme it keeps its one job: being what the eye lands on first.
+ * [SignalDeepGreen] is the light theme's `primary` — buttons, switches, the text-coloured green.
+ * It was also the hero card's fill until 18 Sept 2026, when the hero was lifted to [SignalHeroLight]
+ * because it read too dark (Ian). The two are separate values on purpose: lightening the hero must
+ * not recolour every button in the app.
+ *
+ * [SignalBrightGreen] is the accent, on the progress fill and the selected nav pill.
  */
 val SignalDeepGreen = Color(0xFF003525)
+
+/**
+ * The hero container in light: the heading box at the top of each tab, and the Settings section
+ * headings that match it.
+ *
+ * Lifted from [SignalDeepGreen] (`#003525`) after Ian found it came off too dark. Still deep enough
+ * that [SignalDeepGreenText] on it is about 8:1, so the card and the mode pills on it stay readable.
+ */
+val SignalHeroLight = Color(0xFF0A5238)
 val SignalDeepGreenText = Color(0xFFF0F7F3)
 val SignalBrightGreen = Color(0xFF5BE479)
 
@@ -69,7 +81,7 @@ val SignalBrightGreen = Color(0xFF5BE479)
  * the bright green stays what it is everywhere else: the accent, on the progress fill and the one
  * primary button.
  */
-val SignalHeroDark = Color(0xFF074231)
+val SignalHeroDark = Color(0xFF0B5039) // lifted from #074231 on 18 Sept 2026, with the light hero.
 val SignalOnHeroDark = Color(0xFFCCF3DD)
 val SignalBrightGreenText = Color(0xFF002315)
 

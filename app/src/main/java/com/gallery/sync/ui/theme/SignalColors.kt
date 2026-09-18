@@ -84,7 +84,7 @@ data class GallerySyncColors(
 )
 
 private val SignalLight = GallerySyncColors(
-    heroContainer = SignalDeepGreen,
+    heroContainer = SignalHeroLight,
     onHero = SignalDeepGreenText,
     accent = SignalBrightGreen,
     onAccent = SignalBrightGreenText,
