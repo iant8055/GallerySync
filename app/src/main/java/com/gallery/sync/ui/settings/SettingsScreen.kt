@@ -111,6 +111,14 @@ fun SettingsScreen(
             help = HelpTopic.SETTINGS_SECTION_GENERAL
         )
 
+        // First in General, above Language (Ian, 18 Sept 2026). The setup tour's Help card rings the
+        // mock of this card, so the two move together.
+        LinkCard(
+            title = stringResource(R.string.settings_how_to_guide),
+            detail = stringResource(R.string.settings_how_to_guide_detail),
+            onClick = { page = SupportPage.HOW_TO_GUIDE }
+        )
+
         WithHelp(HelpTopic.SETTINGS_LANGUAGE) {
             Column {
                 Text(
@@ -366,19 +374,13 @@ fun SettingsScreen(
         )
 
         Text(
-            text = stringResource(R.string.settings_language_detail),
+            text = stringResource(R.string.settings_archive_detail),
             style = MaterialTheme.typography.bodySmall
         )
 
         HorizontalDivider()
 
-        // ── About: guide, policy, account deletion, contact ──────────────────
-        LinkCard(
-            title = stringResource(R.string.settings_how_to_guide),
-            detail = stringResource(R.string.settings_how_to_guide_detail),
-            onClick = { page = SupportPage.HOW_TO_GUIDE }
-        )
-
+        // ── About: policy, account deletion, contact ─────────────────────────
         LinkCard(
             title = stringResource(R.string.settings_privacy_policy),
             detail = stringResource(R.string.settings_privacy_policy_detail),

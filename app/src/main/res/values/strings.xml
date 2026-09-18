@@ -11,7 +11,10 @@
     <string name="settings_general">General</string>
     <string name="settings_albums">Albums</string>
     <string name="settings_language">Language</string>
-    <string name="settings_language_detail">Coming soon</string>
+    <string name="settings_language_detail">Multi-Language Support Coming Soon</string>
+    <!-- The Archive band's placeholder. It shared settings_language_detail until the Language line
+         became more specific, which would have put "Multi-Language Support" under Archive. -->
+    <string name="settings_archive_detail">Coming soon</string>
     <string name="settings_appearance">Appearance</string>
     <string name="theme_system">System</string>
     <string name="theme_light">Light</string>
@@ -105,11 +108,7 @@
         The (?) buttons. What each one explains lives in help_topics.xml, which is generated from the
         How To Guide's source (tools/guide/) so the pop-up and the guide cannot disagree. Only the
         words around the pop-up are here.
-
-        help_albums is left because the setup tour's mock Settings screen shows it in a tooltip, and
-        the tour is a picture of the app rather than the app.
     -->
-    <string name="help_albums">Which folders to watch, what happens to cloud copies when you delete from this phone, and the default mode for new albums.</string>
     <string name="help_button_description">Help: %1$s</string>
     <string name="help_open_guide">Read more in the How To Guide</string>
     <string name="archive_list_heading">Files</string>
@@ -904,7 +903,7 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_description_navigation">Browse and download files from OneDrive</string>
     <string name="tour_description_archive">Review files verified in the cloud and free up space</string>
     <string name="tour_description_settings">Backup destination, optimisation, and preferences</string>
-    <string name="tour_description_help">Just press the (?) to get guides, tips, and answers to common questions</string>
+    <string name="tour_description_help">Press any (?) for a quick explanation of that line. For everything in one place, open the How To Guide at the top of Settings.</string>
     <string name="tab_help">Help</string>
 
     <string name="tour_install_title">What we\'ll set up</string>

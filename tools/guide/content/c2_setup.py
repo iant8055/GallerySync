@@ -36,7 +36,9 @@ CHAPTER = Chapter(
 
             **The tour.** Five short cards, one for each of the four tabs (Albums, Restore, Archive and
             Settings) and one for Help. Each points at its tab and says in a sentence what it is for. The
-            Help card explains that a **(?)** button gives you guides, tips and answers.
+            Help card explains that a **(?)** button gives a quick explanation of the line beside it,
+            and rings the **How To Guide** card at the top of Settings, which explains everything in
+            one place.
 
             **What we'll set up.** A checklist of the five things ahead:
             • Give permission to search this phone for photos and videos.

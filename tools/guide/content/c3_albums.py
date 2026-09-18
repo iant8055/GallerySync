@@ -55,7 +55,7 @@ CHAPTER = Chapter(
             an album's mode. To change a mode, use the pill on the album's own card.
 
             For what each mode does, see [[modes-in-depth]].
-        """, ui=True),
+        """),
 
         topic("albums-totals", "Total Album Count/Size and Album Mode Count", """
             ## What it is

@@ -52,7 +52,8 @@ CHAPTER = Chapter(
             • **Settings** (cog). The things you set once and rarely change: appearance, mobile data, where backups go, which folders to watch, and how photos and videos are optimised.
 
             During first-time setup the bar is hidden and a guided tour walks you through the same four
-            tabs. Look for the **(?)** buttons in the app: each opens a short explanation taken from this guide.
+            tabs. Look for the **(?)** buttons in the app: each opens a short explanation taken from this
+            guide. The whole guide is also the first card in **Settings**, under **General**.
         """),
 
         topic("quick-start", "Quick start", """

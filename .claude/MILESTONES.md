@@ -5901,3 +5901,28 @@ Use `set ac 0`, `set usb 0`, `set status 3` and `set level 80`, then `reset`.
 2. **The count on the button lags a backup run** until you change tab (it refreshes on tab entry, as the
    photo count does): probably because a content-triggered run is replaced by its own re-arm, so the observer never sees it SUCCEED (not confirmed). Left alone.
 3. The Settings *Archive* band still says *Coming soon*.
+
+### 18 Sept 2026 (evening) — How To Guide moved into General, Language wording, Albums (?) and the tour's Help card
+
+Ian's requests, all done and looked at on the Moto G (`ZT422CTZQV`, over wireless), light and dark:
+
+- **Albums tab.** The (?) after *Tap to filter by mode* is gone. Its guide topic (`albums-filter`) stays in the
+  guide as a page with no pop-up, so `HelpTopic.ALBUMS_FILTER` no longer exists. The (?) inside the
+  *All Albums* pill (the album cards) is unchanged.
+- **Settings.** The *How To Guide* card is now the first thing in **General**, above *Language*, and no
+  longer among the cards at the bottom. Those are now three (Privacy Policy, Delete Account Info, Contact
+  Info), and the guide says so (`settings-how-to-guide-card` is new; `settings-about-cards` retitled).
+  Supersedes the earlier entry's "How To Guide LinkCard placed first among the cards".
+- **Language** now reads *Multi-Language Support Coming Soon*. The Archive band had been borrowing the same
+  string (`settings_language_detail`), so it has its own now (`settings_archive_detail`, still *Coming soon*).
+  Watched on the device: Archive still reads *Coming soon*.
+- **The tour's Help card.** It now rings the (mock) How To Guide card, at the top of the Settings picture,
+  and says: *Press any (?) for a quick explanation of that line. For everything in one place, open the How To
+  Guide at the top of Settings.* The old tooltip that hung off the Albums (?) is gone, and with it the
+  `help_albums` string. The ring is a rounded rectangle now (a circle sized to a card's width would have lit
+  half the screen). The mock Settings picture gained the same card above Language.
+- The generated pages, `help_topics.xml` and `HelpTopic.kt` were regenerated (94 topics, 52 with a (?)).
+  Full suite 374/374. Crash buffer empty after install and after the tour.
+
+**Fixture note:** to see the tour I ran `pm clear` on the Moto G, so it is signed out of the test OneDrive
+and set up again from scratch; it was left on the tour's Help card. Not a defect.

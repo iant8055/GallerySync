@@ -4,8 +4,9 @@ CHAPTER = Chapter(
     id="settings",
     title="The Settings tab",
     intro="The things you set once and rarely change. The tab is a single scrolling page divided into "
-          "green bands: General, Backup, Albums, Sync, Restore and Archive, with links to the "
-          "policy pages at the bottom. Each band has a (?) beside its name.",
+          "green bands: General, Backup, Albums, Sync, Restore and Archive. The How To Guide is the "
+          "first card in General, and the policy pages are at the bottom. Each band has a (?) beside "
+          "its name.",
     topics=[
         topic("settings-overview", "How the Settings tab is laid out", """
             Each green band is a section heading, with a **(?)** that explains the whole section. Under
@@ -23,16 +24,34 @@ CHAPTER = Chapter(
 
         topic("settings-section-general", "General", """
             ## What it is
-            Settings that apply across the whole app: **Language**, **Appearance** and **Use mobile data**.
+            Settings that apply across the whole app: the **How To Guide** card, **Language**,
+            **Appearance** and **Use mobile data**.
 
             ## Where it comes from
             These are stored on your phone and change how the app looks and when it uses your data plan.
         """, ui=True),
 
+        topic("settings-how-to-guide-card", "The How To Guide card", """
+            ## What it is
+            The first card in **General**, above **Language**. It reads **How To Guide**, with a line
+            under it saying it explains what every screen and every line means, and where its
+            information comes from.
+
+            ## What it does
+            Tap it to open this guide inside the app. **Close** returns you to Settings. You reach the
+            same guide from any **(?)** pop-up, by pressing **Read more in the How To Guide**, which
+            opens it at the topic you were reading.
+
+            ## Where it comes from
+            The guide is a web page, shown from the internet, so it needs a connection. If it cannot be
+            loaded you will see **This page could not be loaded**, with **Open in browser** to try it
+            there.
+        """),
+
         topic("settings-language", "Language", """
             ## What it is
-            A line reading **Language** with **Coming soon** under it. The app is available in English
-            only at the moment, and there is nothing to choose yet.
+            A line reading **Language** with **Multi-Language Support Coming Soon** under it. The app is
+            available in English only at the moment, and there is nothing to choose yet.
         """, ui=True),
 
         topic("settings-appearance", "Appearance", """
@@ -428,16 +447,18 @@ CHAPTER = Chapter(
             See [[archive-overview]].
         """, ui=True),
 
-        topic("settings-about-cards", "The four link cards at the bottom", """
-            Below the sections are four cards. Tap one to open its page inside the app.
+        topic("settings-about-cards", "The three link cards at the bottom", """
+            Below the sections are three cards. Tap one to open its page inside the app.
 
             • **Privacy Policy.** How Gallery Sync handles your photos, videos and account.
             • **Delete Account Info.** How to sign out, remove the app's access to your Microsoft account, and clear its data.
             • **Contact Info.** Questions or problems? It shows the address, which you can select and copy with **Copy address**. It does not open a mail app.
-            • **How To Guide.** This guide.
 
-            The Privacy Policy, Delete Account Info and How To Guide pages are shown from the internet, so
-            they need a connection. If a page cannot be loaded you will see **This page could not be
+            The How To Guide card is not down here: it is the first card in General. See
+            [[settings-how-to-guide-card]].
+
+            The Privacy Policy and Delete Account Info pages are shown from the internet, so they need
+            a connection. If a page cannot be loaded you will see **This page could not be
             loaded**, with **Open in browser** to try it there. Close returns you to Settings.
         """),
     ],

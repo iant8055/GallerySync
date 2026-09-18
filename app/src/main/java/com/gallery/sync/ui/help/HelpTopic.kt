@@ -17,7 +17,6 @@ enum class HelpTopic(
     @param:StringRes val body: Int
 ) {
     ALBUMS_PERMISSION("albums-permission", R.string.help_albums_permission_title, R.string.help_albums_permission_body),
-    ALBUMS_FILTER("albums-filter", R.string.help_albums_filter_title, R.string.help_albums_filter_body),
     ALBUMS_TOTALS("albums-totals", R.string.help_albums_totals_title, R.string.help_albums_totals_body),
     ALBUMS_ALL_BACKED_UP("albums-all-backed-up", R.string.help_albums_all_backed_up_title, R.string.help_albums_all_backed_up_body),
     ALBUMS_OPTIMISED_LINE("albums-optimised-line", R.string.help_albums_optimised_line_title, R.string.help_albums_optimised_line_body),

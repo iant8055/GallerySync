@@ -484,21 +484,15 @@ private fun ModeFilterGrid(
 
         // These read as status until you know they are controls — a count beside a word looks like
         // a summary, which is exactly what they were an hour ago. One quiet line rather than an
-        // affordance on each button, which would make five loud things out of five calm ones.
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = stringResource(R.string.albums_filter_hint),
-                style = MaterialTheme.typography.bodySmall,
-                textAlign = TextAlign.Center,
-                color = LocalContentColor.current.copy(alpha = 0.7f),
-                modifier = Modifier.weight(1f, fill = false)
-            )
-            HelpButton(HelpTopic.ALBUMS_FILTER)
-        }
+        // affordance on each button, which would make five loud things out of five calm ones. It has
+        // no (?) of its own (Ian, 18 Sept 2026): the guide's "albums-filter" topic covers it.
+        Text(
+            text = stringResource(R.string.albums_filter_hint),
+            style = MaterialTheme.typography.bodySmall,
+            textAlign = TextAlign.Center,
+            color = LocalContentColor.current.copy(alpha = 0.7f),
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 

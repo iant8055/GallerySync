@@ -42,16 +42,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
-import androidx.compose.material3.RichTooltip
 
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -63,8 +59,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.delay
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -72,7 +70,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import kotlin.math.roundToInt
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
@@ -82,7 +79,6 @@ import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -757,16 +753,16 @@ private fun TabTooltipsStep(
     val tabIndex = subStep - 1
     val currentTab = tabs.getOrNull(tabIndex)
 
-    // Where the mockup put the help button the Help card points at, and where this overlay sits,
-    // so the two can be expressed in the same coordinates.
-    var helpIconInRoot by remember { mutableStateOf<Rect?>(null) }
+    // Where the mockup put the How To Guide card the Help card points at, and where this overlay
+    // sits, so the two can be expressed in the same coordinates.
+    var guideCardInRoot by remember { mutableStateOf<Rect?>(null) }
     var overlayOrigin by remember { mutableStateOf(Offset.Zero) }
     // How tall the bar drawn inside the frame came out, so the card sits above it rather than on it.
     var navBarHeight by remember { mutableStateOf(72.dp) }
     // Where the phone's screen ended up, so only that is dimmed. Dimming the whole tour left the
     // bezel as a line between two identical greys.
     var screenInRoot by remember { mutableStateOf<Rect?>(null) }
-    val spotlight = helpIconInRoot?.translate(-overlayOrigin.x, -overlayOrigin.y)
+    val spotlight = guideCardInRoot?.translate(-overlayOrigin.x, -overlayOrigin.y)
 
     Box(
         modifier = Modifier
@@ -818,13 +814,13 @@ private fun TabTooltipsStep(
                     1 -> RestoreMockup()
                     2 -> ArchiveMockup()
                     3 -> SettingsMockup()
-                    else -> SettingsMockup(onHelpIconPositioned = { helpIconInRoot = it })
+                    else -> SettingsMockup(onGuideCardPositioned = { guideCardInRoot = it })
                 }
             }
 
             // Scrim so the card pops over the mockup. On the Help card it is punched through at
-            // the help button and ringed, so the tooltip below reads as having come from pressing
-            // it rather than from nowhere.
+            // the How To Guide card and ringed, so the card's words about the guide have something
+            // on screen to point at.
             val scrimColor = MaterialTheme.colorScheme.scrim.copy(alpha = 0.4f)
             val stencilColor = MaterialTheme.colorScheme.scrim
             val ringColor = MaterialTheme.colorScheme.primary
@@ -842,42 +838,16 @@ private fun TabTooltipsStep(
                 }
                 if (isHelp) {
                     spotlight?.let { rect ->
-                        val radius = rect.maxDimension * 0.85f
-                        drawCircle(stencilColor, radius, rect.center, blendMode = BlendMode.Clear)
-                        drawCircle(ringColor, radius, rect.center, style = Stroke(ringWidth))
-                    }
-                }
-            }
-
-            // One real help bubble, open, anchored on the ringed button so it is obvious what
-            // raised it. Same RichTooltip the section headers use, so the tour cannot drift from
-            // what the app actually shows.
-            if (isHelp && spotlight != null) {
-                val helpTooltipState = rememberTooltipState(isPersistent = true)
-                LaunchedEffect(Unit) { helpTooltipState.show() }
-
-                Box(
-                    modifier = Modifier
-                        .offset { IntOffset(spotlight.left.roundToInt(), spotlight.top.roundToInt()) }
-                        .size(with(LocalDensity.current) { spotlight.maxDimension.toDp() })
-                ) {
-                    TooltipBox(
-                        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
-                        tooltip = {
-                            RichTooltip(
-                                colors = TooltipDefaults.richTooltipColors(
-                                    contentColor = MaterialTheme.colorScheme.onSurface
-                                )
-                            ) {
-                                // The Albums section's own help text, because that is the button
-                                // the ring is on — the same RichTooltip Settings opens there.
-                                Text(stringResource(R.string.help_albums))
-                            }
-                        },
-                        state = helpTooltipState,
-                        enableUserInput = false
-                    ) {
-                        Spacer(Modifier.fillMaxSize())
+                        // A rounded rectangle just outside the card, as wide as the card is: a
+                        // circle sized to its width would have lit half the screen.
+                        val margin = ringWidth * 2
+                        val topLeft = Offset(rect.left - margin, rect.top - margin)
+                        val size = Size(rect.width + margin * 2, rect.height + margin * 2)
+                        val corners = CornerRadius(ringWidth * 4)
+                        drawRoundRect(
+                            stencilColor, topLeft, size, corners, blendMode = BlendMode.Clear
+                        )
+                        drawRoundRect(ringColor, topLeft, size, corners, style = Stroke(ringWidth))
                     }
                 }
             }
@@ -2639,7 +2609,7 @@ private fun MockArchiveRow(name: String, size: String, confirmed: Boolean) {
  */
 @Composable
 private fun SettingsMockup(
-    onHelpIconPositioned: ((Rect) -> Unit)? = null
+    onGuideCardPositioned: ((Rect) -> Unit)? = null
 ) {
     Column(
         modifier = Modifier
@@ -2650,6 +2620,28 @@ private fun SettingsMockup(
     ) {
         // ── General ──
         MockSectionHeader(stringResource(R.string.settings_general))
+        // The card the Help card rings. First in General, above Language, as in the real tab.
+        OutlinedCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .onGloballyPositioned { coords ->
+                    onGuideCardPositioned?.invoke(coords.boundsInRoot())
+                }
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.settings_how_to_guide),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = stringResource(R.string.settings_how_to_guide_detail),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
         Text(
             text = stringResource(R.string.settings_language),
             style = MaterialTheme.typography.bodyLarge
@@ -2670,12 +2662,8 @@ private fun SettingsMockup(
         )
         HorizontalDivider()
 
-        // ── Albums ── the section the Help card rings. It was Backup, which this longer mockup
-        // pushed down behind the card, hiding the ring the card is pointing at.
-        MockSectionHeader(
-            stringResource(R.string.settings_albums),
-            onHelpPositioned = onHelpIconPositioned
-        )
+        // ── Albums ──
+        MockSectionHeader(stringResource(R.string.settings_albums))
         Text(
             text = stringResource(R.string.sources_title),
             style = MaterialTheme.typography.bodyLarge
@@ -2814,15 +2802,10 @@ private fun MockRadioRow(label: String, selected: Boolean) {
 /**
  * A section header as Settings draws it, help button included.
  *
- * Inert — this is a mockup, and the tour must never put a live control behind a wizard card. The
- * button is here because step 2's Help card points at it; [onHelpPositioned] reports where it
- * landed so the tour can ring it and hang the tooltip off it.
+ * Inert — this is a mockup, and the tour must never put a live control behind a wizard card.
  */
 @Composable
-private fun MockSectionHeader(
-    title: String,
-    onHelpPositioned: ((Rect) -> Unit)? = null
-) {
+private fun MockSectionHeader(title: String) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -2835,11 +2818,7 @@ private fun MockSectionHeader(
         Icon(
             imageVector = SignalIcons.Help,
             contentDescription = null,
-            modifier = Modifier
-                .size(24.dp)
-                .onGloballyPositioned { coords ->
-                    onHelpPositioned?.invoke(coords.boundsInRoot())
-                }
+            modifier = Modifier.size(24.dp)
         )
     }
 }
