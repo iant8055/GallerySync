@@ -5421,3 +5421,42 @@ in this capture, but isn't proven as the mechanism (as opposed to, say, Doze, or
 WorkManager's own alarm handling under a frozen process). Worth reading `ForceStopRunnable.java` and
 searching for known interactions between process freezing/cached-app policies and WorkManager's
 force-stop detection before deciding on a fix.
+
+### 18 Sept 2026 (late morning, continued) — the canary is cleared by an automatic task removal, not a swipe
+
+Traced what clears WorkManager's force-stop canary, per the entry above. Followed process 10132 (the
+wizard's own process, which set Camera to Sync and was then backgrounded with Home) through the full
+continuous capture.
+
+```
+10:36:26  Camera set to Sync (this session's own action)
+10:37:47.680  BufferQueueConsumer: MainActivity ... disconnect
+10:37:47.833  HWUI: setGrContext validptr-->nullptr
+10:37:48.526  ActivityManager: Killing 10132:com.gallery.sync (adj 915, setSvc -10000): remove task
+10:37:48.675  ActivityManager: appDiedLocked ... isKilledByAm=true
+```
+
+**`remove task` is Android's standard reason string for a task being explicitly removed from
+Recents — the same code path a user swipe goes through.** Nobody swiped anything here: the app was
+backgrounded with Home at ~10:36:2x and never touched again, confirmed directly. About 70 seconds
+of being backgrounded was enough for something — almost certainly Motorola's own recents/process
+management, given `moto_freezer` is the reason string on every other lifecycle event this process
+went through minutes earlier — to remove the task and kill the process automatically, indistinguishable
+in the log from the user doing it by hand.
+
+**This is the same failure CLAUDE.md already names, just not user-triggered the way it assumed.**
+The "Do not add a foreground service" section calls a swipe out of Recents "the unsolved case,"
+on the premise that it requires the user's own gesture and so is somewhat containable. This capture
+shows the *identical* kill path firing on its own, well within two minutes of an ordinary background,
+on a device with no usage history for this app yet. That reframes the whole investigation: this was
+never really about standby buckets or WorkManager quotas — a killed process has no surviving canary
+alarm, so the very next content-trigger dispatch finds `ForceStopRunnable` concluding force-stop and
+cancelling itself, which is the mechanism traced two entries up. Bucket state, RARE vs RESTRICTED,
+was never the variable that mattered; process survival is.
+
+**Still unconfirmed:** whether this is purely Motorola's behavior, whether it would ease once the app
+has enough usage history to earn OS trust (the fresh-install angle already suspected for the RESTRICTED
+findings applies here too), and whether Ian's real Fold 8 — never used for testing — shows the same
+speed. Worth checking `dumpsys activity processes` for the exact policy name behind `moto_freezer`'s
+task-removal behavior before scoping a fix, since the fix needed for "an OEM kills backgrounded apps
+fast" is a different shape than the fix needed for "WorkManager mishandles a real force-stop."
