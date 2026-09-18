@@ -5491,3 +5491,34 @@ reproduced twice. *Why* WorkManager 2.11.2 concludes that, mechanically, is not 
 AlarmManager canary theory was the wrong guess at it. A fix does not need that mechanism nailed down
 to be scoped, since the actionable lever is the same either way: keep the process alive longer, or stop
 depending on a content-trigger `WorkSpec` surviving a process restart at all.
+
+### 18 Sept 2026 (afternoon) — the Doze whitelist is confirmed as the actual lever, diagnostically
+
+Direct test of the hypothesis raised after the withdrawal above: does keeping the app off the
+platform's own battery-optimization exemption list explain the task removal? Added via
+`adb shell dumpsys deviceidle whitelist +com.gallery.sync` — diagnostic only, not a route a real user
+has on this device (see below).
+
+**Before (17–18 Sept, not whitelisted): every background cycle ended in `Killing ... remove task`
+within ~70–90 seconds**, cold-starting the next dispatch into `ForceStopRunnable`'s misdetection.
+
+**After (whitelisted): backgrounded for a full 3 minutes, same PID (15488) alive throughout.** It still
+froze normally (`freezing 15488 ... reason = moto_freezer, adj=700`) — freezing is untouched, and still
+happens — but did **not** escalate to a kill this time. A batch of 5 photos taken while frozen-but-alive
+woke the same process, ran `backup run starting` → `backup run finished: 12 uploaded ... 0 remaining`
+in the same PID, and **no `ForceStopRunnable` instance anywhere in the window logged "force-stopped"**
+— every one that ran logged `Found unfinished work, scheduling it.`, the healthy branch. The 12 (not 5)
+confirms it also swept up files stuck from before the app was whitelisted, the same recovery pattern
+seen on 17 Sept.
+
+**So: staying off the kill list, not the force-stop heuristic itself, is the actual lever.** Freezing a
+process is harmless and reversible — WorkManager's state survives it fine. Killing it is what forces a
+cold restart into `ForceStopRunnable`, which is what intermittently misfires. Keep the process out of
+the kill path and the misfire has nothing to trigger it.
+
+**Why this isn't a shippable fix as tested.** Confirmed with Ian, this Moto G has no per-app
+"Unrestricted" battery screen — only a device-wide "Use Adaptive Battery" switch, which would trade
+away Doze/Standby behaviour for every app to fix one. The only *app-side* way onto this list is
+requesting `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`, which is the Play-review-gated permission Ian
+ruled out on 5 Sept for exactly this reason. This test answers the mechanism question cleanly; it does
+not by itself answer the product question of how a real install reaches the same protected state.
