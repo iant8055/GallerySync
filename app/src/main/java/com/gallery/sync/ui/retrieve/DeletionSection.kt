@@ -25,6 +25,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
+import com.gallery.sync.ui.help.HelpTopic
+import com.gallery.sync.ui.help.TitleWithHelp
+import com.gallery.sync.ui.help.WithHelp
 import com.gallery.sync.domain.backup.CloudDeletionGrace
 import com.gallery.sync.domain.backup.CloudDeletionPolicy
 import com.gallery.sync.ui.common.LabelWithAction
@@ -56,10 +59,12 @@ fun DeletionSection(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text(
-            text = stringResource(R.string.deletion_title),
-            style = MaterialTheme.typography.bodyLarge
-        )
+        WithHelp(HelpTopic.SETTINGS_DELETION) {
+            Text(
+                text = stringResource(R.string.deletion_title),
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
 
         Column(Modifier.selectableGroup()) {
             PolicyRow(
@@ -77,10 +82,12 @@ fun DeletionSection(
         // Only worth showing when it governs something. Under LEAVE nothing is ever offered, so a
         // waiting period is a setting with no effect.
         if (state.policy == CloudDeletionPolicy.ASK) {
-            Text(
-                text = stringResource(R.string.deletion_grace_label),
-                style = MaterialTheme.typography.titleSmall
-            )
+            WithHelp(HelpTopic.SETTINGS_DELETION_WAIT) {
+                Text(
+                    text = stringResource(R.string.deletion_grace_label),
+                    style = MaterialTheme.typography.titleSmall
+                )
+            }
             Text(
                 text = stringResource(R.string.deletion_grace_detail),
                 style = MaterialTheme.typography.bodySmall
@@ -92,10 +99,12 @@ fun DeletionSection(
                 label = { days -> pluralStringResource(R.plurals.deletion_grace_days, days, days) }
             )
 
-            Text(
-                text = stringResource(R.string.deletion_candidates_title),
-                style = MaterialTheme.typography.titleSmall
-            )
+            WithHelp(HelpTopic.SETTINGS_DELETION_REVIEW) {
+                Text(
+                    text = stringResource(R.string.deletion_candidates_title),
+                    style = MaterialTheme.typography.titleSmall
+                )
+            }
 
             if (state.candidates.isEmpty()) {
                 Text(
@@ -171,7 +180,12 @@ private fun ConfirmDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.deletion_confirm_title, files)) },
+        title = {
+            TitleWithHelp(
+                stringResource(R.string.deletion_confirm_title, files),
+                HelpTopic.DIALOG_DELETION_CONFIRM
+            )
+        },
         text = {
             Text(
                 text = stringResource(

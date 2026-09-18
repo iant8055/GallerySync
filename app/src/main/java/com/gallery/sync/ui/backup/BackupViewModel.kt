@@ -10,6 +10,9 @@ import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.media.LocalCopyRemover
 import com.gallery.sync.data.local.media.ProxyApplier
 import com.gallery.sync.data.local.media.ProxyOutcome
+import com.gallery.sync.data.local.media.VideoOptimiser
+import com.gallery.sync.data.local.media.VideoReadiness
+import com.gallery.sync.worker.VideoOptimiseLauncher
 import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.domain.backup.AlbumMergeWarning
 import com.gallery.sync.worker.BackupScheduling
@@ -129,6 +132,17 @@ data class AlbumRow(
         get() = mode == AlbumMode.ARCHIVE && itemCount == 0 && everBackedUpCount > 0
 }
 
+/** What the ongoing video chain is doing, for the Settings screen to say. */
+enum class VideoOptimiseRun {
+    IDLE,
+
+    /** A batch is executing, or about to. */
+    WORKING,
+
+    /** Queued, and held back only by the charger. */
+    WAITING_FOR_CHARGER
+}
+
 enum class AlbumStatus {
 
     /** Every file is in OneDrive. Safe whether or not it is still being watched. */
@@ -240,6 +254,12 @@ data class BackupUiState(
     val proxyCandidateBytes: Long = 0L,
     val canProxy: Boolean = false,
     val proxyStatus: ProxyStatus? = null,
+    /** Clips ready to optimise: in a Sync album, verified, old enough, and inside a granted folder. */
+    val videoCandidateCount: Int = 0,
+    val videoCandidateBytes: Long = 0L,
+    /** Clips that would qualify but sit in a folder nobody granted, so they are left alone. */
+    val videoOutsideCount: Int = 0,
+    val videoOptimiseRun: VideoOptimiseRun = VideoOptimiseRun.IDLE,
     val defaultAlbumMode: AlbumMode = AlbumMode.DEFAULT,
     /** Whether the restore screen lists cloud folders that hold nothing. */
     val showEmptyCloudFolders: Boolean = false,
@@ -413,6 +433,8 @@ class BackupViewModel @Inject constructor(
     private val engine: BackupEngine,
     private val localCopyRemover: LocalCopyRemover,
     private val proxyApplier: ProxyApplier,
+    private val videoOptimiser: VideoOptimiser,
+    private val videoOptimise: VideoOptimiseLauncher,
     private val settings: BackupSettings,
     @param:ApplicationContext private val context: Context
 ) : ViewModel() {
@@ -461,6 +483,7 @@ class BackupViewModel @Inject constructor(
             }
         }
         observeBackgroundWork()
+        observeVideoOptimise()
         observeCloudStatus()
         viewModelScope.launch {
             settings.albumMergeWarnings.collect { warnings ->
@@ -492,6 +515,29 @@ class BackupViewModel @Inject constructor(
                         }
                     )
                 }
+            }
+        }
+    }
+
+    /**
+     * Follows the ongoing video chain, so the screen can say it is working, or waiting for the charger.
+     *
+     * The counts are re-read whenever the chain changes state: each batch that finishes has just made
+     * clips smaller, and the number on the button should fall as it happens.
+     */
+    private fun observeVideoOptimise() {
+        viewModelScope.launch {
+            BackupScheduling.videoOptimiseWork(WorkManager.getInstance(context)).collectLatest { infos ->
+                val live = infos.filter { !it.state.isFinished }
+                val run = when {
+                    live.any { it.state == WorkInfo.State.RUNNING } -> VideoOptimiseRun.WORKING
+                    live.any { BackupScheduling.TAG_WAITING_FOR_CHARGER in it.tags } ->
+                        VideoOptimiseRun.WAITING_FOR_CHARGER
+                    live.isNotEmpty() -> VideoOptimiseRun.WORKING
+                    else -> VideoOptimiseRun.IDLE
+                }
+                _state.update { it.copy(videoOptimiseRun = run) }
+                refreshVideoReadiness()
             }
         }
     }
@@ -755,7 +801,10 @@ class BackupViewModel @Inject constructor(
     }
 
     fun setOptimiseEnabled(enabled: Boolean) {
-        viewModelScope.launch { settings.setOptimiseEnabled(enabled) }
+        viewModelScope.launch {
+            settings.setOptimiseEnabled(enabled)
+            startVideoIfDue()
+        }
     }
 
     fun setOptimisePhotos(enabled: Boolean) {
@@ -767,15 +816,46 @@ class BackupViewModel @Inject constructor(
     }
 
     fun setOptimiseVideo(enabled: Boolean) {
-        viewModelScope.launch { settings.setOptimiseVideo(enabled) }
+        viewModelScope.launch {
+            settings.setOptimiseVideo(enabled)
+            startVideoIfDue()
+        }
     }
 
     fun setVideoOptimiseMode(mode: OptimiseMode) {
-        viewModelScope.launch { settings.setVideoOptimiseMode(mode) }
+        viewModelScope.launch {
+            settings.setVideoOptimiseMode(mode)
+            startVideoIfDue()
+        }
     }
 
     fun setVideoOptimiseAge(age: MediaAge) {
-        viewModelScope.launch { settings.setVideoOptimiseAge(age) }
+        viewModelScope.launch {
+            settings.setVideoOptimiseAge(age)
+            startVideoIfDue()
+            refreshVideoReadiness()
+        }
+    }
+
+    /**
+     * The button: optimise video now, without waiting for the charger.
+     *
+     * The same chain an automatic run uses, so it stops the same way (the switch) and reports the same
+     * way (the status line). It runs in the background and the app can be closed.
+     */
+    fun optimiseVideoNow() {
+        viewModelScope.launch { videoOptimise.requestNow() }
+    }
+
+    /**
+     * A switch just changed. If video is now due to optimise on its own, start the chain rather than
+     * waiting for the next backup run to notice, which could be six hours away.
+     *
+     * Failure is quiet: this is a convenience, and the next backup run asks again.
+     */
+    private suspend fun startVideoIfDue() {
+        runCatching { videoOptimise.requestAutomatic() }
+        refreshVideoReadiness()
     }
 
     fun setVideoQuality(quality: VideoQuality) {
@@ -871,6 +951,29 @@ class BackupViewModel @Inject constructor(
             proxyCandidateBytes = proxyCandidates.sumOf { it.sizeBytes },
             canProxy = proxyApplier.isSupported()
         )
+        refreshVideoReadiness()
+    }
+
+    /**
+     * What the video optimiser could act on, read only while the switches say it may be wanted.
+     *
+     * Asked separately from the rest of the counts because it does a MediaStore lookup per candidate
+     * clip, which is wasted on someone who has video optimising off.
+     */
+    private suspend fun refreshVideoReadiness() {
+        val prefs = settings.current()
+        val ready = if (prefs.isOptimiseEnabled && prefs.optimiseVideo) {
+            videoOptimiser.readiness()
+        } else {
+            VideoReadiness()
+        }
+        _state.update {
+            it.copy(
+                videoCandidateCount = ready.count,
+                videoCandidateBytes = ready.bytes,
+                videoOutsideCount = ready.outsideGrantedFolders
+            )
+        }
     }
 
     /**

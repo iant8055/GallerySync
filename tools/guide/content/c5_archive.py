@@ -1,0 +1,159 @@
+from model import Chapter, topic
+
+CHAPTER = Chapter(
+    id="archive",
+    title="The Archive tab",
+    intro="Archive is the one place where files leave your phone. It only ever handles albums you "
+          "set to Archive, it checks every file against OneDrive first, and it ends with your tap.",
+    topics=[
+        topic("archive-overview", "How Archive works, step by step", """
+            1. **You choose it, once, per album.** On the Albums tab, set an album's mode to **Archive** and confirm. This is your consent. See [[dialog-archive-confirm]].
+            2. **You come here and press Check these files.** Every file in your Archive albums is checked against OneDrive. Anything not there yet is sent first and then checked.
+            3. **The app tells you the result.** Each file gets a tick or a red cross, and a prompt says how many are confirmed and how much room will be freed.
+            4. **You say Yes.** The app asks Android to move the confirmed files to your phone's Trash or Recycle Bin. Android shows its own confirmation. See [[dialog-android-trash]].
+            5. **You empty the bin when you are ready.** Removed files keep taking their full space until you do, and the app never empties it for you.
+
+            ## What "safely" means
+            A file is only removed if OneDrive confirms it holds the file **and** reports the same size as
+            your copy. A file OneDrive does not confirm stays on your phone, and the screen says why.
+
+            ## What Archive cannot do by itself
+            It cannot run while you are away. Android requires you to be present to approve removing
+            files, so the app brings you back here instead of doing it silently. If you try to leave the
+            app while files are checked and waiting, it reminds you. See [[dialog-exit-warning]].
+
+            ## It is a standing instruction
+            An album set to Archive stays that way until you change it. Files that arrive in that album
+            later, from the camera, a download or a file manager, are covered by the same choice.
+            Emptying an album does not switch the mode off.
+
+            ## Availability
+            Moving files to the bin needs Android 11 or newer. On older versions Archive is not offered,
+            rather than deleting files with no way back.
+        """),
+
+        topic("archive-hero", "Files to Archive", """
+            ## What it is
+            The green card. It shows **Files to Archive** and a number, then the names of your Archive
+            albums, then this sentence: **Every file below is checked against OneDrive first. Anything
+            that is not there yet is backed up before it is verified.**
+
+            ## Where it comes from
+            The number is a live count of files on the phone in albums set to Archive. When you arrive
+            it is worked out from the phone; it does not need the internet. The album names are the
+            albums you set to Archive.
+        """, ui=True),
+
+        topic("archive-check-button", "Check these files, and what it reports", """
+            ## What it is
+            The button in the green card, and the messages that replace it as the process moves along:
+            • **Check these files** starts the check.
+            • **Checking against OneDrive...** with a small spinner while OneDrive is asked.
+            • **Batch 1 of 3** while files are being removed. See [[dialog-android-trash]] for why there may be several.
+            • **12 files removed from this phone, freeing 340 MB.** or **Nothing was removed.** when it finishes.
+            • **Asked to wait. These files stay on your phone until then.** after you pressed Delay.
+
+            ## Where it comes from
+            The check asks OneDrive for the list of files in each album's folder and compares names and
+            sizes with the files on your phone. The result messages report what actually happened.
+
+            ## Good to know
+            "Freeing 340 MB" is a promise about after the bin is emptied. A removed file still takes its
+            space in the bin, so the room does not come back at the moment you tap.
+        """, ui=True),
+
+        topic("archive-empty", "When there is nothing to archive", """
+            ## What it is
+            Instead of a list, the card explains why:
+            • **No album is set to Archive. Nothing here will remove anything from your phone.** With a hint that says to set an album to Archive on the Albums tab, and its files will be listed here for checking before anything leaves the phone.
+            • **A zero, and no messages.** You have Archive albums but everything in them has already left the phone. The mode is finished for now and still stands.
+            • **This version of Android has no media trash, so removing local copies is not offered here.** Your Android is older than version 11.
+
+            ## Where it comes from
+            From your album modes and the phone's Android version.
+        """, ui=True),
+
+        topic("archive-file-list", "The file list and its marks", """
+            ## What it is
+            One row for each file waiting to be archived: its name, then its size, then a mark on the right.
+
+            **The mark**
+            • **A spinner.** Being checked, backed up or removed.
+            • **A green tick.** Confirmed in OneDrive at the right size, or already removed.
+            • **A red cross.** OneDrive did not confirm it, so it stays on your phone.
+            • **Nothing.** Not looked at yet.
+
+            **The words under the name**, in place of the size while something is happening:
+            • **Backing up...** The file was not in OneDrive, so it is being sent.
+            • **Moving to Trash/Recycle Bin...** Being removed.
+            • **Removed from this phone.**
+            • In red, why a file is staying: **Could not check OneDrive**, **Not in OneDrive**, or **In OneDrive but the wrong size**. Each ends "staying on your phone". "Could not check" and "is not there" are kept separate because they need different reactions. Being unable to ask is not the same as an answer.
+
+            ## Where it comes from
+            OneDrive's list of files for each album, compared with the phone. It asks once per album, not
+            once per file.
+        """, ui=True),
+
+        topic("archive-prompt", "The question: All files validated, or some validated", """
+            ## What it is
+            After the check, a card asks one question, in one of three forms:
+
+            • **All files validated.** All files are confirmed in OneDrive. Archiving them moves the local copies to your phone's Trash/Recycle Bin, and frees the stated amount once you empty it.
+            • **12 files validated.** Some files could not be confirmed and will stay on the phone. Archiving moves only the confirmed ones. The count and size describe only those.
+            • **Nothing can be archived.** OneDrive did not confirm a single file, so they all stay. A single **Continue** button closes the message.
+
+            If there are many files, it also says something like **Android can only ask about 2,000
+            files at a time, so this will take 2 separate confirmations.**
+
+            **Do you want to continue?**
+            • **Yes** asks Android to move the confirmed files to the bin. Android then shows its own confirmation.
+            • **No** puts the question away. Nothing has been removed, and you can check again later.
+            • **Delay** offers **1 hour**, **12 hours** or **1 day**. The files stay on the phone until then, and the reminder when you leave the app is held back for the same time.
+
+            ## Where the numbers come from
+            The count is the files OneDrive just confirmed. The size is those files' size on your phone.
+            It says "frees" that much once you empty the bin, because the bin keeps the bytes until then.
+        """, ui=True),
+
+        topic("dialog-android-trash", "Android's own confirmation", """
+            ## What it is
+            When you say Yes, Android puts up its own screen asking you to allow Gallery Sync to move the
+            files to the trash. The wording and look belong to Android and your phone maker, and change
+            between phones.
+
+            ## Why it appears
+            Android insists on a tap for this, and only lets an app that is open on screen ask. Gallery
+            Sync does not add a second question of its own on top: the choice you made when you set the
+            album to Archive is the consent, and this is Android's own safeguard.
+
+            ## Why there can be more than one
+            Android can only ask about 2,000 files at a time, so a large album needs a series of
+            confirmations. The Archive tab shows **Batch 1 of 3** so you can see how far along it is.
+
+            ## If you say no
+            Nothing is removed. The files stay where they are.
+        """),
+
+        topic("dialog-exit-warning", "Files ready to Archive (the leaving reminder)", """
+            ## What it is
+            A message that pops up if you try to leave the app with the back gesture while files are
+            checked, confirmed in OneDrive and waiting for your approval. It says how many files are
+            **verified in OneDrive and ready to leave this phone**, and that they stay where they are
+            until you approve the removal.
+
+            • **Archive now** takes you to the Archive tab.
+            • **Leave** closes the app. Nothing is removed.
+            • Tapping outside the message keeps you where you were.
+
+            ## Where it comes from
+            The app's check of your Archive albums. The count is files in those albums that are
+            confirmed in OneDrive and still on the phone.
+
+            ## Good to know
+            It is a reminder, not a guarantee. Android lets an app notice the back gesture and nothing
+            else, so pressing Home or swiping the app away from the recent-apps list will not show it. The
+            Archive tab is always there when you come back. If you pressed **Delay** on the prompt, the
+            reminder waits until the delay has passed.
+        """, ui=True),
+    ],
+)

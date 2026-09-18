@@ -3,6 +3,7 @@ package com.gallery.sync.ui.backup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -22,6 +23,10 @@ import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.entity.BackupState
 import com.gallery.sync.ui.common.formatBytes
+import com.gallery.sync.ui.help.HelpButton
+import com.gallery.sync.ui.help.HelpTopic
+import com.gallery.sync.ui.help.TitleWithHelp
+import com.gallery.sync.ui.help.WithHelp
 
 @Composable
 fun AlbumDetailScreen(
@@ -56,6 +61,7 @@ fun AlbumDetailScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+            HelpButton(HelpTopic.ALBUM_DETAIL, Modifier.padding(end = 8.dp))
         }
 
         HorizontalDivider()
@@ -76,7 +82,8 @@ fun AlbumDetailScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 if (backed > 0) Text(
                     "$backed backed up",
@@ -98,6 +105,8 @@ fun AlbumDetailScreen(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.error
                 )
+                Spacer(Modifier.weight(1f))
+                HelpButton(HelpTopic.ALBUM_FILE_STATUS)
             }
 
             HorizontalDivider()

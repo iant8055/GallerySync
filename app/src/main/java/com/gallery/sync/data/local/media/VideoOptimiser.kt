@@ -29,10 +29,35 @@ data class VideoOptimiseResult(
     /** Failed this time and left as candidates. */
     val failed: Int = 0,
     /** Eligible but not attempted, because the tree grant does not cover their folder. */
-    val notCovered: Int = 0
+    val notCovered: Int = 0,
+    /**
+     * Which clips failed this run.
+     *
+     * A failure leaves the clip a candidate, so left alone the next batch would pick the same
+     * largest-first clip and fail again, for ever, with the smaller clips behind it never reached. The
+     * chain carries these forward and steps over them, and starts clean the next time it is triggered.
+     */
+    val failedIds: List<String> = emptyList()
 ) {
     val didAnything: Boolean get() = optimised > 0 || skipped > 0 || failed > 0
+
+    /** Clips this run took a real look at, which is what proves the chain is moving. */
+    val attempted: Int get() = optimised + skipped + failed
 }
+
+/**
+ * What is ready to optimise right now, for a screen to say and a chain to decide by.
+ *
+ * Counts only clips that could actually be rewritten unattended: still on the phone, and inside a
+ * granted folder. Those outside one are [outsideGrantedFolders], reported apart so the screen can
+ * say why its number is smaller than the library's rather than the run quietly doing less than the
+ * count promised.
+ */
+data class VideoReadiness(
+    val count: Int = 0,
+    val bytes: Long = 0L,
+    val outsideGrantedFolders: Int = 0
+)
 
 /**
  * Replaces old video in Sync albums with a smaller local copy.
@@ -179,6 +204,59 @@ class VideoOptimiser @Inject constructor(
     }
 
     /**
+     * What is ready to optimise under the current settings, without touching anything.
+     *
+     * Ignores the switches on purpose: the screen shows this only while they are on, and a chain that
+     * has just been told to stop should read zero from [run], not from here. It does apply the age,
+     * because "ready" that included a clip shot ten minutes ago under a one-week setting would be a
+     * promise the run then breaks.
+     *
+     * [exclude] is the chain's own list of clips that already failed this time round.
+     */
+    suspend fun readiness(exclude: Set<String> = emptySet()): VideoReadiness =
+        withContext(dispatcher) {
+            val found = eligible(settings.current().videoOptimiseAge, exclude)
+            VideoReadiness(
+                count = found.ready.size,
+                bytes = found.ready.sumOf { it.sizeBytes },
+                outsideGrantedFolders = found.outside
+            )
+        }
+
+    private class Eligible(val ready: List<BackupEntryEntity>, val outside: Int)
+
+    /**
+     * The clips that pass every test but the switches, biggest first.
+     *
+     * Asked of the database for a pool rather than a batch, then narrowed by what the phone can
+     * really do. A batch taken straight from the query and *then* filtered could be all clips outside
+     * the granted folders — they stay candidates for ever, and the biggest sort first — leaving every
+     * clip behind them unreachable.
+     */
+    private suspend fun eligible(age: MediaAge, exclude: Set<String>): Eligible {
+        // Chosen by Sync mode, so one folder's spellings are merged first. TASK-023.
+        albumIdentity.reconcile()
+
+        val pool = entryDao.videoOptimiseCandidates(
+            modifiedBeforeEpochSeconds = cutoffSecondsFor(age),
+            cutoffMillis = OptimiseCutoff.EVERYTHING,
+            limit = CANDIDATE_POOL
+        )
+
+        val ready = mutableListOf<BackupEntryEntity>()
+        var outside = 0
+        for (entry in pool) {
+            if (entry.id in exclude) continue
+            when (safWriter.coverage(Uri.parse(entry.contentUri))) {
+                SafCoverage.COVERED -> ready += entry
+                SafCoverage.OUTSIDE -> outside++
+                SafCoverage.GONE -> Unit
+            }
+        }
+        return Eligible(ready = ready, outside = outside)
+    }
+
+    /**
      * Optimises what is eligible right now, or explains why it did nothing.
      *
      * Reads every gate itself rather than taking them as parameters: the master switch, the video
@@ -195,7 +273,10 @@ class VideoOptimiser @Inject constructor(
      * This is CLAUDE.md's three-areas rule in the direction that is easiest to miss: Area 1 must not
      * reach into Area 2's behaviour any more than it may write Area 2's settings.
      */
-    suspend fun run(limit: Int = DEFAULT_LIMIT): VideoOptimiseResult = withContext(dispatcher) {
+    suspend fun run(
+        limit: Int = DEFAULT_LIMIT,
+        exclude: Set<String> = emptySet()
+    ): VideoOptimiseResult = withContext(dispatcher) {
         val prefs = settings.current()
 
         if (!prefs.isOptimiseEnabled || !prefs.optimiseVideo) {
@@ -203,23 +284,17 @@ class VideoOptimiser @Inject constructor(
             return@withContext VideoOptimiseResult()
         }
 
-        // Chosen by Sync mode, so one folder's spellings are merged first. TASK-023.
-        albumIdentity.reconcile()
-
-        val candidates = entryDao.videoOptimiseCandidates(
-            modifiedBeforeEpochSeconds = cutoffSecondsFor(prefs.videoOptimiseAge),
-            cutoffMillis = OptimiseCutoff.EVERYTHING,
-            limit = limit
-        )
+        val found = eligible(prefs.videoOptimiseAge, exclude)
+        val candidates = found.ready.take(limit)
 
         if (candidates.isEmpty()) {
-            Logger.d(TAG, "no video is eligible for optimising")
-            return@withContext VideoOptimiseResult()
+            Logger.d(TAG, "no video is eligible for optimising (${found.outside} outside a granted folder)")
+            return@withContext VideoOptimiseResult(notCovered = found.outside)
         }
 
-        Logger.i(TAG, "optimising up to ${candidates.size} clips at ${prefs.videoQuality}")
+        Logger.i(TAG, "optimising up to ${candidates.size} of ${found.ready.size} clips at ${prefs.videoQuality}")
 
-        var result = VideoOptimiseResult()
+        var result = VideoOptimiseResult(notCovered = found.outside)
         for (entry in candidates) {
             // A run cut short must not leave a half-written clip. The transcoder cancels its
             // Transformer and deletes its output; nothing has been overwritten by this point.
@@ -243,13 +318,8 @@ class VideoOptimiser @Inject constructor(
     ): VideoOptimiseResult {
         val uri = Uri.parse(entry.contentUri)
 
-        // Asked before transcoding rather than after. Spending seconds of encode on a clip we then
-        // cannot write would be the most expensive way to discover it.
-        if (!safWriter.covers(listOf(entry.contentUri))) {
-            Logger.d(TAG, "${entry.displayName} is outside every granted folder; leaving it")
-            return running.copy(notCovered = running.notCovered + 1)
-        }
-
+        // Coverage was settled before this was called, by [eligible]: spending seconds of encode on a
+        // clip we then cannot write would be the most expensive way to discover it.
         return when (val outcome = transcoder.transcode(uri, entry.displayName, quality)) {
             is TranscodeResult.NotWorthwhile -> {
                 // Permanent. Recorded so the candidate count reaches zero instead of offering the
@@ -262,7 +332,7 @@ class VideoOptimiser @Inject constructor(
 
             is TranscodeResult.Failed -> {
                 Logger.w(TAG, "${entry.displayName} failed to transcode: ${outcome.reason}")
-                running.copy(failed = running.failed + 1)
+                running.copy(failed = running.failed + 1, failedIds = running.failedIds + entry.id)
             }
 
             is TranscodeResult.Created -> {
@@ -273,27 +343,15 @@ class VideoOptimiser @Inject constructor(
 
                 if (!wrote) {
                     Logger.w(TAG, "could not write the smaller copy of ${entry.displayName}")
-                    return running.copy(failed = running.failed + 1)
+                    return running.copy(
+                        failed = running.failed + 1,
+                        failedIds = running.failedIds + entry.id
+                    )
                 }
 
-                // NOT STAMPED, and this is the one hole left in the feature.
-                //
-                // A photo proxy carries its claim in EXIF, so the app can recognise it from the file
-                // alone - which is the whole argument in ProxyMarker: the ledger is wiped by an
-                // uninstall, absent on a new phone, and has been seen going stale. An MP4 has no
-                // equivalent that can be set afterwards. The `©wrt` writer field has to be written
-                // as the container is muxed, inside the transcode, and whether Media3's muxer can
-                // emit the atom that METADATA_KEY_WRITER reads is unverified.
-                //
-                // So a transcoded clip is identifiable only from `isProxied` on its ledger row.
-                // Restore works today, because restorableProxies() reads exactly that. What breaks
-                // is the case ProxyMarker exists for: a reinstall leaves smaller copies on the phone
-                // that nothing can recognise as proxies, and their full-quality originals sit in
-                // OneDrive unoffered.
-                //
-                // Deliberately not papered over with a no-op stamp - ProxyMarker says why, and it is
-                // right: a file that claims to be marked and is not is worse than one honestly
-                // unmarked. Needs its own investigation before this ships.
+                // The clip carries its own marker: [VideoTranscoder] stamps it as it muxes (29 Aug 2026),
+                // so it can be recognised from the file alone after a reinstall. This used to say it
+                // was not stamped, and was left standing after the stamp landed.
 
                 // SafMediaWriter rescans after every write, so MediaStore picks up the new size
                 // without a second call here.
@@ -332,6 +390,14 @@ class VideoOptimiser @Inject constructor(
          * achieves nothing. Ten at roughly 0.15x realtime is a few minutes of work.
          */
         const val DEFAULT_LIMIT = 10
+
+        /**
+         * How many candidates are read before narrowing to what can be written.
+         *
+         * Far above any real count of clips in Sync albums; it exists so the query has a bound, not
+         * so anything is ever cut off by it.
+         */
+        const val CANDIDATE_POOL = 2000
 
         /** Wizard pass handles more clips since it runs with the user watching. */
         const val WIZARD_LIMIT = 500

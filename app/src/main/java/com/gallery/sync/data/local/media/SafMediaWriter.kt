@@ -41,6 +41,18 @@ import javax.inject.Singleton
  * key is computed against a size that is no longer true — so the scanner would treat the proxy as a
  * brand-new file. Every write here is followed by [MediaScannerConnection.scanFile].
  */
+/** Where one file stands against the folders the user granted. See [SafMediaWriter.coverage]. */
+enum class SafCoverage {
+    /** A granted tree covers it, so it can be rewritten with no dialog. */
+    COVERED,
+
+    /** It is on the phone but in a folder nobody granted. */
+    OUTSIDE,
+
+    /** MediaStore no longer has it. */
+    GONE
+}
+
 @Singleton
 class SafMediaWriter @Inject constructor(
     @param:ApplicationContext private val context: Context,
@@ -58,6 +70,28 @@ class SafMediaWriter @Inject constructor(
         val granted = scopedDirectories.current()
         relativePaths.isNotEmpty() && relativePaths.all { path ->
             granted.any { covers(it.relativePath, path) }
+        }
+    }
+
+    /**
+     * Whether a write to the file behind [contentUri] would go through a granted tree.
+     *
+     * The single-file form of [covers], which takes **folder paths**, not content URIs. The two were
+     * confused once: video optimising passed a URI here, no folder path ever starts with
+     * `content://`, and so every clip was reported as outside the granted folders. Asking MediaStore
+     * where the file lives is what turns a URI into the path [covers] wants.
+     *
+     * [SafCoverage.GONE] is its own answer because "no longer on the phone" and "not ours to write"
+     * call for different things: the first is a stale ledger row, the second is a folder the user
+     * never granted, and only the second is worth telling them about.
+     */
+    suspend fun coverage(contentUri: Uri): SafCoverage = withContext(dispatcher) {
+        val location = locate(contentUri) ?: return@withContext SafCoverage.GONE
+        val granted = scopedDirectories.current()
+        if (granted.any { covers(it.relativePath, location.relativePath) }) {
+            SafCoverage.COVERED
+        } else {
+            SafCoverage.OUTSIDE
         }
     }
 

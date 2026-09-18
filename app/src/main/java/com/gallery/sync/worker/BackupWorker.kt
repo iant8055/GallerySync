@@ -31,7 +31,8 @@ class BackupWorker @AssistedInject constructor(
     @Assisted params: WorkerParameters,
     private val engine: BackupEngine,
     private val settings: BackupSettings,
-    private val charging: ChargingState
+    private val charging: ChargingState,
+    private val videoOptimise: VideoOptimiseLauncher
 ) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result {
@@ -209,6 +210,18 @@ class BackupWorker @AssistedInject constructor(
                     else "upload drained; photo optimise already queued"
                 )
             }
+        }
+
+        // The backlog is drained, so whatever is now verified in OneDrive is in reach of the video
+        // optimiser. Asked at the end of every complete run, and that is the point: this is reached
+        // by every content trigger and by the six-hourly pass, so a clip that has just grown older
+        // than the age setting is noticed without a clock of its own.
+        //
+        // Never allowed to fail the backup. Queueing video work is a convenience, and a run that
+        // uploaded everything must not report failure because scheduling something else threw.
+        if (result.isComplete) {
+            runCatching { videoOptimise.requestAutomatic() }
+                .onFailure { Logger.w(TAG, "could not queue video optimising: ${it.javaClass.simpleName}") }
         }
 
         // Carried out of the worker so the screen can say what happened. Without this the UI keeps

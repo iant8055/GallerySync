@@ -7,6 +7,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.gallery.sync.R
+import com.gallery.sync.ui.help.HelpTopic
+import com.gallery.sync.ui.help.TitleWithHelp
 
 /**
  * Stops someone walking away from files that are checked, verified, and waiting on one tap.
@@ -28,7 +30,9 @@ fun ExitWarningDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.exit_warning_title)) },
+        title = {
+            TitleWithHelp(stringResource(R.string.exit_warning_title), HelpTopic.DIALOG_EXIT_WARNING)
+        },
         text = {
             Text(pluralStringResource(R.plurals.exit_warning_body, readyCount, readyCount))
         },

@@ -36,6 +36,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
 import com.gallery.sync.ui.common.SignalIcons
+import com.gallery.sync.ui.help.HelpTopic
+import com.gallery.sync.ui.help.TitleWithHelp
 
 /**
  * Browses OneDrive so the backup destination can be picked instead of typed.
@@ -61,7 +63,9 @@ fun OneDriveFolderPicker(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.picker_title)) },
+        title = {
+            TitleWithHelp(stringResource(R.string.picker_title), HelpTopic.DIALOG_FOLDER_PICKER)
+        },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
 

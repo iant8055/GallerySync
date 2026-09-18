@@ -43,6 +43,26 @@ object BackupScheduling {
     const val MANUAL_WORK = "gallery-sync-backup-manual"
     const val OPTIMISE_WORK = "gallery-sync-optimise"
 
+    /**
+     * The ongoing video optimiser: Settings' Optimise video, after setup.
+     *
+     * **Its own unique name, apart from [OPTIMISE_WORK]**, which is the wizard's one-time chain. Two
+     * reasons. `APPEND_OR_REPLACE` on the shared name would queue a button press *behind* an
+     * automatic run that is waiting for the charger, so pressing Optimise now would do nothing until
+     * the phone was plugged in. And the wizard's chain and this one obey different settings (Area 1
+     * and Area 2 in CLAUDE.md), so they should not be one queue.
+     */
+    const val VIDEO_OPTIMISE_WORK = "gallery-sync-video-optimise"
+
+    /** Clips this chain has already failed on, so it steps over them instead of retrying for ever. */
+    const val KEY_EXCLUDED_CLIPS = "excluded_clips"
+
+    /** Whether this chain waits for the charger. An automatic run does; one somebody asked for does not. */
+    const val KEY_REQUIRES_CHARGING = "requires_charging"
+
+    /** On a queued run that is held back by the charger, so the screen can say what it is waiting for. */
+    const val TAG_WAITING_FOR_CHARGER = "gallery-sync-video-optimise-charging"
+
     /** Marks a run as user-initiated. Carried into every continuation of that chain. */
     const val KEY_MANUAL = "manual"
     const val KEY_OPTIMISE_PHASE = "optimise_phase"
@@ -237,6 +257,51 @@ object BackupScheduling {
     }
 
     /**
+     * Queues one batch of ongoing video optimising.
+     *
+     * [requiresCharging] is TASK-013's rule 5, *on charge*: a transcode is the most expensive thing
+     * this app ever does, and a job that ambushes someone at 20% is worse than one that waits. It is
+     * off only when a person pressed Optimise now, because someone who asked has already decided.
+     *
+     * [policy] is the caller's to choose. An automatic trigger keeps whatever is already there. A
+     * button press replaces one that is only *waiting*, and never one that is running, which would
+     * throw away the clip in flight. A continuation appends behind the batch that queued it.
+     */
+    fun enqueueVideoOptimise(
+        workManager: WorkManager,
+        requiresCharging: Boolean,
+        excludedClips: Set<String>,
+        policy: ExistingWorkPolicy
+    ) {
+        val request = OneTimeWorkRequestBuilder<VideoOptimiseWorker>()
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiresBatteryNotLow(true)
+                    .setRequiresStorageNotLow(true)
+                    .setRequiresCharging(requiresCharging)
+                    .build()
+            )
+            .apply { if (requiresCharging) addTag(TAG_WAITING_FOR_CHARGER) }
+            .setInputData(
+                Data.Builder()
+                    .putBoolean(KEY_REQUIRES_CHARGING, requiresCharging)
+                    .putStringArray(KEY_EXCLUDED_CLIPS, excludedClips.toTypedArray())
+                    .build()
+            )
+            .build()
+
+        workManager.enqueueUniqueWork(VIDEO_OPTIMISE_WORK, policy, request)
+    }
+
+    /** The video chain's work, for a screen to watch. Empty when nothing has ever been queued. */
+    fun videoOptimiseWork(workManager: WorkManager) =
+        workManager.getWorkInfosForUniqueWorkFlow(VIDEO_OPTIMISE_WORK)
+
+    /** Whether a batch of video optimising is executing right now, as opposed to queued. */
+    suspend fun videoOptimiseRunning(workManager: WorkManager): Boolean =
+        videoOptimiseWork(workManager).first().any { it.state == WorkInfo.State.RUNNING }
+
+    /**
      * Identifies a queued pass by which phase it is, since both share [OPTIMISE_WORK].
      *
      * The unique name alone cannot answer "is a photo pass already pending", because
@@ -280,7 +345,12 @@ object BackupScheduling {
     suspend fun optimiseChainLive(workManager: WorkManager): Boolean =
         workManager.getWorkInfosForUniqueWorkFlow(OPTIMISE_WORK)
             .first()
-            .any { !it.state.isFinished }
+            .any { !it.state.isFinished } ||
+            // The ongoing video chain counts only while it is *executing*. This answer is used to
+            // decline a backup run as "our own optimise writes woke it", and to hold back a
+            // cold-start scan. A video batch waiting hours for the charger writes nothing, so
+            // counting it would make the app ignore every real new photo for as long as it waited.
+            videoOptimiseRunning(workManager)
 
     /** Stops the optimise chain. Files already proxied stay proxied; nothing is undone. */
     fun cancelOptimise(workManager: WorkManager) {

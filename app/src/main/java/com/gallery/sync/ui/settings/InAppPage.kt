@@ -96,13 +96,18 @@ private fun FullScreenPageDialog(
  * no mixed content, and navigation confined to our own pages by [SupportLinks.staysInApp].
  * Anything else opens in the phone's browser.
  *
+ * [anchor] lands on one entry of the page, which is how a (?) pop-up's "Read more" opens the guide at
+ * the topic it was explaining. The guide's expandable sections open themselves for a link into them,
+ * so this needs no script.
+ *
  * Back steps back through pages the viewer has visited (the two pages link to each other) and
  * closes it from the first one. A failed load says so and offers the browser instead of leaving a
  * blank sheet.
  */
 @Composable
-fun InAppPageDialog(page: SupportPage, onDismiss: () -> Unit) {
+fun InAppPageDialog(page: SupportPage, onDismiss: () -> Unit, anchor: String? = null) {
     val context = LocalContext.current
+    val address = if (anchor == null) page.url else "${page.url}#$anchor"
     var webView by remember { mutableStateOf<WebView?>(null) }
     var loading by remember { mutableStateOf(true) }
     var failed by remember { mutableStateOf(false) }
@@ -175,7 +180,7 @@ fun InAppPageDialog(page: SupportPage, onDismiss: () -> Unit) {
                                 if (request.isForMainFrame) failed = true
                             }
                         }
-                        loadUrl(page.url)
+                        loadUrl(address)
                         webView = this
                     }
                 }
@@ -195,7 +200,7 @@ fun InAppPageDialog(page: SupportPage, onDismiss: () -> Unit) {
                     )
                     TextButton(
                         onClick = {
-                            openLink(context, Intent(Intent.ACTION_VIEW, page.url.toUri()))
+                            openLink(context, Intent(Intent.ACTION_VIEW, address.toUri()))
                         }
                     ) {
                         Text(stringResource(R.string.settings_page_open_browser))

@@ -34,6 +34,9 @@ import com.gallery.sync.domain.backup.FirstBackupHold
 import com.gallery.sync.domain.backup.FirstBackupWindow
 import com.gallery.sync.domain.backup.RemoteRoots
 import com.gallery.sync.ui.common.LabelWithAction
+import com.gallery.sync.ui.help.HelpTopic
+import com.gallery.sync.ui.help.TitleWithHelp
+import com.gallery.sync.ui.help.WithHelp
 import com.gallery.sync.ui.setup.ReconcileViewModel
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -67,10 +70,12 @@ fun DestinationSection(
     ) {
         // Naming the folder is not the point — "OneDrive/Samsung Gallery/DCIM" means nothing on its
         // own, while "change it and those already-found files stop being found" is a real decision.
-        Text(
-            text = stringResource(R.string.destination_title),
-            style = MaterialTheme.typography.bodyLarge
-        )
+        WithHelp(HelpTopic.SETTINGS_DESTINATION) {
+            Text(
+                text = stringResource(R.string.destination_title),
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
         LabelWithAction(
             action = {
                 OutlinedButton(onClick = viewModel::openDestinationChooser) {
@@ -154,7 +159,12 @@ fun DestinationDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.destination_dialog_title)) },
+        title = {
+            TitleWithHelp(
+                stringResource(R.string.destination_dialog_title),
+                HelpTopic.DIALOG_DESTINATION
+            )
+        },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedTextField(

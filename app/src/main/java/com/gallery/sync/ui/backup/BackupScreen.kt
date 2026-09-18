@@ -76,6 +76,10 @@ import com.gallery.sync.ui.common.SignalIcons
 import com.gallery.sync.ui.common.HeroCard
 import com.gallery.sync.ui.common.HeroOutlinedButton
 import com.gallery.sync.ui.common.formatBytes
+import com.gallery.sync.ui.help.HelpButton
+import com.gallery.sync.ui.help.HelpTopic
+import com.gallery.sync.ui.help.TitleWithHelp
+import com.gallery.sync.ui.help.WithHelp
 import com.gallery.sync.ui.theme.LocalGallerySyncColors
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.RowScope
@@ -199,7 +203,9 @@ private fun PermissionPrompt(headline: String, detail: String, onGrant: () -> Un
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Text(headline, style = MaterialTheme.typography.titleMedium)
+        WithHelp(HelpTopic.ALBUMS_PERMISSION) {
+            Text(headline, style = MaterialTheme.typography.titleMedium)
+        }
         Text(detail, style = MaterialTheme.typography.bodyMedium)
         Button(onClick = onGrant) { Text(stringResource(R.string.permission_grant_action)) }
     }
@@ -264,7 +270,9 @@ private fun AlbumList(
         // the explanation removed and left on the main screen for good.
 
         state.status?.let {
-            Text(it.readable(), style = MaterialTheme.typography.bodyMedium)
+            WithHelp(HelpTopic.ALBUMS_STATUS_LINE) {
+                Text(it.readable(), style = MaterialTheme.typography.bodyMedium)
+            }
 
             // Under the line that names the file and the percentage, the same order as Restore.
             // The text says which file and how far in; the bar is that number, drawn.
@@ -440,15 +448,22 @@ private fun ModeFilterGrid(
                 color = LocalContentColor.current.copy(alpha = if (selected == null) 0.9f else 0.35f)
             )
         ) {
-            Text(
-                text = stringResource(R.string.backup_hero_label),
-                style = MaterialTheme.typography.headlineSmall,
-                textAlign = TextAlign.Center,
-                maxLines = 1,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 8.dp)
-            )
+            // The (?) sits in the pill rather than in a heading row of its own. A row of its own cost
+            // a 320dp screen most of its first album card (checked against the build without it),
+            // and the pill is already what names the list. It explains the album cards, not the
+            // pill: the mode buttons and the filter have theirs on the hint line below.
+            Box(contentAlignment = Alignment.CenterEnd) {
+                Text(
+                    text = stringResource(R.string.backup_hero_label),
+                    style = MaterialTheme.typography.headlineSmall,
+                    textAlign = TextAlign.Center,
+                    maxLines = 1,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                )
+                HelpButton(HelpTopic.ALBUMS_LIST, Modifier.padding(end = 10.dp))
+            }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             ModeFilterChip(
@@ -470,13 +485,20 @@ private fun ModeFilterGrid(
         // These read as status until you know they are controls — a count beside a word looks like
         // a summary, which is exactly what they were an hour ago. One quiet line rather than an
         // affordance on each button, which would make five loud things out of five calm ones.
-        Text(
-            text = stringResource(R.string.albums_filter_hint),
-            style = MaterialTheme.typography.bodySmall,
-            textAlign = TextAlign.Center,
-            color = LocalContentColor.current.copy(alpha = 0.7f),
-            modifier = Modifier.fillMaxWidth()
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = stringResource(R.string.albums_filter_hint),
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.Center,
+                color = LocalContentColor.current.copy(alpha = 0.7f),
+                modifier = Modifier.weight(1f, fill = false)
+            )
+            HelpButton(HelpTopic.ALBUMS_FILTER)
+        }
     }
 }
 
@@ -763,7 +785,9 @@ private fun ArchiveConfirmDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.archive_confirm_title)) },
+        title = {
+            TitleWithHelp(stringResource(R.string.archive_confirm_title), HelpTopic.DIALOG_ARCHIVE_CONFIRM)
+        },
         text = { Text(stringResource(R.string.archive_confirm_body)) },
         confirmButton = {
             TextButton(onClick = onConfirm) {
@@ -799,12 +823,14 @@ private fun AlbumMergeWarningCard(warnings: List<AlbumMergeWarning>, onDismiss: 
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text(
-                text = stringResource(R.string.album_merge_heading),
-                style = MaterialTheme.typography.titleLarge,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
-            )
+            WithHelp(HelpTopic.ALBUM_MERGE_WARNING) {
+                Text(
+                    text = stringResource(R.string.album_merge_heading),
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
             Text(
                 text = stringResource(R.string.album_merge_intro),
                 style = MaterialTheme.typography.bodyMedium
@@ -986,19 +1012,23 @@ private fun HeroDetail(
     // mode, then the media breakdown, then whatever that mode is judged on.
     //
     // Each figure line starts with its label, same size, same line. Ian, 16 Sept 2026.
-    Text(
-        text = stringResource(R.string.albums_size_label) + " " + stringResource(
-            R.string.albums_size_summary,
-            pluralStringResource(
-                R.plurals.albums_hero_albums,
-                summary.albumCount,
-                summary.albumCount
+    WithHelp(HelpTopic.ALBUMS_TOTALS) {
+        Text(
+            text = stringResource(R.string.albums_size_label) + " " + stringResource(
+                R.string.albums_size_summary,
+                pluralStringResource(
+                    R.plurals.albums_hero_albums,
+                    summary.albumCount,
+                    summary.albumCount
+                ),
+                formatBytes(context, summary.totalBytes)
             ),
-            formatBytes(context, summary.totalBytes)
-        ),
-        style = MaterialTheme.typography.titleSmall
-    )
+            style = MaterialTheme.typography.titleSmall
+        )
+    }
     if (modeFilter == null) {
+        // No (?) of its own: the one on the line above explains both. With one here this line lost
+        // its last word to a second row at the Moto G's width, where without it the line fits.
         Text(
             text = stringResource(R.string.albums_mode_totals_label) + " " + stringResource(
                 R.string.albums_mode_totals,
@@ -1036,22 +1066,26 @@ private fun HeroDetail(
     // the Archive filter — where every album is empty by design. The claim needs something to be
     // true of, so the counts it sits under must be non-zero.
     if (shown.sumOf { it.itemCount } > 0 && shown.all { it.outstanding == 0 }) {
-        Text(
-            text = stringResource(R.string.albums_all_backed_up),
-            style = MaterialTheme.typography.bodyMedium
-        )
+        WithHelp(HelpTopic.ALBUMS_ALL_BACKED_UP) {
+            Text(
+                text = stringResource(R.string.albums_all_backed_up),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
     }
 
     // Sync is the mode that shrinks things, so it is judged on what came back.
     if (modeFilter == AlbumMode.SYNC) {
-        Text(
-            text = stringResource(
-                R.string.albums_optimised_summary,
-                summary.optimisedCount,
-                formatBytes(context, summary.savedBytes)
-            ),
-            style = MaterialTheme.typography.bodyMedium
-        )
+        WithHelp(HelpTopic.ALBUMS_OPTIMISED_LINE) {
+            Text(
+                text = stringResource(
+                    R.string.albums_optimised_summary,
+                    summary.optimisedCount,
+                    formatBytes(context, summary.savedBytes)
+                ),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
     }
 
     // Archive is the one filter whose subject is not on the phone. Every other figure on this card
@@ -1074,15 +1108,17 @@ private fun HeroDetail(
         }
 
         val scheduled = summary.imageCount + summary.videoCount
-        Text(
-            text = if (scheduled == 0) {
-                // Archive finished. "0 Scheduled to leave this phone" is arithmetic, not an answer.
-                stringResource(R.string.albums_scheduled_none)
-            } else {
-                stringResource(R.string.albums_scheduled_summary, scheduled)
-            },
-            style = MaterialTheme.typography.bodyMedium
-        )
+        WithHelp(HelpTopic.ALBUMS_ARCHIVE_LINES) {
+            Text(
+                text = if (scheduled == 0) {
+                    // Archive finished. "0 Scheduled to leave this phone" is arithmetic, not an answer.
+                    stringResource(R.string.albums_scheduled_none)
+                } else {
+                    stringResource(R.string.albums_scheduled_summary, scheduled)
+                },
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
     }
 }
 
@@ -1232,6 +1268,8 @@ private fun HeroActions(
                 modifier = Modifier.weight(1f)
             )
         }
+
+        HelpButton(HelpTopic.ALBUMS_RUN_CONTROLS)
     }
 }
 

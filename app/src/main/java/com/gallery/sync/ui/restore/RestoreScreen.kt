@@ -38,6 +38,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
 import com.gallery.sync.ui.common.HeroCard
+import com.gallery.sync.ui.help.HelpButton
+import com.gallery.sync.ui.help.HelpTopic
+import com.gallery.sync.ui.help.TitleWithHelp
+import com.gallery.sync.ui.help.WithHelp
 import com.gallery.sync.ui.common.HeroOutlinedButton
 import com.gallery.sync.ui.common.SignalIcons
 import com.gallery.sync.ui.common.formatBytes
@@ -84,6 +88,7 @@ fun RestoreScreen(
                         R.string.restore_hero_label_files
                     }
                 ),
+                help = HelpTopic.RESTORE_HERO,
                 figure = when {
                     state.loading -> "—"
                     state.openFolder == null -> state.folders.size.toString()
@@ -91,29 +96,33 @@ fun RestoreScreen(
                 },
                 figureFooter = if (state.hasSelection) {
                     {
-                        Text(
-                            text = stringResource(
-                                R.string.restore_selected_summary,
-                                state.selection.size,
-                                formatBytes(context, state.bytesToRecover)
-                            ),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
+                        WithHelp(HelpTopic.RESTORE_SELECTED_SUMMARY, centered = true) {
+                            Text(
+                                text = stringResource(
+                                    R.string.restore_selected_summary,
+                                    state.selection.size,
+                                    formatBytes(context, state.bytesToRecover)
+                                ),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
                     }
                 } else {
                     null
                 },
                 detail = {
-                    Text(
-                        text = state.summary ?: stringResource(
-                            when {
-                                state.rows.isEmpty() && !state.loading -> R.string.restore_empty
-                                state.openFolder == null -> R.string.restore_intro_folders
-                                else -> R.string.restore_intro_files
-                            }
-                        ),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                    WithHelp(HelpTopic.RESTORE_MESSAGE_LINE) {
+                        Text(
+                            text = state.summary ?: stringResource(
+                                when {
+                                    state.rows.isEmpty() && !state.loading -> R.string.restore_empty
+                                    state.openFolder == null -> R.string.restore_intro_folders
+                                    else -> R.string.restore_intro_files
+                                }
+                            ),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
                 },
                 actions = {
                     // Two fixed half-width slots, weighted as Albums weights Sync now and Rescan so
@@ -130,7 +139,8 @@ fun RestoreScreen(
                     // dark-green-on-dark-green here and read as a hole rather than a control.
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         // Slot one changes with the level: Refresh belongs to the folder list,
                         // Select all to a folder. Refresh re-reads the ledger, which is the only
@@ -158,6 +168,8 @@ fun RestoreScreen(
                             modifier = Modifier.weight(1f),
                             enabled = state.hasSelection && !state.running
                         )
+
+                        HelpButton(HelpTopic.RESTORE_BUTTONS)
                     }
                 }
             )
@@ -253,6 +265,9 @@ private fun Breadcrumb(folder: String?, onUp: () -> Unit) {
                 )
             }
         }
+        HelpButton(
+            if (folder == null) HelpTopic.RESTORE_FOLDERS_LIST else HelpTopic.RESTORE_FILES_LIST
+        )
     }
 }
 
@@ -478,11 +493,13 @@ private fun RestoreBar(running: Boolean, onRestore: () -> Unit, onStop: () -> Un
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            HelpButton(HelpTopic.RESTORE_ACTION_BAR)
             Button(
                 onClick = if (running) onStop else onRestore,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.weight(1f),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = signal.accent,

@@ -17,6 +17,7 @@ class SupportLinksTest {
     fun ourOwnPagesLoadInsideTheApp() {
         assertTrue(SupportLinks.staysInApp(SupportPage.PRIVACY_POLICY.url))
         assertTrue(SupportLinks.staysInApp(SupportPage.DELETE_ACCOUNT.url))
+        assertTrue(SupportLinks.staysInApp(SupportPage.HOW_TO_GUIDE.url))
     }
 
     @Test

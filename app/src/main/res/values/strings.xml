@@ -85,6 +85,8 @@
     <string name="settings_archive">Archive</string>
 
     <!-- The three link cards at the bottom of Settings. -->
+    <string name="settings_how_to_guide">How To Guide</string>
+    <string name="settings_how_to_guide_detail">What every screen and every line means, and where its information comes from.</string>
     <string name="settings_privacy_policy">Privacy Policy</string>
     <string name="settings_privacy_policy_detail">How Gallery Sync handles your photos, videos and account.</string>
     <string name="settings_delete_account">Delete Account Info</string>
@@ -99,13 +101,18 @@
     <string name="settings_page_load_failed">This page could not be loaded. Check your connection and try again.</string>
     <string name="settings_page_open_browser">Open in browser</string>
 
-    <!-- Section help tooltips -->
-    <string name="help_general">Settings that apply across the whole app — appearance, network, and language.</string>
+    <!--
+        The (?) buttons. What each one explains lives in help_topics.xml, which is generated from the
+        How To Guide's source (tools/guide/) so the pop-up and the guide cannot disagree. Only the
+        words around the pop-up are here.
+
+        help_albums is left because the setup tour's mock Settings screen shows it in a tooltip, and
+        the tour is a picture of the app rather than the app.
+    -->
     <string name="help_albums">Which folders to watch, what happens to cloud copies when you delete from this phone, and the default mode for new albums.</string>
-    <string name="help_backup">Your OneDrive account and the folder where backups are stored. Changing the folder does not affect files already backed up.</string>
-    <string name="help_sync">Optimise photos and videos to save storage. Files are only changed after they are verified in OneDrive.</string>
-    <string name="help_restore">Browse and download files from OneDrive that are not currently on this phone.</string>
-    <string name="help_archive">Remove local copies after they are confirmed in OneDrive. Files go to your phone\'s trash, not permanently deleted.</string>
+    <string name="help_button_description">Help: %1$s</string>
+    <string name="help_open_guide">Read more in the How To Guide</string>
+    <string name="archive_list_heading">Files</string>
 
     <string name="settings_optimise_master">Optimise photos and video</string>
     <!--
@@ -139,7 +146,27 @@
         <item quantity="other">%1$d photos can be optimised. Smaller copies stay on the phone and the full-size originals stay in OneDrive.</item>
     </plurals>
     <string name="proxy_action">Optimise %1$s of photos</string>
-    <string name="proxy_videos_excluded">Video is optimised separately, and only clips older than the age you set.</string>
+    <!--
+        Video optimising after setup, wired 18 Sept 2026. Until then the Settings controls were saved
+        and nothing read them, and the line that stood here — "Video is optimised separately, and only
+        clips older than the age you set" — described a pass that did not exist. Each state gets its own
+        sentence because they want different reactions; see VideoStatusAndAction.
+    -->
+    <plurals name="video_explainer">
+        <item quantity="one">%1$d clip can be optimised. A smaller copy stays on the phone and the full-quality original stays in OneDrive.</item>
+        <item quantity="other">%1$d clips can be optimised. Smaller copies stay on the phone and the full-quality originals stay in OneDrive.</item>
+    </plurals>
+    <string name="video_action">Optimise %1$s of video</string>
+    <string name="video_none">No video is ready to optimise. A clip has to be in a Sync album, backed up to OneDrive, and older than the age you set.</string>
+    <plurals name="video_working">
+        <item quantity="one">Optimising video in the background. %1$d clip left.</item>
+        <item quantity="other">Optimising video in the background. %1$d clips left.</item>
+    </plurals>
+    <string name="video_waiting_for_charger">Video optimising is waiting for the phone to charge. Press the button to start now instead.</string>
+    <plurals name="video_outside">
+        <item quantity="one">%1$d clip is in a folder you have not given access to, so it is left alone.</item>
+        <item quantity="other">%1$d clips are in folders you have not given access to, so they are left alone.</item>
+    </plurals>
     <string name="settings_optimise_explainer">Optimising replaces the copy on this phone with a smaller version — about 2048 pixels on the long edge, roughly a tenth of the size. The photo stays in your gallery and opens normally in every app, and carries a small cloud badge so you can tell which are optimised. The full-quality original stays in OneDrive, untouched.</string>
     <string name="proxy_none_nothing_synced">Nothing to optimise yet. A photo can only be optimised once it is verified in OneDrive — set an album to Sync in Album Modes, then run a sync.</string>
     <string name="proxy_none_all_done">Every eligible photo is already optimised.</string>
@@ -620,7 +647,6 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
 
     <!-- Gate 1: which folders to look in. -->
     <string name="sources_title">Folders to back up</string>
-    <string name="sources_explain">Gallery Sync only looks in the folders you choose. Most people want DCIM, where the camera saves photos.</string>
     <!--
         Said plainly because it is the whole reason the gate exists. A phone reports around ninety
         albums, nearly all of them app caches and thumbnails, and offering all of them makes the
@@ -633,12 +659,7 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
     <string name="sources_add">Add a folder</string>
     <string name="sources_remove">Remove</string>
     <string name="sources_refused">That folder cannot be used. Choose a folder rather than a whole drive.</string>
-    <!--
-        The reassurance that makes removing safe. Narrowing hides albums; it never forgets what is
-        already backed up or what mode an album was set to.
-    -->
-    <string name="sources_remove_note">Removing a folder stops it being watched. Nothing already backed up is lost, and adding it again restores its settings.</string>
-    <string name="sources_help_title">About folders</string>
+    <!-- The explanation that used to sit here as a tooltip now lives in the guide: settings-folders. -->
     <string name="sources_full_path">%1$s / %2$s</string>
     <string name="volume_internal">Internal storage</string>
     <string name="sources_count">%1$s in this folder</string>

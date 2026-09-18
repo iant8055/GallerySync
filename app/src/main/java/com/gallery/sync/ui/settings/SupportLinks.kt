@@ -5,14 +5,25 @@ import com.gallery.sync.R
 import java.net.URI
 
 /**
- * The two Play-listing documents in `docs/`, shown inside the app from the cards at the bottom of
- * Settings.
+ * The documents in `docs/`, shown inside the app from the cards at the bottom of Settings.
  *
  * They are **read live from GitHub Pages**, served from the `main` branch. What a user sees is
  * whatever is published there, not what is in the working tree, so a change to `docs/` reaches the
  * app only once it is pushed.
  */
 enum class SupportPage(val url: String, @param:StringRes val title: Int) {
+    /**
+     * The How To Guide, as expandable sections.
+     *
+     * The single-page version, `how-to-guide.html`, is published beside it and each page links to the
+     * other. The expandable one is the default because the guide is long and a phone is narrow: about
+     * ninety topics as one scroll is a lot to get through to find one. To make the long page the
+     * default instead, point this at it; both carry the same anchors, so "Read more" works on either.
+     */
+    HOW_TO_GUIDE(
+        url = "${SupportLinks.SITE}/how-to-guide-accordion.html",
+        title = R.string.settings_how_to_guide
+    ),
     PRIVACY_POLICY(
         url = "${SupportLinks.SITE}/privacy-policy.html",
         title = R.string.settings_privacy_policy

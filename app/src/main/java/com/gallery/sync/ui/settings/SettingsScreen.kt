@@ -20,21 +20,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedCard
-import androidx.compose.material3.RichTooltip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TooltipBox
-import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -60,10 +53,13 @@ import com.gallery.sync.domain.backup.OptimiseMode
 import com.gallery.sync.domain.backup.VideoQuality
 import com.gallery.sync.ui.backup.BackupUiState
 import com.gallery.sync.ui.backup.BackupViewModel
+import com.gallery.sync.ui.backup.VideoOptimiseRun
 import com.gallery.sync.ui.backup.ProxyStatus
 import com.gallery.sync.ui.common.LabelWithAction
-import com.gallery.sync.ui.common.SignalIcons
 import com.gallery.sync.ui.common.formatBytes
+import com.gallery.sync.ui.help.HelpButton
+import com.gallery.sync.ui.help.HelpTopic
+import com.gallery.sync.ui.help.WithHelp
 import com.gallery.sync.ui.retrieve.DeletionSection
 import com.gallery.sync.ui.theme.LocalGallerySyncColors
 import com.gallery.sync.ui.theme.ThemeViewModel
@@ -112,21 +108,26 @@ fun SettingsScreen(
         // ── General ──────────────────────────────────────────────────────────
         SectionHeader(
             stringResource(R.string.settings_general),
-            helpText = stringResource(R.string.help_general)
+            help = HelpTopic.SETTINGS_SECTION_GENERAL
         )
 
-        Text(
-            text = stringResource(R.string.settings_language),
-            style = MaterialTheme.typography.bodyLarge
-        )
-        Text(
-            text = stringResource(R.string.settings_language_detail),
-            style = MaterialTheme.typography.bodySmall
-        )
+        WithHelp(HelpTopic.SETTINGS_LANGUAGE) {
+            Column {
+                Text(
+                    text = stringResource(R.string.settings_language),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = stringResource(R.string.settings_language_detail),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
 
         val themeMode by themeViewModel.themeMode.collectAsStateWithLifecycle()
         SettingDropdown(
             label = stringResource(R.string.settings_appearance),
+            help = HelpTopic.SETTINGS_APPEARANCE,
             options = ThemeMode.entries,
             selected = themeMode,
             onSelected = { themeViewModel.setThemeMode(it) },
@@ -143,6 +144,7 @@ fun SettingsScreen(
 
         SettingSwitch(
             label = stringResource(R.string.backup_allow_metered),
+            help = HelpTopic.SETTINGS_MOBILE_DATA,
             detail = stringResource(
                 if (state.allowMeteredNetwork) R.string.backup_allow_metered_on
                 else R.string.backup_allow_metered_off
@@ -154,7 +156,7 @@ fun SettingsScreen(
         // ── Backup ───────────────────────────────────────────────────────────
         SectionHeader(
             stringResource(R.string.settings_backup),
-            helpText = stringResource(R.string.help_backup)
+            help = HelpTopic.SETTINGS_SECTION_BACKUP
         )
 
         LabelWithAction(
@@ -165,7 +167,9 @@ fun SettingsScreen(
             }
         ) {
             accountName?.let {
-                Text(it, style = MaterialTheme.typography.bodyLarge)
+                WithHelp(HelpTopic.SETTINGS_ACCOUNT) {
+                    Text(it, style = MaterialTheme.typography.bodyLarge)
+                }
             }
         }
 
@@ -174,7 +178,7 @@ fun SettingsScreen(
         // ── Albums ───────────────────────────────────────────────────────────
         SectionHeader(
             stringResource(R.string.settings_albums),
-            helpText = stringResource(R.string.help_albums)
+            help = HelpTopic.SETTINGS_SECTION_ALBUMS
         )
 
         SourcesSection()
@@ -183,6 +187,7 @@ fun SettingsScreen(
 
         SettingDropdown(
             label = stringResource(R.string.settings_default_mode),
+            help = HelpTopic.SETTINGS_DEFAULT_MODE,
             options = AlbumMode.canBeDefault,
             selected = state.defaultAlbumMode,
             onSelected = viewModel::setDefaultAlbumMode,
@@ -192,11 +197,12 @@ fun SettingsScreen(
         // ── Sync ─────────────────────────────────────────────────────────────
         SectionHeader(
             stringResource(R.string.settings_sync),
-            helpText = stringResource(R.string.help_sync)
+            help = HelpTopic.SETTINGS_SECTION_SYNC
         )
 
         SettingSwitch(
             label = stringResource(R.string.settings_optimise_photos),
+            help = HelpTopic.SETTINGS_OPTIMISE_PHOTOS,
             detail = if (state.optimisePhotos) stringResource(R.string.settings_optimise_photos_on)
                 else null,
             checked = state.optimisePhotos,
@@ -218,6 +224,7 @@ fun SettingsScreen(
             ) {
                 SettingDropdown(
                     label = stringResource(R.string.settings_optimise_mode),
+                    help = HelpTopic.SETTINGS_OPTIMISE_MODE,
                     options = OptimiseMode.entries,
                     selected = state.photoOptimiseMode,
                     onSelected = viewModel::setPhotoOptimiseMode,
@@ -235,6 +242,7 @@ fun SettingsScreen(
 
         SettingSwitch(
             label = stringResource(R.string.settings_optimise_videos),
+            help = HelpTopic.SETTINGS_OPTIMISE_VIDEO,
             checked = state.optimiseVideo,
             onCheckedChange = { enabled ->
                 viewModel.setOptimiseVideo(enabled)
@@ -254,6 +262,7 @@ fun SettingsScreen(
             ) {
                 SettingDropdown(
                     label = stringResource(R.string.settings_optimise_mode),
+                    help = HelpTopic.SETTINGS_OPTIMISE_MODE,
                     options = OptimiseMode.entries,
                     selected = state.videoOptimiseMode,
                     onSelected = viewModel::setVideoOptimiseMode,
@@ -269,14 +278,26 @@ fun SettingsScreen(
 
                 SettingDropdown(
                     label = stringResource(R.string.settings_older_than),
+                    help = HelpTopic.SETTINGS_VIDEO_AGE,
                     options = MediaAge.entries,
                     selected = state.videoOptimiseAge,
                     onSelected = viewModel::setVideoOptimiseAge,
                     optionLabel = { age -> age.label() }
                 )
 
+                // Said where the choice is made. Until video optimising ran on its own this option
+                // reached nothing, so the cost was theoretical; now it reaches a clip shot this
+                // morning, and the one place that can say so is beside the setting.
+                if (state.videoOptimiseAge == MediaAge.Immediately) {
+                    Text(
+                        text = stringResource(R.string.media_age_immediately_warning),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+
                 SettingDropdown(
                     label = stringResource(R.string.settings_quality),
+                    help = HelpTopic.SETTINGS_VIDEO_QUALITY,
                     options = VideoQuality.entries,
                     selected = state.videoQuality,
                     onSelected = viewModel::setVideoQuality,
@@ -291,7 +312,9 @@ fun SettingsScreen(
             }
         }
 
-        if (state.optimisePhotos || state.optimiseVideo) {
+        // Each kind reports on its own. The photo lines used to appear whenever either switch was on,
+        // so someone who had only video on was shown a photo button for a feature they had left off.
+        if (state.optimisePhotos) {
             if (state.canProxy) {
                 OptimiseStatusAndAction(
                     state = state,
@@ -306,21 +329,32 @@ fun SettingsScreen(
                     context = context
                 )
             } else {
-                Text(
-                    text = stringResource(R.string.proxy_unsupported),
-                    style = MaterialTheme.typography.bodySmall
-                )
+                WithHelp(HelpTopic.SETTINGS_OPTIMISE_STATUS) {
+                    Text(
+                        text = stringResource(R.string.proxy_unsupported),
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
             }
+        }
+
+        if (state.optimiseVideo) {
+            VideoStatusAndAction(
+                state = state,
+                onOptimiseNow = viewModel::optimiseVideoNow,
+                context = context
+            )
         }
 
         // ── Restore ──────────────────────────────────────────────────────────
         SectionHeader(
             stringResource(R.string.settings_restore),
-            helpText = stringResource(R.string.help_restore)
+            help = HelpTopic.SETTINGS_SECTION_RESTORE
         )
 
         SettingSwitch(
             label = stringResource(R.string.settings_show_empty_folders),
+            help = HelpTopic.SETTINGS_SHOW_EMPTY_FOLDERS,
             checked = state.showEmptyCloudFolders,
             onCheckedChange = viewModel::setShowEmptyCloudFolders
         )
@@ -328,7 +362,7 @@ fun SettingsScreen(
         // ── Archive ──────────────────────────────────────────────────────────
         SectionHeader(
             stringResource(R.string.settings_archive),
-            helpText = stringResource(R.string.help_archive)
+            help = HelpTopic.SETTINGS_SECTION_ARCHIVE
         )
 
         Text(
@@ -338,7 +372,13 @@ fun SettingsScreen(
 
         HorizontalDivider()
 
-        // ── About: policy, account deletion, contact ─────────────────────────
+        // ── About: guide, policy, account deletion, contact ──────────────────
+        LinkCard(
+            title = stringResource(R.string.settings_how_to_guide),
+            detail = stringResource(R.string.settings_how_to_guide_detail),
+            onClick = { page = SupportPage.HOW_TO_GUIDE }
+        )
+
         LinkCard(
             title = stringResource(R.string.settings_privacy_policy),
             detail = stringResource(R.string.settings_privacy_policy_detail),
@@ -391,23 +431,27 @@ private fun OptimiseStatusAndAction(
     context: android.content.Context
 ) {
     when {
-        state.proxyCandidateCount == 0 -> Text(
-            text = stringResource(
-                if (state.uploadedCount == 0) R.string.proxy_none_nothing_synced
-                else R.string.proxy_none_all_done
-            ),
-            style = MaterialTheme.typography.bodySmall
-        )
-
-        else -> {
+        state.proxyCandidateCount == 0 -> WithHelp(HelpTopic.SETTINGS_OPTIMISE_STATUS) {
             Text(
-                text = pluralStringResource(
-                    R.plurals.proxy_explainer,
-                    state.proxyCandidateCount,
-                    state.proxyCandidateCount
+                text = stringResource(
+                    if (state.uploadedCount == 0) R.string.proxy_none_nothing_synced
+                    else R.string.proxy_none_all_done
                 ),
                 style = MaterialTheme.typography.bodySmall
             )
+        }
+
+        else -> {
+            WithHelp(HelpTopic.SETTINGS_OPTIMISE_STATUS) {
+                Text(
+                    text = pluralStringResource(
+                        R.plurals.proxy_explainer,
+                        state.proxyCandidateCount,
+                        state.proxyCandidateCount
+                    ),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
             OutlinedButton(onClick = { proxyLauncher() }) {
                 Text(
                     stringResource(
@@ -416,10 +460,6 @@ private fun OptimiseStatusAndAction(
                     )
                 )
             }
-            Text(
-                text = stringResource(R.string.proxy_videos_excluded),
-                style = MaterialTheme.typography.bodySmall
-            )
         }
     }
 
@@ -445,6 +485,63 @@ private fun OptimiseStatusAndAction(
     }
 }
 
+/**
+ * What video optimising is doing, what is ready, and the button that does it now.
+ *
+ * Says which of four things is true, because each wants a different reaction: a batch is running, it
+ * is queued and waiting only for the charger, there is something ready, or there is nothing. A line
+ * that said "nothing to optimise" while a run was waiting on the charger would read as broken.
+ *
+ * The button is offered whenever something is ready and a batch is not already executing, in either
+ * mode and while a run waits for the charger. Pressing it is what starts one *without* the charger.
+ */
+@Composable
+private fun VideoStatusAndAction(
+    state: BackupUiState,
+    onOptimiseNow: () -> Unit,
+    context: android.content.Context
+) {
+    val ready = state.videoCandidateCount
+
+    WithHelp(HelpTopic.SETTINGS_OPTIMISE_VIDEO_STATUS) {
+        Text(
+            text = when (state.videoOptimiseRun) {
+                VideoOptimiseRun.WORKING ->
+                    pluralStringResource(R.plurals.video_working, ready, ready)
+
+                VideoOptimiseRun.WAITING_FOR_CHARGER ->
+                    stringResource(R.string.video_waiting_for_charger)
+
+                VideoOptimiseRun.IDLE -> if (ready > 0) {
+                    pluralStringResource(R.plurals.video_explainer, ready, ready)
+                } else {
+                    stringResource(R.string.video_none)
+                }
+            },
+            style = MaterialTheme.typography.bodySmall
+        )
+    }
+
+    if (ready > 0 && state.videoOptimiseRun != VideoOptimiseRun.WORKING) {
+        OutlinedButton(onClick = onOptimiseNow) {
+            Text(stringResource(R.string.video_action, formatBytes(context, state.videoCandidateBytes)))
+        }
+    }
+
+    // Reported so the number above is not mistaken for the whole library. These clips qualify in
+    // every other way; the app just has no write access to the folder they are in.
+    if (state.videoOutsideCount > 0) {
+        Text(
+            text = pluralStringResource(
+                R.plurals.video_outside,
+                state.videoOutsideCount,
+                state.videoOutsideCount
+            ),
+            style = MaterialTheme.typography.bodySmall
+        )
+    }
+}
+
 // ── Layout primitives ───────────────────────────────────────────────────────
 
 /** The screen's side padding. Section headings reach past it to the edges of the screen. */
@@ -460,9 +557,8 @@ private val SettingsGutter = 16.dp
  * and help icon are never a colour picked for one theme only. It is deliberately **not** `accent`,
  * the bright green of the selected tab in the nav bar.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SectionHeader(title: String, helpText: String? = null) {
+private fun SectionHeader(title: String, help: HelpTopic? = null) {
     val signal = LocalGallerySyncColors.current
 
     Surface(
@@ -480,23 +576,7 @@ private fun SectionHeader(title: String, helpText: String? = null) {
         ) {
             Text(text = title, style = MaterialTheme.typography.headlineSmall)
 
-            if (helpText != null) {
-                val tooltipState = rememberTooltipState(isPersistent = true)
-                val scope = rememberCoroutineScope()
-                TooltipBox(
-                    positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
-                    tooltip = { RichTooltip { Text(helpText) } },
-                    state = tooltipState
-                ) {
-                    IconButton(onClick = { scope.launch { tooltipState.show() } }) {
-                        Icon(
-                            imageVector = SignalIcons.Help,
-                            contentDescription = title,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
-                }
-            }
+            if (help != null) HelpButton(help)
         }
     }
 }
@@ -516,6 +596,7 @@ private fun Modifier.spanScreenWidth(gutter: Dp): Modifier = layout { measurable
 @Composable
 private fun SettingSwitch(
     label: String,
+    help: HelpTopic? = null,
     detail: String? = null,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
@@ -526,7 +607,7 @@ private fun SettingSwitch(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(label, style = MaterialTheme.typography.bodyLarge)
+            LabelWithHelp(label, help)
             if (detail != null) {
                 Text(detail, style = MaterialTheme.typography.bodySmall)
             }
@@ -542,9 +623,27 @@ private fun SettingSwitch(
     }
 }
 
+/** A setting's name with its (?) directly after it, so the button reads as belonging to the words. */
+@Composable
+private fun LabelWithHelp(label: String, help: HelpTopic?, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(2.dp)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier.weight(1f, fill = false)
+        )
+        if (help != null) HelpButton(help)
+    }
+}
+
 @Composable
 private fun <T> SettingDropdown(
     label: String,
+    help: HelpTopic? = null,
     options: List<T>,
     selected: T,
     onSelected: (T) -> Unit,
@@ -557,11 +656,7 @@ private fun <T> SettingDropdown(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.weight(1f)
-        )
+        LabelWithHelp(label, help, modifier = Modifier.weight(1f))
         Box {
             OutlinedButton(onClick = { expanded = true }) {
                 Text(optionLabel(selected), maxLines = 1)

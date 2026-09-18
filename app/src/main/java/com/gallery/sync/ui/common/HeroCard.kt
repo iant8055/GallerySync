@@ -25,6 +25,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.gallery.sync.ui.help.HelpButton
+import com.gallery.sync.ui.help.HelpTopic
 import com.gallery.sync.ui.theme.LocalGallerySyncColors
 
 /**
@@ -74,6 +76,13 @@ fun HeroCard(
      */
     figureFooter: (@Composable ColumnScope.() -> Unit)? = null,
     /**
+     * A (?) beside the label, explaining what this card's headline figure is and where it comes from.
+     *
+     * Ignored when [figureContent] is given, which replaces the label. Albums does that and puts a (?)
+     * on each of its own lines instead.
+     */
+    help: HelpTopic? = null,
+    /**
      * Pushes [actions] to the foot of the card instead of letting them follow [detail].
      *
      * Only worth it where the other column is the taller one — Albums, whose heading and 2 x 2 of
@@ -112,7 +121,7 @@ fun HeroCard(
                     verticalAlignment = Alignment.Top
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        if (figureContent != null) figureContent() else HeroFigure(label, figure, figureFooter)
+                        if (figureContent != null) figureContent() else HeroFigure(label, figure, figureFooter, help)
                     }
                     Column(
                         modifier = Modifier
@@ -140,7 +149,7 @@ fun HeroCard(
                 }
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    if (figureContent != null) figureContent() else HeroFigure(label, figure, figureFooter)
+                    if (figureContent != null) figureContent() else HeroFigure(label, figure, figureFooter, help)
                     detail()
                     actions()
                 }
@@ -212,17 +221,25 @@ fun HeroOutlinedButton(
 private fun HeroFigure(
     label: String,
     figure: String,
-    footer: (@Composable ColumnScope.() -> Unit)?
+    footer: (@Composable ColumnScope.() -> Unit)?,
+    help: HelpTopic?
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.titleLarge,
-            textAlign = TextAlign.Center
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.titleLarge,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.weight(1f, fill = false)
+            )
+            if (help != null) HelpButton(help)
+        }
         Text(text = figure, style = MaterialTheme.typography.displaySmall)
         // A gap, not the column's default nothing. The footer is a second number and it was
         // touching the first — "6" and "13 selected" ran together as one block. Ian, 27 Aug 2026.

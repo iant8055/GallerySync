@@ -44,6 +44,10 @@ import com.gallery.sync.domain.backup.ArchiveEntry
 import com.gallery.sync.domain.backup.ArchiveFailure
 import com.gallery.sync.domain.backup.ArchiveMark
 import com.gallery.sync.ui.common.HeroCard
+import com.gallery.sync.ui.help.HelpButton
+import com.gallery.sync.ui.help.HelpTopic
+import com.gallery.sync.ui.help.TitleWithHelp
+import com.gallery.sync.ui.help.WithHelp
 import com.gallery.sync.ui.common.HeroOutlinedButton
 import com.gallery.sync.ui.common.SignalIcons
 import com.gallery.sync.ui.common.formatBytes
@@ -134,23 +138,28 @@ fun ArchiveScreen(
             // on this tab — which is what someone arriving here wants to know before anything else.
             HeroCard(
                 label = stringResource(R.string.archive_hero_label),
+                help = HelpTopic.ARCHIVE_HERO,
                 figure = state.plan.entries.size.toString(),
                 detail = {
                     when {
-                        !state.isSupported -> Text(
-                            text = stringResource(R.string.archive_unsupported),
-                            style = MaterialTheme.typography.bodySmall
-                        )
+                        !state.isSupported -> WithHelp(HelpTopic.ARCHIVE_EMPTY) {
+                            Text(
+                                text = stringResource(R.string.archive_unsupported),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
 
                         // Two different emptinesses. No Archive album at all means nothing here can
                         // remove anything; Archive albums holding no files means the mode finished
                         // and is still standing. Telling the user the first when the second is true
                         // would be false about the one mode that takes files off the phone.
                         state.plan.isEmpty && state.archiveAlbums.isEmpty() -> {
-                            Text(
-                                text = stringResource(R.string.archive_empty),
-                                style = MaterialTheme.typography.bodySmall
-                            )
+                            WithHelp(HelpTopic.ARCHIVE_EMPTY) {
+                                Text(
+                                    text = stringResource(R.string.archive_empty),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
                             Text(
                                 text = stringResource(R.string.archive_empty_hint),
                                 style = MaterialTheme.typography.bodySmall
@@ -169,7 +178,9 @@ fun ArchiveScreen(
                 },
                 actions = {
                     if (state.isSupported && !state.plan.isEmpty) {
-                        ArchiveHeroActions(state = state, onValidate = viewModel::validate)
+                        WithHelp(HelpTopic.ARCHIVE_CHECK_BUTTON) {
+                            ArchiveHeroActions(state = state, onValidate = viewModel::validate)
+                        }
                     }
                 }
             )
@@ -200,6 +211,14 @@ fun ArchiveScreen(
                     .fillMaxWidth()
                     .weight(1f)
             ) {
+                item(key = "archive-heading") {
+                    WithHelp(HelpTopic.ARCHIVE_FILE_LIST, Modifier.padding(horizontal = 16.dp)) {
+                        Text(
+                            text = stringResource(R.string.archive_list_heading),
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                    }
+                }
                 items(state.plan.entries, key = { it.item.mediaStoreId }) { entry ->
                     ArchiveRow(entry)
                 }
@@ -395,11 +414,13 @@ private fun ArchivePrompt(
             // Nothing survived the check, so there is nothing to offer. Showing a Yes button here
             // would offer an action that cannot succeed.
             if (state.plan.allFailed) {
-                Text(
-                    text = stringResource(R.string.archive_none_confirmed),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.error
-                )
+                WithHelp(HelpTopic.ARCHIVE_PROMPT) {
+                    Text(
+                        text = stringResource(R.string.archive_none_confirmed),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
                 // "Continue", not "No". Ian, 27 Aug 2026, on seeing this screen for real: nothing
                 // can be archived here and the app is not asking for anything, so a No button was
                 // an answer to a question nobody put. This one only dismisses.
@@ -417,10 +438,12 @@ private fun ArchivePrompt(
             val freed = formatBytes(context, state.plan.freeableBytes)
 
             if (state.plan.isPartial) {
-                Text(
-                    text = stringResource(R.string.archive_prompt_partial_title, confirmedCount),
-                    style = MaterialTheme.typography.titleSmall
-                )
+                WithHelp(HelpTopic.ARCHIVE_PROMPT) {
+                    Text(
+                        text = stringResource(R.string.archive_prompt_partial_title, confirmedCount),
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                }
                 Text(
                     text = stringResource(
                         R.string.archive_prompt_partial_body,
@@ -434,10 +457,12 @@ private fun ArchivePrompt(
                     style = MaterialTheme.typography.bodyMedium
                 )
             } else {
-                Text(
-                    text = stringResource(R.string.archive_prompt_all_title),
-                    style = MaterialTheme.typography.titleSmall
-                )
+                WithHelp(HelpTopic.ARCHIVE_PROMPT) {
+                    Text(
+                        text = stringResource(R.string.archive_prompt_all_title),
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                }
                 Text(
                     text = stringResource(R.string.archive_prompt_all_body, freed),
                     style = MaterialTheme.typography.bodyMedium

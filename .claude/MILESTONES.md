@@ -404,7 +404,7 @@ keeps working.
       full size, and still archivable and restorable — all of which need a verified cloud copy. Under
       the old reading, one toggle silently disabled three features and left the largest files on the
       phone unprotected.
-- [ ] **Video transcode for old clips**, age a user setting — see TASK-013. The write needs no tap
+- [x] **Video transcode for old clips**, age a user setting (wired to Settings 18 Sept 2026, see the last entry) — see TASK-013. The write needs no tap
       (SAF, verified 19 Aug 2026); the blocker is a transcode cost measured on real 8K footage, and
       it is gated on v0.4 retrieval.
 - [ ] **Guided first run** — language, cloud, sign-in, permissions, then two gates the engine cannot
@@ -5714,3 +5714,190 @@ Recorded here rather than edited into the old entries, so the withdrawn text sta
 
 The memory files were corrected in the same pass: TASK-021 no longer listed as an open defect, the docs
 map updated, and a note that this file's older checkboxes lag its dated entries.
+
+### 18 Sept 2026 (night, continued) — the How To Guide, a (?) on every item, and what building them found
+
+Ian asked for a complete "How To Guide" explaining every line of every tab (what it is, where its
+information comes from, in layman's terms), a **(?)** on each UI item opening a pop-up of that
+explanation, and a Settings link to the guide in the Privacy Policy / Delete Account look and feel —
+with an accordion version as well if it fitted better. Both were built.
+
+#### What was built
+
+- **One source, four outputs.** The guide is written once in `tools/guide/content/` (eight chapters, 92
+  topics, 52 of which have a (?)) and `python tools/guide/build_guide.py` generates
+  `docs/how-to-guide.html` (one long page, Privacy Policy style), `docs/how-to-guide-accordion.html`
+  (expandable sections), `res/values/help_topics.xml` (the pop-up text) and `ui/help/HelpTopic.kt`
+  (the list of topics). Written twice the pop-ups and the guide would drift, so they are not. `--check`
+  exits 1 if any output is stale. **To change help text, edit `tools/guide/content/` and rebuild;
+  editing the generated files by hand will be overwritten.**
+- **Accordion is what Settings opens** (`SupportPage.HOW_TO_GUIDE`), because about ninety topics as one
+  scroll is a lot to get through on a phone. Both pages link to each other and carry the same anchors;
+  to make the long page the default, change that one URL. The accordion needs no JavaScript (the viewer
+  has it off): it is `<details>`, and a link to an anchor *inside* a closed one opens it, which is why
+  the id sits on the body and not on `<details>`. Checked in Chrome 152 and on the phone.
+- **`ui/help/`:** `HelpButton` (the (?), 28dp drawn, the platform widens the touch area to 48dp — probed
+  on the device: a tap 20dp off the icon opens it, 30dp off does not), `WithHelp`, `TitleWithHelp`,
+  `HelpDialog` (what it is / where it comes from, bold and lists, **Read more in the How To Guide**
+  opening the guide at that topic) and `HelpText` (the pop-up's parser, which mirrors the generator's).
+  Colours are `LocalContentColor` throughout; nothing hardcoded.
+- **Where the (?) are:** Albums (permission message, the "All Albums" pill for the album cards, the
+  filter hint, the two figure lines, "Everything here is backed up", the Sync/Archive lines, the run
+  controls, the status line, the merge warning, the Archive confirmation, and both on the album detail
+  screen); Restore (headline, message line, selection line, buttons, path line for the folder and file
+  lists, action bar); Archive (headline, empty states, check button, file list, the prompt, the leaving
+  reminder); Settings (all six section bands and every setting, the destination dialog, the OneDrive
+  picker and the deletion confirmation). The section-band and *Folders to back up* tooltips became the
+  same pop-up, and their three strings were removed.
+- **Not given a (?):** the first-run wizard (it is a guided tour that explains itself; its nine cards
+  are covered in the guide's *First-time setup* chapter) and the four link cards at the foot of Settings.
+
+#### Verified
+
+- **363/363 unit tests**, 0 failures. Thirteen are new: `HowToGuideConsistencyTest` fails if a topic has no
+  string, is not an anchor in **both** pages, is offered by no screen, or if **any line of any pop-up is
+  missing from the guide**; also that every link inside the guide lands and that the Settings card points
+  at a file that exists. It was checked to be able to fail: corrupting one sentence in the flat page made
+  `everyLineOfEveryPopUpIsInTheGuide` fail, and regenerating restored it.
+- **On the Moto G** (`ZT422CTZQV`, 443dp), light and dark, crash buffer empty: every tab; the pop-up in
+  both themes; the guide page in Chrome on the phone in both, including a deep link opening its section;
+  the destination dialog, the Archive confirmation (opened and **cancelled**; nothing archived), the
+  Sync and Archive filtered figures, "Ask" mode's two extra sections (flipped and put back).
+- **At 320dp,** emulated with `wm density 360` because the Fold 4 cover screen is gone, so this is weaker
+  evidence than hardware. Measured against a build of the untouched `HEAD`. My first layout cost the
+  narrow screen its first album card and made *Album Mode Count* wrap with an orphaned word at the Moto's
+  width; both were fixed (no heading row of its own, one (?) for the two figure lines). Header card is now
+  ~20dp taller than before at 320dp, and identical at 443dp.
+
+#### Not verified
+
+- **The in-app viewer showing the guide.** The pages are not on GitHub Pages until this is pushed, so the
+  Settings card and "Read more" currently show GitHub's 404. What was checked instead is the same engine
+  (Chrome on the phone) with the same page. The viewer's own behaviour with JavaScript off on a
+  fragment link is untested.
+- **Anything at 344dp on hardware, on Samsung One UI, or on API 37.**
+- The leaving reminder and the Restore/Archive states that need real files (a running restore, an archive
+  run, a partial or empty Archive prompt) were read from the code, not watched.
+
+#### Found while writing the guide, for Ian
+
+1. **The Settings video controls are not wired to anything after setup.** *Optimise video*, *Mode*,
+   *Older than* and *Quality* are stored, but `VideoOptimiser.run()` — the entry that honours them — has
+   **no caller**. The only video pass is the wizard's (`wizardCandidates()` / `runForWizard`), which is why
+   MILESTONES still has "Video transcode for old clips" unticked. The guide says this plainly ("saved, but
+   the app does not yet shrink video on its own after setup"). The in-app line *"Video is optimised
+   separately, and only clips older than the age you set"* is therefore not true yet. Either wire it, or
+   hide the controls and reword.
+2. **Settings → Restore → *Show empty folders* changes nothing.** Only `RetrieveViewModel` reads it, and
+   `RetrieveScreen` is not reachable; the live Restore tab already lists only folders with something to
+   bring back. The guide says so.
+3. **The Albums header card does not scroll,** so at 320dp with 1.7x text *Sync now* and *Rescan* are
+   off-screen. **Pre-existing:** the same overflow was measured on the untouched build. Making the card a
+   list item would fix it; not done, because it changes a layout Ian has tuned.
+4. **`LibraryChoice.CHOOSE_PER_ALBUM`'s doc comment says it is the default.** The code default is
+   `BACK_UP_EVERYTHING` (plan 1), which is what the wizard preselects. The guide follows the code.
+5. **Unreachable screens still in the tree:** `RetrieveScreen`, `BrowseScreen`, `SignInScreen`,
+   `FirstBackupSettings`. Not touched; the guide describes only what a user can reach.
+6. **Not investigated:** with the page missing, the viewer showed GitHub's 404 page with no *could not be
+   loaded* overlay, although `onReceivedHttpError` should set it.
+
+#### Keeping it true
+
+A guide that describes the app is only worth having while it does. Any change to a screen's wording,
+a control or a number's source should change `tools/guide/content/` in the same commit; the consistency
+test catches the guide and the pop-ups disagreeing, but not the guide and the screen.
+
+### 18 Sept 2026 (night, continued) — video optimising is now wired to Settings
+
+Ian, on the previous entry's finding that the Settings video controls did nothing: *"Build this"*. They
+now drive a real background chain. What was built, what it found on the way, and what was watched.
+
+#### What was built
+
+- **`VideoOptimiseWorker`**, a separate worker on its own unique chain (`VIDEO_OPTIMISE_WORK`), not the
+  wizard's `OptimiseWorker`. The wizard's pass is Area 1 and ignores modes, age and switches; this is
+  Area 2 and obeys nothing else. Sharing a chain would also have queued a button press *behind* an
+  automatic run waiting for the charger (`APPEND_OR_REPLACE`), so pressing Optimise now would have done
+  nothing until the phone was plugged in.
+- **`VideoOptimisePolicy`** (pure, 11 tests): automatic runs need setup complete, the master switch, the
+  video switch and Mode = Automatic. A chain continues only if the batch attempted something and clips
+  remain; failed clips ride in the next batch's input data as exclusions, so every pass either shortens
+  the candidate list or grows the exclusions and the chain always ends. Capped at 40 (WorkManager's
+  10 KB input limit).
+- **`VideoOptimiseLauncher`**: `requestAutomatic()` (charging required, TASK-013 rule 5) and
+  `requestNow()` (the button: no charger, replaces a run that is only *waiting*, never one executing).
+- **Triggers.** The end of every *complete* backup run (reached by every content trigger and the
+  six-hourly net, which is also what notices a clip that has just grown older than the age setting),
+  and any change to Optimise video, Mode, Older than or the master switch.
+- **Settings.** A video status line and a **Optimise N MB of video** button, four states (ready, none,
+  waiting for the charger, working), an "outside the granted folders" line, and the *Straight away*
+  warning that had been written and never shown. The photo status lines now appear only while the photo
+  switch is on. `proxy_videos_excluded` ("Video is optimised separately…") is gone; it described a pass
+  that did not exist.
+- **The guide** (`tools/guide/`) says how it works now; the pop-up for the new status line is
+  `settings-optimise-video-status`.
+
+#### Two defects in the code that was already there
+
+1. **`VideoOptimiser.run()` could never have optimised anything.** It asked `SafMediaWriter.covers()` —
+   which takes folder paths — about a content URI. No path starts with `content://`, so every clip would
+   have been reported as outside the granted folders. Fixed with `SafMediaWriter.coverage(uri)`, which asks
+   MediaStore where the file is.
+2. **Uncovered clips could starve the batch.** The query took the ten biggest clips and filtered after;
+   clips outside a granted folder stay candidates for ever, so a run whose ten were all uncovered would
+   never reach anything smaller. The optimiser now reads a pool of 2000, narrows it, then takes the batch.
+
+Also corrected: a comment saying transcoded clips are not stamped with the proxy marker. They have been
+since 29 Aug (`VideoTranscoder`); it was verified here (marker present in a pulled clip).
+
+#### A hazard avoided
+
+`optimiseChainLive()` is what makes `BackupWorker` decline a content-triggered run as "our own optimise
+writes woke it" and what holds back the cold-start scan. It counted a chain that was merely *queued*. A
+video batch waiting hours for the charger would therefore have made the app ignore every real new photo
+for as long as it waited. The video chain now counts only while **executing**. **Watched:** with a chain
+blocked on the charger, a new photo pushed into Camera still produced a backup run and uploaded.
+
+#### Verified on the Moto G (`ZT422CTZQV`), unattended
+
+- **Six real clips**, 20–40 MB each, 1080×1920, Sync album, verified: the chain ran on its own after a
+  backup run finished, two batches of three, 26.6→3.4, 39.5→4.9, 34.1→4.3, 27.7→3.5, 39.2→4.9,
+  20.4→2.4 MB, 480×854, 0 failed, ~5 s a clip. "3 left, queueing another batch" appeared once and the
+  chain ended. A pulled clip: H.264 + AAC, 8.09 s, proxy marker present.
+- **No re-upload:** the backup run that followed reported 0 uploaded, 0 remaining.
+- **Waiting for the charger:** with the battery simulated as *discharging*, a new clip uploaded, the log
+  said *"queueing video optimising for the charger"*, JobScheduler held the job, and Settings said so and
+  offered the button. **The button** started it with no charger (tags no longer carry the charging tag)
+  and Settings showed *"Optimising video in the background. 1 clip left."*
+- **Manual mode:** nothing queued after an upload; the button appeared once the count refreshed.
+  Switching back to Automatic queued the chain; restoring the charger released it.
+- **Restore round-trip:** one clip restored to exactly 29,256,747 bytes, its original. `markRestored`
+  sets a per-file mode override of Backup, so a restored clip is not shrunk again, and nothing was
+  queued after it.
+- Crash buffer empty throughout. Full suite 374/374 on a clean rerun.
+
+**A fixture trap, recorded so nobody repeats it:** `dumpsys battery unplug` alone leaves the *status* as
+FULL at 100 percent, which WorkManager treats as charging, so a charging-constrained job ran anyway.
+Use `set ac 0`, `set usb 0`, `set status 3` and `set level 80`, then `reset`.
+
+#### Not verified
+
+- The **outside the granted folders** line and the **failed-clip exclusion** path: neither can be
+  produced without breaking something on purpose, and only their pure decision logic is tested.
+- The **Older than** gate on hardware (only *Straight away* was run); it is the existing query's
+  predicate, not new code.
+- **A very long clip.** WorkManager stops a worker after about ten minutes. Three 1080p clips take
+  under a minute; a long 4K or 8K one might not fit, would be stopped and retried, and could repeat.
+  The wizard's pass has the same shape. Not measured.
+- Anything at 344dp, on Samsung One UI, or on API 37.
+
+#### For Ian
+
+1. **Setup and Settings share these preferences.** The wizard's video switch and quality write the same
+   stored values Settings reads (`setOptimiseVideo`, `setVideoQuality`), so a phone set up with plan 2 or
+   3 and video on now has Optimise video on in Settings and, once an album is set to Sync, will optimise
+   its old clips on the charger. What Settings shows is what runs. CLAUDE.md says the two are independent
+   in both directions; the code is not. Not changed.
+2. **The count on the button lags a backup run** until you change tab (it refreshes on tab entry, as the
+   photo count does): probably because a content-triggered run is replaced by its own re-arm, so the observer never sees it SUCCEED (not confirmed). Left alone.
+3. The Settings *Archive* band still says *Coming soon*.
