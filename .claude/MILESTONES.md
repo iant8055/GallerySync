@@ -5236,3 +5236,58 @@ first commit. They are now written as `''` / `''`. The bytes are identical, an
 stored warning on the Moto G still decoded and rendered after install. 343/343 unit tests pass, and the
 crash buffer is empty.
 
+### 17 Sept 2026 — TASK-021 reproduced: RESTRICTED bucket withholds a ready job, even while charging
+
+Wizard defects were closed (the last one, *Keep <subfolder> only*, verified the same day), so TASK-021
+was cleared to start. Reproduced on the Moto G, wired to this machine over wireless debugging.
+
+**Method.** Camera set to Sync, backed up to a clean baseline (5/5 verified, optimise chain settled —
+`dumpsys jobscheduler` showed only the periodic job waiting on `TIMING_DELAY` and the content-trigger
+job waiting on `CONTENT_TRIGGER`, nothing `ENQUEUED`/`BLOCKED`). A file copied into `DCIM/Camera` under
+a fresh name plus a `MEDIA_SCANNER_SCAN_FILE` broadcast stands in for a new camera photo. The app was
+backgrounded with Home, never foregrounded again until the probe was read — foregrounding is what
+dispatches the job and would have destroyed the measurement. `am set-standby-bucket` forced the bucket
+directly rather than waiting out a real demotion.
+
+**Probe 1 — RARE.** New photo in, bucket forced to `rare`, watched for 8 minutes without touching the
+device. `backup run starting` at T+31s, uploaded, `backup run finished: 1 uploaded` at T+36s. The
+bucket that the 5 Sept entry measured a 26-minute *batching* delay in did not reproduce anything here —
+this device, this run, dispatched almost immediately.
+
+**Probe 2 — RESTRICTED.** A second new photo, bucket forced to `restricted` (the bucket this exact app
+was independently seen to reach earlier the same day, per `dumpsys usagestats` — not a bucket invented
+for the test). Watched for 12 minutes, polling once a minute:
+
+```
+Satisfied constraints: BATTERY_NOT_LOW STORAGE_NOT_LOW CONNECTIVITY FLEXIBILITY CONTENT_TRIGGER
+                        DEVICE_NOT_DOZING BACKGROUND_NOT_RESTRICTED WITHIN_QUOTA
+Unsatisfied constraints: (none)
+```
+
+Fully satisfied — including `WITHIN_QUOTA` — from the first minute onward, for all twelve. No
+`backup run starting` line ever appeared. The job was ready and JobScheduler was not running it.
+
+**Not lost — withheld.** Setting the bucket back to `active` dispatched the job the same second:
+`backup run starting` at 20:38:13, upload logged two seconds later. This is the guard's re-arm working
+exactly as designed; the platform, not the app, was sitting on it.
+
+**This is the 5 Sept quota table, confirmed on hardware rather than read off a doc page.** *"A device in
+the charging state is given unrestricted resource access regardless of its app standby bucket... outside
+the restricted bucket."* The device was on AC power for both probes. RARE's quota is lifted by charging,
+which is why it dispatched in 31 seconds; **RESTRICTED's `once daily, 10 min` is the one quota charging
+does not lift**, which is why an otherwise-satisfied job sat for the full 12 minutes untouched. Ian's
+6 Sept report — new photos taken, several minutes waiting, nothing backed up — is explained: the app had
+reached RESTRICTED, most likely from being closed rather than force-stopped for a stretch, and the
+minutes he was willing to wait were well inside a window the bucket can legitimately hold a ready job
+for.
+
+**Still open — the fix.** The 5 Sept entry scoped two routes short of the foreground-service dead end:
+`AlarmManager.setAndAllowWhileIdle()` and user-initiated data transfer jobs (`setUserInitiated(true)`,
+API 34+, exempt from ordinary job quotas but with no Jetpack support and no minSdk-26 fallback). Neither
+was chosen. The quota table complicates the alarm route specifically for this bucket — Restricted caps
+alarms at 1/day too — which leaves user-initiated jobs as the one route the table calls unconditionally
+exempt, at the cost of a second scheduling path beside WorkManager. This is a real architecture fork,
+not a bug-fix-with-clear-root-cause, and belongs to Ian per CLAUDE.md's escalation rule for that.
+
+Test files left in `DCIM/Camera` on the Moto G (test account): `IMG_20260917_201547_TEST.jpg`,
+`IMG_20260917_202459_TEST2.jpg` — both real uploads now, harmless to leave.
