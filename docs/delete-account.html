@@ -70,7 +70,8 @@
   <ol>
     <li>
       <strong>Sign out in the app.</strong> Open Gallery Sync and tap <strong>Sign out</strong>.
-      This immediately deletes the stored sign-in token and the local index of your files.
+      This removes the app's Microsoft sign-in from your device, so it can no longer reach your
+      OneDrive.
     </li>
     <li>
       <strong>Revoke Gallery Sync's access to your Microsoft account.</strong> Go to
@@ -79,13 +80,14 @@
       permissions</strong>. Gallery Sync can no longer reach your OneDrive after this.
     </li>
     <li>
-      <strong>Uninstall the app.</strong> Uninstalling removes every remaining file Gallery Sync
-      created on your device, including its local database and any cached media.
+      <strong>Uninstall the app, or clear its storage.</strong> Uninstalling (or choosing
+      <em>Clear storage</em> for Gallery Sync in Android's settings) removes the app's local
+      database and settings.
     </li>
   </ol>
 
-  <p>Completing step 1 or step 2 alone is enough to cut off access. Step 3 clears the last of the
-  local data.</p>
+  <p>Completing step 1 or step 2 alone is enough to cut off access. Step 3 clears the local data the
+  app keeps about your files.</p>
 
   <h2>What is deleted, and what is kept</h2>
   <table>
@@ -99,27 +101,38 @@
         <td>Deleted when you sign out or uninstall. Retention period: none.</td>
       </tr>
       <tr>
-        <td>Index of your OneDrive file names and folders</td>
+        <td>Database of your media and their OneDrive copies (names, folders, sizes, dates)</td>
         <td>A database on your device</td>
-        <td>Deleted when you sign out or uninstall. Retention period: none.</td>
+        <td>Deleted when you uninstall or clear the app's storage. It is not cleared by signing out.
+        Retention period: none once removed.</td>
       </tr>
       <tr>
-        <td>Cached photos and videos</td>
+        <td>The app's settings and folder choices</td>
         <td>Gallery Sync's private storage on your device</td>
-        <td>Deleted when you uninstall. Retention period: none.</td>
+        <td>Deleted when you uninstall or clear the app's storage. Retention period: none.</td>
+      </tr>
+      <tr>
+        <td>Photos and videos on your phone</td>
+        <td>Your phone's gallery</td>
+        <td><strong>Kept.</strong> Removing the app changes none of them. Any that were replaced by
+        smaller copies stay as smaller copies, and any moved to your phone's Trash / Recycle Bin stay
+        there until you empty it. The full-size originals are in your OneDrive.</td>
       </tr>
       <tr>
         <td>Your photos and videos in OneDrive</td>
         <td>Your Microsoft account</td>
-        <td><strong>Kept.</strong> They belong to you. Gallery Sync never deletes them.</td>
+        <td><strong>Kept.</strong> They belong to you. Removing the app or its access does not touch
+        them.</td>
       </tr>
     </tbody>
   </table>
 
   <div class="note">
-    <p><strong>Gallery Sync never deletes anything from your OneDrive.</strong> Removing the app
-    does not remove your photos. To delete files stored in OneDrive, use OneDrive itself, or close
-    your Microsoft account at
+    <p><strong>Gallery Sync never permanently deletes anything from your OneDrive.</strong> Removing
+    the app does not remove your photos. If you had turned on the optional setting that asks about
+    OneDrive copies when you delete a photo from your phone, any copies you confirmed were moved to
+    your OneDrive recycle bin, which the app never empties. To delete files stored in OneDrive, use
+    OneDrive itself, or close your Microsoft account at
     <a href="https://account.microsoft.com/">account.microsoft.com</a>.</p>
   </div>
 
@@ -134,7 +147,7 @@
   issue at <a href="https://github.com/iant8055/GallerySync/issues">github.com/iant8055/GallerySync/issues</a>.</p>
 
   <footer>
-    Gallery Sync — account and data deletion. Last updated 17 August 2026.
+    Gallery Sync — account and data deletion. Last updated 18 September 2026.
   </footer>
 
 </main>
