@@ -5522,3 +5522,43 @@ away Doze/Standby behaviour for every app to fix one. The only *app-side* way on
 requesting `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`, which is the Play-review-gated permission Ian
 ruled out on 5 Sept for exactly this reason. This test answers the mechanism question cleanly; it does
 not by itself answer the product question of how a real install reaches the same protected state.
+
+### 18 Sept 2026 (evening) — TASK-021 fixed: every cold start now checks what's outstanding
+
+Built and verified per the spec in `TASK-021.md`. `GallerySyncApplication.armAutomaticSync()` now
+enqueues a real `BackupScheduling.enqueueContinuation()` alongside the existing future-watch re-arm,
+on every process start, gated the same way (`isAutomaticEnabled`). 343/343 unit tests pass.
+
+**Verified on the same Moto G, against the real bug rather than a whitelisted or otherwise cheated
+environment.** Doze whitelist entry removed first (undoing the 18 Sept diagnostic), fresh install of
+the fix over the existing app (settings survived: Camera stayed Sync, 19/19 already verified). The
+process was force-killed directly (`am kill`, standing in for the automatic `remove task` kill this
+session hadn't reproduced cleanly a second time) to guarantee a genuine cold start, then a real photo
+taken:
+
+```
+13:02:19.337  WM-ForceStopRunnable: The default process name was not specified.
+13:02:19.342  WM-ForceStopRunnable: Performing cleanup operations.
+13:02:19.506  WM-ForceStopRunnable: Application was force-stopped, rescheduling.
+13:02:20.099  GallerySync/BackupWorke: backup run starting
+13:02:26.711  … upload: stored IMG_20260918_130153039.jpg
+13:02:29.511  … upload: stored IMG_20260918_130150487_HDR.jpg
+13:02:31.903  … upload: stored IMG_20260918_130148173_HDR.jpg
+13:02:34.639  … upload: stored IMG_20260918_130146171.jpg
+13:02:37.383  … upload: stored IMG_20260918_130144375.jpg
+13:02:37.398  GallerySync/BackupWorke: backup run finished: 5 uploaded, 0 failed, 0 remaining
+```
+
+**`ForceStopRunnable` still misfired — "Application was force-stopped, rescheduling" — and it no
+longer mattered.** The platform-level misdetection is exactly as present as it was all day; the fix
+doesn't touch it and was never meant to. What changed is that the same cold start now also runs a fresh
+continuation, enqueued after that misfire had already completed, and that continuation is what actually
+caught the photo: five files, one run, zero remaining, no delay beyond a few seconds, no second batch
+needed to rescue it. This is the first time all day a single real photo synced unattended without help
+from a later, unrelated trigger.
+
+TASK-021 moves from investigation to closed-pending-Ian's-review. Not yet done: instrumented-build
+testing of the cost caveat in the spec (a cold start for unrelated reasons now always costs a reconcile
+check), and confirming behaviour is the same on a device that doesn't reach RESTRICTED or get killed
+this aggressively — both lower priority than the fix itself being correct, which tonight's capture
+settles.

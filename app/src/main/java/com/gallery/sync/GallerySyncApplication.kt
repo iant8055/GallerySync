@@ -42,7 +42,8 @@ class GallerySyncApplication : Application(), Configuration.Provider {
     }
 
     /**
-     * Arms the background work if the user wants automatic sync.
+     * Arms the background work if the user wants automatic sync, and checks what is already
+     * outstanding.
      *
      * Necessary because the preference defaults to on: until 19 Aug 2026 scheduling was only ever
      * armed by the settings toggle being flipped, so a default of "on" would have described
@@ -51,16 +52,31 @@ class GallerySyncApplication : Application(), Configuration.Provider {
      *
      * Safe to run on every launch. The periodic request uses `KEEP`, so re-arming does not reset
      * the interval and postpone the next run.
+     *
+     * ### Why this also enqueues a continuation, not only the future watch — TASK-021
+     *
+     * This runs before any other component in the process, on every cold start, for any reason.
+     * WorkManager's own force-stop detection also runs once per cold start, and on this device
+     * intermittently — not always — concludes the app was force-stopped and cancels whatever
+     * content-trigger work was already in flight, rather than running it. A new photo's own trigger
+     * can be the casualty, and the replacement watch that gets scheduled only catches the *next*
+     * change, not what it just dropped. See TASK-021 and the 18 Sept MILESTONES entries.
+     *
+     * A continuation enqueued here is a fresh call made after this process's own force-stop check
+     * has already run, so it is not subject to the same cancellation — the same reason the manual
+     * "Right now" and "Sync now" paths have never failed. `BackupWorker` always refreshes the ledger
+     * and checks everything outstanding regardless of what triggered it, so this catches a dropped
+     * photo the same day, on the next time the process is touched at all, rather than waiting for
+     * another trigger or the six-hour net.
      */
     private fun armAutomaticSync() {
         scope.launch {
             runCatching {
                 val preferences = settings.current()
                 if (preferences.isAutomaticEnabled) {
-                    BackupScheduling.enable(
-                        WorkManager.getInstance(this@GallerySyncApplication),
-                        preferences.allowMeteredNetwork
-                    )
+                    val workManager = WorkManager.getInstance(this@GallerySyncApplication)
+                    BackupScheduling.enable(workManager, preferences.allowMeteredNetwork)
+                    BackupScheduling.enqueueContinuation(workManager, preferences.allowMeteredNetwork)
                 }
             }.onFailure {
                 // Never fatal. Failing to schedule costs a delayed backup; crashing on launch

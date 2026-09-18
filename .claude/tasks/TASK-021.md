@@ -86,3 +86,67 @@ before spending time in the code.
 Note also what it proves *works*: the reconcile, the per-album tally and the live UI update are all
 correct and prompt under those conditions. Whatever is wrong is upstream of them, in what wakes the
 worker.
+
+## Root cause, found 18 Sept 2026
+
+Two factory-reset repro runs on the Moto G, the second with continuous `adb logcat` capture (the first
+lost the critical window to buffer rotation). Full detail in `.claude/MILESTONES.md`, 18 Sept entries.
+
+**What actually happens:** backgrounding the app with Home (no swipe) is enough for something on this
+device — confirmed to be an automatic `remove task` kill, the same AOSP path a Recents swipe goes
+through, firing on its own within ~70–90 seconds — to kill the process. The next time a content-trigger
+job needs to run (a new photo arrives), it cold-starts into a fresh process, and WorkManager's own
+`ForceStopRunnable` — which runs on every process start to decide whether the app was force-stopped —
+intermittently (not always; confirmed inconsistent across four cold starts in one session) concludes it
+was, and cancels the job it just started rather than running it. The replacement it schedules only
+watches for the *next* change; it does not retroactively act on files already outstanding. This is why
+the bug looks intermittent and self-healing — a *later* trigger, or the 6-hour periodic net, eventually
+sweeps up whatever an earlier one dropped — and why the manual "Right now"/"Sync now" paths have never
+failed: they enqueue their work after the process is already up, outside the window where
+`ForceStopRunnable`'s startup check can cancel it.
+
+**Diagnostically confirmed, not shippable as a fix:** adding the app to the platform's Doze/battery
+whitelist (`dumpsys deviceidle whitelist +com.gallery.sync`) stopped the kill entirely across a 3-minute
+observation — the process still froze (`moto_freezer`) but never escalated to `remove task`, and a
+subsequent batch uploaded cleanly with zero `ForceStopRunnable` false positives. This confirms staying
+off the kill path is what matters, but this Moto G has no per-app "Unrestricted" battery screen (only a
+device-wide "Adaptive Battery" switch), and the only app-side route onto that list is the
+`REQUEST_IGNORE_BATTERY_OPTIMIZATIONS` permission Ian ruled out 5 Sept as Play-review risk for an
+unqualifying use case. Not pursued further.
+
+Also considered and ruled out: user-initiated data transfer jobs (`setUserInitiated(true)`, API 34+) —
+these can only be scheduled while the app is visible or can launch an Activity from the background,
+which is exactly the condition that doesn't hold when a photo arrives with the app closed. They fit the
+manual paths, which are not the ones that are broken.
+
+## The fix — spec, approved by Ian, 18 Sept 2026
+
+**Make every cold start self-healing, not just the ones whose own WorkSpec survives.**
+`GallerySyncApplication.armAutomaticSync()` already runs before any other component in the process, on
+every single process start, for any reason — confirmed directly, since it precedes `MediaProvider`'s
+own `onCreate` in every capture. Today it only re-arms the *future* watch
+(`BackupScheduling.enable()` → `enqueueContentTriggered()`). It never checks what's already
+outstanding.
+
+Add a call to `BackupScheduling.enqueueContinuation(workManager, preferences.allowMeteredNetwork)`
+alongside the existing `enable()` call, gated the same way (`preferences.isAutomaticEnabled`). This
+enqueues a `BackupWorker` run under `CONTINUATION_WORK` — a fresh enqueue, made *after* this process's
+own `ForceStopRunnable` pass has already completed, so it is not subject to the cancellation the
+content-trigger `WorkSpec` intermittently suffers. `doWork()` always runs a full `refreshLedger()` +
+`uploadPending()` regardless of entry path, so this catches anything outstanding — a photo whose own
+content trigger got silently cancelled included — the same day, on the very next time the app process
+is touched for any reason, rather than waiting for a later trigger or the 6-hour net.
+
+**Not a targeted fix for the cancellation itself** — `ForceStopRunnable`'s internal mechanism on
+WorkManager 2.11.2 was never pinned down (the AlarmManager-canary theory was checked directly and
+withdrawn; see MILESTONES). This works around it structurally: it doesn't matter whether the
+content-trigger `WorkSpec` survives, because every process start now gets its own independent chance to
+catch up.
+
+**Known cost, accepted rather than engineered around:** this adds a real backup check (ledger refresh +
+cloud reconcile) to every cold start, including ones triggered for unrelated reasons — another app
+querying GallerySync's `ContentProvider`, for instance. Cheap when nothing is pending (observed under a
+second in every capture today), not free. No throttling added: `enqueueContinuation` already collapses
+concurrent calls via `ExistingWorkPolicy.REPLACE` on a unique work name, and the codebase has no
+existing pattern of cooldown-gating this class of check — matching "Sync now" costing the same each time
+it's tapped.
