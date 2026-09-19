@@ -5926,3 +5926,40 @@ Ian's requests, all done and looked at on the Moto G (`ZT422CTZQV`, over wireles
 
 **Fixture note:** to see the tour I ran `pm clear` on the Moto G, so it is signed out of the test OneDrive
 and set up again from scratch; it was left on the tour's Help card. Not a defect.
+
+### 18 Sept 2026 (night) — a setup-only page, and the wizard's link to it
+
+Ian: add *"For a more detailed breakdown of the set up process click here"* to the wizard, opening a
+separate page that mirrors the First-Time Setup section of the How To Guide, *"so that is all the user can
+access during the Wizard"*. Then, mid-build: *"Put the link in the very first card of the setup"*.
+
+- **The page**, `docs/setup-guide.html`, is generated from the same source as the guide
+  (`tools/guide/build_guide.py`): the ten topics of the First-time setup chapter, as expandable sections,
+  same anchors. Nothing on it links anywhere but itself. The source marks sentences that only make sense
+  beside the rest of the guide with `{{full: ...}}` (two: the *See "Backup destination dialog"* and *See
+  "Albums read Off after a backup"* references); the full guide keeps them, the setup page drops them, and a
+  reference to a topic outside the chapter fails the build rather than becoming a dead link.
+- **The link** is on the **What we'll set up** card (step 3), under Back and Next: the phrase is the
+  tappable line and *click here* is underlined in the theme's primary colour. It opens the page in the
+  in-app viewer (`SupportPage.SETUP_GUIDE`).
+- **Placed on the wrong card first.** I read "the very first card" as the tour's *How the app works* card
+  (step 2, the first bubble with buttons) and put it there. Ian's second message, with the phone on step 3,
+  corrected that: the first card of the *setup* is *What we'll set up*. It is on that card only now.
+- **The wizard reaches nothing wider.** While the wizard is showing, a (?) pop-up leaves out **Read more in
+  the How To Guide** (`LocalSetupOnlyGuide`, provided around `SetupTour` in `MainActivity`). Reachable today:
+  the destination dialog's two (?) buttons. The pop-up text itself still shows; only the way into the full
+  guide is withdrawn. Nothing in the wizard opens the Settings tab, where the How To Guide card lives.
+- **Tests.** `HowToGuideConsistencyTest` gains four: the page exists and stays in-app; its topics are exactly
+  the chapter's, in order; every link on it stays on it; every line on it is in the full guide. Suite 378/378.
+- **Watched on the Moto G** (fresh `pm clear`): the link on step 3, tapping it opens *First-Time Setup* in
+  the viewer. The page itself was checked in the browser pane, not in the app.
+
+**Not verified.** (1) The page has not been seen *inside the app*: GitHub Pages returns 404 for
+`setup-guide.html` until `docs/` is pushed, so the viewer shows GitHub's 404 page. (2) The (?) pop-up with
+Read more hidden was not seen: reaching the destination dialog needs a signed-in OneDrive on the Moto G,
+which `pm clear` removed. (3) Dark mode of the link line. (4) The welcome picture (step 1) and the tour
+cards (step 2) have no link.
+
+**Also.** The failure overlay (*This page could not be loaded*) did not show for the 404 above: the viewer
+displayed GitHub's own 404 page. `onReceivedHttpError` sets the flag; something in the sequence clears it, or
+the overlay sits behind the page. Same viewer, so the How To Guide has it too. Not investigated.

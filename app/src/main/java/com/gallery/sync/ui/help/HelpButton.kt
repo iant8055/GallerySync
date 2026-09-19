@@ -16,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,6 +32,13 @@ import com.gallery.sync.R
 import com.gallery.sync.ui.common.SignalIcons
 import com.gallery.sync.ui.settings.InAppPageDialog
 import com.gallery.sync.ui.settings.SupportPage
+
+/**
+ * True while first-time setup is on screen, when the only part of the guide a person may open is the
+ * setup page (Ian, 18 Sept 2026). The wizard provides it, and a pop-up that would offer "Read more"
+ * into the full guide leaves the button out instead.
+ */
+val LocalSetupOnlyGuide = compositionLocalOf { false }
 
 /**
  * The (?) beside an item. Tap it for the explanation of that item, taken from the How To Guide.
@@ -137,9 +145,15 @@ fun HelpDialog(topic: HelpTopic, onDismiss: () -> Unit) {
         confirmButton = {
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_page_close)) }
         },
-        dismissButton = {
-            TextButton(onClick = { showGuide = true }) {
-                Text(stringResource(R.string.help_open_guide))
+        // Withdrawn during first-time setup, where the setup page is all of the guide a person can
+        // open. A pop-up there would otherwise lead into every other chapter.
+        dismissButton = if (LocalSetupOnlyGuide.current) {
+            null
+        } else {
+            {
+                TextButton(onClick = { showGuide = true }) {
+                    Text(stringResource(R.string.help_open_guide))
+                }
             }
         }
     )

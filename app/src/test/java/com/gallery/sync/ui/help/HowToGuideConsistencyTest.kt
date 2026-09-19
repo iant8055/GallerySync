@@ -104,6 +104,59 @@ class HowToGuideConsistencyTest {
         assertTrue(SupportLinks.staysInApp("$url#albums-filter"))
     }
 
+    // ── The setup page: all of the guide the wizard can reach ────────────────
+
+    private val setupGuide by lazy { read("../docs/setup-guide.html") }
+
+    @Test
+    fun theWizardLinkOpensAPageThatExistsAndStaysInsideTheApp() {
+        val url = SupportPage.SETUP_GUIDE.url
+        assertTrue(SupportLinks.staysInApp(url))
+        assertTrue("$url is not a file in docs/", File("../docs/" + url.substringAfterLast('/')).exists())
+    }
+
+    @Test
+    fun theSetupPageHoldsExactlyTheSetupChapterOfTheGuide() {
+        val chapter = flatGuide.substringAfter("id=\"ch-setup\"").substringBefore("id=\"ch-albums\"")
+        val chapterTopics = Regex("<h3 id=\"([^\"]+)\"").findAll(chapter).map { it.groupValues[1] }.toList()
+        val pageTopics = Regex("class=\"topic-body\" id=\"([^\"]+)\"").findAll(setupGuide).map { it.groupValues[1] }.toList()
+
+        assertTrue("the setup chapter has no topics", chapterTopics.isNotEmpty())
+        assertEquals("the setup page must list the chapter's topics, in order", chapterTopics, pageTopics)
+    }
+
+    /**
+     * The point of a page of its own: during setup it is all of the guide a person can open, so
+     * nothing on it may lead anywhere else.
+     */
+    @Test
+    fun theSetupPageLeadsNowhereButItself() {
+        val ids = idsIn(setupGuide)
+        val links = Regex("href=\"([^\"]*)\"").findAll(setupGuide).map { it.groupValues[1] }.toList()
+
+        val outside = links.filter { !it.startsWith("#") || it.removePrefix("#") !in ids }
+        assertTrue("the setup page links outside itself: $outside", outside.isEmpty())
+        assertTrue("the setup page mentions the full guide's file", "how-to-guide" !in setupGuide)
+    }
+
+    /** It mirrors the chapter, so it may say less than the guide but never something different. */
+    @Test
+    fun everyLineOnTheSetupPageIsInTheFullGuide() {
+        val full = squash(textOf(flatGuide))
+        val content = setupGuide.substringAfter("class=\"chapter-intro\"").substringBefore("<footer")
+
+        val lines = Regex("<(p|li)[^>]*>(.*?)</\\1>", RegexOption.DOT_MATCHES_ALL)
+            .findAll("<p class=\"chapter-intro\"$content")
+            .map { squash(textOf(it.groupValues[2])) }
+            .filter { it.isNotEmpty() }
+            .toList()
+
+        assertTrue("no lines found on the setup page", lines.isNotEmpty())
+        for (line in lines) {
+            assertTrue("on the setup page but not in the full guide: ${line.take(80)}", line in full)
+        }
+    }
+
     @Test
     fun theGuideCoversEveryTabAndTheSetup() {
         val chapters = Regex("id=\"ch-([a-z0-9-]+)\"").findAll(flatGuide).map { it.groupValues[1] }.toList()

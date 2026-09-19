@@ -4,7 +4,7 @@ CHAPTER = Chapter(
     id="setup",
     title="First-time setup",
     intro="The first time you open Gallery Sync, a short guided setup walks you through nine screens. "
-          "This chapter explains each one, including the messages you might meet along the way.",
+          "Each one is explained here, including the messages you might meet along the way.",
     topics=[
         topic("setup-overview", "How the setup works", """
             Setup is a series of cards. **Next** moves on and **Back** returns to the previous card. You
@@ -48,6 +48,11 @@ CHAPTER = Chapter(
             • Select where backups go in OneDrive.
 
             The checklist is only a preview; nothing is changed by reading it.
+
+            **The link to this explanation.** The **What we'll set up** card ends with **For a more
+            detailed breakdown of the set up process click here**. It opens this explanation on its own,
+            as a page you can read at any point during setup. It is the only part of the guide you can
+            open until setup is finished.
         """),
 
         topic("setup-search-permission", "Let Gallery Sync search this phone", """
@@ -94,7 +99,7 @@ CHAPTER = Chapter(
             Once signed in, the card says **Signed in to OneDrive** and shows **Backup destination**: the
             OneDrive folder where new backups will go. By default this is Samsung Gallery / DCIM, which
             matches where Samsung's own sync puts photos, so files already there are recognised and not
-            sent twice. **Change** lets you pick another folder. See [[dialog-destination]].
+            sent twice. **Change** lets you pick another folder.{{full: See [[dialog-destination]].}}
 
             ## What it checks in the background
             As soon as you are signed in, the app looks at what OneDrive already holds, so the next
@@ -119,7 +124,7 @@ CHAPTER = Chapter(
             early and no first backup runs.
 
             None of the four plans sets an album's mode. After the first backup your albums still show
-            **Off**, and that is correct: only you set modes, on the Albums tab. See [[faq-albums-off-after-backup]].
+            **Off**, and that is correct: only you set modes, on the Albums tab.{{full: See [[faq-albums-off-after-backup]].}}
         """),
 
         topic("setup-optimise", "Optimisation settings during setup", """

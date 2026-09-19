@@ -80,7 +80,11 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
@@ -105,6 +109,8 @@ import com.gallery.sync.ui.common.SignalIcons
 import com.gallery.sync.ui.common.SignalNavBar
 import com.gallery.sync.ui.theme.LocalGallerySyncColors
 import com.gallery.sync.ui.settings.DestinationDialog
+import com.gallery.sync.ui.settings.InAppPageDialog
+import com.gallery.sync.ui.settings.SupportPage
 import com.gallery.sync.ui.signin.SignInUiState
 import com.gallery.sync.ui.signin.SignInViewModel
 
@@ -487,6 +493,7 @@ fun SetupTour(
     // that Back existed — it was that Back silently cancelled the upload as a side effect of
     // re-arming a delay. The difference between a feature and that bug is the confirmation.
     var confirmAbort by rememberSaveable { mutableStateOf(false) }
+    var showSetupGuide by rememberSaveable { mutableStateOf(false) }
     val runInProgress = step == TOTAL_STEPS &&
         backupPhase != WizardBackupPhase.WAITING &&
         backupPhase != WizardBackupPhase.DONE
@@ -559,7 +566,14 @@ fun SetupTour(
                         backupPhase != WizardBackupPhase.DONE,
                     backLabel = if (runInProgress) stringResource(R.string.wizard_cancel) else "",
                     onNext = onNext,
-                    onBack = onBackRequest
+                    onBack = onBackRequest,
+                    // On "What we'll set up", the first card of the setup itself (Ian, 18 Sept 2026):
+                    // the checklist of what is ahead is where someone wants the fuller explanation.
+                    footer = if (step == 3) {
+                        { SetupGuideLink(onClick = { showSetupGuide = true }) }
+                    } else {
+                        null
+                    }
                 ) {
                     when (step) {
                         3 -> InstallationStepsContent()
@@ -620,6 +634,14 @@ fun SetupTour(
             }
         }
 
+        // The setup chapter of the guide, and only that: nothing on it leads anywhere else.
+        if (showSetupGuide) {
+            InAppPageDialog(
+                page = SupportPage.SETUP_GUIDE,
+                onDismiss = { showSetupGuide = false }
+            )
+        }
+
         if (confirmAbort) {
             AlertDialog(
                 onDismissRequest = { confirmAbort = false },
@@ -674,6 +696,8 @@ private fun TourBubble(
     backLabel: String = "",
     onNext: () -> Unit,
     onBack: () -> Unit,
+    /** Below the buttons, for a line that is about the card and not part of moving through it. */
+    footer: (@Composable () -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
     Surface(
@@ -714,8 +738,44 @@ private fun TourBubble(
                     )
                 }
             }
+
+            footer?.invoke()
         }
     }
+}
+
+/**
+ * The line that opens the first-time setup page: "For a more detailed breakdown of the set up
+ * process click here", with **click here** drawn as the link.
+ *
+ * The whole line is the target, not just the two words, because two words are a small thing to hit
+ * on a phone. The colour is the theme's primary rather than a link blue, so it holds in both themes.
+ */
+@Composable
+private fun SetupGuideLink(onClick: () -> Unit) {
+    val action = stringResource(R.string.wizard_guide_link_action)
+    val text = stringResource(R.string.wizard_guide_link, action)
+    val linkColor = MaterialTheme.colorScheme.primary
+    val start = text.indexOf(action)
+
+    Text(
+        text = buildAnnotatedString {
+            append(text)
+            if (start >= 0) {
+                addStyle(
+                    SpanStyle(color = linkColor, textDecoration = TextDecoration.Underline),
+                    start,
+                    start + action.length
+                )
+            }
+        },
+        style = MaterialTheme.typography.bodySmall,
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(vertical = 4.dp)
+    )
 }
 
 // ── Step 1: Welcome ─────────────────────────────────────────────────────────

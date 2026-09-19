@@ -111,6 +111,10 @@
     -->
     <string name="help_button_description">Help: %1$s</string>
     <string name="help_open_guide">Read more in the How To Guide</string>
+    <!-- The wizard's link on its first card. %1$s is the tappable part, wizard_guide_link_action. -->
+    <string name="wizard_guide_link">For a more detailed breakdown of the set up process %1$s</string>
+    <string name="wizard_guide_link_action">click here</string>
+    <string name="setup_guide_title">First-Time Setup</string>
     <string name="archive_list_heading">Files</string>
 
     <string name="settings_optimise_master">Optimise photos and video</string>

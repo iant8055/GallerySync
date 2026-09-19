@@ -20,10 +20,12 @@ import com.gallery.sync.ui.common.ExitWarningDialog
 import com.gallery.sync.ui.common.NavDestination
 import com.gallery.sync.ui.common.SignalIcons
 import com.gallery.sync.ui.common.SignalNavBar
+import com.gallery.sync.ui.help.LocalSetupOnlyGuide
 import com.gallery.sync.ui.archive.ArchiveScreen
 import com.gallery.sync.ui.restore.RestoreScreen
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -223,13 +225,17 @@ private fun SignedInApp(
             }
 
             if (tourVisible && setupViewModel != null) {
-                SetupTour(
-                    viewModel = setupViewModel,
-                    signInViewModel = signInViewModel,
-                    onComplete = { tourDismissed = true },
-                    onSwitchTab = { selectedTab = it },
-                    onStepChanged = { tourStep = it }
-                )
+                // Until setup is finished the only part of the guide a person can open is the setup
+                // page, so a pop-up shown inside the wizard offers no way into the rest of it.
+                CompositionLocalProvider(LocalSetupOnlyGuide provides true) {
+                    SetupTour(
+                        viewModel = setupViewModel,
+                        signInViewModel = signInViewModel,
+                        onComplete = { tourDismissed = true },
+                        onSwitchTab = { selectedTab = it },
+                        onStepChanged = { tourStep = it }
+                    )
+                }
             }
         }
 

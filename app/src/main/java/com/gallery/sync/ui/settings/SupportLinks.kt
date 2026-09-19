@@ -31,6 +31,18 @@ enum class SupportPage(val url: String, @param:StringRes val title: Int) {
     DELETE_ACCOUNT(
         url = "${SupportLinks.SITE}/delete-account.html",
         title = R.string.settings_delete_account
+    ),
+
+    /**
+     * The first-time setup chapter of the guide, on a page of its own.
+     *
+     * The wizard's link opens this and nothing wider: during setup it is all of the guide a person can
+     * reach. It is generated from the same source as the guide, so the two say the same thing, and
+     * every link on it stays on it. See `tools/guide/build_guide.py`.
+     */
+    SETUP_GUIDE(
+        url = "${SupportLinks.SITE}/setup-guide.html",
+        title = R.string.setup_guide_title
     )
 }
 
