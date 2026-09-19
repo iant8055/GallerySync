@@ -5963,3 +5963,9 @@ cards (step 2) have no link.
 **Also.** The failure overlay (*This page could not be loaded*) did not show for the 404 above: the viewer
 displayed GitHub's own 404 page. `onReceivedHttpError` sets the flag; something in the sequence clears it, or
 the overlay sits behind the page. Same viewer, so the How To Guide has it too. Not investigated.
+
+**Update, 18 Sept 2026, after the push (`5cacda3`):** GitHub Pages served `setup-guide.html` about a minute
+after the push (404, 404, then 200). Watched **inside the app** on the Moto G: the link on *What we'll set
+up* opens *First-Time Setup* in the viewer, the page loads with its note, intro and ten collapsed sections, and
+a section opens on tap (*Ready to back up*, with its bullets and sub-heading). That closes item (1) under
+*Not verified* above. Items (2) to (4) stand.
