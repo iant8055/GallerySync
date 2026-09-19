@@ -22,10 +22,16 @@ CHAPTER = Chapter(
             files, so the app brings you back here instead of doing it silently. If you try to leave the
             app while files are checked and waiting, it reminds you. See [[dialog-exit-warning]].
 
-            ## It is a standing instruction
+            ## It is a standing instruction, until the album is empty
             An album set to Archive stays that way until you change it. Files that arrive in that album
-            later, from the camera, a download or a file manager, are covered by the same choice.
-            Emptying an album does not switch the mode off.
+            while it still holds files, from the camera, a download or a file manager, are covered by the
+            same choice.
+
+            When an Archive run takes the last file off the phone, the album is finished. It leaves the
+            Albums tab and Gallery Sync forgets its mode. If you later bring the album back with
+            **Restore**, or something creates the folder again, it is a new album and starts at the
+            default mode for new albums, which can never be Archive. That is what stops an album being
+            archived, restored and archived again by itself.
 
             ## Availability
             Moving files to the bin needs Android 11 or newer. On older versions Archive is not offered,
@@ -34,9 +40,11 @@ CHAPTER = Chapter(
 
         topic("archive-hero", "Files to Archive", """
             ## What it is
-            The green card. It shows **Files to Archive** and a number, then the names of your Archive
-            albums, then this sentence: **Every file below is checked against OneDrive first. Anything
-            that is not there yet is backed up before it is verified.**
+            The green card, laid out like the one on the Restore tab. On the left, **Files to** with
+            **Archive** directly under it; in the right half, a number. Under them, the names of your
+            Archive albums, then this sentence: **Every file below is checked against OneDrive first. Anything
+            that is not there yet is backed up before it is verified.** At the foot of the card, a
+            reminder: **To restore archived files or albums, check the Restore tab.**
 
             ## Where it comes from
             The number is a live count of files on the phone in albums set to Archive. When you arrive
@@ -75,7 +83,7 @@ CHAPTER = Chapter(
 
         topic("archive-file-list", "The file list and its marks", """
             ## What it is
-            One row for each file waiting to be archived: its name, then its size, then a mark on the right.
+            One rounded card for each file waiting to be archived, in the same style as the file cards on the Restore tab: its name, then its size under it, then a mark on the right.
 
             **The mark**
             • **A spinner.** Being checked, backed up or removed.

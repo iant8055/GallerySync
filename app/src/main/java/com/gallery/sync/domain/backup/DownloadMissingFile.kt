@@ -59,8 +59,10 @@ class DownloadMissingFile @Inject constructor(
         entry: BackupEntryEntity,
         onProgress: (bytesWritten: Long, total: Long) -> Unit = { _, _ -> }
     ): RestoreInPlaceResult = withContext(dispatcher) {
-        val remoteItemId = entry.remoteItemId
-            ?: return@withContext RestoreInPlaceResult.Failed("no cloud item recorded")
+        val remoteItemId = entry.remoteItemId?.takeIf { it.isNotBlank() }
+            ?: return@withContext RestoreInPlaceResult.Failed(
+                "OneDrive has not been checked for this file yet. Press Refresh and try again."
+            )
         val expected = entry.remoteSizeBytes
             ?: return@withContext RestoreInPlaceResult.Failed("no cloud size recorded")
 
@@ -128,6 +130,37 @@ class DownloadMissingFile @Inject constructor(
 
         val mediaStoreId = indexed?.first ?: entry.mediaStoreId
         val modified = indexed?.second ?: entry.dateModifiedEpochSeconds
+
+        // No row means OneDrive held a file this app never recorded (Ian, 18 Sept 2026: Restore offers
+        // any file the drive has). The file is really here now, so this is the moment to write its
+        // row. Doing it earlier would have put a "missing" file in the ledger, which is the shape the
+        // cloud-deletion review looks for. It is written already pinned, for the same reason as
+        // below, and as uploaded, so the next scan finds it known rather than new and does not send
+        // it back to the drive it has just come from.
+        if (entryDao.find(entry.id) == null) {
+            entryDao.insertIfNew(
+                listOf(
+                    entry.copy(
+                        id = backupKeyOf(
+                            album = entry.album,
+                            displayName = entry.displayName,
+                            sizeBytes = expected,
+                            dateModifiedEpochSeconds = modified
+                        ),
+                        mediaStoreId = mediaStoreId,
+                        contentUri = uri.toString(),
+                        dateModifiedEpochSeconds = modified,
+                        sizeBytes = expected,
+                        remoteSizeBytes = expected,
+                        isProxied = false,
+                        localProxySizeBytes = null,
+                        localMissingSinceEpochMillis = null,
+                        modeOverride = AlbumMode.BACKUP
+                    )
+                )
+            )
+            return
+        }
 
         entryDao.markRestored(
             oldId = entry.id,

@@ -1024,6 +1024,28 @@ interface BackupEntryDao {
     @Query("UPDATE backup_entries SET modeOverride = :mode WHERE id = :id")
     suspend fun setModeOverride(id: String, mode: AlbumMode?)
 
+    /**
+     * Gives one uploaded row the OneDrive id it never recorded, addressed by its own key.
+     *
+     * The same bookkeeping as [fillMissingRemoteItemId], for a row whose file is no longer on the
+     * phone and so has no MediaStore id to be found by. Used by the Restore tab, which has just
+     * listed the folder and so knows the id.
+     */
+    @Query(
+        """
+        UPDATE backup_entries
+        SET remoteItemId = :remoteItemId
+        WHERE id = :id
+          AND state = :uploaded
+          AND (remoteItemId IS NULL OR remoteItemId = '')
+        """
+    )
+    suspend fun fillMissingRemoteItemIdByKey(
+        id: String,
+        remoteItemId: String,
+        uploaded: BackupState = BackupState.UPLOADED
+    ): Int
+
     /** Every file the user has kept at full size, for the paths that would otherwise remove one. */
     @Query("SELECT id, mediaStoreId FROM backup_entries WHERE modeOverride = :pin")
     suspend fun pinnedKeys(pin: AlbumMode = AlbumMode.BACKUP): List<PinnedKey>

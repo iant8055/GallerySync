@@ -57,24 +57,16 @@ CHAPTER = Chapter(
             For what each mode does, see [[modes-in-depth]].
         """),
 
-        topic("albums-totals", "Total Album Count/Size and Album Mode Count", """
+        topic("albums-totals", "Album Mode Count", """
             ## What it is
-            Two lines of figures under the buttons.
-            • **Total Album Count/Size: 12 Albums · 3.4 GB.** How many albums are being shown, and the combined size of the files in them.
-            • **Album Mode Count: 3 Backup · 2 Sync · 1 Archive · 6 Off.** How many albums you have set to each mode. It only appears when **All Albums** is selected, and it is a quick way to spot albums you have not decided about: those are the ones counted under **Off**.
+            A line of figures under the buttons: **Album Mode Count: 3 Backup · 2 Sync · 1 Archive · 6 Off.**
+            How many albums you have set to each mode. It only appears when **All Albums** is selected,
+            and it is a quick way to spot albums you have not decided about: those are the ones counted
+            under **Off**.
 
             ## Where it comes from
-            The size line comes from your phone's own media library, counting the files that are on the
-            phone right now and only inside the folders you chose during setup. It follows the filter:
-            with **Sync** selected it describes only your Sync albums.
-
-            The mode line is a plain tally of the choices you made on the album cards below.
-
-            ## Good to know
-            It will not always match your gallery app. Files in your phone's Trash are not counted, files
-            outside the chosen folders are not counted, and the small **Restored** album is left out
-            because everything in it is already in OneDrive. See [[numbers-explained]].
-        """, ui=True),
+            A plain tally of the choices you made on the album cards below.
+        """),
 
         topic("albums-all-backed-up", "Everything here is backed up", """
             ## What it is
@@ -177,7 +169,7 @@ CHAPTER = Chapter(
             • **12 files · 340 MB.** How many files the album holds on the phone right now, and their total size. From your phone's media library, inside the chosen folders.
             • **3 optimised · 4 kept at full size · 2 pending.** A second line that appears only when it has something to say, and shows only the parts that are not zero. Optimised counts files replaced by a smaller copy. Kept at full size counts files Restore has put back and that are still ticked, which Gallery Sync leaves alone. Pending counts files not yet sent to OneDrive: the number of files on the phone minus the number the app has recorded as sent.
             • **The OneDrive line.** The only line that describes OneDrive itself. Its four forms are listed below.
-            • **All files Archived**, in place of the three lines above, on an Archive album that has nothing left on the phone. The mode still applies if new files arrive.
+            • **All files Archived**, in place of the three lines above, on an Archive album that has nothing left on the phone. This is uncommon now: when an Archive run empties an album, the album leaves this list and its mode is forgotten. See [[modes-in-depth]].
             • **The mode pill**, at the right, in the mode's colour, with a small arrow. Tap it and choose Off, Backup, Sync or Archive; the current mode is ringed. Choosing Archive first asks you to confirm. See [[dialog-archive-confirm]].
 
             Tap anywhere else on the card to see the album's files. See [[album-detail]].
@@ -197,14 +189,17 @@ CHAPTER = Chapter(
 
         topic("album-detail", "An album's file list", """
             ## What it is
-            Opens when you tap an album card. A **left arrow** at the top goes back. Beside it are the
-            album's name and a line such as **Backup · 12 files**: its mode and how many files the app
-            is tracking. Below are the counts ([[album-file-status]]) and one row for each file.
+            Opens when you tap an album card. It has the same green card at the top as the other tabs.
+            In it, a **return arrow** at the left goes back, and beside it is the folder's name in bold.
+            Under the name is a line such as **Backup · 12 files**: its mode and how many files the app
+            is tracking. Then the counts ([[album-file-status]]) and, on one line, a **Sort by** box
+            ([[album-file-sort]]) and, when some file has one, the **Keep at full size** heading over the
+            tick boxes ([[album-file-pin]]).
 
-            A row shows the file's name, its size, and **video** if it is a video, with its status on
-            the right. A file that Restore has put back also has a tick box at the end. See
-            [[album-file-pin]]. Above the list, a **Sort by** box puts the files in order. See
-            [[album-file-sort]].
+            Below the card is one rounded card for each file, in the same style as the Restore tab's
+            files. Each shows the file's name and, under it, one line with its size (and **video** if it is
+            a video) followed by its marks. A file that Restore has put back also has a tick box at its
+            right.
 
             If the app has not handled any files in the album yet, it says **No files tracked yet**.
 
@@ -217,7 +212,7 @@ CHAPTER = Chapter(
             ## What it is
             Under the album's name, a row of counts, showing only the ones that are not zero:
             **backed up**, **optimised**, **kept at full size**, **pending** and **failed**. Each file
-            then carries one mark:
+            then carries its marks, after its size on the same line:
 
             • **✓ backed up.** In OneDrive, and still full size on the phone.
             • **✓ backed up · optimised.** In OneDrive, and the phone holds a smaller copy. Both are true: a smaller copy is only ever made from a file already confirmed in OneDrive.
@@ -306,9 +301,10 @@ CHAPTER = Chapter(
             ## Why it asks once
             Setting an album to Archive is you saying "take this album off the phone once it is safely in
             OneDrive". This is the moment that choice is confirmed. After that the mode stands until you
-            change it: nobody asks again about the mode itself, and files added to that folder later are
-            covered by the same choice. Android will still show its own confirmation each time files are
-            actually removed. See [[dialog-android-trash]].
+            change it or until Archive has taken every file off the phone: nobody asks again about the
+            mode itself, and files added to the album while it still holds files are covered by the same
+            choice. Android will still show its own confirmation each time files are actually removed.
+            See [[dialog-android-trash]].
 
             ## What happens next
             After you confirm, the app takes you to the Archive tab, where you can watch the files being

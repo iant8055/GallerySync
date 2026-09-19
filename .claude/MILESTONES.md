@@ -6094,3 +6094,184 @@ guide-only; the (?) over *Keep at full size* is back, to the left of the two-lin
 did not match the rest. It is now `SignalIcons.Back` (Ian's `←┘` return glyph, the one the Restore folder view
 and the OneDrive picker use) at 32dp, in the theme's primary colour inside an `IconButton`. Watched on the Moto G:
 drawn larger, and tapping it returns to the album list. Suite 392/392.
+
+### 18 Sept 2026 (night) — Restore lists what OneDrive holds; an emptied Archive album is forgotten
+
+Ian: *"I think we need to change how RESTORE chooses what files are available… RESTORE should be able to
+download ANY file on OneDrive… and put it right back in the album it came from"*, then *"an archived album that
+is empty should just be deleted, and if a RESTORE is called the restore can recreate the Album with the default
+mode"*, *"grey out, with a help item"*, and a general message in the Albums header. The tick boxes that came
+first were a side path to the loop this closes; the source of the problem was Restore only seeing the ledger.
+
+- **Restore is drive-based again.** It was on 25 Aug (`RestorableFile`: *"we need to be able to restore any file,
+  not just the ones we backed up"*), was narrowed to the ledger on 27 Aug, and is this again. The tab shows the
+  ledger's rows at once, then `BackupEngine.driveRestoreFiles()` lists each OneDrive folder and adds what the
+  ledger does not know: photos and videos not on the phone become **downloads**, files the phone has at full
+  size become **greyed-out "already on this phone" rows** (shown, never selectable, explained by a new (?),
+  *Why are some files greyed out?*). A file of the same name at a different size is neither offered nor greyed
+  (it may be an edit, and Restore never overwrites an edit). Comparison ignores case of folder and name.
+  Settings' **Show empty folders** now does what it says (folders with nothing to bring back are listed only
+  when it is on).
+- **It also mends the ledger.** Listing a folder fills in the OneDrive id of any uploaded row that never
+  recorded one, when name and size match. The restore-in-place failure on the 41 empty-id rows was this.
+  A restore or download with no id now says *OneDrive has not been checked for this file yet. Press Refresh*
+  instead of asking OneDrive for an empty id.
+- **A downloaded file with no ledger row gets one, written when it arrives.** Never before: a row for a file
+  never on this phone would sit in the ledger as "missing", the shape the cloud-deletion review looks for. The
+  row is uploaded, pinned to Backup (Restore's flag), and known, so it is neither re-uploaded nor re-shrunk.
+  This is the answer to the note for files with no record that Ian found unclear: yes, and it is the same
+  flag as every other restored file.
+- **An emptied Archive album is forgotten.** `forgetEmptiedArchiveAlbums()` runs right after an Archive run
+  removes files: an Archive album no longer in the scan has its preference row deleted (nothing is written).
+  It drops off the Albums tab and returns as a new album at the default mode, which can never be Archive
+  (`canBeDefault`), when Restore refills the folder. Never from a plain rescan, and guarded like the prune
+  (full access, non-empty scan). **`CLAUDE.md` is updated:** *emptying an album retires its mode* replaces the
+  27 Aug rule that it does not. The 27 Aug block that lists an Archive album with a stored mode at zero files is
+  left in as the safety net for one that predates this.
+- **The Albums header says where to look:** *To restore archived files or albums, check the Restore tab.*
+- **Guide:** Restore chapter rewritten around what OneDrive holds; new topic *Why are some files greyed out?*;
+  Archive, Albums, Settings and Help topics changed where they said an emptied Archive album keeps its mode.
+  97 topics, 54 with a (?). Suite 398/398 (six new, on the classification rule).
+
+**Watched on the Moto G** (a build installed, the Restore tab opened): the tab listed **10 folders**, including
+**`car show` (34 files, 0 to restore · 34 to download)** and **`PauseTest` (11 files, 11 to download)**, folders
+that exist in OneDrive from earlier tests and were never on this phone, and the log said
+`driveRestoreFiles: 53 to download, 4 already here` (34 + 11 + Test 4's 4 + Test 5's 4 = 53; the 4 here are Test
+6's restored files). Crash buffer empty.
+
+**Not verified yet.** Ian began using the phone while this was being checked, so I stopped sending taps. Not seen:
+(1) downloading a drive-only file end to end, and the ledger row it writes; (2) the greyed-out rows and their
+(?) on screen; (3) the Archive step forgetting an album's mode on a real run; (4) the header line; (5) dark mode of
+the new rows; (6) a large library, where listing every folder may take a while (the tab shows *Checking
+OneDrive…* and the ledger's rows first, but it has not been timed).
+
+**Cost to keep an eye on:** the drive pass lists every OneDrive folder each time the tab is entered or Refresh is
+pressed, one request per page per folder per search root. The Albums tab already does the same walk (about 55 s
+for 3,335 files across six albums on the Moto G).
+
+**Fix, same night (Ian): the Restore tab reloaded from scratch every time he left and came back.** Two causes.
+Entering the tab always re-listed OneDrive, and while it did the list fell back to only the ledger's rows (the
+folder count dropped and `car show` and `PauseTest` vanished) with the figure a dash and the bar running. Now the
+OneDrive listing is held in the view model (`DriveListing`, split out of `driveRestoreFiles` as
+`listDriveFolders`) and read again only when it is more than ten minutes old or **Refresh** is pressed (Refresh
+is forced). Every entry still re-compares the held listing with the phone as it is now, which is cheap and stays
+right after an archive or a restore. Nothing is blanked while re-reading: the dash and the bar show only when
+there is nothing yet to show. Watched on the Moto G: one `cloudFolders:` read (23:50:27) on first entry and none
+after leaving to Albums and returning, the full 10-folder list on screen two seconds after returning with no
+dash, bar or "Checking OneDrive…". Suite 398/398. A cost that remains: a file added to OneDrive from a computer
+can take up to ten minutes to turn up unless Refresh is pressed.
+
+**Albums header trimmed, names bold, pointer moved (Ian, late night).** The four mode buttons are one line of four
+(each half the width they were as two rows of two; chip padding 12dp to 4dp). The **Total Album Count/Size** line
+is gone entirely, taking its (?) with it, so the *Album Mode Count* line has none and `albums-totals` is
+guide-only (retitled *Album Mode Count*; 97 topics, 53 with a (?)). *To restore archived files or albums, check
+the Restore tab* moved from the Albums header to the **Archive** tab's card (`archive_restore_pointer`). Album
+names on the Albums list are bold, and so are the file names inside an album's list (Ian said "file name on the
+album tab list"; both were done, and either can be reverted alone). **Read of an ambiguous request:** "the album
+count line" was taken as *Total Album Count/Size*, the one containing those words, not *Album Mode Count*.
+Watched on the Moto G: header on three lines instead of five, Archive card showing the pointer, bold names on
+both lists. Suite 398/398.
+
+**Drill-down rebuilt to match Restore (Ian, 19 Sept).** `AlbumDetailScreen` was rewritten: (1) the top is the same
+green card the other tabs open with (`heroContainer`/`onHero`, 28dp corners), holding the return arrow in the
+card's ink, the **folder name in bold**, the mode line, the counts and the controls; (2) **Sort by and Keep at
+full size share one line** inside it; (3) each file is a rounded card in Restore's `FileCard` style (22dp corners,
+1dp outline, name in `titleMedium`, two columns from 600dp); (4) **backed up on one line and optimised on the one
+below it**. **Correction to the earlier bold request:** Ian meant the *folder* name, not files. File names are
+regular weight again, matching Restore; album names on the Albums list stay bold. The header is drawn in the file
+rather than through `HeroCard` because that card splits into two columns on a wide screen. The counts on the green
+are plain text in the card's ink (the old coloured counts used the theme's primary and tertiary, which are not
+made to sit on green). Watched on the Moto G in light mode: test 6 (four ticked cards, Keep heading beside Sort by)
+and Camera (two-line marks, one ticked). **Not checked:** dark mode of the new header, the 600dp two-column layout.
+Suite 398/398.
+
+**Follow-up (Ian, 19 Sept): size and marks on one line.** *"Since you moved it around you can put backed up ·
+optimized on the same line next to size."* Each file card's second line is now *3 MB · ✓ backed up · optimised*,
+each part in its own colour (one annotated `Text`, so it wraps if a line is ever too long). Watched on the Moto G:
+photo rows and the longest case, video rows (*29 MB · video · ✓ backed up · optimised*), all on one line at 360dp.
+Guide updated. Suite 398/398.
+
+**"Backed up" text made obviously green (Ian, 19 Sept).** In the light theme `primary` is `#003525`, nearly black,
+so the mark read as dark grey. New theme token `GallerySyncColors.safeText`: `#157F37` in light (about 5.1:1 on
+white and 4.7:1 on the off-white surface, clearing the 4.5:1 that 14sp text needs; a brighter green failed it),
+and the existing `SignalBrightGreen` in dark. Used for the drill-down's *backed up* mark only. The Albums cards'
+*verified in OneDrive* line is still the deep green and could take the same token. Watched on the Moto G in both
+themes, which also gives the new drill-down header and cards their dark-mode check. Suite 398/398.
+
+**Restore keeps its list when the app is closed (Ian, 19 Sept: "when you close the app the RESTORE tab loses its
+list").** The held OneDrive listing was memory only. It is now also written to `cache/restore-drive-listing.txt`
+(`DriveListingStore`, `DriveListingCodec`: one tab-separated line per file, escaped, versioned, and anything cut
+short or foreign decodes to `null` so a bad file costs a read of the drive and never a wrong list). It is loaded on
+the first refresh after a launch, shown at once and refreshed behind it if older than ten minutes, stored under the
+OneDrive folder it was read from (a different destination is treated as nothing stored), not written after a
+partial read, and cleared on sign-out. Watched on the Moto G: listing written (12.5 KB), app force-stopped and
+reopened, Restore opened, the full 10-folder list on screen three seconds in with no dash or bar and **no
+`cloudFolders:` read in the log**. Nine codec tests, including tabs, newlines, backslashes and non-Latin names in
+file names. Cost: the file holds names and OneDrive ids of the library, in the app's private cache.
+
+**Restore's cards match the Albums cards (Ian, 19 Sept).** Both already shared the shape (22dp corners, 1dp outline,
+18 by 14 padding); the difference was type. Folder cards: name in bold `bodyLarge`, detail lines in `bodySmall`, no
+gap between lines, 14dp vertical padding (was headline-sized name, larger lines, 18dp). File cards: name in
+`bodyLarge` (not bold: files are not bold, folders are), `bodySmall` lines. **The drill-down's file cards got the
+same type, so it still matches Restore.** Watched on the Moto G: the folder list and a folder's files. Suite
+407 (398 plus the nine codec tests).
+
+**Swipe animation on the Restore folder cards (Ian, 19 Sept: "add some animation to the Swipe").** The card is now
+pulled aside as the finger moves (55 percent of the travel, capped, so it has weight), with a panel uncovered
+behind it that fades in with the pull: a tick on the right for selecting, a cross on the left for putting down. A
+short haptic tick fires when the pull passes the point where letting go will act, and again if it is taken back
+under. On release the card springs back (medium bounce) while the selection applies. Colour and border ease over
+220 ms between selected and not, on folder cards and on file cards, and the arrow and tick crossfade. Watched on
+the Moto G with a slow swipe on `car show`: mid-swipe the card had slid right with a mint tick panel behind it;
+after release it had returned and sat in the selected look. **Not judged:** the feel of the spring and the haptic
+(a screenshot cannot show either), and the pull reaches about 65dp, which pushes a card's right edge past the
+screen edge. Suite 407/407.
+
+**Restore's folder view has the Albums drill-down header (Ian, 19 Sept).** Inside a folder the top is now the same
+green card as an album's file list on the Albums tab: the return arrow and the folder name in `headlineSmall`
+bold at the left (three quarters), **Files in this folder** under the name, and the number centred in the right
+quarter; below, across the card, what is selected, the instruction or result line, and Select all and Clear. The
+path line is gone inside a folder (the header names it and carries the way back) and stays on the folder list,
+which keeps the card every tab opens with. The (?) that sat on the path line is beside the name, and the card's
+own (?) is beside *Files in this folder*. Watched on the Moto G on `car show` (34 files). The dead
+"open folder" branches inside the folder-list `HeroCard` call were left in place. Suite 407/407.
+
+**Restore headers, second pass (Ian, 19 Sept).** (1) Inside a folder: **Files in this folder** moved under the
+number, and the number centred in the right *half* (not quarter) of the card; the left half holds the way back
+and the folder name (bold, up to two lines). (2) The folder list has the same layout: **Folders to** with
+**Restore** directly under it in the left half at `headlineMedium` (Ian: "increase the size"), the number centred
+in the right half. Both share `HeaderLower` (selected summary, message line, and the two buttons), so the
+`HeroCard` call and its now-dead open-folder branches are gone. (3) The **All folders** path line and its (?) are
+gone from the list, and the (?) beside the folder name inside a folder is gone too (`Breadcrumb` deleted). Their
+topics, `restore-folders-list` and `restore-files-list`, are guide-only now: 97 topics, 51 with a (?). The title is
+two strings, `restore_hero_label_top` and `restore_hero_label_bottom`. Watched on the Moto G: the list header (10)
+and the `PauseTest` header (11). Suite 407/407.
+
+**Restore folder instruction (Ian, 19 Sept).** *"Nothing moves until you press Restore"* became *Then press
+Restore.*, on its own line under *Tap a file to select it.* (`restore_intro_files`, one string with an escaped
+newline). The first build showed both sentences on one line because the newline reached the XML as a real line
+break instead of `
+`; fixed and watched on the Moto G. The guide's message-line topic says the same, and still
+says nothing moves until Restore is pressed. Suite 407/407.
+
+**Restore folder header, third pass (Ian, 19 Sept).** Inside a folder: the (?) on *Files in this folder* and the (?)
+beside Select all and Clear are gone; the message's (?) now sits straight after *Tap a file to select it. / Then
+press Restore.* rather than at the far end of the row (`HeaderLower(compact = true)`); the number is larger
+(`displayMedium`, was `displaySmall`) and, with *Files in this folder*, sits about 14dp lower, with the row now
+top-aligned so the folder name stays where it was. The folder list's number took the same size so the two headers
+still match ("make # larger to make restore main header" was read that way); the list header otherwise keeps its
+(?) buttons, which Ian did not ask to change. Watched on the Moto G: the `PauseTest` header and the list header.
+Suite 407/407.
+
+**Archive tab restyled to match Albums and Restore (Ian, 19 Sept).** *Header:* the Restore list's layout, **Files
+to** with **Archive** directly under it on the left half (`headlineMedium`, the (?) beside *Archive*) and the number
+of files waiting centred in the right half (`displayMedium`); under them the album names, the intro, the pointer
+to Restore, and the Check these files control, all unchanged in behaviour. *Files:* each is a rounded card in the
+Restore file card's style (22dp, 1dp outline, 18 by 14 padding, name in `bodyLarge`, the line under it in
+`bodySmall`, the tick, cross or spinner still at the right), listed with 10dp between and in two columns from
+600dp. The **Files** heading and its (?) stay. The header was the shared `HeroCard`; the tab no longer uses it.
+The prompt (*All files validated*) was left as it was. The title is two strings, `archive_hero_label_top` and
+`archive_hero_label_bottom`; the guide's *Files to Archive* and *file list* topics describe the new layout.
+Watched on the Moto G with test 8 (which Ian had set to Archive): the header and four cards. **Not checked:** dark
+mode, the tick and cross marks after a check, the two-column layout, or the prompt under the new header. Suite
+407/407.

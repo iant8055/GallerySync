@@ -47,8 +47,9 @@ CHAPTER = Chapter(
             bin once OneDrive was confirmed to hold them. They are not gone. Open the bin to put them
             back, or use the **Restore** tab to download them again from OneDrive.
 
-            The folder itself is not deleted, and the album's mode still stands. If you do not want the
-            album archived any more, change its mode on the Albums tab.
+            The folder itself is not deleted, but the album has left the Albums tab and its mode has been
+            forgotten, so nothing will archive it again. Open the **Restore** tab to bring it back: it
+            returns as a new album at the default mode.
         """),
 
         topic("faq-photo-looks-small", "A photo looks smaller or lower quality than before", """

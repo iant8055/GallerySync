@@ -94,6 +94,61 @@ class RestoreScopeTest {
         assertEquals(listOf(archivedProxy), offered)
     }
 
+    // ── Files OneDrive holds that the ledger has no row for ────────────────
+
+    private fun classify(
+        album: String = "test 4",
+        name: String = "a.jpg",
+        size: Long = 3_000_000L,
+        present: Set<String> = emptySet(),
+        presentNames: Set<String> = emptySet(),
+        ledger: Set<String> = emptySet()
+    ) = RestoreScope.classifyDriveFile(album, name, size, present, presentNames, ledger)
+
+    /** Test 4 and Test 5, 18 Sept 2026: in OneDrive, gone from the phone, no ledger row. */
+    @Test
+    fun `a file OneDrive holds that the phone lacks and the ledger never heard of is a download`() {
+        assertEquals(RestoreScope.DriveFileState.MISSING, classify())
+    }
+
+    @Test
+    fun `a file the phone has at the same size is here whatever the ledger says`() {
+        val present = setOf(RestoreScope.presenceSignature("test 4", "a.jpg", 3_000_000L))
+        assertEquals(RestoreScope.DriveFileState.HERE, classify(present = present))
+        assertEquals(RestoreScope.DriveFileState.HERE, classify(present = present, ledger = setOf("a.jpg")))
+    }
+
+    @Test
+    fun `a file the ledger has a row for is left to the ledger's own lists`() {
+        assertEquals(RestoreScope.DriveFileState.LEDGER_HANDLES, classify(ledger = setOf("a.jpg")))
+    }
+
+    /** Overwriting an edit is the one thing Restore must never do, so it is neither offered nor greyed. */
+    @Test
+    fun `the same name at a different size is not offered`() {
+        val names = setOf(RestoreScope.presenceName("test 4", "a.jpg"))
+        assertEquals(RestoreScope.DriveFileState.SAME_NAME_OTHER_SIZE, classify(presentNames = names))
+    }
+
+    @Test
+    fun `presence is judged without regard to the case of the folder or the name`() {
+        val present = setOf(RestoreScope.presenceSignature("Camera", "IMG_1.JPG", 10L))
+        assertEquals(
+            RestoreScope.DriveFileState.HERE,
+            classify(album = "camera", name = "img_1.jpg", size = 10L, present = present)
+        )
+    }
+
+    @Test
+    fun `only photos and videos are offered`() {
+        assertTrue(RestoreScope.isMedia("image/jpeg", "a.jpg"))
+        assertTrue(RestoreScope.isMedia("video/mp4", "a.mp4"))
+        assertTrue(!RestoreScope.isMedia("application/pdf", "notes.pdf"))
+        // No useful type from the listing: fall back to the extension.
+        assertTrue(RestoreScope.isMedia("application/octet-stream", "IMG_0001.HEIC"))
+        assertTrue(!RestoreScope.isMedia("application/octet-stream", "notes.txt"))
+    }
+
     @Test
     fun `several albums are judged independently`() {
         val present = setOf(sig(stillHere))

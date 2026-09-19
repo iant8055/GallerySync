@@ -804,6 +804,158 @@ class BackupEngine @Inject constructor(
     }
 
     /**
+     * Lists every OneDrive backup folder, once: the slow half of [driveRestoreFiles], which the Restore
+     * tab holds on to so that leaving the tab and coming back does not read the drive again.
+     *
+     * A folder that cannot be read sets [DriveListing.couldNotList] and is left out, rather than
+     * being treated as empty.
+     */
+    suspend fun listDriveFolders(): DriveListing = withContext(dispatcher) {
+        val folders = cloudFolders()
+            ?: return@withContext DriveListing(emptyMap(), couldNotList = true)
+
+        val byFolder = LinkedHashMap<String, Map<String, RemoteFileRef>>()
+        var couldNotList = false
+        for (folder in folders) {
+            if (folder.isEmpty) continue
+            val index = remoteIndexFor(folder.name)
+            if (index == null) couldNotList = true else byFolder[folder.name] = index
+        }
+        DriveListing(byFolder, couldNotList)
+    }
+
+    /**
+     * Everything OneDrive holds in the folders this app backs up into that the Restore tab should
+     * know about beyond the ledger's own lists, and the ledger's missing ids filled in on the way.
+     *
+     * Takes a [DriveListing] from [listDriveFolders], so the drive is read once and the comparison with
+     * the phone, which is cheap and must be current, can be repeated.
+     *
+     * Ian, 18 Sept 2026: Restore should offer any file OneDrive holds and put it back in the album it
+     * came from, not only what this app uploaded. It was the rule on 25 Aug (`RestorableFile`), was
+     * narrowed to the ledger on 27 Aug, and is this again. What broke it in practice was the ledger
+     * itself: an archive that forgot its rows left files in OneDrive that Restore could not see.
+     *
+     * Reads the drive, so it needs the network and can be slow; the Restore tab shows the ledger's
+     * answer first and this one when it arrives. A folder that cannot be listed sets
+     * [DriveRestoreFiles.couldNotList] and is left out rather than treated as empty. A phone without
+     * full media access returns nothing, because "is it here?" cannot be answered.
+     *
+     * Side effect, bookkeeping only: a ledger row that says uploaded but never recorded an id gets it
+     * from the listing when name and size match. That is what makes restoring in place work for those
+     * rows, and it removes nothing.
+     */
+    suspend fun driveRestoreFiles(listing: DriveListing): DriveRestoreFiles = withContext(dispatcher) {
+        if (scanner.access() != MediaAccess.FULL) return@withContext DriveRestoreFiles.NONE
+
+        val onDevice = scanner.scanEverything()
+        // An empty scan proves nothing about the phone; see RestoreScope.notOnTheDevice.
+        if (onDevice.isEmpty()) return@withContext DriveRestoreFiles.NONE
+        val presentSignatures = onDevice.mapTo(HashSet()) {
+            RestoreScope.presenceSignature(it.album, it.displayName, it.sizeBytes)
+        }
+        val presentNames = onDevice.mapTo(HashSet()) { RestoreScope.presenceName(it.album, it.displayName) }
+
+        val missing = mutableListOf<BackupEntryEntity>()
+        val here = mutableListOf<BackupEntryEntity>()
+        val couldNotList = listing.couldNotList
+
+        for ((folderName, index) in listing.folders) {
+            val known = entryDao.entriesForAlbum(folderName)
+            known.filter { it.state == BackupState.UPLOADED && it.remoteItemId.isNullOrEmpty() }
+                .forEach { row ->
+                    val ref = index[row.displayName]
+                    if (ref != null && ref.id.isNotEmpty() && ref.sizeBytes == row.sizeBytes) {
+                        entryDao.fillMissingRemoteItemIdByKey(row.id, ref.id)
+                    }
+                }
+            val knownNames = known.mapTo(HashSet()) { it.displayName }
+
+            for ((name, ref) in index) {
+                val size = ref.sizeBytes ?: continue
+                if (!RestoreScope.isMedia(ref.mimeType, name)) continue
+
+                when (
+                    RestoreScope.classifyDriveFile(
+                        album = folderName,
+                        displayName = name,
+                        remoteSizeBytes = size,
+                        presentSignatures = presentSignatures,
+                        presentNames = presentNames,
+                        ledgerNamesInAlbum = knownNames
+                    )
+                ) {
+                    RestoreScope.DriveFileState.HERE -> here += driveEntity(folderName, name, size, ref)
+                    RestoreScope.DriveFileState.MISSING -> missing += driveEntity(folderName, name, size, ref)
+                    RestoreScope.DriveFileState.LEDGER_HANDLES,
+                    RestoreScope.DriveFileState.SAME_NAME_OTHER_SIZE -> Unit
+                }
+            }
+        }
+
+        Logger.d(
+            TAG,
+            "driveRestoreFiles: ${missing.size} to download, ${here.size} already here" +
+                if (couldNotList) ", some folders could not be listed" else ""
+        )
+        DriveRestoreFiles(missing, here, couldNotList)
+    }
+
+    /**
+     * A description of one OneDrive file in the shape the Restore code already understands. Not stored.
+     *
+     * The id is prefixed so it can never collide with a ledger key, and `DownloadMissingFile` treats a
+     * row it cannot find as "write one when the file arrives".
+     */
+    private fun driveEntity(album: String, name: String, size: Long, ref: RemoteFileRef) = BackupEntryEntity(
+        id = DRIVE_ID_PREFIX + ref.id,
+        mediaStoreId = 0L,
+        contentUri = "",
+        displayName = name,
+        album = album,
+        sizeBytes = size,
+        dateModifiedEpochSeconds = 0L,
+        mimeType = ref.mimeType,
+        isVideo = ref.mimeType.startsWith("video/") ||
+            name.substringAfterLast('.', "").lowercase() in setOf("mp4", "mov", "m4v", "3gp", "mkv", "webm", "avi"),
+        state = BackupState.UPLOADED,
+        remoteItemId = ref.id,
+        remoteSizeBytes = size,
+        uploadedAtEpochMillis = ref.createdAtEpochMillis
+    )
+
+    /**
+     * Forgets the mode of an Archive album an Archive run has left empty.
+     *
+     * Ian, 18 Sept 2026: an archived album that is empty should simply go, and a restore should bring
+     * it back as a new album with the default mode. That is what this does, with nothing written: the
+     * album's preference row is removed, so the album drops off the Albums tab like any emptied album,
+     * and when files return the scanner finds it new and the ordinary new-album path gives it the
+     * default. That default can never be Archive (`AlbumMode.canBeDefault`), which is what closes the
+     * loop of archive, restore, archive again.
+     *
+     * Replaces 27 Aug's ruling that an emptied Archive album keeps its mode as a standing instruction.
+     * The ledger rows and the OneDrive copies are untouched; the folder stays on disk, empty.
+     *
+     * Called only right after an Archive run has removed files, never from a plain rescan: a partial
+     * scan would otherwise read as "every Archive album is empty" and wipe them all. Guarded the same
+     * way as the prune. Returns the names forgotten.
+     */
+    suspend fun forgetEmptiedArchiveAlbums(): List<String> = withContext(dispatcher) {
+        if (scanner.access() != MediaAccess.FULL) return@withContext emptyList()
+        val everything = scanner.scanEverything()
+        if (everything.isEmpty()) return@withContext emptyList()
+
+        val present = everything.mapTo(HashSet()) { it.album }
+        val emptied = albumDao.albumsInMode(AlbumMode.ARCHIVE).filter { it !in present }
+        if (emptied.isNotEmpty()) {
+            albumDao.deleteAlbums(emptied)
+            Logger.i(TAG, "forgot the Archive mode of ${emptied.size} emptied albums: $emptied")
+        }
+        emptied
+    }
+
+    /**
      * Marks files for upload again, for ones the drive turns out not to have.
      *
      * Archive's validation treats "not in OneDrive" as work rather than as a verdict, and backs the
@@ -1280,6 +1432,9 @@ class BackupEngine @Inject constructor(
 
     companion object {
         private const val TAG = "BackupEngine"
+
+        /** Marks a description of a OneDrive file that has no ledger row. See [driveRestoreFiles]. */
+        const val DRIVE_ID_PREFIX = "drive:"
 
         /**
          * Retired in favour of [RemoteRoots]. The destination is now a user setting and the search

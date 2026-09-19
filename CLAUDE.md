@@ -81,10 +81,21 @@ This is absolute and applies to every file, in every location, without exception
 
   The property still binds the code: anything that widens what an Archive album contains widens what
   will be removed under a choice made earlier, so **the album's membership is not a free variable**.
-  Emptying an album does not retire its mode — the folder survives on disk even when every file in it
-  is trashed (27 Aug 2026), so a camera, a download or a file manager can refill it and the mode still
-  applies. Treat a change that lets files enter an Archive album by some new route as touching this
-  rule.
+  **Emptying an album retires its mode. Ian, 18 Sept 2026, superseding 27 Aug 2026** (when the rule was
+  that the mode outlives the files, because a camera, a download or a file manager can refill the
+  folder). When an Archive run removes the last file, the app forgets the album's mode: the preference
+  row is deleted and nothing is written. The album leaves the Albums tab, and if Restore or anything
+  else refills the folder it comes back as a *new* album at the default mode for new albums, which can
+  never be Archive (`AlbumMode.canBeDefault`). That closes the loop of archive, restore, archive again,
+  and it is the safe direction: a refilled folder is no longer covered by a choice made about the files
+  that used to be in it. It fires only right after an Archive run has removed files, never from a plain
+  rescan, because a partial scan would otherwise read as "every Archive album is empty". The folder
+  stays on disk, empty; the ledger rows and the OneDrive copies are untouched.
+
+  The standing-instruction property above therefore holds **while the album still holds files**. Treat
+  a change that lets files enter an Archive album by some new route while it holds files as touching
+  this rule. A file the user has ticked *Keep at full size* (`FilePin`, Restore's flag) is never
+  offered for archiving, whatever its album's mode.
 
   Android shows its own dialog for a trash request, per batch, capped at 2000 URIs. That is the
   platform's and not ours: it is not where the consent comes from, and it is not to be mirrored by

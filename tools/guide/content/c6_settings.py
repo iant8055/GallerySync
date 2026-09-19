@@ -434,9 +434,10 @@ CHAPTER = Chapter(
             folders, including ones with nothing in them; off lists only folders that have something to
             bring back.
 
-            ## Where things stand in this version
-            The Restore tab currently lists only folders that have something to bring back, so this
-            switch does not change what you see there yet. Leaving it off is right.
+            ## What it changes
+            The Restore tab lists the folders in your OneDrive backup folders that have something to
+            bring back. Turn this on and it lists every folder, including those where every file is
+            already on the phone. Off is right for most people.
         """, ui=True),
 
         topic("settings-section-archive", "Archive (Settings)", """

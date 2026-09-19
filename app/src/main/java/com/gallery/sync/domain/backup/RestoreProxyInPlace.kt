@@ -83,8 +83,10 @@ class RestoreProxyInPlace @Inject constructor(
         entry: BackupEntryEntity,
         onProgress: (bytesWritten: Long, total: Long) -> Unit = { _, _ -> }
     ): RestoreInPlaceResult = withContext(dispatcher) {
-        val remoteItemId = entry.remoteItemId
-            ?: return@withContext RestoreInPlaceResult.Failed("no cloud item recorded")
+        val remoteItemId = entry.remoteItemId?.takeIf { it.isNotBlank() }
+            ?: return@withContext RestoreInPlaceResult.Failed(
+                "OneDrive has not been checked for this file yet. Press Refresh and try again."
+            )
         val expected = entry.remoteSizeBytes
             ?: return@withContext RestoreInPlaceResult.Failed("no cloud size recorded")
         val uri = Uri.parse(entry.contentUri)

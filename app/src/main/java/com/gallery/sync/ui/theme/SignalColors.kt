@@ -35,6 +35,9 @@ data class GallerySyncColors(
     val accent: Color,
     val onAccent: Color,
 
+    /** Text on a plain surface that says a file is safe ("backed up"). See [SignalSafeGreenLight]. */
+    val safeText: Color,
+
     /** Album mode: files are copied up and nothing local changes. */
     val backupContainer: Color,
     val onBackupContainer: Color,
@@ -88,6 +91,7 @@ private val SignalLight = GallerySyncColors(
     onHero = SignalDeepGreenText,
     accent = SignalBrightGreen,
     onAccent = SignalBrightGreenText,
+    safeText = SignalSafeGreenLight,
     backupContainer = SignalBackupLight,
     onBackupContainer = SignalOnBackupLight,
     syncContainer = SignalSyncLight,
@@ -111,6 +115,7 @@ private val SignalDark = GallerySyncColors(
     onHero = SignalOnHeroDark,
     accent = SignalBrightGreen,
     onAccent = SignalBrightGreenText,
+    safeText = SignalBrightGreen,
     backupContainer = SignalBackupDark,
     onBackupContainer = SignalOnBackupDark,
     syncContainer = SignalSyncDark,

@@ -46,6 +46,75 @@ object RestoreScope {
     fun onDiskSizeBytes(isProxied: Boolean, localProxySizeBytes: Long?, sizeBytes: Long): Long =
         if (isProxied && localProxySizeBytes != null) localProxySizeBytes else sizeBytes
 
+    // ── Files OneDrive holds that the ledger has no row for ─────────────────
+
+    /** What the phone has to say about one file OneDrive holds. */
+    enum class DriveFileState {
+
+        /** The phone has it, in that folder, at that size. Shown greyed: nothing to do. */
+        HERE,
+
+        /** The ledger has a row for it, so the ledger's own lists decide what is offered. */
+        LEDGER_HANDLES,
+
+        /**
+         * The phone has a file of that name in that folder at a *different* size.
+         *
+         * Possibly an optimised copy the ledger has lost, possibly a photo the user edited. Nothing
+         * here can tell them apart, and overwriting an edit is the one thing Restore must never do,
+         * so it is left alone and not offered.
+         */
+        SAME_NAME_OTHER_SIZE,
+
+        /** Not on the phone and unknown to the ledger: a download. */
+        MISSING
+    }
+
+    /** Album, name and size, compared without regard to case: MediaStore keeps each writer's spelling. */
+    fun presenceSignature(album: String, displayName: String, sizeBytes: Long): String =
+        signature(album.lowercase(), displayName.lowercase(), sizeBytes)
+
+    fun presenceName(album: String, displayName: String): String =
+        "${album.lowercase()}/${displayName.lowercase()}"
+
+    /**
+     * Where one OneDrive file stands, judged folder by folder.
+     *
+     * Ian, 18 Sept 2026: Restore should offer any file OneDrive holds and put it back in the album it
+     * came from, not only what this app uploaded. The ledger still decides for the files it knows;
+     * this covers the rest.
+     *
+     * The order matters. Present at the right size is settled first, so a file the phone has is never
+     * offered whatever the ledger thinks. A ledger row is second, so the two lists cannot both claim
+     * one file. Only then is a file the phone lacks a download.
+     */
+    fun classifyDriveFile(
+        album: String,
+        displayName: String,
+        remoteSizeBytes: Long,
+        presentSignatures: Set<String>,
+        presentNames: Set<String>,
+        ledgerNamesInAlbum: Set<String>
+    ): DriveFileState = when {
+        presenceSignature(album, displayName, remoteSizeBytes) in presentSignatures -> DriveFileState.HERE
+        displayName in ledgerNamesInAlbum -> DriveFileState.LEDGER_HANDLES
+        presenceName(album, displayName) in presentNames -> DriveFileState.SAME_NAME_OTHER_SIZE
+        else -> DriveFileState.MISSING
+    }
+
+    /** Photos and videos only. A folder can hold anything, and this tab is for the gallery. */
+    fun isMedia(mimeType: String, displayName: String): Boolean {
+        if (mimeType.startsWith("image/") || mimeType.startsWith("video/")) return true
+        if (mimeType != "application/octet-stream" && mimeType.isNotBlank()) return false
+        // The listing gave no useful type; fall back to the extension.
+        return displayName.substringAfterLast('.', "").lowercase() in MEDIA_EXTENSIONS
+    }
+
+    private val MEDIA_EXTENSIONS = setOf(
+        "jpg", "jpeg", "png", "gif", "webp", "heic", "heif", "bmp", "dng",
+        "mp4", "mov", "m4v", "3gp", "mkv", "webm", "avi"
+    )
+
     /**
      * Which of [candidates] are not present on the device, judged per folder.
      *

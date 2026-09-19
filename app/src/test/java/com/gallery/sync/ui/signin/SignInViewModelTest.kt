@@ -1,6 +1,7 @@
 package com.gallery.sync.ui.signin
 
 import android.app.Activity
+import com.gallery.sync.data.local.DriveListingStore
 import com.gallery.sync.data.remote.auth.OneDriveSignIn
 import com.gallery.sync.data.remote.auth.SignInResult
 import kotlinx.coroutines.Dispatchers
@@ -26,6 +27,7 @@ import org.mockito.kotlin.mock
 class SignInViewModelTest {
 
     private val activity: Activity = mock()
+    private val listingStore: DriveListingStore = mock()
 
     @Before
     fun setUp() {
@@ -40,14 +42,14 @@ class SignInViewModelTest {
 
     @Test
     fun `starts signed out when no account is cached`() = runTest {
-        val viewModel = SignInViewModel(FakeSignIn(accountName = null))
+        val viewModel = SignInViewModel(FakeSignIn(accountName = null), listingStore)
 
         assertEquals(SignInUiState.SignedOut, viewModel.state.value)
     }
 
     @Test
     fun `starts signed in when an account is already cached`() = runTest {
-        val viewModel = SignInViewModel(FakeSignIn(accountName = "ian@example.com"))
+        val viewModel = SignInViewModel(FakeSignIn(accountName = "ian@example.com"), listingStore)
 
         assertEquals(SignInUiState.SignedIn("ian@example.com"), viewModel.state.value)
     }
@@ -55,7 +57,7 @@ class SignInViewModelTest {
     @Test
     fun `a successful sign-in reports the account name`() = runTest {
         val fake = FakeSignIn(accountName = null, signInResult = SignInResult.Success("ian@example.com"))
-        val viewModel = SignInViewModel(fake)
+        val viewModel = SignInViewModel(fake, listingStore)
 
         viewModel.signIn(activity)
 
@@ -65,7 +67,7 @@ class SignInViewModelTest {
     @Test
     fun `cancelling sign-in is not an error and returns to signed out`() = runTest {
         val fake = FakeSignIn(accountName = null, signInResult = SignInResult.Cancelled)
-        val viewModel = SignInViewModel(fake)
+        val viewModel = SignInViewModel(fake, listingStore)
 
         viewModel.signIn(activity)
 
@@ -75,7 +77,7 @@ class SignInViewModelTest {
     @Test
     fun `a failed sign-in surfaces the error code`() = runTest {
         val fake = FakeSignIn(accountName = null, signInResult = SignInResult.Failed("invalid_grant"))
-        val viewModel = SignInViewModel(fake)
+        val viewModel = SignInViewModel(fake, listingStore)
 
         viewModel.signIn(activity)
 
@@ -85,7 +87,7 @@ class SignInViewModelTest {
     @Test
     fun `signing out clears the account`() = runTest {
         val fake = FakeSignIn(accountName = "ian@example.com", signOutSucceeds = true)
-        val viewModel = SignInViewModel(fake)
+        val viewModel = SignInViewModel(fake, listingStore)
 
         viewModel.signOut()
 
@@ -96,7 +98,7 @@ class SignInViewModelTest {
     fun `a failed sign-out leaves the account shown as still signed in`() = runTest {
         // The screen must not claim the user is signed out while MSAL still holds the account.
         val fake = FakeSignIn(accountName = "ian@example.com", signOutSucceeds = false)
-        val viewModel = SignInViewModel(fake)
+        val viewModel = SignInViewModel(fake, listingStore)
 
         viewModel.signOut()
 

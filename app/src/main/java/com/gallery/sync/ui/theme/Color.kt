@@ -58,6 +58,19 @@ val SignalOnSurfaceVariantDark = Color(0xFF94999E)
 val SignalDeepGreen = Color(0xFF003525)
 
 /**
+ * Text that says a file is safe: "backed up".
+ *
+ * A clearly green, not the deep brand green. [SignalDeepGreen] is `primary` in the light theme and is
+ * nearly black (`#003525`), so text in it read as dark grey with a hint of green and did not say
+ * "safe" at a glance. Ian, 19 Sept 2026: make it more obviously green.
+ *
+ * `#157F37` measures about 5.1:1 on white and 4.7:1 on the off-white surface, which clears the 4.5:1
+ * that 14sp body text needs. A brighter green looked better and failed that. The dark theme keeps
+ * [SignalBrightGreen], which is already obviously green on a near-black surface.
+ */
+val SignalSafeGreenLight = Color(0xFF157F37)
+
+/**
  * The hero container in light: the heading box at the top of each tab, and the Settings section
  * headings that match it.
  *

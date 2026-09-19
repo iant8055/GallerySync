@@ -307,6 +307,11 @@ class ArchiveViewModel @Inject constructor(
             // drifts from the first.
             engine.refreshLedger()
 
+            // An Archive album this run has emptied goes: its mode is forgotten, so it drops off the
+            // Albums tab and comes back as a new album, at the default mode, when Restore refills it.
+            // Ian, 18 Sept 2026. Only after files were really removed, never on a plain rescan.
+            if (removed.isNotEmpty()) engine.forgetEmptiedArchiveAlbums()
+
             val remaining = engine.filesInArchiveAlbums()
             _state.value = _state.value.copy(
                 plan = ArchivePlan(entries = remaining.map { ArchiveEntry(it) }),

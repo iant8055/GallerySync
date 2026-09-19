@@ -4,6 +4,12 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,7 +49,6 @@ import com.gallery.sync.domain.backup.ArchiveDelay
 import com.gallery.sync.domain.backup.ArchiveEntry
 import com.gallery.sync.domain.backup.ArchiveFailure
 import com.gallery.sync.domain.backup.ArchiveMark
-import com.gallery.sync.ui.common.HeroCard
 import com.gallery.sync.ui.help.HelpButton
 import com.gallery.sync.ui.help.HelpTopic
 import com.gallery.sync.ui.help.TitleWithHelp
@@ -134,56 +139,10 @@ fun ArchiveScreen(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // The same card Albums and Restore open with. The figure is the number of files waiting
-            // on this tab — which is what someone arriving here wants to know before anything else.
-            HeroCard(
-                label = stringResource(R.string.archive_hero_label),
-                help = HelpTopic.ARCHIVE_HERO,
-                figure = state.plan.entries.size.toString(),
-                detail = {
-                    when {
-                        !state.isSupported -> WithHelp(HelpTopic.ARCHIVE_EMPTY) {
-                            Text(
-                                text = stringResource(R.string.archive_unsupported),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-
-                        // Two different emptinesses. No Archive album at all means nothing here can
-                        // remove anything; Archive albums holding no files means the mode finished
-                        // and is still standing. Telling the user the first when the second is true
-                        // would be false about the one mode that takes files off the phone.
-                        state.plan.isEmpty && state.archiveAlbums.isEmpty() -> {
-                            WithHelp(HelpTopic.ARCHIVE_EMPTY) {
-                                Text(
-                                    text = stringResource(R.string.archive_empty),
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
-                            Text(
-                                text = stringResource(R.string.archive_empty_hint),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-
-                        // Archive albums exist and hold nothing: the mode ran to completion, and
-                        // the card already says so — "Files to Archive" standing over a zero. The
-                        // two sentences that sat here restated the standing-instruction rule on
-                        // every visit to a finished tab; that explanation belongs in Help
-                        // (TASK-017), not here. Ian, 27 Aug 2026.
-                        state.plan.isEmpty -> Unit
-
-                        else -> ArchiveHeroDetail(state)
-                    }
-                },
-                actions = {
-                    if (state.isSupported && !state.plan.isEmpty) {
-                        WithHelp(HelpTopic.ARCHIVE_CHECK_BUTTON) {
-                            ArchiveHeroActions(state = state, onValidate = viewModel::validate)
-                        }
-                    }
-                }
-            )
+            // The same header as the Restore list, and laid out like the drill-downs on Albums and
+            // Restore (Ian, 19 Sept 2026): "Files to" with "Archive" under it on the left half, the
+            // number waiting on this tab centred in the right half.
+            ArchiveHeader(state = state, onValidate = viewModel::validate)
         }
 
         if (state.showPrompt) {
@@ -206,26 +165,152 @@ fun ArchiveScreen(
             // weight(1f) rather than fillMaxWidth alone: the list takes whatever height is left once
             // the header and the question have theirs, so a long album scrolls inside its own space
             // instead of pushing the question off the screen.
-            LazyColumn(
+            //
+            // Two columns from 600dp, as on Restore and Albums: unfolded, more rows rather than wider
+            // ones.
+            BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
             ) {
-                item(key = "archive-heading") {
-                    WithHelp(HelpTopic.ARCHIVE_FILE_LIST, Modifier.padding(horizontal = 16.dp)) {
-                        Text(
-                            text = stringResource(R.string.archive_list_heading),
-                            style = MaterialTheme.typography.titleSmall
-                        )
+                val columns = if (maxWidth >= WideBreakpoint) 2 else 1
+                val entries = state.plan.entries
+                val half = (entries.size + columns - 1) / columns
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    item(key = "archive-heading") {
+                        WithHelp(HelpTopic.ARCHIVE_FILE_LIST) {
+                            Text(
+                                text = stringResource(R.string.archive_list_heading),
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                        }
                     }
-                }
-                items(state.plan.entries, key = { it.item.mediaStoreId }) { entry ->
-                    ArchiveRow(entry)
+                    items(half) { index ->
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            for (column in 0 until columns) {
+                                Box(modifier = Modifier.weight(1f)) {
+                                    entries.getOrNull(index + column * half)?.let { entry ->
+                                        ArchiveRow(entry)
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 }
+
+/**
+ * The green header: "Files to" with "Archive" directly under it on the left half, the number of files
+ * waiting on this tab centred in the right half, and under them what is happening, and the control.
+ *
+ * The same surface and layout as the Restore list's header, so the three tabs open alike. It was the
+ * shared `HeroCard`, which centres one figure under one label; the drill-downs on Albums and Restore
+ * moved to this arrangement on 19 Sept 2026 and Archive follows.
+ */
+@Composable
+private fun ArchiveHeader(state: ArchiveUiState, onValidate: () -> Unit) {
+    val signal = LocalGallerySyncColors.current
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(28.dp),
+        color = signal.heroContainer,
+        contentColor = signal.onHero
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column(modifier = Modifier.weight(1f).padding(start = 8.dp)) {
+                    Text(
+                        text = stringResource(R.string.archive_hero_label_top),
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = stringResource(R.string.archive_hero_label_bottom),
+                            style = MaterialTheme.typography.headlineMedium
+                        )
+                        HelpButton(HelpTopic.ARCHIVE_HERO)
+                    }
+                }
+                // The number of files waiting on this tab, which is what someone arriving here wants
+                // to know before anything else.
+                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                    Text(
+                        text = state.plan.entries.size.toString(),
+                        style = MaterialTheme.typography.displayMedium
+                    )
+                }
+            }
+
+            Column(
+                modifier = Modifier.padding(horizontal = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                when {
+                    !state.isSupported -> WithHelp(HelpTopic.ARCHIVE_EMPTY) {
+                        Text(
+                            text = stringResource(R.string.archive_unsupported),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+
+                    // Two different emptinesses. No Archive album at all means nothing here can
+                    // remove anything; Archive albums holding no files means the mode finished
+                    // and is still standing. Telling the user the first when the second is true
+                    // would be false about the one mode that takes files off the phone.
+                    state.plan.isEmpty && state.archiveAlbums.isEmpty() -> {
+                        WithHelp(HelpTopic.ARCHIVE_EMPTY) {
+                            Text(
+                                text = stringResource(R.string.archive_empty),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                        Text(
+                            text = stringResource(R.string.archive_empty_hint),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+
+                    // Archive albums exist and hold nothing: the mode ran to completion, and the card
+                    // already says so, with the number at zero. The two sentences that sat here
+                    // restated the standing-instruction rule on every visit to a finished tab; that
+                    // explanation belongs in Help (TASK-017), not here. Ian, 27 Aug 2026.
+                    state.plan.isEmpty -> Unit
+
+                    else -> ArchiveHeroDetail(state)
+                }
+
+                // Where an archived album goes to be brought back. Moved here from the Albums header
+                // (Ian, 18 Sept 2026): it is about Archive, so it belongs on this tab.
+                Text(
+                    text = stringResource(R.string.archive_restore_pointer),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = LocalContentColor.current.copy(alpha = 0.7f)
+                )
+
+                if (state.isSupported && !state.plan.isEmpty) {
+                    WithHelp(HelpTopic.ARCHIVE_CHECK_BUTTON) {
+                        ArchiveHeroActions(state = state, onValidate = onValidate)
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** Two columns of file cards from here up, as on Restore and Albums. */
+private val WideBreakpoint = 600.dp
 
 /** The album names and the one-line explanation of what this tab does before it does it. */
 @Composable
@@ -315,70 +400,79 @@ private fun ArchiveRow(entry: ArchiveEntry) {
     val context = LocalContext.current
     val signal = LocalGallerySyncColors.current
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalAlignment = Alignment.CenterVertically
+    // A rounded card in the Restore file card's style, which is the Albums card's (Ian, 19 Sept 2026):
+    // the same shape, outline and padding, the name in bodyLarge and the line under it in bodySmall.
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        color = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = entry.name,
-                style = MaterialTheme.typography.bodyMedium,
-                maxLines = 1
-            )
-            val detail = when {
-                entry.failure == ArchiveFailure.COULD_NOT_CHECK ->
-                    stringResource(R.string.archive_failed_unchecked)
+        Row(
+            modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = entry.name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                val detail = when {
+                    entry.failure == ArchiveFailure.COULD_NOT_CHECK ->
+                        stringResource(R.string.archive_failed_unchecked)
 
-                entry.failure == ArchiveFailure.NOT_BACKED_UP ->
-                    stringResource(R.string.archive_failed_not_backed_up)
+                    entry.failure == ArchiveFailure.NOT_BACKED_UP ->
+                        stringResource(R.string.archive_failed_not_backed_up)
 
-                entry.failure == ArchiveFailure.WRONG_SIZE_IN_CLOUD ->
-                    stringResource(R.string.archive_failed_wrong_size)
+                    entry.failure == ArchiveFailure.WRONG_SIZE_IN_CLOUD ->
+                        stringResource(R.string.archive_failed_wrong_size)
 
-                entry.mark == ArchiveMark.BACKING_UP ->
-                    stringResource(R.string.archive_state_backing_up)
+                    entry.mark == ArchiveMark.BACKING_UP ->
+                        stringResource(R.string.archive_state_backing_up)
 
-                entry.mark == ArchiveMark.REMOVING ->
-                    stringResource(R.string.archive_state_removing)
+                    entry.mark == ArchiveMark.REMOVING ->
+                        stringResource(R.string.archive_state_removing)
 
-                entry.mark == ArchiveMark.REMOVED ->
-                    stringResource(R.string.archive_state_removed)
+                    entry.mark == ArchiveMark.REMOVED ->
+                        stringResource(R.string.archive_state_removed)
 
-                else -> formatBytes(context, entry.sizeBytes)
-            }
-            Text(
-                text = detail,
-                style = MaterialTheme.typography.bodySmall,
-                color = if (entry.failure != null) {
-                    MaterialTheme.colorScheme.error
-                } else {
-                    LocalContentColor.current
+                    else -> formatBytes(context, entry.sizeBytes)
                 }
-            )
-        }
+                Text(
+                    text = detail,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (entry.failure != null) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        LocalContentColor.current
+                    }
+                )
+            }
 
-        when (entry.mark) {
-            ArchiveMark.CHECKING, ArchiveMark.BACKING_UP, ArchiveMark.REMOVING ->
-                CircularProgressIndicator(modifier = Modifier.size(18.dp))
+            when (entry.mark) {
+                ArchiveMark.CHECKING, ArchiveMark.BACKING_UP, ArchiveMark.REMOVING ->
+                    CircularProgressIndicator(modifier = Modifier.size(18.dp))
 
-            ArchiveMark.CONFIRMED, ArchiveMark.REMOVED -> Icon(
-                imageVector = SignalIcons.Check,
-                contentDescription = null,
-                tint = signal.accent,
-                modifier = Modifier.size(22.dp)
-            )
+                ArchiveMark.CONFIRMED, ArchiveMark.REMOVED -> Icon(
+                    imageVector = SignalIcons.Check,
+                    contentDescription = null,
+                    tint = signal.accent,
+                    modifier = Modifier.size(22.dp)
+                )
 
-            ArchiveMark.FAILED -> Icon(
-                imageVector = SignalIcons.Cross,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.error,
-                modifier = Modifier.size(22.dp)
-            )
+                ArchiveMark.FAILED -> Icon(
+                    imageVector = SignalIcons.Cross,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(22.dp)
+                )
 
-            ArchiveMark.WAITING -> Unit
+                ArchiveMark.WAITING -> Unit
+            }
         }
     }
 }

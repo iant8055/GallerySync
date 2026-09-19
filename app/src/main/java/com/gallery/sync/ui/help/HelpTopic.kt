@@ -17,7 +17,6 @@ enum class HelpTopic(
     @param:StringRes val body: Int
 ) {
     ALBUMS_PERMISSION("albums-permission", R.string.help_albums_permission_title, R.string.help_albums_permission_body),
-    ALBUMS_TOTALS("albums-totals", R.string.help_albums_totals_title, R.string.help_albums_totals_body),
     ALBUMS_ALL_BACKED_UP("albums-all-backed-up", R.string.help_albums_all_backed_up_title, R.string.help_albums_all_backed_up_body),
     ALBUMS_OPTIMISED_LINE("albums-optimised-line", R.string.help_albums_optimised_line_title, R.string.help_albums_optimised_line_body),
     ALBUMS_ARCHIVE_LINES("albums-archive-lines", R.string.help_albums_archive_lines_title, R.string.help_albums_archive_lines_body),
@@ -33,8 +32,7 @@ enum class HelpTopic(
     RESTORE_MESSAGE_LINE("restore-message-line", R.string.help_restore_message_line_title, R.string.help_restore_message_line_body),
     RESTORE_SELECTED_SUMMARY("restore-selected-summary", R.string.help_restore_selected_summary_title, R.string.help_restore_selected_summary_body),
     RESTORE_BUTTONS("restore-buttons", R.string.help_restore_buttons_title, R.string.help_restore_buttons_body),
-    RESTORE_FOLDERS_LIST("restore-folders-list", R.string.help_restore_folders_list_title, R.string.help_restore_folders_list_body),
-    RESTORE_FILES_LIST("restore-files-list", R.string.help_restore_files_list_title, R.string.help_restore_files_list_body),
+    RESTORE_GREYED_FILES("restore-greyed-files", R.string.help_restore_greyed_files_title, R.string.help_restore_greyed_files_body),
     RESTORE_ACTION_BAR("restore-action-bar", R.string.help_restore_action_bar_title, R.string.help_restore_action_bar_body),
     ARCHIVE_HERO("archive-hero", R.string.help_archive_hero_title, R.string.help_archive_hero_body),
     ARCHIVE_CHECK_BUTTON("archive-check-button", R.string.help_archive_check_button_title, R.string.help_archive_check_button_body),

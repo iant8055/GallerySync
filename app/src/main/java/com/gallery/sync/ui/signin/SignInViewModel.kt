@@ -3,6 +3,7 @@ package com.gallery.sync.ui.signin
 import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gallery.sync.data.local.DriveListingStore
 import com.gallery.sync.data.remote.auth.OneDriveSignIn
 import com.gallery.sync.data.remote.auth.SignInResult
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -30,7 +31,8 @@ sealed interface SignInUiState {
 
 @HiltViewModel
 class SignInViewModel @Inject constructor(
-    private val oneDriveSignIn: OneDriveSignIn
+    private val oneDriveSignIn: OneDriveSignIn,
+    private val driveListingStore: DriveListingStore
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<SignInUiState>(SignInUiState.Loading)
@@ -67,7 +69,9 @@ class SignInViewModel @Inject constructor(
     fun signOut() {
         viewModelScope.launch {
             _state.value = SignInUiState.Working
-            oneDriveSignIn.signOut()
+            val signedOut = oneDriveSignIn.signOut()
+            // A stored OneDrive listing is one account's library. It must not greet the next one.
+            if (signedOut) driveListingStore.clear()
             // Refresh rather than assuming signed-out: if sign-out failed the account is still
             // there, and the screen should say so instead of lying.
             refresh()

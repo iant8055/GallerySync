@@ -276,6 +276,7 @@
 
     <!-- "Tap" rather than "click": the Android convention, on a device with no pointer. -->
     <string name="albums_filter_hint">Tap to filter by mode</string>
+    <string name="archive_restore_pointer">To restore archived files or albums, check the Restore tab.</string>
     <!-- Shown when a mode button is tapped and no album is in that mode. -->
     <string name="albums_filter_none">No album is in that mode.</string>
     <string name="backup_all_done">Everything is backed up</string>
@@ -456,7 +457,9 @@ full size</string>
 
     <!-- The Archive tab: validate, then confirm, then remove. -->
     <string name="archive_title">Archive</string>
-    <string name="archive_hero_label">Files to Archive</string>
+    <!-- One title over two lines, "Files to" and "Archive" directly under it, like the Restore list. -->
+    <string name="archive_hero_label_top">Files to</string>
+    <string name="archive_hero_label_bottom">Archive</string>
     <string name="archive_empty">No album is set to Archive. Nothing here will remove anything from your phone.</string>
     <string name="archive_empty_hint">Set an album to Archive on the Albums tab, and its files will be listed here for checking before anything leaves your phone.</string>
     <string name="archive_intro">Every file below is checked against OneDrive first. Anything that is not there yet is backed up before it is verified.</string>
@@ -582,12 +585,14 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
         The Restore tab, TASK-018: what on this phone has been shrunk, and putting it back.
         Distinct from the old drive-listing tab, which fetched second copies into DCIM/Restored.
     -->
-    <string name="restore_hero_label_folders">Folders to Restore</string>
+    <!-- One title over two lines, "Folders to" and "Restore" directly under it (Ian, 19 Sept 2026). -->
+    <string name="restore_hero_label_top">Folders to</string>
+    <string name="restore_hero_label_bottom">Restore</string>
     <string name="restore_hero_label_files">Files in this folder</string>
     <string name="restore_all_folders">All folders</string>
     <string name="restore_intro_folders">Swipe right to select / left to deselect\nTap to open</string>
-    <string name="restore_intro_files">Tap a file to select it. Nothing moves until you press Restore.</string>
-    <string name="restore_empty">Nothing has been optimised or archived from this phone, so there is nothing to bring back.</string>
+    <string name="restore_intro_files">Tap a file to select it.\nThen press Restore.</string>
+    <string name="restore_empty">Nothing in OneDrive is missing from this phone, so there is nothing to bring back.</string>
     <string name="restore_selected_summary">%1$d selected · %2$s to recover</string>
     <string name="restore_folder_detail">%1$d files · %2$s</string>
     <!-- Named separately: they are different operations on the phone, and one total would hide that. -->
@@ -595,6 +600,13 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
     <string name="restore_folder_split">%1$d to restore · %2$d to download</string>
     <string name="restore_sizes">%1$s now · %2$s full size</string>
     <string name="restore_missing_size">Available for download · %1$s</string>
+    <!-- Restore lists what OneDrive holds (Ian, 18 Sept 2026), so it says when it is still looking,
+         and which files it is not offering and why. -->
+    <string name="restore_checking_cloud">Checking OneDrive for more…</string>
+    <string name="restore_cloud_unavailable">Some OneDrive folders could not be reached, so this list may be incomplete. Press Refresh to try again.</string>
+    <string name="restore_here_size">Already on this phone · %1$s</string>
+    <string name="restore_folder_here">%1$d already on this phone</string>
+    <string name="restore_greyed_line">Greyed-out files are already on this phone.</string>
     <string name="restore_downloading">Working… %1$d%%</string>
     <string name="restore_done_row">Restored to full size</string>
     <string name="restore_downloaded_row">Back on this phone</string>

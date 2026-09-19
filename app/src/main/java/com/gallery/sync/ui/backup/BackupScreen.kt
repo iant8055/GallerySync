@@ -59,6 +59,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -471,15 +472,15 @@ private fun ModeFilterGrid(
                 HelpButton(HelpTopic.ALBUMS_LIST, Modifier.padding(end = 10.dp))
             }
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        // One line of four, each half the width it was as two rows of two. Ian, 18 Sept 2026: the
+        // header was taking too much of the screen.
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             ModeFilterChip(
                 AlbumMode.BACKUP, selected, onSelect, Modifier.weight(1f)
             )
             ModeFilterChip(
                 AlbumMode.SYNC, selected, onSelect, Modifier.weight(1f)
             )
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             ModeFilterChip(
                 AlbumMode.ARCHIVE, selected, onSelect, Modifier.weight(1f)
             )
@@ -561,9 +562,10 @@ private fun ModeFilterChip(
             style = MaterialTheme.typography.labelLarge,
             maxLines = 1,
             textAlign = TextAlign.Center,
+            // 4dp a side: four share the line, and "Archive" is the longest of the names.
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 10.dp)
+                .padding(horizontal = 4.dp, vertical = 10.dp)
         )
     }
 }
@@ -595,6 +597,7 @@ private fun AlbumModeRow(
             Text(
                 text = album.name,
                 style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -1018,23 +1021,11 @@ private fun HeroDetail(
     // mode, then the media breakdown, then whatever that mode is judged on.
     //
     // Each figure line starts with its label, same size, same line. Ian, 16 Sept 2026.
-    WithHelp(HelpTopic.ALBUMS_TOTALS) {
-        Text(
-            text = stringResource(R.string.albums_size_label) + " " + stringResource(
-                R.string.albums_size_summary,
-                pluralStringResource(
-                    R.plurals.albums_hero_albums,
-                    summary.albumCount,
-                    summary.albumCount
-                ),
-                formatBytes(context, summary.totalBytes)
-            ),
-            style = MaterialTheme.typography.titleSmall
-        )
-    }
+    // "Total Album Count/Size: 12 Albums · 3.4 GB" stood here and is gone (Ian, 18 Sept 2026: remove
+    // the album count line entirely). Its (?) went with it, so the mode tally below has none and its
+    // guide topic is guide-only; adding one here would push its last word onto a second row at the
+    // Moto G's width.
     if (modeFilter == null) {
-        // No (?) of its own: the one on the line above explains both. With one here this line lost
-        // its last word to a second row at the Moto G's width, where without it the line fits.
         Text(
             text = stringResource(R.string.albums_mode_totals_label) + " " + stringResource(
                 R.string.albums_mode_totals,

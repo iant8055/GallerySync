@@ -3,8 +3,8 @@ from model import Chapter, topic
 CHAPTER = Chapter(
     id="restore",
     title="The Restore tab",
-    intro="Restore undoes what Gallery Sync did to your phone. It only ever reads from OneDrive and "
-          "writes to your phone, so nothing in OneDrive is touched.",
+    intro="Restore brings photos and videos back from OneDrive to the album they came from. It only "
+          "ever reads from OneDrive and writes to your phone, so nothing in OneDrive is touched.",
     topics=[
         topic("restore-overview", "What Restore brings back", """
             Restore lists two kinds of file, side by side in the same folders:
@@ -16,8 +16,15 @@ CHAPTER = Chapter(
             archived again straight away. You can untick it in the album's file list. See
             [[album-file-pin]].
 
-            Both are things Gallery Sync did, which is why Restore is where you undo them. It is not a
-            browser for everything in your OneDrive. For that, open the OneDrive app itself.
+            ## What OneDrive holds, not only what this app sent
+            Restore lists the photos and videos in your OneDrive backup folders, whoever put them there.
+            It is not limited to what Gallery Sync uploaded, so an album you archived, a folder from
+            another phone or one added from a computer can all be brought back. Each file goes back into
+            the album with the same name as its OneDrive folder. It is still not a general file
+            browser: only photos and videos, and only in your backup folders.
+
+            A file the phone already has at full size is shown greyed out, so you can see why it is not
+            on offer. See [[restore-greyed-files]].
 
             ## Folders first
             The tab always opens on a list of folders (albums), even if there is only one. Swipe a folder
@@ -32,22 +39,33 @@ CHAPTER = Chapter(
         topic("restore-hero", "Folders to Restore and Files in this folder", """
             ## What it is
             The green card at the top. Its heading and big number depend on where you are:
-            • On the folder list: **Folders to Restore** and how many folders have something to bring back.
-            • Inside a folder: **Files in this folder** and how many files are listed.
+            • On the folder list: **Folders to** with **Restore** directly under it, in the left half, and in the right half how many folders have something to bring back.
+            • Inside a folder: the card is laid out like an album's file list on the Albums tab. The return arrow and the folder's name, large and bold, are in the left half, and the number of files is centred in the right half with **Files in this folder** under it.
 
             A dash instead of a number means the list is still loading.
 
             ## Where it comes from
-            The app's own record of what it has optimised or backed up, compared with a look at what is
-            on the phone right now. It does not need the internet just to show this list.
+            First the app's own record of what it has optimised or backed up, compared with a look at
+            what is on the phone right now. Then OneDrive itself, folder by folder: **Checking OneDrive
+            for more...** appears under the card while that happens, and anything else OneDrive holds
+            is added when it arrives. If a folder cannot be reached the card says so, in red, and the
+            list may be incomplete.
+
+            OneDrive is read once and remembered, including when the app is closed. Leaving the tab and
+            coming back, or closing the app and opening it again, shows the list straight away, compared
+            with what is on your phone now. If the remembered list is more than ten minutes old, OneDrive
+            is read again behind it; you can also press **Refresh** at any time. Signing out forgets it.
+
+            A folder appears when it has something to bring back. To list every OneDrive folder, even
+            those with nothing to bring back, turn on **Show empty folders** in Settings.
         """, ui=True),
 
         topic("restore-message-line", "The message under the number", """
             ## What it is
             One line of text whose wording changes with the situation:
             • **Swipe right to select / left to deselect. Tap to open.** On the folder list.
-            • **Tap a file to select it. Nothing moves until you press Restore.** Inside a folder.
-            • **Nothing has been optimised or archived from this phone, so there is nothing to bring back.** When the list is empty.
+            • **Tap a file to select it.** With **Then press Restore.** on the line under it. Inside a folder. Nothing moves until you press Restore.
+            • **Nothing in OneDrive is missing from this phone, so there is nothing to bring back.** When the list is empty.
             • **A result after a restore**, such as **3 back to full quality · 2 back on this phone. 1 unchanged.** or **None recovered. 4 unchanged.** Unchanged means those files were left exactly as they were.
 
             ## Where it comes from
@@ -79,29 +97,31 @@ CHAPTER = Chapter(
             Both are greyed out while a restore is running.
 
             ## Where it comes from
-            **Refresh** repeats the app's look at its own record and at the phone. Nothing goes to the
-            internet.
+            **Refresh** repeats both looks: the app's own record and the phone, then OneDrive, whatever
+            the age of the last reading. Reading OneDrive needs the internet.
         """, ui=True),
 
         topic("restore-folders-list", "The folder list", """
             ## What it is
-            A path line at the top reading **All folders**, then one card per folder. Each card shows:
+            One card per folder. Each card shows:
             • **The folder name.**
             • **12 files · 1.2 GB.** How many files in it can come back, and the extra room they would take.
             • **8 to restore · 4 to download.** How many are smaller copies that would be swapped for full size, and how many are missing from the phone and would be downloaded.
+            • **3 already on this phone**, when some of the folder's files are here at full size. They are greyed out inside the folder. See [[restore-greyed-files]].
             • **3 selected here**, when only some of the folder is selected.
             • **A tick**, when the whole folder is selected. Otherwise an arrow showing that it opens.
 
             ## How to use it
             • **Tap** a card to open it.
-            • **Swipe right** to select everything in the folder; **swipe left** to deselect it. Repeating a swipe changes nothing, so swiping across several folders cannot accidentally undo a choice you already made.
+            • **Swipe right** to select everything in the folder; **swipe left** to deselect it. Repeating a swipe changes nothing, so swiping across several folders cannot accidentally undo a choice you already made. The card slides aside as you pull and shows a tick (or a cross) behind it, ticks against your finger with a short buzz once you have pulled far enough to count, and springs back when you let go.
 
-            When you are inside a folder, the path line shows the folder's name, and an arrow (or tapping
-            the name) takes you back to **All folders**.
+            Inside a folder, the green card at the top names the folder, and its return arrow takes you
+            back to the list of folders.
 
             ## Where it comes from
-            The app's own record, compared with what is on the phone now.
-        """, ui=True),
+            OneDrive's own listing of the folder, compared with what is on the phone now, together with
+            the app's own record of what it has optimised.
+        """),
 
         topic("restore-files-list", "The file list inside a folder", """
             ## What it is
@@ -110,6 +130,7 @@ CHAPTER = Chapter(
             **The name**, then one of:
             • **1.2 MB now · 8.4 MB full size.** A smaller copy on the phone, and the size of the original in OneDrive. Restoring swaps one for the other.
             • **Available for download · 8.4 MB.** The file is not on the phone at all. Restoring brings it back at this size.
+            • **Already on this phone · 8.4 MB.** Greyed out. The phone already has this file at full size, so there is nothing to do. See [[restore-greyed-files]].
 
             **While it works:** **Working... 45%** and a bar.
 
@@ -119,7 +140,28 @@ CHAPTER = Chapter(
             • **Could not restore, your file is unchanged**, with the reason in brackets, in red. Nothing was lost.
 
             ## Where it comes from
-            Sizes come from the app's record of each file. The percentage comes from the download itself.
+            Names and sizes come from OneDrive's listing of the folder. The percentage comes from the
+            download itself.
+        """),
+
+        topic("restore-greyed-files", "Why are some files greyed out?", """
+            ## What it is
+            Inside a folder, some files are faded and cannot be selected. They read **Already on this
+            phone**, with their size. Above the list a line says **Greyed-out files are already on this
+            phone.**
+
+            ## Why they are shown at all
+            OneDrive holds every file in the folder. Files the phone already has, at full size, need no
+            restoring, but leaving them out would make the folder look shorter than it is in OneDrive
+            and leave you wondering where they went. So they are listed, and greyed out.
+
+            ## Where it comes from
+            OneDrive's listing, compared with the photos and videos on the phone, by folder, name and
+            size. A file counts as here only when all three match.
+
+            ## Good to know
+            A file of the same name but a different size is not offered and not greyed: it might be a
+            photo you edited, and Restore never writes over an edit.
         """, ui=True),
 
         topic("restore-action-bar", "Restore and Stop restoring", """
