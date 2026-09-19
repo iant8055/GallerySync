@@ -68,8 +68,25 @@ class SyncDeletionsToCloud @Inject constructor(
 
         val cutoff = System.currentTimeMillis() - prefs.cloudDeletionGraceDays * MILLIS_PER_DAY
 
-        entryDao.cloudDeletionCandidates(missingBefore = cutoff)
-            .also { Logger.d(TAG, "${it.size} cloud copies could be offered for deletion") }
+        val missing = entryDao.cloudDeletionCandidates(missingBefore = cutoff)
+        if (missing.isEmpty()) return@withContext missing
+
+        // A file whose name is still in its folder was edited, not deleted (see [EditedInPlace]),
+        // and only the phone can say what is still there. A scan that cannot be trusted is no
+        // answer, so it offers nothing rather than everything, as [delete] does.
+        if (scanner.access() != MediaAccess.FULL) return@withContext emptyList()
+        val everything = scanner.scanEverything()
+        if (everything.isEmpty()) return@withContext emptyList()
+        val here = EditedInPlace.keysOf(everything.map { it.album to it.displayName })
+
+        missing.filterNot { EditedInPlace.isStillHere(it.album, it.displayName, here) }
+            .also {
+                Logger.d(
+                    TAG,
+                    "${it.size} cloud copies could be offered for deletion " +
+                        "(${missing.size - it.size} left out: still on the phone under the same name)"
+                )
+            }
     }
 
     /**
@@ -105,6 +122,9 @@ class SyncDeletionsToCloud @Inject constructor(
             val presentContent = everything.mapTo(HashSet()) {
                 RestoredAlbum.contentSignature(it.displayName, it.sizeBytes)
             }
+            // And by folder and name alone, for a photo edited in place since the list was drawn:
+            // its size changed, so the check above cannot see it, but it is not a deletion.
+            val presentNames = EditedInPlace.keysOf(everything.map { it.album to it.displayName })
 
             var deleted = 0
             var failed = 0
@@ -112,7 +132,9 @@ class SyncDeletionsToCloud @Inject constructor(
 
             for (entry in approved) {
                 val signature = RestoredAlbum.contentSignature(entry.displayName, entry.sizeBytes)
-                if (signature in presentContent) {
+                if (signature in presentContent ||
+                    EditedInPlace.isStillHere(entry.album, entry.displayName, presentNames)
+                ) {
                     Logger.i(TAG, "not deleting ${entry.displayName}: it is back on the phone")
                     cameBack++
                     continue

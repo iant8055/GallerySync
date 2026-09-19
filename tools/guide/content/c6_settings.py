@@ -228,9 +228,16 @@ CHAPTER = Chapter(
 
             ## Where it comes from
             The app compares its own record of files it sent with what is on the phone now. A file only
-            appears once it has been missing for the waiting period.
+            appears once it has been missing for the waiting period, and only if nothing of that name is
+            left in its folder on the phone.
 
             ## Good to know
+            **A photo you edited and saved over is not listed.** Saving an edit changes the file, so the
+            app no longer recognises the original, but a file with the same name is still in the same
+            folder, so it is not treated as deleted. The unedited original stays in OneDrive as a
+            backup, and you can remove it there yourself if you want it gone. Only a file that has
+            really disappeared is offered.
+
             Files that came back are reported, not hidden. It shows the app checks rather than assumes.
             The button opens a confirmation: [[dialog-deletion-confirm]].
         """, ui=True),

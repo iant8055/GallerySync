@@ -130,3 +130,56 @@ enum class ArchiveDelay(val hours: Long) {
     TWELVE_HOURS(12),
     ONE_DAY(24)
 }
+
+/**
+ * What is in the Archive albums right now: the files that may be archived, and the ones the user
+ * has opted out.
+ *
+ * Only [ArchiveFiles.toArchive] is ever offered for removal. The opted-out half exists so the
+ * Archive tab can show those files greyed out and let the user put one back, which is the whole
+ * of what it is used for. See [FilePin].
+ */
+data class ArchiveFiles(
+    val toArchive: List<LocalMediaItem> = emptyList(),
+    val optedOut: List<LocalMediaItem> = emptyList()
+)
+
+/** A plan matched to the phone, and whether the check that was on screen no longer describes it. */
+data class ReconciledPlan(val plan: ArchivePlan, val needsRecheck: Boolean)
+
+/**
+ * This plan matched to what the phone holds now, for when the user swipes a file out of Archive or
+ * back in, or opens the tab after a file has arrived. Ian, 19 Sept 2026.
+ *
+ * - A file that is no longer archivable (opted out, or gone from the phone) leaves the plan.
+ * - A file that is now archivable and was not in the plan (put back, or newly arrived) joins it
+ *   **unchecked**.
+ *
+ * **The plan only ever loses files or gains unchecked ones here, so nothing that was not confirmed
+ * can become confirmed by this.** That is the property the removal step relies on, since it acts on
+ * [ArchivePlan.confirmed] alone.
+ *
+ * When [checkFinished] and either a file joined or nothing confirmed is left, the check on screen
+ * no longer describes the list: every mark is reset and [ReconciledPlan.needsRecheck] is true, so the
+ * caller returns to waiting for a check rather than saying "all files validated" about a file nobody
+ * validated, or offering to archive nothing.
+ */
+fun ArchivePlan.reconciledWith(files: ArchiveFiles, checkFinished: Boolean): ReconciledPlan {
+    val archivable = files.toArchive.mapTo(HashSet()) { it.mediaStoreId }
+
+    val kept = entries.filter { it.item.mediaStoreId in archivable }
+    val known = kept.mapTo(HashSet()) { it.item.mediaStoreId }
+    val joined = files.toArchive.filter { it.mediaStoreId !in known }.map { ArchiveEntry(it) }
+
+    var merged = (kept + joined).sortedWith(compareBy({ it.album }, { it.name }))
+    var needsRecheck = false
+    var stillValidated = validated
+
+    if (checkFinished && (joined.isNotEmpty() || merged.none { it.mark == ArchiveMark.CONFIRMED })) {
+        merged = merged.map { it.copy(mark = ArchiveMark.WAITING, failure = null) }
+        needsRecheck = true
+    }
+    if (needsRecheck || joined.isNotEmpty()) stillValidated = false
+
+    return ReconciledPlan(copy(entries = merged, validated = stillValidated), needsRecheck)
+}

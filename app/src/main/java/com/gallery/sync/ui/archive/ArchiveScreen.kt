@@ -37,6 +37,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -45,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
+import com.gallery.sync.data.local.media.LocalMediaItem
 import com.gallery.sync.domain.backup.ArchiveDelay
 import com.gallery.sync.domain.backup.ArchiveEntry
 import com.gallery.sync.domain.backup.ArchiveFailure
@@ -55,6 +57,7 @@ import com.gallery.sync.ui.help.TitleWithHelp
 import com.gallery.sync.ui.help.WithHelp
 import com.gallery.sync.ui.common.HeroOutlinedButton
 import com.gallery.sync.ui.common.SignalIcons
+import com.gallery.sync.ui.common.SwipeChoiceBox
 import com.gallery.sync.ui.common.formatBytes
 import com.gallery.sync.ui.theme.LocalGallerySyncColors
 import kotlinx.coroutines.launch
@@ -108,8 +111,12 @@ fun ArchiveScreen(
     // Only from IDLE. A reload during VALIDATING or REMOVING would cut across a run, from READY it
     // would throw away the validation the user is being asked about, and from DONE it would wipe
     // the report of what was just removed.
+    //
+    // Past IDLE it still refreshes the file lists (Ian, 19 Sept 2026: a file put in an Archive album
+    // should appear each time the tab is opened), merging new files in and leaving the phase and the
+    // report of what was just removed alone. See `ArchiveViewModel.refreshFiles`.
     LaunchedEffect(Unit) {
-        if (state.phase == ArchivePhase.IDLE) viewModel.load()
+        if (state.phase == ArchivePhase.IDLE) viewModel.load() else viewModel.refreshFiles()
     }
 
     // Each finished dialog may be followed by another, because Android caps a trash request at 2000
@@ -160,7 +167,18 @@ fun ArchiveScreen(
             )
         }
 
-        if (state.plan.entries.isNotEmpty()) {
+        // Every file in an Archive album: the ones that will be archived, and the ones the user has
+        // swiped out, greyed, in one list in name order (Ian, 19 Sept 2026). A file that arrives in an
+        // Archive album later shows up here too, so there is always a chance to opt it out first.
+        val rows = remember(state.plan.entries, state.optedOut) {
+            (state.plan.entries.map { ArchiveListRow(it.item, it) } + state.optedOut.map { ArchiveListRow(it, null) })
+                .sortedWith(compareBy({ it.item.album }, { it.item.displayName }))
+        }
+        // Not while a check or a removal is running: they act on the list as it was when they began.
+        val canSwipe = state.isSupported &&
+            state.phase != ArchivePhase.VALIDATING && state.phase != ArchivePhase.REMOVING
+
+        if (rows.isNotEmpty()) {
             HorizontalDivider()
             // weight(1f) rather than fillMaxWidth alone: the list takes whatever height is left once
             // the header and the question have theirs, so a long album scrolls inside its own space
@@ -174,8 +192,7 @@ fun ArchiveScreen(
                     .weight(1f)
             ) {
                 val columns = if (maxWidth >= WideBreakpoint) 2 else 1
-                val entries = state.plan.entries
-                val half = (entries.size + columns - 1) / columns
+                val half = (rows.size + columns - 1) / columns
 
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth(),
@@ -190,12 +207,22 @@ fun ArchiveScreen(
                             )
                         }
                     }
+                    item(key = "archive-swipe-hint") {
+                        Text(
+                            text = stringResource(R.string.archive_swipe_hint),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
                     items(half) { index ->
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             for (column in 0 until columns) {
                                 Box(modifier = Modifier.weight(1f)) {
-                                    entries.getOrNull(index + column * half)?.let { entry ->
-                                        ArchiveRow(entry)
+                                    rows.getOrNull(index + column * half)?.let { row ->
+                                        ArchiveListItem(
+                                            row = row,
+                                            canSwipe = canSwipe,
+                                            onSetOptedOut = viewModel::setOptedOut
+                                        )
                                     }
                                 }
                             }
@@ -204,6 +231,34 @@ fun ArchiveScreen(
                 }
             }
         }
+    }
+}
+
+/** One line of the list: a file, and its entry if it is going to be archived. A null entry means opted out. */
+private data class ArchiveListRow(val item: LocalMediaItem, val entry: ArchiveEntry?)
+
+/**
+ * A file's card, swipeable. Left keeps a file on this phone, right puts it back in Archive; each does
+ * nothing on a file already that way, so a run of swipes cannot undo itself.
+ */
+@Composable
+private fun ArchiveListItem(
+    row: ArchiveListRow,
+    canSwipe: Boolean,
+    onSetOptedOut: (LocalMediaItem, Boolean) -> Unit
+) {
+    val optedOut = row.entry == null
+    SwipeChoiceBox(
+        enabled = canSwipe,
+        stateKey = optedOut,
+        onSwipeRight = { if (optedOut) onSetOptedOut(row.item, false) },
+        onSwipeLeft = { if (!optedOut) onSetOptedOut(row.item, true) },
+        accessibilityLabel = stringResource(
+            if (optedOut) R.string.archive_action_archive else R.string.archive_action_keep
+        ),
+        onAccessibilityAction = { onSetOptedOut(row.item, !optedOut) }
+    ) { drawn ->
+        if (row.entry != null) ArchiveRow(row.entry, drawn) else OptedOutRow(row.item, drawn)
     }
 }
 
@@ -396,14 +451,14 @@ private fun ArchiveHeroActions(state: ArchiveUiState, onValidate: () -> Unit) {
  * Ian, 26 Aug 2026.
  */
 @Composable
-private fun ArchiveRow(entry: ArchiveEntry) {
+private fun ArchiveRow(entry: ArchiveEntry, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val signal = LocalGallerySyncColors.current
 
     // A rounded card in the Restore file card's style, which is the Albums card's (Ian, 19 Sept 2026):
     // the same shape, outline and padding, the name in bodyLarge and the line under it in bodySmall.
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
         color = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface,
@@ -473,6 +528,40 @@ private fun ArchiveRow(entry: ArchiveEntry) {
 
                 ArchiveMark.WAITING -> Unit
             }
+        }
+    }
+}
+
+/**
+ * A file the user has swiped out of Archive: the same card, faded the way Restore fades a file that
+ * cannot be chosen, and saying why it is there. No tick, no cross and no spinner: it is not being
+ * checked or removed, and swiping it back is how it rejoins the list.
+ */
+@Composable
+private fun OptedOutRow(item: LocalMediaItem, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+
+    Surface(
+        // Faded as a whole so it reads as set aside in both themes without a colour of its own.
+        modifier = modifier
+            .fillMaxWidth()
+            .alpha(0.5f),
+        shape = RoundedCornerShape(22.dp),
+        color = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp)) {
+            Text(
+                text = item.displayName,
+                style = MaterialTheme.typography.bodyLarge,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = stringResource(R.string.archive_opted_out_detail, formatBytes(context, item.sizeBytes)),
+                style = MaterialTheme.typography.bodySmall
+            )
         }
     }
 }

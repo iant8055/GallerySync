@@ -986,8 +986,8 @@ class BackupEngine @Inject constructor(
         albumDao.albumsInMode(AlbumMode.ARCHIVE).sorted()
     }
 
-    suspend fun filesInArchiveAlbums(): List<LocalMediaItem> = withContext(dispatcher) {
-        if (scanner.access() == MediaAccess.NONE) return@withContext emptyList()
+    suspend fun archiveFiles(): ArchiveFiles = withContext(dispatcher) {
+        if (scanner.access() == MediaAccess.NONE) return@withContext ArchiveFiles()
 
         // Archive removes files. Its album membership must be settled before it is read, or a file
         // named for one spelling is caught by the mode of the other. TASK-023.
@@ -995,14 +995,15 @@ class BackupEngine @Inject constructor(
 
         val archived = albumDao.albumsInMode(AlbumMode.ARCHIVE).toSet()
         if (archived.isEmpty()) {
-            Logger.d(TAG, "filesInArchiveAlbums: no album is set to Archive")
-            return@withContext emptyList()
+            Logger.d(TAG, "archiveFiles: no album is set to Archive")
+            return@withContext ArchiveFiles()
         }
 
         // Files the user has kept at full size are not Archive's to offer. See FilePin: Restore
-        // pins what it brings back, so a restored album is not immediately taken off the phone again.
+        // pins what it brings back, so a restored album is not immediately taken off the phone again,
+        // and the Archive tab pins a file the user swipes out of Archive.
         val pinned = entryDao.pinnedKeys()
-        val notPinned = FilePin.withoutPinned(
+        val (notPinned, optedOut) = FilePin.split(
             items = scanner.scanAll().filter { it.album in archived },
             pinnedIds = pinned.mapTo(HashSet()) { it.id },
             pinnedMediaStoreIds = pinned.mapTo(HashSet()) { it.mediaStoreId },
@@ -1010,16 +1011,54 @@ class BackupEngine @Inject constructor(
             mediaStoreIdOf = { it.mediaStoreId }
         )
 
-        notPinned
-            .sortedWith(compareBy({ it.album }, { it.displayName }))
-            .also {
-                Logger.d(
-                    TAG,
-                    "filesInArchiveAlbums: ${it.size} files in ${archived.size} albums" +
-                        if (pinned.isNotEmpty()) " (kept-at-full-size files left out)" else ""
-                )
-            }
+        val order = compareBy<LocalMediaItem>({ it.album }, { it.displayName })
+        ArchiveFiles(toArchive = notPinned.sortedWith(order), optedOut = optedOut.sortedWith(order)).also {
+            Logger.d(
+                TAG,
+                "archiveFiles: ${it.toArchive.size} to archive, ${it.optedOut.size} opted out, " +
+                    "in ${archived.size} albums"
+            )
+        }
     }
+
+    /** The files that may be archived. Unchanged in meaning: opted-out files are never in it. */
+    suspend fun filesInArchiveAlbums(): List<LocalMediaItem> = archiveFiles().toArchive
+
+    /**
+     * Opts one file out of Archive, or puts it back in. Ian, 19 Sept 2026.
+     *
+     * The choice is the file's pin (see [FilePin]), stored on its ledger row, so it survives the app
+     * being closed and is there to be reversed the next time the Archive tab is opened. Bookkeeping
+     * only: nothing is removed, sent or changed on the phone or the drive, and the direction it
+     * writes can only make the app do less.
+     *
+     * A file put in an Archive album a moment ago may have no ledger row yet, so the ledger is
+     * refreshed first in that case. Returns false when there is still no row to write to, in which
+     * case nothing was saved and the caller must not show the file as opted out.
+     *
+     * Putting a file back also clears any other row pinned under the same MediaStore id: a restore
+     * rewrites a file's modification time, so its row and its key can have drifted apart, and the
+     * pin is matched either way when the list is read.
+     */
+    suspend fun setArchiveOptOut(item: LocalMediaItem, optedOut: Boolean): Boolean =
+        withContext(dispatcher) {
+            val key = backupKeyOf(item.album, item.displayName, item.sizeBytes, item.dateModifiedEpochSeconds)
+
+            if (optedOut) {
+                if (entryDao.find(key) == null) refreshLedger()
+                if (entryDao.find(key) == null) {
+                    Logger.w(TAG, "setArchiveOptOut: no ledger row for ${item.displayName}, nothing saved")
+                    return@withContext false
+                }
+                entryDao.setModeOverride(key, FilePin.overrideFor(true))
+            } else {
+                val pinned = entryDao.pinnedKeys()
+                val ids = pinned.filter { it.id == key || it.mediaStoreId == item.mediaStoreId }.map { it.id }
+                (ids + key).distinct().forEach { entryDao.setModeOverride(it, FilePin.overrideFor(false)) }
+            }
+            Logger.i(TAG, "setArchiveOptOut: ${item.displayName} ${if (optedOut) "kept on the phone" else "back in Archive"}")
+            true
+        }
 
     /**
      * Local files whose cloud copy is confirmed, so the phone's copy is redundant.

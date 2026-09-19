@@ -484,7 +484,7 @@
   <p class="chapter-intro">Archive is the one place where files leave your phone. It only ever handles albums you set to Archive, it checks every file against OneDrive first, and it ends with your tap.</p>
   <details class="topic"><summary>How Archive works, step by step</summary>
   <div class="topic-body" id="archive-overview">
-<ol><li><strong>You choose it, once, per album.</strong> On the Albums tab, set an album's mode to <strong>Archive</strong> and confirm. This is your consent. See <a class="xref" href="#dialog-archive-confirm">“Archive this album?”</a>.</li><li><strong>You come here and press Check these files.</strong> Every file in your Archive albums is checked against OneDrive. Anything not there yet is sent first and then checked.</li><li><strong>The app tells you the result.</strong> Each file gets a tick or a red cross, and a prompt says how many are confirmed and how much room will be freed.</li><li><strong>You say Yes.</strong> The app asks Android to move the confirmed files to your phone's Trash or Recycle Bin. Android shows its own confirmation. See <a class="xref" href="#dialog-android-trash">“Android's own confirmation”</a>.</li><li><strong>You empty the bin when you are ready.</strong> Removed files keep taking their full space until you do, and the app never empties it for you.</li></ol>
+<ol><li><strong>You choose it, once, per album.</strong> On the Albums tab, set an album's mode to <strong>Archive</strong> and confirm. This is your consent. See <a class="xref" href="#dialog-archive-confirm">“Archive this album?”</a>.</li><li><strong>You come here and press Check these files.</strong> Every file in your Archive albums, except any you have chosen to keep on your phone, is checked against OneDrive. Anything not there yet is sent first and then checked.</li><li><strong>The app tells you the result.</strong> Each file gets a tick or a red cross, and a prompt says how many are confirmed and how much room will be freed.</li><li><strong>You say Yes.</strong> The app asks Android to move the confirmed files to your phone's Trash or Recycle Bin. Android shows its own confirmation. See <a class="xref" href="#dialog-android-trash">“Android's own confirmation”</a>.</li><li><strong>You empty the bin when you are ready.</strong> Removed files keep taking their full space until you do, and the app never empties it for you.</li></ol>
 <h4>What "safely" means</h4>
 <p>A file is only removed if OneDrive confirms it holds the file <strong>and</strong> reports the same size as your copy. A file OneDrive does not confirm stays on your phone, and the screen says why.</p>
 <h4>What Archive cannot do by itself</h4>
@@ -500,7 +500,7 @@
 <h4>What it is</h4>
 <p>The green card, laid out like the one on the Restore tab. On the left, <strong>Files to</strong> with <strong>Archive</strong> directly under it; in the right half, a number. Under them, the names of your Archive albums, then this sentence: <strong>Every file below is checked against OneDrive first. Anything that is not there yet is backed up before it is verified.</strong> At the foot of the card, a reminder: <strong>To restore archived files or albums, check the Restore tab.</strong></p>
 <h4>Where it comes from</h4>
-<p>The number is a live count of files on the phone in albums set to Archive. When you arrive it is worked out from the phone; it does not need the internet. The album names are the albums you set to Archive.</p>
+<p>The number is a live count of the files on the phone, in albums set to Archive, that will be archived. Files you have swiped out of Archive are not counted. When you arrive it is worked out from the phone; it does not need the internet. The album names are the albums you set to Archive.</p>
   </div></details>
   <details class="topic"><summary>Check these files, and what it reports</summary>
   <div class="topic-body" id="archive-check-button">
@@ -523,13 +523,17 @@
   <details class="topic"><summary>The file list and its marks</summary>
   <div class="topic-body" id="archive-file-list">
 <h4>What it is</h4>
-<p>One rounded card for each file waiting to be archived, in the same style as the file cards on the Restore tab: its name, then its size under it, then a mark on the right.</p>
+<p>One rounded card for each file in your Archive albums, in the same style as the file cards on the Restore tab: its name, then its size under it, then a mark on the right. A file you put into an Archive album later appears here too, before anything is archived.</p>
+<p><strong>Keeping a file on your phone.</strong> Swipe a card <strong>left</strong> and it fades and reads <strong>Not archiving</strong>. It is left out of every check and every removal, and Gallery Sync remembers your choice, even after you close the app. Swipe it <strong>right</strong> and it returns to the list, ready to be archived; you will need to check the files again before anything is removed. Swiping a card that is already that way does nothing, so a run of swipes cannot undo itself. You cannot swipe while a check or a removal is running. If you use a screen reader, each card offers <strong>Keep on this phone</strong> or <strong>Archive this file</strong> instead.</p>
+<p>An album with a file you have kept stays set to Archive, so files added to it later are still covered by the mode you set. If you would rather it stopped, change the album's mode on the Albums tab.</p>
 <p><strong>The mark</strong></p>
 <ul><li><strong>A spinner.</strong> Being checked, backed up or removed.</li><li><strong>A green tick.</strong> Confirmed in OneDrive at the right size, or already removed.</li><li><strong>A red cross.</strong> OneDrive did not confirm it, so it stays on your phone.</li><li><strong>Nothing.</strong> Not looked at yet.</li></ul>
 <p><strong>The words under the name</strong>, in place of the size while something is happening:</p>
 <ul><li><strong>Backing up...</strong> The file was not in OneDrive, so it is being sent.</li><li><strong>Moving to Trash/Recycle Bin...</strong> Being removed.</li><li><strong>Removed from this phone.</strong></li><li>In red, why a file is staying: <strong>Could not check OneDrive</strong>, <strong>Not in OneDrive</strong>, or <strong>In OneDrive but the wrong size</strong>. Each ends "staying on your phone". "Could not check" and "is not there" are kept separate because they need different reactions. Being unable to ask is not the same as an answer.</li></ul>
 <h4>Where it comes from</h4>
 <p>OneDrive's list of files for each album, compared with the phone. It asks once per album, not once per file.</p>
+<h4>Good to know</h4>
+<p>The number in the green card counts only the files that will be archived, not the ones you have kept. A kept file is the same setting as <strong>Keep at full size</strong> on the Albums tab, so it is counted there as well.</p>
   </div></details>
   <details class="topic"><summary>The question: All files validated, or some validated</summary>
   <div class="topic-body" id="archive-prompt">
@@ -698,8 +702,9 @@
 <p>Appears under <strong>Ask</strong>. It lists what could be removed from OneDrive:</p>
 <ul><li><strong>Nothing to review. Files you delete will appear here once they have been gone for a while.</strong> when the list is empty.</li><li><strong>12 files no longer on this phone, still in OneDrive, taking 340 MB.</strong> followed by up to eight names, each shown as <strong>name · album</strong>, and a button <strong>Remove these from OneDrive</strong>. The list is capped because this is a review, not a file manager.</li><li>After a run, results: <strong>N files removed from OneDrive.</strong>, <strong>N files were back on your phone, so their OneDrive copies were kept.</strong> and <strong>N files could not be removed. Nothing was lost; try again later.</strong></li></ul>
 <h4>Where it comes from</h4>
-<p>The app compares its own record of files it sent with what is on the phone now. A file only appears once it has been missing for the waiting period.</p>
+<p>The app compares its own record of files it sent with what is on the phone now. A file only appears once it has been missing for the waiting period, and only if nothing of that name is left in its folder on the phone.</p>
 <h4>Good to know</h4>
+<p><strong>A photo you edited and saved over is not listed.</strong> Saving an edit changes the file, so the app no longer recognises the original, but a file with the same name is still in the same folder, so it is not treated as deleted. The unedited original stays in OneDrive as a backup, and you can remove it there yourself if you want it gone. Only a file that has really disappeared is offered.</p>
 <p>Files that came back are reported, not hidden. It shows the app checks rather than assumes. The button opens a confirmation: <a class="xref" href="#dialog-deletion-confirm">“Remove files from OneDrive? (the confirmation)”</a>.</p>
   </div></details>
   <details class="topic"><summary>Remove files from OneDrive? (the confirmation)</summary>

@@ -119,6 +119,11 @@
     <string name="wizard_detail_link">For a more detailed explanation %1$s</string>
     <string name="wizard_detail_link_action">Click Here</string>
     <string name="setup_guide_title">First-Time Setup</string>
+    <!-- Swipe a file out of Archive, or back in. Ian, 19 Sept 2026. -->
+    <string name="archive_swipe_hint">Swipe left on a file to keep it on this phone. Swipe right to archive it again.</string>
+    <string name="archive_opted_out_detail">%1$s · Not archiving</string>
+    <string name="archive_action_keep">Keep on this phone</string>
+    <string name="archive_action_archive">Archive this file</string>
     <string name="archive_list_heading">Files</string>
 
     <string name="settings_optimise_master">Optimise photos and video</string>

@@ -7,13 +7,16 @@ import androidx.lifecycle.viewModelScope
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import com.gallery.sync.data.local.media.LocalCopyRemover
+import com.gallery.sync.data.local.media.LocalMediaItem
 import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.domain.backup.ArchiveDelay
 import com.gallery.sync.domain.backup.ArchiveEntry
 import com.gallery.sync.domain.backup.ArchiveFailure
+import com.gallery.sync.domain.backup.ArchiveFiles
 import com.gallery.sync.domain.backup.ArchiveMark
 import com.gallery.sync.domain.backup.ArchivePlan
 import com.gallery.sync.domain.backup.BackupEngine
+import com.gallery.sync.domain.backup.reconciledWith
 import com.gallery.sync.util.Logger
 import com.gallery.sync.worker.BackupScheduling
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -49,7 +52,14 @@ data class ArchiveUiState(
     val removedCount: Int = 0,
     val removedBytes: Long = 0L,
     /** Albums set to Archive, even ones with nothing left in them. */
-    val archiveAlbums: List<String> = emptyList()
+    val archiveAlbums: List<String> = emptyList(),
+    /**
+     * Files in Archive albums that the user has opted out of archiving. Ian, 19 Sept 2026.
+     *
+     * Deliberately **not** part of [plan]. Everything that checks or removes acts on the plan, so a
+     * file that is not in it cannot be archived, whatever else happens on this screen.
+     */
+    val optedOut: List<LocalMediaItem> = emptyList()
 ) {
     val showPrompt: Boolean get() = phase == ArchivePhase.READY && delayedUntil == null
 }
@@ -94,10 +104,11 @@ class ArchiveViewModel @Inject constructor(
     /** Lists what is in Archive albums. Cheap, and safe to call whenever the screen appears. */
     fun load() {
         viewModelScope.launch {
-            val files = engine.filesInArchiveAlbums()
+            val files = engine.archiveFiles()
             val albums = engine.archiveAlbumNames()
             _state.value = _state.value.copy(
-                plan = ArchivePlan(entries = files.map { ArchiveEntry(it) }),
+                plan = ArchivePlan(entries = files.toArchive.map { ArchiveEntry(it) }),
+                optedOut = files.optedOut,
                 archiveAlbums = albums,
                 phase = ArchivePhase.IDLE,
                 batchTotal = 0,
@@ -228,12 +239,84 @@ class ArchiveViewModel @Inject constructor(
     }
 
     /**
+     * Swipe a file out of Archive, or back in. Ian, 19 Sept 2026.
+     *
+     * The choice is saved first (see `BackupEngine.setArchiveOptOut`) and the screen follows what
+     * was saved, so a file is never shown as kept when nothing was written. Not allowed while a
+     * check or a removal is running: those act on the list as it was when they began.
+     *
+     * The plan is edited to match. A file swiped out leaves it. A file swiped back in joins it
+     * unchecked, and if a check had already finished the screen goes back to waiting for one, because
+     * "all files validated" would otherwise be said about a file nobody validated.
+     */
+    fun setOptedOut(item: LocalMediaItem, optedOut: Boolean) {
+        val phase = _state.value.phase
+        if (phase == ArchivePhase.VALIDATING || phase == ArchivePhase.REMOVING) return
+
+        viewModelScope.launch {
+            if (!engine.setArchiveOptOut(item, optedOut)) return@launch
+
+            _state.value = reconciled(_state.value, engine.archiveFiles())
+        }
+    }
+
+    /**
+     * Brings the file lists up to date with the phone without disturbing what the screen is showing
+     * about a run. Called whenever the tab is opened while a check has finished or a run has just
+     * reported (Ian, 19 Sept 2026: a file put in an Archive album should appear each time the tab
+     * is opened). From an idle screen [load] does the same job and starts fresh.
+     *
+     * Not while a check or a removal is running: they act on the list as it was when they began.
+     */
+    fun refreshFiles() {
+        val phase = _state.value.phase
+        if (phase == ArchivePhase.IDLE || phase == ArchivePhase.VALIDATING || phase == ArchivePhase.REMOVING) return
+
+        viewModelScope.launch {
+            val albums = engine.archiveAlbumNames()
+            // Re-read the phase after the suspension: a run may have begun while the phone was asked.
+            val now = _state.value.phase
+            if (now == ArchivePhase.VALIDATING || now == ArchivePhase.REMOVING) return@launch
+            _state.value = reconciled(_state.value, engine.archiveFiles()).copy(archiveAlbums = albums)
+        }
+    }
+
+    /**
+     * [current] with its plan and its opted-out list matched to what the phone holds now. The rule for
+     * the plan is [reconciledWith]; this only applies it to the screen's state.
+     */
+    private fun reconciled(current: ArchiveUiState, files: ArchiveFiles): ArchiveUiState {
+        val result = current.plan.reconciledWith(files, checkFinished = current.phase == ArchivePhase.READY)
+        val phase = if (result.needsRecheck) ArchivePhase.IDLE else current.phase
+        return current.copy(
+            plan = result.plan,
+            optedOut = files.optedOut,
+            phase = phase,
+            batchTotal = if (phase == ArchivePhase.READY) localCopyRemover.batch(result.plan.confirmed).size else 0
+        )
+    }
+
+    /**
      * Builds the next system trash request, marking its files as being removed.
      *
      * Returns null when there is nothing left to ask about, which is how the caller knows the
      * operation is over rather than merely between dialogs.
      */
     suspend fun nextRemovalRequest(): IntentSender? {
+        // The last look before anything leaves the phone: a file the user has opted out is dropped
+        // from the plan here whatever the plan says. The screen already keeps opted-out files out of
+        // the plan, so this is for the case nobody expects, a swipe saved in the moment between the
+        // check finishing and Yes being tapped. Once per operation; the batches that follow share it.
+        if (_state.value.batchIndex == 0) {
+            val optedOutNow = engine.archiveFiles().optedOut.mapTo(HashSet()) { it.mediaStoreId }
+            val current = _state.value.plan
+            if (current.entries.any { it.item.mediaStoreId in optedOutNow }) {
+                Logger.w(TAG, "removal: dropping files opted out since the check")
+                _state.value = _state.value.copy(
+                    plan = current.copy(entries = current.entries.filterNot { it.item.mediaStoreId in optedOutNow })
+                )
+            }
+        }
         val plan = _state.value.plan
         val batches = localCopyRemover.batch(plan.confirmed)
         val index = _state.value.batchIndex
@@ -312,13 +395,15 @@ class ArchiveViewModel @Inject constructor(
             // Ian, 18 Sept 2026. Only after files were really removed, never on a plain rescan.
             if (removed.isNotEmpty()) engine.forgetEmptiedArchiveAlbums()
 
-            val remaining = engine.filesInArchiveAlbums()
+            val remainingFiles = engine.archiveFiles()
+            val remaining = remainingFiles.toArchive
             // Re-read the album names too: forgetting an emptied album changes them, and a stale list
             // left the header saying nothing about there being no Archive album until the app was
             // restarted. Found on the Moto G, 19 Sept 2026.
             val albums = engine.archiveAlbumNames()
             _state.value = _state.value.copy(
                 plan = ArchivePlan(entries = remaining.map { ArchiveEntry(it) }),
+                optedOut = remainingFiles.optedOut,
                 archiveAlbums = albums,
                 batchIndex = 0,
                 batchTotal = 0,

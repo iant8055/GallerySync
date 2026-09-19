@@ -8,7 +8,7 @@ CHAPTER = Chapter(
     topics=[
         topic("archive-overview", "How Archive works, step by step", """
             1. **You choose it, once, per album.** On the Albums tab, set an album's mode to **Archive** and confirm. This is your consent. See [[dialog-archive-confirm]].
-            2. **You come here and press Check these files.** Every file in your Archive albums is checked against OneDrive. Anything not there yet is sent first and then checked.
+            2. **You come here and press Check these files.** Every file in your Archive albums, except any you have chosen to keep on your phone, is checked against OneDrive. Anything not there yet is sent first and then checked.
             3. **The app tells you the result.** Each file gets a tick or a red cross, and a prompt says how many are confirmed and how much room will be freed.
             4. **You say Yes.** The app asks Android to move the confirmed files to your phone's Trash or Recycle Bin. Android shows its own confirmation. See [[dialog-android-trash]].
             5. **You empty the bin when you are ready.** Removed files keep taking their full space until you do, and the app never empties it for you.
@@ -47,8 +47,9 @@ CHAPTER = Chapter(
             reminder: **To restore archived files or albums, check the Restore tab.**
 
             ## Where it comes from
-            The number is a live count of files on the phone in albums set to Archive. When you arrive
-            it is worked out from the phone; it does not need the internet. The album names are the
+            The number is a live count of the files on the phone, in albums set to Archive, that will be
+            archived. Files you have swiped out of Archive are not counted. When you arrive it is worked
+            out from the phone; it does not need the internet. The album names are the
             albums you set to Archive.
         """, ui=True),
 
@@ -83,7 +84,11 @@ CHAPTER = Chapter(
 
         topic("archive-file-list", "The file list and its marks", """
             ## What it is
-            One rounded card for each file waiting to be archived, in the same style as the file cards on the Restore tab: its name, then its size under it, then a mark on the right.
+            One rounded card for each file in your Archive albums, in the same style as the file cards on the Restore tab: its name, then its size under it, then a mark on the right. A file you put into an Archive album later appears here too, before anything is archived.
+
+            **Keeping a file on your phone.** Swipe a card **left** and it fades and reads **Not archiving**. It is left out of every check and every removal, and Gallery Sync remembers your choice, even after you close the app. Swipe it **right** and it returns to the list, ready to be archived; you will need to check the files again before anything is removed. Swiping a card that is already that way does nothing, so a run of swipes cannot undo itself. You cannot swipe while a check or a removal is running. If you use a screen reader, each card offers **Keep on this phone** or **Archive this file** instead.
+
+            An album with a file you have kept stays set to Archive, so files added to it later are still covered by the mode you set. If you would rather it stopped, change the album's mode on the Albums tab.
 
             **The mark**
             • **A spinner.** Being checked, backed up or removed.
@@ -100,6 +105,11 @@ CHAPTER = Chapter(
             ## Where it comes from
             OneDrive's list of files for each album, compared with the phone. It asks once per album, not
             once per file.
+
+            ## Good to know
+            The number in the green card counts only the files that will be archived, not the ones you
+            have kept. A kept file is the same setting as **Keep at full size** on the Albums tab, so
+            it is counted there as well.
         """, ui=True),
 
         topic("archive-prompt", "The question: All files validated, or some validated", """

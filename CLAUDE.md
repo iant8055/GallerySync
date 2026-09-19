@@ -97,6 +97,16 @@ This is absolute and applies to every file, in every location, without exception
   this rule. A file the user has ticked *Keep at full size* (`FilePin`, Restore's flag) is never
   offered for archiving, whatever its album's mode.
 
+  **The user can also opt any file out of Archive, on the Archive tab. Ian, 19 Sept 2026.** Swiping a
+  file left greys it and pins it (the same `FilePin`, so no new column); swiping it right clears the pin.
+  The tab lists every file in an Archive album, archivable or not, so a file added later can be opted
+  out before anything is archived. The pin can only make the app do less, so this adds no removal, and
+  the invariant to protect is that **an opted-out file is never in the plan the check and the removal
+  act on**: `BackupEngine.filesInArchiveAlbums()` never returns a pinned file, opted-out files live in
+  `ArchiveUiState.optedOut` and never in `ArchivePlan`, and `nextRemovalRequest` drops any that were
+  opted out after the check. An album that still holds an opted-out file is not empty, so it keeps its
+  mode.
+
   Android shows its own dialog for a trash request, per batch, capped at 2000 URIs. That is the
   platform's and not ours: it is not where the consent comes from, and it is not to be mirrored by
   an app-level prompt.

@@ -55,6 +55,20 @@ class FilePinTest {
         assertTrue(withoutPinned(listOf(restored), msIds = setOf(42L)).isEmpty())
     }
 
+    /** The Archive tab shows both halves; only the first is ever removed from. */
+    @Test
+    fun `split gives the files that may go and the ones set aside, and together they are everything`() {
+        val a = F("a", 1)
+        val b = F("b", 2)
+        val c = F("c", 3)
+
+        val (goes, kept) = FilePin.split(listOf(a, b, c), setOf("a"), setOf(3L), { it.id }, { it.mediaStoreId })
+
+        assertEquals(listOf(b), goes)
+        assertEquals(listOf(a, c), kept)
+        assertEquals(goes, withoutPinned(listOf(a, b, c), ids = setOf("a"), msIds = setOf(3L)))
+    }
+
     @Test
     fun `with nothing pinned the list is untouched`() {
         val files = listOf(F("a", 1), F("b", 2))

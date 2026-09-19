@@ -6383,3 +6383,108 @@ backup plan*, which is what the step-5 and step-6 links are meant to open. The a
 Ian's, so it does not claim to have driven those two; it only saw where the page was. The other two links (steps 4 and 8)
 were not seen by the agent. Lesson for the log: **when the phone is shared, read `logcat` for a signed-in scan before
 tapping**, since a wizard moving without my input means somebody else has it.
+
+### 19 Sept 2026 (afternoon) — an edited photo is not a deleted photo
+
+**The defect (found by reading, from Ian's question about "Wait before asking").** The ledger identifies a file by folder,
+name, size and modified time. Saving an edit over `IMG_1234.jpg` changes the last two, so the original's row stops
+matching, is stamped missing, and (once past the waiting period, under **Ask**) `cloudDeletionCandidates` offers its
+OneDrive copy for removal on the *Gone from this phone* list, while a file of exactly that name is in the gallery. The
+edited file uploads as a new one (OneDrive `rename` conflict behaviour), so nothing is lost, but every in-place edit would
+have looked like a deletion. Ian: *"we can't have every edited file look like a deletion"*, then agreed the rule below.
+
+**The rule (Ian's, 19 Sept).** *Don't offer a file if something with the same name is still in that folder on the phone.*
+`EditedInPlace` (new, pure, Android-free): key is the folder lower-cased plus the name with any `_restored` suffix taken off
+(`RestoredAlbum.originalNameOf`), so folder case never matters (TASK-023) and name case does. Applied twice in
+`SyncDeletionsToCloud`: `candidates()` now scans and drops any candidate whose key is on the phone, and returns **nothing**
+when media access is not FULL or the scan is empty (the same refusal `delete()` already made, and toward not offering);
+`delete()` re-checks each approved file by the same key beside the existing name-and-size check, so a photo edited after the
+list was drawn is counted as back (`cameBack`) and its OneDrive copy is left alone. A file moved to another folder was already
+caught by `contentSignature` (name and size anywhere). It errs toward not offering: a new photo reusing a deleted photo's
+name in the same folder hides the old one, which costs a cloud copy left behind, the setting hardest to regret.
+
+**Tests.** `EditedInPlaceTest` (5) and `SyncDeletionsToCloudTest` (7, the real class against mocked ledger, scan and drive):
+an edited photo is not offered while a really deleted one is; folder case; same name in another folder still offered; a
+`_restored` name counts as here; an empty scan or PARTIAL access offers nothing; Leave never scans; an approved file edited since
+the list was drawn is not deleted. **Mutation check:** with the fix disabled, 4 of the 7 fail (the edited, case, `_restored` and
+approved-then-edited cases), and the other 3 are the ones that should not change. Suite green. The guide's *Gone from this
+phone* topic now says an edited photo is not listed and the unedited original stays in OneDrive as a backup; regenerated.
+
+**Not verified on the phone.** The Moto G was in Ian's hands, mid-Archive-test (Temp 9 set to Archive, 10 files waiting), so the
+app was not restarted and this build is **not installed**. A hardware check needs: an uploaded photo edited in place
+(`echo x >> file` plus a media scan), a second photo moved out of its folder, **Ask** set, the two rows' `localMissingSince`
+back-dated past the 1-day minimum (there is no `sqlite3` on the phone: force-stop, pull the database with its `-wal`/`-shm`,
+edit on the PC, push back), then the *Gone from this phone* list should show the removed photo and not the edited one.
+
+**Design still open with Ian (not built).** Replace the days-based wait and the Settings review list with a screen shown when
+the app opens, listing files gone since it was last shown, with Keep / Remove per file, defaults to keep. Open: the
+Archive-removed marker column and migration (mandatory under that design, otherwise every Archive run raises the screen),
+whether anything starts selected, and whether it shows on every return or only when there are new files. Also decided in
+principle: external storage is excluded from backup (scan `VOLUME_EXTERNAL_PRIMARY` only, refuse non-primary folder grants),
+which removes the SD-card-out case from the false-absence list; not built either.
+
+### 19 Sept 2026 (afternoon) — opt a file out of Archive, on the Archive tab
+
+Ian: *"right now EVERYTHING in a selected folder gets Archived... allow a user to select certain files to opt out of
+Archiving in a folder, the database to remember that choice, and the option to reverse it at a later point when going
+back into the Archive Tab... if a user put a new file in an Album set as Archive it will appear... swiping left greys out
+the files so it won't Archive; [swiping the other way] makes a greyed out file ungrey and be archived."* His second
+"swiping left" was read as **right**, matching Restore's directional swipe; not yet confirmed with him.
+
+**Design: no new column.** The opt-out **is the file's pin** (`FilePin`, `modeOverride = BACKUP`, the flag Restore already
+writes and Archive already skips). In an Archive album the pin means exactly "do not offer this file for removal", so the
+per-file choice is stored, survives the app being closed, and is there to reverse. It can only make the app do less, so it
+adds no removal and needed no migration (CLAUDE.md's escalation for a schema change did not apply). `FilePin`'s comment and
+the Archive paragraph of CLAUDE.md now say the Archive tab is a second thing that sets it.
+
+**What was built.**
+- `BackupEngine.archiveFiles()` returns `ArchiveFiles(toArchive, optedOut)`; `filesInArchiveAlbums()` is now just
+  `.toArchive`, so **every path that removes a file still reads a list that never holds a pinned file**.
+  `FilePin.split` gives both halves (`withoutPinned` is its first). `setArchiveOptOut(item, optedOut)` writes or clears the
+  pin: it refreshes the ledger first if a just-arrived file has no row and returns false, saving nothing, if there is still none;
+  putting a file back also clears a row pinned under a drifted key (matched by MediaStore id, as when a restore rewrites the mtime).
+- **Opted-out files are never in `ArchivePlan`.** They live in `ArchiveUiState.optedOut`; the check and the removal act on the plan
+  alone. Defence in depth: `nextRemovalRequest` (first call of an operation) drops any plan entry opted out since the check.
+- `ArchivePlan.reconciledWith(files, checkFinished)` (pure) merges the plan with the phone after a swipe or when the tab is opened:
+  the plan **only loses files or gains unchecked ones**, so nothing unconfirmed can become confirmed, and if a check had finished
+  and a file joined (or nothing confirmed is left) every mark is reset and the screen returns to waiting for a check, rather than
+  saying "all files validated" about a file nobody validated. `refreshFiles()` applies it every time the tab is opened past IDLE
+  (before, a file added after a check or a run did not show until the app restarted; from IDLE `load()` does it).
+- `SwipeChoiceBox` (`ui/common`): the Restore folder card's swipe feel (threshold, resistance, spring, haptic, tick and cross
+  revealed) written once, directional, with a TalkBack custom action ("Keep on this phone" / "Archive this file") for anyone not
+  swiping. Restore's own folder card still has its own copy and could move to it. Disabled during a check or a removal.
+- Archive tab list: every file in an Archive album in name order, opted-out ones faded (`alpha 0.5`, as Restore fades unavailable
+  files) reading *size · Not archiving*, a hint line under **Files**, header count = files that *will* be archived. An album holding
+  an opted-out file is not empty, so `forgetEmptiedArchiveAlbums` leaves its mode alone.
+- Guide: `archive-file-list` explains the swipes, that the choice is remembered, that the mode stands, and the screen-reader actions;
+  `archive-hero` and `archive-overview` no longer count or check kept files. Regenerated.
+
+**Tests (suite green).** `ArchiveOptOutTest` (7, the real engine against mocks): an opted-out file is never in the removal list
+(by key, and by MediaStore id when the key drifted), other albums excluded, ordering, the pin is written, nothing is saved and false
+returned when there is no row, and putting a file back clears both keys. `ArchivePlanReconcileTest` (8): a swiped-out file leaves and
+the rest keep their marks, a put-back or arrived file joins unchecked and resets a finished check, a gone file leaves, opting out
+every confirmed file asks for a new check, nothing unconfirmed can become confirmed, ordering. `FilePinTest` +1 (`split`).
+**Mutation checks:** letting pinned files back into the removal list fails 6 of 18; a joined file arriving pre-confirmed fails the
+unchecked-merge test.
+
+**Verified on the Moto G** (Temp 9, set to Archive by Ian, 10 files waiting), debug build of the day:
+- Swipe left on one file: it fades, reads *1 MB · Not archiving*, header 10 to 9; the database row was `modeOverride = BACKUP`.
+  A second left swipe did nothing (directional). Force-stop and relaunch: still faded, still 9.
+- **Check these files** with one kept: *All files validated*, 9 confirmed ("frees 18 MB"), the kept file with no tick.
+  **Yes** raised Android's dialog **"move 9 photos to trash"** (not 10), so the kept file is excluded all the way to the platform.
+  **Deny** was pressed: *Nothing was removed*, 10 files still in the folder, none `.trashed`.
+- Swipe right (after that run, phase DONE): back to 10 and no pinned rows left in the database.
+- A new photo copied into Temp 9 while *All files validated* was showing: opening the tab again showed 11, the old prompt
+  withdrawn and Check back (the new file is unverified). It was swiped out (ledger row already existed, pinned, state `UPLOADED`:
+  the automatic sync had already sent it), count back to 10; swiped back in to clear the pin; the file removed from the phone.
+- Dark mode: the faded row and the list are readable. Light mode restored.
+- **Nothing was archived**: every Yes was answered Deny.
+
+**Left over from that test, in OneDrive:** `zz_arrival_test.jpg` (7 MB) in `Temp 9`, uploaded by the automatic sync before it was
+removed from the phone. The app never deletes from OneDrive, so it stays until removed by hand; Restore will list it as available.
+
+**Not verified.** The two-column layout with the new rows (the density trick was not repeated); TalkBack's custom action; the swipe
+feel with a real finger; an opt-out while a check is running (disabled, so only reasoned); an Archive album that holds *only*
+opted-out files after a run (`forgetEmptiedArchiveAlbums` reads the phone, so it should stay, but was not run). Two wording
+points not changed: the Albums tab counts a pinned file as *kept at full size* even in an Archive album, and a file the user edits in
+place gets a new key, so its opt-out is lost and it rejoins the list unchecked (visible before anything is archived, as every file is).
