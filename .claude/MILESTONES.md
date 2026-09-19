@@ -6329,3 +6329,46 @@ reading the engine, and the run needs the platform's trash dialog.
 the Archive tab's two-column layout; the haptic and spring feel; the tick and cross marks in dark mode (ticks were
 seen in dark and light, crosses were not, since every file verified). Suite 407/407. Uncommitted at the time of
 writing.
+
+### 19 Sept 2026 (morning) — a 2,079-file wizard run, and "For a more detailed explanation Click Here" on four cards
+
+**The run.** Moto G, `pm clear` at 10:46 after Ian had reset both sides (1,888 images copied into `Pictures`, ten `Temp`
+folders of ten photos in `DCIM`, OneDrive emptied, the old test folders removed, full-size copies of the files pulled
+back to the phone). Wizard plan 1, 3-minute delay, Close; the app left closed with nothing in Recents. **2,079 of 2,079
+files uploaded, 8.03 GB, every `remoteSizeBytes` equal to `sizeBytes`, every row carrying a remote id, none proxied, none
+failed, none remaining**, started 10:59 and finished 12:22:26 (about 83 minutes, ~2.5 MB/s on the large videos, one to
+three seconds per photo). The last worker result was `SUCCESS` (`backup run finished: 1 uploaded, 0 already there,
+0 failed, 0 deferred, 0 remaining`), and reopening the app showed the wizard on its final card, *"Congratulations your
+backup has finished successfully and has been verified. Press Finish."*, at 100%.
+
+**The delay did not fire on time. Not new: this is the 5 Sept and 15 Sept batching hold, and I reported it wrongly at first
+as unexplained.** Armed 10:51:59 for 179.9 s, due about 10:55. From then `Ready: true` with no unsatisfied constraint
+(`CHARGING` satisfied, AC powered), `Standby bucket: RARE`, empty pending queue, nothing active, process alive but frozen
+(`freezing ... reason = moto_freezer`). Not dispatched by 10:59, four minutes late. Released at 10:59:13 by
+`cmd jobscheduler run -u 0 -n androidx.work.systemjobscheduler com.gallery.sync 4` (no `-f`, so constraints were
+respected); it started within a second, which is the same release that opening the app gave on 5 and 15 Sept. Ian's
+correction, which I record because I had first called it unexplained: the earlier entries above already hold the
+mechanism (JobScheduler batches a ready job from a non-active app until five are ready or 31 minutes pass, and `pm clear`
+drops the app into RARE within seconds of Close) and the decisions (the delay card promises no time; the first backup
+waits for the charger). One difference worth keeping: this release came from `cmd jobscheduler run`, not from opening the
+app, so the batching hold is not specific to a foreground transition. It confirms nothing else and changes nothing.
+The wizard's first `BackupWorker` (`manual`, `all_albums`), enqueued at 10:46:28 seconds after the wipe, is recorded
+`FAILED` with no output; that is almost certainly the "backup run starting (not manual) three seconds after launch,
+before any folder was granted" already noted on 15 Sept, but I did not read its log to confirm it.
+
+**The links.** A line reading *For a more detailed explanation Click Here* (`wizard_detail_link`,
+`wizard_detail_link_action`) now ends the four cards **Choose folders to back up** (step 4), **Cloud Storage** (5),
+**Choose your backup plan** (6) and **Ready to back up** (8). Each opens the setup guide page at that card's own
+section, via the existing `InAppPageDialog` `anchor` parameter and `DetailAnchors` in `SetupTour.kt`
+(`setup-choose-folders`, `setup-cloud`, `setup-backup-plan`, `setup-ready`); the step-3 link is unchanged and still opens
+the page from the top. `SetupGuideLink` takes the string resources as parameters. `HowToGuideConsistencyTest` gained
+`everyWizardDetailLinkLandsOnASectionOfTheSetupPage`: the four step keys are exactly 4, 5, 6, 8 and each id is on
+`docs/setup-guide.html`. Suite green.
+
+**Installed and launched; the links themselves are NOT seen on the phone.** Back is withdrawn once a backup is done
+(`canGoBack` is false at `WizardBackupPhase.DONE`), so the four earlier cards cannot be reached from where the wizard
+stopped, and *Run setup again* is a testing affordance the project says not to test against. Seeing them takes a fresh
+wizard: `pm clear`, then Ian signs in at the Cloud Storage card, which the agent cannot do. **Not verified:** that the
+link is readable in both themes on each card, that the card layout holds with the extra line (step 4's card is the
+tallest), that each link lands on the right section inside the in-app viewer, and that the anchors resolve on the
+published page (the test proves the working tree, not GitHub Pages). Uncommitted at the time of writing.

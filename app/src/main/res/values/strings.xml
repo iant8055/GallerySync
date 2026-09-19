@@ -114,6 +114,10 @@
     <!-- The wizard's link on its first card. %1$s is the tappable part, wizard_guide_link_action. -->
     <string name="wizard_guide_link">For a more detailed breakdown of the set up process %1$s</string>
     <string name="wizard_guide_link_action">click here</string>
+    <!-- The link at the foot of the folders, cloud, plan and ready cards; it opens that card's own section
+         of the setup guide. %1$s is the tappable part, wizard_detail_link_action. Ian, 19 Sept 2026. -->
+    <string name="wizard_detail_link">For a more detailed explanation %1$s</string>
+    <string name="wizard_detail_link_action">Click Here</string>
     <string name="setup_guide_title">First-Time Setup</string>
     <string name="archive_list_heading">Files</string>
 

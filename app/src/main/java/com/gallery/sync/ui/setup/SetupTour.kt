@@ -48,6 +48,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -115,6 +116,19 @@ import com.gallery.sync.ui.signin.SignInUiState
 import com.gallery.sync.ui.signin.SignInViewModel
 
 private const val TOTAL_STEPS = 9
+
+/**
+ * The cards that end with "For a more detailed explanation Click Here", and the section of the setup
+ * guide each one opens. Steps 4 (Choose folders to back up), 5 (Cloud Storage), 6 (Choose your backup
+ * plan) and 8 (Ready to back up); the ids are the guide's topic anchors, and
+ * `HowToGuideConsistencyTest` checks that each is on the published setup page.
+ */
+internal val DetailAnchors = mapOf(
+    4 to "setup-choose-folders",
+    5 to "setup-cloud",
+    6 to "setup-backup-plan",
+    8 to "setup-ready"
+)
 
 /**
  * Content padding for the three video-quality buttons.
@@ -494,6 +508,8 @@ fun SetupTour(
     // re-arming a delay. The difference between a feature and that bug is the confirmation.
     var confirmAbort by rememberSaveable { mutableStateOf(false) }
     var showSetupGuide by rememberSaveable { mutableStateOf(false) }
+    // Which section of the setup guide to open at; null opens it from the top.
+    var setupGuideAnchor by rememberSaveable { mutableStateOf<String?>(null) }
     val runInProgress = step == TOTAL_STEPS &&
         backupPhase != WizardBackupPhase.WAITING &&
         backupPhase != WizardBackupPhase.DONE
@@ -569,10 +585,32 @@ fun SetupTour(
                     onBack = onBackRequest,
                     // On "What we'll set up", the first card of the setup itself (Ian, 18 Sept 2026):
                     // the checklist of what is ahead is where someone wants the fuller explanation.
-                    footer = if (step == 3) {
-                        { SetupGuideLink(onClick = { showSetupGuide = true }) }
-                    } else {
-                        null
+                    //
+                    // Four later cards carry the same kind of link (Ian, 19 Sept 2026), each opening the
+                    // setup guide at that card's own section, so the explanation is the one for the
+                    // screen the person is looking at.
+                    footer = when {
+                        step == 3 -> {
+                            {
+                                SetupGuideLink(onClick = {
+                                    setupGuideAnchor = null
+                                    showSetupGuide = true
+                                })
+                            }
+                        }
+                        step in DetailAnchors -> {
+                            {
+                                SetupGuideLink(
+                                    textRes = R.string.wizard_detail_link,
+                                    actionRes = R.string.wizard_detail_link_action,
+                                    onClick = {
+                                        setupGuideAnchor = DetailAnchors[step]
+                                        showSetupGuide = true
+                                    }
+                                )
+                            }
+                        }
+                        else -> null
                     }
                 ) {
                     when (step) {
@@ -638,7 +676,8 @@ fun SetupTour(
         if (showSetupGuide) {
             InAppPageDialog(
                 page = SupportPage.SETUP_GUIDE,
-                onDismiss = { showSetupGuide = false }
+                onDismiss = { showSetupGuide = false },
+                anchor = setupGuideAnchor
             )
         }
 
@@ -752,9 +791,13 @@ private fun TourBubble(
  * on a phone. The colour is the theme's primary rather than a link blue, so it holds in both themes.
  */
 @Composable
-private fun SetupGuideLink(onClick: () -> Unit) {
-    val action = stringResource(R.string.wizard_guide_link_action)
-    val text = stringResource(R.string.wizard_guide_link, action)
+private fun SetupGuideLink(
+    onClick: () -> Unit,
+    @StringRes textRes: Int = R.string.wizard_guide_link,
+    @StringRes actionRes: Int = R.string.wizard_guide_link_action
+) {
+    val action = stringResource(actionRes)
+    val text = stringResource(textRes, action)
     val linkColor = MaterialTheme.colorScheme.primary
     val start = text.indexOf(action)
 

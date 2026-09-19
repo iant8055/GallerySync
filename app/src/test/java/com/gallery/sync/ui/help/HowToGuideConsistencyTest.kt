@@ -2,6 +2,7 @@ package com.gallery.sync.ui.help
 
 import com.gallery.sync.ui.settings.SupportLinks
 import com.gallery.sync.ui.settings.SupportPage
+import com.gallery.sync.ui.setup.DetailAnchors
 import java.io.File
 import javax.xml.parsers.DocumentBuilderFactory
 import org.junit.Assert.assertEquals
@@ -113,6 +114,19 @@ class HowToGuideConsistencyTest {
         val url = SupportPage.SETUP_GUIDE.url
         assertTrue(SupportLinks.staysInApp(url))
         assertTrue("$url is not a file in docs/", File("../docs/" + url.substringAfterLast('/')).exists())
+    }
+
+    /**
+     * The "For a more detailed explanation Click Here" links on the wizard's folders, cloud, plan and
+     * ready cards each open the setup page at a section. A misspelt id would open the page at the top
+     * with nothing to say so, which is the kind of fault only a person reading closely would catch.
+     */
+    @Test
+    fun everyWizardDetailLinkLandsOnASectionOfTheSetupPage() {
+        assertEquals(setOf(4, 5, 6, 8), DetailAnchors.keys)
+        for ((step, anchor) in DetailAnchors) {
+            assertTrue("step $step: #$anchor is not on the setup page", "id=\"$anchor\"" in setupGuide)
+        }
     }
 
     @Test
