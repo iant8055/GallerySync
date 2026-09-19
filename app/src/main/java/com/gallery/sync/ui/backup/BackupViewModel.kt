@@ -29,6 +29,7 @@ import com.gallery.sync.data.local.media.MediaScanner
 import com.gallery.sync.domain.backup.AlbumCloudClaim
 import com.gallery.sync.domain.backup.BackupEngine
 import com.gallery.sync.domain.backup.CloudConfirmation
+import com.gallery.sync.domain.backup.FilePin
 import com.gallery.sync.domain.backup.ReconcileWithCloud
 import com.gallery.sync.domain.backup.MediaAge
 import com.gallery.sync.domain.backup.OptimiseMode
@@ -99,6 +100,8 @@ data class AlbumRow(
     /** What the drive itself last said about this album, or NeverChecked. */
     val cloudClaim: AlbumCloudClaim = AlbumCloudClaim.NeverChecked,
     val proxiedCount: Int = 0,
+    /** Files here kept at full size. Drawn after the optimised count. See `FilePin`. */
+    val pinnedCount: Int = 0,
     val imageCount: Int = 0,
     val videoCount: Int = 0,
     /** What optimising reclaimed in this album. Zero unless something here has been proxied. */
@@ -705,6 +708,7 @@ class BackupViewModel @Inject constructor(
                     backedUpCount = counts?.backedUp ?: 0,
                     cloudClaim = AlbumCloudClaim.from(cloudByAlbum[album.name]),
                     proxiedCount = counts?.proxied ?: 0,
+                    pinnedCount = counts?.pinned ?: 0,
                     imageCount = album.imageCount,
                     videoCount = album.videoCount,
                     savedBytes = counts?.savedBytes ?: 0L,
@@ -743,6 +747,7 @@ class BackupViewModel @Inject constructor(
                         backedUpCount = counts?.backedUp ?: 0,
                         cloudClaim = AlbumCloudClaim.from(cloudByAlbum[name]),
                         proxiedCount = counts?.proxied ?: 0,
+                        pinnedCount = counts?.pinned ?: 0,
                         savedBytes = counts?.savedBytes ?: 0L,
                         everBackedUpCount = counts?.everBackedUp ?: 0,
                         everBackedUpBytes = counts?.everBackedUpBytes ?: 0L,
@@ -765,6 +770,18 @@ class BackupViewModel @Inject constructor(
     }
 
     suspend fun albumEntries(album: String) = entryDao.entriesForAlbum(album)
+
+    /**
+     * Keeps a file at full size, or lets it follow its album again.
+     *
+     * The tick in an album's file list. A pin can only make the app do less to a file, so it is
+     * applied at once with no confirmation; see `FilePin`. The counts are refreshed so the album card
+     * and the Archive figures agree with the tick by the time the user goes back.
+     */
+    suspend fun setPinned(entry: BackupEntryEntity, pinned: Boolean) {
+        entryDao.setModeOverride(entry.id, FilePin.overrideFor(pinned))
+        refresh()
+    }
 
     fun setAlbumMode(album: String, mode: AlbumMode) {
         viewModelScope.launch {

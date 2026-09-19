@@ -126,6 +126,12 @@ fun BackupScreen(
             mode = album.mode,
             entries = detailEntries,
             onBack = { detailAlbum = null },
+            onSetPinned = { entry, pinned ->
+                scope.launch {
+                    viewModel.setPinned(entry, pinned)
+                    detailEntries = viewModel.albumEntries(album.name)
+                }
+            },
             modifier = modifier
         )
         return
@@ -966,6 +972,12 @@ private fun AlbumRow.statusBreakdown(): String {
     return buildString {
         if (proxiedCount > 0) {
             append(stringResource(R.string.album_status_optimized, proxiedCount))
+        }
+        // After optimised, before pending. Ian, 18 Sept 2026. Files the user kept at full size, or
+        // that Restore put back, so the card says how many the app has been told to leave alone.
+        if (pinnedCount > 0) {
+            if (isNotEmpty()) append(separator)
+            append(stringResource(R.string.album_status_kept, pinnedCount))
         }
         val pending = outstanding
         if (pending > 0) {

@@ -175,7 +175,7 @@ CHAPTER = Chapter(
 
             • **Album name**, for example Camera.
             • **12 files · 340 MB.** How many files the album holds on the phone right now, and their total size. From your phone's media library, inside the chosen folders.
-            • **3 optimised · 2 pending.** A second line that appears only when it has something to say. Optimised counts files replaced by a smaller copy; pending counts files not yet sent to OneDrive. Pending is the number of files on the phone minus the number the app has recorded as sent.
+            • **3 optimised · 4 kept at full size · 2 pending.** A second line that appears only when it has something to say, and shows only the parts that are not zero. Optimised counts files replaced by a smaller copy. Kept at full size counts files Restore has put back and that are still ticked, which Gallery Sync leaves alone. Pending counts files not yet sent to OneDrive: the number of files on the phone minus the number the app has recorded as sent.
             • **The OneDrive line.** The only line that describes OneDrive itself. Its four forms are listed below.
             • **All files Archived**, in place of the three lines above, on an Archive album that has nothing left on the phone. The mode still applies if new files arrive.
             • **The mode pill**, at the right, in the mode's colour, with a small arrow. Tap it and choose Off, Backup, Sync or Archive; the current mode is ringed. Choosing Archive first asks you to confirm. See [[dialog-archive-confirm]].
@@ -202,7 +202,9 @@ CHAPTER = Chapter(
             is tracking. Below are the counts ([[album-file-status]]) and one row for each file.
 
             A row shows the file's name, its size, and **video** if it is a video, with its status on
-            the right.
+            the right. A file that Restore has put back also has a tick box at the end. See
+            [[album-file-pin]]. Above the list, a **Sort by** box puts the files in order. See
+            [[album-file-sort]].
 
             If the app has not handled any files in the album yet, it says **No files tracked yet**.
 
@@ -214,7 +216,8 @@ CHAPTER = Chapter(
         topic("album-file-status", "File marks and counts in an album", """
             ## What it is
             Under the album's name, a row of counts, showing only the ones that are not zero:
-            **backed up**, **optimised**, **pending** and **failed**. Each file then carries one mark:
+            **backed up**, **optimised**, **kept at full size**, **pending** and **failed**. Each file
+            then carries one mark:
 
             • **✓ backed up.** In OneDrive, and still full size on the phone.
             • **✓ backed up · optimised.** In OneDrive, and the phone holds a smaller copy. Both are true: a smaller copy is only ever made from a file already confirmed in OneDrive.
@@ -225,6 +228,49 @@ CHAPTER = Chapter(
             ## Where it comes from
             The app's own record of each file's progress. The OneDrive-checked answer is the last line of
             the album card on the main list.
+        """, ui=True),
+
+        topic("album-file-sort", "Sorting an album's files", """
+            ## What it is
+            A **Sort by** box above the list of files, showing the order now in force: **Name**, **Date**
+            or **Status**. Tap it and choose another to put the files in that order.
+
+            • **Name.** A to Z, ignoring capital letters.
+            • **Date.** Newest first, using the date your phone holds for each file. A file put back by Restore carries the date it was restored.
+            • **Status.** The files that need attention come first: failed, then pending, then optimised, then backed up. Files in the same group are in name order.
+
+            ## Good to know
+            Sorting only changes how the list is shown. It changes nothing about the files, and the list
+            opens in name order each time.
+        """),
+
+        topic("album-file-pin", "Keep at full size", """
+            ## What it is
+            A tick box at the end of a file in an album's list, under the heading **Keep at full size**.
+            It appears only beside files that Restore has put back. A file Restore has not touched has no
+            box. While the box is ticked, Gallery Sync leaves that one file exactly as it is, whatever
+            mode the album is in.
+
+            ## What a tick does
+            • In a **Sync** album, the file is not replaced by a smaller copy.
+            • In an **Archive** album, the file is not moved to the Trash. It stays on the phone, and it is not counted as scheduled to leave.
+            • In a **Backup** or **Off** album it changes nothing today. The tick is remembered, in case you change the album's mode later.
+
+            A tick can only make Gallery Sync do less. It never removes, shrinks or sends anything, so it
+            needs no confirmation.
+
+            ## Why Restore ticks them
+            Restore ticks every file it brings back, so a file you have just restored is not shrunk or
+            archived again straight away. Untick it whenever you like. From then on the file follows its
+            album's mode again: in a Sync album it can be shrunk the next time optimising runs, and in an
+            Archive album it can be offered for archiving again.
+
+            A file you untick keeps its box while the list is open, so a slip can be put right. Once you
+            leave the list, only files that are still ticked show a box.
+
+            ## Where it comes from
+            The tick is kept on your phone by Gallery Sync, for that one file. Ticking does not touch the
+            file itself.
         """, ui=True),
 
         topic("album-merge-warning", "Duplicate album names detected", """

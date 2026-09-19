@@ -600,7 +600,12 @@ class BackupEngine @Inject constructor(
                         id = entry.id,
                         originalSizeBytes = remoteSize!!,
                         proxySizeBytes = entry.sizeBytes,
-                        remoteItemId = "",
+                        // The listing's id, as the exact-size skip above records. This said "" and
+                        // it is the path a phone that was already optimised takes after a reinstall,
+                        // so every such row claimed a cloud copy it could not fetch, and was
+                        // forgotten outright when its album was archived: the row's protection from
+                        // the prune is a real item id. Moto G, 18 Sept 2026, Test 4 and Test 5.
+                        remoteItemId = remoteMatch?.id.orEmpty(),
                         // The original's arrival in OneDrive, for the same reason as the skip above.
                         uploadedAt = remoteMatch?.createdAtEpochMillis ?: 0L
                     )
@@ -784,7 +789,15 @@ class BackupEngine @Inject constructor(
         RestoreScope.notOnTheDevice(
             candidates = entryDao.fetchableFromCloud(),
             presentOnDevice = present,
-            signatureOf = { RestoreScope.signature(it.album, it.displayName, it.sizeBytes) }
+            // The size the file has on the phone, so an optimised photo still in its folder matches
+            // its own proxy and is not offered as a download. See RestoreScope.onDiskSizeBytes.
+            signatureOf = {
+                RestoreScope.signature(
+                    it.album,
+                    it.displayName,
+                    RestoreScope.onDiskSizeBytes(it.isProxied, it.localProxySizeBytes, it.sizeBytes)
+                )
+            }
         ).also {
             Logger.d(TAG, "filesNotOnThePhone: ${it.size} files are in OneDrive but not in their folder")
         }
@@ -834,10 +847,26 @@ class BackupEngine @Inject constructor(
             return@withContext emptyList()
         }
 
-        scanner.scanAll()
-            .filter { it.album in archived }
+        // Files the user has kept at full size are not Archive's to offer. See FilePin: Restore
+        // pins what it brings back, so a restored album is not immediately taken off the phone again.
+        val pinned = entryDao.pinnedKeys()
+        val notPinned = FilePin.withoutPinned(
+            items = scanner.scanAll().filter { it.album in archived },
+            pinnedIds = pinned.mapTo(HashSet()) { it.id },
+            pinnedMediaStoreIds = pinned.mapTo(HashSet()) { it.mediaStoreId },
+            idOf = { backupKeyOf(it.album, it.displayName, it.sizeBytes, it.dateModifiedEpochSeconds) },
+            mediaStoreIdOf = { it.mediaStoreId }
+        )
+
+        notPinned
             .sortedWith(compareBy({ it.album }, { it.displayName }))
-            .also { Logger.d(TAG, "filesInArchiveAlbums: ${it.size} files in ${archived.size} albums") }
+            .also {
+                Logger.d(
+                    TAG,
+                    "filesInArchiveAlbums: ${it.size} files in ${archived.size} albums" +
+                        if (pinned.isNotEmpty()) " (kept-at-full-size files left out)" else ""
+                )
+            }
     }
 
     /**
@@ -877,6 +906,11 @@ class BackupEngine @Inject constructor(
         // could not see were the ones it had shrunk itself.
         val verifiedProxiedIds = verifiedEntries.filter { it.isProxied }.mapTo(HashSet()) { it.mediaStoreId }
 
+        // Left out before anything is matched: a file the user kept at full size is never offered.
+        val pinned = entryDao.pinnedKeys()
+        val pinnedIds = pinned.mapTo(HashSet()) { it.id }
+        val pinnedMediaStoreIds = pinned.mapTo(HashSet()) { it.mediaStoreId }
+
         scanner.scanAll().filter { item ->
             if (item.album !in archived) return@filter false
             val key = backupKeyOf(
@@ -885,6 +919,7 @@ class BackupEngine @Inject constructor(
                 sizeBytes = item.sizeBytes,
                 dateModifiedEpochSeconds = item.dateModifiedEpochSeconds
             )
+            if (key in pinnedIds || item.mediaStoreId in pinnedMediaStoreIds) return@filter false
             key in verified || item.mediaStoreId in verifiedProxiedIds
         }.also {
             Logger.d(
@@ -957,7 +992,17 @@ class BackupEngine @Inject constructor(
                 index == null -> unconfirmed += item
 
                 // Listed, and the drive reports the size we expect. The only confirming case.
-                ref?.sizeBytes == expected -> confirmed += item
+                ref?.sizeBytes == expected -> {
+                    confirmed += item
+                    // The listing has just handed us this file's OneDrive id. A row that never
+                    // recorded one is about to lose its file from the phone, and a row without an
+                    // id is what the prune forgets when the album empties and what Restore cannot
+                    // fetch. Bookkeeping only: nothing is removed here, and a row that already has
+                    // an id is left alone. See BackupEntryDao.fillMissingRemoteItemId.
+                    if (ref?.id?.isNotEmpty() == true) {
+                        entryDao.fillMissingRemoteItemId(item.mediaStoreId, ref.id)
+                    }
+                }
 
                 // Listed, the name is there, and the drive did not say how big it is. **Not**
                 // evidence the file is gone — it is the absence of evidence either way, and it

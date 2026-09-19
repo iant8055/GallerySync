@@ -32,6 +32,21 @@ object RestoreScope {
         "$album/$displayName|$sizeBytes"
 
     /**
+     * The size a row's file has **on the phone**, which is what a device scan reports.
+     *
+     * For an optimised file that is the proxy, not the original: the ledger keeps the original's size
+     * in `sizeBytes` (it is what the cloud copy is checked against) and the proxy's in
+     * `localProxySizeBytes`. Comparing the original against a scan would never match a proxy that is
+     * still in its folder, and would offer to download a file the user is looking at.
+     *
+     * Added 18 Sept 2026 with the fix that lets an archived proxy appear on the Restore tab at all.
+     * Until then proxied rows were left out of the download list wholesale, which hid this problem
+     * and also hid every optimised file that had been archived.
+     */
+    fun onDiskSizeBytes(isProxied: Boolean, localProxySizeBytes: Long?, sizeBytes: Long): Long =
+        if (isProxied && localProxySizeBytes != null) localProxySizeBytes else sizeBytes
+
+    /**
      * Which of [candidates] are not present on the device, judged per folder.
      *
      * [presentOnDevice] is every [signature] the scan found. **An empty set returns nothing**, never

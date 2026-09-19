@@ -12,6 +12,10 @@ CHAPTER = Chapter(
             • **To restore.** A photo or video the app has replaced with a smaller copy, and which is still on the phone. Restoring puts the full-size original in its place, in the same album and under the same name.
             • **To download.** A file the app backed up that is no longer in its folder on the phone, most often because its album was archived. Downloading puts it back in the album it came from, under its own name.
 
+            Every file Restore brings back is ticked **Keep at full size**, so it is not shrunk or
+            archived again straight away. You can untick it in the album's file list. See
+            [[album-file-pin]].
+
             Both are things Gallery Sync did, which is why Restore is where you undo them. It is not a
             browser for everything in your OneDrive. For that, open the OneDrive app itself.
 

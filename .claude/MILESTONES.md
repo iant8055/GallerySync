@@ -5969,3 +5969,128 @@ after the push (404, 404, then 200). Watched **inside the app** on the Moto G: t
 up* opens *First-Time Setup* in the viewer, the page loads with its note, intro and ten collapsed sections, and
 a section opens on tap (*Ready to back up*, with its bullets and sub-heading). That closes item (1) under
 *Not verified* above. Items (2) to (4) stand.
+
+### 18 Sept 2026 (night) — archived albums missing from the Restore tab (`Test 4`, `Test 5`)
+
+Ian archived two albums on the Moto G. Both archived correctly (files in OneDrive in full, local copies in the
+Files app's Trash) and **neither was listed on Restore**.
+
+**Measured, from the phone's ledger (`gallery_sync.db` with its `-wal`).** No rows at all for `test 4` or
+`test 5`. Every one of the 59 rows that remained had `remoteItemId = ''` and `isProxied = 1`. At 21:05:43 the
+log said `forgot 8 rows for albums no longer on the device`: the archive emptied both albums and the prune
+deleted their rows. Restore is built from rows, so there was nothing to list.
+
+**Three faults in a chain, one from each layer:**
+
+1. **The recovered-proxy path wrote an empty OneDrive id.** After the `pm clear` the phone's photos were
+   already optimised, so the reconcile matched them as *backed-up proxies* (`markRecoveredAsProxied`) and
+   passed `remoteItemId = ""`, although the listing it was reading held the real id. The sibling path for
+   files at their exact size had been fixed for this on an earlier day; this one had not.
+2. **The prune protects a row only if it has a real id.** `forgetAlbumsNotOnDevice` spares *"a file still in
+   OneDrive that can be fetched"* by testing `remoteItemId != ''`. An empty id made the rows look stale, so
+   the archive that had just confirmed them in OneDrive also erased the record of them.
+3. **Even with an id, an archived optimised file was on neither Restore list.** `restorableProxies` needs the
+   file still on the phone; `fetchableFromCloud` said `isProxied = 0`. An optimised file whose album is then
+   archived (a path the engine deliberately supports, 26 Aug) is off the phone *and* proxied: neither query
+   returned it. This one was found by reading the queries, then proven on the device (below).
+
+**The fix.** (1) `BackupEngine` records the listing's id on the recovered-proxy path. (2)
+`confirmStillInCloud`, which runs before an archive, writes the id it has just been handed onto any row that
+lacks one (`BackupEntryDao.fillMissingRemoteItemId`; bookkeeping only, touches only rows whose id is empty),
+so **rows already in a ledger are healed at the moment their album is archived**. (3) `fetchableFromCloud`
+no longer excludes optimised rows; `filesNotOnThePhone` compares an optimised row at the size it has *on the
+phone* (`RestoreScope.onDiskSizeBytes`), so a proxy still in its folder is not also offered as a download;
+`RestoreViewModel` additionally never lists one entry as both kinds. Suite 382/382 (four new, on the size rule).
+
+**Watched on the Moto G, Test 6 (Off, four optimised photos, rows with empty ids):**
+- Set to Archive, *Check these files*: `confirmStillInCloud: 4 confirmed`. Ledger read straight after, before
+  the trash tap: `test 6` had 4 of 4 ids (`F6D661310DF0…`), every other album still empty. That is the heal.
+- Allowed the trash request: `kept 4 rows for files still in OneDrive but not on the device`, where the same
+  step on Test 4 and 5 had logged `forgot 8 rows`.
+- Restore tab: **test 6 — 4 files · 13 MB · 0 to restore · 4 to download.**
+- Restore: `downloaded … into test 6` four times; the folder holds 3,250,107 / 3,317,173 / 3,782,577 /
+  3,104,202 bytes, against 568 to 745 KB for the optimised copies that were archived. Summary *4 back on this
+  phone*.
+- Test 6 put back to **Off** afterwards, as it was. (Set by tapping the UI, as the user would, on the test
+  phone. The app wrote no mode.)
+
+**Not fixed, and why it matters.**
+- **`Test 4` and `Test 5` stay off the Restore tab.** Their rows are gone and Restore only offers what this
+  app has a record of; the 8 optimised copies are in the phone's Trash. To get them back: restore the 8 files
+  from the Trash, let the app rescan (the recovered-proxy path now records ids), and archive again.
+- **The other 41 rows on this phone still have empty ids** (Camera and tests 1, 2, 3, 7, 8): the heal happens
+  only when an album is archived. **Restore in place fails on them**: pressing Restore on `test 8` gave *None
+  recovered. 4 unchanged.* The cause was not read from the log (nothing was written for it); an empty id is
+  the one difference from `test 6`, whose downloads succeeded. A backup-time heal, or a guard that offers a
+  restore only for a row with an id, would close it.
+- **Reinstall is the door for both.** Any phone whose optimised photos are re-recognised after a reinstall or
+  on a new phone gets these rows. Older rows on the Fold 8 may already hold empty ids.
+
+### 18 Sept 2026 (late night) — "keep at full size": a per-file pin you can see, a count on the card, a sort
+
+Ian, after the Restore discussion: *"Safer only ('keep this one at full size'): a per-file Backup pin inside a
+Sync or Archive album… have Restore set the flag ON, allow the user to switch it off"*, then *"just a check box
+I think will suffice"*, a count on the Albums card after *optimised*, and a sort in the album's file list.
+
+- **The pin is the flag Restore already wrote.** `modeOverride = BACKUP` on a row; `FilePin` names it. Restore
+  (`markRestored`, both the in-place and the download path) has set it since 27 Aug, hidden. It is now a tick
+  box on every file in an album's list, headed **Keep at full size**, and the user can clear it. Ticking can
+  only make the app do less, so it has no confirmation. A per-file Archive or Sync was not built: that is
+  removal or rewriting decided file by file, a different consent from the album's mode.
+- **Archive now honours it.** Until now only the optimiser read the flag. `filesInArchiveAlbums` (the Archive
+  tab's list) and `redundantLocalCopies` (what may be removed, and the *Scheduled to leave* count) both leave
+  pinned files out, matched by ledger key **or** MediaStore id, since a restore changes the key and not the id.
+  This closes the loop found earlier tonight: a restored file in an Archive album was offered for archiving
+  again.
+- **Albums card:** *3 optimised · 4 kept at full size · 2 pending*, each part only when non-zero (counted from
+  files still on the phone). **File list:** the same count, a **Sort** row (Name A–Z, Date newest first,
+  Status: failed, pending, optimised, backed up; ties by name), and the tick column. Three new guide topics
+  and pop-ups (`album-file-sort`, `album-file-pin`, plus edited `albums-list`, `album-detail`,
+  `album-file-status`, and the Restore overview). 96 topics, 54 with a (?).
+- **Tests:** 392/392 (ten new: the pin's values, the Archive filter by key and by MediaStore id, and the three
+  orderings).
+
+**Watched on the Moto G:**
+- Test 6 (Off, four files Restore had put back) showed **4 kept at full size** on the card with no action from
+  me, and four ticked boxes in its list: Restore's flag, made visible.
+- Unticking one file: list count and card both went to 3. Date sort reversed the order as expected.
+- Set to Archive (the confirm dialog, then the Archive tab): **Files to Archive 1**, the unticked file only,
+  and the log line *1 files in 1 albums (kept-at-full-size files left out)*. **Yes was not pressed; nothing was
+  removed.** Test 6 was then set back to Off and all four files re-ticked, as they were.
+- The pop-up for *Keep at full size* in dark mode, and the list in both themes. Crash buffer empty.
+- Slip while testing: after sorting by Name my tap unticked a different file than the one I meant; re-ticked.
+
+**Not done, deliberately waiting on Ian.** The larger redesign is still open: Restore listing what OneDrive
+holds rather than what the ledger recorded, greyed-out files with a help item, forgetting the mode of an
+emptied Archive album, and the header message. Restore ticking files with **no** ledger row depends on it.
+
+**A note for the next reader:** switching the theme while a file list is open returns to the album list (the
+open album is not saved across a recreate). It was that way before this change.
+
+**Correction, same night (Ian): the tick box is for restored files only.** *"We only need the check box for
+files that have been RESTORED not every file."* The box and its *Keep at full size* heading now appear only
+beside files that were pinned when the list opened, which is the files Restore has put back, since Restore is the
+only thing that sets the flag; a file never restored has no box and a blank of the same width so statuses line
+up. Nothing can be pinned from the list any more, only cleared and put back. The guide's *Keep at full size*,
+*An album's file list* and *An album card* topics say so. **The cost:** a file that is unticked keeps its box only
+while that list is open. After leaving, nothing records that it was ever restored (the flag was its only trace),
+so it shows no box and cannot be re-ticked. Keeping the box would need a stored "restored" marker, which is a
+database migration, so it was not done without asking. Watched on the Moto G: `test 7` (never restored) shows
+no boxes and no heading; `test 6` shows all four, ticked. Suite still 392/392.
+
+**Layout changes, same night (Ian):** the *Keep at full size* heading is two lines (*Keep at / full size*), centred
+over the box column (56dp, no end padding, the boxes' centre is 28dp from the edge). **Sort** became **Sort by**
+with a dropdown (the box shows the order in force; the menu offers Name, Date, Status), the same pattern as
+Settings' dropdowns. The (?) over the *Keep at full size* heading was removed, so that topic (`album-file-pin`)
+is guide-only again (96 topics, 53 with a (?)); the album file list's own (?) still links to it. Watched on the
+Moto G: heading over the boxes, dropdown open with its three choices, Date reversing the order. Suite 392/392.
+
+**Correction to the note above (Ian):** the (?) I removed was the wrong one. He meant the one on the **Sort by**
+line, not the one over **Keep at full size**. Now: Sort by has no (?) and its topic (`album-file-sort`) is
+guide-only; the (?) over *Keep at full size* is back, to the left of the two-line heading, and opens
+`album-file-pin`. 96 topics, 53 with a (?). Watched on the Moto G. Suite 392/392.
+
+**Back arrow in an album's file list (Ian):** it was a "←" character in a text button, the only back control that
+did not match the rest. It is now `SignalIcons.Back` (Ian's `←┘` return glyph, the one the Restore folder view
+and the OneDrive picker use) at 32dp, in the theme's primary colour inside an `IconButton`. Watched on the Moto G:
+drawn larger, and tapping it returns to the album list. Suite 392/392.

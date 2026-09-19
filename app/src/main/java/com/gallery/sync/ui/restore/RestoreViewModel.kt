@@ -149,8 +149,14 @@ class RestoreViewModel @Inject constructor(
             // its folder here. The second is asked of the engine rather than of a stored column,
             // because "gone" means something stricter here than it does to the deletion guard —
             // see RestoreScope.
-            val rows = entryDao.restorableProxies().map { RestoreRow(it, RowKind.Restore) } +
-                engine.filesNotOnThePhone().map { RestoreRow(it, RowKind.Download) }
+            val proxies = entryDao.restorableProxies()
+            val proxyIds = proxies.mapTo(HashSet()) { it.id }
+            // A file is one row or the other, never both: an optimised file still on the phone is a
+            // restore in place, and `filesNotOnThePhone` now considers optimised files too.
+            val rows = proxies.map { RestoreRow(it, RowKind.Restore) } +
+                engine.filesNotOnThePhone()
+                    .filterNot { it.id in proxyIds }
+                    .map { RestoreRow(it, RowKind.Download) }
             val ids = rows.mapTo(HashSet()) { it.id }
             _state.value = _state.value.copy(
                 rows = rows.sortedWith(compareBy({ it.album.lowercase() }, { it.displayName })),

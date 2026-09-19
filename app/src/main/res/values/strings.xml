@@ -337,6 +337,16 @@
     <string name="album_cloud_all_present">%1$d verified in OneDrive</string>
     <string name="album_cloud_some_missing">%1$d of %2$d verified in OneDrive</string>
     <string name="album_status_optimized">%1$d optimised</string>
+    <!-- Files kept at full size (FilePin): ticked by the user, or put back by Restore. -->
+    <string name="album_status_kept">%1$d kept at full size</string>
+    <string name="album_sort_label">Sort by</string>
+    <string name="album_sort_name">Name</string>
+    <string name="album_sort_date">Date</string>
+    <string name="album_sort_status">Status</string>
+    <!-- Two lines on purpose: it heads a 56dp column of tick boxes. -->
+    <string name="album_keep_column">Keep at
+full size</string>
+    <string name="album_file_keep_description">Keep %1$s at full size</string>
     <string name="album_status_pending">%1$d pending</string>
     <string name="album_watching">Watching for new files</string>
     <string name="album_not_watching">Not watched — nothing new expected</string>

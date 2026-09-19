@@ -80,8 +80,18 @@ data class AlbumBackupCount(
      * `totalBytes` is therefore zero — which is how that view came to describe a finished archive as
      * "0 Images · 0 Videos". Ian, 27 Aug 2026.
      */
-    val everBackedUpBytes: Long
+    val everBackedUpBytes: Long,
+
+    /**
+     * Files here the user has kept at full size (`FilePin`), whether by ticking the box or because
+     * Restore put them back. Counted only while the file is on the phone, like the other figures on
+     * the card, since it is drawn beside them.
+     */
+    val pinned: Int = 0
 )
+
+/** The two identities of a pinned file. See `FilePin.withoutPinned` for why both are carried. */
+data class PinnedKey(val id: String, val mediaStoreId: Long)
 
 @Dao
 interface BackupEntryDao {
@@ -681,12 +691,23 @@ interface BackupEntryDao {
      * own question, per folder, in `BackupEngine.filesNotOnThePhone`. Ian, 28 Aug 2026, choosing
      * per-folder for Restore: a copy in an unrelated album is not an answer to "get that album
      * back".
+     *
+     * ### Optimised files are included (18 Sept 2026)
+     *
+     * This used to say `isProxied = 0`, on the reasoning that an optimised file is a *restore in
+     * place* row and belongs to [restorableProxies]. True while its proxy is on the phone. Once the
+     * proxy has gone (an Archive album whose photos had been optimised first, a path the app
+     * deliberately supports) the row has `localMissingSinceEpochMillis` set, so [restorableProxies]
+     * drops it, and this dropped it too: the file was in OneDrive, off the phone, and on neither list.
+     * Ian found it on the Moto G with `Test 4` and `Test 5`.
+     *
+     * Not offering a proxy that is still in its folder is now the caller's job, done per folder by
+     * size on disk: see `RestoreScope.onDiskSizeBytes`.
      */
     @Query(
         """
         SELECT * FROM backup_entries
         WHERE state = :uploaded
-          AND isProxied = 0
           AND remoteItemId IS NOT NULL
           AND remoteItemId != ''
           AND remoteSizeBytes IS NOT NULL
@@ -694,6 +715,29 @@ interface BackupEntryDao {
         """
     )
     suspend fun fetchableFromCloud(uploaded: BackupState = BackupState.UPLOADED): List<BackupEntryEntity>
+
+    /**
+     * Gives an uploaded row the OneDrive item id it never recorded.
+     *
+     * Bookkeeping only: it removes nothing anywhere and touches only a row whose id is empty. Rows
+     * recovered after a reinstall recorded an empty id, so a row that said "safely in OneDrive" could
+     * not be fetched, and could not be told apart from a stale one when its album emptied. Called for
+     * the files an Archive is about to remove, from the listing that has just confirmed them.
+     */
+    @Query(
+        """
+        UPDATE backup_entries
+        SET remoteItemId = :remoteItemId
+        WHERE mediaStoreId = :mediaStoreId
+          AND state = :uploaded
+          AND (remoteItemId IS NULL OR remoteItemId = '')
+        """
+    )
+    suspend fun fillMissingRemoteItemId(
+        mediaStoreId: Long,
+        remoteItemId: String,
+        uploaded: BackupState = BackupState.UPLOADED
+    ): Int
 
     /**
      * Moves a row onto the file that has just replaced it, in one statement.
@@ -959,12 +1003,30 @@ interface BackupEntryDao {
                COALESCE(SUM(
                    CASE WHEN state = :uploaded
                         THEN COALESCE(remoteSizeBytes, sizeBytes) ELSE 0 END
-               ), 0) AS everBackedUpBytes
+               ), 0) AS everBackedUpBytes,
+               SUM(CASE WHEN modeOverride = :pin AND localMissingSinceEpochMillis IS NULL
+                        THEN 1 ELSE 0 END) AS pinned
         FROM backup_entries
         GROUP BY album
         """
     )
-    suspend fun albumCounts(uploaded: BackupState = BackupState.UPLOADED): List<AlbumBackupCount>
+    suspend fun albumCounts(
+        uploaded: BackupState = BackupState.UPLOADED,
+        pin: AlbumMode = AlbumMode.BACKUP
+    ): List<AlbumBackupCount>
+
+    /**
+     * Sets or clears one file's own mode. `null` returns it to following its album.
+     *
+     * Bookkeeping only. The one caller that writes anything but null writes the pin, which can only
+     * make the app do less to the file. See `FilePin`.
+     */
+    @Query("UPDATE backup_entries SET modeOverride = :mode WHERE id = :id")
+    suspend fun setModeOverride(id: String, mode: AlbumMode?)
+
+    /** Every file the user has kept at full size, for the paths that would otherwise remove one. */
+    @Query("SELECT id, mediaStoreId FROM backup_entries WHERE modeOverride = :pin")
+    suspend fun pinnedKeys(pin: AlbumMode = AlbumMode.BACKUP): List<PinnedKey>
 
     @Query(
         """
