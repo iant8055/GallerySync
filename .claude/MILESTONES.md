@@ -6488,3 +6488,31 @@ feel with a real finger; an opt-out while a check is running (disabled, so only 
 opted-out files after a run (`forgetEmptiedArchiveAlbums` reads the phone, so it should stay, but was not run). Two wording
 points not changed: the Albums tab counts a pinned file as *kept at full size* even in an Archive album, and a file the user edits in
 place gets a new key, so its opt-out is lost and it rejoins the list unchecked (visible before anything is archived, as every file is).
+
+**Follow-up, 19 Sept 2026 (later): a file swiped out of Archive and back keeps its green tick.** Ian, from the phone: swiping a file out
+and back in on the Archive tab did not bring its green tick back. It was my design: a file that rejoined was treated as never
+checked, and any join reset every tick and withdrew the *All files validated* prompt. Wrong for a file that was verified a moment
+ago and only set aside. `ArchivePlan.reconciledWith` now takes the confirmations of the current check that the user has swiped out
+(`ReconciledPlan.setAside`, held in `ArchiveUiState.setAside`, never shown and never acted on) and returns a file with its
+confirmation when it comes back **unchanged** (same name, album, size and modified time), without disturbing the other ticks or the
+prompt. Only *confirmed* files are remembered (a red cross is not), a new or edited file still joins unchecked and still withdraws the
+check, and nothing is remembered or applied outside a finished check. The memory is cleared when a new check starts or the list is
+reloaded. This is no more trust than the removal step already places in the check, which does not ask OneDrive again at Yes. The
+guide's *file list* sentence now says so. Six new tests in `ArchivePlanReconcileTest` (out and back keeps every tick, an edited file
+is checked again, a failed file is not remembered, a new file still forces a re-check, several files independently, nothing applied
+without a finished check); suite green. **Not yet seen on the phone:** it was in Ian's hands, on the Restore tab, so nothing was
+installed. The hardware check is: Check (ticks appear), swipe one left (its tick goes, the others stay, the prompt stays), swipe it
+right (the tick returns, the prompt is unchanged, the count follows).
+
+**Ian then asked: "Can we use the same functionality from the RESTORE tab?"** Read as: make the Archive file cards select and
+deselect the way Restore's file cards do (tap a file to toggle it, a selected card highlighted green with a check on the right).
+Not built; it collides with what the tick means on the Archive tab today (confirmed in OneDrive, Ian's 26 Aug choice), so the
+question went back to Ian.
+
+**Green tick after swipe out and back: verified on the Moto G, 19 Sept 2026 (3:04 pm), after Ian closed the app.** Temp 9, ten files:
+Check these files gave ten ticks and *All files validated, frees 20 MB*. Swiping the second file left faded it (*1 MB · Not archiving*),
+kept the other nine ticks and the prompt, count 9, *frees 18 MB*. Swiping it right returned its green tick, the prompt stayed as it was,
+count 10, *frees 20 MB*. **Yes** then raised Android's dialog **"move 10 photos to trash"**, so the returned file's confirmation is real
+and in the removal set, not only drawn; **Deny** was pressed. Ten files still in the folder, none `.trashed`, no pinned rows left.
+So the "Not yet seen" line above is closed for this fix. Still open: the phone was on the Restore tab when Ian asked whether Archive can
+"use the same functionality" as Restore, and he has not yet said which part he means.
