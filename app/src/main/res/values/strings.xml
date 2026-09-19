@@ -591,9 +591,13 @@ They go to the OneDrive recycle bin, where you can restore them yourself. Galler
     <string name="restore_hero_label_files">Files in this folder</string>
     <string name="restore_all_folders">All folders</string>
     <string name="restore_intro_folders">Swipe right to select / left to deselect\nTap to open</string>
-    <string name="restore_intro_files">Tap a file to select it.\nThen press Restore.</string>
+    <string name="restore_intro_files">Tap a file  →  Then press Restore</string>
+    <!-- Once something is selected the first half changes to say how to undo it. Ian, 19 Sept 2026. -->
+    <string name="restore_intro_files_selected">Tap again to deselect it  →  Then press Restore</string>
     <string name="restore_empty">Nothing in OneDrive is missing from this phone, so there is nothing to bring back.</string>
     <string name="restore_selected_summary">%1$d selected · %2$s to recover</string>
+    <!-- The same, stacked, for the half-width slot beside "Files in this folder" so it breaks between the two facts and not mid-phrase. -->
+    <string name="restore_selected_summary_stacked">%1$d selected\n%2$s to recover</string>
     <string name="restore_folder_detail">%1$d files · %2$s</string>
     <!-- Named separately: they are different operations on the phone, and one total would hide that. -->
     <!-- Parallel verbs, matching the file rows and the button: two things one action does. -->

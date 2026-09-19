@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -299,7 +300,8 @@ private fun HeaderLower(
         modifier = Modifier.padding(horizontal = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        if (state.hasSelection) {
+        // Inside a folder the header draws this itself, beside what the number counts.
+        if (state.hasSelection && !compact) {
             WithHelp(HelpTopic.RESTORE_SELECTED_SUMMARY) {
                 Text(
                     text = stringResource(
@@ -380,8 +382,9 @@ private fun FolderHeader(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Row(verticalAlignment = Alignment.Top) {
-                // Left half: the way back and the folder's name.
+            // The folder's name and the number share a line and a centre (Ian, 19 Sept 2026): the name
+            // on the left half, larger, and the number in the middle of the right half.
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Row(
                     modifier = Modifier.weight(1f),
                     verticalAlignment = Alignment.CenterVertically
@@ -399,23 +402,51 @@ private fun FolderHeader(
                     // wrapping keeps all of it where an ellipsis would not.
                     Text(
                         text = folder,
-                        style = MaterialTheme.typography.headlineSmall,
+                        style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f, fill = false)
                     )
                 }
+                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                    Text(text = figure, style = MaterialTheme.typography.displayMedium)
+                }
+            }
 
-                // Right half: the number, larger and lower than it was, centred, with what it counts
-                // under it. No (?) on the label. Ian, 19 Sept 2026.
-                Column(
+            // What is selected, on the same level as what the number counts. The row keeps room for
+            // two lines whether or not anything is selected, so the card does not change height as
+            // files are ticked.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 44.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(top = 14.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                        .padding(start = 8.dp)
                 ) {
-                    Text(text = figure, style = MaterialTheme.typography.displayMedium)
+                    if (state.hasSelection) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Text(
+                                text = stringResource(
+                                    R.string.restore_selected_summary_stacked,
+                                    state.selection.size,
+                                    formatBytes(context, state.bytesToRecover)
+                                ),
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.weight(1f, fill = false)
+                            )
+                            HelpButton(HelpTopic.RESTORE_SELECTED_SUMMARY)
+                        }
+                    }
+                }
+                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
                     Text(
                         text = stringResource(R.string.restore_hero_label_files),
                         style = MaterialTheme.typography.bodyMedium,
@@ -427,7 +458,9 @@ private fun FolderHeader(
             HeaderLower(
                 state = state,
                 context = context,
-                message = state.summary ?: stringResource(R.string.restore_intro_files),
+                message = state.summary ?: stringResource(
+                    if (state.hasSelection) R.string.restore_intro_files_selected else R.string.restore_intro_files
+                ),
                 firstLabel = stringResource(R.string.retrieve_select_all),
                 onFirst = viewModel::selectAllHere,
                 onClear = viewModel::clearSelection,

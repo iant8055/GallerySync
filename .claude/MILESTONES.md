@@ -6275,3 +6275,57 @@ The prompt (*All files validated*) was left as it was. The title is two strings,
 Watched on the Moto G with test 8 (which Ian had set to Archive): the header and four cards. **Not checked:** dark
 mode, the tick and cross marks after a check, the two-column layout, or the prompt under the new header. Suite
 407/407.
+
+**Restore folder header, fourth pass, and the checks Ian left for the morning (19 Sept).**
+
+*Header (Ian, 19 Sept).* Inside a Restore folder: the folder name is larger (`headlineMedium`, bold, was
+`headlineSmall`) and centred vertically on the same line as the number (the row is `CenterVertically`; the 14dp
+top offset on the number is gone). *N selected · X MB to recover* now sits in the left half on the same line as
+*Files in this folder*, in the right half; it is stacked on two lines (`restore_selected_summary_stacked`: the count,
+then the size) so it breaks between the facts rather than mid-phrase, and its (?) follows it. The row keeps a
+44dp minimum height, so the card does not change height as files are ticked; watched with zero and one file
+selected. The one-line instruction is now **Tap a file → Then press Restore** on a single line
+(`restore_intro_files`), and once something is selected the first half reads **Tap again to deselect it → Then
+press Restore** (`restore_intro_files_selected`). Ian typed `>>>>` for the separator; I used an arrow, which is a
+one-line change if he wants the literal characters. The guide's `restore-hero`, `restore-message-line` and
+`restore-selected-summary` topics say the same; regenerated (97 topics, 51 with a (?)).
+
+*Verified on the Moto G, all against the debug build installed 19 Sept:*
+- **Archive step forgets an emptied album's mode: yes, on a real run, twice.** test 8 (`ARCHIVE`, four files, all
+  verified): Check these files, Yes, Allow. The four files were renamed in place to `.trashed-<expiry>-<name>` with
+  unchanged sizes, `album_preferences` lost the `test 8` row, and the Albums tab dropped to *0 Archive* with no test 8
+  listed. Repeated with test 7 after setting it to Archive through the mode dialog (Cancel/Archive confirmation
+  shown as designed): same result.
+- **A real download of files the app had no ledger row for: yes.** test 8 was offered by Restore from the OneDrive
+  listing (*4 to download*), swiped to select, restored: four full-size files landed in `DCIM/test 8` (3.3 MB against
+  the 589 KB optimised copies), and four ledger rows were written, each `UPLOADED`, `remoteSizeBytes` equal to
+  `sizeBytes`, not proxied, `modeOverride = BACKUP` (Keep at full size). The folder then left the Restore list
+  (10 to 9), and test 8 came back on the Albums tab as a **new album at Off**, *4 kept at full size, 4 verified in
+  OneDrive*, with no `album_preferences` row written for it. That is the whole loop the redesign was for, and it
+  does not repeat: archive, restore, and the album does not re-archive.
+- **Greyed-out rows: yes.** test 1 after a restore-in-place showed *1 already on this phone* on the folder card;
+  inside the folder the file is faded and reads *Already on this phone · 2 MB*, tapping it selects nothing, the line
+  *Greyed-out files are already on this phone.* appears above the list, and its (?) opens *Why are some files greyed
+  out?*.
+- **Restore in place after ids are healed: yes**, by accident. A stray tap of mine landed on the Restore bar with
+  test 1's one selected file and ran it: *1 back to full quality*, the file now greyed and kept at full size.
+- **Dark mode:** the Albums tab and drill-down, the Restore list, the Restore folder header with and without a
+  selection and its cards (selected and not), the Archive tab header and cards, and the *Files ready to Archive*
+  dialog. All readable. `cmd uimode night no` restored afterwards.
+- **Two columns from 600dp:** emulated with `wm density 180` (720px wide = 640dp), reset afterwards to the
+  physical 260. Albums, the Restore list and a Restore folder (PauseTest, 11 files) all lay out in two columns and
+  read correctly. **The Archive tab's two columns were not seen**: nothing was waiting to archive at that moment.
+- **Swipe select on a folder card: yes**, one swipe with `adb shell input swipe`, folder selected with the count
+  and size in the header. **The feel of the spring and the haptic cannot be judged over adb** and remain Ian's call.
+
+*Defect found and fixed.* After an Archive run finished, `ArchiveViewModel` re-read the file list but not
+`archiveAlbums`, so the tab kept believing the emptied album was still an Archive album. The header then showed only
+the Restore pointer, and *No album is set to Archive...* did not appear until the app was restarted. The finish block
+now re-reads `engine.archiveAlbumNames()` after `forgetEmptiedArchiveAlbums()`. Confirmed on the Moto G by the test 7
+run above: the message appears immediately after the run with no restart. No unit test: it is ViewModel state
+reading the engine, and the run needs the platform's trash dialog.
+
+**Not verified:** performance of the OneDrive pass on a large library (the test account holds about 100 files);
+the Archive tab's two-column layout; the haptic and spring feel; the tick and cross marks in dark mode (ticks were
+seen in dark and light, crosses were not, since every file verified). Suite 407/407. Uncommitted at the time of
+writing.

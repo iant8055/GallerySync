@@ -313,8 +313,13 @@ class ArchiveViewModel @Inject constructor(
             if (removed.isNotEmpty()) engine.forgetEmptiedArchiveAlbums()
 
             val remaining = engine.filesInArchiveAlbums()
+            // Re-read the album names too: forgetting an emptied album changes them, and a stale list
+            // left the header saying nothing about there being no Archive album until the app was
+            // restarted. Found on the Moto G, 19 Sept 2026.
+            val albums = engine.archiveAlbumNames()
             _state.value = _state.value.copy(
                 plan = ArchivePlan(entries = remaining.map { ArchiveEntry(it) }),
+                archiveAlbums = albums,
                 batchIndex = 0,
                 batchTotal = 0,
                 phase = ArchivePhase.DONE,

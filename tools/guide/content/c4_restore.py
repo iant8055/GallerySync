@@ -40,7 +40,7 @@ CHAPTER = Chapter(
             ## What it is
             The green card at the top. Its heading and big number depend on where you are:
             • On the folder list: **Folders to** with **Restore** directly under it, in the left half, and in the right half how many folders have something to bring back.
-            • Inside a folder: the card is laid out like an album's file list on the Albums tab. The return arrow and the folder's name, large and bold, are in the left half, and the number of files is centred in the right half with **Files in this folder** under it.
+            • Inside a folder: the card is laid out like an album's file list on the Albums tab. The return arrow and the folder's name, large and bold, are in the left half, level with the number of files, which is centred in the right half. Under the number is **Files in this folder**, and once you have selected something, what you have selected is on the same line, in the left half.
 
             A dash instead of a number means the list is still loading.
 
@@ -64,7 +64,7 @@ CHAPTER = Chapter(
             ## What it is
             One line of text whose wording changes with the situation:
             • **Swipe right to select / left to deselect. Tap to open.** On the folder list.
-            • **Tap a file to select it.** With **Then press Restore.** on the line under it. Inside a folder. Nothing moves until you press Restore.
+            • **Tap a file → Then press Restore.** Inside a folder. Once you have selected a file, the first half changes to **Tap again to deselect it**. Nothing moves until you press Restore.
             • **Nothing in OneDrive is missing from this phone, so there is nothing to bring back.** When the list is empty.
             • **A result after a restore**, such as **3 back to full quality · 2 back on this phone. 1 unchanged.** or **None recovered. 4 unchanged.** Unchanged means those files were left exactly as they were.
 
@@ -74,8 +74,8 @@ CHAPTER = Chapter(
 
         topic("restore-selected-summary", "N selected and how much to recover", """
             ## What it is
-            Appears under the big number once you have selected something: for example **6 selected · 1.2 GB
-            to recover**.
+            Appears once you have selected something, in the left half of the green card on the same
+            line as **Files in this folder**: for example **6 selected · 1.2 GB to recover**.
 
             ## Where it comes from
             **Selected** is a count of the files you have chosen across all folders. **To recover** is the
