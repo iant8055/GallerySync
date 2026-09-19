@@ -6372,3 +6372,14 @@ wizard: `pm clear`, then Ian signs in at the Cloud Storage card, which the agent
 link is readable in both themes on each card, that the card layout holds with the extra line (step 4's card is the
 tallest), that each link lands on the right section inside the in-app viewer, and that the anchors resolve on the
 published page (the test proves the working tree, not GitHub Pages). Uncommitted at the time of writing.
+
+**Follow-up, 19 Sept 2026 (afternoon): the links have been seen, by Ian.** After a second `pm clear` at 12:44 Ian took the
+fresh wizard over on the Moto G, signed in himself, and reported *"done - looks great"*. That answers the "not seen on
+the phone" line above for the links as a whole; he did not say which of the smaller checks it covered (dark mode, the
+Choose folders card's height, each anchor). The agent's own incidental sightings while both were tapping at once (the
+agent had not realised until the log showed a signed-in scan): the in-app **First-Time Setup** page open twice at a
+section, expanded and outlined, first *Cloud storage: signing in and choosing where backups go* and then *Choose your
+backup plan*, which is what the step-5 and step-6 links are meant to open. The agent's taps may have overlapped
+Ian's, so it does not claim to have driven those two; it only saw where the page was. The other two links (steps 4 and 8)
+were not seen by the agent. Lesson for the log: **when the phone is shared, read `logcat` for a signed-in scan before
+tapping**, since a wizard moving without my input means somebody else has it.
