@@ -248,7 +248,10 @@ class BackupEngine @Inject constructor(
         // by the time the screen looked. `canBeDefault` keeps Archive out of it, so seeding can
         // never arm a mode that removes files.
         val defaultMode = settings.current().defaultAlbumMode
-        albumDao.insertIfNew(albumsOnDevice.map { AlbumPreferenceEntity(it, defaultMode) })
+        //
+        // Except that the Camera album never starts at Sync (Ian, 20 Sept 2026): a photo taken this
+        // minute must not be shrunk this minute. See [CameraAlbum].
+        albumDao.insertIfNew(albumsOnDevice.map { AlbumPreferenceEntity(it, CameraAlbum.seeded(it, defaultMode)) })
 
         // Unscoped, deliberately, and used for two things. Pruning asks "does this album still
         // exist on the phone?", and marking asks "is this file still here?" — both are questions

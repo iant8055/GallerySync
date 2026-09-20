@@ -71,6 +71,7 @@ import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.media.MediaAccess
 import com.gallery.sync.domain.backup.AlbumCloudClaim
 import com.gallery.sync.domain.backup.AlbumMergeWarning
+import com.gallery.sync.domain.backup.CameraAlbum
 import com.gallery.sync.domain.backup.StopReason
 import com.gallery.sync.ui.common.LabelWithAction
 import com.gallery.sync.ui.common.SignalIcons
@@ -82,6 +83,7 @@ import com.gallery.sync.ui.help.HelpTopic
 import com.gallery.sync.ui.help.TitleWithHelp
 import com.gallery.sync.ui.help.WithHelp
 import com.gallery.sync.ui.theme.LocalGallerySyncColors
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.OutlinedIconButton
@@ -121,7 +123,34 @@ fun BackupScreen(
     var detailAlbum by remember { mutableStateOf<AlbumRow?>(null) }
     var detailEntries by remember { mutableStateOf<List<BackupEntryEntity>>(emptyList()) }
 
+    // Android's own confirmation for the Camera album's Optimise, asked only for files outside a folder
+    // the app was granted at setup. Declared ahead of the drill-down because that returns early.
+    val cameraConsentLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) viewModel.onCameraConsentGranted()
+        else viewModel.onCameraConsentDeclined()
+    }
+
+    // The drill-down lists what the ledger holds, so it is read again whenever the counts move: an
+    // optimise running in the background makes files smaller one at a time, and the Camera list
+    // should shrink as it happens rather than when the screen is next opened.
+    LaunchedEffect(detailAlbum?.name, state.cameraOptimising, state.albums) {
+        val name = detailAlbum?.name ?: return@LaunchedEffect
+        detailEntries = viewModel.albumEntries(name)
+        // While the Camera optimise runs the ledger changes a file at a time and nothing else tells this
+        // screen, so it looks again every couple of seconds until the run is over.
+        while (state.cameraOptimising) {
+            delay(2_000)
+            detailEntries = viewModel.albumEntries(name)
+        }
+    }
+
     detailAlbum?.let { album ->
+        // Not offered while Camera is set to Archive: those files are on their way off the phone, so
+        // shrinking them is moot, and swiping one out of the list would also opt it out of Archive
+        // (the same pin), which nothing on this screen would say.
+        val isCamera = CameraAlbum.isCamera(album.name) && album.mode != AlbumMode.ARCHIVE
         AlbumDetailScreen(
             albumName = album.name,
             mode = album.mode,
@@ -133,7 +162,24 @@ fun BackupScreen(
                     detailEntries = viewModel.albumEntries(album.name)
                 }
             },
-            modifier = modifier
+            modifier = modifier,
+            camera = if (isCamera) {
+                CameraOptimiseControls(
+                    settings = viewModel.cameraSettings(state),
+                    running = state.cameraOptimising,
+                    onOptimise = { before ->
+                        scope.launch {
+                            when (val start = viewModel.prepareCameraOptimise(album.name, before)) {
+                                is BackupViewModel.CameraStart.NeedsConsent ->
+                                    cameraConsentLauncher.launch(IntentSenderRequest.Builder(start.sender).build())
+
+                                BackupViewModel.CameraStart.Started,
+                                BackupViewModel.CameraStart.NothingToDo -> Unit
+                            }
+                        }
+                    }
+                )
+            } else null
         )
         return
     }
@@ -660,7 +706,7 @@ private fun AlbumModeRow(
             }
         }
 
-        AlbumModeDropdown(current = album.mode, onModeSelected = onModeSelected)
+        AlbumModeDropdown(current = album.mode, modes = CameraAlbum.modesFor(album.name), onModeSelected = onModeSelected)
     }
     }
 }
@@ -680,6 +726,8 @@ private fun AlbumModeRow(
 @Composable
 private fun AlbumModeDropdown(
     current: AlbumMode,
+    /** What the menu offers. The Camera album's has no Sync; see `CameraAlbum`. */
+    modes: List<AlbumMode>,
     onModeSelected: (AlbumMode) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -734,7 +782,7 @@ private fun AlbumModeDropdown(
             containerColor = MaterialTheme.colorScheme.surface,
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
         ) {
-            AlbumMode.entries.forEach { mode ->
+            modes.forEach { mode ->
                 val (itemContainer, itemContent) = mode.pillColors()
                 DropdownMenuItem(
                     text = {

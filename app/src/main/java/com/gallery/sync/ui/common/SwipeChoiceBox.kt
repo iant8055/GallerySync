@@ -14,7 +14,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -85,6 +87,12 @@ fun SwipeChoiceBox(
 
     val pull = remember { Animatable(0f) }
 
+    // The gesture below is started once and kept while its keys stay the same, so it must not hold the
+    // callbacks it was first given: a list that reorders or shrinks puts a different file in the same
+    // slot, and a swipe would then act on the old one.
+    val currentRight by rememberUpdatedState(onSwipeRight)
+    val currentLeft by rememberUpdatedState(onSwipeLeft)
+
     // 0 at rest, 1 once the pull is far enough that letting go will act.
     val progress = (abs(pull.value) / (SwipeThresholdPx * SwipeResistance)).coerceIn(0f, 1f)
 
@@ -113,8 +121,8 @@ fun SwipeChoiceBox(
                     },
                     onDragEnd = {
                         when {
-                            travelled > SwipeThresholdPx -> onSwipeRight()
-                            travelled < -SwipeThresholdPx -> onSwipeLeft()
+                            travelled > SwipeThresholdPx -> currentRight()
+                            travelled < -SwipeThresholdPx -> currentLeft()
                         }
                         scope.launch { pull.animateTo(0f, SwipeReturnSpring) }
                     },

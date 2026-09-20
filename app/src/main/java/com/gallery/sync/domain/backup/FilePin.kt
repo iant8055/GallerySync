@@ -26,6 +26,11 @@ import com.gallery.sync.data.local.entity.BackupState
  * column of its own. Because the pin can only make the app do less, letting the user set it on any
  * file there still adds no removal.
  *
+ * And the **Camera album's optimise list** (Ian, 20 Sept 2026): once an age is chosen, each file it would
+ * shrink can be swiped out, which greys and pins it, and swiped back in, which clears the pin. There the pin
+ * means "leave this one at full size", so it needs no column either. Because the Camera album is never Sync,
+ * this is the only thing a pin does to a Camera file today besides the Archive opt-out.
+ *
  * ### Why only this direction
  *
  * It can only make the app do **less** to a file, never more. Nothing is removed, shrunk or sent

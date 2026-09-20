@@ -127,6 +127,11 @@ case that failed on 24 Aug 2026.
 **Cost of leaving it Off:** new albums are not protected until noticed. The failure mode is "backs up
 too little", which is visible and recoverable; the opposite is neither.
 
+**The Camera album is never seeded at Sync** (Ian, 20 Sept 2026). If the default for new albums is Sync, a
+newly found Camera album starts at Backup instead (`CameraAlbum.seeded`), and Select all does the same. Its menu
+offers Off, Backup and Archive. An album already at Sync keeps it. Camera's replacement is the manual
+*Only list Photos/Videos older than…* control in its file list, which does nothing until the button is pressed.
+
 **Archive can never be this default.** `AlbumMode.canBeDefault` excludes it
 ([AlbumMode.kt:87](../app/src/main/java/com/gallery/sync/data/local/entity/AlbumMode.kt)), so no
 setting can arm a mode that removes files for albums the user has not seen. A stored value outside

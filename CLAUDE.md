@@ -264,6 +264,19 @@ Three areas, fully independent:
    with nothing to send. There is no optimise button or status line in Settings.
 3. **Album modes** (Off / Backup / Sync / Archive). Set **only** by the user, per album.
 
+**The Camera album has no Sync, and has its own manual optimise. Ian, 20 Sept 2026.** *"I don't want a user
+to take a picture/video and then BAM it's optimized already."* The Camera album (`CameraAlbum`, by name) offers
+Off, Backup and Archive; Sync is not on its menu, `setAlbumMode` refuses it, and seeding a new Camera album
+or Select all writes Backup where every other album would get Sync. **An album already at Sync is left alone**,
+because rewriting that would be the app setting a mode. In its place, the album's file list has *Only list Photos/Videos
+older than* 1 day / 1 week / 1 month / 6 months / 1 year / All (`CameraOptimisePlan`): a **one-shot, manual
+optimise of one folder, not a mode and not a standing rule**. Nothing is remembered but the files the user swiped
+out (`FilePin`, so no new column), nothing runs until the button is pressed, and it writes no album mode, so it is
+none of the three areas above and touches none of them. It obeys the Settings switches, measures age from the
+file's modified time, and only ever takes a file OneDrive has confirmed at its full size. **The invariant to
+protect: a swiped-out (pinned) file is never in `CameraOptimisePlan.eligible`**, which is the only list the worker
+acts on; the cutoff is fixed when the button is pressed so the files done are the files shown.
+
 **One exception, made by Ian, 16 Sept 2026 — a folder/album conflict sets the mode to `Off`.** When the
 app finds one folder under two album identities (TASK-023: MediaStore keeps each writer's spelling, so
 `camera` and `Camera` read as two albums over one directory) and they are merged, the merged album's mode

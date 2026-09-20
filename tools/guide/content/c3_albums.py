@@ -194,7 +194,8 @@ CHAPTER = Chapter(
             Under the name is a line such as **Backup · 12 files**: its mode and how many files the app
             is tracking. Then the counts ([[album-file-status]]) and, on one line, a **Sort by** box
             ([[album-file-sort]]) and, when some file has one, the **Keep at full size** heading over the
-            tick boxes ([[album-file-pin]]).
+            tick boxes ([[album-file-pin]]). In the **Camera** album there is also a control to optimise
+            older photos and videos ([[album-camera-optimise]]).
 
             Below the card is one rounded card for each file, in the same style as the Restore tab's
             files. Each shows the file's name and, under it, one line with its size (and **video** if it is
@@ -266,6 +267,60 @@ CHAPTER = Chapter(
             ## Where it comes from
             The tick is kept on your phone by Gallery Sync, for that one file. Ticking does not touch the
             file itself.
+        """, ui=True),
+
+        topic("album-camera-optimise", "Optimise older photos and videos in Camera", """
+            ## What it is
+            Only the **Camera** album has this. At the top of its file list, under the counts, is
+            **Only list Photos/Videos older than**, with a box to choose **1 day**, **1 week**,
+            **1 month**, **6 months**, **1 year** or **All**. Choose one and the list below shows just the files that
+            are that old or older and could be made smaller. A **Cancel** button appears beside the box; it
+            drops the age and brings back the whole album. The card says how many files there are and
+            roughly how much space they would give back, marked **(estimate)**, and a button at the bottom
+            of the screen, like Restore's, reads **Optimise 12 files** (with the real number).
+
+            Nothing happens until you press that button. It is a one-off tidy of one folder. It is not a
+            mode, it is not remembered, and it does not change how new photos are handled: a picture you
+            take stays exactly as it is until you ask. **All** lists every backed-up photo and video, including
+            ones you took a moment ago, so look down the list and swipe out anything you want left alone before
+            you press the button. The control is not shown while Camera is set to
+            **Archive**, because those files are on their way off the phone.
+
+            ## Why Camera has no Sync
+            The Camera album offers **Off**, **Backup** and **Archive**, and not **Sync**. Sync makes a
+            photo smaller as soon as OneDrive has it, which is right for an album you have set aside and
+            wrong for the folder your camera writes to. This control is the alternative: you say how old a
+            photo has to be, and only then is it touched. An album that was already set to Sync before this
+            was added keeps that setting.
+
+            ## Which files are listed
+            • Photos and videos that OneDrive has confirmed, at the same size. A file not yet backed up is never listed.
+            • Only files at least as old as the age you chose, by the date your phone holds for each file (the date it was last changed).
+            • Photos only if **Optimise photos** is on in Settings, and videos only if **Optimise video** is on. If one is off, the card says so.
+            • Not files that have already been made smaller, or that could not be made smaller.
+
+            ## Before you choose
+            The Camera file list shows nothing until you choose an age, and says so. Once you have, it lists
+            only the files that age would optimise, so there is nothing on screen that cannot be swiped.
+            **Cancel** empties it again. A file Restore has put back appears greyed in the list, if it is old enough, marked
+            **Kept at full size**; swipe it right to let it be optimised again.
+
+            ## Leaving files out
+            Swipe right to select and left to deselect, as everywhere in the app. Swipe a file to the left to
+            deselect it and keep it at full size: it goes grey and is left out of the count and of the
+            estimate. Swipe it to the right to select it again and put it back on the list. This is the same tick as
+            **Keep at full size** ([[album-file-pin]]), so it can only make the app do less.
+
+            ## What the button does
+            It replaces each listed file on your phone with a smaller copy that stays in your gallery
+            under its own name. The full-size original stays in OneDrive, and **Restore** brings it back.
+            Files inside the folders you gave Gallery Sync access to at setup are done in the background;
+            any outside them need Android's own confirmation first. Nothing is removed and nothing is sent.
+            While it runs the card shows how many are left and the list gets shorter as each one is done.
+
+            ## Where it comes from
+            The app's own record of what OneDrive has confirmed for each file, and your Settings switches.
+            Video is made smaller at the quality chosen in Settings.
         """, ui=True),
 
         topic("album-merge-warning", "Duplicate album names detected", """

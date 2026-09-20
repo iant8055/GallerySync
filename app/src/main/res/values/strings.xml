@@ -120,10 +120,10 @@
     <string name="wizard_detail_link_action">Click Here</string>
     <string name="setup_guide_title">First-Time Setup</string>
     <!-- Swipe a file out of Archive, or back in. Ian, 19 Sept 2026. -->
-    <string name="archive_swipe_hint">Swipe left on a file to keep it on this phone. Swipe right to archive it again.</string>
+    <string name="archive_swipe_hint">Swipe right to select / left to deselect. A deselected file stays on this phone.</string>
     <string name="archive_opted_out_detail">%1$s · Not archiving</string>
-    <string name="archive_action_keep">Keep on this phone</string>
-    <string name="archive_action_archive">Archive this file</string>
+    <string name="archive_action_keep">Deselect (keep on this phone)</string>
+    <string name="archive_action_archive">Select (archive this file)</string>
     <string name="archive_list_heading">Files</string>
 
     <string name="settings_optimise_master">Optimise photos and video</string>
@@ -584,9 +584,9 @@ full size</string>
     <string name="restore_hero_label_files">Files in this folder</string>
     <string name="restore_all_folders">All folders</string>
     <string name="restore_intro_folders">Swipe right to select / left to deselect\nTap to open</string>
-    <string name="restore_intro_files">Tap a file  →  Then press Restore</string>
+    <string name="restore_intro_files">Swipe right to select / left to deselect  →  Then press Restore</string>
     <!-- Once something is selected the first half changes to say how to undo it. Ian, 19 Sept 2026. -->
-    <string name="restore_intro_files_selected">Tap again to deselect it  →  Then press Restore</string>
+    <string name="restore_intro_files_selected">Swipe left to deselect  →  Then press Restore</string>
     <string name="restore_empty">Nothing in OneDrive is missing from this phone, so there is nothing to bring back.</string>
     <string name="restore_selected_summary">%1$d selected · %2$s to recover</string>
     <!-- The same, stacked, for the half-width slot beside "Files in this folder" so it breaks between the two facts and not mid-phrase. -->
@@ -1110,5 +1110,39 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="abort_backup_body">Uploading stops so you can change your settings. Files already in OneDrive stay there, and starting again picks up where this left off rather than sending them twice. Nothing is deleted. Photos already optimised stay optimised, with their full-size originals in OneDrive.</string>
     <string name="abort_backup_confirm">Stop and go back</string>
     <string name="abort_backup_keep">Keep backing up</string>
+
+    <!-- Camera album: optimise what is already old (Ian, 20 Sept 2026). A one-shot, manual optimise, not a mode. -->
+    <string name="camera_optimise_heading">Only list Photos/Videos older than</string>
+    <string name="camera_optimise_choose">Choose</string>
+    <string name="camera_optimise_cancel">Cancel</string>
+    <string name="camera_age_day">1 day</string>
+    <string name="camera_age_week">1 week</string>
+    <string name="camera_age_month">1 month</string>
+    <string name="camera_age_six_months">6 months</string>
+    <string name="camera_age_year">1 year</string>
+    <string name="camera_age_all">All</string>
+    <plurals name="camera_optimise_summary">
+        <item quantity="one">%1$d file · about %2$s saved (estimate)</item>
+        <item quantity="other">%1$d files · about %2$s saved (estimate)</item>
+    </plurals>
+    <plurals name="camera_optimise_button">
+        <item quantity="one">Optimise %d file</item>
+        <item quantity="other">Optimise %d files</item>
+    </plurals>
+    <!-- The one wording for choosing files by swiping, wherever a list does it. Ian, 20 Sept 2026. -->
+    <string name="select_swipe_hint">Swipe right to select / left to deselect</string>
+    <string name="select_action_select">Select</string>
+    <string name="select_action_deselect">Deselect</string>
+    <string name="camera_choose_hint">Choose an age above to list the photos and videos it would optimise. Nothing is listed until you do.</string>
+    <string name="camera_optimise_working">Optimising… %1$d left</string>
+    <string name="camera_optimise_none">Nothing this old is ready to optimise. Only files already in OneDrive are offered.</string>
+    <string name="camera_optimise_all_kept">Every file this old is deselected and stays at full size. Swipe a file right to select it.</string>
+    <string name="camera_optimise_all_off">Optimising is switched off in Settings.</string>
+    <string name="camera_optimise_photos_off">Photos are switched off in Settings, so none are listed.</string>
+    <string name="camera_optimise_videos_off">Video is switched off in Settings, so none is listed.</string>
+    <string name="camera_optimise_swipe_hint">Swipe right to select / left to deselect. A deselected file stays at full size.</string>
+    <string name="camera_action_keep">Deselect (keep at full size)</string>
+    <string name="camera_action_optimise">Select (optimise this file)</string>
+    <string name="camera_opted_out_detail">%1$s · Kept at full size</string>
 
 </resources>

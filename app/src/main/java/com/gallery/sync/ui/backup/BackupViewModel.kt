@@ -9,6 +9,7 @@ import androidx.work.WorkManager
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.media.LocalCopyRemover
 import com.gallery.sync.data.local.media.ProxyApplier
+import com.gallery.sync.data.local.media.ProxyGenerator
 import com.gallery.sync.data.local.media.ProxyOutcome
 import com.gallery.sync.data.local.media.VideoOptimiser
 import com.gallery.sync.data.local.media.VideoReadiness
@@ -29,6 +30,9 @@ import com.gallery.sync.data.local.media.MediaAccess
 import com.gallery.sync.data.local.media.MediaScanner
 import com.gallery.sync.domain.backup.AlbumCloudClaim
 import com.gallery.sync.domain.backup.BackupEngine
+import com.gallery.sync.domain.backup.CameraAlbum
+import com.gallery.sync.domain.backup.CameraOptimisePlan
+import com.gallery.sync.domain.backup.CameraOptimiseSettings
 import com.gallery.sync.domain.backup.CloudConfirmation
 import com.gallery.sync.domain.backup.FilePin
 import com.gallery.sync.domain.backup.ReconcileWithCloud
@@ -264,6 +268,8 @@ data class BackupUiState(
      */
     val proxyDialogRequested: Boolean = false,
     val defaultAlbumMode: AlbumMode = AlbumMode.DEFAULT,
+    /** The Camera album's manual optimise is queued or running. Drives its button and its list. */
+    val cameraOptimising: Boolean = false,
     /** Whether the restore screen lists cloud folders that hold nothing. */
     val showEmptyCloudFolders: Boolean = false,
     /**
@@ -471,6 +477,7 @@ class BackupViewModel @Inject constructor(
         observeBackgroundWork()
         observeVideoOptimise()
         observeWhatOptimisingWaits()
+        observeCameraOptimise()
         observeCloudStatus()
         viewModelScope.launch {
             settings.albumMergeWarnings.collect { warnings ->
@@ -544,6 +551,23 @@ class BackupViewModel @Inject constructor(
                     .distinctUntilChanged()
                     .map { }
             ).debounce(1_500).collect { refreshCounts() }
+        }
+    }
+
+    /** Keeps [BackupUiState.cameraOptimising] true from the tap until the last batch has finished. */
+    private fun observeCameraOptimise() {
+        viewModelScope.launch {
+            BackupScheduling.cameraOptimiseWork(WorkManager.getInstance(context))
+                .map { infos ->
+                    infos.any { !it.state.isFinished && BackupScheduling.optimiseTag(BackupScheduling.PHASE_CAMERA) in it.tags }
+                }
+                .distinctUntilChanged()
+                .collect { live ->
+                    val wasLive = _state.value.cameraOptimising
+                    _state.update { it.copy(cameraOptimising = live) }
+                    // The run has just ended: the album cards still show the counts from before it.
+                    if (wasLive && !live) refresh()
+                }
         }
     }
 
@@ -700,7 +724,7 @@ class BackupViewModel @Inject constructor(
                 // No write here any more — [BackupEngine.refreshLedger] seeds the row. The fallback
                 // remains only for an album the scanner reports that the ledger has not recorded,
                 // which the screen should still render rather than skip.
-                val mode = storedModes[album.name] ?: defaultMode
+                val mode = storedModes[album.name] ?: CameraAlbum.seeded(album.name, defaultMode)
                 if (album.name !in knownBefore && mode.uploads) hasNewUploadAlbums = true
                 AlbumRow(
                     name = album.name,
@@ -785,7 +809,82 @@ class BackupViewModel @Inject constructor(
         refresh()
     }
 
+    /** What the Camera control would do at [modifiedBeforeEpochSeconds], under Settings as they are now. */
+    fun cameraSettings(state: BackupUiState = _state.value) = CameraOptimiseSettings(
+        enabled = state.isOptimiseEnabled,
+        photos = state.optimisePhotos,
+        videos = state.optimiseVideo,
+        photoSavingPercent = ProxyGenerator.APPROXIMATE_SAVING_PERCENT,
+        videoSavingPercent = state.videoQuality.approximateSavingPercent
+    )
+
+    /** The files [prepareCameraOptimise] asked Android about, held until the person answers. */
+    private var pendingCamera: PendingCameraRun? = null
+
+    private data class PendingCameraRun(val album: String, val before: Long)
+
+    /** What tapping *Optimise* on the Camera album led to. */
+    sealed interface CameraStart {
+        /** Queued. Nothing more to ask. */
+        data object Started : CameraStart
+
+        /** Some files sit outside a granted folder: Android's own dialog comes first, then [onCameraConsentGranted]. */
+        data class NeedsConsent(val sender: IntentSender) : CameraStart
+
+        /** Nothing on the list is still there to optimise. */
+        data object NothingToDo : CameraStart
+    }
+
+    /**
+     * The tap on *Optimise* in the Camera album.
+     *
+     * [modifiedBeforeEpochSeconds] is the cutoff the list on screen was drawn with, so the files
+     * worked on are the ones the person was looking at. Files inside a folder the app was granted at
+     * setup are rewritten with no dialog; any outside one need Android's confirmation first, raised
+     * by the screen from [CameraStart.NeedsConsent]. Nothing is removed by either route.
+     */
+    suspend fun prepareCameraOptimise(album: String, modifiedBeforeEpochSeconds: Long): CameraStart {
+        if (!CameraAlbum.isCamera(album)) return CameraStart.NothingToDo
+        val plan = CameraOptimisePlan.of(entryDao.entriesForAlbum(album), modifiedBeforeEpochSeconds, cameraSettings())
+        val ready = proxyApplier.onDevice(plan.eligible)
+        if (ready.isEmpty()) {
+            refreshCounts()
+            return CameraStart.NothingToDo
+        }
+
+        val outside = proxyApplier.splitByConsent(ready).outside
+        if (outside.isNotEmpty()) {
+            val sender = proxyApplier.createWriteRequest(outside.take(CAMERA_WRITE_REQUEST_LIMIT))
+            if (sender != null) {
+                pendingCamera = PendingCameraRun(album, modifiedBeforeEpochSeconds)
+                return CameraStart.NeedsConsent(sender)
+            }
+            // No dialog could be built. The files inside a granted folder can still be done, so go on.
+        }
+        return startCameraOptimise(album, modifiedBeforeEpochSeconds)
+    }
+
+    /** Android's dialog was confirmed. */
+    fun onCameraConsentGranted() {
+        val pending = pendingCamera ?: return
+        pendingCamera = null
+        viewModelScope.launch { startCameraOptimise(pending.album, pending.before) }
+    }
+
+    /** The dialog was dismissed. Nothing was consented to, so nothing is done. */
+    fun onCameraConsentDeclined() {
+        pendingCamera = null
+    }
+
+    private suspend fun startCameraOptimise(album: String, before: Long): CameraStart {
+        BackupScheduling.enqueueCameraOptimise(WorkManager.getInstance(context), album, before)
+        return CameraStart.Started
+    }
+
     fun setAlbumMode(album: String, mode: AlbumMode) {
+        // The Camera album has no Sync (Ian, 20 Sept 2026). The menu does not offer it; this is the
+        // second lock, for anything that reaches here by another route.
+        if (!CameraAlbum.canChoose(album, mode)) return
         viewModelScope.launch {
             albumDao.setPreference(AlbumPreferenceEntity(album, mode))
             // Deliberately leaves any duplicate-name warning in place. Only Dismiss removes it (Ian,
@@ -949,9 +1048,11 @@ class BackupViewModel @Inject constructor(
                 .takeIf { it != AlbumMode.OFF }
                 ?: AlbumMode.BACKUP
             val mode = if (enabled) preferred else AlbumMode.OFF
-            albumDao.setPreferences(albums.map { AlbumPreferenceEntity(it.name, mode) })
+            // Camera never takes Sync, so Select all gives it Backup where everything else gets Sync.
+            val modeFor = { name: String -> CameraAlbum.seeded(name, mode) }
+            albumDao.setPreferences(albums.map { AlbumPreferenceEntity(it.name, modeFor(it.name)) })
             _state.value = _state.value.copy(
-                albums = albums.map { it.copy(mode = mode) }
+                albums = albums.map { it.copy(mode = modeFor(it.name)) }
             )
             refreshCounts()
         }
@@ -1349,3 +1450,6 @@ private fun androidx.work.Data.toFinishedStatus(): BackupStatus.Finished? {
         }
     )
 }
+
+/** MediaStore's own cap on one write request, and so on how many files one Camera dialog can cover. */
+private const val CAMERA_WRITE_REQUEST_LIMIT = 2000

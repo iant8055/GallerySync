@@ -67,6 +67,7 @@ import com.gallery.sync.ui.help.TitleWithHelp
 import com.gallery.sync.ui.help.WithHelp
 import com.gallery.sync.ui.common.HeroOutlinedButton
 import com.gallery.sync.ui.common.SignalIcons
+import com.gallery.sync.ui.common.SwipeChoiceBox
 import com.gallery.sync.ui.common.formatBytes
 import com.gallery.sync.ui.theme.LocalGallerySyncColors
 import kotlin.math.abs
@@ -187,12 +188,28 @@ fun RestoreScreen(
                                     }
                                 } else {
                                     state.visibleRows.getOrNull(position)?.let { row ->
-                                        FileCard(
-                                            row = row,
-                                            selected = row.id in state.selection,
-                                            enabled = !state.running,
-                                            onToggle = { viewModel.toggle(row) }
-                                        )
+                                        val selectedNow = row.id in state.selection
+                                        // The same gesture as the folder cards and every other list that
+                                        // selects: right selects, left deselects, repeating either is a
+                                        // no-op. Tapping the card still toggles it. Ian, 20 Sept 2026.
+                                        SwipeChoiceBox(
+                                            enabled = !state.running && row.isActionable,
+                                            stateKey = selectedNow,
+                                            onSwipeRight = { if (!selectedNow) viewModel.toggle(row) },
+                                            onSwipeLeft = { if (selectedNow) viewModel.toggle(row) },
+                                            accessibilityLabel = stringResource(
+                                                if (selectedNow) R.string.select_action_deselect else R.string.select_action_select
+                                            ),
+                                            onAccessibilityAction = { viewModel.toggle(row) }
+                                        ) { drawn ->
+                                            FileCard(
+                                                row = row,
+                                                selected = selectedNow,
+                                                enabled = !state.running,
+                                                onToggle = { viewModel.toggle(row) },
+                                                modifier = drawn
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -664,7 +681,8 @@ private fun FileCard(
     row: RestoreRow,
     selected: Boolean,
     enabled: Boolean,
-    onToggle: () -> Unit
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
 
@@ -683,7 +701,7 @@ private fun FileCard(
     Surface(
         // Greyed out by fading the whole card, so it reads as unavailable in both themes without a
         // colour of its own being chosen.
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .alpha(if (row.isActionable) 1f else 0.5f),
         shape = RoundedCornerShape(22.dp),
@@ -790,7 +808,6 @@ private fun RestoreBar(running: Boolean, onRestore: () -> Unit, onStop: () -> Un
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            HelpButton(HelpTopic.RESTORE_ACTION_BAR)
             Button(
                 onClick = if (running) onStop else onRestore,
                 modifier = Modifier.weight(1f),

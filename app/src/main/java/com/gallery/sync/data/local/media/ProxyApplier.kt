@@ -133,6 +133,10 @@ class ProxyApplier @Inject constructor(
         live.take(MAX_URIS_PER_REQUEST)
     }
 
+    /** [entries] whose file is still on the phone, in the same order. For callers that chose the files themselves. */
+    suspend fun onDevice(entries: List<BackupEntryEntity>): List<BackupEntryEntity> =
+        withContext(dispatcher) { entries.filter { stillOnDevice(Uri.parse(it.contentUri)) } }
+
     /**
      * Whether the URI still resolves to a row in MediaStore.
      *

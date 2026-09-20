@@ -5,15 +5,21 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import androidx.work.Data
+import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.media.ProxyApplier
 import com.gallery.sync.data.local.media.ProxyOutcome
 import com.gallery.sync.data.local.media.VideoOptimiser
 import com.gallery.sync.data.local.settings.BackupSettings
+import com.gallery.sync.domain.backup.CameraOptimisePlan
+import com.gallery.sync.domain.backup.CameraOptimiseSettings
 import com.gallery.sync.domain.backup.PhotoOptimisePolicy
 import com.gallery.sync.domain.backup.WizardBulkOptimise
 import com.gallery.sync.util.Logger
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 
 /**
  * Replaces originals with proxies, outside the wizard's lifetime.
@@ -47,12 +53,15 @@ class OptimiseWorker @AssistedInject constructor(
     @Assisted params: WorkerParameters,
     private val proxyApplier: ProxyApplier,
     private val videoOptimiser: VideoOptimiser,
-    private val settings: BackupSettings
+    private val settings: BackupSettings,
+    private val entryDao: BackupEntryDao
 ) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result {
         val phase = inputData.getString(BackupScheduling.KEY_OPTIMISE_PHASE)
             ?: return Result.success()
+
+        if (phase == BackupScheduling.PHASE_CAMERA) return runCamera()
 
         val remaining = when (phase) {
             BackupScheduling.PHASE_PHOTOS -> runPhotos()
@@ -82,6 +91,84 @@ class OptimiseWorker @AssistedInject constructor(
             handOffToVideo()
         }
 
+        return Result.success()
+    }
+
+    /**
+     * One batch of the Camera album's manual optimise, and a continuation while more is left.
+     *
+     * The list is worked out again here with [CameraOptimisePlan], from the cutoff the person tapped
+     * with, so it is the list they were shown minus anything swiped out, finished or gone since. It
+     * reads the Settings switches again too: switching photos off mid-run stops photos at the next file.
+     *
+     * A file that fails is not retried by the next batch. Its id travels in the continuation and is
+     * stepped over, which is what keeps one unwritable file from being the first candidate of every
+     * batch for ever. A batch that made no progress ends the chain instead of queueing another.
+     *
+     * Files outside a granted folder are written through the grant Android gave when the person
+     * confirmed its dialog, which is asked for before this is queued. Where that grant is missing the
+     * write fails and the file is stepped over like any other failure.
+     */
+    private suspend fun runCamera(): Result {
+        val album = inputData.getString(BackupScheduling.KEY_OPTIMISE_ALBUM) ?: return Result.success()
+        val before = inputData.getLong(BackupScheduling.KEY_OPTIMISE_BEFORE, Long.MIN_VALUE)
+        if (before == Long.MIN_VALUE) return Result.success()
+        val excluded = inputData.getStringArray(BackupScheduling.KEY_OPTIMISE_EXCLUDED)?.toMutableSet()
+            ?: mutableSetOf()
+
+        val prefs = settings.current()
+        val plan = CameraOptimisePlan.of(
+            entries = entryDao.entriesForAlbum(album),
+            modifiedBeforeEpochSeconds = before,
+            settings = CameraOptimiseSettings(
+                enabled = prefs.isOptimiseEnabled,
+                photos = prefs.optimisePhotos,
+                videos = prefs.optimiseVideo,
+                photoSavingPercent = 0,
+                videoSavingPercent = 0
+            )
+        )
+        val ready = proxyApplier.onDevice(plan.eligible.filter { it.id !in excluded })
+        if (ready.isEmpty()) {
+            Logger.d(TAG, "camera: nothing left to optimise")
+            return Result.success()
+        }
+
+        val photos = ready.filter { !it.isVideo }.take(PHOTO_BATCH)
+        val videos = ready.filter { it.isVideo }.take(VIDEO_BATCH)
+        Logger.i(TAG, "camera: ${photos.size} photos and ${videos.size} clips of ${ready.size} ready")
+
+        var progressed = 0
+        for (photo in photos) {
+            currentCoroutineContext().ensureActive()
+            when (val outcome = proxyApplier.apply(listOf(photo))) {
+                is ProxyOutcome.Completed -> progressed++
+                is ProxyOutcome.Stopped -> {
+                    Logger.w(TAG, "camera: ${outcome.failedFile} not written (${outcome.reason})")
+                    excluded += photo.id
+                }
+                ProxyOutcome.NothingToDo, ProxyOutcome.NotSupported -> excluded += photo.id
+            }
+        }
+        if (videos.isNotEmpty()) {
+            val result = videoOptimiser.optimiseEntries(videos, prefs.videoQuality)
+            progressed += result.optimised + result.skipped
+            excluded += result.failedIds
+        }
+
+        val notYetTried = ready.size - photos.size - videos.size
+        if (progressed > 0 && notYetTried > 0 && excluded.size <= MAX_EXCLUDED) {
+            Logger.i(TAG, "camera: $notYetTried left, queueing another batch")
+            BackupScheduling.enqueueOptimise(
+                WorkManager.getInstance(applicationContext),
+                BackupScheduling.PHASE_CAMERA,
+                Data.Builder()
+                    .putString(BackupScheduling.KEY_OPTIMISE_ALBUM, album)
+                    .putLong(BackupScheduling.KEY_OPTIMISE_BEFORE, before)
+                    .putStringArray(BackupScheduling.KEY_OPTIMISE_EXCLUDED, excluded.toTypedArray())
+                    .build()
+            )
+        }
         return Result.success()
     }
 
@@ -195,5 +282,8 @@ class OptimiseWorker @AssistedInject constructor(
 
         /** A transcode is tens of seconds, so few enough to finish well inside the window. */
         const val VIDEO_BATCH = 3
+
+        /** Failures a Camera pass carries forward before it gives up rather than grow its input without bound. */
+        const val MAX_EXCLUDED = 100
     }
 }

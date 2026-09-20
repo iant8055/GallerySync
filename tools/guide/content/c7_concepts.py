@@ -16,14 +16,19 @@ CHAPTER = Chapter(
             • **Sync.** Backs up, and also makes the album eligible for optimising: photos can be replaced by smaller copies that stay in your gallery. Optimising itself is controlled in Settings, under Sync, and is off until you switch it on.
             • **Archive.** Backs up, verifies, and then takes the files off the phone into its Trash/Recycle Bin, after your tap. The album leaves your gallery. The only mode that removes files. It is a standing instruction while the album holds files: files added to it later are covered too. Once Archive has emptied the album, the album leaves the list and its mode is forgotten.
 
+            ## The Camera album has no Sync
+            Camera offers **Off**, **Backup** and **Archive**. Sync would make a new photo smaller the
+            moment it is backed up, so Camera has a separate control instead: choose an age and optimise
+            only what is already old. See [[album-camera-optimise]].
+
             ## Only you set a mode
             Nothing sets an album's mode for you: not first-time setup, not the optimise settings, and not
             a backup. The one exception is the merge of duplicate album names, which can only ever set
             **Off**. See [[album-merge-warning]].
 
             ## Which one should I pick?
-            • Camera and albums you want protected but kept as they are: **Backup**.
-            • Camera and albums that fill the phone, where you want space back but still want to see the photos: **Sync**.
+            • Camera, and albums you want protected but kept as they are: **Backup**.
+            • Albums that fill the phone, where you want space back but still want to see the photos: **Sync**. For Camera, use **Backup** and optimise the old photos from its file list ([[album-camera-optimise]]).
             • Old albums you rarely open and want off the phone: **Archive**.
             • Not sure yet: leave it **Off**, or use **Backup**. You can change a mode at any time.
 

@@ -43,6 +43,7 @@ import com.gallery.sync.R
 import com.gallery.sync.domain.backup.DeletedFile
 import com.gallery.sync.domain.backup.DeletionOutcome
 import com.gallery.sync.ui.common.HeroOutlinedButton
+import com.gallery.sync.ui.common.SwipeChoiceBox
 import com.gallery.sync.ui.common.formatBytes
 import com.gallery.sync.ui.help.HelpButton
 import com.gallery.sync.ui.help.HelpTopic
@@ -152,14 +153,37 @@ private fun DeletedFilesScreen(
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
+                if (interactive) {
+                    item(key = "swipe-hint") {
+                        Text(
+                            text = stringResource(R.string.select_swipe_hint),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
                 items(state.files, key = { it.id }) { file ->
-                    DeletedFileCard(
-                        file = file,
-                        step = state.step,
-                        selected = file.id in state.selected,
+                    // Swiping right ticks a file and left unticks it, as everywhere else. A tick removes
+                    // nothing by itself: the confirmation dialog still stands between it and OneDrive.
+                    val selectedNow = file.id in state.selected
+                    SwipeChoiceBox(
                         enabled = interactive,
-                        onToggle = { viewModel.toggle(file.id) }
-                    )
+                        stateKey = selectedNow,
+                        onSwipeRight = { if (!selectedNow) viewModel.toggle(file.id) },
+                        onSwipeLeft = { if (selectedNow) viewModel.toggle(file.id) },
+                        accessibilityLabel = stringResource(
+                            if (selectedNow) R.string.select_action_deselect else R.string.select_action_select
+                        ),
+                        onAccessibilityAction = { viewModel.toggle(file.id) }
+                    ) { drawn ->
+                        DeletedFileCard(
+                            file = file,
+                            step = state.step,
+                            selected = selectedNow,
+                            enabled = interactive,
+                            onToggle = { viewModel.toggle(file.id) },
+                            modifier = drawn
+                        )
+                    }
                 }
             }
             ActionBar(state = state, viewModel = viewModel)
@@ -292,7 +316,8 @@ private fun DeletedFileCard(
     step: DeletedFilesStep,
     selected: Boolean,
     enabled: Boolean,
-    onToggle: () -> Unit
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val scheme = MaterialTheme.colorScheme
@@ -326,7 +351,7 @@ private fun DeletedFileCard(
     Surface(
         onClick = onToggle,
         enabled = enabled,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
         color = container,
         contentColor = content,

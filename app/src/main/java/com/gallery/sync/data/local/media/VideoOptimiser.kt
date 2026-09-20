@@ -153,6 +153,32 @@ class VideoOptimiser @Inject constructor(
         result
     }
 
+    /**
+     * Optimises exactly [entries], which the caller chose, at [quality].
+     *
+     * For the Camera album's manual control (Ian, 20 Sept 2026), where the person has been shown the
+     * list and ticked nothing off it but the files they swiped out. Writes the way the wizard does:
+     * the tree grant where one covers the file, otherwise the write grant Android gave for it when
+     * the person confirmed its dialog. A clip neither reaches is counted as failed and named in
+     * [VideoOptimiseResult.failedIds], so a chain can step over it instead of retrying it for ever.
+     *
+     * No settings are read here. Whether video is wanted at all, and how old it must be, were decided
+     * when [entries] was chosen.
+     */
+    suspend fun optimiseEntries(
+        entries: List<BackupEntryEntity>,
+        quality: com.gallery.sync.domain.backup.VideoQuality
+    ): VideoOptimiseResult = withContext(dispatcher) {
+        var result = VideoOptimiseResult()
+        for (entry in entries) {
+            coroutineContext.ensureActive()
+            val before = result.failed
+            result = optimiseForWizard(entry, quality, result)
+            if (result.failed > before) result = result.copy(failedIds = result.failedIds + entry.id)
+        }
+        result
+    }
+
     private suspend fun optimiseForWizard(
         entry: BackupEntryEntity,
         quality: com.gallery.sync.domain.backup.VideoQuality,

@@ -213,7 +213,7 @@ CHAPTER = Chapter(
             These files were deleted from your phone but a copy is in OneDrive, **whether Gallery Sync put
             it there or not**. The question is what to do with the OneDrive copies.
 
-            **Nothing is ticked to start with.** Tap a card to tick it; a ticked card turns red and says
+            **Nothing is ticked to start with.** Swipe a card right (or tap it) to tick it, and left to untick it; a ticked card turns red and says
             **Will be removed from OneDrive**.
             • **Remove N from OneDrive** asks you to confirm first. See [[dialog-remove-from-onedrive]]. The ticked files' OneDrive copies go to the OneDrive recycle bin, and **the files you left unticked stay in OneDrive for good.**
             • **Keep all in OneDrive** leaves every copy alone, whatever is ticked.
@@ -224,7 +224,7 @@ CHAPTER = Chapter(
             still in your phone's **trash** (Recycle Bin on some phones), where they stay for about a
             month. The question is what to do with the files themselves.
 
-            **Nothing is ticked to start with.** Tap a card to tick it; a ticked card says **Will be backed
+            **Nothing is ticked to start with.** Swipe a card right (or tap it) to tick it, and left to untick it; a ticked card says **Will be backed
             up to OneDrive**.
             • **Back up N to OneDrive** sends the ticked files to OneDrive from the trash. It only adds a copy: **nothing is deleted, and the files stay in the trash.** You can watch it count as it goes. **The files you left unticked stay in the trash.**
             • **Leave all in the trash** does nothing to any of them.

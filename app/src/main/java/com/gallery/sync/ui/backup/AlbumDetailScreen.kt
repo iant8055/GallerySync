@@ -12,10 +12,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -28,14 +31,17 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -51,18 +57,38 @@ import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.entity.BackupState
 import com.gallery.sync.domain.backup.AlbumFileSort
+import com.gallery.sync.domain.backup.CameraOptimiseAge
+import com.gallery.sync.domain.backup.CameraOptimisePlan
+import com.gallery.sync.domain.backup.CameraOptimiseSettings
 import com.gallery.sync.domain.backup.FilePin
 import com.gallery.sync.domain.backup.FileSort
 import com.gallery.sync.ui.common.HeroOutlinedButton
 import com.gallery.sync.ui.common.SignalIcons
+import com.gallery.sync.ui.common.SwipeChoiceBox
 import com.gallery.sync.ui.common.formatBytes
 import com.gallery.sync.ui.help.HelpButton
 import com.gallery.sync.ui.help.HelpTopic
 import com.gallery.sync.ui.help.WithHelp
 import com.gallery.sync.ui.theme.LocalGallerySyncColors
+import java.time.Instant
+
+/** Choose and Cancel are wider than their words, as a pair of buttons wants to be. Ian, 20 Sept 2026. */
+private val CameraButtonMinWidth = 140.dp
 
 /** Two columns of file cards from here up, as on the Restore tab: unfolded, more rows rather than wider ones. */
 private val WideBreakpoint = 600.dp
+
+/**
+ * What the Camera album's *Only list Photos/Videos older than…* control needs from its owner.
+ * Null for every other album, which is what keeps the control off them.
+ */
+data class CameraOptimiseControls(
+    val settings: CameraOptimiseSettings,
+    /** A pass is queued or running, so the button and the swipes wait. */
+    val running: Boolean,
+    /** The tap. Handed the cutoff the list was drawn with, so what is done is what was shown. */
+    val onOptimise: (modifiedBeforeEpochSeconds: Long) -> Unit
+)
 
 /**
  * An album's files.
@@ -80,11 +106,32 @@ fun AlbumDetailScreen(
     onBack: () -> Unit,
     /** The tick box: keep one file at full size, or let it follow its album again. See `FilePin`. */
     onSetPinned: (BackupEntryEntity, Boolean) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /** Only the Camera album passes this. See [CameraOptimiseControls]. */
+    camera: CameraOptimiseControls? = null
 ) {
     val context = LocalContext.current
     var sort by rememberSaveable { mutableStateOf(FileSort.NAME) }
-    val shown = remember(entries, sort) { AlbumFileSort.sorted(entries, sort) }
+
+    // The Camera album's chosen age and the cutoff it made, kept together and not remembered past this
+    // screen: it is a manual optimise, not a rule (Ian, 20 Sept 2026), so nothing here is stored.
+    var ageName by rememberSaveable(albumName) { mutableStateOf<String?>(null) }
+    var before by rememberSaveable(albumName) { mutableLongStateOf(0L) }
+    val age = ageName?.let { name -> CameraOptimiseAge.entries.firstOrNull { it.name == name } }
+    val plan = remember(entries, age, before, camera?.settings) {
+        if (camera != null && age != null) CameraOptimisePlan.of(entries, before, camera.settings) else null
+    }
+
+    // With an age chosen the list is the files that age would optimise, greyed ones included, and
+    // nothing else. Without one it is the album as it always was.
+    //
+    // In the Camera album nothing is listed until an age is chosen (Ian, 20 Sept 2026): a list of files
+    // that cannot be swiped, above a control that would make them swipeable, only confused.
+    val awaitingAge = camera != null && plan == null
+    val shown = remember(entries, sort, plan, awaitingAge) {
+        if (awaitingAge) emptyList()
+        else AlbumFileSort.sorted(plan?.let { it.eligible + it.optedOut } ?: entries, sort)
+    }
 
     // Which files get a tick box: the ones Restore has put back, and only those (Ian, 18 Sept 2026 —
     // the box exists to undo Restore's pin, so a file Restore never touched has nothing to undo).
@@ -105,7 +152,19 @@ fun AlbumDetailScreen(
                 entries = entries,
                 sort = sort,
                 onSort = { sort = it },
-                showKeepColumn = restoredIds.isNotEmpty(),
+                showKeepColumn = restoredIds.isNotEmpty() && plan == null,
+                camera = camera?.let {
+                    CameraHeader(
+                        controls = it,
+                        age = age,
+                        before = before,
+                        plan = plan,
+                        onAge = { picked ->
+                            ageName = picked?.name
+                            if (picked != null) before = picked.thresholdEpochSeconds(Instant.now())
+                        }
+                    )
+                },
                 onBack = onBack
             )
         }
@@ -118,6 +177,18 @@ fun AlbumDetailScreen(
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(16.dp)
             )
+        } else if (shown.isEmpty()) {
+            // Either no age is chosen yet, and this says what to do, or one is and nothing that old
+            // qualifies, and the header says why. The spacer keeps the bar, if one is showing, at the
+            // bottom of the screen rather than under the header.
+            if (awaitingAge) {
+                Text(
+                    text = stringResource(R.string.camera_choose_hint),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+            Spacer(Modifier.weight(1f))
         } else {
             BoxWithConstraints(modifier = Modifier.fillMaxWidth().weight(1f)) {
                 val columns = if (maxWidth >= WideBreakpoint) 2 else 1
@@ -134,12 +205,37 @@ fun AlbumDetailScreen(
                                 val position = index + column * half
                                 Box(modifier = Modifier.weight(1f)) {
                                     shown.getOrNull(position)?.let { entry ->
-                                        FileCard(
-                                            entry = entry,
-                                            context = context,
-                                            showKeepBox = entry.id in restoredIds,
-                                            onSetPinned = { pinned -> onSetPinned(entry, pinned) }
-                                        )
+                                        if (plan != null && camera != null) {
+                                            // Swiped out means pinned, which is all Keep at full size is. The
+                                            // same gesture and the same fade as the Archive tab.
+                                            val optedOut = FilePin.isPinned(entry.modeOverride)
+                                            SwipeChoiceBox(
+                                                enabled = !camera.running,
+                                                stateKey = optedOut,
+                                                onSwipeRight = { if (optedOut) onSetPinned(entry, false) },
+                                                onSwipeLeft = { if (!optedOut) onSetPinned(entry, true) },
+                                                accessibilityLabel = stringResource(
+                                                    if (optedOut) R.string.camera_action_optimise else R.string.camera_action_keep
+                                                ),
+                                                onAccessibilityAction = { onSetPinned(entry, !optedOut) }
+                                            ) { drawn ->
+                                                FileCard(
+                                                    entry = entry,
+                                                    context = context,
+                                                    showKeepBox = false,
+                                                    onSetPinned = {},
+                                                    modifier = drawn,
+                                                    optedOut = optedOut
+                                                )
+                                            }
+                                        } else {
+                                            FileCard(
+                                                entry = entry,
+                                                context = context,
+                                                showKeepBox = entry.id in restoredIds,
+                                                onSetPinned = { pinned -> onSetPinned(entry, pinned) }
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -147,6 +243,18 @@ fun AlbumDetailScreen(
                     }
                 }
             }
+        }
+
+        // The Optimise button, at the bottom as Restore's is (Ian, 20 Sept 2026). Shown when there is
+        // something to do or a run is in progress, exactly as Restore's bar shows for a selection or a run.
+        if (camera != null && plan != null && !camera.settings.everythingOff &&
+            (plan.eligible.isNotEmpty() || camera.running)
+        ) {
+            CameraOptimiseBar(
+                count = plan.eligible.size,
+                running = camera.running,
+                onOptimise = { camera.onOptimise(before) }
+            )
         }
     }
 }
@@ -166,6 +274,7 @@ private fun DetailHeader(
     sort: FileSort,
     onSort: (FileSort) -> Unit,
     showKeepColumn: Boolean,
+    camera: CameraHeader?,
     onBack: () -> Unit
 ) {
     val signal = LocalGallerySyncColors.current
@@ -236,9 +345,12 @@ private fun DetailHeader(
                         )
                     }
 
+                    if (camera != null) CameraOptimiseSection(camera)
+
                     // Sort by and Keep at full size on one line. The heading is two lines, and only
-                    // there when some file has a box.
-                    Row(
+                    // there when some file has a box. Not in the Camera album before an age is chosen:
+                    // there is nothing listed to sort.
+                    if (camera == null || camera.plan != null) Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -293,10 +405,13 @@ private fun FileCard(
     entry: BackupEntryEntity,
     context: android.content.Context,
     showKeepBox: Boolean,
-    onSetPinned: (Boolean) -> Unit
+    onSetPinned: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+    /** Swiped out of the Camera optimise list: faded, as Archive fades a file it will not take. */
+    optedOut: Boolean = false
 ) {
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().alpha(if (optedOut) 0.5f else 1f),
         shape = RoundedCornerShape(22.dp),
         color = MaterialTheme.colorScheme.surface,
         contentColor = MaterialTheme.colorScheme.onSurface,
@@ -322,10 +437,10 @@ private fun FileCard(
                     append(formatBytes(context, entry.sizeBytes))
                     if (entry.isVideo) append(" · video")
                 }
-                val marks = entry.statusLines()
+                val marks = if (optedOut) emptyList() else entry.statusLines()
                 Text(
                     text = buildAnnotatedString {
-                        append(size)
+                        append(if (optedOut) stringResource(R.string.camera_opted_out_detail, size) else size)
                         marks.forEach { (text, color) ->
                             append(" · ")
                             withStyle(SpanStyle(color = color)) { append(text) }
@@ -347,6 +462,172 @@ private fun FileCard(
             }
         }
     }
+}
+
+/**
+ * The one action, at the foot of the screen: the same bar as the Restore tab's, a full-width accent
+ * button on a tinted strip. Disabled and reading how many are left while a run is
+ * going, since there is nothing to stop and nothing to press.
+ */
+@Composable
+private fun CameraOptimiseBar(count: Int, running: Boolean, onOptimise: () -> Unit) {
+    val signal = LocalGallerySyncColors.current
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surfaceVariant
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Button(
+                onClick = onOptimise,
+                enabled = !running && count > 0,
+                modifier = Modifier.weight(1f),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = signal.accent,
+                    contentColor = signal.onAccent,
+                    disabledContainerColor = LocalContentColor.current.copy(alpha = 0.14f),
+                    disabledContentColor = LocalContentColor.current.copy(alpha = 0.55f)
+                )
+            ) {
+                Text(
+                    text = if (running) {
+                        stringResource(R.string.camera_optimise_working, count)
+                    } else {
+                        pluralStringResource(R.plurals.camera_optimise_button, count, count)
+                    },
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1
+                )
+            }
+        }
+    }
+}
+
+/** What the header needs to draw the Camera control: the choice, what it gives, and what to do about it. */
+private data class CameraHeader(
+    val controls: CameraOptimiseControls,
+    val age: CameraOptimiseAge?,
+    /** The cutoff the chosen [age] made, which the list and the button both use. */
+    val before: Long,
+    val plan: CameraOptimisePlan?,
+    val onAge: (CameraOptimiseAge?) -> Unit
+)
+
+/**
+ * *Only list Photos/Videos older than* [choose], and under it what that would do.
+ *
+ * Ian's design, 20 Sept 2026. Picking an age fills the list below with the files it would touch, and
+ * this says how many and about how much space they would give back; nothing is done until the button
+ * is pressed. The count and the estimate are the same for the button and for the worker that follows it.
+ * Files swiped out of the list below are not in either.
+ */
+@Composable
+private fun CameraOptimiseSection(camera: CameraHeader) {
+    val settings = camera.controls.settings
+    val context = LocalContext.current
+    var menuOpen by remember { mutableStateOf(false) }
+
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = stringResource(R.string.camera_optimise_heading),
+                style = MaterialTheme.typography.bodyMedium
+            )
+            HelpButton(HelpTopic.ALBUM_CAMERA_OPTIMISE)
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Box {
+                HeroOutlinedButton(
+                    onClick = { menuOpen = true },
+                    label = camera.age?.let { stringResource(it.label()) } ?: stringResource(R.string.camera_optimise_choose),
+                    modifier = Modifier.widthIn(min = CameraButtonMinWidth),
+                    enabled = !camera.controls.running
+                )
+                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                    CameraOptimiseAge.entries.forEach { option ->
+                        DropdownMenuItem(
+                            text = { Text(stringResource(option.label())) },
+                            onClick = {
+                                camera.onAge(option)
+                                menuOpen = false
+                            }
+                        )
+                    }
+                }
+            }
+            // Beside the chooser, and only once there is something to cancel: it drops the chosen age and
+            // the list goes back to the whole album. Ian, 20 Sept 2026, in place of a menu item.
+            if (camera.age != null) {
+                HeroOutlinedButton(
+                    onClick = { camera.onAge(null) },
+                    label = stringResource(R.string.camera_optimise_cancel),
+                    modifier = Modifier.widthIn(min = CameraButtonMinWidth),
+                    enabled = !camera.controls.running
+                )
+            }
+        }
+
+        val plan = camera.plan ?: return@Column
+        val count = plan.eligible.size
+
+        when {
+            settings.everythingOff -> Text(
+                text = stringResource(R.string.camera_optimise_all_off),
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            // Nothing to do, and either nothing that old qualifies or every one that does was swiped out.
+            count == 0 -> Text(
+                text = stringResource(
+                    if (plan.optedOut.isEmpty()) R.string.camera_optimise_none else R.string.camera_optimise_all_kept
+                ),
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            else -> {
+                Text(
+                    text = if (camera.controls.running) {
+                        stringResource(R.string.camera_optimise_working, count)
+                    } else {
+                        pluralStringResource(
+                            R.plurals.camera_optimise_summary,
+                            count,
+                            count,
+                            formatBytes(context, plan.estimatedSavedBytes)
+                        )
+                    },
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = stringResource(R.string.camera_optimise_swipe_hint),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
+
+        // Say which kind is missing when only one is switched off, so a shorter list is not a mystery.
+        if (!settings.everythingOff) {
+            if (!settings.photos) Text(stringResource(R.string.camera_optimise_photos_off), style = MaterialTheme.typography.bodySmall)
+            if (!settings.videos) Text(stringResource(R.string.camera_optimise_videos_off), style = MaterialTheme.typography.bodySmall)
+        }
+    }
+}
+
+private fun CameraOptimiseAge.label(): Int = when (this) {
+    CameraOptimiseAge.OneDay -> R.string.camera_age_day
+    CameraOptimiseAge.OneWeek -> R.string.camera_age_week
+    CameraOptimiseAge.OneMonth -> R.string.camera_age_month
+    CameraOptimiseAge.SixMonths -> R.string.camera_age_six_months
+    CameraOptimiseAge.OneYear -> R.string.camera_age_year
+    CameraOptimiseAge.All -> R.string.camera_age_all
 }
 
 private fun FileSort.label(): Int = when (this) {

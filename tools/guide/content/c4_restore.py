@@ -64,7 +64,7 @@ CHAPTER = Chapter(
             ## What it is
             One line of text whose wording changes with the situation:
             • **Swipe right to select / left to deselect. Tap to open.** On the folder list.
-            • **Tap a file → Then press Restore.** Inside a folder. Once you have selected a file, the first half changes to **Tap again to deselect it**. Nothing moves until you press Restore.
+            • **Swipe right to select / left to deselect → Then press Restore.** Inside a folder. Once you have selected a file, the first half changes to **Swipe left to deselect**. Tapping a file selects or unselects it too. Nothing moves until you press Restore.
             • **Nothing in OneDrive is missing from this phone, so there is nothing to bring back.** When the list is empty.
             • **A result after a restore**, such as **3 back to full quality · 2 back on this phone. 1 unchanged.** or **None recovered. 4 unchanged.** Unchanged means those files were left exactly as they were.
 
@@ -125,7 +125,7 @@ CHAPTER = Chapter(
 
         topic("restore-files-list", "The file list inside a folder", """
             ## What it is
-            One card per file. **Tap** to select or unselect it; a selected file is highlighted with a tick.
+            One card per file. **Swipe right** to select it and **swipe left** to deselect it, the same as on the folder list; a selected file is highlighted with a tick. Tapping a card does the same. Repeating a swipe changes nothing.
 
             **The name**, then one of:
             • **1.2 MB now · 8.4 MB full size.** A smaller copy on the phone, and the size of the original in OneDrive. Restoring swaps one for the other.
@@ -175,6 +175,6 @@ CHAPTER = Chapter(
             ## What happens
             Each file is downloaded from your OneDrive, checked, and only then put in place. It needs an
             internet connection and enough free space. Your OneDrive is only read, never changed.
-        """, ui=True),
+        """),
     ],
 )
