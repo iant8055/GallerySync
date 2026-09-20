@@ -66,7 +66,7 @@ one. On a phone rarely connected to Wi-Fi, that is indefinite.
 ### Optimise photos automatically — **off**
 `isAutoOptimiseEnabled = false`
 
-**If untouched:** no photo is ever replaced with a smaller copy unless the user taps Optimise.
+**If untouched:** no photo is ever replaced with a smaller copy. With the switches on, the **Mode** decides *when*. Ian, 19 Sept 2026: **Automatic** is *"as soon as a file hits an Album whose mode is SYNC or an Album mode is switched to SYNC"*, **Manual** is *"through the Sync Now button on the Albums tab"*. There is no Optimise button in Settings any more.
 
 **Why off:** optimising rewrites the file on the phone, and that is not undoable from the phone — the
 full-quality original only exists in OneDrive from then on. Recovering it is a download.
@@ -74,9 +74,12 @@ full-quality original only exists in OneDrive from then on. Recovering it is a d
 **Cost of leaving it off:** no space is reclaimed by optimising. The 4.8 GB of proxy candidates on a
 real library stays occupied until asked for.
 
-**Note:** turning it on does *not* make optimising unattended. Android requires a confirmation dialog
-per batch and that dialog needs an Activity. On means "ask me when there is something to do" rather
-than "do it silently".
+**Note (corrected 19 Sept 2026):** Automatic photo optimising **is** unattended inside the folders
+granted at setup: `OptimiseWorker`'s `sync-photos` pass writes through the tree grant with no dialog,
+started at the end of a backup run (so a new file is optimised the moment OneDrive has confirmed it)
+and when an album is switched to Sync. A photo **outside** the granted folders still needs Android's
+confirmation, which only an Activity can show, so it waits until the app is open (Automatic) or Sync
+now is pressed (Manual).
 
 ---
 
@@ -313,12 +316,11 @@ is the worst possible moment to offer a bulk action.
 |---|---|---|
 | **Automatic sync → off** | No | Scheduled runs stop. Nothing already uploaded changes. Photos taken from now on are not backed up until "Sync now" is tapped, and nothing will remind you. |
 | **Mobile data → on** | No | The next run may use cellular. If the first backup has not completed, that is the whole library — 148 GB on the measured device. This is the only setting whose change can cost real money. |
-| **Optimise automatically → on** | No | The app offers to optimise when candidates exist, instead of waiting to be found. Still one Android confirmation per batch; it cannot become unattended. Already-optimised photos are unaffected. |
+| **Optimise photos / video → Mode Automatic** | No | Photos in Sync albums are optimised as soon as OneDrive has confirmed them, and when an album is switched to Sync; video does the same but only while charging. Already-optimised files are unaffected. |
+| **Optimise photos / video → Mode Manual** | No | Nothing is optimised until **Sync now** is pressed on the Albums tab, which is then enabled even when there is nothing to send. |
 | **New albums start as → Backup or Sync** | **No** — existing albums keep their modes | Only albums discovered *after* the change get it. `insertIfNew` uses `IGNORE`, so a choice already made is never overwritten. The live risk is different: a new folder appearing later — a messaging app's media directory, a new camera mode — begins uploading without a decision. Archive can never be selected here. |
 | **Backs up into → a new folder** | No | New uploads go to the new path. Nothing already uploaded moves, and the old root stays permanently in the search set, so nothing is stranded and nothing is sent twice. |
 | **First backup hour / charging** | Only until the first backup completes | Moves or removes the overnight gate. With charging off, a fourteen-hour transfer can begin on battery. Once `hasCompletedFirstBackup` is set the whole setting is inert, and it is one-way. |
-| **Waiting period → shorter** | **Yes, under Ask** | Same mechanism as Leave → Ask: it re-tests existing timestamps, so shortening it surfaces more files immediately. A transient absence — unmounted card, revoked permission, gallery reindex — is likelier to be offered as a deletion. |
-| **Waiting period → longer** | Yes | Files currently in the review list may drop out of it until they qualify again. |
 | **Appearance** | No | Cosmetic. Note it is an in-app override, so `cmd uimode night yes` does not exercise it — see above. |
 
 ## Two changes that cannot be undone by changing the setting back

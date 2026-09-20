@@ -12,6 +12,7 @@ import com.gallery.sync.data.local.media.ProxyApplier
 import com.gallery.sync.data.local.media.ProxyOutcome
 import com.gallery.sync.data.local.media.VideoOptimiser
 import com.gallery.sync.data.local.media.VideoReadiness
+import com.gallery.sync.worker.PhotoOptimiseLauncher
 import com.gallery.sync.worker.VideoOptimiseLauncher
 import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.domain.backup.AlbumMergeWarning
@@ -33,14 +34,20 @@ import com.gallery.sync.domain.backup.FilePin
 import com.gallery.sync.domain.backup.ReconcileWithCloud
 import com.gallery.sync.domain.backup.MediaAge
 import com.gallery.sync.domain.backup.OptimiseMode
+import com.gallery.sync.domain.backup.OptimiseOnSyncNow
+import com.gallery.sync.domain.backup.PhotoOptimisePolicy
 import com.gallery.sync.domain.backup.StopReason
 import com.gallery.sync.domain.backup.VideoQuality
 import com.gallery.sync.util.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -133,17 +140,6 @@ data class AlbumRow(
      */
     val isArchivedAndEmpty: Boolean
         get() = mode == AlbumMode.ARCHIVE && itemCount == 0 && everBackedUpCount > 0
-}
-
-/** What the ongoing video chain is doing, for the Settings screen to say. */
-enum class VideoOptimiseRun {
-    IDLE,
-
-    /** A batch is executing, or about to. */
-    WORKING,
-
-    /** Queued, and held back only by the charger. */
-    WAITING_FOR_CHARGER
 }
 
 enum class AlbumStatus {
@@ -254,15 +250,19 @@ data class BackupUiState(
     val removalHeldBack: CloudConfirmation? = null,
     /** Photos whose local copy could be replaced by a proxy, and what they occupy now. */
     val proxyCandidateCount: Int = 0,
-    val proxyCandidateBytes: Long = 0L,
     val canProxy: Boolean = false,
-    val proxyStatus: ProxyStatus? = null,
     /** Clips ready to optimise: in a Sync album, verified, old enough, and inside a granted folder. */
     val videoCandidateCount: Int = 0,
-    val videoCandidateBytes: Long = 0L,
-    /** Clips that would qualify but sit in a folder nobody granted, so they are left alone. */
-    val videoOutsideCount: Int = 0,
-    val videoOptimiseRun: VideoOptimiseRun = VideoOptimiseRun.IDLE,
+    /**
+     * Something set to Manual is ready, so **Sync now** has work even with nothing to send. Ian,
+     * 19 Sept 2026: Manual means through that button. See [OptimiseOnSyncNow].
+     */
+    val manualOptimiseWaiting: Boolean = false,
+    /**
+     * Sync now has just finished and photos are Manual, so the screen should offer Android's dialog for
+     * any photo outside the granted folders. Consumed by [BackupViewModel.consumeProxyDialogRequest].
+     */
+    val proxyDialogRequested: Boolean = false,
     val defaultAlbumMode: AlbumMode = AlbumMode.DEFAULT,
     /** Whether the restore screen lists cloud folders that hold nothing. */
     val showEmptyCloudFolders: Boolean = false,
@@ -400,30 +400,9 @@ data class BackupUiState(
      * user had started.
      */
     val canRunBackup: Boolean get() = isRunning || pendingCount > 0
-}
 
-/** What optimising photos is doing, or what it did. */
-sealed interface ProxyStatus {
-
-    data object Working : ProxyStatus
-
-    data class Done(val proxiedCount: Int, val bytesReclaimed: Long) : ProxyStatus
-
-    /** Stopped at a file that would not replace even after retries. */
-    data class Stopped(
-        val proxiedCount: Int,
-        val bytesReclaimed: Long,
-        val failedFile: String,
-        val reason: String
-    ) : ProxyStatus
-
-    /**
-     * Android refused to produce the consent dialog, so nothing was even asked.
-     *
-     * Worth its own state: without it the button is pressed, no dialog appears, no message
-     * appears, and the app looks broken with nothing to act on.
-     */
-    data object CouldNotAsk : ProxyStatus
+    /** Whether the Sync now button does anything: files to send, or Manual optimising to run. */
+    val canSyncNow: Boolean get() = pendingCount > 0 || manualOptimiseWaiting
 }
 
 @HiltViewModel
@@ -438,9 +417,13 @@ class BackupViewModel @Inject constructor(
     private val proxyApplier: ProxyApplier,
     private val videoOptimiser: VideoOptimiser,
     private val videoOptimise: VideoOptimiseLauncher,
+    private val photoOptimise: PhotoOptimiseLauncher,
     private val settings: BackupSettings,
     @param:ApplicationContext private val context: Context
 ) : ViewModel() {
+
+    /** Set when Sync now is pressed with photos on Manual, and read when that run finishes. */
+    private var offerProxyDialogAfterRun = false
 
     /** Captured when consent is requested, so exactly that set is what gets rewritten. */
     private var pendingProxyCandidates: List<BackupEntryEntity> = emptyList()
@@ -487,6 +470,7 @@ class BackupViewModel @Inject constructor(
         }
         observeBackgroundWork()
         observeVideoOptimise()
+        observeWhatOptimisingWaits()
         observeCloudStatus()
         viewModelScope.launch {
             settings.albumMergeWarnings.collect { warnings ->
@@ -530,18 +514,36 @@ class BackupViewModel @Inject constructor(
      */
     private fun observeVideoOptimise() {
         viewModelScope.launch {
-            BackupScheduling.videoOptimiseWork(WorkManager.getInstance(context)).collectLatest { infos ->
-                val live = infos.filter { !it.state.isFinished }
-                val run = when {
-                    live.any { it.state == WorkInfo.State.RUNNING } -> VideoOptimiseRun.WORKING
-                    live.any { BackupScheduling.TAG_WAITING_FOR_CHARGER in it.tags } ->
-                        VideoOptimiseRun.WAITING_FOR_CHARGER
-                    live.isNotEmpty() -> VideoOptimiseRun.WORKING
-                    else -> VideoOptimiseRun.IDLE
-                }
-                _state.update { it.copy(videoOptimiseRun = run) }
+            BackupScheduling.videoOptimiseWork(WorkManager.getInstance(context)).collectLatest {
                 refreshVideoReadiness()
             }
+        }
+    }
+
+    /**
+     * Keeps "Sync now has optimising to run" honest while the app is open.
+     *
+     * The state that enables the button is worked out from the ledger, and until now it was only
+     * re-read when a run reported through a chain this screen watches. A file taken with the app
+     * open is uploaded by the content-triggered run, which is replaced by its own successor the moment
+     * it finishes, so no "finished" is ever seen: the button stayed grey with a Manual photo waiting
+     * (found on the Moto G, 20 Sept 2026), and stayed enabled after Sync now had optimised it.
+     *
+     * Re-reads whenever the number of uploaded files changes, which is how a file becomes a candidate,
+     * or the optimise chain changes state, which is how it stops being one. Debounced, because an
+     * upload run changes the first many times a minute and the read is not free.
+     */
+    @OptIn(FlowPreview::class)
+    private fun observeWhatOptimisingWaits() {
+        val workManager = WorkManager.getInstance(context)
+        viewModelScope.launch {
+            merge(
+                entryDao.observeCount(BackupState.UPLOADED).map { },
+                workManager.getWorkInfosForUniqueWorkFlow(BackupScheduling.OPTIMISE_WORK)
+                    .map { infos -> infos.map { it.state } }
+                    .distinctUntilChanged()
+                    .map { }
+            ).debounce(1_500).collect { refreshCounts() }
         }
     }
 
@@ -803,7 +805,19 @@ class BackupViewModel @Inject constructor(
                     settings.current().allowMeteredNetwork
                 )
             }
+
+            // Ian, 19 Sept 2026: Automatic optimising runs *"as soon as ... an Album mode is switched to
+            // SYNC"*. The run queued above will ask again when it finishes, but files already verified
+            // in OneDrive need no run, and waiting for one that has nothing to send would leave them
+            // at full size.
+            if (mode == AlbumMode.SYNC) startOptimisingIfDue()
         }
+    }
+
+    /** Asks both kinds to start if their Settings say they should run on their own. Never fails the caller. */
+    private suspend fun startOptimisingIfDue() {
+        runCatching { photoOptimise.requestAutomatic() }
+        runCatching { videoOptimise.requestAutomatic() }
     }
 
     /**
@@ -820,16 +834,34 @@ class BackupViewModel @Inject constructor(
     fun setOptimiseEnabled(enabled: Boolean) {
         viewModelScope.launch {
             settings.setOptimiseEnabled(enabled)
+            startPhotosIfDue()
             startVideoIfDue()
         }
     }
 
     fun setOptimisePhotos(enabled: Boolean) {
-        viewModelScope.launch { settings.setOptimisePhotos(enabled) }
+        viewModelScope.launch {
+            settings.setOptimisePhotos(enabled)
+            startPhotosIfDue()
+            refreshCounts()
+        }
     }
 
     fun setPhotoOptimiseMode(mode: OptimiseMode) {
-        viewModelScope.launch { settings.setPhotoOptimiseMode(mode) }
+        viewModelScope.launch {
+            settings.setPhotoOptimiseMode(mode)
+            startPhotosIfDue()
+            refreshCounts()
+        }
+    }
+
+    /**
+     * A photo switch just changed. If photos are now due to optimise on their own, start the pass
+     * rather than waiting for the next backup run to notice, which could be six hours away. Quiet on
+     * failure: the next backup run asks again.
+     */
+    private suspend fun startPhotosIfDue() {
+        runCatching { photoOptimise.requestAutomatic() }
     }
 
     fun setOptimiseVideo(enabled: Boolean) {
@@ -852,16 +884,6 @@ class BackupViewModel @Inject constructor(
             startVideoIfDue()
             refreshVideoReadiness()
         }
-    }
-
-    /**
-     * The button: optimise video now, without waiting for the charger.
-     *
-     * The same chain an automatic run uses, so it stops the same way (the switch) and reports the same
-     * way (the status line). It runs in the background and the app can be closed.
-     */
-    fun optimiseVideoNow() {
-        viewModelScope.launch { videoOptimise.requestNow() }
     }
 
     /**
@@ -965,7 +987,6 @@ class BackupViewModel @Inject constructor(
             archiveAlbumsReady = redundant.map { it.album }.distinct().sorted(),
             canRemoveLocalCopies = localCopyRemover.isSupported(),
             proxyCandidateCount = proxyCandidates.size,
-            proxyCandidateBytes = proxyCandidates.sumOf { it.sizeBytes },
             canProxy = proxyApplier.isSupported()
         )
         refreshVideoReadiness()
@@ -987,8 +1008,16 @@ class BackupViewModel @Inject constructor(
         _state.update {
             it.copy(
                 videoCandidateCount = ready.count,
-                videoCandidateBytes = ready.bytes,
-                videoOutsideCount = ready.outsideGrantedFolders
+                manualOptimiseWaiting = OptimiseOnSyncNow.isWaiting(
+                    setupComplete = prefs.hasCompletedSetup,
+                    optimiseEnabled = prefs.isOptimiseEnabled,
+                    optimisePhotos = prefs.optimisePhotos,
+                    photoMode = prefs.photoOptimiseMode,
+                    optimiseVideo = prefs.optimiseVideo,
+                    videoMode = prefs.videoOptimiseMode,
+                    photosReady = it.proxyCandidateCount,
+                    videoReady = ready.count
+                )
             )
         }
     }
@@ -1001,30 +1030,25 @@ class BackupViewModel @Inject constructor(
      * files the user never saw in the dialog.
      */
     suspend fun buildProxyWriteRequest(): IntentSender? {
-        pendingProxyCandidates = proxyApplier.candidates()
+        // Only what the background pass cannot do. Photos inside a granted folder are rewritten by
+        // `OptimiseWorker` with no dialog, so they are neither asked about nor rewritten here. Ian,
+        // 19 Sept 2026: Automatic means as soon as a file arrives, which a dialog can never be.
+        val outside = proxyApplier.splitByConsent(proxyApplier.candidates()).outside
+        pendingProxyCandidates = outside
+        if (outside.isEmpty()) return null
 
-        // No dialog when every candidate sits inside a granted SAF tree — the grant already carries
-        // write permission, verified on hardware 19 Aug 2026. Returning null here means the caller
-        // proceeds straight to the rewrite, which is what makes "optimise automatically" mean what
-        // its name says rather than "ask me about it automatically".
-        if (!proxyApplier.needsWriteRequest(pendingProxyCandidates)) {
-            Logger.i("BackupViewModel", "optimising ${pendingProxyCandidates.size} files through the tree grant")
-            applyPendingProxies()
-            return null
-        }
-
-        val sender = proxyApplier.createWriteRequest(pendingProxyCandidates)
-
-        // Clears any earlier result on success, so the dialog is not shown over a stale message.
-        _state.value = _state.value.copy(
-            proxyStatus = if (sender == null) ProxyStatus.CouldNotAsk else null
-        )
+        val sender = proxyApplier.createWriteRequest(outside)
 
         // The count shown may have been built before files moved underneath it; put the screen
         // back in step with what is actually eligible now.
         if (sender == null) refreshCounts()
 
         return sender
+    }
+
+    /** The screen has seen the request that Sync now finished and is about to ask, so it is not asked twice. */
+    fun consumeProxyDialogRequest() {
+        _state.update { it.copy(proxyDialogRequested = false) }
     }
 
     fun onProxyConsentGranted() = applyPendingProxies()
@@ -1040,25 +1064,17 @@ class BackupViewModel @Inject constructor(
         if (candidates.isEmpty()) return
 
         viewModelScope.launch {
-            _state.value = _state.value.copy(proxyStatus = ProxyStatus.Working)
-
-            val status = when (val outcome = proxyApplier.apply(candidates)) {
+            when (val outcome = proxyApplier.apply(candidates)) {
                 is ProxyOutcome.Completed ->
-                    ProxyStatus.Done(outcome.proxiedCount, outcome.bytesReclaimed)
+                    Logger.i("BackupViewModel", "optimised ${outcome.proxiedCount} photos, freed ${outcome.bytesReclaimed} bytes")
 
-                is ProxyOutcome.Stopped -> ProxyStatus.Stopped(
-                    proxiedCount = outcome.proxiedCount,
-                    bytesReclaimed = outcome.bytesReclaimed,
-                    failedFile = outcome.failedFile,
-                    reason = outcome.reason
-                )
+                is ProxyOutcome.Stopped ->
+                    Logger.w("BackupViewModel", "optimising stopped at ${outcome.failedFile}: ${outcome.reason}")
 
-                ProxyOutcome.NothingToDo, ProxyOutcome.NotSupported ->
-                    ProxyStatus.Done(0, 0L)
+                ProxyOutcome.NothingToDo, ProxyOutcome.NotSupported -> Unit
             }
 
             pendingProxyCandidates = emptyList()
-            _state.value = _state.value.copy(proxyStatus = status)
             refresh()
         }
     }
@@ -1138,6 +1154,10 @@ class BackupViewModel @Inject constructor(
         lastCompletedSeen = -1
         if (_state.value.isRunning) return
         viewModelScope.launch {
+            val prefs = settings.current()
+            offerProxyDialogAfterRun = PhotoOptimisePolicy.runsOnSyncNow(
+                prefs.hasCompletedSetup, prefs.isOptimiseEnabled, prefs.optimisePhotos, prefs.photoOptimiseMode
+            )
             BackupScheduling.enqueueManualRun(
                 WorkManager.getInstance(context),
                 settings.current().allowMeteredNetwork
@@ -1297,7 +1317,15 @@ class BackupViewModel @Inject constructor(
                         lastCompletedSeen = done
                         refreshCounts()
                     }
-                    if (info?.state?.isFinished == true) refresh()
+                    if (info?.state?.isFinished == true) {
+                        refresh()
+                        // Sync now has done what it can without a dialog. Photos outside the granted
+                        // folders are asked about now, while the app is on screen to show it.
+                        if (info.state == WorkInfo.State.SUCCEEDED && offerProxyDialogAfterRun) {
+                            offerProxyDialogAfterRun = false
+                            _state.update { it.copy(proxyDialogRequested = true) }
+                        }
+                    }
                 }
         }
     }

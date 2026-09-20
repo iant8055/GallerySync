@@ -306,7 +306,8 @@ CHAPTER = Chapter(
         topic("settings-optimise-photos", "Optimise photos", """
             ## What it is
             A switch. Off is the starting choice. On says **Photos in Sync albums are optimised for
-            storage.** A **Mode** row appears under it. See [[settings-optimise-mode]].
+            storage.** A **Mode** row appears under it, and it decides when this happens. See
+            [[settings-optimise-mode]].
 
             ## What optimising a photo does
             The photo on your phone is replaced with a smaller copy, reduced to about 2048 pixels on the
@@ -317,7 +318,8 @@ CHAPTER = Chapter(
             ## Only in Sync albums
             Backup and Archive albums never optimise, and Off does nothing. A photo is only ever
             optimised after OneDrive has confirmed it holds the original at the same size, and a
-            photo that would not get smaller is left alone.
+            photo that would not get smaller is left alone. A photo you have set to **Keep at full
+            size** is never touched.
 
             See [[how-optimising-works]].
         """, ui=True),
@@ -325,8 +327,7 @@ CHAPTER = Chapter(
         topic("settings-optimise-video", "Optimise video", """
             ## What it is
             A switch. Off is the starting choice. Turning it on reveals **Mode**, **Older than** and
-            **Quality**, and a status line with a button underneath. See
-            [[settings-optimise-video-status]].
+            **Quality**.
 
             ## What it does
             Old video in Sync albums is replaced by a smaller copy on your phone. The full-quality
@@ -339,17 +340,17 @@ CHAPTER = Chapter(
             • It is in an album set to **Sync**.
             • OneDrive has confirmed it at the same size.
             • It is older than the age you chose.
-            • It is in a folder you gave Gallery Sync access to. A clip anywhere else is left alone, and the status line says how many.
+            • It is in a folder you gave Gallery Sync access to. A clip anywhere else is left alone.
             • It has not been optimised already, and has not been found already small enough to leave.
 
             ## When it happens
             **Automatic** starts by itself, and only while the phone is charging, because re-encoding
             video is the heaviest thing the app does. It starts:
-            • When a backup run finishes everything. That happens after every new photo and on the six-hourly check, which is also how a clip that has just grown older than your chosen age is noticed.
+            • When a backup run finishes everything. That happens after every new video, when you switch an album to Sync, and on the six-hourly check, which is also how a clip that has just grown older than your chosen age is noticed.
             • When you change Optimise video, Mode or Older than.
 
-            **Manual** waits until you press the button. In either mode the button starts it straight
-            away, without waiting for the charger.
+            **Manual** waits until you press **Sync now** on the Albums tab. It then starts straight
+            away, without waiting for the charger. See [[albums-run-controls]].
 
             It works in the background, a few clips at a time, and you can close the app. Switching
             Optimise video off stops it after the clip in progress.
@@ -357,35 +358,17 @@ CHAPTER = Chapter(
             See [[how-optimising-works]].
         """, ui=True),
 
-        topic("settings-optimise-video-status", "The video status and button", """
-            ## What it is
-            Shown under the video settings once Optimise video is on. It says one of four things:
-
-            • **12 clips can be optimised.** A smaller copy stays on the phone and the full-quality original stays in OneDrive. Followed by a button, **Optimise 1.4 GB of video**, which starts it now.
-            • **No video is ready to optimise.** A clip has to be in a Sync album, backed up to OneDrive, and older than the age you set.
-            • **Video optimising is waiting for the phone to charge.** An automatic run is queued and needs the charger. The button starts it now instead.
-            • **Optimising video in the background. 9 clips left.** A run is working. The number falls as each clip is done.
-
-            If some clips would qualify but are in a folder you have not given access to, a further line
-            says so: **N clips are in folders you have not given access to, so they are left alone.**
-
-            ## Where the numbers come from
-            The app's own record of clips it has backed up, narrowed to those in Sync albums, older than
-            your chosen age, still on the phone, and in a folder you gave access to. The size is what
-            those clips take on your phone now.
-
-            ## Good to know
-            "Ready" counts clips the app can rewrite without asking you. A clip in a folder you did not
-            grant is not counted, so the figure can be smaller than the number of videos you own.
-        """, ui=True),
-
         topic("settings-optimise-mode", "Mode: Automatic or Manual", """
             ## What it is
             A box under **Optimise photos** (and another under **Optimise video**) showing
-            **Automatic** or **Manual**.
+            **Automatic** or **Manual**. It decides when optimising happens.
 
-            • **Automatic.** Photos are optimised on their own when you open the Albums or Settings tab, with no button to press. For folders you gave access to during setup this happens without a prompt. For anything outside them, Android asks you to confirm each batch. Video is optimised on its own in the background, while the phone is charging.
-            • **Manual.** Nothing happens until you press the **Optimise** button shown further down. The list of what is ready to optimise stays up to date, so you can choose your own moment.
+            • **Automatic.** As soon as a file reaches an album set to **Sync**, or an album is switched to Sync. The file is sent to OneDrive first and optimised the moment OneDrive has confirmed it. Photos are optimised in the background, with no prompt, for folders you gave access to during setup. Video waits for the phone to be charging.
+            • **Manual.** Nothing happens until you press **Sync now** on the Albums tab. That sends whatever is waiting and then optimises. **Sync now** can be pressed even when nothing is left to send, if something is ready to optimise. See [[albums-run-controls]].
+
+            ## Photos outside the folders you gave access to
+            The app cannot change these on its own. Android asks you to confirm them, so they wait until
+            you open the app (Automatic) or press **Sync now** (Manual), and the prompt then appears.
 
             ## Good to know
             Manual is not the same as switching optimising off. Automatic is the starting mode when you
@@ -425,34 +408,6 @@ CHAPTER = Chapter(
             ## Good to know
             Optimising re-encodes the clip at a lower resolution. Nothing is cut, and it stays in your
             gallery. The full-quality original stays in OneDrive.
-        """, ui=True),
-
-        topic("settings-optimise-status", "The optimise status and button", """
-            ## What it is
-            Shown under the switches once optimising is on. On Android 11 or newer:
-
-            • **12 photos can be optimised.** A smaller copy stays on the phone and the full-size original stays in OneDrive. Followed by a button, **Optimise 480 MB of photos**, which does it now.
-            • **Nothing to optimise yet.** A photo can only be optimised once it is verified in OneDrive, so set an album to Sync and run a sync first.
-            • **Every eligible photo is already optimised.**
-
-            During and after a run:
-            • **Optimising...** while it works.
-            • **Optimised 12 photos and freed 480 MB.** when done.
-            • **Stopped after 5 photos. One could not be replaced (reason). Nothing after it was changed.** if something went wrong.
-            • **Android wouldn't show the permission prompt, so no photos were changed.** Try again.
-
-            On older Android: **Optimising photos needs Android 11 or newer.**
-
-            Video has its own status and button, described in [[settings-optimise-video-status]]. Each
-            kind only appears while its own switch is on.
-
-            ## Where the numbers come from
-            The app's own record of which photos are in Sync albums, are verified in OneDrive, and have
-            not been optimised yet. The size is what those photos take on your phone now.
-
-            ## Good to know
-            Unlike Archive, optimising replaces the photo in place instead of moving it to a bin, so the
-            space it frees is not held back waiting for a bin to be emptied.
         """, ui=True),
 
         topic("settings-section-restore", "Restore (Settings)", """

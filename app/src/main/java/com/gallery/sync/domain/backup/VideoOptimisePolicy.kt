@@ -30,6 +30,20 @@ object VideoOptimisePolicy {
     ): Boolean = setupComplete && optimiseEnabled && optimiseVideo && mode == OptimiseMode.Auto
 
     /**
+     * Whether pressing **Sync now** should also optimise video.
+     *
+     * Ian, 19 Sept 2026: Manual means *"through the Sync Now button on the Albums tab"*. So it is the
+     * mode that answers here, the mirror of [runsAutomatically]: a Manual clip waits for that button and
+     * an Automatic one never needs it.
+     */
+    fun runsOnSyncNow(
+        setupComplete: Boolean,
+        optimiseEnabled: Boolean,
+        optimiseVideo: Boolean,
+        mode: OptimiseMode
+    ): Boolean = setupComplete && optimiseEnabled && optimiseVideo && mode == OptimiseMode.Manual
+
+    /**
      * Whether a batch that just finished should be followed by another.
      *
      * Two things have to be true, and between them they are what makes the chain end.

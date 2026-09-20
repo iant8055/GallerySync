@@ -66,6 +66,26 @@ class VideoOptimiseLauncher @Inject constructor(
     }
 
     /**
+     * Starts a chain because somebody pressed **Sync now** and video is set to Manual.
+     *
+     * Ian, 19 Sept 2026: Manual means through the Sync Now button. Not held for the charger, since they
+     * asked. Does nothing for Automatic video, which has already been queued for the charger, and does
+     * not need a second nudge that would skip the wait.
+     */
+    suspend fun requestOnSyncNow(): Boolean {
+        val prefs = settings.current()
+        if (!VideoOptimisePolicy.runsOnSyncNow(
+                setupComplete = prefs.hasCompletedSetup,
+                optimiseEnabled = prefs.isOptimiseEnabled,
+                optimiseVideo = prefs.optimiseVideo,
+                mode = prefs.videoOptimiseMode
+            )
+        ) return false
+        if (videoOptimiser.readiness().count == 0) return false
+        return requestNow()
+    }
+
+    /**
      * Starts a chain because somebody pressed Optimise now.
      *
      * Not held for the charger, since they asked. A run that is only *waiting* for it is replaced;

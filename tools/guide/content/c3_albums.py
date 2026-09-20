@@ -119,7 +119,7 @@ CHAPTER = Chapter(
             The buttons at the bottom of the green card. They change depending on what is happening.
 
             **When nothing is running**
-            • **Sync now** starts a backup. It is greyed out when there is nothing to send, meaning every file in your Backup, Sync and Archive albums is already sent.
+            • **Sync now** starts a backup, and then optimises anything you set to Manual in Settings. It is greyed out when there is nothing to send and nothing waiting to be optimised, meaning every file in your Backup, Sync and Archive albums is already sent.
             • **Rescan** looks at the phone again and asks OneDrive again, so all the figures are fresh. While it works it says **Checking OneDrive...** and is disabled.
 
             **When a backup is running**

@@ -258,7 +258,10 @@ Three areas, fully independent:
 1. **The install wizard's four modes.** One-time, at install. Acts only on files already on the
    device. Does **not** set album modes and does **not** write the Settings optimise tree.
 2. **The ongoing optimise settings.** Global, not per-album. Applies only to Sync albums — Backup and
-   Archive never optimise. Does **not** set album modes.
+   Archive never optimise. Does **not** set album modes. **When it runs (Ian, 19 Sept 2026):**
+   *Automatic* is as soon as a file reaches a Sync album (after OneDrive has confirmed it) or an album is
+   switched to Sync; *Manual* is through **Sync now** on the Albums tab, which is enabled for it even
+   with nothing to send. There is no optimise button or status line in Settings.
 3. **Album modes** (Off / Backup / Sync / Archive). Set **only** by the user, per album.
 
 **One exception, made by Ian, 16 Sept 2026 — a folder/album conflict sets the mode to `Off`.** When the

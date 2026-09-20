@@ -58,11 +58,9 @@ enum class HelpTopic(
     SETTINGS_SECTION_SYNC("settings-section-sync", R.string.help_settings_section_sync_title, R.string.help_settings_section_sync_body),
     SETTINGS_OPTIMISE_PHOTOS("settings-optimise-photos", R.string.help_settings_optimise_photos_title, R.string.help_settings_optimise_photos_body),
     SETTINGS_OPTIMISE_VIDEO("settings-optimise-video", R.string.help_settings_optimise_video_title, R.string.help_settings_optimise_video_body),
-    SETTINGS_OPTIMISE_VIDEO_STATUS("settings-optimise-video-status", R.string.help_settings_optimise_video_status_title, R.string.help_settings_optimise_video_status_body),
     SETTINGS_OPTIMISE_MODE("settings-optimise-mode", R.string.help_settings_optimise_mode_title, R.string.help_settings_optimise_mode_body),
     SETTINGS_VIDEO_AGE("settings-video-age", R.string.help_settings_video_age_title, R.string.help_settings_video_age_body),
     SETTINGS_VIDEO_QUALITY("settings-video-quality", R.string.help_settings_video_quality_title, R.string.help_settings_video_quality_body),
-    SETTINGS_OPTIMISE_STATUS("settings-optimise-status", R.string.help_settings_optimise_status_title, R.string.help_settings_optimise_status_body),
     SETTINGS_SECTION_RESTORE("settings-section-restore", R.string.help_settings_section_restore_title, R.string.help_settings_section_restore_body),
     SETTINGS_SHOW_EMPTY_FOLDERS("settings-show-empty-folders", R.string.help_settings_show_empty_folders_title, R.string.help_settings_show_empty_folders_body),
     SETTINGS_SECTION_ARCHIVE("settings-section-archive", R.string.help_settings_section_archive_title, R.string.help_settings_section_archive_body);

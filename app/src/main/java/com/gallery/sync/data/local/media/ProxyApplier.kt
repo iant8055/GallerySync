@@ -47,6 +47,13 @@ sealed interface ProxyOutcome {
 }
 
 /**
+ * Candidates split by how they may be written. [inside] sit in a folder the user granted at setup, so
+ * they can be rewritten with no dialog and therefore in the background. [outside] need Android's
+ * confirmation, which only an Activity can raise.
+ */
+data class ConsentSplit(val inside: List<BackupEntryEntity>, val outside: List<BackupEntryEntity>)
+
+/**
  * Replaces local originals with downscaled proxies.
  *
  * **The destructive half of proxying.** After this runs, the full-resolution image exists only in
@@ -151,6 +158,24 @@ class ProxyApplier @Inject constructor(
         val paths = entries.mapNotNull { relativePathOf(Uri.parse(it.contentUri)) }
         if (paths.size != entries.size) return true
         return !safWriter.covers(paths)
+    }
+
+    /**
+     * Sorts [entries] into the ones a granted folder covers and the ones that need a dialog.
+     *
+     * Asked per file, unlike [needsWriteRequest], which answers for a whole batch. Background optimising
+     * has to act on the covered ones and leave the rest alone, and one file outside a folder must not
+     * keep the other nine hundred from being done. A file whose location cannot be read counts as
+     * outside: doing less is the safe direction.
+     */
+    suspend fun splitByConsent(entries: List<BackupEntryEntity>): ConsentSplit {
+        val inside = ArrayList<BackupEntryEntity>()
+        val outside = ArrayList<BackupEntryEntity>()
+        for (entry in entries) {
+            val path = relativePathOf(Uri.parse(entry.contentUri))
+            if (path != null && safWriter.covers(listOf(path))) inside += entry else outside += entry
+        }
+        return ConsentSplit(inside, outside)
     }
 
     private fun relativePathOf(uri: Uri): String? = runCatching {

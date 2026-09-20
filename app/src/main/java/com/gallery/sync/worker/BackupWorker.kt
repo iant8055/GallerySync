@@ -32,7 +32,8 @@ class BackupWorker @AssistedInject constructor(
     private val engine: BackupEngine,
     private val settings: BackupSettings,
     private val charging: ChargingState,
-    private val videoOptimise: VideoOptimiseLauncher
+    private val videoOptimise: VideoOptimiseLauncher,
+    private val photoOptimise: PhotoOptimiseLauncher
 ) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result {
@@ -222,6 +223,23 @@ class BackupWorker @AssistedInject constructor(
         if (result.isComplete) {
             runCatching { videoOptimise.requestAutomatic() }
                 .onFailure { Logger.w(TAG, "could not queue video optimising: ${it.javaClass.simpleName}") }
+
+            // Photos likewise. Ian, 19 Sept 2026: Automatic means *"as soon as a file hits an Album
+            // whose mode is SYNC"*, and a file that has just been sent and verified is the earliest a
+            // photo can be touched at all. Reached by every content trigger, so a new photo is
+            // optimised the moment it is safe rather than the next time the app is opened.
+            runCatching { photoOptimise.requestAutomatic() }
+                .onFailure { Logger.w(TAG, "could not queue photo optimising: ${it.javaClass.simpleName}") }
+
+            // Manual means Sync now (Ian, same day). This run was that button, so whatever is set to
+            // Manual is optimised now. Photos outside the granted folders need a dialog and are
+            // offered by the screen once the run has finished.
+            if (manual) {
+                runCatching { photoOptimise.requestOnSyncNow() }
+                    .onFailure { Logger.w(TAG, "could not queue photo optimising: ${it.javaClass.simpleName}") }
+                runCatching { videoOptimise.requestOnSyncNow() }
+                    .onFailure { Logger.w(TAG, "could not queue video optimising: ${it.javaClass.simpleName}") }
+            }
         }
 
         // Carried out of the worker so the screen can say what happened. Without this the UI keeps

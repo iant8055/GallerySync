@@ -6716,3 +6716,65 @@ Ian pressed **Yes** and **Allow** on Temp 5 (10 files) and Temp 9 (10 files) wit
 **Seen and left alone.** After a run that takes every waiting file the tab shows the count at zero and **no message that 15 files were archived**: the report is drawn only while files are waiting (the header's action slot is gated on that, and Ian's 27 Aug note says the zero says it). Whether a *15 files moved to the trash* line should show is his call.
 Also still true: the Albums tab counts the swiped-out files as *kept at full size*, which is the pin's older meaning.
 **Side effect.** 15 test photos are in the phone's trash, 30 days, and fetchable from Restore.
+
+### 20 Sept 2026 - optimising runs from its Settings: Automatic on arrival, Manual on Sync now; the Settings status lines are gone
+
+Ian: *"All optimizations should run based on their Settings in Settings. Automatically - as soon as a file hits an Album who's mode is SYNC or an Album mode is switched to SYNC. Manually - through the "Sync Now" Button on the Albums Tab. So let get rid
+of the "Every single photo is already optimized" and the "No video is ready......" lines in Settings, along with the associated (?) in the "How To Guide"."*
+
+**What it was.** Video Automatic already started at the end of every complete backup run (and waited for the charger). **Photo Automatic had no background trigger at all**: it was a `LaunchedEffect` that fired when the Albums or Settings tab was on screen. Manual for both was a button in Settings,
+with a status line above it (the two lines Ian named are `proxy_none_all_done` and `video_none`, the "nothing to do" states of those blocks).
+
+**What it is now.**
+- **Photos, Automatic:** a new `OptimiseWorker` phase, `sync-photos` (Area 2: Sync albums only, honouring the Settings switches and the "Keep at full size" pin; not the wizard's `photos` phase). Started by `PhotoOptimiseLauncher.requestAutomatic()` at the end of every complete backup run, when an album is switched to Sync, and when a photo
+  switch or mode changes. Works only through folders granted at setup (no dialog), so it can run unattended; `ProxyApplier.splitByConsent` sorts each candidate. It stops when photos are switched off and **stops rather than loops** if a photo will not replace.
+- **Manual, both kinds:** the backup run started by **Sync now** ends by starting whatever is set to Manual (`requestOnSyncNow`, video without waiting for the charger). **Sync now is enabled when Manual optimising is waiting**, even with nothing to send (`OptimiseOnSyncNow`, `BackupUiState.canSyncNow`), because it was only ever enabled for files to upload.
+- **Photos outside the granted folders** need Android's dialog. `buildProxyWriteRequest` now asks only about those. Automatic offers it when the app is open; Manual offers it when Sync now finishes. **Not seen on the phone:** every folder on the Moto G is inside a grant.
+- **Settings:** the status-and-button blocks for photos and video are gone, with the auto-offer effect, the results text, the button's entry point and the strings, state fields and the `ProxyStatus`/`VideoOptimiseRun` types that only they used. What is left under the switches is the "needs Android 11" note on an old phone. **Guide:** topics `settings-optimise-status` and `settings-optimise-video-status` are deleted
+  (94 topics, 48 with a (?)); Mode, Optimise photos, Optimise video, Sync now and "When things happen" were rewritten to match; DEFAULTS.md and CLAUDE.md's Area 2 line updated, and DEFAULTS' two *Waiting period* rows removed (that Settings option went earlier this session).
+
+**Seen on the Moto G** (photo and video both on Manual to start, as Ian had them; photo Mode flipped to Automatic for the test and put back to Manual):
+1. **Manual:** a 7.2 MB photo dropped into `Temp 0` (a Sync album) uploaded and **stayed full size**; **Sync now went from greyed to enabled with nothing to send**; pressed: *photo optimising queued, proxying 1 of 1, reclaimed 6,576,488 bytes*, the file 7,164,060 to 587,572 bytes; Sync now greyed again.
+2. **Automatic, hands off:** a second photo added at 00:23:15; the backup ran at 00:23:45, *photo optimising queued*, optimised by 00:23:52 (7,301,107 to 485,685 bytes).
+3. **Album switched to Sync:** a new album `zz_album` set to Sync at 00:24:52; uploaded, optimised by 00:24:58 (7,302,296 to 403,971 bytes). After Rescan the album reads *1 optimised, 1 verified in OneDrive*. **It briefly read "0 of 1 verified" from the cloud check that predates the upload**, until Rescan.
+4. Settings: the Sync section holds the two switches, their Mode, Older than and Quality, and nothing under them; the Mode (?) shows the new text.
+No crash; no dialog appeared in any run.
+
+**Tests.** 530 pass (15 new: `PhotoOptimisePolicyTest`, `OptimiseOnSyncNowTest`, three more in `VideoOptimisePolicyTest`). **Six mutations each caught:** Manual photos run alone, Manual photos never run on Sync now, a chain continues after photos are switched off, Automatic video pushed past the charger by Sync now, Sync now ignoring waiting Manual optimising, an Automatic kind counted as waiting for the button.
+**Not covered by a test:** the worker phase and the launchers, which need WorkManager and are seen only on the phone; the album-switch hook (the run it queues did the work here; the direct call finds nothing for an album that still has files to upload).
+
+**Side effects of testing, all on the test rig.** New files `zz_opt_1.jpg`, `zz_opt_2.jpg` in `Temp 0` and `zz_album/zz_opt_3.jpg`, each now optimised and in OneDrive; `zz_album` is set back to Off. Photo Mode is back to Manual. Nothing of Ian's was rewritten: the only candidates were the three new photos.
+
+**Decisions made without asking, worth knowing.** (1) The Settings **buttons** went too, not only the two named lines: with Manual meaning Sync now they would have been a second, contradicting route. (2) Photos do **not** wait for the charger (video does); a switch on a large existing album will therefore optimise a batch of 60 at a time in the background whenever the battery is not low.
+(3) **Sync now optimises whatever is set to Manual, not only what it uploaded**, since Manual means the button and not "the files this run sent".
+
+### 20 Sept 2026 (night) - three data-integrity defects found and two fixed; a long test campaign on the Moto G
+
+Ian asked, before bed, whether anything stops an optimised file being backed up over its full version, then told me to test backups, syncs, restores and archives under different settings while he slept, using his disposable pictures.
+
+**1. FIXED - a small upload REPLACED a cloud file of the same name.** `GraphUploadService.uploadSmallFile` (`PUT ...:/content`, the route for files under 4 MiB) sent no conflict setting, and Graph's default for that route is to **replace**. Only `createUploadSession` carried `rename`. Measured on the phone: a 133,017-byte file uploaded, then
+a different 187,856-byte file under the same name: the folder count did not change, the name read 187,856 bytes, the first was overwritten. **Every optimised photo is under 4 MiB**, so the route an optimised copy would take past the other guards was the one that overwrote the full-size original; an edited photo did the same. The `rename` is now in the URL (`?@microsoft.graph.conflictBehavior=rename`) so no caller can leave
+it out. Re-measured: the second upload came back `zz_replace2 1.png` and the original survived; both the over- and under-4 MiB edits produced `name 1.jpg`. The existing test "uploads never request replace on conflict" only ever covered the resumable route (its file is over 5 MiB), which is how this survived; two tests now cover the simple route and the 4 MiB boundary, and putting the old URL back fails them.
+**This corrects two claims written earlier:** the 19 Sept cache entry said uploads "rename on conflict and never overwrite", and the uploader's own class comment said it never overwrites. Both were false for small files until now. OneDrive keeps prior versions of a replaced file, so an overwrite made before this fix may be recoverable from OneDrive's version history; nothing in this app can do it.
+**The other layers that keep an optimised file out of the upload path were already sound** and are what protected real data: an optimised row stays UPLOADED so it is never pending; the scan skips a proxied file by MediaStore id; the upload loop skips a same-name-same-size file and recognises a proxy (marker plus a larger same-named cloud file) after a lost ledger.
+
+**2. FIXED - Pause then Resume uploaded every pending file twice.** Resume started the automatic chain and the manual chain within 15 ms; both read the same pending rows and uploaded them side by side, so 24 photos became 30 files in OneDrive, six of them ` 1.jpg` copies. An old race, not from today's work. `BackupEngine.uploadPending` now holds a process-wide `Mutex`: a second run waits and then reads the ledger as the first left it.
+Re-run with the fix: 24 files, no duplicates. `UploadRunExclusionTest` pins it, and removing the lock fails it.
+
+**3. KNOWN, not fixed - a hard kill mid-upload can leave one duplicate.** The file in flight when the process dies is finished by OneDrive after the app has gone, and the next run's listing may not show it yet, so it is sent again as ` 1.jpg` (1 in 25 in the run; the earlier 40-file run that included a kill had the same cause plus the Resume race). Loses nothing. **Proposed fix:** send with `conflictBehavior=fail`; on a 409 list the folder once, and if a same-size copy is there treat the file as already uploaded, otherwise retry with `rename`.
+
+**Also found and fixed:** after a background run uploaded a file, **Sync now stayed grey with Manual photos waiting**, and stayed enabled after they were optimised, because nothing told the open screen the ledger had changed. `BackupViewModel.observeWhatOptimisingWaits` now re-reads when the uploaded count or the optimise chain changes.
+
+**Campaign results** (test albums `zzT1..zzT13` and `zz_*`; files drawn from Ian's `camera roll` and `temp` folders; 13 scenarios; every PASS below was checked against the ledger, the files on disk and OneDrive's own listing):
+- **Backup and Off albums are never optimised**, even with photos and video on Automatic; a Backup album with two files over 4 MiB uploaded through the resumable route at exact sizes.
+- **Sync + photos Automatic:** 8 uploaded and optimised, 26.7 MB down to 5.1 MB; OneDrive lists 8 files at the original sizes; later runs upload nothing.
+- **Sync + photos Manual:** uploaded untouched; **Sync now enabled with nothing to send**; pressed, all optimised; grey again afterwards (re-verified in one process after the refresh fix).
+- **Optimise photos switch:** off, nothing optimised; on, optimising starts by itself. **Mixed formats:** HEIC optimised; small PNG, WebP and JPEG deliberately skipped and never retried; no file left half-processed.
+- **Video Automatic** (AC power): 2 clips optimised (4.4 MB to 0.8 MB, 1440x1080 to 640x480), a third judged "no smaller" and marked; lengths preserved. **Video Manual:** untouched on arrival, transcoded by Sync now, length within 55 ms.
+- **Album switched Backup to Sync with files already in OneDrive:** the direct hook fired (log shows optimising queued before the run finished), 6 s, 26.3 MB reclaimed. **Sync to Backup:** new files uploaded, not touched.
+- **Restore an optimised album:** every file back to its exact original size, pinned Keep at full size, OneDrive unchanged, Automatic optimising did not shrink them again.
+- **Archive with opt-outs:** swipe-out remembered; Android asked about exactly 4 of 6; 4 trashed, 2 kept; rows ARCHIVED and flagged gone; OneDrive holds all 6; the deleted-files window stayed silent; **Restore returned the 4 at full size and pinned.**
+- **Edited photo** in a Backup album: both versions kept, renamed, on both upload routes. **An edit saved over an already-optimised photo is not uploaded at all** (same MediaStore id, so it is taken to be the proxy). Nothing is overwritten, but the edit has no cloud copy until the file is restored to full size; pre-existing design, worth Ian's decision.
+- **Pause / Resume / force-kill,** 40 files: all uploaded at the right sizes; duplicates as above.
+
+**Test-rig notes.** My first attempts at driving the UI mis-tapped neighbouring albums, which is why `zzT1_backup` briefly ended up on Sync; **none of Ian's albums, pins or settings changed** (checked against a baseline taken before testing) and his optimise switches are back to photos Manual, video Manual. A file that exists elsewhere on the phone by name and size is never marked "gone" after Archive, by design; the test set had to avoid Ian's `Pictures` album to see the flag. Left on the phone and in OneDrive (`Samsung Gallery/DCIM/zz*`): the test albums, in modes SYNC, BACKUP and ARCHIVE. Nothing was deleted.

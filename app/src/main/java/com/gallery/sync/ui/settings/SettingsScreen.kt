@@ -53,8 +53,6 @@ import com.gallery.sync.domain.backup.OptimiseMode
 import com.gallery.sync.domain.backup.VideoQuality
 import com.gallery.sync.ui.backup.BackupUiState
 import com.gallery.sync.ui.backup.BackupViewModel
-import com.gallery.sync.ui.backup.VideoOptimiseRun
-import com.gallery.sync.ui.backup.ProxyStatus
 import com.gallery.sync.ui.common.LabelWithAction
 import com.gallery.sync.ui.common.formatBytes
 import com.gallery.sync.ui.help.HelpButton
@@ -78,24 +76,6 @@ fun SettingsScreen(
     val scope = rememberCoroutineScope()
     var page by remember { mutableStateOf<SupportPage?>(null) }
     var showContact by remember { mutableStateOf(false) }
-
-    val proxyLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartIntentSenderForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) viewModel.onProxyConsentGranted()
-    }
-
-    var hasOfferedAutoProxy by remember { mutableStateOf(false) }
-    LaunchedEffect(state.isAutoOptimiseEnabled, state.proxyCandidateCount, state.canProxy) {
-        if (state.isAutoOptimiseEnabled && state.canProxy &&
-            state.proxyCandidateCount > 0 && !hasOfferedAutoProxy
-        ) {
-            hasOfferedAutoProxy = true
-            viewModel.buildProxyWriteRequest()?.let {
-                proxyLauncher.launch(IntentSenderRequest.Builder(it).build())
-            }
-        }
-    }
 
     Column(
         modifier = modifier
@@ -320,37 +300,14 @@ fun SettingsScreen(
             }
         }
 
-        // Each kind reports on its own. The photo lines used to appear whenever either switch was on,
-        // so someone who had only video on was shown a photo button for a feature they had left off.
-        if (state.optimisePhotos) {
-            if (state.canProxy) {
-                OptimiseStatusAndAction(
-                    state = state,
-                    viewModel = viewModel,
-                    proxyLauncher = {
-                        scope.launch {
-                            viewModel.buildProxyWriteRequest()?.let {
-                                proxyLauncher.launch(IntentSenderRequest.Builder(it).build())
-                            }
-                        }
-                    },
-                    context = context
-                )
-            } else {
-                WithHelp(HelpTopic.SETTINGS_OPTIMISE_STATUS) {
-                    Text(
-                        text = stringResource(R.string.proxy_unsupported),
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
-        }
-
-        if (state.optimiseVideo) {
-            VideoStatusAndAction(
-                state = state,
-                onOptimiseNow = viewModel::optimiseVideoNow,
-                context = context
+        // Nothing else follows the switches. Optimising runs from the modes above (Ian, 19 Sept 2026):
+        // Automatic as soon as a file reaches a Sync album or an album is switched to Sync, Manual when
+        // Sync now is pressed on the Albums tab. The status line and the button that used to sit here
+        // were the old way of asking, and are gone with the guide topics that explained them.
+        if (state.optimisePhotos && !state.canProxy) {
+            Text(
+                text = stringResource(R.string.proxy_unsupported),
+                style = MaterialTheme.typography.bodySmall
             )
         }
 
@@ -420,127 +377,6 @@ private fun LinkCard(title: String, detail: String, onClick: () -> Unit) {
             Text(text = title, style = MaterialTheme.typography.bodyLarge)
             Text(text = detail, style = MaterialTheme.typography.bodySmall)
         }
-    }
-}
-
-// ── Proxy status and action ─────────────────────────────────────────────────
-
-@Composable
-private fun OptimiseStatusAndAction(
-    state: BackupUiState,
-    viewModel: BackupViewModel,
-    proxyLauncher: () -> Unit,
-    context: android.content.Context
-) {
-    when {
-        state.proxyCandidateCount == 0 -> WithHelp(HelpTopic.SETTINGS_OPTIMISE_STATUS) {
-            Text(
-                text = stringResource(
-                    if (state.uploadedCount == 0) R.string.proxy_none_nothing_synced
-                    else R.string.proxy_none_all_done
-                ),
-                style = MaterialTheme.typography.bodySmall
-            )
-        }
-
-        else -> {
-            WithHelp(HelpTopic.SETTINGS_OPTIMISE_STATUS) {
-                Text(
-                    text = pluralStringResource(
-                        R.plurals.proxy_explainer,
-                        state.proxyCandidateCount,
-                        state.proxyCandidateCount
-                    ),
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-            OutlinedButton(onClick = { proxyLauncher() }) {
-                Text(
-                    stringResource(
-                        R.string.proxy_action,
-                        formatBytes(context, state.proxyCandidateBytes)
-                    )
-                )
-            }
-        }
-    }
-
-    state.proxyStatus?.let { status ->
-        Text(
-            text = when (status) {
-                ProxyStatus.Working -> stringResource(R.string.proxy_working)
-                is ProxyStatus.Done -> stringResource(
-                    R.string.proxy_done,
-                    status.proxiedCount,
-                    formatBytes(context, status.bytesReclaimed)
-                )
-                is ProxyStatus.Stopped -> stringResource(
-                    R.string.proxy_stopped,
-                    status.proxiedCount,
-                    status.failedFile,
-                    status.reason
-                )
-                ProxyStatus.CouldNotAsk -> stringResource(R.string.proxy_could_not_ask)
-            },
-            style = MaterialTheme.typography.bodyMedium
-        )
-    }
-}
-
-/**
- * What video optimising is doing, what is ready, and the button that does it now.
- *
- * Says which of four things is true, because each wants a different reaction: a batch is running, it
- * is queued and waiting only for the charger, there is something ready, or there is nothing. A line
- * that said "nothing to optimise" while a run was waiting on the charger would read as broken.
- *
- * The button is offered whenever something is ready and a batch is not already executing, in either
- * mode and while a run waits for the charger. Pressing it is what starts one *without* the charger.
- */
-@Composable
-private fun VideoStatusAndAction(
-    state: BackupUiState,
-    onOptimiseNow: () -> Unit,
-    context: android.content.Context
-) {
-    val ready = state.videoCandidateCount
-
-    WithHelp(HelpTopic.SETTINGS_OPTIMISE_VIDEO_STATUS) {
-        Text(
-            text = when (state.videoOptimiseRun) {
-                VideoOptimiseRun.WORKING ->
-                    pluralStringResource(R.plurals.video_working, ready, ready)
-
-                VideoOptimiseRun.WAITING_FOR_CHARGER ->
-                    stringResource(R.string.video_waiting_for_charger)
-
-                VideoOptimiseRun.IDLE -> if (ready > 0) {
-                    pluralStringResource(R.plurals.video_explainer, ready, ready)
-                } else {
-                    stringResource(R.string.video_none)
-                }
-            },
-            style = MaterialTheme.typography.bodySmall
-        )
-    }
-
-    if (ready > 0 && state.videoOptimiseRun != VideoOptimiseRun.WORKING) {
-        OutlinedButton(onClick = onOptimiseNow) {
-            Text(stringResource(R.string.video_action, formatBytes(context, state.videoCandidateBytes)))
-        }
-    }
-
-    // Reported so the number above is not mistaken for the whole library. These clips qualify in
-    // every other way; the app just has no write access to the folder they are in.
-    if (state.videoOutsideCount > 0) {
-        Text(
-            text = pluralStringResource(
-                R.plurals.video_outside,
-                state.videoOutsideCount,
-                state.videoOutsideCount
-            ),
-            style = MaterialTheme.typography.bodySmall
-        )
     }
 }
 

@@ -69,6 +69,12 @@ object BackupScheduling {
     const val PHASE_PHOTOS = "photos"
     const val PHASE_VIDEO = "video"
 
+    /**
+     * The ongoing photo pass (Area 2): Sync albums only, honouring the Settings switches. Not the
+     * wizard's [PHASE_PHOTOS], which ignores modes and acts once at install.
+     */
+    const val PHASE_SYNC_PHOTOS = "sync-photos"
+
     /** Upload all albums regardless of album modes. Used by the wizard on fresh installs. */
     const val KEY_ALL_ALBUMS = "all_albums"
 
@@ -345,7 +351,13 @@ object BackupScheduling {
     suspend fun optimiseChainLive(workManager: WorkManager): Boolean =
         workManager.getWorkInfosForUniqueWorkFlow(OPTIMISE_WORK)
             .first()
-            .any { !it.state.isFinished } ||
+            // The ongoing photo pass counts only while it is *executing*, for the reason the video
+            // chain does below: a batch queued and waiting on the battery writes nothing, and counting
+            // it would make the app ignore every real new photo for as long as it waited.
+            .any {
+                !it.state.isFinished &&
+                    (it.state == WorkInfo.State.RUNNING || optimiseTag(PHASE_SYNC_PHOTOS) !in it.tags)
+            } ||
             // The ongoing video chain counts only while it is *executing*. This answer is used to
             // decline a backup run as "our own optimise writes woke it", and to hold back a
             // cold-start scan. A video batch waiting hours for the charger writes nothing, so

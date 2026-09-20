@@ -156,6 +156,18 @@ fun BackupScreen(
         }
     }
 
+    // Sync now has just finished with photos on Manual. Whatever sits in a granted folder has been
+    // done in the background; anything outside one needs Android's dialog, which is asked for here
+    // because this is the screen the person pressed the button on.
+    LaunchedEffect(state.proxyDialogRequested) {
+        if (state.proxyDialogRequested) {
+            viewModel.consumeProxyDialogRequest()
+            viewModel.buildProxyWriteRequest()?.let {
+                proxyLauncher.launch(IntentSenderRequest.Builder(it).build())
+            }
+        }
+    }
+
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { viewModel.refresh() }
@@ -1199,7 +1211,9 @@ private fun HeroActions(
             } else {
                 Button(
                     onClick = onSyncNow,
-                    enabled = state.pendingCount > 0,
+                    // Files to send, or Manual optimising to run: Ian, 19 Sept 2026, Manual means
+                    // through this button, so it must be pressable with nothing left to upload.
+                    enabled = state.canSyncNow,
                     modifier = Modifier.weight(1f),
                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
                     colors = ButtonDefaults.buttonColors(

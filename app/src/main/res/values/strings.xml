@@ -148,46 +148,8 @@
     <string name="settings_automatic">Automatic sync</string>
     <string name="settings_optimise">Optimise photos</string>
 
-    <!--
-        "Optimise" rather than "compress" or "shrink": the photo stays in the gallery and stays
-        usable, which is the point. Videos are named as excluded because their absence would
-        otherwise look like a bug.
-    -->
-    <plurals name="proxy_explainer">
-        <item quantity="one">%1$d photo can be optimised. A smaller copy stays on the phone and the full-size original stays in OneDrive.</item>
-        <item quantity="other">%1$d photos can be optimised. Smaller copies stay on the phone and the full-size originals stay in OneDrive.</item>
-    </plurals>
-    <string name="proxy_action">Optimise %1$s of photos</string>
-    <!--
-        Video optimising after setup, wired 18 Sept 2026. Until then the Settings controls were saved
-        and nothing read them, and the line that stood here — "Video is optimised separately, and only
-        clips older than the age you set" — described a pass that did not exist. Each state gets its own
-        sentence because they want different reactions; see VideoStatusAndAction.
-    -->
-    <plurals name="video_explainer">
-        <item quantity="one">%1$d clip can be optimised. A smaller copy stays on the phone and the full-quality original stays in OneDrive.</item>
-        <item quantity="other">%1$d clips can be optimised. Smaller copies stay on the phone and the full-quality originals stay in OneDrive.</item>
-    </plurals>
-    <string name="video_action">Optimise %1$s of video</string>
-    <string name="video_none">No video is ready to optimise. A clip has to be in a Sync album, backed up to OneDrive, and older than the age you set.</string>
-    <plurals name="video_working">
-        <item quantity="one">Optimising video in the background. %1$d clip left.</item>
-        <item quantity="other">Optimising video in the background. %1$d clips left.</item>
-    </plurals>
-    <string name="video_waiting_for_charger">Video optimising is waiting for the phone to charge. Press the button to start now instead.</string>
-    <plurals name="video_outside">
-        <item quantity="one">%1$d clip is in a folder you have not given access to, so it is left alone.</item>
-        <item quantity="other">%1$d clips are in folders you have not given access to, so they are left alone.</item>
-    </plurals>
     <string name="settings_optimise_explainer">Optimising replaces the copy on this phone with a smaller version — about 2048 pixels on the long edge, roughly a tenth of the size. The photo stays in your gallery and opens normally in every app, and carries a small cloud badge so you can tell which are optimised. The full-quality original stays in OneDrive, untouched.</string>
-    <string name="proxy_none_nothing_synced">Nothing to optimise yet. A photo can only be optimised once it is verified in OneDrive — set an album to Sync in Album Modes, then run a sync.</string>
-    <string name="proxy_none_all_done">Every eligible photo is already optimised.</string>
     <string name="proxy_unsupported">Optimising photos needs Android 11 or newer.</string>
-    <string name="proxy_working">Optimising…</string>
-    <string name="proxy_done">Optimised %1$d photos and freed %2$s.</string>
-    <string name="proxy_stopped">Stopped after %1$d photos. %2$s could not be replaced (%3$s). Nothing after it was changed.</string>
-    <!-- Says plainly that nothing happened. Silence here is what made this look broken. -->
-    <string name="proxy_could_not_ask">Android wouldn\'t show the permission prompt, so no photos were changed. The list has been refreshed — try again.</string>
 
     <!-- Sign in -->
     <string name="sign_in_prompt">Connect your OneDrive account to browse your photos and videos.</string>

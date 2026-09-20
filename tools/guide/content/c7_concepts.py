@@ -71,7 +71,7 @@ CHAPTER = Chapter(
             ## Video
             • A clip is re-encoded at a lower resolution: **480p** (High, the most shrinking), **720p** (Medium) or **1080p** (Low). Nothing is ever cut, so a clip is never shortened.
             • It stays in your gallery under its own name.
-            • It happens in the background, a few clips at a time, and by itself only while the phone is charging. First-time setup also optimises video once, if you chose a plan that includes it.
+            • It happens in the background, a few clips at a time. Automatic waits for the phone to be charging; Manual starts when you press **Sync now**. First-time setup also optimises video once, if you chose a plan that includes it.
             • Only clips old enough to pass the age you set are touched, and a clip that would not get smaller is left as it is and not offered again.
 
             ## The rules it always follows
@@ -120,13 +120,16 @@ CHAPTER = Chapter(
             **Sync now** starts a run straight away, whether or not the phone is charging.
 
             ## Optimising photos
-            **Automatic** happens when you open the Albums or Settings tab. **Manual** happens when you press
-            the Optimise button in Settings.
+            **Automatic** happens as soon as a file reaches a Sync album, or an album is switched to Sync:
+            after the file has been sent and confirmed in OneDrive, and in the background. **Manual**
+            happens when you press **Sync now** on the Albums tab. Photos outside the folders you gave
+            access to need Android's confirmation, so they wait until you open the app or press **Sync now**.
 
             ## Optimising video
-            **Automatic** starts after a backup run has finished everything, and when you change the video
-            settings, and it waits for the phone to be charging. **Manual**, or the button in Settings,
-            starts it straight away. It runs in the background and you can close the app.
+            **Automatic** starts after a backup run has finished everything, when an album is switched to
+            Sync, and when you change the video settings, and it waits for the phone to be charging.
+            **Manual** starts when you press **Sync now**, straight away. It runs in the background and
+            you can close the app.
 
             ## Archiving
             Only when you say Yes on the Archive tab. Android requires a tap, so this cannot run while

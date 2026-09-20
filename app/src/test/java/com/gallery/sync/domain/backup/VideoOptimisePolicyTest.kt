@@ -86,4 +86,30 @@ class VideoOptimisePolicyTest {
         // 20 to 27 seconds a clip was measured at 1080p on the Moto G; WorkManager allows ten minutes.
         assertEquals(3, VideoOptimisePolicy.BATCH)
     }
+
+    private fun onSyncNow(
+        setupComplete: Boolean = true,
+        optimiseEnabled: Boolean = true,
+        optimiseVideo: Boolean = true,
+        mode: OptimiseMode = OptimiseMode.Manual
+    ) = VideoOptimisePolicy.runsOnSyncNow(setupComplete, optimiseEnabled, optimiseVideo, mode)
+
+    @Test
+    fun manualVideoRunsWhenSyncNowIsPressed() {
+        assertTrue(onSyncNow())
+    }
+
+    @Test
+    fun automaticVideoDoesNotSkipTheChargerBecauseSyncNowWasPressed() {
+        // Sync now on an Automatic clip would start it without the wait for the charger, which is the
+        // one thing Automatic promises.
+        assertFalse(onSyncNow(mode = OptimiseMode.Auto))
+    }
+
+    @Test
+    fun syncNowNeedsSetupAndBothSwitches() {
+        assertFalse(onSyncNow(setupComplete = false))
+        assertFalse(onSyncNow(optimiseEnabled = false))
+        assertFalse(onSyncNow(optimiseVideo = false))
+    }
 }

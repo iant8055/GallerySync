@@ -6,8 +6,10 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.gallery.sync.data.local.media.ProxyApplier
+import com.gallery.sync.data.local.media.ProxyOutcome
 import com.gallery.sync.data.local.media.VideoOptimiser
 import com.gallery.sync.data.local.settings.BackupSettings
+import com.gallery.sync.domain.backup.PhotoOptimisePolicy
 import com.gallery.sync.domain.backup.WizardBulkOptimise
 import com.gallery.sync.util.Logger
 import dagger.assisted.Assisted
@@ -54,6 +56,7 @@ class OptimiseWorker @AssistedInject constructor(
 
         val remaining = when (phase) {
             BackupScheduling.PHASE_PHOTOS -> runPhotos()
+            BackupScheduling.PHASE_SYNC_PHOTOS -> runSyncPhotos()
             BackupScheduling.PHASE_VIDEO -> runVideo()
             else -> {
                 Logger.w(TAG, "unknown optimise phase '$phase'")
@@ -104,6 +107,40 @@ class OptimiseWorker @AssistedInject constructor(
             if (started) "photos done; video pass queued"
             else "photos done; video pass already queued"
         )
+    }
+
+    /**
+     * The ongoing photo pass: Sync albums only, and only through folders the user granted, because a
+     * worker cannot show Android's dialog. Photos outside them are left for the moment someone is in
+     * the app to be asked, so they are not counted as work this chain still owes.
+     *
+     * Stops the moment the Settings switches say photos are no longer wanted, and **stops rather than
+     * repeats** when a photo will not replace: the same file would be the first candidate of the next
+     * batch, and a chain that retried it for ever would never end.
+     */
+    private suspend fun runSyncPhotos(): Int {
+        val prefs = settings.current()
+        if (!PhotoOptimisePolicy.mayContinue(prefs.hasCompletedSetup, prefs.isOptimiseEnabled, prefs.optimisePhotos)) {
+            Logger.d(TAG, "sync photos: switched off, stopping")
+            return 0
+        }
+
+        val inside = proxyApplier.splitByConsent(proxyApplier.candidates()).inside
+        if (inside.isEmpty()) {
+            Logger.d(TAG, "sync photos: nothing eligible inside the granted folders")
+            return 0
+        }
+
+        val batch = inside.take(PHOTO_BATCH)
+        Logger.i(TAG, "sync photos: proxying ${batch.size} of ${inside.size}")
+        return when (val outcome = proxyApplier.apply(batch)) {
+            is ProxyOutcome.Completed -> (inside.size - batch.size).coerceAtLeast(0)
+            is ProxyOutcome.Stopped -> {
+                Logger.w(TAG, "sync photos: stopped at ${outcome.failedFile} (${outcome.reason})")
+                0
+            }
+            ProxyOutcome.NothingToDo, ProxyOutcome.NotSupported -> 0
+        }
     }
 
     private suspend fun runPhotos(): Int {
