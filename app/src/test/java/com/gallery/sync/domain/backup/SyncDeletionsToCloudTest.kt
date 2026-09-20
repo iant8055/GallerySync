@@ -363,4 +363,26 @@ class SyncDeletionsToCloudTest {
         assertEquals(0, outcome.deleted)
         verify(drive, never()).moveToRecycleBin(any())
     }
+
+    @Test
+    fun `a removal makes the window forget what it remembered about that album`() = runTest {
+        val gone = ledgerRow("Camera", "IMG_5678.jpg")
+        givenAskAndScan()
+        whenever(drive.moveToRecycleBin(any())).thenReturn(DataResult.Success(Unit))
+
+        sync.delete(listOf(DeletedFile.of(gone)))
+
+        verify(engine).forgetCachedRemoteIndex("Camera")
+    }
+
+    @Test
+    fun `a removal that failed changed nothing so nothing is forgotten`() = runTest {
+        val gone = ledgerRow("Camera", "IMG_5678.jpg")
+        givenAskAndScan()
+        whenever(drive.moveToRecycleBin(any())).thenReturn(DataResult.Failure(com.gallery.sync.domain.model.RemoteError.Network))
+
+        sync.delete(listOf(DeletedFile.of(gone)))
+
+        verify(engine, never()).forgetCachedRemoteIndex(any())
+    }
 }

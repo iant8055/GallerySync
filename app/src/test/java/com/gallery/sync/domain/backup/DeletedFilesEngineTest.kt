@@ -385,4 +385,91 @@ class DeletedFilesEngineTest {
         verify(unsentDao, never()).insertIfNew(any())
         verify(entryDao, never()).forgetPending(any(), any())
     }
+
+    // ── Remembering a folder listing for a few minutes ──────────────────────
+
+    private val folder = "${RemoteRoots.DEFAULT_DESTINATION}/Temp 8"
+
+    private suspend fun listedTimes() = org.mockito.kotlin.mockingDetails(repository).invocations
+        .count { it.method.name == "listFolderByPath" }
+
+    @Test
+    fun `backing up right after the lookup does not list the folder again`() = runTest {
+        givenFolder("Temp 8")
+        whenever(uploadRepository.upload(any<UploadSource>(), any(), any(), anyOrNull(), any()))
+            .thenReturn(uploaded("a.jpg", 1_000L))
+        val file = deleted("a.jpg")
+
+        engine.cloudCopiesOf(listOf(file))
+        engine.backUpFromTrash(listOf(file))
+
+        assertEquals("one walk of the folder answered both", 1, listedTimes())
+    }
+
+    @Test
+    fun `what is remembered expires after three minutes`() = runTest {
+        givenFolder("Temp 8")
+        var now = 1_000_000L
+        engine.clock = { now }
+
+        engine.cloudCopiesOf(listOf(deleted("a.jpg")))
+        now += 2 * 60_000L
+        engine.cloudCopiesOf(listOf(deleted("a.jpg")))
+        assertEquals("two minutes on it is still remembered", 1, listedTimes())
+
+        now += 2 * 60_000L
+        engine.cloudCopiesOf(listOf(deleted("a.jpg")))
+        assertEquals("four minutes on the drive is asked again", 2, listedTimes())
+    }
+
+    @Test
+    fun `an upload into an album drops what was remembered about it`() = runTest {
+        givenFolder("Temp 8")
+        whenever(uploadRepository.upload(any<UploadSource>(), any(), any(), anyOrNull(), any()))
+            .thenReturn(uploaded("a.jpg", 1_000L))
+        val file = deleted("a.jpg")
+
+        engine.cloudCopiesOf(listOf(file))
+        engine.backUpFromTrash(listOf(file))
+        engine.cloudCopiesOf(listOf(deleted("b.jpg")))
+
+        assertEquals("the drive changed, so the next question is put to the drive", 2, listedTimes())
+    }
+
+    @Test
+    fun `forgetting the cache makes the next question go to the drive`() = runTest {
+        givenFolder("Temp 8")
+
+        engine.cloudCopiesOf(listOf(deleted("a.jpg")))
+        engine.forgetCachedRemoteIndex("Temp 8")
+        engine.cloudCopiesOf(listOf(deleted("a.jpg")))
+        assertEquals(2, listedTimes())
+
+        engine.forgetCachedRemoteIndex()
+        engine.cloudCopiesOf(listOf(deleted("a.jpg")))
+        assertEquals(3, listedTimes())
+    }
+
+    @Test
+    fun `a listing that came back short is never remembered`() = runTest {
+        whenever(repository.listFolderByPath(folder))
+            .thenReturn(DataResult.Success(FolderPage(listOf(remoteFile("x.jpg", 5L)), "next")))
+        whenever(repository.listNextPage("next")).thenReturn(DataResult.Failure(RemoteError.Network))
+
+        engine.cloudCopiesOf(listOf(deleted("a.jpg")))
+        engine.cloudCopiesOf(listOf(deleted("a.jpg")))
+
+        assertEquals("a half-read folder would say no copy for files it never reached", 2, listedTimes())
+    }
+
+    @Test
+    fun `a failed listing is not remembered either`() = runTest {
+        whenever(repository.listFolderByPath(folder))
+            .thenReturn(DataResult.Failure(RemoteError.Network))
+            .thenReturn(DataResult.Success(FolderPage(listOf(remoteFile("a.jpg", 1_000L, id = "found")), null)))
+        val file = deleted("a.jpg")
+
+        assertEquals(setOf(file.id), engine.cloudCopiesOf(listOf(file)).unknown)
+        assertEquals(mapOf(file.id to "found"), engine.cloudCopiesOf(listOf(file)).found)
+    }
 }

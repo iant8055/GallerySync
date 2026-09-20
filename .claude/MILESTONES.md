@@ -6660,3 +6660,19 @@ TalkBack; the Restore tab offering the backed-up file. **Known cost:** *Back up*
 
 **Settled without asking, worth knowing.** The whole window, backing up included, stays Ask-only. Files deleted outright (not to the trash) that have no OneDrive copy are not offered, since nothing can be done, and their record
 is dropped after 45 days.
+
+### 19 Sept 2026 - the deleted-files window remembers a OneDrive folder listing for three minutes
+
+Ian asked for the cache the *Back up* step was missing: after the window's lookup had walked the 1,888-file `Pictures` folder (about 20 s), *Back up* walked it again. This closes the **known cost** named in the entry above.
+
+**What it is.** `BackupEngine.cachedRemoteIndexFor`, used only by `cloudCopiesOf` and `backUpFromTrash`, remembers an album's listing for three minutes. The upload queue, Restore and the cloud check are untouched and still read the
+drive as it is now. **Never kept: a listing that came back short** (`remoteIndexFor` now says so through `onPartial`, including when the page cap stops it), because a half-read folder says "no copy" for files it never reached and a cache
+would repeat that; **and a failed listing.** **Dropped whenever this app changes the drive:** after an upload into an album, and after a removal from it (`forgetCachedRemoteIndex`).
+
+**Seen on the Moto G.** Two never-uploaded files, ticked and backed up: the Pictures folder was listed only by the lookup, none after *Back up*, and the two files were **sent in about 3 s** where the same step took about 25 s. Both rows
+UPLOADED at the drive's size, settled, and left in the trash.
+
+**Tests.** 505 pass (8 new: one walk answers both steps, expiry at three minutes, an upload and a removal each drop the album, forgetting works, a short listing and a failed listing are not kept). **Five mutations, each caught:** short listing cached, no expiry,
+upload does not drop the album, removal does not drop the album, nothing cached.
+
+**Still true, and small.** A file put in that folder by something other than this app in the last three minutes is not seen, which can cost a renamed duplicate and nothing worse (uploads rename on conflict and never overwrite).

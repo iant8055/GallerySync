@@ -1429,6 +1429,47 @@ class BackupEngine @Inject constructor(
         }.sortedBy { it.displayName.lowercase() }
     }
 
+    private class CachedIndex(val index: Map<String, RemoteFileRef>, val atMillis: Long)
+
+    private val indexCache = HashMap<String, CachedIndex>()
+
+    /** The clock the cache reads, so a test can move time. */
+    internal var clock: () -> Long = System::currentTimeMillis
+
+    /**
+     * [remoteIndexFor], remembered for a few minutes, **for the deleted-files window only**.
+     *
+     * The window looks in OneDrive to decide where a file belongs, and *Back up* then needs the same
+     * listing to be sure it is not sending a second copy. For a large album that is many requests
+     * (about 20 s for a 1,888-file folder), and the second walk answered a question the first had
+     * just answered. Ian asked for the cache on 19 Sept 2026.
+     *
+     * Deliberately not used by the upload queue, Restore or the cloud check, which want the drive as
+     * it is now. Kept short, and dropped whenever this app changes the drive ([forgetCachedRemoteIndex]).
+     *
+     * **A listing that came back short is never kept.** A partial index says "no copy" for files it
+     * simply did not reach, and a cache would repeat that for minutes. Failures are not kept either.
+     */
+    private suspend fun cachedRemoteIndexFor(album: String): Map<String, RemoteFileRef>? {
+        val now = clock()
+        synchronized(indexCache) {
+            indexCache[album]?.takeIf { now - it.atMillis < INDEX_CACHE_MILLIS }?.let { return it.index }
+        }
+
+        var partial = false
+        val fresh = remoteIndexFor(album) { partial = true } ?: return null
+        if (!partial) synchronized(indexCache) { indexCache[album] = CachedIndex(fresh, now) }
+        return fresh
+    }
+
+    /**
+     * Drops what is remembered about the drive, for one album or all of them. Called whenever this app
+     * has just added to it or removed from it, so the next question is answered from the drive as it is.
+     */
+    fun forgetCachedRemoteIndex(album: String? = null) {
+        synchronized(indexCache) { if (album == null) indexCache.clear() else indexCache.remove(album) }
+    }
+
     /**
      * Which of these deleted files OneDrive already holds, **whether this app put them there or not**.
      * Ian, 19 Sept 2026.
@@ -1446,7 +1487,7 @@ class BackupEngine @Inject constructor(
         val unknown = HashSet<String>()
 
         for ((album, group) in files.groupBy { it.album }) {
-            val index = remoteIndexFor(album)
+            val index = cachedRemoteIndexFor(album)
             if (index == null) {
                 unknown += group.map { it.id }
                 continue
@@ -1507,7 +1548,7 @@ class BackupEngine @Inject constructor(
             val index = if (remoteByAlbum.containsKey(file.album)) {
                 remoteByAlbum[file.album]
             } else {
-                remoteIndexFor(file.album).also { remoteByAlbum[file.album] = it }
+                cachedRemoteIndexFor(file.album).also { remoteByAlbum[file.album] = it }
             }
             if (index == null) {
                 failed++
@@ -1533,6 +1574,8 @@ class BackupEngine @Inject constructor(
                 is DataResult.Success -> {
                     // Size equality is the proof, as for every upload: "a file appeared" is also true
                     // of a truncated one.
+                    // The drive has changed, so nothing remembered about this album is true any more.
+                    forgetCachedRemoteIndex(file.album)
                     if (result.value.sizeBytes == file.sizeBytes) {
                         recordBackedUp(file, result.value.id, result.value.sizeBytes)
                         uploaded++
@@ -1650,7 +1693,10 @@ class BackupEngine @Inject constructor(
      * A failure mid-walk returns what was gathered so far rather than nothing. A partial index can
      * only cause a re-upload, while an empty one guarantees a whole album of them.
      */
-    internal suspend fun remoteIndexFor(album: String): Map<String, RemoteFileRef>? {
+    internal suspend fun remoteIndexFor(
+        album: String,
+        onPartial: () -> Unit = {}
+    ): Map<String, RemoteFileRef>? {
         val merged = mutableMapOf<String, RemoteFileRef>()
 
         for (root in RemoteRoots.searchOrder(destinationRoot())) {
@@ -1658,7 +1704,7 @@ class BackupEngine @Inject constructor(
             // under-report what is backed up, and under-reporting here means re-uploading files the
             // user already has — the same "failing to ask is not evidence of absence" rule that the
             // per-album null exists for, applied across roots.
-            val one = indexForPath("$root/$album", album) ?: return null
+            val one = indexForPath("$root/$album", album, onPartial) ?: return null
             // First root wins on a duplicate name, so the destination's copy is preferred.
             for ((name, ref) in one) merged.putIfAbsent(name, ref)
         }
@@ -1666,7 +1712,11 @@ class BackupEngine @Inject constructor(
     }
 
     /** Every file at one remote path, by name and size, or null if it could not be listed. */
-    private suspend fun indexForPath(path: String, album: String): Map<String, RemoteFileRef>? {
+    private suspend fun indexForPath(
+        path: String,
+        album: String,
+        onPartial: () -> Unit
+    ): Map<String, RemoteFileRef>? {
         val index = mutableMapOf<String, RemoteFileRef>()
 
         var page = when (val result = repository.listFolderByPath(path)) {
@@ -1685,6 +1735,7 @@ class BackupEngine @Inject constructor(
                 is DataResult.Success -> result.value
                 is DataResult.Failure -> {
                     Logger.w(TAG, "page ${pages + 1} of $album failed (${result.error}); using $pages")
+                    onPartial()
                     return index
                 }
             }
@@ -1692,6 +1743,9 @@ class BackupEngine @Inject constructor(
             .associate { it.name to RemoteFileRef(it.id, it.sizeBytes, it.mimeType, it.createdAtUtc) }
             pages++
         }
+
+        // Stopped by the page cap with more still to read: the index is short.
+        if (page.nextPageToken != null) onPartial()
 
         if (pages > 1) Logger.d(TAG, "$album: ${index.size} remote files across $pages pages")
         // Name the path. Two roots are searched for every album — the destination and the legacy
@@ -1775,6 +1829,9 @@ class BackupEngine @Inject constructor(
          * comfortably past the 8,482 in the whole library it was measured against.
          */
         const val MAX_REMOTE_PAGES = 200
+
+        /** How long the deleted-files window remembers what a OneDrive folder held. */
+        const val INDEX_CACHE_MILLIS = 3L * 60 * 1000
 
         /** Files per run. Small enough that a cancelled worker loses little work. */
         const val DEFAULT_BATCH = 25

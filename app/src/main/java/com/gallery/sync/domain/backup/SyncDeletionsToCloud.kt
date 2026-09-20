@@ -243,6 +243,8 @@ class SyncDeletionsToCloud @Inject constructor(
 
                 when (deletionRepository.moveToRecycleBin(remoteId)) {
                     is DataResult.Success -> {
+                        // The drive has changed, so what the window remembered of this album is stale.
+                        engine.forgetCachedRemoteIndex(file.album)
                         // Now on neither the phone nor the drive, so the record describes nothing.
                         // Forgetting it is bookkeeping and removes no file anywhere.
                         when (file.origin) {
