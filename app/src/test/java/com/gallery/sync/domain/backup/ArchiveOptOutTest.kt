@@ -8,6 +8,7 @@ import com.gallery.sync.data.local.dao.PinnedKey
 import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.entity.BackupState
+import com.gallery.sync.data.local.entity.CloudCopyDecision
 import com.gallery.sync.data.local.entity.backupKeyOf
 import com.gallery.sync.data.local.media.LocalMediaItem
 import com.gallery.sync.data.local.media.MediaAccess
@@ -176,5 +177,26 @@ class ArchiveOptOutTest {
         verify(entryDao).setModeOverride(olderKey, null)
         verify(entryDao).setModeOverride(keyOf(item), null)
         verify(entryDao, never()).setModeOverride(eq("other"), any())
+    }
+
+    // ── Archive marks what it removes, so the deleted-files window never offers it ───────────
+
+    @Test
+    fun `files Archive removed are marked archived by key and by MediaStore id`() = runTest {
+        val gone = file("Temp 9", "a.jpg", 1L)
+        val also = file("Temp 9", "b.jpg", 2L)
+
+        engine.markRemovedByArchive(listOf(gone, also))
+
+        verify(entryDao).setCloudDecision(listOf(keyOf(gone), keyOf(also)), CloudCopyDecision.ARCHIVED)
+        verify(entryDao).setCloudDecisionByMediaStoreId(listOf(1L, 2L), CloudCopyDecision.ARCHIVED)
+    }
+
+    @Test
+    fun `marking nothing writes nothing`() = runTest {
+        engine.markRemovedByArchive(emptyList())
+
+        verify(entryDao, never()).setCloudDecision(any(), any())
+        verify(entryDao, never()).setCloudDecisionByMediaStoreId(any(), any())
     }
 }

@@ -7,6 +7,7 @@ import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.entity.AlbumPreferenceEntity
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.entity.BackupState
+import com.gallery.sync.data.local.entity.CloudCopyDecision
 import com.gallery.sync.data.local.entity.backupKeyOf
 import com.gallery.sync.data.local.media.LocalMediaItem
 import com.gallery.sync.data.local.media.MediaAccess
@@ -1021,6 +1022,26 @@ class BackupEngine @Inject constructor(
         }
     }
 
+    /**
+     * Records that Archive took these files off the phone on purpose, so their OneDrive copies are
+     * never offered for removal by the "files deleted from this phone" window. See
+     * [CloudCopyDecision.ARCHIVED].
+     *
+     * Marked by content key and by MediaStore id, because a row's key can have drifted from the file's
+     * (a restore rewrites the modification time) while its id has not. Bookkeeping only; called after
+     * a removal completes and before the ledger is refreshed.
+     */
+    suspend fun markRemovedByArchive(items: List<LocalMediaItem>) = withContext(dispatcher) {
+        if (items.isEmpty()) return@withContext
+        items.map { backupKeyOf(it.album, it.displayName, it.sizeBytes, it.dateModifiedEpochSeconds) }
+            .chunked(DECISION_CHUNK)
+            .forEach { entryDao.setCloudDecision(it, CloudCopyDecision.ARCHIVED) }
+        items.map { it.mediaStoreId }
+            .chunked(DECISION_CHUNK)
+            .forEach { entryDao.setCloudDecisionByMediaStoreId(it, CloudCopyDecision.ARCHIVED) }
+        Logger.i(TAG, "markRemovedByArchive: ${items.size} files marked as archived on purpose")
+    }
+
     /** The files that may be archived. Unchanged in meaning: opted-out files are never in it. */
     suspend fun filesInArchiveAlbums(): List<LocalMediaItem> = archiveFiles().toArchive
 
@@ -1498,6 +1519,9 @@ class BackupEngine @Inject constructor(
          * would work.
          */
         const val STALE_SESSION_AFTER_MILLIS = 10 * 60 * 1000L
+
+        /** SQLite binds one variable per id and stops at 999, so lists of ids are written in chunks. */
+        const val DECISION_CHUNK = 500
 
         const val SQL_BATCH = 500
 

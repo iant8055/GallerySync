@@ -16,7 +16,6 @@ import com.gallery.sync.domain.backup.MediaAge
 import com.gallery.sync.domain.backup.OptimiseCutoff
 import com.gallery.sync.domain.backup.OptimiseMode
 import com.gallery.sync.domain.backup.VideoQuality
-import com.gallery.sync.domain.backup.CloudDeletionGrace
 import com.gallery.sync.domain.backup.CloudDeletionPolicy
 import com.gallery.sync.domain.backup.AlbumIdentityRules
 import com.gallery.sync.domain.backup.AlbumMergeWarning
@@ -120,8 +119,15 @@ data class BackupPreferences(
      * removed in error costs the photo, because the local one is already gone.
      */
     val cloudDeletionPolicy: CloudDeletionPolicy = CloudDeletionPolicy.DEFAULT,
-    /** How long a file must have been gone before its cloud copy may even be offered. */
-    val cloudDeletionGraceDays: Int = CloudDeletionGrace.DEFAULT_DAYS,
+    /**
+     * The newest departure the "files deleted from this phone" window has already been shown for,
+     * as the moment that file was first seen missing.
+     *
+     * The window shows only when a file has left the phone since this. "Decide later" sets it to the
+     * newest file's time, so the same files do not bring the window back on every open; only a
+     * file that goes after it does. Ian, 19 Sept 2026: *"shows only when new files."*
+     */
+    val deletionPromptSeenUpToEpochMillis: Long = 0L,
     /**
      * Whether the restore screen lists folders OneDrive reports as holding nothing.
      *
@@ -284,9 +290,7 @@ class BackupSettings @Inject constructor(
             cloudDeletionPolicy = stored[KEY_CLOUD_DELETION_POLICY]
                 ?.let { runCatching { CloudDeletionPolicy.valueOf(it) }.getOrNull() }
                 ?: CloudDeletionPolicy.DEFAULT,
-            cloudDeletionGraceDays = stored[KEY_CLOUD_DELETION_GRACE]
-                ?.takeIf { it in CloudDeletionGrace.SELECTABLE_DAYS }
-                ?: CloudDeletionGrace.DEFAULT_DAYS,
+            deletionPromptSeenUpToEpochMillis = stored[KEY_DELETION_PROMPT_SEEN] ?: 0L,
             showEmptyCloudFolders = stored[KEY_SHOW_EMPTY_FOLDERS] ?: false,
             hasCompletedSetup = stored[KEY_SETUP_COMPLETE] ?: false,
             isPaused = stored[KEY_PAUSED] ?: false,
@@ -504,9 +508,8 @@ class BackupSettings @Inject constructor(
         context.dataStore.edit { it[KEY_SHOW_EMPTY_FOLDERS] = show }
     }
 
-    suspend fun setCloudDeletionGraceDays(days: Int) {
-        if (days !in CloudDeletionGrace.SELECTABLE_DAYS) return
-        context.dataStore.edit { it[KEY_CLOUD_DELETION_GRACE] = days }
+    suspend fun setDeletionPromptSeenUpTo(epochMillis: Long) {
+        context.dataStore.edit { it[KEY_DELETION_PROMPT_SEEN] = epochMillis }
     }
 
     suspend fun setFirstBackupStartHour(hour: Int) {
@@ -578,7 +581,7 @@ class BackupSettings @Inject constructor(
         val KEY_FIRST_BACKUP_DELAY = longPreferencesKey("first_backup_delay_millis")
         val KEY_FIRST_BACKUP_DONE = booleanPreferencesKey("first_backup_completed")
         val KEY_CLOUD_DELETION_POLICY = stringPreferencesKey("cloud_deletion_policy")
-        val KEY_CLOUD_DELETION_GRACE = intPreferencesKey("cloud_deletion_grace_days")
+        val KEY_DELETION_PROMPT_SEEN = longPreferencesKey("deletion_prompt_seen_up_to")
         val KEY_SHOW_EMPTY_FOLDERS = booleanPreferencesKey("show_empty_cloud_folders")
         val KEY_SETUP_COMPLETE = booleanPreferencesKey("setup_complete")
         val KEY_BACKFILL_CHECKED = booleanPreferencesKey("upgrade_backfill_checked")

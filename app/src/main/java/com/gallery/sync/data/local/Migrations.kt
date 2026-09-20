@@ -204,9 +204,22 @@ object Migrations {
         }
     }
 
+    /**
+     * Adds what has been decided about a departed file's OneDrive copy. See [CloudCopyDecision].
+     *
+     * Additive, and null is right for every existing row: nothing has been decided about any file at
+     * the moment of upgrade, so every row reads exactly as it did. Ian approved the column on
+     * 19 Sept 2026 (*"ARCHIVE Marker - ok"*).
+     */
+    val MIGRATION_9_10 = object : Migration(9, 10) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE `backup_entries` ADD COLUMN `cloudDecision` TEXT")
+        }
+    }
+
     /** Every migration, in order, for the database builder. */
     val ALL = arrayOf(
         MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7,
-        MIGRATION_7_8, MIGRATION_8_9
+        MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10
     )
 }

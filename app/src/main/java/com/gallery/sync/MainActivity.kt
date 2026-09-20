@@ -20,6 +20,7 @@ import com.gallery.sync.ui.common.ExitWarningDialog
 import com.gallery.sync.ui.common.NavDestination
 import com.gallery.sync.ui.common.SignalIcons
 import com.gallery.sync.ui.common.SignalNavBar
+import com.gallery.sync.ui.deleted.DeletedFilesGate
 import com.gallery.sync.ui.help.LocalSetupOnlyGuide
 import com.gallery.sync.ui.archive.ArchiveScreen
 import com.gallery.sync.ui.restore.RestoreScreen
@@ -120,11 +121,15 @@ private fun GallerySyncApp(modifier: Modifier = Modifier) {
             modifier = modifier
         )
 
-        else -> SignedInApp(
-            accountName = (signInState as SignInUiState.SignedIn).accountName,
-            onSignOut = signInViewModel::signOut,
-            modifier = modifier
-        )
+        // The window for files deleted from the phone stands in front of the set-up app only, never
+        // the wizard: setup is finished and the user is signed in. Ian, 19 Sept 2026.
+        else -> DeletedFilesGate(modifier = modifier) {
+            SignedInApp(
+                accountName = (signInState as SignInUiState.SignedIn).accountName,
+                onSignOut = signInViewModel::signOut,
+                modifier = modifier
+            )
+        }
     }
 }
 

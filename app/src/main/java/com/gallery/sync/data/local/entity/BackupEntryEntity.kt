@@ -150,7 +150,16 @@ data class BackupEntryEntity(
      * treating them as interchangeable would silently start re-optimising restored files the day
      * someone widened the skip logic.
      */
-    val modeOverride: AlbumMode? = null
+    val modeOverride: AlbumMode? = null,
+
+    /**
+     * What has been settled about this file's OneDrive copy once it has left the phone. See
+     * [CloudCopyDecision]. Null for every row at upgrade, which is right: nothing has been decided.
+     *
+     * Cleared when the file is back on the phone (`clearLocalMissing`), and by a restore that
+     * replaces the row, so a file deleted a second time is treated as a new deletion.
+     */
+    val cloudDecision: CloudCopyDecision? = null
 )
 
 /**

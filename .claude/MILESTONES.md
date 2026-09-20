@@ -6516,3 +6516,87 @@ count 10, *frees 20 MB*. **Yes** then raised Android's dialog **"move 10 photos 
 and in the removal set, not only drawn; **Deny** was pressed. Ten files still in the folder, none `.trashed`, no pinned rows left.
 So the "Not yet seen" line above is closed for this fix. Still open: the phone was on the Restore tab when Ian asked whether Archive can
 "use the same functionality" as Restore, and he has not yet said which part he means.
+
+### 19 Sept 2026 (evening) — the tick means "checked against OneDrive" again; Settings loses the wait and the review list
+
+**The tick-memory fix is reversed (Ian's decision).** Ian, after seeing it work: *"the Green Check Mark on the files indicates that the file has
+been 'checked' against OneDrive. Once it is Unselected (swipe left, greyed out) the file needs to be re-checked against OneDrive in order for the
+green check to appear."* So `e064900` (a swiped-out file keeps its confirmation and gets its tick straight back) is **withdrawn**, by
+`git revert` of its code, tests and guide text; the two MILESTONES entries about it above are left in place as history and are superseded by
+this one. The behaviour is the one of `a4d7429`: a file swiped back in joins **unchecked**, every tick is reset, the *All files validated*
+prompt is withdrawn and **Check these files** returns; the next Check verifies everything again and the ticks reappear. That is the safer
+reading of the same rule: a tick is a verification made in the current check, never a memory of one. The earlier suite case *a file put back
+joins unchecked and the finished check is dropped* covers it. The guide now says it in words (*A green tick means a file has been checked
+against OneDrive in the current check, so a file you bring back has no tick until the files are checked again*).
+Verified on the Moto G (3:27 pm, Temp 9): Check gave ten ticks and *All files validated*; swipe one left then right left **no ticks**, no prompt,
+*Check these files* showing; Check again gave ten ticks and the prompt. No pinned rows left.
+
+**Settings: *Wait before asking* and *Gone from this phone* removed (Ian).** *"we need to remove the entire 'Wait before Asking' and 'gone from
+phone' as this will be handled in the new Pre-app Pop-up window."* Removed: the waiting-period choice (1/7/30/90 days), the review list with its
+names and the *Remove these from OneDrive* button, the confirmation dialog and the result lines, from `DeletionSection` (now the title and the
+Leave/Ask choice only), `DeletionViewModel` (now just the policy), the fourteen strings and the days plural only they used, and three guide topics
+(`settings-deletion-wait`, `settings-deletion-review`, `dialog-deletion-confirm`; **97 to 94 topics, 51 to 48 with a (?)**). The `settings-deletion`
+topic no longer points at the removed review. The (?) beside the setting was checked on the phone and reads correctly. The
+*edited-photo-is-not-a-deletion* paragraph went with the review topic; the rule itself is not affected.
+**Kept for the new window, so it can reuse it:** `SyncDeletionsToCloud` (list, re-scan, delete to the OneDrive recycle bin), `EditedInPlace`,
+`CloudDeletionGrace` and the stored `cloudDeletionGraceDays`, and their tests. Nothing calls `candidates()` or `delete()` from a screen now.
+
+**Consequence to keep in view: until the pre-app window exists, choosing *Ask* does nothing at all.** Nothing is offered, nothing is removed from
+OneDrive, and nothing asks. The Ask label and its (?) text still describe the intended behaviour. The window itself is not built; the open design
+questions (Archive-removed marker column and migration, whether anything starts selected, when it shows, the timing choices, cancelled files) are
+in the entry above, and external storage is still to be excluded from backup.
+
+Suite green (94 topics). Verified on the Moto G: the Settings section with **Ask** selected shows only the title and the two choices, and the
+Archive tab as above. Uncommitted at the time of writing.
+
+### 19 Sept 2026 (evening) — the window that opens with the app: files deleted from the phone
+
+Ian: *"build the Pre_pop up"*, after removing *Wait before asking* and *Gone from this phone* from Settings. His answers on the open questions:
+*"ARCHIVE Marker - ok"* (a ledger column, so the migration was approved), *"Default selections to OFF"*, *"Shows only when new files"*, *"no delays are
+need"*, *"cancelled files are left out unless they are deleted again"*, and *"any file deleted since the last app opening; any file that has not been
+decided stays until a decision has been made"*. The design (mine, from the earlier thoughts message, on those answers):
+
+**What it is.** A full-screen window, `DeletedFilesGate` in `MainActivity`'s set-up branch (never the wizard), that replaces the app while it is up. It
+appears when the app comes to the front and **something has left the phone since it was last shown**, only under **Ask**. Listed: every undecided file
+that has left the phone and is still in OneDrive at the right size, old and new. **Nothing is ticked to start with.** Tap a card to tick it (a ticked card is
+red and says *Will be removed from OneDrive*). **Remove N from OneDrive** opens a confirmation (count, size, *goes to the OneDrive recycle bin, Gallery Sync never
+empties it*); only its **Remove from OneDrive** removes anything. The ticked files' OneDrive copies go to the recycle bin; the **unticked files are marked
+`KEPT`**. **Keep all in OneDrive** marks everything `KEPT`. **Decide later** and the back button close it and decide nothing (the files stay undecided and the
+window does not come back until something new has left). A result screen says what happened. The header is *Files deleted / from phone (?)* with the number
+on the right, like the other tabs.
+
+**Data (approved migration).** `backup_entries.cloudDecision` (`CloudCopyDecision`: `ARCHIVED`, `KEPT`), `MIGRATION_9_10` (`ADD COLUMN ... TEXT`, null for every
+row), database version 10, schema `10.json` exported. `cloudDeletionCandidates` no longer takes a time and adds `cloudDecision IS NULL`. `ARCHIVED` is written by
+`BackupEngine.markRemovedByArchive` when an Archive removal completes (by key and by MediaStore id, before the ledger refresh); `KEPT` by
+`SyncDeletionsToCloud.keep`. **Both are cleared when the file is back on the phone** (`clearLocalMissing` now also nulls `cloudDecision`, and a restore that
+replaces the row does too), which is how *"unless they are deleted again"* is met. The waiting period is gone for good: `CloudDeletionGrace`,
+`cloudDeletionGraceDays` and its tests are removed; `deletionPromptSeenUpToEpochMillis` (DataStore) records the newest departure the window has been shown for,
+set **as it is shown**, so leaving without deciding does not bring it back for the same files.
+
+**Guards kept or added.** The edited-in-place rule (`EditedInPlace`) both when the list is built and again before deleting; nothing offered on a scan that
+cannot be trusted; and **`MassAbsence`** (new, pure): more than 20 files *and* more than half of everything uploaded missing at once reads as a bad scan (an index
+rebuild, a permission change) and offers nothing. It looks at most once a minute and never disturbs a window that is up.
+
+**Tests (suite green, 460).** `DeletedFilesViewModelTest` (16): under Leave nothing is scanned; nothing shows when nothing has left; nothing ticked to start; not shown
+again for files already shown; a newer file brings it back with the older undecided ones listed too; the seen-up-to stamp is set on showing; once a minute; a window
+that is up is not disturbed; tick, select all, clear; decide later and keep all; **removal needs a tick and the confirmation**; cancelling keeps the ticks; only ticked
+files are removed and the rest kept; a failed removal is not marked kept; finish. `MassAbsenceTest` (5), `SyncDeletionsToCloudTest` (+2: the guard, keep in chunks),
+`ArchiveOptOutTest` (+2: Archive marks by key and MediaStore id), `CloudDeletionPolicyTest` (the two policy tests the deleted grace test held). **Mutation check:**
+removing the confirmation requirement and the seen-up-to rule fails 2 of the window's tests. Guide: `deleted-files-window` and `dialog-remove-from-onedrive` added, the
+`settings-deletion` text points to the window (96 topics, 50 with a (?)); CLAUDE.md records how the consent is taken.
+
+**Verified on the Moto G.** The migration ran on the existing database (version 10, 2,080 rows, no decisions, no crash). The window then opened on the first launch with a real
+case, my leftover `zz_arrival_test.jpg` (uploaded, deleted from the phone earlier): nothing ticked, *Remove 0* disabled; ticking it turned the card red; the confirmation
+appeared; **Remove** gave *1 file moved to the OneDrive recycle bin* and the ledger row was forgotten (that test file is now in OneDrive's recycle bin). Then, with Temp 9's
+uploaded files moved to a hidden folder as stand-in deletions (all restored afterwards): three deleted gave a window of 3; **Decide later** and a relaunch showed nothing;
+one more deleted gave a window of **4** (the three undecided and the new one); ticking one and confirming gave *Moved to the OneDrive recycle bin: 1 file. Left in
+OneDrive: 3 files.* and the database showed the removed row forgotten and the other three `KEPT`; a relaunch showed nothing; putting the files back cleared the `KEPT` marks
+and the missing flag; **deleting two of them again brought them back into a window of 2**. Dark mode readable, and the window survived the theme change. The header title
+wrapped to three lines at first and was shortened; two strings that did not agree in number (*These 1 file are*) were rephrased.
+
+**Not verified on hardware.** (1) **Archive marking end to end.** Temp 9, the only album with uploaded, full-size files, now carries Ian's own Archive setup (an *Asked to
+wait* and two files swiped out), so I did not archive it. The `WHERE mediaStoreId IN` update is checked by Room at compile time and by the tests, and the `WHERE id IN`
+twin ran on the phone, but *archive, then reopen, then nothing offered* was not seen. (2) The mass-absence guard, the failed-removal message, and a very long list. (3)
+Whether the OneDrive recycle bin really holds the removed files: read off the app's own result, not looked at in OneDrive. Side effect of the test: `20190620_053058.jpg`
+had its OneDrive copy removed and the automatic sync sent it again. **Also seen, unrelated:** most of the ledger is `PENDING` (only Camera, Car Show and Temp 9 read
+uploaded) after Ian's wipe and re-run, so the window can only offer files the ledger records as uploaded.

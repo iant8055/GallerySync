@@ -4,6 +4,7 @@ import android.net.Uri
 import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.entity.BackupState
+import com.gallery.sync.data.local.entity.CloudCopyDecision
 import com.gallery.sync.data.local.media.LocalMediaItem
 import com.gallery.sync.data.local.media.MediaAccess
 import com.gallery.sync.data.local.media.MediaScanner
@@ -18,6 +19,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -74,7 +76,9 @@ class SyncDeletionsToCloudTest {
         whenever(settings.current()).thenReturn(
             BackupPreferences(cloudDeletionPolicy = CloudDeletionPolicy.ASK)
         )
-        whenever(dao.cloudDeletionCandidates(any(), any())).thenReturn(missing)
+        whenever(dao.cloudDeletionCandidates(any())).thenReturn(missing)
+        // A library big enough that a handful of missing files is an ordinary tidy-up.
+        whenever(dao.uploadedCount(any())).thenReturn(2_000)
         whenever(scanner.access()).thenReturn(MediaAccess.FULL)
         whenever(scanner.scanEverything()).thenReturn(phone)
     }
@@ -131,6 +135,31 @@ class SyncDeletionsToCloudTest {
 
         assertTrue(sync.candidates().isEmpty())
         verify(scanner, never()).scanEverything()
+    }
+
+    @Test
+    fun `nothing is offered when a mass of files went missing at once`() = runTest {
+        val many = (1..30).map { ledgerRow("Camera", "IMG_$it.jpg") }
+        givenAskAndScan(many, listOf(onPhone("Camera", "other.jpg", 1L)))
+        whenever(dao.uploadedCount(any())).thenReturn(50)
+
+        assertTrue("30 of 50 is more than half, so it reads as a bad scan", sync.candidates().isEmpty())
+
+        whenever(dao.uploadedCount(any())).thenReturn(2_000)
+        assertEquals("30 of 2,000 is an ordinary tidy-up", 30, sync.candidates().size)
+    }
+
+    @Test
+    fun `keeping files records the decision in chunks and removes nothing`() = runTest {
+        val many = (1..1_200).map { ledgerRow("Camera", "IMG_$it.jpg") }
+
+        sync.keep(many)
+
+        val ids = org.mockito.kotlin.argumentCaptor<List<String>>()
+        verify(dao, org.mockito.kotlin.times(3)).setCloudDecision(ids.capture(), eq(CloudCopyDecision.KEPT))
+        assertEquals("every id, none twice", 1_200, ids.allValues.flatten().toSet().size)
+        assertTrue("no chunk over SQLite's limit", ids.allValues.all { it.size <= 500 })
+        verify(drive, never()).moveToRecycleBin(any())
     }
 
     /** The list may be stale by the time someone approves it; the last check must catch an edit too. */

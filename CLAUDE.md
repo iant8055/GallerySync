@@ -170,6 +170,19 @@ This is absolute and applies to every file, in every location, without exception
 - Deleting a photo from the phone does not delete its backup unless the user explicitly
   confirms that specific action.
 
+  **How that consent is taken, built 19 Sept 2026 (Ian).** Only under the Settings choice *Ask*, and
+  only in the window that opens with the app (`ui/deleted/DeletedFilesGate`), never in Settings and
+  never in the wizard. It lists files that have left the phone and are undecided, **nothing ticked to
+  start with**; the user ticks the files whose OneDrive copy should go and then confirms in a
+  dialog naming the count and size, and only then does `SyncDeletionsToCloud.delete` move them to the
+  OneDrive recycle bin (never emptied by this app). **Showing the window is not consent**, and back,
+  *Decide later* and dismissing the dialog all remove nothing. Unticked files are left alone for good
+  (`CloudCopyDecision.KEPT`) until they come back to the phone and are deleted again. Files Archive
+  removed on purpose (`CloudCopyDecision.ARCHIVED`, written when an Archive removal completes) are
+  never offered, because their OneDrive copy is the one the user asked to keep. A photo edited in place
+  (its name is still in its folder) is not a deletion, and a scan that loses more than half the library
+  at once is treated as a bad scan (`MassAbsence`) and offers nothing.
+
 ### UI must be readable in dark mode
 Learned the hard way on the Teleprompter app, where dark-mode users could not read the
 text at all. That is a shipped-to-users bug, not a cosmetic one.

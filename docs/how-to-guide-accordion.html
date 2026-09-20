@@ -524,10 +524,10 @@
   <div class="topic-body" id="archive-file-list">
 <h4>What it is</h4>
 <p>One rounded card for each file in your Archive albums, in the same style as the file cards on the Restore tab: its name, then its size under it, then a mark on the right. A file you put into an Archive album later appears here too, before anything is archived.</p>
-<p><strong>Keeping a file on your phone.</strong> Swipe a card <strong>left</strong> and it fades and reads <strong>Not archiving</strong>. It is left out of every check and every removal, and Gallery Sync remembers your choice, even after you close the app. Swipe it <strong>right</strong> and it returns to the list, ready to be archived. If it had already been checked in the current check it gets its green tick straight back and nothing else changes; a file that has not been checked yet, or that changed while it was set aside, needs the files checked again before anything is removed. Swiping a card that is already that way does nothing, so a run of swipes cannot undo itself. You cannot swipe while a check or a removal is running. If you use a screen reader, each card offers <strong>Keep on this phone</strong> or <strong>Archive this file</strong> instead.</p>
+<p><strong>Keeping a file on your phone.</strong> Swipe a card <strong>left</strong> and it fades and reads <strong>Not archiving</strong>. It is left out of every check and every removal, and Gallery Sync remembers your choice, even after you close the app. Swipe it <strong>right</strong> and it returns to the list, ready to be archived. A green tick means a file has been checked against OneDrive in the current check, so a file you bring back has no tick until the files are checked again, and nothing is removed until they are. Swiping a card that is already that way does nothing, so a run of swipes cannot undo itself. You cannot swipe while a check or a removal is running. If you use a screen reader, each card offers <strong>Keep on this phone</strong> or <strong>Archive this file</strong> instead.</p>
 <p>An album with a file you have kept stays set to Archive, so files added to it later are still covered by the mode you set. If you would rather it stopped, change the album's mode on the Albums tab.</p>
 <p><strong>The mark</strong></p>
-<ul><li><strong>A spinner.</strong> Being checked, backed up or removed.</li><li><strong>A green tick.</strong> Confirmed in OneDrive at the right size, or already removed.</li><li><strong>A red cross.</strong> OneDrive did not confirm it, so it stays on your phone.</li><li><strong>Nothing.</strong> Not looked at yet.</li></ul>
+<ul><li><strong>A spinner.</strong> Being checked, backed up or removed.</li><li><strong>A green tick.</strong> Checked against OneDrive and confirmed there at the right size, or already removed.</li><li><strong>A red cross.</strong> OneDrive did not confirm it, so it stays on your phone.</li><li><strong>Nothing.</strong> Not looked at yet.</li></ul>
 <p><strong>The words under the name</strong>, in place of the size while something is happening:</p>
 <ul><li><strong>Backing up...</strong> The file was not in OneDrive, so it is being sent.</li><li><strong>Moving to Trash/Recycle Bin...</strong> Being removed.</li><li><strong>Removed from this phone.</strong></li><li>In red, why a file is staying: <strong>Could not check OneDrive</strong>, <strong>Not in OneDrive</strong>, or <strong>In OneDrive but the wrong size</strong>. Each ends "staying on your phone". "Could not check" and "is not there" are kept separate because they need different reactions. Being unable to ask is not the same as an answer.</li></ul>
 <h4>Where it comes from</h4>
@@ -681,40 +681,36 @@
   <div class="topic-body" id="settings-deletion">
 <h4>What it is</h4>
 <p>Two choices, one selected at a time:</p>
-<ul><li><strong>Leave the OneDrive copy</strong> (the starting choice). Nothing is ever removed from OneDrive. Deleting on your phone only frees space here.</li><li><strong>Ask me about the OneDrive copy.</strong> Gallery Sync shows you what has gone from your phone and asks before removing anything from OneDrive. It never removes anything on its own.</li></ul>
+<ul><li><strong>Leave the OneDrive copy</strong> (the starting choice). Nothing is ever removed from OneDrive. Deleting on your phone only frees space here.</li><li><strong>Ask me about the OneDrive copy.</strong> When you open the app after files have gone from your phone, a window lists them and asks what you want done with their OneDrive copies. It never removes anything on its own. See <a class="xref" href="#deleted-files-window">“Files deleted from this phone (the window that opens with the app)”</a>.</li></ul>
 <h4>Why Leave is the default</h4>
 <p>A copy left in OneDrive costs a little storage. A copy removed by mistake could cost you the photo, because the one on your phone is already gone.</p>
 <h4>Good to know</h4>
-<p>The app never treats a missing file as an instruction to delete. Even under <strong>Ask</strong>, nothing moves without you reading a list and confirming. See <a class="xref" href="#settings-deletion-review">“Gone from this phone”</a>.</p>
+<p>The app never treats a missing file as an instruction to delete. Under <strong>Ask</strong> it asks you first, and nothing in OneDrive moves without your say-so.</p>
   </div></details>
-  <details class="topic"><summary>Wait before asking</summary>
-  <div class="topic-body" id="settings-deletion-wait">
+  <details class="topic"><summary>Files deleted from this phone (the window that opens with the app)</summary>
+  <div class="topic-body" id="deleted-files-window">
 <h4>What it is</h4>
-<p>Appears only when you choose <strong>Ask</strong>. It sets how many days a file has to be missing from your phone before it is offered for removal from OneDrive: <strong>1</strong>, <strong>7</strong> (the starting choice), <strong>30</strong> or <strong>90</strong> days.</p>
-<h4>Why there is a wait</h4>
-<p>A file seen missing once is not proof it was deleted. A phone with its storage card out looks the same as a deleted photo for a while, and so does a gallery app that is reindexing. A week of continuous absence is much stronger evidence.</p>
-<h4>Good to know</h4>
-<p>A longer wait means space in OneDrive is reclaimed later. A shorter one makes it more likely that a temporary absence is offered as a deletion. Under <strong>Leave</strong>, this setting does nothing, so it is hidden.</p>
-  </div></details>
-  <details class="topic"><summary>Gone from this phone</summary>
-  <div class="topic-body" id="settings-deletion-review">
-<h4>What it is</h4>
-<p>Appears under <strong>Ask</strong>. It lists what could be removed from OneDrive:</p>
-<ul><li><strong>Nothing to review. Files you delete will appear here once they have been gone for a while.</strong> when the list is empty.</li><li><strong>12 files no longer on this phone, still in OneDrive, taking 340 MB.</strong> followed by up to eight names, each shown as <strong>name · album</strong>, and a button <strong>Remove these from OneDrive</strong>. The list is capped because this is a review, not a file manager.</li><li>After a run, results: <strong>N files removed from OneDrive.</strong>, <strong>N files were back on your phone, so their OneDrive copies were kept.</strong> and <strong>N files could not be removed. Nothing was lost; try again later.</strong></li></ul>
+<p>A full-screen window that opens <strong>before the Albums tab</strong>, when files have left your phone since it last appeared and you have chosen <strong>Ask</strong> in Settings. The green card at the top says <strong>Files deleted from phone</strong> and, in the right half, how many there are. Under it are how much they take up in OneDrive, how many you have ticked, and <strong>Select all</strong> and <strong>Clear</strong>.</p>
+<h4>What is listed</h4>
+<p>Every file that has gone from your phone but is still in OneDrive at the right size and that you have not yet decided about, each as a card with its name, its album and its size. The list holds the older ones as well as the newest: <strong>a file you have not decided about stays on the list until you decide.</strong></p>
+<p>Not listed: a file <strong>Archive</strong> took off the phone on purpose (its OneDrive copy is the one you asked to keep); a photo you <strong>edited and saved over</strong>, because a file of the same name is still in the same folder; a file you chose to keep, <strong>until it comes back to the phone and is deleted again</strong>; and a file whose full-quality original is the one behind an optimised photo.</p>
+<h4>When it appears</h4>
+<p>Only under <strong>Ask</strong>, only after first-time setup is finished, and <strong>only when there are new files</strong>: something has left the phone since the window was last shown. Opening the app with nothing new shows nothing. There is no waiting period. If a very large share of your library seems to have gone at once, it is treated as a scan going wrong rather than as deletions and nothing is offered.</p>
+<h4>What you do</h4>
+<p><strong>Nothing is ticked to start with.</strong> Tap a card to tick it; a ticked card turns red and says <strong>Will be removed from OneDrive</strong>.</p>
+<ul><li><strong>Remove N from OneDrive</strong> asks you to confirm first. See <a class="xref" href="#dialog-remove-from-onedrive">“Remove files from OneDrive? (the confirmation)”</a>. The ticked files' OneDrive copies go to the OneDrive recycle bin, and <strong>the files you left unticked stay in OneDrive for good.</strong></li><li><strong>Keep all in OneDrive</strong> leaves every file's copy alone, whatever is ticked.</li><li><strong>Decide later</strong> closes the window without deciding anything. The files stay on the list and the window does not come back until something new has left the phone.</li><li>The back button does the same as <strong>Decide later</strong>. It never removes anything.</li></ul>
+<p>When it has finished it says what happened: how many were moved to the recycle bin, how many were left in OneDrive, how many turned out to be back on your phone, and how many could not be removed. A file that could not be removed is not lost and is not decided, so it stays on the list.</p>
 <h4>Where it comes from</h4>
-<p>The app compares its own record of files it sent with what is on the phone now. A file only appears once it has been missing for the waiting period, and only if nothing of that name is left in its folder on the phone.</p>
-<h4>Good to know</h4>
-<p><strong>A photo you edited and saved over is not listed.</strong> Saving an edit changes the file, so the app no longer recognises the original, but a file with the same name is still in the same folder, so it is not treated as deleted. The unedited original stays in OneDrive as a backup, and you can remove it there yourself if you want it gone. Only a file that has really disappeared is offered.</p>
-<p>Files that came back are reported, not hidden. It shows the app checks rather than assumes. The button opens a confirmation: <a class="xref" href="#dialog-deletion-confirm">“Remove files from OneDrive? (the confirmation)”</a>.</p>
+<p>The app's own record of what it sent, compared with what is on your phone when you open it. It looks when the app comes to the front, and at most once a minute.</p>
   </div></details>
   <details class="topic"><summary>Remove files from OneDrive? (the confirmation)</summary>
-  <div class="topic-body" id="dialog-deletion-confirm">
+  <div class="topic-body" id="dialog-remove-from-onedrive">
 <h4>What it is</h4>
-<p>A confirmation with the number and size: <strong>Remove 12 files from OneDrive?</strong> It says these files are not on your phone any more, and how much removing them frees in OneDrive.</p>
+<p>A confirmation with the number and size: <strong>Remove 12 files from OneDrive?</strong> It says the files are not on your phone any more.</p>
 <p>They go to the <strong>OneDrive recycle bin</strong>, where you can restore them yourself. Gallery Sync never empties that bin.</p>
-<p><strong>Remove from OneDrive</strong> goes ahead. <strong>Keep them</strong> cancels, and it is worded that way so the safe choice says what it does.</p>
+<p><strong>Remove from OneDrive</strong> goes ahead. <strong>Cancel</strong> closes the confirmation and decides nothing: your ticks stay as they were.</p>
 <h4>Where it comes from</h4>
-<p>The number and size are the files in the list you just reviewed.</p>
+<p>The number and size are the files you ticked in the window behind it. Just before anything is removed the app looks at your phone again, and any file that has come back, or whose name is back in its folder, is left alone.</p>
   </div></details>
   <details class="topic"><summary>Default mode for new albums</summary>
   <div class="topic-body" id="settings-default-mode">

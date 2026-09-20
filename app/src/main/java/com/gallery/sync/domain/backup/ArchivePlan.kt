@@ -144,18 +144,8 @@ data class ArchiveFiles(
     val optedOut: List<LocalMediaItem> = emptyList()
 )
 
-/**
- * A plan matched to the phone.
- *
- * @property needsRecheck the check that was on screen no longer describes the list.
- * @property setAside files this check confirmed that the user has since swiped out, by MediaStore id,
- * kept so the confirmation can come back with the file. Empty once the check is withdrawn.
- */
-data class ReconciledPlan(
-    val plan: ArchivePlan,
-    val needsRecheck: Boolean,
-    val setAside: Map<Long, ArchiveEntry> = emptyMap()
-)
+/** A plan matched to the phone, and whether the check that was on screen no longer describes it. */
+data class ReconciledPlan(val plan: ArchivePlan, val needsRecheck: Boolean)
 
 /**
  * This plan matched to what the phone holds now, for when the user swipes a file out of Archive or
@@ -163,75 +153,33 @@ data class ReconciledPlan(
  *
  * - A file that is no longer archivable (opted out, or gone from the phone) leaves the plan.
  * - A file that is now archivable and was not in the plan (put back, or newly arrived) joins it
- *   **unchecked**, with one exception below.
+ *   **unchecked**.
  *
- * ### The exception: a file set aside keeps its confirmation
+ * **The plan only ever loses files or gains unchecked ones here, so nothing that was not confirmed
+ * can become confirmed by this.** That is the property the removal step relies on, since it acts on
+ * [ArchivePlan.confirmed] alone.
  *
- * Ian, 19 Sept 2026: swipe a checked file out and back and its green tick did not return, and every
- * other tick vanished with it. Verification is about the file and OneDrive, not about whether the
- * file was on the list a moment ago, so when a file this check **confirmed** is swiped out its
- * confirmation is kept in [setAside], and swiping it back returns it with the tick, without
- * disturbing the rest. This is no more trust than the removal step already places in the check,
- * which does not ask OneDrive again at Yes.
- *
- * It applies only to a file that is unchanged (same name, size and modified time), so a file edited
- * while it was set aside is a different file and must be checked again. And only a *confirmed* file
- * is remembered: a red cross is not.
- *
- * **Otherwise the plan only ever loses files or gains unchecked ones, so nothing that was not
- * confirmed can become confirmed by this.** That is the property the removal step relies on, since it
- * acts on [ArchivePlan.confirmed] alone.
- *
- * When [checkFinished] and either a file that has never been checked joined or nothing confirmed is
- * left, the check on screen no longer describes the list: every mark is reset and
- * [ReconciledPlan.needsRecheck] is true, so the caller returns to waiting for a check rather than
- * saying "all files validated" about a file nobody validated, or offering to archive nothing.
+ * When [checkFinished] and either a file joined or nothing confirmed is left, the check on screen
+ * no longer describes the list: every mark is reset and [ReconciledPlan.needsRecheck] is true, so the
+ * caller returns to waiting for a check rather than saying "all files validated" about a file nobody
+ * validated, or offering to archive nothing.
  */
-fun ArchivePlan.reconciledWith(
-    files: ArchiveFiles,
-    checkFinished: Boolean,
-    setAside: Map<Long, ArchiveEntry> = emptyMap()
-): ReconciledPlan {
+fun ArchivePlan.reconciledWith(files: ArchiveFiles, checkFinished: Boolean): ReconciledPlan {
     val archivable = files.toArchive.mapTo(HashSet()) { it.mediaStoreId }
-    val optedOut = files.optedOut.mapTo(HashSet()) { it.mediaStoreId }
 
     val kept = entries.filter { it.item.mediaStoreId in archivable }
     val known = kept.mapTo(HashSet()) { it.item.mediaStoreId }
-    val arrivals = files.toArchive.filter { it.mediaStoreId !in known }
+    val joined = files.toArchive.filter { it.mediaStoreId !in known }.map { ArchiveEntry(it) }
 
-    // Confirmations to carry: those already set aside, and any confirmed file swiped out just now.
-    val carried = if (checkFinished) {
-        setAside + entries
-            .filter { it.mark == ArchiveMark.CONFIRMED && it.item.mediaStoreId in optedOut }
-            .associateBy { it.item.mediaStoreId }
-    } else {
-        emptyMap()
-    }
-
-    val restored = arrivals
-        .filter { item ->
-            val before = carried[item.mediaStoreId]?.item
-            before != null &&
-                before.displayName == item.displayName &&
-                before.album == item.album &&
-                before.sizeBytes == item.sizeBytes &&
-                before.dateModifiedEpochSeconds == item.dateModifiedEpochSeconds
-        }
-    val restoredIds = restored.mapTo(HashSet()) { it.mediaStoreId }
-
-    val returning = restored.map { ArchiveEntry(it, mark = ArchiveMark.CONFIRMED) }
-    val fresh = arrivals.filter { it.mediaStoreId !in restoredIds }.map { ArchiveEntry(it) }
-
-    var merged = (kept + returning + fresh).sortedWith(compareBy({ it.album }, { it.name }))
+    var merged = (kept + joined).sortedWith(compareBy({ it.album }, { it.name }))
     var needsRecheck = false
     var stillValidated = validated
 
-    if (checkFinished && (fresh.isNotEmpty() || merged.none { it.mark == ArchiveMark.CONFIRMED })) {
+    if (checkFinished && (joined.isNotEmpty() || merged.none { it.mark == ArchiveMark.CONFIRMED })) {
         merged = merged.map { it.copy(mark = ArchiveMark.WAITING, failure = null) }
         needsRecheck = true
     }
-    if (needsRecheck || fresh.isNotEmpty()) stillValidated = false
+    if (needsRecheck || joined.isNotEmpty()) stillValidated = false
 
-    val nextSetAside = if (needsRecheck) emptyMap() else carried.filterKeys { it !in restoredIds && it in optedOut }
-    return ReconciledPlan(copy(entries = merged, validated = stillValidated), needsRecheck, nextSetAside)
+    return ReconciledPlan(copy(entries = merged, validated = stillValidated), needsRecheck)
 }

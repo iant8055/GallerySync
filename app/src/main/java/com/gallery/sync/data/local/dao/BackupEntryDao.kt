@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.entity.BackupEntryEntity
+import com.gallery.sync.data.local.entity.CloudCopyDecision
 import com.gallery.sync.data.local.entity.BackupState
 import com.gallery.sync.data.local.media.RestoredAlbum
 import kotlinx.coroutines.flow.Flow
@@ -285,11 +286,15 @@ interface BackupEntryDao {
     )
     suspend fun markLocalMissing(ids: List<String>, now: Long): Int
 
-    /** Clears the flag for anything back on the phone — a restore, or a file that reappeared. */
+    /**
+     * Clears the flag for anything back on the phone — a restore, or a file that reappeared — and any
+     * decision about its OneDrive copy with it, so a file deleted a second time is offered a second
+     * time. See `CloudCopyDecision`.
+     */
     @Query(
         """
         UPDATE backup_entries
-        SET localMissingSinceEpochMillis = NULL
+        SET localMissingSinceEpochMillis = NULL, cloudDecision = NULL
         WHERE localMissingSinceEpochMillis IS NOT NULL
           AND id IN (:ids)
         """
@@ -324,8 +329,10 @@ interface BackupEntryDao {
      *
      * Every condition is a guard, and none is redundant:
      *
-     * - `localMissingSinceEpochMillis <= :missingBefore` is the grace period. Absence observed once
-     *   is not evidence of a deletion; absence that persists is.
+     * - `cloudDecision IS NULL`: nothing has been settled about this file. Archive marks what it
+     *   removes on purpose, and a file the user chose to keep is left out, until it is back on the
+     *   phone and gone again. There is no waiting period any more (Ian, 19 Sept 2026: *"no delays
+     *   are need"*): the window that offers these only shows files that are new since it last did.
      * - a usable `remoteItemId`, because without one there is nothing safe to delete, and matching
      *   by name would be a way to remove the wrong photo.
      * - `remoteSizeBytes = sizeBytes`, the same verification bar as everywhere else.
@@ -347,7 +354,7 @@ interface BackupEntryDao {
         SELECT * FROM backup_entries
         WHERE state = :uploaded
           AND localMissingSinceEpochMillis IS NOT NULL
-          AND localMissingSinceEpochMillis <= :missingBefore
+          AND cloudDecision IS NULL
           AND remoteItemId IS NOT NULL
           AND remoteItemId != ''
           AND remoteSizeBytes IS NOT NULL
@@ -357,9 +364,27 @@ interface BackupEntryDao {
         """
     )
     suspend fun cloudDeletionCandidates(
-        missingBefore: Long,
         uploaded: BackupState = BackupState.UPLOADED
     ): List<BackupEntryEntity>
+
+    /** How many files are recorded as uploaded, for judging whether a scan looks wrong. */
+    @Query("SELECT COUNT(*) FROM backup_entries WHERE state = :uploaded")
+    suspend fun uploadedCount(uploaded: BackupState = BackupState.UPLOADED): Int
+
+    /**
+     * Records what was decided about these rows' OneDrive copies. Bookkeeping only. Callers chunk the
+     * list, because SQLite binds one variable per id.
+     */
+    @Query("UPDATE backup_entries SET cloudDecision = :decision WHERE id IN (:ids)")
+    suspend fun setCloudDecision(ids: List<String>, decision: CloudCopyDecision)
+
+    /**
+     * The same for rows found by MediaStore id, which is how Archive knows the files it removed. A
+     * row's key can have drifted from the file's (a restore rewrites the modification time) while its
+     * MediaStore id has not, so Archive marks by both.
+     */
+    @Query("UPDATE backup_entries SET cloudDecision = :decision WHERE mediaStoreId IN (:mediaStoreIds)")
+    suspend fun setCloudDecisionByMediaStoreId(mediaStoreIds: List<Long>, decision: CloudCopyDecision)
 
     /**
      * Returns rows to pending so the uploader will send them again.

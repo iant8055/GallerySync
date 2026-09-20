@@ -2,6 +2,7 @@ package com.gallery.sync.domain.backup
 
 import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.entity.BackupEntryEntity
+import com.gallery.sync.data.local.entity.CloudCopyDecision
 import com.gallery.sync.data.local.media.MediaAccess
 import com.gallery.sync.data.local.media.RestoredAlbum
 import com.gallery.sync.data.local.media.MediaScanner
@@ -30,15 +31,18 @@ data class DeletionOutcome(
  * one it can prove is safe elsewhere. This removes the drive's copy, and the local copy is already
  * gone by definition — there is nothing left to fall back to except the recycle bin.
  *
- * ### Four guards, each load-bearing
+ * ### Guards, each load-bearing
  *
  * 1. **The policy must be [CloudDeletionPolicy.ASK].** The default is LEAVE and there is no
  *    automatic mode; [CloudDeletionPolicy] records why one cannot be made safe.
- * 2. **The grace period**, applied in the query. "Never infers deletion from absence alone" —
- *    absence that persists for days is a different claim from absence noticed once.
- * 3. **A fresh scan immediately before deleting.** A file that has come back is dropped from the
- *    batch however recently the list was drawn. This is the mirror of the removal re-check: the
- *    ledger records what was true once, and the operation is when that gets tested.
+ * 2. **Nothing already settled, and nothing Archive took off the phone on purpose** (the query's
+ *    `cloudDecision IS NULL`), and **nothing when a mass of files went missing at once**
+ *    ([MassAbsence]). There is no waiting period: the window that offers these only shows files
+ *    that are new since it last appeared (Ian, 19 Sept 2026).
+ * 3. **A file whose name is still in its folder is not a deletion** ([EditedInPlace]), and **a fresh
+ *    scan immediately before deleting.** A file that has come back is dropped from the batch however
+ *    recently the list was drawn. This is the mirror of the removal re-check: the ledger records what
+ *    was true once, and the operation is when that gets tested.
  * 4. **An explicit confirmation**, which lives in the UI — which is why [delete] takes an
  *    already-approved list rather than deciding for itself what to remove.
  *
@@ -66,10 +70,14 @@ class SyncDeletionsToCloud @Inject constructor(
         val prefs = settings.current()
         if (prefs.cloudDeletionPolicy != CloudDeletionPolicy.ASK) return@withContext emptyList()
 
-        val cutoff = System.currentTimeMillis() - prefs.cloudDeletionGraceDays * MILLIS_PER_DAY
-
-        val missing = entryDao.cloudDeletionCandidates(missingBefore = cutoff)
+        val missing = entryDao.cloudDeletionCandidates()
         if (missing.isEmpty()) return@withContext missing
+
+        // A scan that came back short, not the user, is the likelier cause of a mass of missing files.
+        if (MassAbsence.looksLikeABadScan(missing.size, entryDao.uploadedCount())) {
+            Logger.w(TAG, "${missing.size} files look missing at once, which reads as a bad scan: offering none")
+            return@withContext emptyList()
+        }
 
         // A file whose name is still in its folder was edited, not deleted (see [EditedInPlace]),
         // and only the phone can say what is still there. A scan that cannot be trusted is no
@@ -87,6 +95,15 @@ class SyncDeletionsToCloud @Inject constructor(
                         "(${missing.size - it.size} left out: still on the phone under the same name)"
                 )
             }
+    }
+
+    /**
+     * Records that the user chose to leave these files' OneDrive copies alone. They are left out of
+     * the window from now on, until they are back on the phone and gone again. Bookkeeping only:
+     * nothing is removed or changed anywhere.
+     */
+    suspend fun keep(entries: List<BackupEntryEntity>) = withContext(dispatcher) {
+        entries.map { it.id }.chunked(CHUNK).forEach { entryDao.setCloudDecision(it, CloudCopyDecision.KEPT) }
     }
 
     /**
@@ -158,6 +175,8 @@ class SyncDeletionsToCloud @Inject constructor(
 
     private companion object {
         const val TAG = "DeletionSync"
-        const val MILLIS_PER_DAY = 24L * 60 * 60 * 1000
+
+        /** SQLite binds one variable per id and stops at 999, so lists are written in chunks. */
+        const val CHUNK = 500
     }
 }

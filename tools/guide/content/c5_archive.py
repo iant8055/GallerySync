@@ -86,13 +86,13 @@ CHAPTER = Chapter(
             ## What it is
             One rounded card for each file in your Archive albums, in the same style as the file cards on the Restore tab: its name, then its size under it, then a mark on the right. A file you put into an Archive album later appears here too, before anything is archived.
 
-            **Keeping a file on your phone.** Swipe a card **left** and it fades and reads **Not archiving**. It is left out of every check and every removal, and Gallery Sync remembers your choice, even after you close the app. Swipe it **right** and it returns to the list, ready to be archived. If it had already been checked in the current check it gets its green tick straight back and nothing else changes; a file that has not been checked yet, or that changed while it was set aside, needs the files checked again before anything is removed. Swiping a card that is already that way does nothing, so a run of swipes cannot undo itself. You cannot swipe while a check or a removal is running. If you use a screen reader, each card offers **Keep on this phone** or **Archive this file** instead.
+            **Keeping a file on your phone.** Swipe a card **left** and it fades and reads **Not archiving**. It is left out of every check and every removal, and Gallery Sync remembers your choice, even after you close the app. Swipe it **right** and it returns to the list, ready to be archived. A green tick means a file has been checked against OneDrive in the current check, so a file you bring back has no tick until the files are checked again, and nothing is removed until they are. Swiping a card that is already that way does nothing, so a run of swipes cannot undo itself. You cannot swipe while a check or a removal is running. If you use a screen reader, each card offers **Keep on this phone** or **Archive this file** instead.
 
             An album with a file you have kept stays set to Archive, so files added to it later are still covered by the mode you set. If you would rather it stopped, change the album's mode on the Albums tab.
 
             **The mark**
             • **A spinner.** Being checked, backed up or removed.
-            • **A green tick.** Confirmed in OneDrive at the right size, or already removed.
+            • **A green tick.** Checked against OneDrive and confirmed there at the right size, or already removed.
             • **A red cross.** OneDrive did not confirm it, so it stays on your phone.
             • **Nothing.** Not looked at yet.
 

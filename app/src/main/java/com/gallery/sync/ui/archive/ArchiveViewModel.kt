@@ -59,12 +59,7 @@ data class ArchiveUiState(
      * Deliberately **not** part of [plan]. Everything that checks or removes acts on the plan, so a
      * file that is not in it cannot be archived, whatever else happens on this screen.
      */
-    val optedOut: List<LocalMediaItem> = emptyList(),
-    /**
-     * Files the current check confirmed that the user has since swiped out, so the green tick can come
-     * back with the file. Not shown anywhere and never acted on: only [plan] is. See [reconciledWith].
-     */
-    val setAside: Map<Long, ArchiveEntry> = emptyMap()
+    val optedOut: List<LocalMediaItem> = emptyList()
 ) {
     val showPrompt: Boolean get() = phase == ArchivePhase.READY && delayedUntil == null
 }
@@ -114,7 +109,6 @@ class ArchiveViewModel @Inject constructor(
             _state.value = _state.value.copy(
                 plan = ArchivePlan(entries = files.toArchive.map { ArchiveEntry(it) }),
                 optedOut = files.optedOut,
-                setAside = emptyMap(),
                 archiveAlbums = albums,
                 phase = ArchivePhase.IDLE,
                 batchTotal = 0,
@@ -140,7 +134,6 @@ class ArchiveViewModel @Inject constructor(
 
         viewModelScope.launch {
             _state.value = _state.value.copy(
-                setAside = emptyMap(),
                 phase = ArchivePhase.VALIDATING,
                 plan = _state.value.plan.copy(
                     entries = entries.map { it.copy(mark = ArchiveMark.CHECKING, failure = null) },
@@ -293,16 +286,11 @@ class ArchiveViewModel @Inject constructor(
      * the plan is [reconciledWith]; this only applies it to the screen's state.
      */
     private fun reconciled(current: ArchiveUiState, files: ArchiveFiles): ArchiveUiState {
-        val result = current.plan.reconciledWith(
-            files,
-            checkFinished = current.phase == ArchivePhase.READY,
-            setAside = current.setAside
-        )
+        val result = current.plan.reconciledWith(files, checkFinished = current.phase == ArchivePhase.READY)
         val phase = if (result.needsRecheck) ArchivePhase.IDLE else current.phase
         return current.copy(
             plan = result.plan,
             optedOut = files.optedOut,
-            setAside = if (phase == ArchivePhase.READY) result.setAside else emptyMap(),
             phase = phase,
             batchTotal = if (phase == ArchivePhase.READY) localCopyRemover.batch(result.plan.confirmed).size else 0
         )
@@ -382,6 +370,12 @@ class ArchiveViewModel @Inject constructor(
             // those is a list of things that do not exist. What survives is the count and the
             // bytes, which is what the screen actually needs to report.
             val removed = settled.removed
+
+            // Say these files left on purpose, before the ledger notices they have gone: the "files
+            // deleted from this phone" window must never offer to remove the OneDrive copy of a file
+            // Archive just took off the phone. That copy is the one the user asked to keep. Ian,
+            // 19 Sept 2026 (*"ARCHIVE Marker - ok"*).
+            engine.markRemovedByArchive(removed.map { it.item })
 
             // Tell the ledger the files have gone, before re-reading anything.
             //

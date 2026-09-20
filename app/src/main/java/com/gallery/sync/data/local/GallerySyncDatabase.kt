@@ -4,6 +4,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.gallery.sync.data.local.converter.AlbumModeConverter
+import com.gallery.sync.data.local.converter.CloudCopyDecisionConverter
 import com.gallery.sync.data.local.converter.BackupStateConverter
 import com.gallery.sync.data.local.converter.MediaSourceConverter
 import com.gallery.sync.data.local.dao.AlbumCloudStatusDao
@@ -37,10 +38,15 @@ import com.gallery.sync.data.local.entity.MediaItemEntity
         AlbumPreferenceEntity::class,
         AlbumCloudStatusEntity::class
     ],
-    version = 9,
+    version = 10,
     exportSchema = true
 )
-@TypeConverters(MediaSourceConverter::class, BackupStateConverter::class, AlbumModeConverter::class)
+@TypeConverters(
+    MediaSourceConverter::class,
+    BackupStateConverter::class,
+    AlbumModeConverter::class,
+    CloudCopyDecisionConverter::class
+)
 abstract class GallerySyncDatabase : RoomDatabase() {
 
     abstract fun mediaItemDao(): MediaItemDao
