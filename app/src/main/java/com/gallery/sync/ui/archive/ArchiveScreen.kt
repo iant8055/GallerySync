@@ -152,7 +152,7 @@ fun ArchiveScreen(
             ArchiveHeader(state = state, onValidate = viewModel::validate)
         }
 
-        if (state.showPrompt) {
+        if (state.showPrompt()) {
             ArchivePrompt(
                 state = state,
                 onYes = {
@@ -417,24 +417,34 @@ private fun ArchiveHeroActions(state: ArchiveUiState, onValidate: () -> Unit) {
             style = MaterialTheme.typography.bodySmall
         )
 
-        ArchivePhase.DONE -> Text(
-            text = if (state.removedCount == 0) {
-                stringResource(R.string.archive_done_none)
-            } else {
-                stringResource(
-                    R.string.archive_done,
-                    pluralStringResource(
-                        R.plurals.file_count,
-                        state.removedCount,
-                        state.removedCount
-                    ),
-                    formatBytes(context, state.removedBytes)
+        ArchivePhase.DONE -> Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                text = if (state.removedCount == 0) {
+                    stringResource(R.string.archive_done_none)
+                } else {
+                    stringResource(
+                        R.string.archive_done,
+                        pluralStringResource(
+                            R.plurals.file_count,
+                            state.removedCount,
+                            state.removedCount
+                        ),
+                        formatBytes(context, state.removedBytes)
+                    )
+                },
+                style = MaterialTheme.typography.bodySmall
+            )
+            // Files still waiting means the run did not take them all, or was refused. Asking again
+            // must not need a restart.
+            if (state.offersCheck()) {
+                HeroOutlinedButton(
+                    onClick = onValidate,
+                    label = stringResource(R.string.archive_validate)
                 )
-            },
-            style = MaterialTheme.typography.bodySmall
-        )
+            }
+        }
 
-        ArchivePhase.READY -> if (state.delayedUntil != null) {
+        ArchivePhase.READY -> if (state.isDelayed()) {
             Text(
                 text = stringResource(R.string.archive_delayed),
                 style = MaterialTheme.typography.bodySmall

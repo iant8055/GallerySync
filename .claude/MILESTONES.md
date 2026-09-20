@@ -6676,3 +6676,43 @@ UPLOADED at the drive's size, settled, and left in the trash.
 upload does not drop the album, removal does not drop the album, nothing cached.
 
 **Still true, and small.** A file put in that folder by something other than this app in the last three minutes is not seen, which can cost a renamed duplicate and nothing worse (uploads rename on conflict and never overwrite).
+
+### 19 Sept 2026 - Archive: a finished check did nothing, because an expired Delay still counted
+
+Ian set `Temp 5` to Archive (20 files across Temp 5 and Temp 9), swiped out five, pressed *Check these files*, and **nothing happened after the check: "the Tab just sat there."**
+
+**Cause.** The log showed the check finishing correctly (*validate: 17 confirmed, 0 could not be archived*, then the two swipe-outs, then 15 to archive). The screen then sat in READY with the question hidden, because `ArchiveUiState.showPrompt` was
+`phase == READY && delayedUntil == null` and `delayedUntil` was set from **any** stored time above zero. Temp 9 carried a **Delay** pressed earlier that day (stored as 17:08), which had run out nearly six hours before. **A stored Delay was read as
+"delayed" for ever, so once anyone had pressed Delay the Archive question could never be asked again.** Nothing else in the app had this: `ExitWarning` already judged the stored time against the clock. It went unseen because nobody had reached the
+prompt again after a Delay expired; the tab in that state said only a small *Asked to wait* line, easy to read past.
+
+**Fix.** `ArchiveUiState.isDelayed(now)` is true only while the stored time is in the future, and `showPrompt(now)` uses it. The screen's *Asked to wait* line uses it too. Not changed: a Delay that runs out while the tab is open is noticed on the next
+interaction rather than at the moment it ends.
+
+**Seen on the Moto G, with Ian's own state (Temp 5 + Temp 9, five swiped out).** *Check these files*, then *All files validated... Do you want to continue? Yes / No / Delay* with green ticks; **Yes** raised Android's dialog for **15 photos**, which is
+20 minus the five swiped out; **Deny** gave *Nothing was removed* and all 20 files were still there. **Not done: an Allow.** The removal itself was not run, so *archive, then empty the album's mode, then reopen* is still unseen since the tick change.
+
+**Tests.** 510 pass (5 new in `ArchiveDelayTest`). Mutation-checked: put the old reading back and two tests fail.
+
+### 19 Sept 2026 - Archive: no way to ask again after a refused removal
+
+Ian, straight after the fix above: *"how to restart Archive after cancel??"* Denying Android's trash dialog left the tab on *Nothing was removed* with the 15 files still waiting and **no button**. A removal that has reported moves the tab to
+its DONE state, which showed the report only, and nothing moved it back: reopening the tab reloads only from IDLE, so the only way out was to kill and reopen the app. The same held after a removal Android only part-allowed.
+
+**Fix.** DONE now shows *Check these files* under the report whenever files are still waiting (`ArchiveUiState.offersCheck`). Starting a check clears the old report, and `validate()` now refuses to start while a check or a removal is already running. *No* on the question already
+went back to IDLE and was not affected.
+
+**Seen on the Moto G.** Check, Yes, Deny: *Nothing was removed* with **Check these files** back beneath it; pressed it: the check ran again and *All files validated... Yes / No / Delay* returned. All 20 files still on the phone.
+**Tests.** 515 pass (5 new in `ArchiveCheckButtonTest`); the old behaviour put back fails one. **Still not done on hardware:** pressing **Allow**.
+
+### 19 Sept 2026 - Archive removal seen end to end on the Moto G, after the tick change
+
+Ian pressed **Yes** and **Allow** on Temp 5 (10 files) and Temp 9 (10 files) with five files swiped out. **This closes the open item: the Archive marking, the removal and the deleted-files window's silence were unseen since the window was built.**
+
+**What happened.** Android's dialog offered **15 photos**. After Allow: *archive: 15 files removed from this phone*; on disk Temp 5 holds 2 live and 8 trashed, Temp 9 holds 3 live and 7 trashed (renamed in place, as recorded for the Fold 4 and the Moto G). The 5 swiped-out files stayed.
+**Ledger.** All 15 rows are UPLOADED, flagged gone from the phone, and marked `ARCHIVED` (8 + 7); the 5 kept files carry their pin; `unsent_departures` is empty. **Both albums keep the Archive mode**, because each still holds files (the emptying rule, as designed).
+**The deleted-files window did not open on the next launch**, so files Archive removed are not offered for deletion from OneDrive. **Restore** offers them: *Temp 5, 8 files, 49 MB, 8 to download, 2 already on this phone*. The Albums tab reads *2 kept at full size / 10 verified in OneDrive* for Temp 5 and *3 kept* for Temp 9.
+
+**Seen and left alone.** After a run that takes every waiting file the tab shows the count at zero and **no message that 15 files were archived**: the report is drawn only while files are waiting (the header's action slot is gated on that, and Ian's 27 Aug note says the zero says it). Whether a *15 files moved to the trash* line should show is his call.
+Also still true: the Albums tab counts the swiped-out files as *kept at full size*, which is the pin's older meaning.
+**Side effect.** 15 test photos are in the phone's trash, 30 days, and fetchable from Restore.

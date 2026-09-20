@@ -61,7 +61,31 @@ data class ArchiveUiState(
      */
     val optedOut: List<LocalMediaItem> = emptyList()
 ) {
-    val showPrompt: Boolean get() = phase == ArchivePhase.READY && delayedUntil == null
+    /**
+     * Whether a Delay is still in force at [now]. **One that has run out is not.**
+     *
+     * The stored time was read as "delayed" for as long as it existed, so once anyone had pressed
+     * Delay the question below could never be asked again: it stayed silent after the wait ended,
+     * with the check finished, the files verified and nothing on the screen to say why. Ian, 19 Sept
+     * 2026, on Temp 5 and Temp 9, with a Delay set that afternoon. `ExitWarning` already judged the
+     * stored time against the clock; this now does too.
+     */
+    fun isDelayed(now: Instant = Instant.now()): Boolean = delayedUntil?.isAfter(now) == true
+
+    /**
+     * Whether *Check these files* is offered: files are waiting and nothing is running.
+     *
+     * **After a removal has reported too.** The tab used to show the report and no button, so a
+     * request the user refused, or one Android only part-allowed, left files waiting with no way to
+     * ask again short of restarting the app. Ian, 19 Sept 2026: *"how to restart Archive after
+     * cancel??"*. The rest of the screen always could; only the button was missing.
+     */
+    fun offersCheck(): Boolean =
+        isSupported && !plan.isEmpty && (phase == ArchivePhase.IDLE || phase == ArchivePhase.DONE)
+
+    /** The Archive question: shown once the check is done, unless the user asked to be left alone. */
+    fun showPrompt(now: Instant = Instant.now()): Boolean =
+        phase == ArchivePhase.READY && !isDelayed(now)
 }
 
 /**
@@ -129,11 +153,18 @@ class ArchiveViewModel @Inject constructor(
      * membership of a list rather than as a rule someone has to remember.
      */
     fun validate() {
-        val entries = _state.value.plan.entries
+        val current = _state.value
+        val entries = current.plan.entries
         if (entries.isEmpty()) return
+        // One run at a time: a second check or a check during a removal would act on a list that is
+        // changing under it.
+        if (current.phase == ArchivePhase.VALIDATING || current.phase == ArchivePhase.REMOVING) return
 
         viewModelScope.launch {
             _state.value = _state.value.copy(
+                // The last report is about the last run, not this one.
+                removedCount = 0,
+                removedBytes = 0L,
                 phase = ArchivePhase.VALIDATING,
                 plan = _state.value.plan.copy(
                     entries = entries.map { it.copy(mark = ArchiveMark.CHECKING, failure = null) },
