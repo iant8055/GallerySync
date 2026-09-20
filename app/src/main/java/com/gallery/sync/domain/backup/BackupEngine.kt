@@ -29,6 +29,8 @@ import com.gallery.sync.domain.repository.OneDriveUploadRepository
 import com.gallery.sync.util.Logger
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -541,6 +543,30 @@ class BackupEngine @Inject constructor(
         maxBytes: Long = DEFAULT_BATCH_BYTES,
         allAlbums: Boolean = false,
         onProgress: (BackupProgress) -> Unit = {}
+    ): BackupRunResult = uploadMutex.withLock {
+        uploadPendingWhileHolding(limit, maxBytes, allAlbums, onProgress)
+    }
+
+    /**
+     * One upload run at a time, however many workers ask.
+     *
+     * **Found 20 Sept 2026 on the Moto G, and it duplicated files in OneDrive.** Pressing *Resume* after
+     * *Pause* started the automatic chain and the manual chain within 15 ms of each other. Both read the
+     * same pending rows and uploaded every one of them side by side, so 24 photos became 30 files in
+     * OneDrive, six of them renamed copies (` 1.jpg`) that nothing else would ever remove. Nothing in
+     * the ledger could see it: the second copy of each upload simply succeeded.
+     *
+     * A run that has to wait here starts afterwards and reads the ledger as the first left it, so what
+     * the first uploaded is no longer pending and there is nothing for the second to do twice. Held by
+     * the engine, which is a singleton, and so shared by every worker in the process.
+     */
+    private val uploadMutex = Mutex()
+
+    private suspend fun uploadPendingWhileHolding(
+        limit: Int,
+        maxBytes: Long,
+        allAlbums: Boolean,
+        onProgress: (BackupProgress) -> Unit
     ): BackupRunResult =
         withContext(dispatcher) {
             if (scanner.access() == MediaAccess.NONE) {

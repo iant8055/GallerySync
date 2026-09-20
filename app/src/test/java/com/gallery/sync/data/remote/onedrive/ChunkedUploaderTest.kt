@@ -115,6 +115,35 @@ class ChunkedUploaderTest {
     }
 
     /**
+     * Found 20 Sept 2026, on the phone. [uploads never request replace on conflict] below only ever
+     * covered the resumable route, which a file over 5 MiB takes. The single-request route Graph
+     * documents as **replacing** by default, and it carried no conflict setting at all, so a small
+     * file overwrote a cloud file of the same name. Every optimised photo and most edited ones are small.
+     */
+    @Test
+    fun `a small file asks for rename on conflict, never replace`() = runTest {
+        server.enqueue(jsonResponse(200, """{"id":"A1","name":"small.jpg","size":1024}"""))
+
+        uploader.upload(fileOfSize("small.jpg", 1024), "DCIM/Camera")
+
+        val path = server.takeRequest().path!!
+        assertTrue("the simple upload must say rename: $path", path.contains("@microsoft.graph.conflictBehavior=rename"))
+        assertTrue(!path.contains("replace"))
+    }
+
+    @Test
+    fun `a file just under the four MiB line asks for rename too`() = runTest {
+        val size = ChunkedUploader.SMALL_FILE_THRESHOLD_BYTES - 1
+        server.enqueue(jsonResponse(200, """{"id":"A1","name":"edge.jpg","size":$size}"""))
+
+        uploader.upload(fileOfSize("edge.jpg", size), "DCIM/Camera")
+
+        val request = server.takeRequest()
+        assertEquals("one request, so it took the simple route", 1, server.requestCount)
+        assertTrue(request.path!!.contains("@microsoft.graph.conflictBehavior=rename"))
+    }
+
+    /**
      * Changed 28 Aug 2026, and the old version was asserting the defect.
      *
      * It required an empty file to upload "successfully", which writes a zero-byte file to the drive

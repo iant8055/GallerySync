@@ -54,8 +54,17 @@ interface GraphUploadService {
      *
      * Graph supports this up to 4 MiB. Opening a resumable session for a 200 KB thumbnail costs an
      * extra round trip and buys nothing, so [ChunkedUploader] routes small files here.
+     *
+     * **`rename` is in the URL on purpose, and it was missing until 20 Sept 2026.** Graph's default for
+     * this endpoint is to **replace** a file of the same name, unlike `createUploadSession`, whose body
+     * carries `rename`. Measured on the Moto G: a 133,017-byte file was uploaded, then a different
+     * 187,856-byte file under the same name; the folder count did not change and the name read 187,856
+     * bytes, so the first was overwritten. Every optimised photo is well under 4 MiB, as is any edited
+     * one, so the path an optimised copy would take past every other guard was the one that replaced
+     * the full-size original in OneDrive. Written into the annotation rather than passed in, so no
+     * caller can leave it out.
      */
-    @PUT("me/drive/root:/{path}:/content")
+    @PUT("me/drive/root:/{path}:/content?@microsoft.graph.conflictBehavior=rename")
     suspend fun uploadSmallFile(
         @Path(value = "path", encoded = true) path: String,
         @Body body: RequestBody
