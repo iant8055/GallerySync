@@ -558,16 +558,19 @@ full size</string>
     <string name="deletion_leave">Leave the OneDrive copy</string>
     <string name="deletion_leave_detail">Nothing is ever removed from OneDrive. Deleting on your phone only frees space here.</string>
     <string name="deletion_ask">Ask me about the OneDrive copy</string>
-    <string name="deletion_ask_detail">Gallery Sync shows you what has gone from your phone and asks before removing anything from OneDrive. It never removes anything on its own.</string>
+    <string name="deletion_ask_detail">Gallery Sync shows you every file that has gone from your phone and asks what to do: delete or keep the OneDrive copy, or back up a file that never made it. It never removes anything on its own.</string>
 
     <!--
         The window that opens with the app when files have left the phone since it last appeared.
         Ian, 19 Sept 2026. Ticking a file means removing its OneDrive copy, so nothing starts ticked.
     -->
+    <string name="deleted_checking">Checking for deleted files…</string>
+    <string name="deleted_checking_onedrive">Files have been deleted from your phone. Checking OneDrive for copies of them. A large folder can take a moment.</string>
+    <string name="deleted_checking_skip">Skip for now</string>
     <string name="deleted_files_label_top">Files deleted</string>
     <string name="deleted_files_label_bottom">from phone</string>
-    <string name="deleted_files_intro">These files have left your phone but are still in OneDrive, %1$s in all. Tick the ones whose OneDrive copy you want removed. The rest stay in OneDrive.</string>
-    <string name="deleted_files_none_selected">Nothing ticked. Everything stays in OneDrive.</string>
+    <string name="deleted_files_intro">These files have been deleted from your phone, but a backup is in OneDrive (%1$s in all). What do you want to do with the OneDrive copies? Tick the ones to delete. The rest are kept.</string>
+    <string name="deleted_files_none_selected">Nothing ticked. Every OneDrive copy is kept.</string>
     <string name="deleted_files_selected">%1$d ticked · %2$s to be removed from OneDrive</string>
     <string name="deleted_files_done">Done. This is what happened.</string>
     <string name="deleted_files_remove">Remove %1$d from OneDrive</string>
@@ -585,6 +588,18 @@ full size</string>
     <string name="deleted_result_removed">Moved to the OneDrive recycle bin: %1$s.</string>
     <string name="deleted_result_kept">Left in OneDrive: %1$s.</string>
     <string name="deleted_result_came_back">Back on your phone, so left in OneDrive: %1$s.</string>
+    <string name="deleted_nocopy_intro">These files have been deleted from your phone and no backup can be found in OneDrive (%1$s in all). They are still in your phone\'s trash. What do you want to do with them? Tick the ones to back up to OneDrive. The rest stay in the trash.</string>
+    <string name="deleted_nocopy_none_selected">Nothing ticked. Everything stays in the trash.</string>
+    <string name="deleted_nocopy_selected">%1$d ticked · %2$s to back up</string>
+    <string name="deleted_nocopy_backup">Back up %1$d to OneDrive</string>
+    <string name="deleted_nocopy_leave_all">Leave all in the trash</string>
+    <string name="deleted_nocopy_will_backup">Will be backed up to OneDrive</string>
+    <string name="deleted_nocopy_stays">Stays in the trash</string>
+    <string name="deleted_backing_up">Backing up %1$d of %2$d</string>
+    <string name="deleted_result_backed_up">Backed up to OneDrive: %1$s.</string>
+    <string name="deleted_result_left_trash">Left in the trash: %1$s.</string>
+    <string name="deleted_result_unreadable">No longer readable, most likely because the trash was emptied: %1$s.</string>
+    <string name="deleted_result_backup_failed">Could not be backed up, and still on the list for next time: %1$s. Nothing was lost.</string>
     <string name="deleted_result_failed">Could not be removed, and still on the list for next time: %1$s. Nothing was lost.</string>
 
     <!--

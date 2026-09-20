@@ -6600,3 +6600,63 @@ twin ran on the phone, but *archive, then reopen, then nothing offered* was not 
 Whether the OneDrive recycle bin really holds the removed files: read off the app's own result, not looked at in OneDrive. Side effect of the test: `20190620_053058.jpg`
 had its OneDrive copy removed and the automatic sync sent it again. **Also seen, unrelated:** most of the ledger is `PENDING` (only Camera, Car Show and Temp 9 read
 uploaded) after Ian's wipe and re-run, so the window can only offer files the ledger records as uploaded.
+
+### 19 Sept 2026 - the deleted-files window was meant to cover ALL deleted files, and the app can read the trash
+
+Ian, after deleting ten photos from `Temp 8` and seeing no window: *"this was written to include ALL deleted files NOT just the files backed up by GS."* **The window as built (7e64391) is
+narrower than that and was the wrong reading.** It offers only files the ledger records as uploaded. The ten photos were never uploaded (`Temp 8` is `OFF`, its rows `PENDING`),
+and `forgetPendingFilesThatAreGone` deletes the row of a never-uploaded file that leaves the phone, so they left no trace at all. The window was silent because it had nothing to offer,
+not because it failed; the database, the Ask policy and the log all agreed.
+
+**The design Ian gave, replacing the single window:**
+- **Window 1** - *these files have been deleted but are backed up on the Cloud; what do you want to do with the Cloud copies?* **Keep** or **Delete**.
+- **Window 2** - *these files have been deleted but no backup can be found; what do you want to do with these files?* **Remain in Trash** or **Back up to Cloud**.
+- "On the Cloud" means a copy in OneDrive **whether the app put it there or not**. Ian chose to look in the album's own OneDrive folder, matching by name and size, not to search the drive.
+- Every file in either window is in the phone's trash, because that is how it left.
+
+**Measured, on the Moto G, from inside the app (a throwaway probe, deleted afterwards):** a MediaStore query with `QUERY_ARG_MATCH_TRASHED` (`MATCH_ONLY` and `MATCH_INCLUDE` both) returns
+all ten trashed photos of `Temp 8`, owned by another package (`com.android.providers.downloads`), and `openInputStream` reads every byte of every one at full size (1.4 MB to 5.1 MB, 20 of 20
+reads, 0 failures). **So a trashed file can be uploaded without untrashing it, which is what "Back up to Cloud" needs.** Ian had said it should work because Restore does; Restore in fact
+downloads from OneDrive rather than reading the trash (28 Aug), so this was not known until it was measured. **An adb `run-as` probe was inconclusive** and is not evidence either way:
+that shell cannot list `DCIM/Temp 8` at all, which the app can. **This does not reopen the 28 Aug decision** that Restore always pulls from the cloud and never from the trash; it only says
+Backup may read a trashed file.
+
+**Not built yet.** Keep the rows of never-uploaded files that leave the phone (flag them missing instead of deleting them; the upload queue must skip a flagged row), the OneDrive folder
+lookup, the two windows, and the upload from the trash. The ten `Temp 8` photos are already forgotten and cannot be listed retroactively.
+
+### 19 Sept 2026 - the deleted-files window covers ALL deleted files, in two windows
+
+Built to the design Ian gave (see the entry above). **Verified on the Moto G, both themes, in the real flow.**
+
+**What was built.** `unsent_departures` (database **version 11**, migration 10 to 11, additive, schema `11.json`): the ledger still forgets a pending row whose file has gone, but writes it here
+first. `BackupEngine.cloudCopiesOf` lists each album's OneDrive folder (the existing `remoteIndexFor`, every page) and matches by name and size. `MediaScanner.trashedIds` says which departed files are
+in the phone's trash. `BackupEngine.backUpFromTrash` uploads a trashed file through its URI and records an uploaded, gone-from-the-phone ledger row with the decision set, so Restore can fetch it and the
+window does not offer to remove the copy just made. `SyncDeletionsToCloud.offer` builds the two parts, the view model steps through them, the screen has a per-window wording, colour (red only where a removal is
+possible) and buttons, and a **checking screen** holds the app until the first look is done (Ian: *before even the Album tab is displayed*), with *Skip for now* when OneDrive has to be asked. Both guide
+topics and the Settings copy were rewritten.
+
+**Seen on the phone.**
+- Migration 10 to 11 on a live database: 2,069 rows intact.
+- Three photos trashed the way another app does it (`content update is_trashed`): the three pending rows were forgotten **and recorded**, all three found in the trash, and OneDrive's own `Temp 8` folder
+  already held them, **so a file the ledger called PENDING was correctly offered as "backed up in OneDrive"**. That is the *whether we put it there or not* case working.
+- Window 1: tick one, confirm dialog, *Moved to the OneDrive recycle bin: 1 file. Left in OneDrive: 2 files.*
+- Window 2: two files that exist nowhere in OneDrive. Ticked one, *Back up*: it listed the 1,888-file Pictures folder first, then sent. Ledger row **UPLOADED, drive size 194,952 = local size, gone from the
+  phone, decision KEPT**; the unticked one was forgotten; **both stayed in the phone's trash**; OneDrive's Pictures folder went from 1,888 to 1,889 files.
+- Older undecided files come back with the new ones (3 old + 2 new = 5). Reopening with nothing new shows nothing.
+- *Skip for now* on the checking screen: the app opened, nothing was shown or marked as seen, and **the next open brought the window back**.
+- Dark mode: the checking screen, both windows and a ticked card in each are readable.
+
+**Found on the way, and fixed.** With a large album the lookup took about 30 s and the Albums tab drew first with the window popping over it later, which broke Ian's rule. The checking screen is the fix.
+
+**Tests.** 497 pass. New: `DeletedFilesEngineTest` (17), the rewritten `SyncDeletionsToCloudTest` (22) and `DeletedFilesViewModelTest` (29). **Mutation-checked**, eight safeguards each broken and each caught: departure not
+recorded before the row is forgotten; files outside the trash offered; an unlistable album read as empty; any same name counted as a copy; the window stamped as seen when OneDrive could not be asked; the second
+window able to delete; a backup that does not stop on a failure that repeats; the just-made copy left undecided.
+
+**Side effects of testing, all on the test account.** One OneDrive copy (`20181225_093534.jpg`, `Temp 8`) is in the OneDrive recycle bin. `20181005_201215.jpg` was decided *keep*. `zz_nocloud_1.png` is now in
+`Pictures` in OneDrive and `zz_nocloud_1..3.png` are in the phone's trash. Ten test photos I trashed were put back. Ian's own ten trashed `Temp 8` photos were left alone.
+
+**Not verified.** A long failure mid-backup on hardware (the stop-on-drive-full path is unit-tested only); more than one album with departures; a phone with no trash (API below 30, where window 2 never appears);
+TalkBack; the Restore tab offering the backed-up file. **Known cost:** *Back up* lists the album's OneDrive folder again (about 20 s for Pictures) although the lookup just did; a short-lived index cache would avoid it and was not added.
+
+**Settled without asking, worth knowing.** The whole window, backing up included, stays Ask-only. Files deleted outright (not to the trash) that have no OneDrive copy are not offered, since nothing can be done, and their record
+is dropped after 45 days.

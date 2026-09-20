@@ -40,7 +40,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
-import com.gallery.sync.data.local.entity.BackupEntryEntity
+import com.gallery.sync.domain.backup.DeletedFile
 import com.gallery.sync.domain.backup.DeletionOutcome
 import com.gallery.sync.ui.common.HeroOutlinedButton
 import com.gallery.sync.ui.common.formatBytes
@@ -69,10 +69,46 @@ fun DeletedFilesGate(
 
     LifecycleEventEffect(Lifecycle.Event.ON_START) { viewModel.evaluate() }
 
-    if (state.phase == DeletedFilesPhase.HIDDEN) {
-        content()
-    } else {
-        DeletedFilesScreen(state = state, viewModel = viewModel, modifier = modifier)
+    when {
+        // The app is not drawn until it is known whether the window has to come first. Ian, 19 Sept
+        // 2026: before even the Albums tab is displayed.
+        state.checking -> CheckingScreen(
+            askingOneDrive = state.askingOneDrive,
+            onSkip = viewModel::skipCheck,
+            modifier = modifier
+        )
+
+        state.phase == DeletedFilesPhase.HIDDEN -> content()
+        else -> DeletedFilesScreen(state = state, viewModel = viewModel, modifier = modifier)
+    }
+}
+
+/**
+ * What is on screen while the first look runs. Usually a moment. It takes longer only when files have
+ * been deleted and OneDrive has to be asked about them, and then it says so and offers a way out:
+ * skipping decides nothing and the files are offered again next time.
+ */
+@Composable
+private fun CheckingScreen(askingOneDrive: Boolean, onSkip: () -> Unit, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier.fillMaxSize().padding(32.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        CircularProgressIndicator()
+        Text(
+            text = stringResource(
+                if (askingOneDrive) R.string.deleted_checking_onedrive else R.string.deleted_checking
+            ),
+            modifier = Modifier.padding(top = 20.dp),
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+        if (askingOneDrive) {
+            TextButton(onClick = onSkip, modifier = Modifier.padding(top = 12.dp)) {
+                Text(stringResource(R.string.deleted_checking_skip))
+            }
+        }
     }
 }
 
@@ -119,6 +155,7 @@ private fun DeletedFilesScreen(
                 items(state.files, key = { it.id }) { file ->
                     DeletedFileCard(
                         file = file,
+                        step = state.step,
                         selected = file.id in state.selected,
                         enabled = interactive,
                         onToggle = { viewModel.toggle(file.id) }
@@ -175,7 +212,11 @@ private fun DeletedFilesHeader(state: DeletedFilesUiState, viewModel: DeletedFil
                 }
                 Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
                     Text(
-                        text = state.files.size.toString(),
+                        text = if (state.phase == DeletedFilesPhase.DONE) {
+                            (state.inCloud.size + state.notInCloud.size).toString()
+                        } else {
+                            state.files.size.toString()
+                        },
                         style = MaterialTheme.typography.displayMedium
                     )
                 }
@@ -191,9 +232,10 @@ private fun DeletedFilesHeader(state: DeletedFilesUiState, viewModel: DeletedFil
                         style = MaterialTheme.typography.bodyMedium
                     )
                 } else {
+                    val inCloud = state.step == DeletedFilesStep.IN_CLOUD
                     Text(
                         text = stringResource(
-                            R.string.deleted_files_intro,
+                            if (inCloud) R.string.deleted_files_intro else R.string.deleted_nocopy_intro,
                             formatBytes(context, state.totalBytes)
                         ),
                         style = MaterialTheme.typography.bodyMedium
@@ -201,10 +243,13 @@ private fun DeletedFilesHeader(state: DeletedFilesUiState, viewModel: DeletedFil
                     // Always there, so the card does not change height as files are ticked.
                     Text(
                         text = if (state.selected.isEmpty()) {
-                            stringResource(R.string.deleted_files_none_selected)
+                            stringResource(
+                                if (inCloud) R.string.deleted_files_none_selected
+                                else R.string.deleted_nocopy_none_selected
+                            )
                         } else {
                             stringResource(
-                                R.string.deleted_files_selected,
+                                if (inCloud) R.string.deleted_files_selected else R.string.deleted_nocopy_selected,
                                 state.selected.size,
                                 formatBytes(context, state.selectedBytes)
                             )
@@ -235,28 +280,47 @@ private fun DeletedFilesHeader(state: DeletedFilesUiState, viewModel: DeletedFil
 }
 
 /**
- * One file. Tapping it ticks or unticks it. A ticked card is tinted with the error colour and says
- * what will happen, because ticking here means removing something from OneDrive, and a green tick
- * elsewhere in the app means the opposite of alarming.
+ * One file. Tapping it ticks or unticks it, and it says what will happen.
+ *
+ * In the first window a ticked card is tinted with the error colour, because ticking there means
+ * removing something from OneDrive, and a green tick elsewhere in the app means the opposite of
+ * alarming. In the second it is tinted as a plain selection, because ticking there only adds a copy.
  */
 @Composable
 private fun DeletedFileCard(
-    file: BackupEntryEntity,
+    file: DeletedFile,
+    step: DeletedFilesStep,
     selected: Boolean,
     enabled: Boolean,
     onToggle: () -> Unit
 ) {
     val context = LocalContext.current
     val scheme = MaterialTheme.colorScheme
+    val removes = step == DeletedFilesStep.IN_CLOUD
 
     val container by animateColorAsState(
-        if (selected) scheme.errorContainer else scheme.surface, tween(200), label = "container"
+        when {
+            !selected -> scheme.surface
+            removes -> scheme.errorContainer
+            else -> scheme.primaryContainer
+        },
+        tween(200), label = "container"
     )
     val content by animateColorAsState(
-        if (selected) scheme.onErrorContainer else scheme.onSurface, tween(200), label = "content"
+        when {
+            !selected -> scheme.onSurface
+            removes -> scheme.onErrorContainer
+            else -> scheme.onPrimaryContainer
+        },
+        tween(200), label = "content"
     )
     val border by animateColorAsState(
-        if (selected) scheme.error else scheme.outline, tween(200), label = "border"
+        when {
+            !selected -> scheme.outline
+            removes -> scheme.error
+            else -> scheme.primary
+        },
+        tween(200), label = "border"
     )
 
     Surface(
@@ -290,7 +354,12 @@ private fun DeletedFileCard(
                 )
                 Text(
                     text = stringResource(
-                        if (selected) R.string.deleted_file_will_remove else R.string.deleted_file_stays
+                        when {
+                            removes && selected -> R.string.deleted_file_will_remove
+                            removes -> R.string.deleted_file_stays
+                            selected -> R.string.deleted_nocopy_will_backup
+                            else -> R.string.deleted_nocopy_stays
+                        }
                     ),
                     style = MaterialTheme.typography.bodySmall
                 )
@@ -301,10 +370,14 @@ private fun DeletedFileCard(
     }
 }
 
-/** The buttons under the list: remove what is ticked, keep everything, or decide another time. */
+/**
+ * The buttons under the list: act on what is ticked, settle everything the passive way, or decide
+ * another time. What "act" means depends on the window, and only the first one removes anything.
+ */
 @Composable
 private fun ActionBar(state: DeletedFilesUiState, viewModel: DeletedFilesViewModel) {
     val listing = state.phase == DeletedFilesPhase.LISTING
+    val inCloud = state.step == DeletedFilesStep.IN_CLOUD
 
     Surface(tonalElevation = 3.dp, modifier = Modifier.fillMaxWidth()) {
         Column(
@@ -319,27 +392,54 @@ private fun ActionBar(state: DeletedFilesUiState, viewModel: DeletedFilesViewMod
                 ) {
                     CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
                     Text(
-                        text = stringResource(R.string.deleted_files_working),
+                        text = if (state.progressTotal > 0) {
+                            stringResource(R.string.deleted_backing_up, state.progressDone, state.progressTotal)
+                        } else {
+                            stringResource(R.string.deleted_files_working)
+                        },
                         modifier = Modifier.padding(start = 12.dp),
                         style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+                if (state.progressName.isNotEmpty()) {
+                    Text(
+                        text = state.progressName,
+                        modifier = Modifier.fillMaxWidth(),
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
                     )
                 }
                 return@Column
             }
 
-            Button(
-                onClick = viewModel::askToRemove,
-                enabled = listing && state.selected.isNotEmpty(),
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error,
-                    contentColor = MaterialTheme.colorScheme.onError
-                )
-            ) {
-                Text(
-                    text = stringResource(R.string.deleted_files_remove, state.selected.size),
-                    maxLines = 1
-                )
+            if (inCloud) {
+                Button(
+                    onClick = viewModel::askToRemove,
+                    enabled = listing && state.selected.isNotEmpty(),
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError
+                    )
+                ) {
+                    Text(
+                        text = stringResource(R.string.deleted_files_remove, state.selected.size),
+                        maxLines = 1
+                    )
+                }
+            } else {
+                Button(
+                    onClick = viewModel::backUpSelected,
+                    enabled = listing && state.selected.isNotEmpty(),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = stringResource(R.string.deleted_nocopy_backup, state.selected.size),
+                        maxLines = 1
+                    )
+                }
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -351,7 +451,12 @@ private fun ActionBar(state: DeletedFilesUiState, viewModel: DeletedFilesViewMod
                     enabled = listing,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(stringResource(R.string.deleted_files_keep_all), maxLines = 1)
+                    Text(
+                        stringResource(
+                            if (inCloud) R.string.deleted_files_keep_all else R.string.deleted_nocopy_leave_all
+                        ),
+                        maxLines = 1
+                    )
                 }
                 TextButton(
                     onClick = viewModel::decideLater,
@@ -368,7 +473,7 @@ private fun ActionBar(state: DeletedFilesUiState, viewModel: DeletedFilesViewMod
 /** What the window did, said separately for each outcome. */
 @Composable
 private fun Outcome(state: DeletedFilesUiState) {
-    val outcome: DeletionOutcome? = state.outcome
+    val outcome: DeletionOutcome? = state.removal
 
     Column(
         modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp),
@@ -383,13 +488,51 @@ private fun Outcome(state: DeletedFilesUiState) {
                 style = MaterialTheme.typography.bodyLarge
             )
         }
-        if (state.keptCount > 0) {
+        if (state.cloudCopiesKept > 0) {
             Text(
                 text = stringResource(
                     R.string.deleted_result_kept,
-                    pluralStringResource(R.plurals.file_count, state.keptCount, state.keptCount)
+                    pluralStringResource(R.plurals.file_count, state.cloudCopiesKept, state.cloudCopiesKept)
                 ),
                 style = MaterialTheme.typography.bodyLarge
+            )
+        }
+        val backup = state.backup
+        if (backup != null && backup.backedUp > 0) {
+            Text(
+                text = stringResource(
+                    R.string.deleted_result_backed_up,
+                    pluralStringResource(R.plurals.file_count, backup.backedUp, backup.backedUp)
+                ),
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+        if (state.leftInTrash > 0) {
+            Text(
+                text = stringResource(
+                    R.string.deleted_result_left_trash,
+                    pluralStringResource(R.plurals.file_count, state.leftInTrash, state.leftInTrash)
+                ),
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+        if (backup != null && backup.unreadable > 0) {
+            Text(
+                text = stringResource(
+                    R.string.deleted_result_unreadable,
+                    pluralStringResource(R.plurals.file_count, backup.unreadable, backup.unreadable)
+                ),
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+        if (backup != null && backup.failed > 0) {
+            Text(
+                text = stringResource(
+                    R.string.deleted_result_backup_failed,
+                    pluralStringResource(R.plurals.file_count, backup.failed, backup.failed)
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error
             )
         }
         // Reported, not hidden. A file that came back is the check working.

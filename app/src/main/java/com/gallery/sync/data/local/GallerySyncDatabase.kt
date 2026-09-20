@@ -12,11 +12,13 @@ import com.gallery.sync.data.local.dao.AlbumPreferenceDao
 import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.dao.MediaFolderDao
 import com.gallery.sync.data.local.dao.MediaItemDao
+import com.gallery.sync.data.local.dao.UnsentDepartureDao
 import com.gallery.sync.data.local.entity.AlbumCloudStatusEntity
 import com.gallery.sync.data.local.entity.AlbumPreferenceEntity
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.entity.MediaFolderEntity
 import com.gallery.sync.data.local.entity.MediaItemEntity
+import com.gallery.sync.data.local.entity.UnsentDepartureEntity
 
 /**
  * The local index of cloud-hosted media, and the backup ledger.
@@ -36,9 +38,10 @@ import com.gallery.sync.data.local.entity.MediaItemEntity
         MediaFolderEntity::class,
         BackupEntryEntity::class,
         AlbumPreferenceEntity::class,
-        AlbumCloudStatusEntity::class
+        AlbumCloudStatusEntity::class,
+        UnsentDepartureEntity::class
     ],
-    version = 10,
+    version = 11,
     exportSchema = true
 )
 @TypeConverters(
@@ -58,6 +61,8 @@ abstract class GallerySyncDatabase : RoomDatabase() {
     abstract fun albumPreferenceDao(): AlbumPreferenceDao
 
     abstract fun albumCloudStatusDao(): AlbumCloudStatusDao
+
+    abstract fun unsentDepartureDao(): UnsentDepartureDao
 
     companion object {
         const val DATABASE_NAME = "gallery_sync.db"

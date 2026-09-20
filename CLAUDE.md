@@ -183,6 +183,23 @@ This is absolute and applies to every file, in every location, without exception
   (its name is still in its folder) is not a deletion, and a scan that loses more than half the library
   at once is treated as a bad scan (`MassAbsence`) and offers nothing.
 
+  **It covers every deleted file, not only the ones this app backed up, and asks two questions. Ian,
+  19 Sept 2026, later the same day.** Files with a copy in OneDrive, *whether this app put it there or
+  not* (found by name and size in the album's own OneDrive folder, `BackupEngine.cloudCopiesOf`), are the
+  first window: keep the copy or delete it, and deleting is still the only removal and still needs the
+  tick and the confirmation dialog above. Files with **no** copy are the second window, and they are in
+  the phone's trash: **Remain in Trash** or **Back up to Cloud** (`BackupEngine.backUpFromTrash`, which
+  reads the trashed file through its MediaStore URI, measured readable on the Moto G). Backing up **adds a
+  copy and removes nothing anywhere**, and leaves the file in the trash, so it needs the tick and no
+  dialog. Nothing is ticked to start with in either, and an unticked file gets the passive answer.
+
+  A file the app never sent is kept as a row in `unsent_departures`, written **before** the ledger forgets
+  its pending row (that forgetting stands: a kept pending row makes the upload queue chase a file it
+  cannot open). The window is Ask-only as a whole, backing up included. **A file that could not be placed
+  because OneDrive could not be asked is left out and the window is not counted as seen**: failing to ask
+  is not evidence of absence. The app is held on a checking screen until the first look is done, so the
+  window really does come before the Albums tab, with a *Skip for now* that decides nothing.
+
 ### UI must be readable in dark mode
 Learned the hard way on the Teleprompter app, where dark-mode users could not read the
 text at all. That is a shipped-to-users bug, not a cosmetic one.

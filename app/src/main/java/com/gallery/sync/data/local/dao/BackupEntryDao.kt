@@ -523,6 +523,14 @@ interface BackupEntryDao {
     @Query("SELECT * FROM backup_entries WHERE id = :id")
     suspend fun find(id: String): BackupEntryEntity?
 
+    /** Whole rows for a list of keys. Chunk the list: SQLite binds one variable per id. */
+    @Query("SELECT * FROM backup_entries WHERE id IN (:ids)")
+    suspend fun entriesByIds(ids: List<String>): List<BackupEntryEntity>
+
+    /** Every row, whatever its state: the size of the library the ledger knows about. */
+    @Query("SELECT COUNT(*) FROM backup_entries")
+    suspend fun totalCount(): Int
+
     /** Every album name the ledger holds, for spotting one folder under two spellings (TASK-023). */
     @Query("SELECT DISTINCT album FROM backup_entries")
     suspend fun distinctAlbums(): List<String>

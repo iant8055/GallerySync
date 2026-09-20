@@ -3,11 +3,13 @@ package com.gallery.sync.domain.backup
 import android.content.Context
 import com.gallery.sync.data.local.dao.AlbumPreferenceDao
 import com.gallery.sync.data.local.dao.BackupEntryDao
+import com.gallery.sync.data.local.dao.UnsentDepartureDao
 import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.entity.AlbumPreferenceEntity
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.entity.BackupState
 import com.gallery.sync.data.local.entity.CloudCopyDecision
+import com.gallery.sync.data.local.entity.UnsentDepartureEntity
 import com.gallery.sync.data.local.entity.backupKeyOf
 import com.gallery.sync.data.local.media.LocalMediaItem
 import com.gallery.sync.data.local.media.MediaAccess
@@ -17,6 +19,7 @@ import com.gallery.sync.data.local.media.RestoredAlbum
 import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.data.remote.onedrive.ContentUriUploadSource
 import com.gallery.sync.data.remote.onedrive.ResumableSession
+import com.gallery.sync.data.remote.onedrive.UploadSource
 import com.gallery.sync.di.IoDispatcher
 import com.gallery.sync.domain.model.DataResult
 import com.gallery.sync.domain.model.RemoteError
@@ -97,6 +100,7 @@ class BackupEngine @Inject constructor(
     private val scanner: MediaScanner,
     private val entryDao: BackupEntryDao,
     private val albumDao: AlbumPreferenceDao,
+    private val unsentDao: UnsentDepartureDao,
     private val settings: BackupSettings,
     private val repository: OneDriveRepository,
     private val uploadRepository: OneDriveUploadRepository,
@@ -338,6 +342,7 @@ class BackupEngine @Inject constructor(
             Logger.i(TAG, "$marked files no longer on the device, $returned back")
         }
 
+        forgetDeparturesThatCameBack(present, presentContent, presentIds)
         forgetPendingFilesThatAreGone(present, presentContent, presentIds)
     }
 
@@ -374,9 +379,56 @@ class BackupEngine @Inject constructor(
 
         if (gone.isEmpty()) return
 
+        // Written down before the rows are forgotten, so forgetting one no longer means forgetting the
+        // file. Ian, 19 Sept 2026: the window that opens with the app covers ALL deleted files, and a
+        // file this app never sent is one of them. See [UnsentDepartureEntity].
+        recordDepartures(gone)
+
         var forgotten = 0
         gone.chunked(SQL_BATCH).forEach { forgotten += entryDao.forgetPending(it) }
         Logger.i(TAG, "forgot $forgotten pending rows whose files are no longer on the device")
+    }
+
+    /** Keeps what is needed to ask about files that left the phone unsent. */
+    private suspend fun recordDepartures(ids: List<String>) {
+        val now = System.currentTimeMillis()
+        ids.chunked(SQL_BATCH).forEach { chunk ->
+            unsentDao.insertIfNew(entryDao.entriesByIds(chunk).map { departureOf(it, now) })
+        }
+    }
+
+    private fun departureOf(entry: BackupEntryEntity, now: Long) = UnsentDepartureEntity(
+        id = entry.id,
+        mediaStoreId = entry.mediaStoreId,
+        contentUri = entry.contentUri,
+        displayName = entry.displayName,
+        album = entry.album,
+        sizeBytes = entry.sizeBytes,
+        dateModifiedEpochSeconds = entry.dateModifiedEpochSeconds,
+        mimeType = entry.mimeType,
+        isVideo = entry.isVideo,
+        goneSinceEpochMillis = now
+    )
+
+    /**
+     * Drops the record of a departure whose file is on the phone again, by the same three readings the
+     * ledger uses to say a file is here: its key, its content, its MediaStore id. A photo restored from
+     * the trash is no longer something to ask about. Judged before new departures are recorded, so a
+     * file is never both.
+     */
+    private suspend fun forgetDeparturesThatCameBack(
+        present: Set<String>,
+        presentContent: Set<String>,
+        presentIds: Set<Long>
+    ) {
+        val back = unsentDao.all().filter {
+            it.id in present ||
+                RestoredAlbum.contentSignature(it.displayName, it.sizeBytes) in presentContent ||
+                it.mediaStoreId in presentIds
+        }.map { it.id }
+        if (back.isEmpty()) return
+        back.chunked(SQL_BATCH).forEach { unsentDao.forget(it) }
+        Logger.i(TAG, "${back.size} departed files are back on the phone")
     }
 
     /**
@@ -702,6 +754,7 @@ class BackupEngine @Inject constructor(
                         // kept row would exhaust its attempts and then sit as a permanent failure
                         // inflating the count for good.
                         if (result.error == RemoteError.LocalFileMissing) {
+                            recordDepartures(listOf(entry.id))
                             entryDao.forget(entry.id)
                             pruned++
                             continue
@@ -1374,6 +1427,197 @@ class BackupEngine @Inject constructor(
                     RestoredAlbum.contentSignature(name, ref.sizeBytes) in onDevice
             )
         }.sortedBy { it.displayName.lowercase() }
+    }
+
+    /**
+     * Which of these deleted files OneDrive already holds, **whether this app put them there or not**.
+     * Ian, 19 Sept 2026.
+     *
+     * Looks in each album's own OneDrive folder, by name and size, and nowhere else: he chose that over
+     * searching the whole drive. A same-named file of a different size is different content, so it is
+     * not a copy. Reuses [remoteIndexFor], the walk that already reads every page.
+     *
+     * A file that cannot be placed is reported as unknown rather than absent. **Failing to ask is not
+     * evidence of absence**, and treating an unlistable folder as empty would tell the user nothing
+     * was backed up and invite them to send a second copy.
+     */
+    suspend fun cloudCopiesOf(files: List<DeletedFile>): CloudLookup = withContext(dispatcher) {
+        val found = HashMap<String, String>()
+        val unknown = HashSet<String>()
+
+        for ((album, group) in files.groupBy { it.album }) {
+            val index = remoteIndexFor(album)
+            if (index == null) {
+                unknown += group.map { it.id }
+                continue
+            }
+            for (file in group) {
+                val ref = index[file.displayName] ?: continue
+                val size = ref.sizeBytes
+                when {
+                    size == null -> unknown += file.id
+                    size == file.sizeBytes -> found[file.id] = ref.id
+                    // Same name, other size: another version, not this file's copy.
+                }
+            }
+        }
+        CloudLookup(found = found, unknown = unknown)
+    }
+
+    /**
+     * Sends files that were deleted before they were ever backed up to OneDrive, reading them from the
+     * phone's trash, and leaves them where they are. Ian, 19 Sept 2026: *"Remain in Trash / Back up to
+     * Cloud"*.
+     *
+     * Adds a copy and removes nothing anywhere, which is why it needs no confirmation of its own. The
+     * user has ticked these files and pressed the button; not ticking one leaves it in the trash.
+     *
+     * ### What "readable" means
+     *
+     * A trashed photo keeps its MediaStore id and its bytes, and this app can open it through the
+     * URI the ledger row recorded (measured on the Moto G, 19 Sept 2026). If the trash has since been
+     * emptied the open fails with `LocalFileMissing`: there is nothing left to save or to decide, so
+     * the record is dropped and the file is counted as [TrashBackupOutcome.unreadable].
+     *
+     * ### What is written when one lands
+     *
+     * A ledger row, already uploaded and already marked as gone from the phone, with the decision set
+     * so the deletion window does not immediately offer to remove the copy that was just made. That
+     * row is also what lets Restore fetch the file back.
+     *
+     * A failure that will repeat for every file stops the run, as [uploadPending] does. Files not
+     * reached, and files that failed, keep their record and are offered again.
+     */
+    suspend fun backUpFromTrash(
+        files: List<DeletedFile>,
+        onProgress: (done: Int, total: Int, current: String) -> Unit = { _, _, _ -> }
+    ): TrashBackupOutcome = withContext(dispatcher) {
+        var uploaded = 0
+        var alreadyThere = 0
+        var unreadable = 0
+        var failed = 0
+        var done = 0
+
+        // Same rule as the upload queue: a listing that failed stays failed for the whole run.
+        val remoteByAlbum = mutableMapOf<String, Map<String, RemoteFileRef>?>()
+
+        for (file in files) {
+            onProgress(done, files.size, file.displayName)
+
+            val index = if (remoteByAlbum.containsKey(file.album)) {
+                remoteByAlbum[file.album]
+            } else {
+                remoteIndexFor(file.album).also { remoteByAlbum[file.album] = it }
+            }
+            if (index == null) {
+                failed++
+                done++
+                continue
+            }
+
+            val there = index[file.displayName]
+            if (there != null && there.sizeBytes == file.sizeBytes) {
+                recordBackedUp(file, there.id, there.sizeBytes ?: file.sizeBytes)
+                alreadyThere++
+                done++
+                continue
+            }
+
+            val result = uploadRepository.upload(
+                source = sourceFor(file),
+                remoteFolderPath = remotePathFor(file.album),
+                onProgress = { _, _ -> }
+            )
+
+            when (result) {
+                is DataResult.Success -> {
+                    // Size equality is the proof, as for every upload: "a file appeared" is also true
+                    // of a truncated one.
+                    if (result.value.sizeBytes == file.sizeBytes) {
+                        recordBackedUp(file, result.value.id, result.value.sizeBytes)
+                        uploaded++
+                    } else {
+                        Logger.w(TAG, "trash backup of ${file.displayName}: sent ${file.sizeBytes}, stored ${result.value.sizeBytes}")
+                        failed++
+                    }
+                }
+
+                is DataResult.Failure -> {
+                    if (result.error == RemoteError.LocalFileMissing) {
+                        // Trash emptied since the row was written. Nothing left to save or to ask.
+                        unsentDao.forget(listOf(file.id))
+                        unreadable++
+                    } else if (stopReasonFor(result.error) != null) {
+                        Logger.w(TAG, "backUpFromTrash: stopping run — ${stopReasonFor(result.error)}")
+                        return@withContext TrashBackupOutcome(
+                            uploaded = uploaded,
+                            alreadyThere = alreadyThere,
+                            unreadable = unreadable,
+                            failed = failed + (files.size - done),
+                            stoppedBecause = stopReasonFor(result.error)
+                        )
+                    } else {
+                        failed++
+                    }
+                }
+            }
+            done++
+        }
+
+        onProgress(done, files.size, "")
+        Logger.i(TAG, "backUpFromTrash: $uploaded sent, $alreadyThere already there, $unreadable unreadable, $failed left")
+        TrashBackupOutcome(uploaded, alreadyThere, unreadable, failed)
+    }
+
+    /**
+     * How a departed file's bytes are opened: through the URI its ledger row recorded, which a trashed
+     * item keeps. A seam for tests only, because `Uri.parse` does not run off a device.
+     */
+    internal var sourceFor: (DeletedFile) -> UploadSource = { file ->
+        ContentUriUploadSource(
+            resolver = context.contentResolver,
+            uri = android.net.Uri.parse(file.contentUri),
+            displayName = file.displayName,
+            sizeBytes = file.sizeBytes
+        )
+    }
+
+    /** Records that a departed file is now in OneDrive, and drops it from the unsent list. */
+    private suspend fun recordBackedUp(file: DeletedFile, remoteItemId: String, remoteSize: Long) {
+        val now = System.currentTimeMillis()
+        entryDao.insertIfNew(
+            listOf(
+                BackupEntryEntity(
+                    id = file.id,
+                    mediaStoreId = file.mediaStoreId,
+                    contentUri = file.contentUri,
+                    displayName = file.displayName,
+                    album = file.album,
+                    sizeBytes = file.sizeBytes,
+                    dateModifiedEpochSeconds = file.dateModifiedEpochSeconds,
+                    mimeType = file.mimeType,
+                    isVideo = file.isVideo,
+                    // Written as uploaded in one go, so the upload queue can never see it pending.
+                    state = BackupState.UPLOADED,
+                    remoteItemId = remoteItemId,
+                    remoteSizeBytes = remoteSize,
+                    uploadedAtEpochMillis = now,
+                    localMissingSinceEpochMillis = file.departedAtEpochMillis,
+                    cloudDecision = CloudCopyDecision.KEPT
+                )
+            )
+        )
+        // Stated again for a row that already existed, which the insert above leaves as it was.
+        entryDao.markUploaded(
+            id = file.id,
+            remoteItemId = remoteItemId,
+            remoteSizeBytes = remoteSize,
+            uploadedAt = now
+        )
+        // Left alone from now on: the user chose to save this file, so its copy is not a candidate for
+        // the very next question.
+        entryDao.setCloudDecision(listOf(file.id), CloudCopyDecision.KEPT)
+        unsentDao.forget(listOf(file.id))
     }
 
     /**

@@ -52,6 +52,7 @@ class ArchiveOptOutTest {
         scanner = scanner,
         entryDao = entryDao,
         albumDao = albumDao,
+        unsentDao = mock(),
         settings = mock<BackupSettings>(),
         repository = mock<OneDriveRepository>(),
         uploadRepository = mock<OneDriveUploadRepository>(),

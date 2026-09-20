@@ -95,6 +95,38 @@ class MediaScanner @Inject constructor(
     }
 
     /**
+     * The MediaStore ids of the photos and videos in the phone's trash, whichever app put them there.
+     *
+     * Trashing keeps a file's id and its bytes, and an app holding the media permission can list
+     * trashed items and read them (measured on the Moto G, 19 Sept 2026: ten photos another package
+     * had trashed, every byte of every one readable). That is what makes it possible to back up a
+     * file after it has been deleted.
+     *
+     * Empty below Android 11, where there is no trash, and without full media access, where the answer
+     * would be partial. **Empty is also what a failed query returns**, which is the safe direction:
+     * the caller offers less, never more.
+     */
+    suspend fun trashedIds(): Set<Long> = withContext(dispatcher) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R || access() != MediaAccess.FULL) {
+            return@withContext emptySet()
+        }
+        (trashedIn(imagesCollection()) + trashedIn(videosCollection())).toSet()
+    }
+
+    private fun trashedIn(collection: Uri): List<Long> {
+        val args = android.os.Bundle().apply {
+            putInt(MediaStore.QUERY_ARG_MATCH_TRASHED, MediaStore.MATCH_ONLY)
+        }
+        return runCatching {
+            resolver.query(collection, arrayOf(MediaStore.MediaColumns._ID), args, null)?.use { cursor ->
+                buildList { while (cursor.moveToNext()) add(cursor.getLong(0)) }
+            }.orEmpty()
+        }.onFailure {
+            Logger.e(TAG, "trash query failed for $collection: ${it.javaClass.simpleName}")
+        }.getOrDefault(emptyList())
+    }
+
+    /**
      * Gives every item in a folder the same album name, however each writer spelled the folder.
      *
      * Done here, beneath every consumer, so nothing downstream can see a folder as two albums.

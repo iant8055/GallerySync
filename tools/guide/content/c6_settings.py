@@ -190,7 +190,7 @@ CHAPTER = Chapter(
             Two choices, one selected at a time:
 
             • **Leave the OneDrive copy** (the starting choice). Nothing is ever removed from OneDrive. Deleting on your phone only frees space here.
-            • **Ask me about the OneDrive copy.** When you open the app after files have gone from your phone, a window lists them and asks what you want done with their OneDrive copies. It never removes anything on its own. See [[deleted-files-window]].
+            • **Ask me about the OneDrive copy.** When you open the app after files have gone from your phone, a window lists them, whether or not the app ever backed them up, and asks what you want done: delete or keep their OneDrive copies, or back up the ones that never made it. It never removes anything on its own. See [[deleted-files-window]].
 
             ## Why Leave is the default
             A copy left in OneDrive costs a little storage. A copy removed by mistake could cost you the
@@ -201,45 +201,68 @@ CHAPTER = Chapter(
             first, and nothing in OneDrive moves without your say-so.
         """, ui=True),
 
-        topic("deleted-files-window", "Files deleted from this phone (the window that opens with the app)", """
+        topic("deleted-files-window", "Files deleted from your phone (the window that opens with the app)", """
             ## What it is
             A full-screen window that opens **before the Albums tab**, when files have left your phone
-            since it last appeared and you have chosen **Ask** in Settings. The green card at the top
-            says **Files deleted from phone** and, in the right half, how many there are. Under
-            it are how much they take up in OneDrive, how many you have ticked, and **Select all** and
-            **Clear**.
+            since it last appeared and you have chosen **Ask** in Settings. It covers **every** file
+            deleted from your phone, **whether or not Gallery Sync ever backed it up**. The green card at
+            the top says **Files deleted from phone** and, in the right half, how many there are. It
+            comes in up to two windows, one after the other, and each appears only if it has files.
+
+            ## Window 1: a backup is in OneDrive
+            These files were deleted from your phone but a copy is in OneDrive, **whether Gallery Sync put
+            it there or not**. The question is what to do with the OneDrive copies.
+
+            **Nothing is ticked to start with.** Tap a card to tick it; a ticked card turns red and says
+            **Will be removed from OneDrive**.
+            • **Remove N from OneDrive** asks you to confirm first. See [[dialog-remove-from-onedrive]]. The ticked files' OneDrive copies go to the OneDrive recycle bin, and **the files you left unticked stay in OneDrive for good.**
+            • **Keep all in OneDrive** leaves every copy alone, whatever is ticked.
+            • **Decide later** moves on to the next window without deciding anything.
+
+            ## Window 2: no backup can be found
+            These files were deleted from your phone and **no copy could be found in OneDrive**. They are
+            still in your phone's **trash** (Recycle Bin on some phones), where they stay for about a
+            month. The question is what to do with the files themselves.
+
+            **Nothing is ticked to start with.** Tap a card to tick it; a ticked card says **Will be backed
+            up to OneDrive**.
+            • **Back up N to OneDrive** sends the ticked files to OneDrive from the trash. It only adds a copy: **nothing is deleted, and the files stay in the trash.** You can watch it count as it goes. **The files you left unticked stay in the trash.**
+            • **Leave all in the trash** does nothing to any of them.
+            • **Decide later** closes the window without deciding anything.
+
+            A file whose bytes are no longer in the trash (you emptied it) can't be backed up. It is
+            reported and dropped from the list.
 
             ## What is listed
-            Every file that has gone from your phone but is still in OneDrive at the right size and that
-            you have not yet decided about, each as a card with its name, its album and its size. The
-            list holds the older ones as well as the newest: **a file you have not decided about stays
-            on the list until you decide.**
+            The older files as well as the newest: **a file you have not decided about stays on the list
+            until you decide.** Gallery Sync looks for a file's copy in the OneDrive folder for its album,
+            by **name and size**.
 
             Not listed: a file **Archive** took off the phone on purpose (its OneDrive copy is the one you
             asked to keep); a photo you **edited and saved over**, because a file of the same name is still
-            in the same folder; a file you chose to keep, **until it comes back to the phone and is
-            deleted again**; and a file whose full-quality original is the one behind an optimised photo.
+            in the same folder; a file you decided about, **until it comes back to the phone and is
+            deleted again**; and a file that was deleted outright rather than to the trash and has no
+            OneDrive copy, because there is nothing left to do about it.
 
             ## When it appears
             Only under **Ask**, only after first-time setup is finished, and **only when there are new
             files**: something has left the phone since the window was last shown. Opening the app with
             nothing new shows nothing. There is no waiting period. If a very large share of your library
             seems to have gone at once, it is treated as a scan going wrong rather than as deletions and
-            nothing is offered.
+            nothing is offered. If OneDrive can't be reached, the files it could not check are left out
+            and offered again next time.
 
-            ## What you do
-            **Nothing is ticked to start with.** Tap a card to tick it; a ticked card turns red and says
-            **Will be removed from OneDrive**.
-            • **Remove N from OneDrive** asks you to confirm first. See [[dialog-remove-from-onedrive]]. The ticked files' OneDrive copies go to the OneDrive recycle bin, and **the files you left unticked stay in OneDrive for good.**
-            • **Keep all in OneDrive** leaves every file's copy alone, whatever is ticked.
-            • **Decide later** closes the window without deciding anything. The files stay on the list and the window does not come back until something new has left the phone.
-            • The back button does the same as **Decide later**. It never removes anything.
+            ## When it has finished
+            It says what happened: how many OneDrive copies were moved to the recycle bin, how many were
+            kept, how many files were backed up, how many were left in the trash, how many turned out to be
+            back on your phone, and how many could not be done. **A file that could not be done is not lost
+            and is not decided, so it stays on the list.**
 
-            When it has finished it says what happened: how many were moved to the recycle bin, how many were left in OneDrive, how many turned out to be back on your phone, and how many could not be removed. A file that could not be removed is not lost and is not decided, so it stays on the list.
+            The back button does the same as **Decide later**. It never removes anything.
 
             ## Where it comes from
-            The app's own record of what it sent, compared with what is on your phone when you open it.
-            It looks when the app comes to the front, and at most once a minute.
+            The app's own record of the files it has seen on your phone, compared with what is on your
+            phone when you open it. It looks when the app comes to the front, and at most once a minute.
         """, ui=True),
 
         topic("dialog-remove-from-onedrive", "Remove files from OneDrive? (the confirmation)", """

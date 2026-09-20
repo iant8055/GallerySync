@@ -9,6 +9,7 @@ import com.gallery.sync.data.local.dao.AlbumPreferenceDao
 import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.dao.MediaFolderDao
 import com.gallery.sync.data.local.dao.MediaItemDao
+import com.gallery.sync.data.local.dao.UnsentDepartureDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -59,4 +60,9 @@ object DatabaseModule {
     @Singleton
     fun provideAlbumCloudStatusDao(database: GallerySyncDatabase): AlbumCloudStatusDao =
         database.albumCloudStatusDao()
+
+    @Provides
+    @Singleton
+    fun provideUnsentDepartureDao(database: GallerySyncDatabase): UnsentDepartureDao =
+        database.unsentDepartureDao()
 }
