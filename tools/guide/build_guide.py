@@ -262,7 +262,7 @@ def page(title: str, sub: str, body: str, heading: str = "How To Guide", name: s
 {body}
 
   <footer>
-    Gallery Sync — {html.escape(name)}. Last updated {LAST_UPDATED}.
+    GallerySync — {html.escape(name)}. Last updated {LAST_UPDATED}.
   </footer>
 
 </main>
@@ -273,7 +273,7 @@ def page(title: str, sub: str, body: str, heading: str = "How To Guide", name: s
 
 def intro_note(switch_html: str) -> str:
     return f"""  <div class="note">
-    <p><strong>Every screen, every line.</strong> This guide explains each part of Gallery Sync in plain
+    <p><strong>Every screen, every line.</strong> This guide explains each part of GallerySync in plain
     language &mdash; what you are looking at, and where the information comes from. Inside the app, the
     <strong>(?)</strong> buttons open the same explanations as a pop-up.</p>
   </div>
@@ -304,7 +304,7 @@ def build_flat(topics: dict[str, Topic]) -> str:
         for t in chapter.topics:
             parts.append(f'  <h3 id="{t.id}">{html.escape(t.title)}</h3>')
             parts.append(blocks_html(for_guide(t.body), topics, "h4"))
-    return page("How To Guide — Gallery Sync", f"Gallery Sync — last updated {LAST_UPDATED}", "\n".join(parts))
+    return page("How To Guide — GallerySync", f"GallerySync — last updated {LAST_UPDATED}", "\n".join(parts))
 
 
 def build_accordion(topics: dict[str, Topic]) -> str:
@@ -323,7 +323,7 @@ def build_accordion(topics: dict[str, Topic]) -> str:
                 f'  <details class="topic"><summary>{html.escape(t.title)}</summary>\n'
                 f'  <div class="topic-body" id="{t.id}">\n{blocks_html(for_guide(t.body), topics, "h4")}\n  </div></details>'
             )
-    return page("How To Guide — Gallery Sync", f"Gallery Sync — last updated {LAST_UPDATED}", "\n".join(parts))
+    return page("How To Guide — GallerySync", f"GallerySync — last updated {LAST_UPDATED}", "\n".join(parts))
 
 
 def build_setup(topics: dict[str, Topic]) -> str:
@@ -346,7 +346,7 @@ def build_setup(topics: dict[str, Topic]) -> str:
 
     parts = [
         """  <div class="note">
-    <p><strong>Every card, in order.</strong> This page explains each step of Gallery Sync's first-time
+    <p><strong>Every card, in order.</strong> This page explains each step of GallerySync's first-time
     setup in plain language: what a card is for, what its buttons do, and the messages you might meet.
     Tap a heading to open it.</p>
   </div>""",
@@ -364,8 +364,8 @@ def build_setup(topics: dict[str, Topic]) -> str:
             f'  <div class="topic-body" id="{t.id}">\n{blocks_html(body, topics, "h4")}\n  </div></details>'
         )
     return page(
-        "First-Time Setup — Gallery Sync",
-        f"Gallery Sync — last updated {LAST_UPDATED}",
+        "First-Time Setup — GallerySync",
+        f"GallerySync — last updated {LAST_UPDATED}",
         "\n".join(parts),
         heading="First-Time Setup",
         name="First-Time Setup",

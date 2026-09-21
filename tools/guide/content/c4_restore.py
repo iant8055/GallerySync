@@ -18,7 +18,7 @@ CHAPTER = Chapter(
 
             ## What OneDrive holds, not only what this app sent
             Restore lists the photos and videos in your OneDrive backup folders, whoever put them there.
-            It is not limited to what Gallery Sync uploaded, so an album you archived, a folder from
+            It is not limited to what GallerySync uploaded, so an album you archived, a folder from
             another phone or one added from a computer can all be brought back. Each file goes back into
             the album with the same name as its OneDrive folder. It is still not a general file
             browser: only photos and videos, and only in your backup folders.

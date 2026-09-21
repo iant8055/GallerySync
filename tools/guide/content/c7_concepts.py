@@ -91,7 +91,7 @@ CHAPTER = Chapter(
         """),
 
         topic("where-deleted-files-go", "Where removed files go", """
-            Gallery Sync never permanently deletes anything. Everything it removes goes somewhere you can
+            GallerySync never permanently deletes anything. Everything it removes goes somewhere you can
             recover it from.
 
             ## On your phone
@@ -151,7 +151,7 @@ CHAPTER = Chapter(
         """),
 
         topic("where-your-data-lives", "Where your data lives", """
-            • **Your photos and videos** go from your phone directly to your own OneDrive account, over an encrypted connection. Gallery Sync has no server, so they never pass through anything belonging to the developer.
+            • **Your photos and videos** go from your phone directly to your own OneDrive account, over an encrypted connection. GallerySync has no server, so they never pass through anything belonging to the developer.
             • **Your Microsoft sign-in** is kept in encrypted storage on your phone. You type your password on Microsoft's own page, never into the app.
             • **The app's own record** of what it has sent, its settings and your folder choices are kept in private storage on your phone, not readable by other apps.
             • **The developer collects nothing:** no analytics, no crash reporting, no advertising.
@@ -162,7 +162,7 @@ CHAPTER = Chapter(
         """),
 
         topic("numbers-explained", "Why the numbers may differ from your gallery app", """
-            The counts in Gallery Sync answer a narrower question than your gallery does. They count:
+            The counts in GallerySync answer a narrower question than your gallery does. They count:
 
             • Only files **on the phone right now**.
             • Only inside the **folders you chose**.
@@ -170,7 +170,7 @@ CHAPTER = Chapter(
             • Not the small **Restored** album, whose files are already in OneDrive.
 
             Your gallery app may also show cloud-only items, or group folders differently. Neither
-            number is wrong; they are counting different things. Each figure in Gallery Sync says what it
+            number is wrong; they are counting different things. Each figure in GallerySync says what it
             counts, and the **(?)** beside it says where it comes from.
         """),
     ],

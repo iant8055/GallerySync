@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Gallery Sync</string>
+    <string name="app_name">GallerySync</string>
 
     <!-- Tabs -->
     <string name="tab_backup">Albums</string>
@@ -94,15 +94,15 @@
     <string name="settings_how_to_guide">How To Guide</string>
     <string name="settings_how_to_guide_detail">What every screen and every line means, and where its information comes from.</string>
     <string name="settings_privacy_policy">Privacy Policy</string>
-    <string name="settings_privacy_policy_detail">How Gallery Sync handles your photos, videos and account.</string>
+    <string name="settings_privacy_policy_detail">How GallerySync handles your photos, videos and account.</string>
     <string name="settings_delete_account">Delete Account Info</string>
     <string name="settings_delete_account_detail">How to sign out, remove the app\'s access to your Microsoft account, and clear its data.</string>
     <string name="settings_contact">Contact Info</string>
     <string name="settings_contact_detail">Questions or problems? Email %1$s</string>
-    <string name="contact_page_intro">Questions or problems with Gallery Sync? Write to:</string>
+    <string name="contact_page_intro">Questions or problems with GallerySync? Write to:</string>
     <string name="contact_page_copy">Copy address</string>
     <string name="contact_page_copied">Copied</string>
-    <string name="contact_page_clip_label">Gallery Sync contact</string>
+    <string name="contact_page_clip_label">GallerySync contact</string>
     <string name="settings_page_close">Close</string>
     <string name="settings_page_load_failed">This page could not be loaded. Check your connection and try again.</string>
     <string name="settings_page_open_browser">Open in browser</string>
@@ -193,10 +193,10 @@
     <string name="error_unknown">Something went wrong: %1$s</string>
 
     <!-- Media permission -->
-    <string name="permission_needed_title">Gallery Sync needs access to your photos</string>
+    <string name="permission_needed_title">GallerySync needs access to your photos</string>
     <string name="permission_needed_detail">It reads the albums you choose so it can sync them to OneDrive. It never deletes anything.</string>
     <string name="permission_partial_title">Only some photos are shared</string>
-    <string name="permission_partial_detail">Gallery Sync can currently see just the photos you picked, so a sync would be incomplete. Grant access to all photos to sync whole albums.</string>
+    <string name="permission_partial_detail">GallerySync can currently see just the photos you picked, so a sync would be incomplete. Grant access to all photos to sync whole albums.</string>
     <string name="permission_grant_action">Grant access</string>
 
     <!-- Backup -->
@@ -256,7 +256,7 @@
     <string name="backup_all_done">Everything is backed up</string>
     <string name="backup_nothing_selected">No albums switched on</string>
     <!--
-        "verified" matters: this is what Gallery Sync has confirmed, not what OneDrive contains.
+        "verified" matters: this is what GallerySync has confirmed, not what OneDrive contains.
         After a reinstall the ledger is empty and this reads 0, which would otherwise look like
         the user's whole backup had disappeared.
     -->
@@ -518,7 +518,7 @@ full size</string>
     <string name="deletion_leave">Leave the OneDrive copy</string>
     <string name="deletion_leave_detail">Nothing is ever removed from OneDrive. Deleting on your phone only frees space here.</string>
     <string name="deletion_ask">Ask me about the OneDrive copy</string>
-    <string name="deletion_ask_detail">Gallery Sync shows you every file that has gone from your phone and asks what to do: delete or keep the OneDrive copy, or back up a file that never made it. It never removes anything on its own.</string>
+    <string name="deletion_ask_detail">GallerySync shows you every file that has gone from your phone and asks what to do: delete or keep the OneDrive copy, or back up a file that never made it. It never removes anything on its own.</string>
 
     <!--
         The window that opens with the app when files have left the phone since it last appeared.
@@ -542,7 +542,7 @@ full size</string>
     <string name="deleted_file_will_remove">Will be removed from OneDrive</string>
     <string name="deleted_file_stays">Stays in OneDrive</string>
     <string name="deleted_confirm_title">Remove %1$s from OneDrive?</string>
-    <string name="deleted_confirm_body">Gone from your phone: %1$s (%2$s). What you remove goes to the OneDrive recycle bin, where you can restore it yourself. Gallery Sync never empties that bin.</string>
+    <string name="deleted_confirm_body">Gone from your phone: %1$s (%2$s). What you remove goes to the OneDrive recycle bin, where you can restore it yourself. GallerySync never empties that bin.</string>
     <string name="deleted_confirm_action">Remove from OneDrive</string>
     <string name="deleted_confirm_cancel">Cancel</string>
     <string name="deleted_result_removed">Moved to the OneDrive recycle bin: %1$s.</string>
@@ -700,7 +700,7 @@ full size</string>
     -->
     <string name="reconcile_incomplete">Could not check %1$d of your albums just now, holding %2$s. They will be checked again on the first backup, and nothing about them is assumed either way.</string>
     <string name="reconcile_retry">Check again</string>
-    <string name="reconcile_no_access">Gallery Sync needs access to your photos before it can check.</string>
+    <string name="reconcile_no_access">GallerySync needs access to your photos before it can check.</string>
 
     <plurals name="album_count">
         <item quantity="one">%1$d album</item>
@@ -759,8 +759,8 @@ full size</string>
         The reassurance that makes this safe to change. The previous folder stays in the search set,
         so nothing already uploaded is stranded and nothing is sent twice.
     -->
-    <string name="destination_dialog_body">New photos and videos will go here. The %1$d files already backed up stay where they are, and Gallery Sync keeps looking in the old folder too, so nothing is uploaded twice.</string>
-    <string name="destination_dialog_body_unknown">New photos and videos will go here. Anything already backed up stays where it is, and Gallery Sync keeps looking in the old folder too, so nothing is uploaded twice.</string>
+    <string name="destination_dialog_body">New photos and videos will go here. The %1$d files already backed up stay where they are, and GallerySync keeps looking in the old folder too, so nothing is uploaded twice.</string>
+    <string name="destination_dialog_body_unknown">New photos and videos will go here. Anything already backed up stays where it is, and GallerySync keeps looking in the old folder too, so nothing is uploaded twice.</string>
     <string name="destination_invalid">That folder path cannot be used. Use a plain path like Pictures/Backup, with no leading or trailing slash.</string>
     <string name="destination_save">Use this folder</string>
     <string name="destination_cancel">Cancel</string>
@@ -857,7 +857,7 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="wizard_scan_running">Looking through your folders…</string>
     <string name="wizard_scan_no_access">Without permission to read your media, nothing can be counted. This is not the same as finding nothing.</string>
 
-    <string name="wizard_library_title">What should Gallery Sync do?</string>
+    <string name="wizard_library_title">What should GallerySync do?</string>
     <string name="wizard_library_body">Sets every album at once. Nothing here removes a file from your phone.</string>
 
     <!-- Photos and videos counted apart: Sync shrinks one and leaves the other whole, so a single

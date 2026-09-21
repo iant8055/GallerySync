@@ -28,7 +28,7 @@ CHAPTER = Chapter(
             same choice.
 
             When an Archive run takes the last file off the phone, the album is finished. It leaves the
-            Albums tab and Gallery Sync forgets its mode. If you later bring the album back with
+            Albums tab and GallerySync forgets its mode. If you later bring the album back with
             **Restore**, or something creates the folder again, it is a new album and starts at the
             default mode for new albums, which can never be Archive. That is what stops an album being
             archived, restored and archived again by itself.
@@ -85,7 +85,7 @@ CHAPTER = Chapter(
             ## What it is
             One rounded card for each file in your Archive albums, in the same style as the file cards on the Restore tab: its name, then its size under it, then a mark on the right. A file you put into an Archive album later appears here too, before anything is archived.
 
-            **Keeping a file on your phone.** Swipe right to select and left to deselect, as everywhere in the app. Swipe a card **left** to deselect it and it fades and reads **Not archiving**. It is left out of every check and every removal, and Gallery Sync remembers your choice, even after you close the app. Swipe it **right** to select it again and it returns to the list, ready to be archived. A green tick means a file has been checked against OneDrive in the current check, so a file you bring back has no tick until the files are checked again, and nothing is removed until they are. Swiping a card that is already that way does nothing, so a run of swipes cannot undo itself. You cannot swipe while a check or a removal is running. If you use a screen reader, each card offers **Deselect (keep on this phone)** or **Select (archive this file)** instead.
+            **Keeping a file on your phone.** Swipe right to select and left to deselect, as everywhere in the app. Swipe a card **left** to deselect it and it fades and reads **Not archiving**. It is left out of every check and every removal, and GallerySync remembers your choice, even after you close the app. Swipe it **right** to select it again and it returns to the list, ready to be archived. A green tick means a file has been checked against OneDrive in the current check, so a file you bring back has no tick until the files are checked again, and nothing is removed until they are. Swiping a card that is already that way does nothing, so a run of swipes cannot undo itself. You cannot swipe while a check or a removal is running. If you use a screen reader, each card offers **Deselect (keep on this phone)** or **Select (archive this file)** instead.
 
             An album with a file you have kept stays set to Archive, so files added to it later are still covered by the mode you set. If you would rather it stopped, change the album's mode on the Albums tab.
 
@@ -133,7 +133,7 @@ CHAPTER = Chapter(
 
         topic("dialog-android-trash", "Android's own confirmation", """
             ## What it is
-            When you say Yes, Android puts up its own screen asking you to allow Gallery Sync to move the
+            When you say Yes, Android puts up its own screen asking you to allow GallerySync to move the
             files to the trash. The wording and look belong to Android and your phone maker, and change
             between phones.
 

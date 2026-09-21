@@ -141,7 +141,7 @@ CHAPTER = Chapter(
             A dialog opened by **Change**:
 
             • **Folder in OneDrive.** A box holding the folder path. Use a plain path like **Pictures/Backup**, with no slash at the start or end. An unusable path shows **That folder path cannot be used.**
-            • **A note.** New photos and videos will go here. The files already backed up stay where they are, and Gallery Sync keeps looking in the old folder too, so nothing is uploaded twice. It shows the number of files already backed up when it knows it.
+            • **A note.** New photos and videos will go here. The files already backed up stay where they are, and GallerySync keeps looking in the old folder too, so nothing is uploaded twice. It shows the number of files already backed up when it knows it.
             • **Browse...** opens a picker so you can pick a folder from OneDrive. See [[dialog-folder-picker]].
             • **Reset to default.** Appears when the path is not the default. Puts back Samsung Gallery/DCIM.
             • **Use this folder** saves. **Cancel** closes without changing anything.
@@ -173,13 +173,13 @@ CHAPTER = Chapter(
 
         topic("settings-folders", "Folders to back up", """
             ## What it is
-            The folders Gallery Sync is allowed to look in, each shown as a path such as **Internal storage
+            The folders GallerySync is allowed to look in, each shown as a path such as **Internal storage
             / DCIM**, with a box beside it. **Add a folder** opens Android's folder picker. To take
             folders off the list, tick the box beside each one and press **Remove**, which stays greyed
             out until something is ticked.
 
             ## What it means
-            Gallery Sync only looks in the folders you choose. Anything outside them is not scanned,
+            GallerySync only looks in the folders you choose. Anything outside them is not scanned,
             listed or touched. Most people want DCIM, where the camera saves photos. A phone can report
             around ninety albums, almost all of them app caches and thumbnails, which is why the choice
             is yours.
@@ -217,12 +217,12 @@ CHAPTER = Chapter(
             ## What it is
             A full-screen window that opens **before the Albums tab**, when files have left your phone
             since it last appeared and you have chosen **Ask** in Settings. It covers **every** file
-            deleted from your phone, **whether or not Gallery Sync ever backed it up**. The green card at
+            deleted from your phone, **whether or not GallerySync ever backed it up**. The green card at
             the top says **Files deleted from phone** and, in the right half, how many there are. It
             comes in up to two windows, one after the other, and each appears only if it has files.
 
             ## Window 1: a backup is in OneDrive
-            These files were deleted from your phone but a copy is in OneDrive, **whether Gallery Sync put
+            These files were deleted from your phone but a copy is in OneDrive, **whether GallerySync put
             it there or not**. The question is what to do with the OneDrive copies.
 
             **Nothing is ticked to start with.** Swipe a card right (or tap it) to tick it, and left to untick it; a ticked card turns red and says
@@ -247,7 +247,7 @@ CHAPTER = Chapter(
 
             ## What is listed
             The older files as well as the newest: **a file you have not decided about stays on the list
-            until you decide.** Gallery Sync looks for a file's copy in the OneDrive folder for its album,
+            until you decide.** GallerySync looks for a file's copy in the OneDrive folder for its album,
             by **name and size**.
 
             Not listed: a file **Archive** took off the phone on purpose (its OneDrive copy is the one you
@@ -282,7 +282,7 @@ CHAPTER = Chapter(
             A confirmation with the number and size: **Remove 12 files from OneDrive?** It says the
             files are not on your phone any more.
 
-            They go to the **OneDrive recycle bin**, where you can restore them yourself. Gallery Sync
+            They go to the **OneDrive recycle bin**, where you can restore them yourself. GallerySync
             never empties that bin.
 
             **Remove from OneDrive** goes ahead. **Cancel** closes the confirmation and decides nothing:
@@ -352,7 +352,7 @@ CHAPTER = Chapter(
             • It is in an album set to **Sync**.
             • OneDrive has confirmed it at the same size.
             • It is older than the age you chose.
-            • It is in a folder you gave Gallery Sync access to. A clip anywhere else is left alone.
+            • It is in a folder you gave GallerySync access to. A clip anywhere else is left alone.
             • It has not been optimised already, and has not been found already small enough to leave.
 
             ## When it happens
@@ -450,7 +450,7 @@ CHAPTER = Chapter(
         topic("settings-about-cards", "The three link cards at the bottom", """
             Below the sections are three cards. Tap one to open its page inside the app.
 
-            • **Privacy Policy.** How Gallery Sync handles your photos, videos and account.
+            • **Privacy Policy.** How GallerySync handles your photos, videos and account.
             • **Delete Account Info.** How to sign out, remove the app's access to your Microsoft account, and clear its data.
             • **Contact Info.** Questions or problems? It shows the address, which you can select and copy with **Copy address**. It does not open a mail app.
 

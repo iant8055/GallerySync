@@ -26,7 +26,7 @@ CHAPTER = Chapter(
         topic("albums-permission", "The permission message", """
             ## What it is
             A message at the top of the tab, in one of two forms:
-            • **Gallery Sync needs access to your photos.** The app cannot see any albums yet. It reads the albums you choose so it can sync them to OneDrive, and it never deletes anything.
+            • **GallerySync needs access to your photos.** The app cannot see any albums yet. It reads the albums you choose so it can sync them to OneDrive, and it never deletes anything.
             • **Only some photos are shared.** Android is letting the app see just the photos you picked, so a sync would be incomplete. The albums it can see are still listed below.
 
             The **Grant access** button opens Android's permission screen.
@@ -37,7 +37,7 @@ CHAPTER = Chapter(
 
             ## Good to know
             To sync whole albums, choose **Allow all** when Android asks. If Android does not show the
-            prompt any more, open your phone's Settings, then Apps, then Gallery Sync, then Permissions,
+            prompt any more, open your phone's Settings, then Apps, then GallerySync, then Permissions,
             and allow Photos and videos there.
         """, ui=True),
 
@@ -167,7 +167,7 @@ CHAPTER = Chapter(
 
             • **Album name**, for example Camera.
             • **12 files · 340 MB.** How many files the album holds on the phone right now, and their total size. From your phone's media library, inside the chosen folders.
-            • **3 optimised · 4 kept at full size · 2 pending.** A second line that appears only when it has something to say, and shows only the parts that are not zero. Optimised counts files replaced by a smaller copy. Kept at full size counts files Restore has put back and that are still ticked, which Gallery Sync leaves alone. Pending counts files not yet sent to OneDrive: the number of files on the phone minus the number the app has recorded as sent.
+            • **3 optimised · 4 kept at full size · 2 pending.** A second line that appears only when it has something to say, and shows only the parts that are not zero. Optimised counts files replaced by a smaller copy. Kept at full size counts files Restore has put back and that are still ticked, which GallerySync leaves alone. Pending counts files not yet sent to OneDrive: the number of files on the phone minus the number the app has recorded as sent.
             • **The OneDrive line.** The only line that describes OneDrive itself. Its four forms are listed below.
             • **All files Archived**, in place of the three lines above, on an Archive album that has nothing left on the phone. This is uncommon now: when an Archive run empties an album, the album leaves this list and its mode is forgotten. See [[modes-in-depth]].
             • **The mode pill**, at the right, in the mode's colour, with a small arrow. Tap it and choose Off, Backup, Sync or Archive; the current mode is ringed. Choosing Archive first asks you to confirm. See [[dialog-archive-confirm]].
@@ -244,7 +244,7 @@ CHAPTER = Chapter(
             ## What it is
             A tick box at the end of a file in an album's list, under the heading **Keep at full size**.
             It appears only beside files that Restore has put back. A file Restore has not touched has no
-            box. While the box is ticked, Gallery Sync leaves that one file exactly as it is, whatever
+            box. While the box is ticked, GallerySync leaves that one file exactly as it is, whatever
             mode the album is in.
 
             ## What a tick does
@@ -252,7 +252,7 @@ CHAPTER = Chapter(
             • In an **Archive** album, the file is not moved to the Trash. It stays on the phone, and it is not counted as scheduled to leave.
             • In a **Backup** or **Off** album it changes nothing today. The tick is remembered, in case you change the album's mode later.
 
-            A tick can only make Gallery Sync do less. It never removes, shrinks or sends anything, so it
+            A tick can only make GallerySync do less. It never removes, shrinks or sends anything, so it
             needs no confirmation.
 
             ## Why Restore ticks them
@@ -265,7 +265,7 @@ CHAPTER = Chapter(
             leave the list, only files that are still ticked show a box.
 
             ## Where it comes from
-            The tick is kept on your phone by Gallery Sync, for that one file. Ticking does not touch the
+            The tick is kept on your phone by GallerySync, for that one file. Ticking does not touch the
             file itself.
         """, ui=True),
 
@@ -314,7 +314,7 @@ CHAPTER = Chapter(
             ## What the button does
             It replaces each listed file on your phone with a smaller copy that stays in your gallery
             under its own name. The full-size original stays in OneDrive, and **Restore** brings it back.
-            Files inside the folders you gave Gallery Sync access to at setup are done in the background;
+            Files inside the folders you gave GallerySync access to at setup are done in the background;
             any outside them need Android's own confirmation first. Nothing is removed and nothing is sent.
             While it runs the card shows how many are left and the list gets shorter as each one is done.
 
@@ -327,7 +327,7 @@ CHAPTER = Chapter(
             ## What it is
             A red card at the top of the list. Some phones store a single folder under two spellings, for
             example **camera** and **Camera**, so the list would show two albums that are really one
-            folder. When Gallery Sync finds this it joins them and tells you.
+            folder. When GallerySync finds this it joins them and tells you.
 
             The card shows a table with **Album Name 1**, **Album Name 2** and **Merged Album Name**,
             then three sentences: the albums have been merged to avoid confusion, the combined album's

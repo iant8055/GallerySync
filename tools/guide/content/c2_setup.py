@@ -3,7 +3,7 @@ from model import Chapter, topic
 CHAPTER = Chapter(
     id="setup",
     title="First-time setup",
-    intro="The first time you open Gallery Sync, a short guided setup walks you through nine screens. "
+    intro="The first time you open GallerySync, a short guided setup walks you through nine screens. "
           "Each one is explained here, including the messages you might meet along the way.",
     topics=[
         topic("setup-overview", "How the setup works", """
@@ -55,8 +55,8 @@ CHAPTER = Chapter(
             open until setup is finished.
         """),
 
-        topic("setup-search-permission", "Let Gallery Sync search this phone", """
-            **Give search permission** opens Android's own permission screen. Gallery Sync needs it to
+        topic("setup-search-permission", "Let GallerySync search this phone", """
+            **Give search permission** opens Android's own permission screen. GallerySync needs it to
             find out where your photos and videos are stored.
 
             ## Why it asks first, on its own card
@@ -65,18 +65,18 @@ CHAPTER = Chapter(
 
             ## Good to know
             On Android 14 and later you may be offered "Select photos" instead of "Allow all". If you
-            share only some photos, Gallery Sync can only see those, so a backup would be incomplete.
+            share only some photos, GallerySync can only see those, so a backup would be incomplete.
             The Albums tab warns you when this is the case. To sync whole albums, allow access to all
             photos.
         """),
 
         topic("setup-choose-folders", "Choose folders to back up", """
-            Once it has permission, Gallery Sync searches and shows the folders it found, each with a
+            Once it has permission, GallerySync searches and shows the folders it found, each with a
             tick box. **Tick the ones you want looked after.** DCIM is where most phones keep the camera
             roll, so it is what most people choose. Press **Next** to move on.
 
             ## Then Android asks again, once per folder
-            For each ticked folder, Android shows its own folder picker so you can give Gallery Sync
+            For each ticked folder, Android shows its own folder picker so you can give GallerySync
             lasting access to that folder. This second permission is what allows the app to swap a
             photo for a smaller copy, or bring an original back, without asking you every time. It is
             limited to the folders you chose, and you can withdraw it in Android's settings.
@@ -85,7 +85,7 @@ CHAPTER = Chapter(
             A card appears above the list saying what happened and what it means for the backup:
             • **No access was given.** Nothing in that folder can be backed up or optimised. Choose **Try again** or **Skip** that folder, which leaves it out of the backup.
             • **You chose a folder inside it** (for example DCIM/Camera instead of DCIM). Only that inner folder would be backed up and the rest of DCIM left out. Choose **Choose all** to try again, or **Keep** the narrower choice.
-            • **You chose a different folder.** It is not used, because Gallery Sync needs access to the ticked folder itself. Try again or skip.
+            • **You chose a different folder.** It is not used, because GallerySync needs access to the ticked folder itself. Try again or skip.
             • **The choice cannot be used.** Same options.
 
             Nothing is uploaded, scanned or changed in a folder you did not choose.
@@ -93,7 +93,7 @@ CHAPTER = Chapter(
 
         topic("setup-cloud", "Cloud storage: signing in and choosing where backups go", """
             **Sign in with Microsoft** opens Microsoft's own sign-in page. You type your password there,
-            never into Gallery Sync. The app only receives a token that lets it work with your OneDrive
+            never into GallerySync. The app only receives a token that lets it work with your OneDrive
             files, and it keeps that token in encrypted storage on your phone.
 
             Once signed in, the card says **Signed in to OneDrive** and shows **Backup destination**: the

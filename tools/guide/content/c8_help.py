@@ -59,7 +59,7 @@ CHAPTER = Chapter(
         """),
 
         topic("faq-restore-empty", "The Restore tab says there is nothing to bring back", """
-            Restore only lists things Gallery Sync has changed on this phone: photos and videos it has
+            Restore only lists things GallerySync has changed on this phone: photos and videos it has
             replaced with smaller copies, and files it backed up that are no longer in their folder. If
             you have not optimised or archived anything, the list is empty, and that is right. For
             anything else in your OneDrive, open the OneDrive app.
@@ -79,9 +79,9 @@ CHAPTER = Chapter(
         """),
 
         topic("faq-only-some-photos", "The app says only some photos are shared", """
-            Android gave Gallery Sync access to only the photos you picked, so the albums are incomplete.
+            Android gave GallerySync access to only the photos you picked, so the albums are incomplete.
             Press **Grant access** on the Albums tab and choose **Allow all**. If Android does not show
-            the prompt, allow Photos and videos for Gallery Sync in your phone's Settings under Apps.
+            the prompt, allow Photos and videos for GallerySync in your phone's Settings under Apps.
         """),
 
         topic("contact-and-privacy", "Contact, privacy and deleting your data", """
