@@ -51,13 +51,17 @@ data (a few thousand files at most, on a test OneDrive account). So:
    the backup end", which is the boundary between the two populations, and whether the app's default
    destination (`Samsung Gallery/DCIM`) points at it. **If the backup is somewhere else, the destination is
    set to it in the wizard, or the app will not find it.**
-3. **OneDrive space, and the 1 TB that will end.** Read from the account on 20 Sept 2026: the personal account
-   (the same kind as the Moto G's test account) has **Microsoft 365 Personal, 1 TB, from an order on Aug 27, 2026
-   paid with a redeemed code ($0.00)**, and 8.5 GB used. Its end date is **not known** (the Manage buttons did
-   nothing in Chrome, for Ian or for Claude). OneDrive's storage page lists only that plan and the free 5 GB, so
-   **when the 1 TB ends the account falls back to 5 GB**, below what is already in it. The $1.99 Play
-   subscription (Microsoft 365 Basic) is the main account's, not this one's. Before the Fold 8 backup is relied
-   on, decide where it will live: renew the plan, or move it. Check the same account holds the old backup.
+3. **Which OneDrive account holds the old backup, and does it have room.** Two accounts are in play and an earlier
+   version of this item mixed them up:
+   - **`IanDev`, the Moto G's test account** (a personal Microsoft account). Read on 20 Sept 2026: Microsoft 365
+     Personal, 1 TB, from an order on Aug 27, 2026 paid with a redeemed code ($0.00), 8.5 GB used. **The 1 TB's end
+     date is not known** (the Manage buttons did nothing in Chrome, for Ian or for Claude). OneDrive's storage page
+     lists only that plan and the free 5 GB, so when it ends this account falls back to 5 GB.
+   - **Ian's main personal account** (the Google account is `iant8055`). Its Google Play subscription is Microsoft 365
+     Basic, 100 GB, $1.99 a month, since Nov 2020. **Not yet confirmed that this is the account holding the
+     Fold 8's old backup**, and 100 GB is less than the ~148 GB library, so the room needs checking.
+   Ian to say which account the Fold 8 backs up to and where its old backup is. That decides the sign-in in
+   Phase 2, the space question, and whether the test account's 1 TB matters to the Fold 8 at all.
 4. **Is Samsung's sync still running?** It stops 30 Sept. Running both at once is safe in principle (the app skips
    what is already there) but worth knowing about.
 5. **Upload speed.** Run a speed test on the Wi-Fi to be used. It sets how long the gap takes: the Moto G measured
@@ -87,8 +91,8 @@ data (a few thousand files at most, on a test OneDrive account). So:
 2. Sign in **with the personal account** and grant the media permission. The app's sign-in is set to accept both
    work/school and personal Microsoft accounts (`msal_config.json`: `AzureADandPersonalMicrosoftAccount`, tenant
    `common`), but that is only the app's side. **The Azure app registration must also allow personal accounts.**
-   The Moto G's test account may be a different kind (work or personal), so this is not yet proven for the
-   personal one. If sign-in is refused, that is an Azure registration setting and is Ian's to change; it is the
+   The Moto G's test account is a personal Microsoft account too (Ian, 20 Sept), so that kind of sign-in is
+   proven; whether the Fold 8's account is the same one is to be confirmed (Phase 0, item 3). If sign-in is refused, that is an Azure registration setting and is Ian's to change; it is the
    first thing to find out, before anything else in this phase. The app holds one account at a time
    (`account_mode: SINGLE`), so the Fold 8 and the Moto G do not interfere.
 3. In the wizard choose **#4 — check cloud storage but do not back up any new files.** No uploads, no
@@ -196,5 +200,5 @@ Only if all of that is clean does Ian consider setting a real album to Sync or A
 2. Which OneDrive account is it in, and does it have room for the recent weeks?
 3. Wireless debugging on the Fold 8, or sideload by hand?
 4. Will the recent, unbacked weeks be copied to the PC first? (Recommended, and quick.)
-5. Is the Moto G's test account a personal or a work/school account? (Decides whether the personal account is
-   the same kind the app has been proven on.) Does the Azure registration allow personal accounts?
+5. Which OneDrive account will the Fold 8 back up to: the main personal account (Basic, 100 GB), or `IanDev` (1 TB
+   until the code runs out)? The test account is a personal Microsoft account, so the sign-in kind is proven.
