@@ -109,6 +109,7 @@ import com.gallery.sync.ui.common.NavDestination
 import com.gallery.sync.ui.common.SignalIcons
 import com.gallery.sync.ui.common.SignalNavBar
 import com.gallery.sync.ui.theme.LocalGallerySyncColors
+import com.gallery.sync.ui.theme.SignalWelcomeGround
 import com.gallery.sync.ui.settings.DestinationDialog
 import com.gallery.sync.ui.settings.InAppPageDialog
 import com.gallery.sync.ui.settings.SupportPage
@@ -531,17 +532,22 @@ fun SetupTour(
         )
 
         if (step == 1) {
+            // The welcome picture is a fixed dark green with a phone running off its bottom edge, so it
+            // sits on that same green and is pinned to the bottom: on a tall screen the spare room is
+            // above it, on a wide one (the Fold unfolded) it is at the sides, and it never floats.
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .background(SignalWelcomeGround)
                     .clickable(onClick = onNext),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.BottomCenter
             ) {
                 Image(
                     painter = painterResource(R.drawable.welcome_screen),
                     contentDescription = stringResource(R.string.tour_welcome_title),
-                    contentScale = ContentScale.FillWidth,
-                    modifier = Modifier.fillMaxWidth()
+                    contentScale = ContentScale.Fit,
+                    alignment = Alignment.BottomCenter,
+                    modifier = Modifier.fillMaxSize()
                 )
             }
         } else if (step == 2) {

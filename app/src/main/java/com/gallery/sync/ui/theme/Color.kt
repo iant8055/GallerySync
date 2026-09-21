@@ -146,6 +146,14 @@ val SignalNavLight = Color(0xFF20262D)
 val SignalNavDark = Color(0xFF2A3037)
 val SignalOnNav = Color(0xFFD5DAE0)
 
+/**
+ * The ground the welcome picture sits on. It is the flat colour the picture itself is painted on
+ * (`#003322`, sampled from its edges), so on a screen taller or wider than the picture the spare room
+ * is the same green and the picture has no visible edge. The phone in it runs off the bottom, which is why
+ * the picture is pinned to the bottom of the screen and the spare room is left above it.
+ */
+val SignalWelcomeGround = Color(0xFF003322)
+
 // --- Error ---
 val SignalErrorLight = Color(0xFFA51E24)
 val SignalErrorDark = Color(0xFFF47B74)
