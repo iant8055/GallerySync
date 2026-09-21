@@ -82,6 +82,9 @@
     <string name="media_age_one_year">1 year</string>
 
     <string name="settings_backup">Backup</string>
+    <string name="backup_location_onedrive">OneDrive</string>
+    <string name="backup_location_last">At least one backup location must stay on.</string>
+    <string name="backup_account_label">Account</string>
     <string name="settings_sync">Sync</string>
     <string name="settings_sync_folders">Sync folders</string>
     <string name="settings_restore">Restore</string>

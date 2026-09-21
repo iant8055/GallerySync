@@ -6914,3 +6914,26 @@ default, the content trigger and 6-hourly periodic worker, the wizard's steps, t
 no longer says otherwise. What still stands between the two milestones and a Play submission is not on the
 checklist: the testing affordances to strip, the open items in TASK-023, and whatever Ian decides about
 optimised photos that are edited (TASK-024).
+
+### 20 Sept 2026 (night) - Settings re-laid out: Language last, a light line between settings, Albums reordered, folders ticked then removed
+
+Ian sketched the changes as text mockups over several messages; this is what was built from the last version of each.
+
+- **Language is the last line on the Settings tab**, below the policy pages (was in General, under the How To Guide card). The
+  tour's Settings picture moves it too.
+- **A light line between each sub-setting** (`SettingDivider`, the theme's own divider colour): in General, Backup, Albums and Sync.
+  Indented options stay under their own switch. Read in both themes on the Moto G.
+- **Albums reads in Ian's order:** *Default mode for new albums*, then *Folders to back up*, then *When you delete a photo/video*.
+- **Folders to back up:** a box beside each folder, then **Add a folder** and **Remove** side by side. Remove is greyed until
+  something is ticked and removes every ticked folder (`removeSource`, unchanged). The old per-row Remove button is gone. Seen
+  ticking enable Remove on the phone; an actual removal was **not** exercised (it would drop the test phone's folder grant).
+- **Backup shows OneDrive with its box at the left of the name**, ticked and greyed out, *At least one backup location must stay
+  on.*, an **Account** label over the address (its (?) and Sign out kept) and the folder location. The rule is `BackupLocations.canSwitchOff`
+  (5 tests; 572 in all, 0 failed): the last location on can never be switched off, so the box unlocks by itself the day a second
+  location exists. **Google Photos and USB Drive were drawn for a moment as placeholders and removed at Ian's word**; the enum still
+  names them, nothing shows them.
+- Guide (`c6_settings.py`) and the tour's Settings mock follow; regenerated, `--check` clean.
+- **Not done, and not asked for after Ian rewrote his message:** a "clear demarcation after the Archive heading", and "a user default
+  for the Settings section". The first version of his message had both; the resent one did not.
+- **During the screenshot run the harness's swipes appeared to tick a folder box and flip Optimise photos on the test phone.** A targeted
+  probe (swipes starting on the folder row, three times) did not reproduce it, so it is unexplained rather than ruled out.

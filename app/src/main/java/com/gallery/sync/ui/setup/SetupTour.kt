@@ -2723,7 +2723,7 @@ private fun SettingsMockup(
     ) {
         // ── General ──
         MockSectionHeader(stringResource(R.string.settings_general))
-        // The card the Help card rings. First in General, above Language, as in the real tab.
+        // The card the Help card rings. First in General, as in the real tab.
         OutlinedCard(
             modifier = Modifier
                 .fillMaxWidth()
@@ -2745,15 +2745,7 @@ private fun SettingsMockup(
                 )
             }
         }
-        Text(
-            text = stringResource(R.string.settings_language),
-            style = MaterialTheme.typography.bodyLarge
-        )
-        Text(
-            text = stringResource(R.string.settings_language_detail),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        HorizontalDivider()
         MockDropdownRow(
             label = stringResource(R.string.settings_appearance),
             value = stringResource(R.string.theme_system)
@@ -2767,15 +2759,20 @@ private fun SettingsMockup(
 
         // ── Albums ──
         MockSectionHeader(stringResource(R.string.settings_albums))
+        MockDropdownRow(
+            label = stringResource(R.string.settings_default_mode),
+            value = stringResource(R.string.mode_off)
+        )
+        HorizontalDivider()
         Text(
             text = stringResource(R.string.sources_title),
             style = MaterialTheme.typography.bodyLarge
         )
         Row(
-            Modifier.fillMaxWidth(),
-            Arrangement.SpaceBetween,
-            Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            Checkbox(checked = false, onCheckedChange = null)
             Text(
                 // Two arguments, volume then path — as SourcesSection passes them. One argument
                 // crashed the tour on the Settings card: MissingFormatArgumentException, 15 Sept.
@@ -2784,23 +2781,20 @@ private fun SettingsMockup(
                     stringResource(R.string.volume_internal),
                     "DCIM"
                 ),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.weight(1f)
+                style = MaterialTheme.typography.bodyLarge
             )
-            OutlinedButton(onClick = {}) { Text(stringResource(R.string.sources_remove)) }
         }
-        Button(onClick = {}) { Text(stringResource(R.string.sources_add)) }
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Button(onClick = {}) { Text(stringResource(R.string.sources_add)) }
+            OutlinedButton(onClick = {}, enabled = false) { Text(stringResource(R.string.sources_remove)) }
+        }
+        HorizontalDivider()
         Text(
             text = stringResource(R.string.deletion_title),
             style = MaterialTheme.typography.bodyLarge
         )
         MockRadioRow(stringResource(R.string.deletion_leave), selected = true)
         MockRadioRow(stringResource(R.string.deletion_ask), selected = false)
-        MockDropdownRow(
-            label = stringResource(R.string.settings_default_mode),
-            value = stringResource(R.string.mode_off)
-        )
         HorizontalDivider()
 
         // ── Backup ──
@@ -2810,11 +2804,26 @@ private fun SettingsMockup(
             Arrangement.SpaceBetween,
             Alignment.CenterVertically
         ) {
+            Checkbox(checked = true, onCheckedChange = null, enabled = false)
             Text(
-                text = "user@outlook.com",
-                style = MaterialTheme.typography.bodyLarge,
+                text = stringResource(R.string.backup_location_onedrive),
+                style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.weight(1f)
             )
+        }
+        Row(
+            Modifier.fillMaxWidth(),
+            Arrangement.SpaceBetween,
+            Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.backup_account_label),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(text = "user@outlook.com", style = MaterialTheme.typography.bodyLarge)
+            }
             OutlinedButton(onClick = {}) { Text(stringResource(R.string.sign_out_action)) }
         }
         Row(
@@ -2840,7 +2849,20 @@ private fun SettingsMockup(
         // ── Sync ──
         MockSectionHeader(stringResource(R.string.settings_sync))
         MockSwitchRow(stringResource(R.string.settings_optimise_photos), checked = false)
+        HorizontalDivider()
         MockSwitchRow(stringResource(R.string.settings_optimise_videos), checked = false)
+        HorizontalDivider()
+
+        // ── The foot of the page: Language is last, as in the real tab ──
+        Text(
+            text = stringResource(R.string.settings_language),
+            style = MaterialTheme.typography.bodyLarge
+        )
+        Text(
+            text = stringResource(R.string.settings_language_detail),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 

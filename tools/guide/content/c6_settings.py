@@ -5,13 +5,15 @@ CHAPTER = Chapter(
     title="The Settings tab",
     intro="The things you set once and rarely change. The tab is a single scrolling page divided into "
           "green bands: General, Backup, Albums, Sync, Restore and Archive. The How To Guide is the "
-          "first card in General, and the policy pages are at the bottom. Each band has a (?) beside "
-          "its name.",
+          "first card in General, the policy pages are near the bottom, and Language is the very last "
+          "line. Each band has a (?) beside its name, and a thin line separates one setting from the "
+          "next.",
     topics=[
         topic("settings-overview", "How the Settings tab is laid out", """
             Each green band is a section heading, with a **(?)** that explains the whole section. Under
-            it are that section's settings. Switches turn something on or off; boxes with the current
-            value open a short list; buttons open a page or a dialog.
+            it are that section's settings, each set off from the next by a thin line. Switches turn
+            something on or off; boxes with the current value open a short list; buttons open a page or
+            a dialog.
 
             ## Two things that are true of every setting
             • Changing one takes effect straight away. There is no Save button.
@@ -24,8 +26,8 @@ CHAPTER = Chapter(
 
         topic("settings-section-general", "General", """
             ## What it is
-            Settings that apply across the whole app: the **How To Guide** card, **Language**,
-            **Appearance** and **Use mobile data**.
+            Settings that apply across the whole app: the **How To Guide** card, **Appearance** and
+            **Use mobile data**. **Language** is not here: it is the last line on the page.
 
             ## Where it comes from
             These are stored on your phone and change how the app looks and when it uses your data plan.
@@ -33,7 +35,7 @@ CHAPTER = Chapter(
 
         topic("settings-how-to-guide-card", "The How To Guide card", """
             ## What it is
-            The first card in **General**, above **Language**. It reads **How To Guide**, with a line
+            The first card in **General**. It reads **How To Guide**, with a line
             under it saying it explains what every screen and every line means, and where its
             information comes from.
 
@@ -50,8 +52,9 @@ CHAPTER = Chapter(
 
         topic("settings-language", "Language", """
             ## What it is
-            A line reading **Language** with **Multi-Language Support Coming Soon** under it. The app is
-            available in English only at the moment, and there is nothing to choose yet.
+            A line reading **Language** with **Multi-Language Support Coming Soon** under it, at the very
+            bottom of the Settings tab, below the policy pages. The app is available in English only at
+            the moment, and there is nothing to choose yet.
         """, ui=True),
 
         topic("settings-appearance", "Appearance", """
@@ -86,8 +89,15 @@ CHAPTER = Chapter(
 
         topic("settings-section-backup", "Backup", """
             ## What it is
-            Your OneDrive account and the folder where backups are stored: the connected account with
-            its **Sign out** button, and **Current folder location** with a **Change** button.
+            Where your photos and videos are backed up to. For now that is OneDrive: its name with a box
+            to the left of it, then the connected **Account** with its **Sign out** button, and
+            **Current folder location** with a **Change** button.
+
+            ## At least one backup location
+            The box beside a location is there for switching it on or off, but the last one left on
+            cannot be switched off: a backup that goes nowhere protects nothing. OneDrive is the only
+            location there is, so its box stays ticked and greyed out, and you will see **At least one
+            backup location must stay on.**
 
             ## Good to know
             Changing the folder does not affect files already backed up.
@@ -157,14 +167,16 @@ CHAPTER = Chapter(
 
         topic("settings-section-albums", "Albums", """
             ## What it is
-            Which folders to watch, what happens to cloud copies when you delete from this phone, and the
-            mode a brand new album starts with.
+            The mode a brand new album starts with, which folders to watch, and what happens to cloud
+            copies when you delete from this phone, in that order and with a thin line between them.
         """, ui=True),
 
         topic("settings-folders", "Folders to back up", """
             ## What it is
             The folders Gallery Sync is allowed to look in, each shown as a path such as **Internal storage
-            / DCIM**, with a **Remove** button. **Add a folder** opens Android's folder picker.
+            / DCIM**, with a box beside it. **Add a folder** opens Android's folder picker. To take
+            folders off the list, tick the box beside each one and press **Remove**, which stays greyed
+            out until something is ticked.
 
             ## What it means
             Gallery Sync only looks in the folders you choose. Anything outside them is not scanned,

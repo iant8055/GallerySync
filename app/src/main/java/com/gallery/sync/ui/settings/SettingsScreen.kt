@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
@@ -48,6 +49,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
 import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.settings.ThemeMode
+import com.gallery.sync.domain.backup.BackupLocation
+import com.gallery.sync.domain.backup.BackupLocations
 import com.gallery.sync.domain.backup.MediaAge
 import com.gallery.sync.domain.backup.OptimiseMode
 import com.gallery.sync.domain.backup.VideoQuality
@@ -91,26 +94,15 @@ fun SettingsScreen(
             help = HelpTopic.SETTINGS_SECTION_GENERAL
         )
 
-        // First in General, above Language (Ian, 18 Sept 2026). The setup tour's Help card rings the
-        // mock of this card, so the two move together.
+        // First in General (Ian, 18 Sept 2026). The setup tour's Help card rings the mock of this card,
+        // so the two move together. Language used to follow it and now sits at the foot of the page.
         LinkCard(
             title = stringResource(R.string.settings_how_to_guide),
             detail = stringResource(R.string.settings_how_to_guide_detail),
             onClick = { page = SupportPage.HOW_TO_GUIDE }
         )
 
-        WithHelp(HelpTopic.SETTINGS_LANGUAGE) {
-            Column {
-                Text(
-                    text = stringResource(R.string.settings_language),
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Text(
-                    text = stringResource(R.string.settings_language_detail),
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-        }
+        SettingDivider()
 
         val themeMode by themeViewModel.themeMode.collectAsStateWithLifecycle()
         SettingDropdown(
@@ -130,6 +122,8 @@ fun SettingsScreen(
             }
         )
 
+        SettingDivider()
+
         SettingSwitch(
             label = stringResource(R.string.backup_allow_metered),
             help = HelpTopic.SETTINGS_MOBILE_DATA,
@@ -147,6 +141,22 @@ fun SettingsScreen(
             help = HelpTopic.SETTINGS_SECTION_BACKUP
         )
 
+        // A block per place a backup can go, its box at the left of the name (Ian, 20 Sept 2026).
+        // OneDrive is the only one there is, so its box is locked on: there must always be at least one.
+        Column {
+            LocationHeading(
+                title = stringResource(R.string.backup_location_onedrive),
+                checked = true,
+                enabled = BackupLocations.canSwitchOff(BackupLocations.inUse, BackupLocation.ONEDRIVE),
+                onCheckedChange = {}
+            )
+            Text(
+                text = stringResource(R.string.backup_location_last),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
         LabelWithAction(
             action = {
                 OutlinedButton(onClick = onSignOut) {
@@ -156,7 +166,14 @@ fun SettingsScreen(
         ) {
             accountName?.let {
                 WithHelp(HelpTopic.SETTINGS_ACCOUNT) {
-                    Text(it, style = MaterialTheme.typography.bodyLarge)
+                    Column {
+                        Text(
+                            text = stringResource(R.string.backup_account_label),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(it, style = MaterialTheme.typography.bodyLarge)
+                    }
                 }
             }
         }
@@ -169,10 +186,6 @@ fun SettingsScreen(
             help = HelpTopic.SETTINGS_SECTION_ALBUMS
         )
 
-        SourcesSection()
-
-        DeletionSection()
-
         SettingDropdown(
             label = stringResource(R.string.settings_default_mode),
             help = HelpTopic.SETTINGS_DEFAULT_MODE,
@@ -181,6 +194,14 @@ fun SettingsScreen(
             onSelected = viewModel::setDefaultAlbumMode,
             optionLabel = { it.settingsLabel() }
         )
+
+        SettingDivider()
+
+        SourcesSection()
+
+        SettingDivider()
+
+        DeletionSection()
 
         // ── Sync ─────────────────────────────────────────────────────────────
         SectionHeader(
@@ -227,6 +248,8 @@ fun SettingsScreen(
                 )
             }
         }
+
+        SettingDivider()
 
         SettingSwitch(
             label = stringResource(R.string.settings_optimise_videos),
@@ -335,6 +358,7 @@ fun SettingsScreen(
             style = MaterialTheme.typography.bodySmall
         )
 
+        // The end of the sections proper. Everything below is the foot of the page, not a setting.
         HorizontalDivider()
 
         // ── About: policy, account deletion, contact ─────────────────────────
@@ -356,6 +380,22 @@ fun SettingsScreen(
             detail = stringResource(R.string.settings_contact_detail, SupportLinks.CONTACT_EMAIL),
             onClick = { showContact = true }
         )
+
+        // Language is the last thing on the page (Ian, 20 Sept 2026). It is a placeholder for now.
+        SettingDivider()
+
+        WithHelp(HelpTopic.SETTINGS_LANGUAGE) {
+            Column {
+                Text(
+                    text = stringResource(R.string.settings_language),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Text(
+                    text = stringResource(R.string.settings_language_detail),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        }
     }
 
     page?.let { InAppPageDialog(page = it, onDismiss = { page = null }) }
@@ -429,6 +469,33 @@ private fun Modifier.spanScreenWidth(gutter: Dp): Modifier = layout { measurable
     val width = constraints.maxWidth + bleed * 2
     val placeable = measurable.measure(constraints.copy(minWidth = width, maxWidth = width))
     layout(constraints.maxWidth, placeable.height) { placeable.place(-bleed, 0) }
+}
+
+/**
+ * The light line between one sub-setting and the next (Ian, 20 Sept 2026). The theme's own divider
+ * colour, so it is faint in both themes and never a colour picked for one.
+ */
+@Composable
+private fun SettingDivider() {
+    HorizontalDivider()
+}
+
+/** A backup location's name, with the box that switches it on or off at the left of it. */
+@Composable
+private fun LocationHeading(
+    title: String,
+    checked: Boolean,
+    enabled: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Checkbox(checked = checked, onCheckedChange = onCheckedChange, enabled = enabled)
+        Text(text = title, style = MaterialTheme.typography.titleMedium)
+    }
 }
 
 @Composable
