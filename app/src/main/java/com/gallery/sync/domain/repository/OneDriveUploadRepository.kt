@@ -14,8 +14,9 @@ import java.io.File
  * write capability behind its own interface means a caller that only browses cannot accidentally
  * be handed the ability to upload.
  *
- * Nothing here deletes, moves, or overwrites: uploads use `conflictBehavior = rename`, so an
- * existing cloud file is never replaced.
+ * Nothing here deletes, moves, or overwrites: an upload first asks OneDrive to fail if the name is
+ * taken, and if a *different* file has it the upload is filed beside it with `rename`. An existing
+ * cloud file is never replaced. If the same file is already there, nothing is sent.
  */
 interface OneDriveUploadRepository {
 

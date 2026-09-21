@@ -1,6 +1,8 @@
 package com.gallery.sync.data.remote.onedrive
 
 import com.gallery.sync.data.remote.onedrive.dto.ChunkAcceptedDto
+import com.gallery.sync.data.remote.onedrive.dto.CreateUploadSessionRequestDto
+import com.gallery.sync.data.remote.onedrive.dto.UploadablePropertiesDto
 import com.gallery.sync.data.remote.onedrive.dto.UploadedItemDto
 import com.gallery.sync.util.Logger
 import kotlinx.coroutines.ensureActive
@@ -47,6 +49,26 @@ sealed interface UploadOutcome {
  * 100 MB video interrupted at 90 MB on mobile data does not begin again from zero.
  *
  * This class only ever **adds** files. It does not delete, move, or overwrite anything.
+ *
+ * ### A name that is already taken (20 Sept 2026, late)
+ *
+ * Every upload first asks OneDrive to **fail** if the name exists. A 409 is then looked into rather
+ * than papered over: what is at that path, and is it the same size? If so this very file has already
+ * arrived, which is what a hard kill mid-upload leaves behind (OneDrive finishes the upload after the app
+ * has gone, and the next folder listing may not show it yet), and the answer is [UploadOutcome.Success]
+ * with that item, sending nothing. If it is a different size, or not there after all, the file goes up
+ * again asking for **rename**, so it lands beside the other.
+ *
+ * **One exception to "never replace", found by a repeated-kill test on the Moto G.** A resumable session
+ * makes a zero-byte placeholder under the file's name the moment it is created. Kill the app right then
+ * and the placeholder is orphaned, and the retry finds the name held by an empty file. That, and not a
+ * finished upload the listing had not caught up with (which is what this comment first assumed), is what
+ * produced the " 1" duplicates. An item that is read and found to hold **zero bytes**, with its eTag, is
+ * filled in place (`replace`, guarded by `If-Match`): nothing of anyone's is lost by replacing nothing.
+ * Anything with content in it is never replaced.
+ *
+ * Same name and same size is the app's own definition of the same file everywhere else too (the
+ * folder listing it skips uploads by, and `verifiedInCloud`), so this adds no new way to be wrong.
  */
 @Singleton
 class ChunkedUploader @Inject constructor(
@@ -77,13 +99,93 @@ class ChunkedUploader @Inject constructor(
             return UploadOutcome.EmptySource
         }
 
-        return if (total < SMALL_FILE_THRESHOLD_BYTES) {
+        val first = attempt(
+            source, remotePath, total, onProgress, existingSession, onSessionCreated, NameClash.FAIL
+        )
+        if (first !is UploadOutcome.HttpFailure || first.code != HTTP_CONFLICT) return first
+
+        return whenTheNameIsTaken(source, remotePath, total, onProgress, onSessionCreated)
+    }
+
+    /**
+     * What to do if the name is already in the folder. [FILL_EMPTY] is only ever chosen for an item that
+     * was read and found to hold no bytes.
+     */
+    private enum class NameClash { FAIL, RENAME, FILL_EMPTY }
+
+    private suspend fun attempt(
+        source: UploadSource,
+        remotePath: String,
+        total: Long,
+        onProgress: (Long, Long) -> Unit,
+        existingSession: ResumableSession?,
+        onSessionCreated: suspend (ResumableSession) -> Unit,
+        clash: NameClash,
+        expectedETag: String? = null
+    ): UploadOutcome =
+        if (total < SMALL_FILE_THRESHOLD_BYTES) {
             // Small files go in one request, so there is no session to resume and nothing an
             // interruption could leave half-done.
-            uploadSmall(source, remotePath, total, onProgress)
+            uploadSmall(source, remotePath, total, onProgress, clash)
         } else {
-            uploadChunked(source, remotePath, total, onProgress, existingSession, onSessionCreated)
+            uploadChunked(
+                source, remotePath, total, onProgress, existingSession, onSessionCreated, clash, expectedETag
+            )
         }
+
+    /**
+     * OneDrive said the name is taken. Find out by what.
+     *
+     * The same size means this file is already there, so it is reported as uploaded and nothing more is
+     * sent. If a different file has the name, or nothing does after all (the file went between the two
+     * calls), it is uploaded again beside it. If OneDrive cannot say what is there, or the connection
+     * drops, the file stays pending and is tried on the next run: a retry costs nothing, a guess can
+     * make a duplicate.
+     */
+    private suspend fun whenTheNameIsTaken(
+        source: UploadSource,
+        remotePath: String,
+        total: Long,
+        onProgress: (Long, Long) -> Unit,
+        onSessionCreated: suspend (ResumableSession) -> Unit
+    ): UploadOutcome {
+        val lookup = uploadApi.itemAtPath(remotePath)
+        val existing = lookup.body()?.takeIf { lookup.isSuccessful }
+
+        if (existing != null && existing.size == total) {
+            Logger.i(TAG, "${source.displayName} is already in OneDrive at the same size; not sending it again")
+            onProgress(total, total)
+            return UploadOutcome.Success(existing)
+        }
+
+        // Only "a different file is there" or "nothing is there" may lead to a second upload. If OneDrive
+        // could not answer (a 5xx, a throttle), the honest position is that we do not know, and guessing
+        // wrong here is exactly what makes a duplicate. The file stays pending and is tried again.
+        if (!lookup.isSuccessful && lookup.code() != HTTP_NOT_FOUND) {
+            Logger.w(TAG, "${source.displayName}: the name is taken and OneDrive would not say by what (HTTP ${lookup.code()}); leaving it for the next run")
+            return UploadOutcome.HttpFailure(HTTP_CONFLICT, "name taken; lookup answered ${lookup.code()}")
+        }
+
+        // An empty item under a big file's name is what an interrupted upload session leaves behind: the
+        // session makes a zero-byte placeholder at once and the app can be killed before it has read the
+        // session back, so it can never resume it. Fill it, guarded by its eTag, rather than file the photo
+        // beside it and leave the empty one holding the real name. Small files never open a session, so
+        // they never leave one; an empty item under a small file's name is not ours to fill.
+        if (existing != null && existing.size == 0L && existing.eTag != null &&
+            total >= SMALL_FILE_THRESHOLD_BYTES
+        ) {
+            Logger.i(TAG, "${source.displayName}: the name holds an empty placeholder from an interrupted upload; filling it")
+            return attempt(
+                source, remotePath, total, onProgress, null, onSessionCreated, NameClash.FILL_EMPTY, existing.eTag
+            )
+        }
+
+        Logger.i(
+            TAG,
+            "${source.displayName}: the name is taken by a different file " +
+                "(${existing?.size ?: "unreadable"} bytes there, $total here); uploading beside it"
+        )
+        return attempt(source, remotePath, total, onProgress, null, onSessionCreated, NameClash.RENAME)
     }
 
     /** Convenience for callers already holding a [File], such as the debug upload test. */
@@ -97,14 +199,21 @@ class ChunkedUploader @Inject constructor(
         source: UploadSource,
         remotePath: String,
         total: Long,
-        onProgress: (Long, Long) -> Unit
+        onProgress: (Long, Long) -> Unit,
+        clash: NameClash
     ): UploadOutcome {
         Logger.d(TAG, "uploading ${source.displayName} as a single request ($total bytes)")
 
         val bytes = ByteArray(total.toInt())
         source.open().use { it.readFully(0, bytes, total.toInt()) }
 
-        val response = uploadApi.uploadSmallFile(remotePath, bytes.toRequestBody(OCTET_STREAM))
+        val body = bytes.toRequestBody(OCTET_STREAM)
+        val response = when (clash) {
+            NameClash.FAIL -> uploadApi.uploadSmallFile(remotePath, body)
+            NameClash.RENAME -> uploadApi.uploadSmallFileRenaming(remotePath, body)
+            // Never chosen for a small file (see whenTheNameIsTaken); if it ever were, rename is the safe reading.
+            NameClash.FILL_EMPTY -> uploadApi.uploadSmallFileRenaming(remotePath, body)
+        }
 
         return if (response.isSuccessful) {
             onProgress(total, total)
@@ -120,7 +229,9 @@ class ChunkedUploader @Inject constructor(
         total: Long,
         onProgress: (Long, Long) -> Unit,
         existingSession: ResumableSession?,
-        onSessionCreated: suspend (ResumableSession) -> Unit
+        onSessionCreated: suspend (ResumableSession) -> Unit,
+        clash: NameClash,
+        expectedETag: String?
     ): UploadOutcome {
         // Continue a session left over from an interrupted run, when there is one and the server
         // still recognises it. Anything unusable falls through to opening a fresh session, which is
@@ -142,7 +253,19 @@ class ChunkedUploader @Inject constructor(
             )
             onProgress(offset, total)
         } else {
-            val sessionResponse = uploadApi.createUploadSession(remotePath)
+            val sessionResponse = uploadApi.createUploadSession(
+                remotePath,
+                CreateUploadSessionRequestDto(
+                    item = UploadablePropertiesDto(
+                        conflictBehavior = when (clash) {
+                            NameClash.FAIL -> UploadablePropertiesDto.CONFLICT_BEHAVIOUR_FAIL
+                            NameClash.RENAME -> UploadablePropertiesDto.CONFLICT_BEHAVIOUR_RENAME
+                            NameClash.FILL_EMPTY -> UploadablePropertiesDto.CONFLICT_BEHAVIOUR_REPLACE
+                        }
+                    )
+                ),
+                ifMatch = expectedETag
+            )
             if (!sessionResponse.isSuccessful) {
                 return UploadOutcome.HttpFailure(
                     sessionResponse.code(),
@@ -262,6 +385,8 @@ class ChunkedUploader @Inject constructor(
         private val OCTET_STREAM = "application/octet-stream".toMediaType()
 
         private const val HTTP_ACCEPTED = 202
+        private const val HTTP_CONFLICT = 409
+        private const val HTTP_NOT_FOUND = 404
 
         /**
          * Graph requires every chunk except the last to be a multiple of 320 KiB and rejects

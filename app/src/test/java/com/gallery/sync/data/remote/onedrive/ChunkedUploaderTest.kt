@@ -121,18 +121,18 @@ class ChunkedUploaderTest {
      * file overwrote a cloud file of the same name. Every optimised photo and most edited ones are small.
      */
     @Test
-    fun `a small file asks for rename on conflict, never replace`() = runTest {
+    fun `a small file asks to fail on a name clash, never replace`() = runTest {
         server.enqueue(jsonResponse(200, """{"id":"A1","name":"small.jpg","size":1024}"""))
 
         uploader.upload(fileOfSize("small.jpg", 1024), "DCIM/Camera")
 
         val path = server.takeRequest().path!!
-        assertTrue("the simple upload must say rename: $path", path.contains("@microsoft.graph.conflictBehavior=rename"))
+        assertTrue("the simple upload must say fail: $path", path.contains("@microsoft.graph.conflictBehavior=fail"))
         assertTrue(!path.contains("replace"))
     }
 
     @Test
-    fun `a file just under the four MiB line asks for rename too`() = runTest {
+    fun `a file just under the four MiB line asks to fail too`() = runTest {
         val size = ChunkedUploader.SMALL_FILE_THRESHOLD_BYTES - 1
         server.enqueue(jsonResponse(200, """{"id":"A1","name":"edge.jpg","size":$size}"""))
 
@@ -140,7 +140,7 @@ class ChunkedUploaderTest {
 
         val request = server.takeRequest()
         assertEquals("one request, so it took the simple route", 1, server.requestCount)
-        assertTrue(request.path!!.contains("@microsoft.graph.conflictBehavior=rename"))
+        assertTrue(request.path!!.contains("@microsoft.graph.conflictBehavior=fail"))
     }
 
     /**
@@ -240,8 +240,211 @@ class ChunkedUploaderTest {
         uploader.upload(fileOfSize("x.mp4", size), "DCIM/Camera")
 
         val body = server.takeRequest().body.readUtf8()
-        assertTrue(body.contains("rename"))
+        assertTrue("the session must ask to fail: $body", body.contains("\"fail\""))
         assertTrue(!body.contains("replace"))
+    }
+
+    // ---------- a name that is already taken ----------
+    //
+    // A hard kill mid-upload leaves the file finished in OneDrive and the ledger saying pending. The next
+    // run sends it again; the name is taken, and what matters is whether it is taken by *this* file.
+
+    private fun conflict() = jsonResponse(409, """{"error":{"code":"nameAlreadyExists"}}""")
+
+    private fun allRequests(): List<okhttp3.mockwebserver.RecordedRequest> =
+        (1..server.requestCount).map { server.takeRequest() }
+
+    @Test
+    fun `a small file that is already in OneDrive at the same size is reported uploaded and not sent again`() = runTest {
+        server.enqueue(conflict())
+        server.enqueue(jsonResponse(200, """{"id":"THERE","name":"small.jpg","size":1024,"eTag":"e1"}"""))
+
+        val outcome = uploader.upload(fileOfSize("small.jpg", 1024), "DCIM/Camera")
+
+        val item = (outcome as UploadOutcome.Success).item
+        assertEquals("THERE", item.id)
+        assertEquals(1024L, item.size)
+        val requests = allRequests()
+        assertEquals("one attempt and one look, no second upload", listOf("PUT", "GET"), requests.map { it.method })
+        assertTrue(requests[1].path!!.contains("root:/DCIM/Camera/small.jpg"))
+    }
+
+    @Test
+    fun `a small file whose name is taken by a different size is filed beside it with rename`() = runTest {
+        server.enqueue(conflict())
+        server.enqueue(jsonResponse(200, """{"id":"OTHER","name":"small.jpg","size":999}"""))
+        server.enqueue(jsonResponse(201, """{"id":"NEW","name":"small 1.jpg","size":1024}"""))
+
+        val outcome = uploader.upload(fileOfSize("small.jpg", 1024), "DCIM/Camera")
+
+        assertEquals("small 1.jpg", (outcome as UploadOutcome.Success).item.name)
+        val requests = allRequests()
+        assertEquals(listOf("PUT", "GET", "PUT"), requests.map { it.method })
+        assertTrue(requests[0].path!!.contains("conflictBehavior=fail"))
+        assertTrue("the retry must rename, not replace: ${requests[2].path}", requests[2].path!!.contains("conflictBehavior=rename"))
+        assertTrue(requests.none { it.path!!.contains("replace") })
+    }
+
+    @Test
+    fun `a name that turns out not to be taken after all is uploaded with rename`() = runTest {
+        server.enqueue(conflict())
+        server.enqueue(jsonResponse(404, """{"error":{"code":"itemNotFound"}}"""))
+        server.enqueue(jsonResponse(201, """{"id":"NEW","name":"small.jpg","size":1024}"""))
+
+        val outcome = uploader.upload(fileOfSize("small.jpg", 1024), "DCIM/Camera")
+
+        assertTrue(outcome is UploadOutcome.Success)
+        val requests = allRequests()
+        assertEquals(listOf("PUT", "GET", "PUT"), requests.map { it.method })
+        assertTrue(requests[2].path!!.contains("conflictBehavior=rename"))
+    }
+
+    @Test
+    fun `an existing file with no size reported is not taken for the same file`() = runTest {
+        server.enqueue(conflict())
+        server.enqueue(jsonResponse(200, """{"id":"ODD","name":"small.jpg"}"""))
+        server.enqueue(jsonResponse(201, """{"id":"NEW","name":"small 1.jpg","size":1024}"""))
+
+        uploader.upload(fileOfSize("small.jpg", 1024), "DCIM/Camera")
+
+        assertEquals(3, server.requestCount)
+    }
+
+    @Test
+    fun `if OneDrive cannot say what has the name, nothing is uploaded beside anything`() = runTest {
+        server.enqueue(conflict())
+        server.enqueue(jsonResponse(503, """{"error":{"code":"serviceNotAvailable"}}"""))
+
+        val outcome = uploader.upload(fileOfSize("small.jpg", 1024), "DCIM/Camera")
+
+        assertEquals("left as a failure, so the file stays pending", 409, (outcome as UploadOutcome.HttpFailure).code)
+        assertEquals("one attempt and one look, and no rename upload", 2, server.requestCount)
+    }
+
+    @Test
+    fun `a failure that is not a name clash is not looked into`() = runTest {
+        server.enqueue(jsonResponse(403, """{"error":{"code":"accessDenied"}}"""))
+
+        val outcome = uploader.upload(fileOfSize("small.jpg", 1024), "DCIM/Camera")
+
+        assertEquals(403, (outcome as UploadOutcome.HttpFailure).code)
+        assertEquals(1, server.requestCount)
+    }
+
+    @Test
+    fun `a large file already in OneDrive at the same size sends no bytes`() = runTest {
+        val size = ChunkedUploader.CHUNK_SIZE_BYTES + 10L
+        server.enqueue(conflict())
+        server.enqueue(jsonResponse(200, """{"id":"THERE","name":"big.mp4","size":$size}"""))
+
+        val outcome = uploader.upload(fileOfSize("big.mp4", size), "DCIM/Camera")
+
+        assertEquals("THERE", (outcome as UploadOutcome.Success).item.id)
+        val requests = allRequests()
+        assertEquals("a session refused and a look, and not one chunk", listOf("POST", "GET"), requests.map { it.method })
+    }
+
+    @Test
+    fun `a large file whose name is taken by a different size opens a second session that renames`() = runTest {
+        val size = ChunkedUploader.CHUNK_SIZE_BYTES + 10L
+        server.enqueue(conflict())
+        server.enqueue(jsonResponse(200, """{"id":"OTHER","name":"big.mp4","size":5}"""))
+        server.enqueue(jsonResponse(200, """{"uploadUrl":"${server.url("/session")}"}"""))
+        server.enqueue(jsonResponse(201, """{"id":"NEW","name":"big 1.mp4","size":$size}"""))
+
+        val outcome = uploader.upload(fileOfSize("big.mp4", size), "DCIM/Camera")
+
+        assertTrue(outcome is UploadOutcome.Success)
+        val bodies = allRequests().map { it.body.readUtf8() }
+        assertTrue("first session asks to fail", bodies[0].contains("\"fail\""))
+        assertTrue("second session asks to rename: ${bodies[2]}", bodies[2].contains("\"rename\""))
+        assertTrue(bodies.none { it.contains("replace") })
+    }
+
+    @Test
+    fun `a clash discovered only when the last chunk lands is still recognised as the same file`() = runTest {
+        val size = ChunkedUploader.CHUNK_SIZE_BYTES + 10L
+        server.enqueue(jsonResponse(200, """{"uploadUrl":"${server.url("/session")}"}"""))
+        server.enqueue(jsonResponse(202, """{"nextExpectedRanges":["${ChunkedUploader.CHUNK_SIZE_BYTES}-"]}"""))
+        server.enqueue(conflict())
+        server.enqueue(jsonResponse(200, """{"id":"THERE","name":"big.mp4","size":$size}"""))
+
+        val outcome = uploader.upload(fileOfSize("big.mp4", size), "DCIM/Camera")
+
+        assertEquals("THERE", (outcome as UploadOutcome.Success).item.id)
+        assertEquals(4, server.requestCount)
+    }
+
+    // ---------- an empty placeholder left by an interrupted session ----------
+    //
+    // Found by a repeated-kill test on the Moto G, 20 Sept 2026: createUploadSession makes a zero-byte
+    // item under the name at once. Killed before the response was read, the app cannot resume it, and the
+    // retry is told the name is taken by a file of 0 bytes. Renaming around it left the empty file holding
+    // the real name and filed the photo as " 1".
+
+    @Test
+    fun `a zero byte placeholder under a big file's name is filled in place, guarded by its eTag`() = runTest {
+        val size = ChunkedUploader.CHUNK_SIZE_BYTES + 10L
+        server.enqueue(conflict())
+        server.enqueue(jsonResponse(200, """{"id":"HOLE","name":"big.mp4","size":0,"eTag":"\"E0\""}"""))
+        server.enqueue(jsonResponse(200, """{"uploadUrl":"${server.url("/session")}"}"""))
+        server.enqueue(jsonResponse(201, """{"id":"HOLE","name":"big.mp4","size":$size}"""))
+
+        val outcome = uploader.upload(fileOfSize("big.mp4", size), "DCIM/Camera")
+
+        assertEquals("big.mp4", (outcome as UploadOutcome.Success).item.name)
+        val requests = allRequests()
+        assertEquals(listOf("POST", "GET", "POST", "PUT"), requests.map { it.method })
+        val bodies = requests.map { it.body.readUtf8() }
+        assertTrue("the first session still asks to fail", bodies[0].contains("\"fail\""))
+        assertNull("no guard on the first attempt", requests[0].getHeader("If-Match"))
+        assertTrue("the second session fills the placeholder: ${bodies[2]}", bodies[2].contains("\"replace\""))
+        assertEquals("guarded by the eTag that was read", "\"E0\"", requests[2].getHeader("If-Match"))
+    }
+
+    @Test
+    fun `an empty item with no eTag to guard it is not filled`() = runTest {
+        val size = ChunkedUploader.CHUNK_SIZE_BYTES + 10L
+        server.enqueue(conflict())
+        server.enqueue(jsonResponse(200, """{"id":"HOLE","name":"big.mp4","size":0}"""))
+        server.enqueue(jsonResponse(200, """{"uploadUrl":"${server.url("/session")}"}"""))
+        server.enqueue(jsonResponse(201, """{"id":"NEW","name":"big 1.mp4","size":$size}"""))
+
+        uploader.upload(fileOfSize("big.mp4", size), "DCIM/Camera")
+
+        val bodies = allRequests().map { it.body.readUtf8() }
+        assertTrue("renamed instead: ${bodies[2]}", bodies[2].contains("\"rename\""))
+        assertTrue(bodies.none { it.contains("replace") })
+    }
+
+    @Test
+    fun `an empty item under a small file's name is never filled either`() = runTest {
+        server.enqueue(conflict())
+        server.enqueue(jsonResponse(200, """{"id":"HOLE","name":"small.jpg","size":0,"eTag":"E0"}"""))
+        server.enqueue(jsonResponse(201, """{"id":"NEW","name":"small 1.jpg","size":1024}"""))
+
+        uploader.upload(fileOfSize("small.jpg", 1024), "DCIM/Camera")
+
+        val requests = allRequests()
+        assertTrue(requests[2].path!!.contains("conflictBehavior=rename"))
+        assertTrue(requests.none { it.path!!.contains("replace") || it.body.readUtf8().contains("replace") })
+    }
+
+    @Test
+    fun `a file with content in it is never replaced, however small the difference`() = runTest {
+        val size = ChunkedUploader.CHUNK_SIZE_BYTES + 10L
+        server.enqueue(conflict())
+        server.enqueue(jsonResponse(200, """{"id":"OTHER","name":"big.mp4","size":1,"eTag":"E1"}"""))
+        server.enqueue(jsonResponse(200, """{"uploadUrl":"${server.url("/session")}"}"""))
+        server.enqueue(jsonResponse(201, """{"id":"NEW","name":"big 1.mp4","size":$size}"""))
+
+        uploader.upload(fileOfSize("big.mp4", size), "DCIM/Camera")
+
+        val requests = allRequests()
+        val bodies = requests.map { it.body.readUtf8() }
+        assertTrue(bodies[2].contains("\"rename\""))
+        assertTrue(bodies.none { it.contains("replace") })
+        assertNull(requests[2].getHeader("If-Match"))
     }
 
     // ---------- failures ----------
