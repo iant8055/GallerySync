@@ -88,7 +88,14 @@ data class AlbumBackupCount(
      * Restore put them back. Counted only while the file is on the phone, like the other figures on
      * the card, since it is drawn beside them.
      */
-    val pinned: Int = 0
+    val pinned: Int = 0,
+
+    /**
+     * Files here whose upload failed for good (five attempts). Counted only while the file is on the
+     * phone. These are also counted as pending on the card, which is what "not yet in OneDrive" means;
+     * this is the part of that number the queue has given up on. See `RetryFailed`.
+     */
+    val failed: Int = 0
 )
 
 /** The two identities of a pinned file. See `FilePin.withoutPinned` for why both are carried. */
@@ -417,6 +424,24 @@ interface BackupEntryDao {
         pending: BackupState = BackupState.PENDING
     ): Int
 
+    /**
+     * Puts one album's failed files back in the queue: pending, attempts back to zero, the old error
+     * cleared. Returns how many. The user's *Retry failed* (`RetryFailed`); bookkeeping only, since the
+     * only effect is that the next run tries to upload them again.
+     */
+    @Query(
+        """
+        UPDATE backup_entries
+        SET state = :pending, attemptCount = 0, lastError = NULL
+        WHERE state = :failed AND album = :album
+        """
+    )
+    suspend fun resetFailuresInAlbum(
+        album: String,
+        pending: BackupState = BackupState.PENDING,
+        failed: BackupState = BackupState.FAILED
+    ): Int
+
     /** Clears the failure count so the user can retry something that has given up. */
     @Query("UPDATE backup_entries SET state = :pending, attemptCount = 0, lastError = NULL WHERE state = :failed")
     suspend fun resetFailures(
@@ -439,8 +464,19 @@ interface BackupEntryDao {
         uploaded: BackupState = BackupState.UPLOADED
     ): List<BackupEntryEntity>
 
-    @Query("SELECT COUNT(*) FROM backup_entries WHERE state != :uploaded")
-    suspend fun countPendingAll(uploaded: BackupState = BackupState.UPLOADED): Int
+    /**
+     * What is left to send, counted the way [nextPendingAll] picks: **a file that has used up its attempts
+     * is not left to send.**
+     *
+     * Until 21 Sept 2026 this counted every row that was not uploaded, failed ones included. A file that had
+     * failed five times was never picked again but was still counted as remaining, and the worker chains
+     * another batch whenever `remaining > 0`, so one permanently failed file kept the queue re-running for
+     * ever: a run about every second, each rescanning the whole library. Found on the Moto G while building
+     * *Retry failed*, with a file OneDrive refused the name of. Such a file is now the user's to retry, from
+     * the album (`RetryFailed`), not the queue's to spin on.
+     */
+    @Query("SELECT COUNT(*) FROM backup_entries WHERE state != :uploaded AND attemptCount < :maxAttempts")
+    suspend fun countPendingAll(maxAttempts: Int, uploaded: BackupState = BackupState.UPLOADED): Int
 
     @Query("SELECT COUNT(*) FROM backup_entries WHERE state = :state")
     fun observeCount(state: BackupState): Flow<Int>
@@ -465,12 +501,13 @@ interface BackupEntryDao {
         """
         SELECT COUNT(*) FROM backup_entries
         WHERE state != :uploaded
+          AND attemptCount < :maxAttempts
           AND album IN (
               SELECT albumName FROM album_preferences WHERE mode != 'OFF'
           )
         """
     )
-    suspend fun countPendingInSelectedAlbums(uploaded: BackupState = BackupState.UPLOADED): Int
+    suspend fun countPendingInSelectedAlbums(maxAttempts: Int, uploaded: BackupState = BackupState.UPLOADED): Int
 
     @Query("SELECT COUNT(*) FROM backup_entries")
     fun observeTotal(): Flow<Int>
@@ -1038,14 +1075,17 @@ interface BackupEntryDao {
                         THEN COALESCE(remoteSizeBytes, sizeBytes) ELSE 0 END
                ), 0) AS everBackedUpBytes,
                SUM(CASE WHEN modeOverride = :pin AND localMissingSinceEpochMillis IS NULL
-                        THEN 1 ELSE 0 END) AS pinned
+                        THEN 1 ELSE 0 END) AS pinned,
+               SUM(CASE WHEN state = :failedState AND localMissingSinceEpochMillis IS NULL
+                        THEN 1 ELSE 0 END) AS failed
         FROM backup_entries
         GROUP BY album
         """
     )
     suspend fun albumCounts(
         uploaded: BackupState = BackupState.UPLOADED,
-        pin: AlbumMode = AlbumMode.BACKUP
+        pin: AlbumMode = AlbumMode.BACKUP,
+        failedState: BackupState = BackupState.FAILED
     ): List<AlbumBackupCount>
 
     /**

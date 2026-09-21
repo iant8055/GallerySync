@@ -162,6 +162,12 @@ fun BackupScreen(
                     detailEntries = viewModel.albumEntries(album.name)
                 }
             },
+            onRetryFailed = {
+                scope.launch {
+                    viewModel.retryFailed(album.name)
+                    detailEntries = viewModel.albumEntries(album.name)
+                }
+            },
             modifier = modifier,
             camera = if (isCamera) {
                 CameraOptimiseControls(
@@ -1046,6 +1052,11 @@ private fun AlbumRow.statusBreakdown(): String {
         if (pending > 0) {
             if (isNotEmpty()) append(separator)
             append(stringResource(R.string.album_status_pending, pending))
+        }
+        // The part of "pending" the queue has given up on, so the album can be opened and retried.
+        if (failedCount > 0 && mode != AlbumMode.OFF) {
+            if (isNotEmpty()) append(separator)
+            append(stringResource(R.string.album_status_failed, failedCount))
         }
     }
 }

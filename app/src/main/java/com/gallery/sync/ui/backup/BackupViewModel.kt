@@ -117,6 +117,8 @@ data class AlbumRow(
     val videoCount: Int = 0,
     /** What optimising reclaimed in this album. Zero unless something here has been proxied. */
     val savedBytes: Long = 0L,
+    /** Files here the queue has given up on after five attempts. See `RetryFailed`. */
+    val failedCount: Int = 0,
     /** Uploaded rows including files no longer on the phone. Only for [isArchivedAndEmpty]. */
     val everBackedUpCount: Int = 0,
 
@@ -729,6 +731,7 @@ class BackupViewModel @Inject constructor(
                     imageCount = album.imageCount,
                     videoCount = album.videoCount,
                     savedBytes = counts?.savedBytes ?: 0L,
+                    failedCount = counts?.failed ?: 0,
                     everBackedUpCount = counts?.everBackedUp ?: 0,
                     everBackedUpBytes = counts?.everBackedUpBytes ?: 0L
                 )
@@ -787,6 +790,20 @@ class BackupViewModel @Inject constructor(
     }
 
     suspend fun albumEntries(album: String) = entryDao.entriesForAlbum(album)
+
+    /**
+     * *Retry failed* on one album: its failed files go back in the queue and a backup starts.
+     *
+     * Returns how many were put back. Adds work and nothing else. It never touches a file on the phone
+     * or in OneDrive, and if a run is already going the files are simply picked up by its next batch.
+     */
+    suspend fun retryFailed(album: String): Int {
+        val n = entryDao.resetFailuresInAlbum(album)
+        Logger.i("BackupViewModel", "retry failed: $n files in $album put back in the queue")
+        refreshCounts()
+        if (n > 0) runBackupNow()
+        return n
+    }
 
     /**
      * Keeps a file at full size, or lets it follow its album again.
@@ -1060,7 +1077,7 @@ class BackupViewModel @Inject constructor(
         // and a 172 MB baseline still stored, which would have opened the next run part-finished.
         // This asks the only question that matters, wherever the app happens to notice: no work
         // outstanding means no run in progress, so the denominator is meaningless.
-        if (entryDao.countPendingInSelectedAlbums() == 0 &&
+        if (entryDao.countPendingInSelectedAlbums(BackupEngine.MAX_ATTEMPTS) == 0 &&
             settings.current().runBaselineBytes != 0L
         ) {
             settings.setRunBaselineBytes(0L)
@@ -1072,7 +1089,7 @@ class BackupViewModel @Inject constructor(
             hasLoadedCounts = true,
             uploadedCount = entryDao.countInState(BackupState.UPLOADED),
             uploadedBytes = entryDao.uploadedBytesInSelectedAlbums(),
-            pendingCount = entryDao.countPendingInSelectedAlbums(),
+            pendingCount = entryDao.countPendingInSelectedAlbums(BackupEngine.MAX_ATTEMPTS),
             pendingBytes = entryDao.pendingBytesInSelectedAlbums(),
             redundantCount = redundant.size,
             redundantBytes = redundant.sumOf { it.sizeBytes },

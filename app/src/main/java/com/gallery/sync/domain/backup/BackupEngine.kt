@@ -473,11 +473,11 @@ class BackupEngine @Inject constructor(
      * noticing the gate was no longer needed. See FIX-001.
      */
     suspend fun outstandingCount(): Int = withContext(dispatcher) {
-        entryDao.countPendingInSelectedAlbums()
+        entryDao.countPendingInSelectedAlbums(MAX_ATTEMPTS)
     }
 
     suspend fun outstandingCountAll(): Int = withContext(dispatcher) {
-        entryDao.countPendingAll()
+        entryDao.countPendingAll(MAX_ATTEMPTS)
     }
 
     /** Files actually sent to OneDrive since [sinceMillis]. See `BackupEntryDao.countUploadedSince`. */
@@ -804,7 +804,7 @@ class BackupEngine @Inject constructor(
                             return@withContext BackupRunResult(
                                 uploaded = uploaded,
                                 failed = failed,
-                                remaining = if (allAlbums) entryDao.countPendingAll() else entryDao.countPendingInSelectedAlbums(),
+                                remaining = if (allAlbums) entryDao.countPendingAll(MAX_ATTEMPTS) else entryDao.countPendingInSelectedAlbums(MAX_ATTEMPTS),
                                 skipped = skipped,
                                 deferred = deferred,
                                 pruned = pruned,
@@ -822,7 +822,7 @@ class BackupEngine @Inject constructor(
                 failed = failed,
                 // A real count. This previously reused nextPending with a limit of 1, so it could
                 // only ever report 0 or 1 — "1 still to go" actually meant "at least one".
-                remaining = if (allAlbums) entryDao.countPendingAll() else entryDao.countPendingInSelectedAlbums(),
+                remaining = if (allAlbums) entryDao.countPendingAll(MAX_ATTEMPTS) else entryDao.countPendingInSelectedAlbums(MAX_ATTEMPTS),
                 skipped = skipped,
                 deferred = deferred,
                 pruned = pruned

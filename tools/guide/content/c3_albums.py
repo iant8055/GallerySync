@@ -167,7 +167,7 @@ CHAPTER = Chapter(
 
             • **Album name**, for example Camera.
             • **12 files · 340 MB.** How many files the album holds on the phone right now, and their total size. From your phone's media library, inside the chosen folders.
-            • **3 optimised · 4 kept at full size · 2 pending.** A second line that appears only when it has something to say, and shows only the parts that are not zero. Optimised counts files replaced by a smaller copy. Kept at full size counts files Restore has put back and that are still ticked, which GallerySync leaves alone. Pending counts files not yet sent to OneDrive: the number of files on the phone minus the number the app has recorded as sent.
+            • **3 optimised · 4 kept at full size · 2 pending.** A second line that appears only when it has something to say, and shows only the parts that are not zero. Optimised counts files replaced by a smaller copy. Kept at full size counts files Restore has put back and that are still ticked, which GallerySync leaves alone. Pending counts files not yet sent to OneDrive: the number of files on the phone minus the number the app has recorded as sent. **Failed** counts those of the pending files the app has given up on after several attempts; open the album to retry them.
             • **The OneDrive line.** The only line that describes OneDrive itself. Its four forms are listed below.
             • **All files Archived**, in place of the three lines above, on an Archive album that has nothing left on the phone. This is uncommon now: when an Archive run empties an album, the album leaves this list and its mode is forgotten. See [[modes-in-depth]].
             • **The mode pill**, at the right, in the mode's colour, with a small arrow. Tap it and choose Off, Backup, Sync or Archive; the current mode is ringed. Choosing Archive first asks you to confirm. See [[dialog-archive-confirm]].
@@ -220,6 +220,9 @@ CHAPTER = Chapter(
             • **✓ optimised.** Smaller on the phone.
             • **⟳ pending.** Waiting to be sent.
             • **✗ failed.** Could not be sent after several attempts. The app does not keep retrying a file forever.
+
+            ## Retry failed
+            When an album that is being backed up has failed files, a hint and a **Retry** button appear under the counts, reading for example **Retry 3 failed**. Pressing it puts those files back in the queue and starts a backup. It only adds work: nothing is removed from your phone or from OneDrive. If a file fails again, it stays marked failed and the button is still there.
 
             ## Where it comes from
             The app's own record of each file's progress. The OneDrive-checked answer is the last line of

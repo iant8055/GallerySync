@@ -62,6 +62,7 @@ import com.gallery.sync.domain.backup.CameraOptimisePlan
 import com.gallery.sync.domain.backup.CameraOptimiseSettings
 import com.gallery.sync.domain.backup.FilePin
 import com.gallery.sync.domain.backup.FileSort
+import com.gallery.sync.domain.backup.RetryFailed
 import com.gallery.sync.ui.common.HeroOutlinedButton
 import com.gallery.sync.ui.common.SignalIcons
 import com.gallery.sync.ui.common.SwipeChoiceBox
@@ -106,6 +107,8 @@ fun AlbumDetailScreen(
     onBack: () -> Unit,
     /** The tick box: keep one file at full size, or let it follow its album again. See `FilePin`. */
     onSetPinned: (BackupEntryEntity, Boolean) -> Unit,
+    /** *Retry failed*: put the failed files back in the queue and start a backup. See `RetryFailed`. */
+    onRetryFailed: () -> Unit,
     modifier: Modifier = Modifier,
     /** Only the Camera album passes this. See [CameraOptimiseControls]. */
     camera: CameraOptimiseControls? = null
@@ -165,6 +168,7 @@ fun AlbumDetailScreen(
                         }
                     )
                 },
+                onRetryFailed = onRetryFailed,
                 onBack = onBack
             )
         }
@@ -275,6 +279,7 @@ private fun DetailHeader(
     onSort: (FileSort) -> Unit,
     showKeepColumn: Boolean,
     camera: CameraHeader?,
+    onRetryFailed: () -> Unit,
     onBack: () -> Unit
 ) {
     val signal = LocalGallerySyncColors.current
@@ -342,6 +347,19 @@ private fun DetailHeader(
                         Text(
                             text = counts.joinToString(" · "),
                             style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+
+                    // Files that failed five times are left alone by the queue, so this is the way back.
+                    val failedFiles = entries.count { it.state == BackupState.FAILED }
+                    if (RetryFailed.offered(mode, failedFiles)) {
+                        Text(
+                            text = stringResource(R.string.album_retry_failed_hint),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        HeroOutlinedButton(
+                            onClick = onRetryFailed,
+                            label = stringResource(R.string.album_retry_failed, failedFiles)
                         )
                     }
 

@@ -323,6 +323,9 @@
 full size</string>
     <string name="album_file_keep_description">Keep %1$s at full size</string>
     <string name="album_status_pending">%1$d pending</string>
+    <string name="album_status_failed">%1$d failed</string>
+    <string name="album_retry_failed">Retry %1$d failed</string>
+    <string name="album_retry_failed_hint">These files could not be sent after several tries. Retry puts them back in the queue and starts a backup.</string>
     <string name="album_watching">Watching for new files</string>
     <string name="album_not_watching">Not watched — nothing new expected</string>
     <plurals name="file_count">

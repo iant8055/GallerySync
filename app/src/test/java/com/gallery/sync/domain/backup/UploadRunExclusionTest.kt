@@ -52,7 +52,7 @@ class UploadRunExclusionTest {
     @Test
     fun `a second run waits for the first instead of uploading the same files beside it`() = runTest {
         whenever(scanner.access()).thenReturn(MediaAccess.FULL)
-        whenever(entryDao.countPendingInSelectedAlbums(any())).thenReturn(0)
+        whenever(entryDao.countPendingInSelectedAlbums(any(), any())).thenReturn(0)
 
         val gate = CompletableDeferred<Unit>()
         var inside = 0

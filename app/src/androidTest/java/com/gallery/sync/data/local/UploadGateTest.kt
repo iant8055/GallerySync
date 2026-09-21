@@ -83,7 +83,7 @@ class UploadGateTest {
         // album_preferences deliberately left empty — the exact state of a fresh install.
 
         assertEquals(emptyList<BackupEntryEntity>(), queue())
-        assertEquals(0, entryDao.countPendingInSelectedAlbums())
+        assertEquals(0, entryDao.countPendingInSelectedAlbums(5))
     }
 
     @Test
@@ -92,7 +92,7 @@ class UploadGateTest {
         albumDao.setPreference(AlbumPreferenceEntity("Camera", AlbumMode.BACKUP))
 
         assertEquals(listOf("a.jpg"), queue().map { it.displayName })
-        assertEquals(1, entryDao.countPendingInSelectedAlbums())
+        assertEquals(1, entryDao.countPendingInSelectedAlbums(5))
     }
 
     @Test
@@ -101,7 +101,7 @@ class UploadGateTest {
         albumDao.setPreference(AlbumPreferenceEntity("Camera", AlbumMode.OFF))
 
         assertEquals(emptyList<BackupEntryEntity>(), queue())
-        assertEquals(0, entryDao.countPendingInSelectedAlbums())
+        assertEquals(0, entryDao.countPendingInSelectedAlbums(5))
     }
 
     /**
@@ -123,7 +123,7 @@ class UploadGateTest {
         // "Unseen" gets no row at all.
 
         assertEquals(2, queue().size)
-        assertEquals(2, entryDao.countPendingInSelectedAlbums())
+        assertEquals(2, entryDao.countPendingInSelectedAlbums(5))
     }
 
     /** Seeding runs on every scan, so it must never overwrite what the user chose. */
