@@ -120,18 +120,6 @@ data class ArchivePlan(
 }
 
 /**
- * How long the user asked to be left alone.
- *
- * Not repeat prompting in the sense CLAUDE.md forbids — the rule is about the app asking again on
- * its own. This is the user saying "ask me later", which is their choice to make.
- */
-enum class ArchiveDelay(val hours: Long) {
-    ONE_HOUR(1),
-    TWELVE_HOURS(12),
-    ONE_DAY(24)
-}
-
-/**
  * What is in the Archive albums right now: the files that may be archived, and the ones the user
  * has opted out.
  *

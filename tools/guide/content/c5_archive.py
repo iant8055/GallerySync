@@ -60,7 +60,6 @@ CHAPTER = Chapter(
             • **Checking against OneDrive...** with a small spinner while OneDrive is asked.
             • **Batch 1 of 3** while files are being removed. See [[dialog-android-trash]] for why there may be several.
             • **12 files removed from this phone, freeing 340 MB.** or **Nothing was removed.** when it finishes.
-            • **Asked to wait. These files stay on your phone until then.** after you pressed Delay.
 
             ## Where it comes from
             The check asks OneDrive for the list of files in each album's folder and compares names and
@@ -126,7 +125,6 @@ CHAPTER = Chapter(
             **Do you want to continue?**
             • **Yes** asks Android to move the confirmed files to the bin. Android then shows its own confirmation.
             • **No** puts the question away. Nothing has been removed, and you can check again later.
-            • **Delay** offers **1 hour**, **12 hours** or **1 day**. The files stay on the phone until then, and the reminder when you leave the app is held back for the same time.
 
             ## Where the numbers come from
             The count is the files OneDrive just confirmed. The size is those files' size on your phone.
@@ -170,8 +168,7 @@ CHAPTER = Chapter(
             ## Good to know
             It is a reminder, not a guarantee. Android lets an app notice the back gesture and nothing
             else, so pressing Home or swiping the app away from the recent-apps list will not show it. The
-            Archive tab is always there when you come back. If you pressed **Delay** on the prompt, the
-            reminder waits until the delay has passed.
+            Archive tab is always there when you come back.
         """, ui=True),
     ],
 )

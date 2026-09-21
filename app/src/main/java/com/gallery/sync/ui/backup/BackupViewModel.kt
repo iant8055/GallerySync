@@ -242,14 +242,6 @@ data class BackupUiState(
      * What it does carry is the fact Android's dialog cannot state — that the cloud copy is verified.
      */
     val archiveAlbumsReady: List<String> = emptyList(),
-    /**
-     * When the user's "ask me later" on the Archive summons runs out, or 0 if none is set.
-     *
-     * Carried here because the exit warning is decided at the root of the app, and forcing
-     * `ArchiveViewModel` into existence there would run a full device scan on every launch just to
-     * find out whether to arm a dialog. See [ExitWarning].
-     */
-    val archiveDelayedUntilEpochMillis: Long = 0L,
     /** What the last removal attempt refused to remove, and why. Null before any attempt. */
     val removalHeldBack: CloudConfirmation? = null,
     /** Photos whose local copy could be replaced by a proxy, and what they occupy now. */
@@ -462,7 +454,6 @@ class BackupViewModel @Inject constructor(
                     isPaused = prefs.isPaused,
                     runBaselineBytes = prefs.runBaselineBytes,
                     defaultAlbumMode = prefs.defaultAlbumMode,
-                    archiveDelayedUntilEpochMillis = prefs.archiveDelayedUntilEpochMillis,
                     isOptimiseEnabled = prefs.isOptimiseEnabled,
                     optimisePhotos = prefs.optimisePhotos,
                     photoOptimiseMode = prefs.photoOptimiseMode,

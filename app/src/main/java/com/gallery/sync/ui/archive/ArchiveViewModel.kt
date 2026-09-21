@@ -9,7 +9,6 @@ import androidx.work.WorkManager
 import com.gallery.sync.data.local.media.LocalCopyRemover
 import com.gallery.sync.data.local.media.LocalMediaItem
 import com.gallery.sync.data.local.settings.BackupSettings
-import com.gallery.sync.domain.backup.ArchiveDelay
 import com.gallery.sync.domain.backup.ArchiveEntry
 import com.gallery.sync.domain.backup.ArchiveFailure
 import com.gallery.sync.domain.backup.ArchiveFiles
@@ -26,7 +25,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import java.time.Instant
 import javax.inject.Inject
 
 /** Which of the two passes the screen is showing. */
@@ -36,8 +34,6 @@ data class ArchiveUiState(
     val plan: ArchivePlan = ArchivePlan(),
     val phase: ArchivePhase = ArchivePhase.IDLE,
     val isSupported: Boolean = true,
-    /** Set when the user chose Delay, so the screen can say what it is waiting for. */
-    val delayedUntil: Instant? = null,
     /** How many system dialogs the removal will need, and which one we are on. */
     val batchTotal: Int = 0,
     val batchIndex: Int = 0,
@@ -62,17 +58,6 @@ data class ArchiveUiState(
     val optedOut: List<LocalMediaItem> = emptyList()
 ) {
     /**
-     * Whether a Delay is still in force at [now]. **One that has run out is not.**
-     *
-     * The stored time was read as "delayed" for as long as it existed, so once anyone had pressed
-     * Delay the question below could never be asked again: it stayed silent after the wait ended,
-     * with the check finished, the files verified and nothing on the screen to say why. Ian, 19 Sept
-     * 2026, on Temp 5 and Temp 9, with a Delay set that afternoon. `ExitWarning` already judged the
-     * stored time against the clock; this now does too.
-     */
-    fun isDelayed(now: Instant = Instant.now()): Boolean = delayedUntil?.isAfter(now) == true
-
-    /**
      * Whether *Check these files* is offered: files are waiting and nothing is running.
      *
      * **After a removal has reported too.** The tab used to show the report and no button, so a
@@ -83,9 +68,8 @@ data class ArchiveUiState(
     fun offersCheck(): Boolean =
         isSupported && !plan.isEmpty && (phase == ArchivePhase.IDLE || phase == ArchivePhase.DONE)
 
-    /** The Archive question: shown once the check is done, unless the user asked to be left alone. */
-    fun showPrompt(now: Instant = Instant.now()): Boolean =
-        phase == ArchivePhase.READY && !isDelayed(now)
+    /** The Archive question: shown once the check is done. */
+    fun showPrompt(): Boolean = phase == ArchivePhase.READY
 }
 
 /**
@@ -111,18 +95,6 @@ class ArchiveViewModel @Inject constructor(
     init {
         _state.value = _state.value.copy(isSupported = localCopyRemover.isSupported())
         load()
-
-        // The snooze is persisted, so it outlives the app being closed — which is the case it now
-        // has to cover, since the exit warning fires at exactly the moment someone who chose Delay
-        // is walking away. See BackupPreferences.archiveDelayedUntilEpochMillis.
-        viewModelScope.launch {
-            settings.preferences.collect { prefs ->
-                val millis = prefs.archiveDelayedUntilEpochMillis
-                _state.value = _state.value.copy(
-                    delayedUntil = if (millis > 0L) Instant.ofEpochMilli(millis) else null
-                )
-            }
-        }
     }
 
     /** Lists what is in Archive albums. Cheap, and safe to call whenever the screen appears. */
@@ -455,13 +427,6 @@ class ArchiveViewModel @Inject constructor(
     /** The user said no. Nothing is remembered — the album is still Archive, so it will offer again. */
     fun dismiss() {
         _state.value = _state.value.copy(phase = ArchivePhase.IDLE)
-    }
-
-    /** The user asked to be left alone for a while. Their choice, not the app deciding to re-ask. */
-    fun delay(delay: ArchiveDelay) {
-        val until = Instant.now().plusSeconds(delay.hours * 3600)
-        _state.value = _state.value.copy(delayedUntil = until)
-        viewModelScope.launch { settings.setArchiveDelayedUntil(until.toEpochMilli()) }
     }
 
     private companion object {

@@ -486,11 +486,6 @@ full size</string>
         app is not asking for anything — so "No" was an answer to nothing. This button dismisses.
     -->
     <string name="archive_prompt_continue">Continue</string>
-    <string name="archive_prompt_delay">Delay</string>
-    <string name="archive_delay_1h">1 hour</string>
-    <string name="archive_delay_12h">12 hours</string>
-    <string name="archive_delay_1d">1 day</string>
-    <string name="archive_delayed">Asked to wait. These files stay on your phone until then.</string>
 
     <string name="archive_none_confirmed">Nothing can be archived. OneDrive did not confirm a single one of these files, so they all stay on your phone.</string>
     <string name="archive_batch_progress">Batch %1$d of %2$d</string>

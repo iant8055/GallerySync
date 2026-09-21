@@ -52,7 +52,6 @@ import com.gallery.sync.ui.theme.ThemeViewModel
 import com.gallery.sync.util.RecentsCard
 import javax.inject.Inject
 import dagger.hilt.android.AndroidEntryPoint
-import java.time.Instant
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -181,11 +180,7 @@ private fun SignedInApp(
     val activity = LocalActivity.current
 
     var showExitWarning by remember { mutableStateOf(false) }
-    val warnOnExit = ExitWarning.shouldWarn(
-        readyCount = backupState.redundantCount,
-        delayedUntilEpochMillis = backupState.archiveDelayedUntilEpochMillis,
-        now = Instant.now()
-    )
+    val warnOnExit = ExitWarning.shouldWarn(readyCount = backupState.redundantCount)
 
     // Only the back gesture can be caught. Home and a swipe from Recents cannot be, so this is a
     // net rather than a guarantee — see ExitWarning.

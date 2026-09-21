@@ -1,6 +1,5 @@
 package com.gallery.sync.domain.backup
 
-import java.time.Instant
 
 /**
  * Whether leaving the app should stop and say that files are waiting to be archived.
@@ -27,19 +26,6 @@ import java.time.Instant
  */
 object ExitWarning {
 
-    /**
-     * True when there is something waiting and the user has not asked to be left alone.
-     *
-     * [delayedUntilEpochMillis] is `0` when no delay was ever set. A delay that has expired is the
-     * same as none — the point of the snooze is that it runs out.
-     */
-    fun shouldWarn(
-        readyCount: Int,
-        delayedUntilEpochMillis: Long,
-        now: Instant
-    ): Boolean {
-        if (readyCount <= 0) return false
-        if (delayedUntilEpochMillis <= 0L) return true
-        return now.toEpochMilli() >= delayedUntilEpochMillis
-    }
+    /** True when there is something waiting to be archived. */
+    fun shouldWarn(readyCount: Int): Boolean = readyCount > 0
 }

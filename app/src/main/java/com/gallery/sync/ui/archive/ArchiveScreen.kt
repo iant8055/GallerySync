@@ -47,7 +47,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
 import com.gallery.sync.data.local.media.LocalMediaItem
-import com.gallery.sync.domain.backup.ArchiveDelay
 import com.gallery.sync.domain.backup.ArchiveEntry
 import com.gallery.sync.domain.backup.ArchiveFailure
 import com.gallery.sync.domain.backup.ArchiveMark
@@ -162,8 +161,7 @@ fun ArchiveScreen(
                         }
                     }
                 },
-                onNo = viewModel::dismiss,
-                onDelay = viewModel::delay
+                onNo = viewModel::dismiss
             )
         }
 
@@ -444,12 +442,8 @@ private fun ArchiveHeroActions(state: ArchiveUiState, onValidate: () -> Unit) {
             }
         }
 
-        ArchivePhase.READY -> if (state.isDelayed()) {
-            Text(
-                text = stringResource(R.string.archive_delayed),
-                style = MaterialTheme.typography.bodySmall
-            )
-        }
+        // The question itself is the prompt below; there is nothing to add here.
+        ArchivePhase.READY -> Unit
     }
 }
 
@@ -587,11 +581,9 @@ private fun OptedOutRow(item: LocalMediaItem, modifier: Modifier = Modifier) {
 private fun ArchivePrompt(
     state: ArchiveUiState,
     onYes: () -> Unit,
-    onNo: () -> Unit,
-    onDelay: (ArchiveDelay) -> Unit
+    onNo: () -> Unit
 ) {
     val context = LocalContext.current
-    var delayOpen by remember { mutableStateOf(false) }
 
     Surface(
         modifier = Modifier
@@ -689,23 +681,6 @@ private fun ArchivePrompt(
                 }
                 OutlinedButton(onClick = onNo) {
                     Text(stringResource(R.string.archive_prompt_no), maxLines = 1)
-                }
-                TextButton(onClick = { delayOpen = !delayOpen }) {
-                    Text(stringResource(R.string.archive_prompt_delay), maxLines = 1)
-                }
-            }
-
-            if (delayOpen) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TextButton(onClick = { onDelay(ArchiveDelay.ONE_HOUR) }) {
-                        Text(stringResource(R.string.archive_delay_1h), maxLines = 1)
-                    }
-                    TextButton(onClick = { onDelay(ArchiveDelay.TWELVE_HOURS) }) {
-                        Text(stringResource(R.string.archive_delay_12h), maxLines = 1)
-                    }
-                    TextButton(onClick = { onDelay(ArchiveDelay.ONE_DAY) }) {
-                        Text(stringResource(R.string.archive_delay_1d), maxLines = 1)
-                    }
                 }
             }
         }
