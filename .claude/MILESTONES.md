@@ -246,6 +246,13 @@ Verified on hardware: sign-in completes and the real drive lists.
       chunk**, extending as chunks land. This covers a run killed and restarted promptly; it does not
       cover a phone left overnight.
 - [ ] Retry failed items from the UI
+      **Audited 20 Sept 2026: not built, and it is a gap rather than a nicety.** A file that fails five
+      times (`BackupEngine.MAX_ATTEMPTS`) is marked `FAILED` and `nextPending` never selects it again.
+      `BackupEntryDao.resetFailures()` exists to put such rows back, and **nothing calls it**. The Albums
+      tab reports "N failed" after a run and an album's file list labels the file "✗ failed" with its
+      error, but there is no control: a file that hit its five attempts stays unsent until the ledger is
+      rebuilt. Network trouble does not count against a file (the run leaves it `PENDING`), so this is
+      only for genuine per-file failures.
 - [x] **Start time for the first backup.** The initial whole-library upload is the heaviest thing the
       app ever does. User-set, default overnight (1am, six-hour window), charging required for that
       first run. Only automatic runs are gated — "Sync now" is never held, because someone who asked
@@ -385,13 +392,22 @@ keeps working.
       nothing new becomes eligible. Proxying is the only lever; nothing is deleted. If it cannot
       reach the floor it stops and says so. Notifies when free space drops below the floor, which is
       also how it asks for the next batch of write consent. See TASK-011.~~
-- [ ] **Album modes in the UI.** Schema 4 carries Off/Backup/Sync/Archive; the screen is still a
-      switch. See TASK-012.
+- [x] **Album modes in the UI.** Schema 4 carries Off/Backup/Sync/Archive; the screen is still a
+      switch. See TASK-012. **Built, ticked 20 Sept 2026 by audit.** Each album row on the Albums tab
+      carries a mode pill that opens an Off / Backup / Sync / Archive menu (`AlbumModeDropdown`), Archive
+      behind its confirmation, with a default mode for new albums in Settings and a mode filter above the
+      list. The Camera album's menu has no Sync (20 Sept 2026).
 - [ ] **Running count of space saved, per album and in total.** Each album row says what has already
       been freed and what its selected mode could free, updating as the mode changes. Same
       aggregates the floor uses, so the two screens cannot disagree. Added by Ian 19 Aug 2026. See
       TASK-011.
-- [ ] **Sync scope — two toggles, photos and video, and they gate optimising only.** Revised by Ian,
+
+      **Audited 20 Sept 2026: half built, so left unticked.** *In total* exists: with the Sync filter on,
+      the Albums card reads "N Optimised · X Saved" (`AlbumsSummary.savedBytes`). *Per album* is computed
+      (`AlbumRow.savedBytes`, from the ledger) **but no row draws it**: an album row shows only how many
+      files are optimised. *What its selected mode could free* is not built for albums at all; the only
+      forecasts in the app are the wizard's estimate and the Camera album's per-age estimate.
+- [x] **Sync scope — two toggles, photos and video, and they gate optimising only.** Revised by Ian,
       29 Aug 2026, replacing a tri-state (Photos only / Video only / Both) that gated *uploading*.
 
       **The old shape was wrong about what Sync is.** TASK-011's table said the excluded medium was
@@ -404,13 +420,31 @@ keeps working.
       full size, and still archivable and restorable — all of which need a verified cloud copy. Under
       the old reading, one toggle silently disabled three features and left the largest files on the
       phone unprotected.
+
+      **Built, ticked 20 Sept 2026 by audit.** Settings → Sync has *Optimise photos* and *Optimise videos*
+      switches (`optimisePhotos`, `optimiseVideo`), each with its own Automatic/Manual mode. They are read
+      only by the optimise policies and workers (`PhotoOptimisePolicy`, `VideoOptimisePolicy`,
+      `OptimiseWorker`, the two launchers); nothing in the upload path reads them, so turning either off
+      leaves that medium backed up, archivable and restorable.
 - [x] **Video transcode for old clips**, age a user setting (wired to Settings 18 Sept 2026, see the last entry) — see TASK-013. The write needs no tap
       (SAF, verified 19 Aug 2026); the blocker is a transcode cost measured on real 8K footage, and
       it is gated on v0.4 retrieval.
-- [ ] **Guided first run** — language, cloud, sign-in, permissions, then two gates the engine cannot
+- [x] **Guided first run** — language, cloud, sign-in, permissions, then two gates the engine cannot
       start without: which directories to pull from, and what to do with the existing library. The
       directory picker is also the SAF write grant. See TASK-014.
-- [ ] **Move to backup should distinguish photo from video**, or be replaced by Archive mode.
+      **Built, ticked 20 Sept 2026 by audit, with one part not done.** `SetupTour` walks sign-in, media
+      permission, directory discovery and the SAF grant, the cloud destination, the four library
+      choices, the video-quality level, the first-backup start time and the backup progress, with tab
+      tooltips over mock screens. Run from a fresh install on the Moto G on several dates, most recently
+      the 2,079-file run of 19 Sept. **Language is not built:** Settings shows a *Language* line reading
+      "Multi-Language Support Coming Soon", and the language step was scoped and shelved by Ian on 4 Sept
+      (see Open questions). *Run setup again* in Settings is the testing affordance that will not ship.
+- [x] **Move to backup should distinguish photo from video**, or be replaced by Archive mode.
+      **Replaced by Archive, ticked 20 Sept 2026 by audit.** There is no "Move to backup" control or
+      string left; removal is the Archive mode and goes through `MediaStore.createTrashRequest`.
+      Two leftovers carry the old name and are unused by any screen: `BackupViewModel.buildMoveToBackupRequest`
+      / `onMoveToBackupFinished`. (`LocalCopyRemover.createMoveToBackupRequest` is still called, by the
+      Archive screen.)
 
 ## v0.4.0 — Retrieval and deletion sync
 - [x] Fetch a cloud-only item back on demand, registering it in MediaStore so every app sees it.
@@ -429,7 +463,7 @@ keeps working.
       miniature — seven videos backed up, one offered, the other six absent only because they were
       still on the phone. Anything answering "is this on the phone, and is it ours?" asks the file,
       not the ledger.
-- [ ] **Restore replaces the proxy; it does not download a second copy.** Supersedes the
+- [x] **Restore replaces the proxy; it does not download a second copy.** Supersedes the
       drive-listing tab built 25–26 Aug 2026. See TASK-018.
 
       The old tab listed what OneDrive holds under the backup roots and fetched a chosen file into
@@ -465,15 +499,31 @@ keeps working.
       and `contentSignature` must keep stripping it — three places test `name|size` to decide whether
       content is on the phone, and one of them is the last check before a cloud copy goes to the
       recycle bin.
+
+      **Built, ticked 20 Sept 2026 by audit.** `RestoreProxyInPlace` writes the original back over the
+      proxy; tagged **v0.3.1** on 27 Aug and verified on the Fold 4 (a 496 KB proxy back to 738,695 bytes,
+      a 200 MB clip stopped at 47 MB with nothing left behind), and again on the Moto G on 18–19 Sept.
+      **It has since grown:** from 18 Sept the tab is drive-based again and *also* downloads files
+      OneDrive holds that are not on the phone, and greys out the ones already there. Replacing a proxy is
+      still what a restore of an optimised file does; downloading is the other half, not a replacement.
 - [x] Deletion sync, opt-in and batched. Highest-risk feature in the product; it only follows a
       backup engine that has been watched working. Never infers deletion from absence alone.
-      **Built 25 Aug 2026**, default Leave, no automatic option. Screens verified; a real cloud
-      deletion has not been performed, and should be watched once on a disposable file.
+      **Built 25 Aug 2026**, default Leave, no automatic option. Screens verified. **A real cloud
+      deletion has since been performed and watched:** Ian confirmed the file in the OneDrive recycle bin
+      on 25 Aug (see that day's entry), and the Ask window built 19 Sept moved test files to it on the
+      Moto G (see the 19 Sept entries).
 
 ## v0.5.0 — Google Photos + Billing
 - [ ] Google Play Billing (`pro_unlock`)
 - [ ] Google Photos adapter (requires OAuth — Ian)
 - [ ] Settings: sync frequency, account management
+      **Audited 20 Sept 2026: account management partly there, sync frequency not.** Settings shows the
+      signed-in account with a *Sign out* button and a *Delete Account Info* page (how to sign out, remove
+      the app's access and clear its data). There is **no sync-frequency control**: the schedule is fixed
+      (a content trigger on new media plus the 6-hourly safety net), with only the metered-network switch,
+      the first-backup start time and the Automatic on/off switch to choose from. Nothing in v0.5 is
+      built: `MediaSource.GOOGLE_PHOTOS` is an enum value and nothing more, and the app has no billing
+      dependency and no `BillingRepository`.
 
 ---
 
@@ -5666,7 +5716,8 @@ on Samsung One UI or API 37.
 
 Recorded here rather than edited into the old entries, so the withdrawn text stays visible.
 
-- **The v0.2–v0.4 checkboxes lag the log.** Still unticked: *Album modes in the UI*, *Guided first run*,
+- **The v0.2–v0.4 checkboxes lag the log.** *(Reconciled by audit on 20 Sept 2026; see that day's "checklist
+  audited against the code" entry at the end of this file. The text below is left as it was written.)* Still unticked: *Album modes in the UI*, *Guided first run*,
   *Video transcode*, *Restore replaces the proxy*, *Retry failed items*. The v0.4 deletion-sync line
   still says *"a real cloud deletion has not been performed"*; the 25 Aug entry proves one. Some
   unticked items are genuinely unbuilt (*space saved per album*, *Sync scope toggles*), so they were not
@@ -6827,3 +6878,39 @@ Ian's design, after the Automatic-optimise change: *"I don't want a user to take
 ### 20 Sept 2026 (later) - "Get full size" from the Share menu: probed, then shelved by Ian
 
 Ian's original idea was that opening a file to edit it should fetch the full-size original. MILESTONES' platform constraints already say Android has no hook for that (nothing can intercept another app opening a media file; Samsung could only because it owns the viewer), so the closest route is a **Share / Open-with target**: the user shares the photo to Gallery Sync from inside the gallery and the app swaps the original back in. A throwaway debug-only probe on the Moto G showed **Google Photos does list it and hands over a URI that wraps the MediaStore URI (id parseable), with name, size and path, and the file reads as the smaller copy**, so matching to the ledger is reliable. It does not help editors that open photos from their own picker, and only Google Photos was tested. **Shelved for a future release; nothing built, the probe is removed.** Everything found, the limits, the related undecided edit-over-proxy fix and the DocumentsProvider alternative are in `.claude/tasks/TASK-024.md`.
+
+### 20 Sept 2026 (evening) - the milestone checklist audited against the code
+
+Ian asked for the checklist to be checked against what is actually built. Every unticked box was traced to
+the code and to the log; the ticked ones were spot-checked (metered default `false`, Automatic sync on by
+default, the content trigger and 6-hourly periodic worker, the wizard's steps, the Settings switches).
+**Nothing was run on a device for this; it is a read of the code and of this file.**
+
+**Ticked (built, and already verified on hardware in earlier entries):**
+- v0.3 *Album modes in the UI*, *Sync scope toggles*, *Guided first run* (language excepted, below), and
+  *Move to backup* (replaced by Archive).
+- v0.4 *Restore replaces the proxy* (tagged v0.3.1, 27 Aug).
+- v0.4 *Deletion sync*: the "no real deletion performed" sentence was stale and is corrected.
+
+**Still open:**
+- v0.2 **Retry failed items from the UI.** Not built, and a real gap: a file that fails five times is never
+  selected again, `resetFailures()` has no caller, and there is no control (see the item).
+- v0.3 **Running count of space saved, per album and in total.** Half built: the total exists under the
+  Sync filter, the per-album figure is computed and not drawn, the "could free" forecast is not built.
+- v0.5 **Billing, Google Photos, sync frequency.** Nothing built beyond account name, Sign out and the
+  Delete Account Info page.
+
+**Not on the checklist, found on the way:**
+- **The language step is a placeholder.** The guided first run in TASK-014 lists language; Settings says
+  "Multi-Language Support Coming Soon". Ian shelved it on 4 Sept, so it is recorded here and not counted as
+  a defect.
+- **`v0.2.0` was never tagged**, though the heading says so. Tags are `v0.1.0` and `v0.3.1` only; 168
+  commits sit after `v0.3.1`, and `versionName` is still `0.3.0` (lower than the tag).
+- **Dead code:** `BackupViewModel.buildMoveToBackupRequest` and `onMoveToBackupFinished` are called by nothing.
+- **Stale comment:** `MediaSource.kt` says the Google Photos purchase check is in `BillingRepository` "in v0.3.0";
+  it is v0.5 and the class does not exist.
+
+**Release gate, on this reading:** v0.3 has one item open (per-album space saved) and v0.4 none; the checklist
+no longer says otherwise. What still stands between the two milestones and a Play submission is not on the
+checklist: the testing affordances to strip, the open items in TASK-023, and whatever Ian decides about
+optimised photos that are edited (TASK-024).
