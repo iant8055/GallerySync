@@ -12,9 +12,11 @@
     <string name="settings_albums">Albums</string>
     <string name="settings_language">Language</string>
     <string name="settings_language_detail">Multi-Language Support Coming Soon</string>
-    <!-- The Archive band's placeholder. It shared settings_language_detail until the Language line
-         became more specific, which would have put "Multi-Language Support" under Archive. -->
-    <string name="settings_archive_detail">Coming soon</string>
+    <!-- The Archive band. "Coming soon" until 22 Sept 2026, when the age filter and the
+         "come of age" notification gave it real content. The age row reuses archive_age_label —
+         the same words as the Archive tab's own filter, since this sets where that starts. -->
+    <string name="settings_archive_notify">Notify when files are ready to archive</string>
+    <string name="settings_archive_notify_blocked">Notifications are turned off for GallerySync in your phone\'s settings, so nothing will arrive until you turn them back on there.</string>
     <string name="settings_appearance">Appearance</string>
     <string name="theme_system">System</string>
     <string name="theme_light">Light</string>
@@ -495,6 +497,29 @@ full size</string>
     <string name="archive_done">%1$s removed from this phone, freeing %2$s.</string>
     <string name="archive_done_none">Nothing was removed.</string>
 
+    <!-- The Archive tab's age filter and the "come of age" notification. Ian, 22 Sept 2026. -->
+    <string name="archive_age_label">Only show files older than</string>
+    <string name="archive_age_hour">1 hour</string>
+    <string name="archive_age_day">1 day</string>
+    <string name="archive_age_week">1 week</string>
+    <string name="archive_age_month">1 month</string>
+    <string name="archive_age_year">1 year</string>
+    <string name="archive_age_all">All</string>
+    <plurals name="archive_age_hidden_hint">
+        <item quantity="one">%1$d file is younger than your filter and is not shown or checked right now.</item>
+        <item quantity="other">%1$d files are younger than your filter and are not shown or checked right now.</item>
+    </plurals>
+    <string name="archive_hidden_by_age_detail">%1$s · too recent for your filter</string>
+
+    <string name="notification_channel_archive_ready">Archive ready</string>
+    <string name="notification_channel_archive_ready_description">Files in an Archive album have been confirmed in OneDrive and are waiting for you to remove them from this phone.</string>
+    <string name="notification_archive_ready_title">Files ready to archive</string>
+    <plurals name="notification_archive_ready_body">
+        <item quantity="one">1 file is verified in OneDrive and ready to leave this phone.</item>
+        <item quantity="other">%1$d files are verified in OneDrive and ready to leave this phone.</item>
+    </plurals>
+    <string name="notification_archive_ready_album">In %1$s.</string>
+
     <!-- Live re-check before removing a local copy. -->
     <string name="removal_checking">Checking OneDrive still has these…</string>
     <!--
@@ -686,6 +711,17 @@ full size</string>
     <string name="sources_full_path">%1$s / %2$s</string>
     <string name="volume_internal">Internal storage</string>
     <string name="sources_count">%1$s in this folder</string>
+
+    <!-- Confirms Remove on Settings > Folders to back up, so a stray tap does not stop a folder being
+         watched. Removing deletes nothing (ScopedDirectories.remove), so the body says so rather than
+         warning about loss. See guide topic dialog-remove-folder. -->
+    <string name="sources_remove_confirm_title">Stop watching this folder?</string>
+    <plurals name="sources_remove_confirm_body">
+        <item quantity="one">GallerySync will stop looking in this folder. Nothing already backed up is lost, and adding the folder back restores everything as it was.</item>
+        <item quantity="other">GallerySync will stop looking in these %1$d folders. Nothing already backed up is lost, and adding a folder back restores everything as it was.</item>
+    </plurals>
+    <string name="sources_remove_confirm_accept">Remove</string>
+    <string name="sources_remove_confirm_cancel">Cancel</string>
 
     <!-- First-run reconciliation: what OneDrive already holds. -->
     <string name="reconcile_title">Checking what is already in OneDrive</string>

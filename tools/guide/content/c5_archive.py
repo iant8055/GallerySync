@@ -70,6 +70,28 @@ CHAPTER = Chapter(
             space in the bin, so the room does not come back at the moment you tap.
         """, ui=True),
 
+        topic("archive-age-filter", "Only show files older than…", """
+            ## What it is
+            A control above the file list: **Only show files older than**, with a choice from 1 hour up
+            to 1 year, or **All**. It narrows what **Check these files** looks at this round, to files
+            whose modified date is at least that old. A newer file is neither archived nor lost — it is
+            simply left out of this check, shown greyed further down the list, and comes back into the
+            check on its own once it is old enough, or the moment you widen the filter.
+
+            The control stays visible even when the filter currently hides every file in an Archive
+            album, so there is always a way back to a wider view.
+
+            ## Where the starting choice comes from
+            Settings → Archive has a default for this, which is what the filter is set to each time you
+            open the tab fresh. Changing the filter here, on the Archive tab, only lasts for this visit
+            and does not change that default.
+
+            ## Good to know
+            This is different from swiping a file out. Swiping is a choice about one file that
+            GallerySync remembers until you swipe it back. The age filter is a choice about this round
+            of checking, for every file at once, and remembers nothing about which files it held back.
+        """, ui=True),
+
         topic("archive-empty", "When there is nothing to archive", """
             ## What it is
             Instead of a list, the card explains why:
@@ -88,6 +110,8 @@ CHAPTER = Chapter(
             **Keeping a file on your phone.** Swipe right to select and left to deselect, as everywhere in the app. Swipe a card **left** to deselect it and it fades and reads **Not archiving**. It is left out of every check and every removal, and GallerySync remembers your choice, even after you close the app. Swipe it **right** to select it again and it returns to the list, ready to be archived. A green tick means a file has been checked against OneDrive in the current check, so a file you bring back has no tick until the files are checked again, and nothing is removed until they are. Swiping a card that is already that way does nothing, so a run of swipes cannot undo itself. You cannot swipe while a check or a removal is running. If you use a screen reader, each card offers **Deselect (keep on this phone)** or **Select (archive this file)** instead.
 
             An album with a file you have kept stays set to Archive, so files added to it later are still covered by the mode you set. If you would rather it stopped, change the album's mode on the Albums tab.
+
+            **A file younger than your age filter** fades the same way and reads **too recent for your filter** instead of **Not archiving**. See [[archive-age-filter]]. It still swipes: swiping it left pins it permanently, which is a stronger version of the same thing.
 
             **The mark**
             • **A spinner.** Being checked, backed up or removed.

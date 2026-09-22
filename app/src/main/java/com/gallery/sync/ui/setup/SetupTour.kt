@@ -163,6 +163,16 @@ private val DelayChoiceMinutes = listOf(3, 60, 120, 240, 480, 720, 1440)
 private const val DelayChipsPerRow = 4
 
 /**
+ * How long the welcome picture stays up no matter what. Ian, 22 Sept 2026: *"sometimes when you
+ * open the app the Welcome screen blinks on"* — its whole surface is `clickable(onClick = onNext)`,
+ * so a tap that bleeds through from opening the app (a double-tap on the launcher icon, or the same
+ * tap that launched it landing on the very first frame) dismisses it before anyone has actually seen
+ * it. This does not change the interaction otherwise: tap-to-continue still works, just not before
+ * this much time has genuinely passed.
+ */
+private const val WelcomeMinimumVisibleMillis = 3_000L
+
+/**
  * Guided setup as tooltip-style bubbles overlaying the Albums tab.
  *
  * Replaces the old full-screen wizard. The user sees the real app behind a scrim, and each bubble
@@ -532,6 +542,9 @@ fun SetupTour(
         )
 
         if (step == 1) {
+            // Reset only if this step is re-entered fresh; see WelcomeMinimumVisibleMillis.
+            val shownAtMillis = remember { System.currentTimeMillis() }
+
             // The welcome picture is a fixed dark green with a phone running off its bottom edge, so it
             // sits on that same green and is pinned to the bottom: on a tall screen the spare room is
             // above it, on a wide one (the Fold unfolded) it is at the sides, and it never floats.
@@ -539,7 +552,9 @@ fun SetupTour(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(SignalWelcomeGround)
-                    .clickable(onClick = onNext),
+                    .clickable(onClick = {
+                        if (System.currentTimeMillis() - shownAtMillis >= WelcomeMinimumVisibleMillis) onNext()
+                    }),
                 contentAlignment = Alignment.BottomCenter
             ) {
                 Image(

@@ -6,6 +6,7 @@ import androidx.work.Configuration
 import androidx.work.WorkManager
 import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.util.Logger
+import com.gallery.sync.worker.ArchiveReadyNotifier
 import com.gallery.sync.worker.BackupScheduling
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
@@ -38,6 +39,9 @@ class GallerySyncApplication : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+        // A channel costs nothing to create and is needed before the first notification can post
+        // — done here, unconditionally, whether or not the user ever turns the Settings switch on.
+        ArchiveReadyNotifier.createChannel(this)
         armAutomaticSync()
     }
 

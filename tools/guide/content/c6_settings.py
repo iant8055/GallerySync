@@ -194,7 +194,23 @@ CHAPTER = Chapter(
 
             ## Removing is safe
             Removing a folder only stops it being watched. Nothing already backed up is lost, and adding
-            it again restores what you had set for its albums.
+            it again restores what you had set for its albums. **Remove** asks you to confirm first.
+            See [[dialog-remove-folder]].
+        """, ui=True),
+
+        topic("dialog-remove-folder", "Stop watching this folder?", """
+            ## What it is
+            A confirmation that appears when you tick one or more folders and press **Remove** under
+            **Folders to back up**. **Remove** confirms; **Cancel** leaves the list exactly as it was.
+
+            ## Why it asks
+            A folder can hold several albums, so one tap on a ticked box removes more than it looks
+            like. This catches a stray tap before it takes effect.
+
+            ## What actually happens
+            GallerySync stops looking in the folder and hands back its permission. Nothing already
+            backed up is lost: no ledger row and no album mode is deleted. Adding the same folder back
+            brings everything back with its history intact, and nothing is re-uploaded.
         """, ui=True),
 
         topic("settings-deletion", "When you delete a photo or video from this phone", """
@@ -441,10 +457,45 @@ CHAPTER = Chapter(
 
         topic("settings-section-archive", "Archive (Settings)", """
             ## What it is
-            A band that reads **Coming soon**. Archive has no settings of its own on this page: it is
-            controlled album by album on the Albums tab, and carried out on the Archive tab.
+            Two settings, added 22 Sept 2026:
+            • **Only show files older than**, which sets where the Archive tab's own age filter starts each time you open it. See [[settings-archive-default-age]].
+            • **Notify when files are ready to archive**, off by default. See [[settings-archive-notify]].
 
-            See [[archive-overview]].
+            Everything else about Archive is still controlled album by album on the Albums tab, and carried out on the Archive tab. See [[archive-overview]].
+        """, ui=True),
+
+        topic("settings-archive-default-age", "Only show files older than (Settings)", """
+            ## What it is
+            Where the Archive tab's **Only show files older than** filter starts each time you open the
+            tab fresh: 1 hour, 1 day, 1 week, 1 month, 1 year, or **All**. See [[archive-age-filter]] for
+            what the filter itself does.
+
+            ## Good to know
+            This is only a starting point. Changing the filter on the Archive tab itself, once you are
+            there, lasts for that visit and does not change this default.
+
+            The default is **All** out of the box, so nothing is held back until you choose otherwise —
+            the same as before this setting existed.
+        """, ui=True),
+
+        topic("settings-archive-notify", "Notify when files are ready to archive", """
+            ## What it is
+            A switch, off by default. On, GallerySync asks Android for permission to post
+            notifications, then lets you know when files in an Archive album have been confirmed in
+            OneDrive and are ready to leave your phone.
+
+            ## Why it is not the only way to find out
+            The Albums tab already shows this, and a reminder appears if you try to leave the app with
+            files waiting. Those need no permission and cannot be silently switched off. A notification
+            can — Android may refuse it, or you can turn it off later in your phone's own Settings,
+            outside this app entirely — so it is offered as an extra, never as the only way you would
+            know.
+
+            ## Good to know
+            It tells you once per new batch of files becoming ready, not once per file and not again for
+            a batch that is still sitting there unchanged. If your phone has already told Android not to
+            notify for GallerySync, the switch says so underneath it, and turning it off and back on here
+            asks again.
         """, ui=True),
 
         topic("settings-about-cards", "The three link cards at the bottom", """

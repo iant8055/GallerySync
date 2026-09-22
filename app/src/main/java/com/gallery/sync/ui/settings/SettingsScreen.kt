@@ -49,6 +49,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
 import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.settings.ThemeMode
+import com.gallery.sync.domain.backup.ArchiveAge
 import com.gallery.sync.domain.backup.BackupLocation
 import com.gallery.sync.domain.backup.BackupLocations
 import com.gallery.sync.domain.backup.MediaAge
@@ -64,6 +65,7 @@ import com.gallery.sync.ui.help.WithHelp
 import com.gallery.sync.ui.retrieve.DeletionSection
 import com.gallery.sync.ui.theme.LocalGallerySyncColors
 import com.gallery.sync.ui.theme.ThemeViewModel
+import com.gallery.sync.worker.ArchiveNotifyPermission
 import kotlinx.coroutines.launch
 
 @Composable
@@ -353,10 +355,47 @@ fun SettingsScreen(
             help = HelpTopic.SETTINGS_SECTION_ARCHIVE
         )
 
-        Text(
-            text = stringResource(R.string.settings_archive_detail),
-            style = MaterialTheme.typography.bodySmall
+        SettingDropdown(
+            label = stringResource(R.string.archive_age_label),
+            help = HelpTopic.SETTINGS_ARCHIVE_DEFAULT_AGE,
+            options = ArchiveAge.entries,
+            selected = state.archiveDefaultAge,
+            onSelected = viewModel::setArchiveDefaultAge,
+            optionLabel = { age -> age.label() }
         )
+
+        // Whether the OS actually has the permission right now — checked fresh on every
+        // recomposition rather than trusted from the stored preference, so the switch never claims
+        // a notification will arrive when Android would silently drop it (denied at the prompt, or
+        // turned off for the app afterwards in the phone's own Settings, outside this app entirely).
+        val notifyPermitted = ArchiveNotifyPermission.granted(context)
+        val requestNotifyPermission = rememberLauncherForActivityResult(
+            ActivityResultContracts.RequestPermission()
+        ) { granted -> viewModel.setArchiveNotifyEnabled(granted) }
+
+        SettingSwitch(
+            label = stringResource(R.string.settings_archive_notify),
+            help = HelpTopic.SETTINGS_ARCHIVE_NOTIFY,
+            checked = state.archiveNotifyEnabled && notifyPermitted,
+            onCheckedChange = { turnOn ->
+                when {
+                    !turnOn -> viewModel.setArchiveNotifyEnabled(false)
+                    notifyPermitted -> viewModel.setArchiveNotifyEnabled(true)
+                    ArchiveNotifyPermission.needsRuntimeRequest() ->
+                        requestNotifyPermission.launch(ArchiveNotifyPermission.MANIFEST_NAME)
+                    // Below API 33 the permission has no runtime prompt to launch; it is simply held.
+                    else -> viewModel.setArchiveNotifyEnabled(true)
+                }
+            }
+        )
+        // The preference says on but nothing will arrive — said plainly rather than leaving the
+        // switch to read as broken. Turning it off and back on here re-asks Android.
+        if (state.archiveNotifyEnabled && !notifyPermitted) {
+            Text(
+                text = stringResource(R.string.settings_archive_notify_blocked),
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
 
         // The end of the sections proper. Everything below is the foot of the page, not a setting.
         HorizontalDivider()
@@ -591,6 +630,17 @@ private fun MediaAge.label(): String = when (this) {
     MediaAge.TwelveHours -> stringResource(R.string.media_age_twelve_hours)
     MediaAge.OneDay -> stringResource(R.string.media_age_one_day)
     MediaAge.OneWeek -> stringResource(R.string.media_age_one_week)
+}
+
+/** The same wording as the Archive tab's own filter — one vocabulary, one setting. */
+@Composable
+private fun ArchiveAge.label(): String = when (this) {
+    ArchiveAge.OneHour -> stringResource(R.string.archive_age_hour)
+    ArchiveAge.OneDay -> stringResource(R.string.archive_age_day)
+    ArchiveAge.OneWeek -> stringResource(R.string.archive_age_week)
+    ArchiveAge.OneMonth -> stringResource(R.string.archive_age_month)
+    ArchiveAge.OneYear -> stringResource(R.string.archive_age_year)
+    ArchiveAge.All -> stringResource(R.string.archive_age_all)
 }
 
 @Composable

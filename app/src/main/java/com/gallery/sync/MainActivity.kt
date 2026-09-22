@@ -61,6 +61,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Standard launch mode (no launchMode set in the manifest) always runs onCreate with the
+        // Intent that started this instance, whether that is a cold start or a notification tap
+        // arriving while the app is already running — so this is read once here rather than needing
+        // an onNewIntent override. See ArchiveReadyNotifier.
+        val openArchive = intent?.getBooleanExtra(EXTRA_OPEN_ARCHIVE, false) ?: false
+
         // The net for a flag left set. The wizard hides this app's Recents card while the first
         // backup runs and restores it when that finishes, but a process killed mid-run has nothing
         // left to do the restoring, and an app permanently missing from Recents with no explanation
@@ -83,12 +89,23 @@ class MainActivity : ComponentActivity() {
                 }
             ) {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    GallerySyncApp(modifier = Modifier.padding(innerPadding))
+                    GallerySyncApp(modifier = Modifier.padding(innerPadding), initialTab = if (openArchive) ArchiveTab else 0)
                 }
             }
         }
     }
+
+    companion object {
+        /** Tells a freshly created [MainActivity] to open on the Archive tab. See [ArchiveReadyNotifier]. */
+        const val EXTRA_OPEN_ARCHIVE = "open_archive"
+    }
 }
+
+/**
+ * Which tab index is Archive — shared between [SignedInApp] and the notification's Intent extra
+ * above, so the two cannot drift apart.
+ */
+private const val ArchiveTab = 2
 
 /**
  * Chooses between signing in and the signed-in app.
@@ -97,7 +114,7 @@ class MainActivity : ComponentActivity() {
  * swaps the UI without extra plumbing.
  */
 @Composable
-private fun GallerySyncApp(modifier: Modifier = Modifier) {
+private fun GallerySyncApp(modifier: Modifier = Modifier, initialTab: Int = 0) {
     val signInViewModel: SignInViewModel = hiltViewModel()
     val signInState by signInViewModel.state.collectAsStateWithLifecycle()
     val setupViewModel: ReconcileViewModel = hiltViewModel()
@@ -118,6 +135,8 @@ private fun GallerySyncApp(modifier: Modifier = Modifier) {
             setupViewModel = setupViewModel,
             signInViewModel = signInViewModel,
             modifier = modifier
+            // initialTab not passed here: the wizard overlays every tab while it is visible, and a
+            // fresh install cannot have an Archive album ready to notify about in the first place.
         )
 
         // The window for files deleted from the phone stands in front of the set-up app only, never
@@ -126,6 +145,7 @@ private fun GallerySyncApp(modifier: Modifier = Modifier) {
             SignedInApp(
                 accountName = (signInState as SignInUiState.SignedIn).accountName,
                 onSignOut = signInViewModel::signOut,
+                initialTab = initialTab,
                 modifier = modifier
             )
         }
@@ -144,9 +164,11 @@ private fun SignedInApp(
     showTour: Boolean = false,
     setupViewModel: ReconcileViewModel? = null,
     signInViewModel: SignInViewModel? = null,
+    /** Which tab to open on, e.g. Archive after a "come of age" notification tap. See [MainActivity]. */
+    initialTab: Int = 0,
     modifier: Modifier = Modifier
 ) {
-    var selectedTab by remember { mutableIntStateOf(0) }
+    var selectedTab by remember { mutableIntStateOf(initialTab) }
 
     // Order is the order of use. Albums is what people open the app for; Cloud check and Settings
     // are things done once. Restore moved second because it was the tab falling off the right edge
@@ -167,7 +189,7 @@ private fun SignedInApp(
     // after they accept the confirmation tells them nothing about what happens next. The tab is the
     // answer to "and then what?", and arriving there is how the app says the choice was taken
     // seriously.
-    val archiveTab = 2
+    val archiveTab = ArchiveTab
 
     // Leaving with files checked, verified and waiting on one tap.
     //

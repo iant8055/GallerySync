@@ -15,6 +15,13 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <!--
+        Only for the Settings -> Archive "Notify when files are ready to archive" switch, which is
+        off by default. Runtime-requested on Android 13+ when the user turns the switch on; below
+        13 it is granted automatically and nothing here changes. See ArchiveReadyNotifier.
+    -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!--
         Reading the user's photos and videos is unavoidable for a backup app: it has to find new
         media on its own, which rules out the Photo Picker (a manual choice every time) and
         Selected Photos Access (cannot discover anything new). This is the same access Samsung's

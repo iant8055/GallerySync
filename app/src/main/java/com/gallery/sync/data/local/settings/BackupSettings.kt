@@ -11,6 +11,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.gallery.sync.data.local.entity.AlbumMode
+import com.gallery.sync.domain.backup.ArchiveAge
 import com.gallery.sync.domain.backup.LibraryChoice
 import com.gallery.sync.domain.backup.MediaAge
 import com.gallery.sync.domain.backup.OptimiseCutoff
@@ -231,7 +232,27 @@ data class BackupPreferences(
      * so a file found already in OneDrive — which keeps its OneDrive arrival date — is not counted
      * as an upload. Persisted so reopening mid-run keeps counting the same way.
      */
-    val wizardRunStartedAt: Long = 0L
+    val wizardRunStartedAt: Long = 0L,
+    /**
+     * What the Archive tab's age filter starts at when the tab is opened. Ian, 22 Sept 2026.
+     *
+     * A Settings default, not a standing rule the tab enforces on its own — changing the filter on
+     * the Archive tab itself is a session choice and does not write this back. See [ArchiveAge].
+     */
+    val archiveDefaultAge: ArchiveAge = ArchiveAge.DEFAULT,
+    /**
+     * Whether a notification is sent when files in an Archive album have come of age. Ian, 22 Sept
+     * 2026. **Off by default**, like every other setting that was not asked for — this one doubly
+     * so, since turning it on requests a runtime permission (`POST_NOTIFICATIONS`) the user has not
+     * been asked about yet on first run.
+     */
+    val archiveNotifyEnabled: Boolean = false,
+    /**
+     * The ready-to-archive count [ArchiveReadyNotice] last judged, so a notification fires only when
+     * the count has **grown** past it, never merely because it is still above zero. Bookkeeping, not
+     * a user-facing setting — there is no screen that shows this number.
+     */
+    val archiveReadyLastSeenCount: Int = 0
 )
 
 /**
@@ -293,7 +314,10 @@ class BackupSettings @Inject constructor(
             videoOptimiseAge = MediaAge.fromNameOrDefault(stored[KEY_VIDEO_OPTIMISE_AGE]),
             wizardStep = stored[KEY_WIZARD_STEP] ?: 0,
             wizardBackupTotal = stored[KEY_WIZARD_BACKUP_TOTAL] ?: 0,
-            wizardRunStartedAt = stored[KEY_WIZARD_RUN_STARTED_AT] ?: 0L
+            wizardRunStartedAt = stored[KEY_WIZARD_RUN_STARTED_AT] ?: 0L,
+            archiveDefaultAge = ArchiveAge.fromNameOrDefault(stored[KEY_ARCHIVE_DEFAULT_AGE]),
+            archiveNotifyEnabled = stored[KEY_ARCHIVE_NOTIFY_ENABLED] ?: false,
+            archiveReadyLastSeenCount = stored[KEY_ARCHIVE_READY_LAST_SEEN] ?: 0
         )
     }
 
@@ -489,6 +513,21 @@ class BackupSettings @Inject constructor(
         context.dataStore.edit { it[KEY_SHOW_EMPTY_FOLDERS] = show }
     }
 
+    /** What the Archive tab's age filter starts at. See [ArchiveAge]. */
+    suspend fun setArchiveDefaultAge(age: ArchiveAge) {
+        context.dataStore.edit { it[KEY_ARCHIVE_DEFAULT_AGE] = age.name }
+    }
+
+    /** Whether a notification is sent when files in an Archive album have come of age. */
+    suspend fun setArchiveNotifyEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[KEY_ARCHIVE_NOTIFY_ENABLED] = enabled }
+    }
+
+    /** See [ArchiveReadyNotice]. Called after every check, whether or not it notified. */
+    suspend fun setArchiveReadyLastSeenCount(count: Int) {
+        context.dataStore.edit { it[KEY_ARCHIVE_READY_LAST_SEEN] = count }
+    }
+
     suspend fun setDeletionPromptSeenUpTo(epochMillis: Long) {
         context.dataStore.edit { it[KEY_DELETION_PROMPT_SEEN] = epochMillis }
     }
@@ -577,5 +616,8 @@ class BackupSettings @Inject constructor(
         val KEY_WIZARD_BACKUP_TOTAL = intPreferencesKey("wizard_backup_total")
         val KEY_WIZARD_RUN_STARTED_AT = longPreferencesKey("wizard_run_started_at")
         val KEY_ALBUM_MERGE_WARNINGS = stringSetPreferencesKey("album_merge_warnings")
+        val KEY_ARCHIVE_DEFAULT_AGE = stringPreferencesKey("archive_default_age")
+        val KEY_ARCHIVE_NOTIFY_ENABLED = booleanPreferencesKey("archive_notify_enabled")
+        val KEY_ARCHIVE_READY_LAST_SEEN = intPreferencesKey("archive_ready_last_seen_count")
     }
 }

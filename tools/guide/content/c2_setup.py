@@ -12,15 +12,13 @@ CHAPTER = Chapter(
             ticked, and you must be signed in before the cloud card lets you continue.
 
             ## What you will be asked, in order
-            1. A welcome card.
-            2. A short tour of the four tabs.
-            3. A summary of the five things being set up.
-            4. Permission to look for photos and videos on your phone, then which folders to look after.
-            5. Signing in to your Microsoft account, and where in OneDrive backups go.
-            6. Your backup plan: one of four choices about the photos and videos already on the phone.
-            7. Only for two of the plans: how much to optimise.
-            8. When the first backup should start.
-            9. The first backup itself, with progress.
+            1. A welcome card, a short tour, and a summary of what's ahead. See [[setup-welcome-tour]].
+            2. Permission to look for photos and videos on your phone, then which folders to look after.
+            3. Signing in to your Microsoft account, and where in OneDrive backups go.
+            4. Your backup plan: one of four choices about the photos and videos already on the phone.
+            5. Only for two of the plans: how much to optimise.
+            6. When the first backup should start.
+            7. The first backup itself, with progress.
 
             ## Good to know
             The first backup is the big one, because it sends everything that is not already in OneDrive.
@@ -32,7 +30,7 @@ CHAPTER = Chapter(
         """),
 
         topic("setup-welcome-tour", "Welcome, the tour, and what will be set up", """
-            **The welcome card.** A picture that says "Welcome to GallerySync". Tap anywhere to continue.
+            **The welcome card.** A picture that says "Welcome to GallerySync". Tap anywhere to continue, once it has been on screen a moment — a tap in the first instant, such as the one that opened the app, does not count, so the card cannot vanish before it has actually been seen.
 
             **The tour.** Five short cards, one for each of the four tabs (Albums, Restore, Archive and
             Settings) and one for Help. Each points at its tab and says in a sentence what it is for. The

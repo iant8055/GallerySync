@@ -33,7 +33,8 @@ class BackupWorker @AssistedInject constructor(
     private val settings: BackupSettings,
     private val charging: ChargingState,
     private val videoOptimise: VideoOptimiseLauncher,
-    private val photoOptimise: PhotoOptimiseLauncher
+    private val photoOptimise: PhotoOptimiseLauncher,
+    private val archiveReadyNotifier: ArchiveReadyNotifier
 ) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result {
@@ -240,6 +241,13 @@ class BackupWorker @AssistedInject constructor(
                 runCatching { videoOptimise.requestOnSyncNow() }
                     .onFailure { Logger.w(TAG, "could not queue video optimising: ${it.javaClass.simpleName}") }
             }
+
+            // Whatever just got verified in OneDrive may also have brought an Archive album's ready
+            // count up. Same reasoning as the optimise requests above: reached by every content
+            // trigger and the six-hourly net, so a file is noticed the moment it is ready rather than
+            // the next time someone happens to open the app. Never allowed to fail the run.
+            runCatching { archiveReadyNotifier.checkAndNotify() }
+                .onFailure { Logger.w(TAG, "could not check archive-ready notice: ${it.javaClass.simpleName}") }
         }
 
         // Carried out of the worker so the screen can say what happened. Without this the UI keeps

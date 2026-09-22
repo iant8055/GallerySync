@@ -36,6 +36,7 @@ enum class HelpTopic(
     RESTORE_GREYED_FILES("restore-greyed-files", R.string.help_restore_greyed_files_title, R.string.help_restore_greyed_files_body),
     ARCHIVE_HERO("archive-hero", R.string.help_archive_hero_title, R.string.help_archive_hero_body),
     ARCHIVE_CHECK_BUTTON("archive-check-button", R.string.help_archive_check_button_title, R.string.help_archive_check_button_body),
+    ARCHIVE_AGE_FILTER("archive-age-filter", R.string.help_archive_age_filter_title, R.string.help_archive_age_filter_body),
     ARCHIVE_EMPTY("archive-empty", R.string.help_archive_empty_title, R.string.help_archive_empty_body),
     ARCHIVE_FILE_LIST("archive-file-list", R.string.help_archive_file_list_title, R.string.help_archive_file_list_body),
     ARCHIVE_PROMPT("archive-prompt", R.string.help_archive_prompt_title, R.string.help_archive_prompt_body),
@@ -51,6 +52,7 @@ enum class HelpTopic(
     DIALOG_FOLDER_PICKER("dialog-folder-picker", R.string.help_dialog_folder_picker_title, R.string.help_dialog_folder_picker_body),
     SETTINGS_SECTION_ALBUMS("settings-section-albums", R.string.help_settings_section_albums_title, R.string.help_settings_section_albums_body),
     SETTINGS_FOLDERS("settings-folders", R.string.help_settings_folders_title, R.string.help_settings_folders_body),
+    DIALOG_REMOVE_FOLDER("dialog-remove-folder", R.string.help_dialog_remove_folder_title, R.string.help_dialog_remove_folder_body),
     SETTINGS_DELETION("settings-deletion", R.string.help_settings_deletion_title, R.string.help_settings_deletion_body),
     DELETED_FILES_WINDOW("deleted-files-window", R.string.help_deleted_files_window_title, R.string.help_deleted_files_window_body),
     DIALOG_REMOVE_FROM_ONEDRIVE("dialog-remove-from-onedrive", R.string.help_dialog_remove_from_onedrive_title, R.string.help_dialog_remove_from_onedrive_body),
@@ -63,5 +65,7 @@ enum class HelpTopic(
     SETTINGS_VIDEO_QUALITY("settings-video-quality", R.string.help_settings_video_quality_title, R.string.help_settings_video_quality_body),
     SETTINGS_SECTION_RESTORE("settings-section-restore", R.string.help_settings_section_restore_title, R.string.help_settings_section_restore_body),
     SETTINGS_SHOW_EMPTY_FOLDERS("settings-show-empty-folders", R.string.help_settings_show_empty_folders_title, R.string.help_settings_show_empty_folders_body),
-    SETTINGS_SECTION_ARCHIVE("settings-section-archive", R.string.help_settings_section_archive_title, R.string.help_settings_section_archive_body);
+    SETTINGS_SECTION_ARCHIVE("settings-section-archive", R.string.help_settings_section_archive_title, R.string.help_settings_section_archive_body),
+    SETTINGS_ARCHIVE_DEFAULT_AGE("settings-archive-default-age", R.string.help_settings_archive_default_age_title, R.string.help_settings_archive_default_age_body),
+    SETTINGS_ARCHIVE_NOTIFY("settings-archive-notify", R.string.help_settings_archive_notify_title, R.string.help_settings_archive_notify_body);
 }

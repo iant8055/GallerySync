@@ -20,6 +20,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -47,6 +49,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
 import com.gallery.sync.data.local.media.LocalMediaItem
+import com.gallery.sync.domain.backup.ArchiveAge
 import com.gallery.sync.domain.backup.ArchiveEntry
 import com.gallery.sync.domain.backup.ArchiveFailure
 import com.gallery.sync.domain.backup.ArchiveMark
@@ -148,7 +151,7 @@ fun ArchiveScreen(
             // The same header as the Restore list, and laid out like the drill-downs on Albums and
             // Restore (Ian, 19 Sept 2026): "Files to" with "Archive" under it on the left half, the
             // number waiting on this tab centred in the right half.
-            ArchiveHeader(state = state, onValidate = viewModel::validate)
+            ArchiveHeader(state = state, onValidate = viewModel::validate, onSetAgeFilter = viewModel::setAgeFilter)
         }
 
         if (state.showPrompt()) {
@@ -165,11 +168,17 @@ fun ArchiveScreen(
             )
         }
 
-        // Every file in an Archive album: the ones that will be archived, and the ones the user has
-        // swiped out, greyed, in one list in name order (Ian, 19 Sept 2026). A file that arrives in an
-        // Archive album later shows up here too, so there is always a chance to opt it out first.
-        val rows = remember(state.plan.entries, state.optedOut) {
-            (state.plan.entries.map { ArchiveListRow(it.item, it) } + state.optedOut.map { ArchiveListRow(it, null) })
+        // Every file in an Archive album: the ones that will be archived, the ones the user has
+        // swiped out, and the ones held back by the age filter — all greyed except the first, in one
+        // list in name order (Ian, 19 Sept 2026 for the opt-out rows; 22 Sept for the age ones). A
+        // file that arrives in an Archive album later shows up here too, so there is always a chance
+        // to opt it out first.
+        val rows = remember(state.plan.entries, state.optedOut, state.hiddenByAge) {
+            (
+                state.plan.entries.map { ArchiveListRow(it.item, it) } +
+                    state.optedOut.map { ArchiveListRow(it, null) } +
+                    state.hiddenByAge.map { ArchiveListRow(it, null, hiddenByAge = true) }
+                )
                 .sortedWith(compareBy({ it.item.album }, { it.item.displayName }))
         }
         // Not while a check or a removal is running: they act on the list as it was when they began.
@@ -232,8 +241,15 @@ fun ArchiveScreen(
     }
 }
 
-/** One line of the list: a file, and its entry if it is going to be archived. A null entry means opted out. */
-private data class ArchiveListRow(val item: LocalMediaItem, val entry: ArchiveEntry?)
+/**
+ * One line of the list: a file, and its entry if it is going to be archived.
+ *
+ * A null entry means the file is not currently in the plan, for one of two reasons: the user swiped
+ * it out ([hiddenByAge] false), or it is younger than the current age filter ([hiddenByAge] true).
+ * Only the first is a per-file choice; the row still swipes either way, since pinning a file the
+ * age filter is already holding back is a strictly more permanent version of the same thing.
+ */
+private data class ArchiveListRow(val item: LocalMediaItem, val entry: ArchiveEntry?, val hiddenByAge: Boolean = false)
 
 /**
  * A file's card, swipeable. Left keeps a file on this phone, right puts it back in Archive; each does
@@ -245,7 +261,10 @@ private fun ArchiveListItem(
     canSwipe: Boolean,
     onSetOptedOut: (LocalMediaItem, Boolean) -> Unit
 ) {
-    val optedOut = row.entry == null
+    // A file held back by age is not pinned, so it reads as "not opted out" for the swipe state —
+    // swiping it left pins it (a stronger, permanent choice); swiping right does nothing, the same
+    // as any other file that was never opted out.
+    val optedOut = row.entry == null && !row.hiddenByAge
     SwipeChoiceBox(
         enabled = canSwipe,
         stateKey = optedOut,
@@ -256,7 +275,11 @@ private fun ArchiveListItem(
         ),
         onAccessibilityAction = { onSetOptedOut(row.item, !optedOut) }
     ) { drawn ->
-        if (row.entry != null) ArchiveRow(row.entry, drawn) else OptedOutRow(row.item, drawn)
+        when {
+            row.entry != null -> ArchiveRow(row.entry, drawn)
+            row.hiddenByAge -> HiddenByAgeRow(row.item, drawn)
+            else -> OptedOutRow(row.item, drawn)
+        }
     }
 }
 
@@ -269,7 +292,7 @@ private fun ArchiveListItem(
  * moved to this arrangement on 19 Sept 2026 and Archive follows.
  */
 @Composable
-private fun ArchiveHeader(state: ArchiveUiState, onValidate: () -> Unit) {
+private fun ArchiveHeader(state: ArchiveUiState, onValidate: () -> Unit, onSetAgeFilter: (ArchiveAge) -> Unit) {
     val signal = LocalGallerySyncColors.current
 
     Surface(
@@ -344,6 +367,20 @@ private fun ArchiveHeader(state: ArchiveUiState, onValidate: () -> Unit) {
                     else -> ArchiveHeroDetail(state)
                 }
 
+                // Shown whenever an Archive album exists, even if the filter currently hides every
+                // file in it — otherwise there would be no way back from a filter that empties the
+                // list. Ian, 22 Sept 2026.
+                if (state.isSupported && state.archiveAlbums.isNotEmpty()) {
+                    ArchiveAgeSection(
+                        age = state.ageFilter,
+                        hiddenCount = state.hiddenByAge.size,
+                        // Not while a check or a removal is running, or the question is up: each
+                        // describes a list already fixed. Mirrors Camera's own `enabled = !running`.
+                        enabled = state.phase == ArchivePhase.IDLE || state.phase == ArchivePhase.DONE,
+                        onSetAge = onSetAgeFilter
+                    )
+                }
+
                 // Where an archived album goes to be brought back. Moved here from the Albums header
                 // (Ian, 18 Sept 2026): it is about Archive, so it belongs on this tab.
                 Text(
@@ -364,6 +401,59 @@ private fun ArchiveHeader(state: ArchiveUiState, onValidate: () -> Unit) {
 
 /** Two columns of file cards from here up, as on Restore and Albums. */
 private val WideBreakpoint = 600.dp
+
+/**
+ * *Only show files older than…*, and, when the filter is holding files back, how many.
+ *
+ * Always visible once an Archive album exists (see the call site), because the alternative — this
+ * control disappearing exactly when the filter empties the list — would leave no way back to a
+ * wider view. The dropdown always shows a value; unlike Camera's one-shot picker there is no unset
+ * state, so there is no separate cancel control — choosing **All** is how you see everything.
+ */
+@Composable
+private fun ArchiveAgeSection(age: ArchiveAge, hiddenCount: Int, enabled: Boolean, onSetAge: (ArchiveAge) -> Unit) {
+    var menuOpen by remember { mutableStateOf(false) }
+
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(text = stringResource(R.string.archive_age_label), style = MaterialTheme.typography.bodySmall)
+            HelpButton(HelpTopic.ARCHIVE_AGE_FILTER)
+            Box {
+                HeroOutlinedButton(
+                    onClick = { menuOpen = true },
+                    label = stringResource(age.label()),
+                    enabled = enabled
+                )
+                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                    ArchiveAge.entries.forEach { option ->
+                        DropdownMenuItem(
+                            text = { Text(stringResource(option.label())) },
+                            onClick = {
+                                onSetAge(option)
+                                menuOpen = false
+                            }
+                        )
+                    }
+                }
+            }
+        }
+        if (hiddenCount > 0) {
+            Text(
+                text = pluralStringResource(R.plurals.archive_age_hidden_hint, hiddenCount, hiddenCount),
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+    }
+}
+
+private fun ArchiveAge.label(): Int = when (this) {
+    ArchiveAge.OneHour -> R.string.archive_age_hour
+    ArchiveAge.OneDay -> R.string.archive_age_day
+    ArchiveAge.OneWeek -> R.string.archive_age_week
+    ArchiveAge.OneMonth -> R.string.archive_age_month
+    ArchiveAge.OneYear -> R.string.archive_age_year
+    ArchiveAge.All -> R.string.archive_age_all
+}
 
 /** The album names and the one-line explanation of what this tab does before it does it. */
 @Composable
@@ -564,6 +654,39 @@ private fun OptedOutRow(item: LocalMediaItem, modifier: Modifier = Modifier) {
             )
             Text(
                 text = stringResource(R.string.archive_opted_out_detail, formatBytes(context, item.sizeBytes)),
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+    }
+}
+
+/**
+ * A file younger than the current age filter: the same faded card as [OptedOutRow], saying why it
+ * is set aside for a different reason. Swiping it left still pins it permanently — see
+ * [ArchiveListItem].
+ */
+@Composable
+private fun HiddenByAgeRow(item: LocalMediaItem, modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .alpha(0.5f),
+        shape = RoundedCornerShape(22.dp),
+        color = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp)) {
+            Text(
+                text = item.displayName,
+                style = MaterialTheme.typography.bodyLarge,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = stringResource(R.string.archive_hidden_by_age_detail, formatBytes(context, item.sizeBytes)),
                 style = MaterialTheme.typography.bodySmall
             )
         }

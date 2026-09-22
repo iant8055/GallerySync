@@ -8,11 +8,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
@@ -28,6 +31,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
 import com.gallery.sync.ui.help.HelpButton
 import com.gallery.sync.ui.help.HelpTopic
+import com.gallery.sync.ui.help.TitleWithHelp
 import com.gallery.sync.ui.setup.ReconcileViewModel
 
 @Composable
@@ -38,6 +42,9 @@ fun SourcesSection(
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     var tickedForRemoval by remember { mutableStateOf(emptySet<String>()) }
+    // Confirmed once, here, rather than removing the moment Remove is tapped: a folder can hold
+    // several albums, so one tap on a ticked box takes more with it than it looks like.
+    var confirmingRemoval by remember { mutableStateOf(false) }
 
     val pickFolder = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocumentTree()
@@ -113,15 +120,42 @@ fun SourcesSection(
             // simply not there to remove.
             OutlinedButton(
                 enabled = state.directories.any { it.treeUri in tickedForRemoval },
-                onClick = {
-                    state.directories
-                        .filter { it.treeUri in tickedForRemoval }
-                        .forEach { viewModel.removeSource(it.treeUri) }
-                    tickedForRemoval = emptySet()
-                }
+                onClick = { confirmingRemoval = true }
             ) {
                 Text(stringResource(R.string.sources_remove), maxLines = 1)
             }
         }
+    }
+
+    if (confirmingRemoval) {
+        val count = state.directories.count { it.treeUri in tickedForRemoval }
+        AlertDialog(
+            onDismissRequest = { confirmingRemoval = false },
+            title = {
+                TitleWithHelp(
+                    stringResource(R.string.sources_remove_confirm_title),
+                    HelpTopic.DIALOG_REMOVE_FOLDER
+                )
+            },
+            text = {
+                Text(pluralStringResource(R.plurals.sources_remove_confirm_body, count, count))
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    state.directories
+                        .filter { it.treeUri in tickedForRemoval }
+                        .forEach { viewModel.removeSource(it.treeUri) }
+                    tickedForRemoval = emptySet()
+                    confirmingRemoval = false
+                }) {
+                    Text(stringResource(R.string.sources_remove_confirm_accept))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmingRemoval = false }) {
+                    Text(stringResource(R.string.sources_remove_confirm_cancel))
+                }
+            }
+        )
     }
 }

@@ -6993,3 +6993,141 @@ Ian: "Retry failed items: build it." The last unticked v0.2 item, and the one th
 - Left as it was: `BackupEntryDao.resetFailures()` (all albums) is still unused. A per-album button was enough for now; a global one is easy to add if wanted.
 
 **Retry's success path, checked 21 Sept 2026 (Moto G).** The five-attempt failure had only been seen failing again. To see it succeed, the 10 pending files of `Temp 4` were marked FAILED with 5 attempts in the ledger (database edited with the app stopped, put back with `adb push` and `run-as cp`), and the album set to Backup: it sat at "10 pending · 10 failed" and nothing was sent, as it should. **Retry 10 failed** then took all ten to UPLOADED with 0 attempts in about seven seconds; the hint, the button and the "failed" marks disappeared and the header read "10 backed up". No crash. The log had no PUT or POST, because those ten already had matching copies in OneDrive and were recognised rather than re-sent, so it was repeated with a file OneDrive had never seen: a unique 3.7 MB JPEG in a new album `zzT21_retry`, marked FAILED (5 attempts) while the album was Off, then the album set to Backup (nothing sent, again). **Retry 1 failed** took it to PENDING, then UPLOADED in eleven seconds, with one `PUT .../Samsung Gallery/DCIM/zzT21_retry/RETRY_1790029148.jpg:/content?conflictBehavior=fail` in the log and the remote size equal to the local size (3,721,428). So both halves are watched now: reset, then a genuine upload. `Temp 4` and `zzT21_retry` were left at Backup, all uploaded.
+
+### 22 Sept 2026 - Confirmation dialog for removing a Settings backup folder
+
+Ian: on Settings, removing a ticked folder from **Folders to back up** happened the instant **Remove**
+was tapped, with no confirmation. Added one, matching every other confirm dialog in the app
+(`TitleWithHelp` + a guide-driven `(?)` help topic): **Stop watching this folder?**, naming the count
+when more than one is ticked, with **Cancel** (does nothing) and **Remove** (does what the old button
+did). The body states what `ScopedDirectories.remove` actually does — stops watching, releases the
+folder's permission, deletes no ledger row and no album mode, and re-adding restores everything — so
+it does not read like a warning about loss it does not cause.
+
+New guide topic `dialog-remove-folder` in `c6_settings.py`, linked from `settings-folders`.
+`build_guide.py --check` clean; `HowToGuideConsistencyTest` and the full unit suite pass.
+
+**Checked on the Moto G, both themes.** Ticked Pictures, pressed Remove: dialog appeared, folder list
+unchanged. Cancel: dialog closed, both folders still there. The `(?)` help button opened the right
+topic. Removed for real: Pictures left the list, DCIM stayed. Re-added Pictures through the folder
+picker to leave the phone as found. Repeated the tick-and-Remove step in dark mode
+(`cmd uimode night yes`): title, body and both buttons read clearly against the dark surface. No
+crashes from com.gallery.sync at any point (one unrelated system crash from com.google.android.as
+during launch, logged and ignored).
+
+### 22 Sept 2026 - Retry failed items stress-tested: killed mid-run, airplane mode mid-run, and on an Archive album
+
+Three cases from the "what's left to test" review, all on the Moto G, all against real ledger rows with
+real files (a database edit while the app was stopped, put back byte-safe, then a real Retry press).
+
+**Killed 1.2 seconds into a retry, before any network activity.** `Temp 6`, 10 files force-failed, set to
+Backup, `Retry 10 failed` pressed, then `am force-stop` at +1.2 s. Right after the kill the ledger already
+read PENDING/0 for all ten — `resetFailuresInAlbum` commits before the upload starts, so the reset itself
+is safe from a kill. Reopening the app (no other action) let WorkManager resume the queued work on its
+own: all ten reached UPLOADED within 5 seconds of reopening. No crash.
+
+**Airplane mode turned on 1 second into a retry.** `Temp 7`, same setup. `cmd connectivity airplane-mode
+enable` cut the network — and, being reached over wireless debugging, cut adb's own connection to the
+phone at the same moment, so nothing could be observed or reversed remotely until Ian toggled airplane
+mode off on the phone by hand. By the time adb reconnected, all ten files were already UPLOADED — the
+app had recovered entirely on its own while unobserved, with no relaunch. No crash. **Caveat:** the
+window between enabling airplane mode and Ian's fix was unobserved, so exactly when the retry recovered
+inside that window isn't known — only that it did, unattended.
+
+**Retry on an Archive-mode album**, not just Backup. `Temp 8`, 10 files force-failed while Off, then set
+to **Archive** (through the real confirmation dialog). The album screen read "Archive · 10 files / 10
+failed" with the same hint and **Retry 10 failed** button as a Backup album — `RetryFailed.offered` only
+checks the mode isn't Off, so this was expected but had never been seen on Archive specifically. Pressed
+it: all ten reached UPLOADED in 12 seconds, no crash, and **all ten files were still on the phone
+afterwards** (`ls` on the folder) — Retry only re-sent them, it archived nothing, which is correct: Yes on
+Archive's own check is a separate, explicit step this never touched.
+
+**One thing learned about the test rig, not the app:** the Moto G is reached only over wireless
+debugging, so any test that disables Wi-Fi (airplane mode, a Wi-Fi toggle) is also a test that cuts the
+test harness's own access — recoverable only by hand, on the phone. Worth remembering before the next
+airplane-mode test.
+
+### 22 Sept 2026 - Archive gets real Settings: an age filter (with a Settings default) and an opt-in "come of age" notification
+
+Ian, after the Archive Settings band sat at "Coming soon" since 18 Sept: proposed an age filter for the
+Archive tab plus a notification, asked what effect `POST_NOTIFICATIONS` has on the Play listing (answered:
+one manifest line, not on Google's restricted-permission list, no Data Safety change, no extra review —
+unlike background location or Accessibility), then approved both with the trigger and default discussed.
+
+**The age filter.** `ArchiveAge` (1 hour / 1 day / 1 week / 1 month / 1 year / All — Ian's list, a shorter
+first step than Camera's own age control since Archive removes a file outright rather than shrinking it).
+A control on the Archive tab, mirroring Camera's own pattern: files younger than the filter are held out of
+`plan` into a new `hiddenByAge` list — the same standing as the opt-out list, so `validate()`,
+`nextRemovalRequest()` and everything else that acts on `plan.entries` needed no change. The control stays
+visible even when the filter empties the list (`state.archiveAlbums.isNotEmpty()`, not `!plan.isEmpty`), so
+there is always a way back to a wider view — checked deliberately, since gating it on the file list itself
+would have been a dead end. A held-back row still swipes: swiping it left pins it permanently
+(`FilePin`), a stronger version of the same choice. Settings → Archive gets a default (**All** out of the
+box, so nothing changes until chosen otherwise) that only sets where the tab's filter starts each visit;
+changing the filter on the tab itself is a session choice and does not write the default back.
+
+**The notification.** Off by default. `POST_NOTIFICATIONS` requested at runtime (13+) only when the switch
+is turned on; the switch reflects the OS permission's real state on every recomposition rather than the
+stored preference, so a permission denied or later revoked in the phone's own Settings shows as off with
+an explanatory line, never as a lie. `ArchiveReadyNotice.shouldNotify(lastSeen, current)` fires only on
+**growth** past the last count it was asked about — never merely because the count is still above zero —
+reusing the exact signal `ExitWarning`'s readyCount already uses (`BackupEngine.redundantLocalCopies`, a
+local ledger read, no extra network cost). Checked at the end of every complete `BackupWorker` run, the
+same point the photo/video optimisers are queued, wrapped in `runCatching` so it can never fail the backup.
+Tapping the notification opens `MainActivity` straight onto the Archive tab (`EXTRA_OPEN_ARCHIVE`, standard
+launch mode so `onCreate` always sees the Intent fresh). Deliberately **additive**, never a replacement for
+the Albums tab summons or the exit-warning dialog — see `ArchiveReadyNotifier`'s own doc comment for why a
+permission-gated channel can never be the only way the user finds out.
+
+New: `ArchiveAge.kt`, `ArchiveReadyNotice.kt`, `ArchiveNotifyPermission.kt`, `ArchiveReadyNotifier.kt`.
+Guide: `archive-age-filter`, `settings-archive-default-age`, `settings-archive-notify`; `archive-file-list`
+and `settings-section-archive` updated. Suite 581 (was 570) before this session's other work; +11 here
+(`ArchiveAgeTest`, `ArchiveReadyNoticeTest`), 0 failed.
+
+**Checked on the Moto G, both themes.** Age filter: dropdown shows all six options in order; picked 1 year
+against files test-pushed today (so all read as "modified" within the last year, not by EXIF date, which
+is correct — the filter reads modification time, same as Camera's) — count dropped to 0, hint read "21
+files are younger than your filter…", **Check these files** correctly disappeared (nothing to check),
+the control itself stayed put. Swiped a held-back row left: it moved to "Not archiving" and the ledger
+showed it pinned (`modeOverride='BACKUP'`); swiped back, unpinned. Widened back to 1 hour: count returned
+to 21. `(?)` help opened the right topic. Dark mode: selector and rows all legible.
+
+Notification: turned the Settings switch on, Android's own permission dialog appeared, granted — channel
+`archive_ready` confirmed registered (`dumpsys notification`, importance DEFAULT). Pushed one genuinely new
+file into an Archive-mode album, let the ordinary sync path upload and verify it (no manual "Check" step
+needed — `redundantLocalCopies()` reads the ledger, which the ordinary upload path already updates), and a
+real `BackupWorker` run completed: a notification posted, title "Files ready to archive", body "22 files
+are verified in OneDrive and ready to leave this phone." (21 existing + 1 new), correctly omitting the
+single-album name suffix since three albums were involved. Tapped it: app opened directly on the Archive
+tab reading 22, notification cleared (auto-cancel). A second complete run with nothing new correctly sent
+no second notification — the "grown, not merely nonzero" rule holding in practice, not just in the unit
+test. Revoked the OS permission by hand (`pm revoke`) while the Settings preference stayed on: the switch
+correctly read off, with the blocked-message line underneath; tapped it, got the system dialog again,
+declined it this time — switch stayed off, no crash. Re-granted the permission and left the switch off
+(the same resting state a fresh install would show). Crash buffer empty throughout.
+
+**One thing found about the test rig, not the app**, worth recording so it isn't rediscovered the hard way:
+`Logger.formatTag` truncates a tag to 23 characters, and `"BackupWorker"` and `"ArchiveReadyNotifier"`
+both overrun that — `"GallerySync/BackupWorke"` (missing the final "r") and `"GallerySync/ArchiveRead"`.
+A `logcat` grep for the untruncated name never matches and reads as total silence, which burned a long
+stretch of this session's testing before the cause was found. Grep a prefix that survives truncation
+(`"GallerySync/BackupWork"`) instead.
+
+### 22 Sept 2026 - the welcome screen no longer blinks past itself on launch
+
+Ian: *"sometimes when you open the app the Welcome screen blinks on"*. Cause: the whole welcome step is
+`Modifier.clickable(onClick = onNext)`, tap-anywhere-to-continue, and a tap that bleeds through from
+opening the app — a double-tap on the launcher icon, or the very tap that launched it landing on the
+first frame — reaches that same listener and dismisses the screen before anyone has seen it.
+
+**Fix:** a fixed 3-second floor (`WelcomeMinimumVisibleMillis`) timestamped when the step is first shown
+(`remember { System.currentTimeMillis() }`); the tap handler is a no-op until that much time has actually
+passed, then works exactly as before. Nothing about the normal interaction changes past the first three
+seconds. Guide (`setup-welcome-tour`) updated to say so. Suite and compile clean.
+
+**Checked on the Moto G.** Flipped `setup_complete` false from a freshly pulled copy of the phone's own
+DataStore file (not a stale snapshot — the earlier `ds_backup_original.pb` from 21 Sept predates several
+settings added since and would have been the wrong thing to restore from), launched, and tapped the
+welcome screen immediately: it stayed up. Tapped again after 3.5 seconds: advanced to the tour's second
+step normally. Restored the real DataStore byte-exact (`cmp` equivalent: read-back comparison in Python,
+identical) and relaunched: no crash, straight to the Albums tab as before.

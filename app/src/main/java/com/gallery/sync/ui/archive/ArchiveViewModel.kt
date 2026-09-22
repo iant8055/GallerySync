@@ -9,6 +9,7 @@ import androidx.work.WorkManager
 import com.gallery.sync.data.local.media.LocalCopyRemover
 import com.gallery.sync.data.local.media.LocalMediaItem
 import com.gallery.sync.data.local.settings.BackupSettings
+import com.gallery.sync.domain.backup.ArchiveAge
 import com.gallery.sync.domain.backup.ArchiveEntry
 import com.gallery.sync.domain.backup.ArchiveFailure
 import com.gallery.sync.domain.backup.ArchiveFiles
@@ -16,6 +17,7 @@ import com.gallery.sync.domain.backup.ArchiveMark
 import com.gallery.sync.domain.backup.ArchivePlan
 import com.gallery.sync.domain.backup.BackupEngine
 import com.gallery.sync.domain.backup.reconciledWith
+import com.gallery.sync.domain.backup.split
 import com.gallery.sync.util.Logger
 import com.gallery.sync.worker.BackupScheduling
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -55,7 +57,18 @@ data class ArchiveUiState(
      * Deliberately **not** part of [plan]. Everything that checks or removes acts on the plan, so a
      * file that is not in it cannot be archived, whatever else happens on this screen.
      */
-    val optedOut: List<LocalMediaItem> = emptyList()
+    val optedOut: List<LocalMediaItem> = emptyList(),
+    /** The age filter this session is showing. Starts at the Settings default; see [ArchiveAge]. */
+    val ageFilter: ArchiveAge = ArchiveAge.DEFAULT,
+    /**
+     * Files in Archive albums younger than [ageFilter]. Ian, 22 Sept 2026.
+     *
+     * Deliberately **not** part of [plan], the same way [optedOut] is not: everything that checks or
+     * removes acts on the plan, so a file held back by age cannot be archived this round, whatever
+     * else happens on this screen. Unlike [optedOut] this is not a per-file choice — widening the
+     * filter, or simply waiting, brings a file back into [plan] on its own.
+     */
+    val hiddenByAge: List<LocalMediaItem> = emptyList()
 ) {
     /**
      * Whether *Check these files* is offered: files are waiting and nothing is running.
@@ -97,13 +110,24 @@ class ArchiveViewModel @Inject constructor(
         load()
     }
 
-    /** Lists what is in Archive albums. Cheap, and safe to call whenever the screen appears. */
+    /**
+     * Lists what is in Archive albums. Cheap, and safe to call whenever the screen appears.
+     *
+     * Starts the age filter at the Settings default each time — a fresh look at the tab gets the
+     * default view, the same way [ArchiveUiState.removedCount] resets rather than carrying over
+     * from a previous visit. Changing the filter afterwards is [setAgeFilter] and does not touch
+     * the default.
+     */
     fun load() {
         viewModelScope.launch {
+            val age = settings.current().archiveDefaultAge
             val files = engine.archiveFiles()
+            val split = age.split(files.toArchive)
             val albums = engine.archiveAlbumNames()
             _state.value = _state.value.copy(
-                plan = ArchivePlan(entries = files.toArchive.map { ArchiveEntry(it) }),
+                ageFilter = age,
+                plan = ArchivePlan(entries = split.eligible.map { ArchiveEntry(it) }),
+                hiddenByAge = split.hiddenByAge,
                 optedOut = files.optedOut,
                 archiveAlbums = albums,
                 phase = ArchivePhase.IDLE,
@@ -111,6 +135,34 @@ class ArchiveViewModel @Inject constructor(
                 batchIndex = 0,
                 removedCount = 0,
                 removedBytes = 0L
+            )
+        }
+    }
+
+    /**
+     * Changes this session's age filter. Ian, 22 Sept 2026.
+     *
+     * Only while nothing is running or being asked about — mirrors Camera's own age control
+     * (`enabled = !running`): a check in progress, or the Yes/No question, describes a list already
+     * fixed, and widening or narrowing it under that would describe something the screen never
+     * actually showed. This is a view choice for the session, not written back to Settings; the
+     * Settings default only decides where the filter starts each time the tab is freshly opened.
+     */
+    fun setAgeFilter(age: ArchiveAge) {
+        val phase = _state.value.phase
+        if (phase != ArchivePhase.IDLE && phase != ArchivePhase.DONE) return
+
+        viewModelScope.launch {
+            val files = engine.archiveFiles()
+            // Re-read the phase after the suspension: a check may have begun while the phone was asked.
+            val now = _state.value.phase
+            if (now != ArchivePhase.IDLE && now != ArchivePhase.DONE) return@launch
+            val split = age.split(files.toArchive)
+            _state.value = _state.value.copy(
+                ageFilter = age,
+                plan = ArchivePlan(entries = split.eligible.map { ArchiveEntry(it) }),
+                hiddenByAge = split.hiddenByAge,
+                optedOut = files.optedOut
             )
         }
     }
@@ -289,11 +341,17 @@ class ArchiveViewModel @Inject constructor(
      * the plan is [reconciledWith]; this only applies it to the screen's state.
      */
     private fun reconciled(current: ArchiveUiState, files: ArchiveFiles): ArchiveUiState {
-        val result = current.plan.reconciledWith(files, checkFinished = current.phase == ArchivePhase.READY)
+        // A file held back by the current age filter is, for reconciliation's purposes, simply not
+        // there to archive — the same standing the opted-out list already has. reconciledWith needs
+        // no change to see it that way.
+        val split = current.ageFilter.split(files.toArchive)
+        val result = current.plan
+            .reconciledWith(files.copy(toArchive = split.eligible), checkFinished = current.phase == ArchivePhase.READY)
         val phase = if (result.needsRecheck) ArchivePhase.IDLE else current.phase
         return current.copy(
             plan = result.plan,
             optedOut = files.optedOut,
+            hiddenByAge = split.hiddenByAge,
             phase = phase,
             batchTotal = if (phase == ArchivePhase.READY) localCopyRemover.batch(result.plan.confirmed).size else 0
         )
@@ -405,13 +463,14 @@ class ArchiveViewModel @Inject constructor(
             if (removed.isNotEmpty()) engine.forgetEmptiedArchiveAlbums()
 
             val remainingFiles = engine.archiveFiles()
-            val remaining = remainingFiles.toArchive
+            val split = _state.value.ageFilter.split(remainingFiles.toArchive)
             // Re-read the album names too: forgetting an emptied album changes them, and a stale list
             // left the header saying nothing about there being no Archive album until the app was
             // restarted. Found on the Moto G, 19 Sept 2026.
             val albums = engine.archiveAlbumNames()
             _state.value = _state.value.copy(
-                plan = ArchivePlan(entries = remaining.map { ArchiveEntry(it) }),
+                plan = ArchivePlan(entries = split.eligible.map { ArchiveEntry(it) }),
+                hiddenByAge = split.hiddenByAge,
                 optedOut = remainingFiles.optedOut,
                 archiveAlbums = albums,
                 batchIndex = 0,

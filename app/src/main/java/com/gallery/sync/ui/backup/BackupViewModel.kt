@@ -29,6 +29,7 @@ import com.gallery.sync.data.local.entity.BackupState
 import com.gallery.sync.data.local.media.MediaAccess
 import com.gallery.sync.data.local.media.MediaScanner
 import com.gallery.sync.domain.backup.AlbumCloudClaim
+import com.gallery.sync.domain.backup.ArchiveAge
 import com.gallery.sync.domain.backup.BackupEngine
 import com.gallery.sync.domain.backup.CameraAlbum
 import com.gallery.sync.domain.backup.CameraOptimisePlan
@@ -266,6 +267,10 @@ data class BackupUiState(
     val cameraOptimising: Boolean = false,
     /** Whether the restore screen lists cloud folders that hold nothing. */
     val showEmptyCloudFolders: Boolean = false,
+    /** What the Archive tab's age filter starts at. See `ArchiveAge`. */
+    val archiveDefaultAge: ArchiveAge = ArchiveAge.DEFAULT,
+    /** Whether a notification is sent when files in an Archive album have come of age. */
+    val archiveNotifyEnabled: Boolean = false,
     /**
      * The user has held backing up until they say otherwise.
      *
@@ -453,6 +458,8 @@ class BackupViewModel @Inject constructor(
                         prefs.photoOptimiseMode == OptimiseMode.Auto,
                     allowMeteredNetwork = prefs.allowMeteredNetwork,
                     showEmptyCloudFolders = prefs.showEmptyCloudFolders,
+                    archiveDefaultAge = prefs.archiveDefaultAge,
+                    archiveNotifyEnabled = prefs.archiveNotifyEnabled,
                     isPaused = prefs.isPaused,
                     runBaselineBytes = prefs.runBaselineBytes,
                     defaultAlbumMode = prefs.defaultAlbumMode,
@@ -936,6 +943,22 @@ class BackupViewModel @Inject constructor(
      */
     fun setShowEmptyCloudFolders(show: Boolean) {
         viewModelScope.launch { settings.setShowEmptyCloudFolders(show) }
+    }
+
+    /** What the Archive tab's age filter starts at. See [ArchiveAge]. */
+    fun setArchiveDefaultAge(age: ArchiveAge) {
+        viewModelScope.launch { settings.setArchiveDefaultAge(age) }
+    }
+
+    /**
+     * Turns the "come of age" notification on or off.
+     *
+     * The permission request itself is the caller's job — `SettingsScreen` asks for
+     * `POST_NOTIFICATIONS` before calling this with `true`, and calls it with `false` again if the
+     * user declines, so this never persists "on" against a permission that was refused.
+     */
+    fun setArchiveNotifyEnabled(enabled: Boolean) {
+        viewModelScope.launch { settings.setArchiveNotifyEnabled(enabled) }
     }
 
     fun setOptimiseEnabled(enabled: Boolean) {
