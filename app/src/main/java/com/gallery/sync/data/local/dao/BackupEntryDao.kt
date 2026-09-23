@@ -172,6 +172,37 @@ interface BackupEntryDao {
         state: BackupState = BackupState.UPLOADED
     )
 
+    /**
+     * Records that [id] was sent to a provider that never reports the stored file's size — Google
+     * Photos; see TASK-026 — so `remoteSizeBytes` is written NULL rather than guessed from the local
+     * size passed back in [com.gallery.sync.domain.model.UploadedItem].
+     *
+     * This is a structural guarantee, not a convention followed at the call site: [verifiedInCloud]
+     * requires `remoteSizeBytes IS NOT NULL`, so a row written through this method can never satisfy
+     * it, and can never become eligible for Archive, Sync, or any other path that trusts that query
+     * as the bar for "safe to remove the local copy" — CLAUDE.md's absolute rule that nothing weaker
+     * than a confirmed matching byte size may say a file is safely backed up. Writing the local size
+     * into `remoteSizeBytes` here, the way [markUploaded] does for OneDrive, would make every such row
+     * silently satisfy that query forever, having confirmed nothing.
+     */
+    @Query(
+        """
+        UPDATE backup_entries
+        SET state = :state,
+            remoteItemId = :remoteItemId,
+            remoteSizeBytes = NULL,
+            uploadedAtEpochMillis = :uploadedAt,
+            lastError = NULL
+        WHERE id = :id
+        """
+    )
+    suspend fun markUploadedWithoutSizeVerification(
+        id: String,
+        remoteItemId: String,
+        uploadedAt: Long,
+        state: BackupState = BackupState.UPLOADED
+    )
+
     @Query(
         """
         UPDATE backup_entries

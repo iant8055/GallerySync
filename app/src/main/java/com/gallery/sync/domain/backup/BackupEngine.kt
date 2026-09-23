@@ -24,6 +24,7 @@ import com.gallery.sync.di.IoDispatcher
 import com.gallery.sync.domain.model.DataResult
 import com.gallery.sync.domain.model.RemoteError
 import com.gallery.sync.domain.model.RemoteMediaNode
+import com.gallery.sync.domain.repository.GooglePhotosUploadRepository
 import com.gallery.sync.domain.repository.OneDriveRepository
 import com.gallery.sync.domain.repository.OneDriveUploadRepository
 import com.gallery.sync.util.Logger
@@ -106,6 +107,7 @@ class BackupEngine @Inject constructor(
     private val settings: BackupSettings,
     private val repository: OneDriveRepository,
     private val uploadRepository: OneDriveUploadRepository,
+    private val googlePhotosUploadRepository: GooglePhotosUploadRepository,
     private val proxyMarker: ProxyMarker,
     private val albumIdentity: AlbumIdentityReconciler,
     @ApplicationContext private val context: Context,
@@ -209,6 +211,13 @@ class BackupEngine @Inject constructor(
         // the original it replaced — the single most important line in this method.
         val proxied = entryDao.proxiedMediaStoreIds().toSet()
 
+        // Where each album's uploads go, from the user's own per-album choice — see TASK-026. Read
+        // once here rather than per item: a row's `location` is fixed at creation and never re-read
+        // afterwards (BackupEntryEntity.location), so this lookup only ever matters for rows made in
+        // this pass. An album with no row yet — never touched, or seeded moments from now below —
+        // correctly falls back to BackupLocation.DEFAULT, same as the entity's own default.
+        val albumLocations = albumDao.all().orEmpty().associate { it.albumName to it.backupLocation }
+
         val items = scanner.scanAll().filterNot { it.mediaStoreId in proxied }
         val entries = items.map { item ->
             BackupEntryEntity(
@@ -226,7 +235,8 @@ class BackupEngine @Inject constructor(
                 dateModifiedEpochSeconds = item.dateModifiedEpochSeconds,
                 mimeType = item.mimeType,
                 isVideo = item.isVideo,
-                state = BackupState.PENDING
+                state = BackupState.PENDING,
+                location = albumLocations[item.album] ?: BackupLocation.DEFAULT
             )
         }
 
@@ -588,10 +598,23 @@ class BackupEngine @Inject constructor(
                 albumIdentity.reconcile()
                 entryDao.nextPending(limit = limit, maxAttempts = MAX_ATTEMPTS)
             }.let { candidates -> withinByteBudget(candidates, maxBytes) }
+
+            // Split by destination — see TASK-026. The two loops below are independent on purpose:
+            // Ian, 23 Sept 2026, "a failed Google run (or iDrive or OneDrive) should never stop
+            // another backup." Neither loop's own stop condition may prevent the other from running
+            // in this same pass, and only OneDrive's may ever fail the whole worker run — see
+            // stoppedBecause on the BackupRunResult this function returns, and BackupWorker's mapping
+            // of it. `pending.size` is still what both loops report progress against, so a run
+            // spanning both providers shows one continuous count rather than resetting partway.
+            val (oneDrivePending, googlePhotosPending) = pending.partition {
+                it.location == BackupLocation.ONEDRIVE
+            }
+
             var uploaded = 0
             var failed = 0
             var skipped = 0
             var pruned = 0
+            var deferred = 0
 
             // One remote listing per album, reused across every file in it. Asking per file would
             // cost a request each; asking once costs one and answers for all of them.
@@ -602,9 +625,13 @@ class BackupEngine @Inject constructor(
             // duplicates. Observed: 81 of 87 albums failed to list in a single run when
             // connectivity dropped. Failing to ask is not evidence of absence.
             val remoteByAlbum = mutableMapOf<String, Map<String, RemoteFileRef>?>()
-            var deferred = 0
 
-            for (entry in pending) {
+            // Only OneDrive's own stop reason may ever fail the whole worker run (see below and
+            // BackupWorker). Kept local to this loop rather than returned early, so a OneDrive stop
+            // no longer skips the Google Photos loop that follows it.
+            var oneDriveStop: StopReason? = null
+
+            for (entry in oneDrivePending) {
                 // `containsKey` rather than `getOrPut`: getOrPut re-runs its lambda whenever the
                 // stored value is null, so a failed album would be listed again for every one of
                 // its pending files — hundreds of requests in the exact network conditions that
@@ -801,15 +828,96 @@ class BackupEngine @Inject constructor(
                         val stop = stopReasonFor(result.error)
                         if (stop != null) {
                             Logger.w(TAG, "uploadPending: stopping run — $stop")
-                            return@withContext BackupRunResult(
-                                uploaded = uploaded,
-                                failed = failed,
-                                remaining = if (allAlbums) entryDao.countPendingAll(MAX_ATTEMPTS) else entryDao.countPendingInSelectedAlbums(MAX_ATTEMPTS),
-                                skipped = skipped,
-                                deferred = deferred,
-                                pruned = pruned,
-                                stoppedBecause = stop
+                            oneDriveStop = stop
+                            break
+                        }
+                        entryDao.markFailed(entry.id, result.error.toString())
+                        failed++
+                    }
+                }
+            }
+
+            // ---------- Google Photos ----------
+            //
+            // No remote-index precheck the way the OneDrive loop above has: that exists so a lost
+            // ledger (a reinstall, or a scan that never got the chance to record an upload) does not
+            // produce a renamed duplicate, and the Google Photos equivalent — reconciling against
+            // this app's own items via mediaItems.list — is not built yet; tracked in TASK-026. Until
+            // then a lost Google Photos ledger risks a duplicate upload, not a data-loss risk, so this
+            // is a documented gap rather than a blocker.
+            //
+            // Independent of oneDriveStop above, by design: see the note where the two lists were
+            // split.
+            for (entry in googlePhotosPending) {
+                onProgress(
+                    BackupProgress(
+                        completed = uploaded + skipped + pruned,
+                        total = pending.size,
+                        currentFile = entry.displayName,
+                        currentBytesSent = 0,
+                        currentBytesTotal = entry.sizeBytes
+                    )
+                )
+
+                val source = ContentUriUploadSource(
+                    resolver = context.contentResolver,
+                    uri = android.net.Uri.parse(entry.contentUri),
+                    displayName = entry.displayName,
+                    sizeBytes = entry.sizeBytes
+                )
+
+                val result = googlePhotosUploadRepository.upload(
+                    source = source,
+                    onProgress = { sent, total ->
+                        onProgress(
+                            BackupProgress(
+                                completed = uploaded + skipped + pruned,
+                                total = pending.size,
+                                currentFile = entry.displayName,
+                                currentBytesSent = sent,
+                                currentBytesTotal = total
                             )
+                        )
+                    }
+                )
+
+                when (result) {
+                    is DataResult.Success -> {
+                        // Never byte-verified — Google reports no size, ever, on any call. Written
+                        // through markUploadedWithoutSizeVerification, which always leaves
+                        // remoteSizeBytes NULL, so this row can never satisfy verifiedInCloud() and
+                        // can never become Archive/Sync eligible. See that method's doc and TASK-026.
+                        entryDao.markUploadedWithoutSizeVerification(
+                            id = entry.id,
+                            remoteItemId = result.value.id,
+                            uploadedAt = System.currentTimeMillis()
+                        )
+                        uploaded++
+                    }
+
+                    is DataResult.Failure -> {
+                        if (result.error == RemoteError.LocalFileMissing) {
+                            recordDepartures(listOf(entry.id))
+                            entryDao.forget(entry.id)
+                            pruned++
+                            continue
+                        }
+
+                        if (result.error == RemoteError.EmptyLocalFile) {
+                            deferred++
+                            continue
+                        }
+
+                        val stop = stopReasonFor(result.error)
+                        if (stop != null) {
+                            // Ends the Google Photos loop only. Never written into the
+                            // BackupRunResult below — a Google Photos-only problem (an expired
+                            // Google token, its own quota) must not fail the whole worker run and
+                            // must not be reported as though OneDrive were the reason. These rows
+                            // are simply left PENDING/FAILED and picked up on the next run, the same
+                            // way a deferred OneDrive file already is today.
+                            Logger.w(TAG, "uploadPending (Google Photos): stopping this provider's loop — $stop")
+                            break
                         }
                         entryDao.markFailed(entry.id, result.error.toString())
                         failed++
@@ -825,7 +933,11 @@ class BackupEngine @Inject constructor(
                 remaining = if (allAlbums) entryDao.countPendingAll(MAX_ATTEMPTS) else entryDao.countPendingInSelectedAlbums(MAX_ATTEMPTS),
                 skipped = skipped,
                 deferred = deferred,
-                pruned = pruned
+                pruned = pruned,
+                // OneDrive's stop reason only. See where the two lists were split, and BackupWorker's
+                // mapping of this field to a WorkManager Result — a Google Photos stop must never
+                // turn a run that otherwise finished into a failed worker outcome for both providers.
+                stoppedBecause = oneDriveStop
             )
         }
 
