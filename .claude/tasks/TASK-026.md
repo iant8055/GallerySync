@@ -3,8 +3,9 @@
 Milestone: v0.5.0 (Google Photos + Billing), pulled forward at Ian's request, 22 Sept 2026
 Raised by: Ian, 22 Sept 2026 — competitive research on multi-cloud support, market pricing research, then
 "lets plan out for the multi-platform Pro add on option... $2.49 price point works"
-Status: **IN PROGRESS.** OAuth registered. Room schema migrated (v11 → v12). AppAuth sign-in flow
-built and compiling on-device. Wire client (upload + batchCreate) and BackupEngine dispatch next.
+Status: **IN PROGRESS.** OAuth registered. Room schema migrated (v11 → v12). AppAuth sign-in flow and
+the Google Photos wire client (upload + batchCreate + app-created listing) both built and compiling
+on-device. `BackupEngine` dispatch next.
 
 ## What was decided, and why, before any code
 
@@ -170,9 +171,36 @@ exercised end-to-end** — there is no UI entry point to trigger it yet, since t
 picker hasn't been built. Worth an actual sign-in round-trip against Ian's real Google account once that
 picker exists.
 
+## Wire client — done
+
+`GooglePhotosRepositoryImpl` / `GooglePhotosUploadRepositoryImpl`, mirroring the OneDrive
+repositories' shape: the network boundary lives here, no Retrofit or OkHttp type escapes the data
+layer, every failure maps to a typed `RemoteError`, a 401 invalidates the stored token the same way
+Graph's interceptor does. Own `OkHttpClient`/`Retrofit` in `NetworkModule` (own base URL, own
+`GooglePhotosAuthInterceptor`, same debug-only body logging with `Authorization` redacted).
+
+Upload is the two-call shape the interface already documented: raw bytes to `/v1/uploads` — streamed
+in 1 MiB chunks via a real `RequestBody` rather than loaded whole into memory, since Google's
+raw-upload endpoint has no small-file ceiling the way Graph's does and this project has already hit
+an OOM once loading a whole response body (see CLAUDE.md) — then the returned token into
+`mediaItems:batchCreate`. No chunked/resumable variant: an interruption between the two calls just
+strands an unused token that expires server-side, nothing ever becomes visible in the library, so v1
+simply retries the whole thing from the top rather than resuming.
+
+Caught one real bug before it shipped: the first draft of the upload-token step used a mutable field
+on the (singleton) repository to smuggle a failure result out of a helper method — a data race under
+any two concurrent uploads. Replaced with a small sealed result type instead of shipping it.
+
+Verified: full app + test compile, unit tests pass — including new coverage for the pure mapper and
+the streaming request body (a real temp file in, a real okio `Buffer` catching what's written,
+sized to force the multi-chunk loop rather than only the single-chunk case) — installs and launches
+clean on the Moto G. **Not yet exercised against the real Photos Library API** — that needs the
+sign-in UI, which doesn't exist yet, and `BackupEngine` actually calling any of this.
+
 ## Open, for Ian when there's a moment
 
 - Nothing blocking right now. Will flag here if something needs a decision only he can make.
-- Next up, no decision needed to start: the Google Photos wire client (raw upload + `batchCreate`), then
-  `BackupEngine`'s dispatch. UI (destination picker, Sync/Archive mode restriction, Pro-unlock gating)
-  comes after that — and is also where the sign-in flow above finally gets a real on-device test.
+- Next up, no decision needed to start: `BackupEngine`'s per-album dispatch — deciding which
+  repository pair to call based on an album's `BackupLocation`. UI (destination picker, Sync/Archive
+  mode restriction, Pro-unlock gating) comes after that — and is also where the sign-in flow and wire
+  client above finally get a real, on-device, against-Ian's-actual-account test.
