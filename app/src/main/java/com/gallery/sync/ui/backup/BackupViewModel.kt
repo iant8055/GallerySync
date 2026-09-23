@@ -31,6 +31,7 @@ import com.gallery.sync.data.local.media.MediaScanner
 import com.gallery.sync.domain.backup.AlbumCloudClaim
 import com.gallery.sync.domain.backup.ArchiveAge
 import com.gallery.sync.domain.backup.BackupEngine
+import com.gallery.sync.domain.backup.BackupLocation
 import com.gallery.sync.domain.backup.CameraAlbum
 import com.gallery.sync.domain.backup.CameraOptimisePlan
 import com.gallery.sync.domain.backup.CameraOptimiseSettings
@@ -901,7 +902,11 @@ class BackupViewModel @Inject constructor(
         // second lock, for anything that reaches here by another route.
         if (!CameraAlbum.canChoose(album, mode)) return
         viewModelScope.launch {
-            albumDao.setPreference(AlbumPreferenceEntity(album, mode))
+            // setPreference REPLACEs the whole row — a mode change alone must not silently reset
+            // the album's chosen backupLocation back to the default. See TASK-026 and
+            // AlbumPreferenceDao.preferenceOrNull's doc comment.
+            val existingLocation = albumDao.preferenceOrNull(album)?.backupLocation ?: BackupLocation.DEFAULT
+            albumDao.setPreference(AlbumPreferenceEntity(album, mode, existingLocation))
             // Deliberately leaves any duplicate-name warning in place. Only Dismiss removes it (Ian,
             // 16 Sept 2026). Clearing it here also fired when the chosen mode equalled the current
             // one, which removed the card with no visible change and is the likeliest cause of the
@@ -1081,7 +1086,18 @@ class BackupViewModel @Inject constructor(
             val mode = if (enabled) preferred else AlbumMode.OFF
             // Camera never takes Sync, so Select all gives it Backup where everything else gets Sync.
             val modeFor = { name: String -> CameraAlbum.seeded(name, mode) }
-            albumDao.setPreferences(albums.map { AlbumPreferenceEntity(it.name, modeFor(it.name)) })
+            // setPreferences REPLACEs every row — same reason as setAlbumMode above, a bulk mode
+            // change must not silently reset every album's chosen backupLocation to the default.
+            val existingLocations = albumDao.all().associate { it.albumName to it.backupLocation }
+            albumDao.setPreferences(
+                albums.map {
+                    AlbumPreferenceEntity(
+                        it.name,
+                        modeFor(it.name),
+                        existingLocations[it.name] ?: BackupLocation.DEFAULT
+                    )
+                }
+            )
             _state.value = _state.value.copy(
                 albums = albums.map { it.copy(mode = modeFor(it.name)) }
             )
