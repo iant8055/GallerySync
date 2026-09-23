@@ -28,6 +28,11 @@ android {
         versionName = "0.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // AppAuth's own manifest declares the redirect activity's intent-filter with this
+        // placeholder. Must match google_photos_config.json's redirect_uri scheme
+        // ("com.gallery.sync:/oauth2redirect") or the OAuth callback never reaches the app.
+        manifestPlaceholders["appAuthRedirectScheme"] = "com.gallery.sync"
     }
 
     buildTypes {
@@ -129,6 +134,9 @@ dependencies {
 
     // Microsoft identity (MSAL) — interactive sign-in + silent refresh for Graph
     implementation(libs.msal)
+
+    // Google identity (AppAuth) — interactive sign-in + PKCE + refresh for the Photos Library API
+    implementation(libs.appauth)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockito.core)

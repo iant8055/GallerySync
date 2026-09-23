@@ -247,9 +247,28 @@ object Migrations {
         }
     }
 
+    /**
+     * 11 → 12: one destination per album, chosen by the user. See TASK-026.
+     *
+     * Purely additive, one column on each of the two tables. `'ONEDRIVE'` is not a placeholder
+     * default — every album and every ledger row that exists before this column does genuinely
+     * targets OneDrive, since nothing else has ever been usable. Existing behaviour is unchanged
+     * until someone actively picks a second provider for an album.
+     */
+    val MIGRATION_11_12 = object : Migration(11, 12) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "ALTER TABLE `album_preferences` ADD COLUMN `backupLocation` TEXT NOT NULL DEFAULT 'ONEDRIVE'"
+            )
+            db.execSQL(
+                "ALTER TABLE `backup_entries` ADD COLUMN `location` TEXT NOT NULL DEFAULT 'ONEDRIVE'"
+            )
+        }
+    }
+
     /** Every migration, in order, for the database builder. */
     val ALL = arrayOf(
         MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7,
-        MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11
+        MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12
     )
 }

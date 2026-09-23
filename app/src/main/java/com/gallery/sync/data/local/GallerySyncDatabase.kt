@@ -4,6 +4,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.gallery.sync.data.local.converter.AlbumModeConverter
+import com.gallery.sync.data.local.converter.BackupLocationConverter
 import com.gallery.sync.data.local.converter.CloudCopyDecisionConverter
 import com.gallery.sync.data.local.converter.BackupStateConverter
 import com.gallery.sync.data.local.converter.MediaSourceConverter
@@ -30,7 +31,9 @@ import com.gallery.sync.data.local.entity.UnsentDepartureEntity
  *
  * Version 2 adds `backup_entries` and `album_preferences`. Version 3 records photo proxies.
  * Version 4 replaces the album on/off flag with a four-valued mode. Version 5 records files that
- * were examined and found not worth proxying.
+ * were examined and found not worth proxying. Version 12 gives each album and each ledger row a
+ * [com.gallery.sync.domain.backup.BackupLocation], one destination per album chosen by the user
+ * — see TASK-026.
  */
 @Database(
     entities = [
@@ -41,14 +44,15 @@ import com.gallery.sync.data.local.entity.UnsentDepartureEntity
         AlbumCloudStatusEntity::class,
         UnsentDepartureEntity::class
     ],
-    version = 11,
+    version = 12,
     exportSchema = true
 )
 @TypeConverters(
     MediaSourceConverter::class,
     BackupStateConverter::class,
     AlbumModeConverter::class,
-    CloudCopyDecisionConverter::class
+    CloudCopyDecisionConverter::class,
+    BackupLocationConverter::class
 )
 abstract class GallerySyncDatabase : RoomDatabase() {
 

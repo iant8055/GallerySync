@@ -258,6 +258,48 @@ class MigrationTest {
         db.close()
     }
 
+    @Test
+    fun migrate11To12_producesTheSchemaRoomExpects() {
+        helper.createDatabase(TEST_DB, 11).close()
+
+        helper.runMigrationsAndValidate(TEST_DB, 12, true, Migrations.MIGRATION_11_12).close()
+    }
+
+    @Test
+    fun migrate11To12_defaultsExistingAlbumsAndRowsToOneDrive() {
+        // Every album and every ledger row that exists before this column does genuinely targets
+        // OneDrive, since nothing else has ever been usable. Anything but ONEDRIVE here would
+        // silently reroute an existing user's uploads to a provider they never chose.
+        helper.createDatabase(TEST_DB, 11).apply {
+            execSQL("INSERT INTO album_preferences (albumName, mode) VALUES ('Camera', 'BACKUP')")
+            execSQL(
+                """
+                INSERT INTO backup_entries
+                    (id, mediaStoreId, contentUri, displayName, album, sizeBytes,
+                     dateModifiedEpochSeconds, mimeType, isVideo, state, attemptCount,
+                     isProxied, isProxySkipped)
+                VALUES
+                    ('k1', 42, 'content://media/external/images/media/42', 'IMG_1.jpg',
+                     'Camera', 1024, 1700000000, 'image/jpeg', 0, 'UPLOADED', 0, 0, 0)
+                """.trimIndent()
+            )
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(TEST_DB, 12, true, Migrations.MIGRATION_11_12)
+
+        db.query("SELECT backupLocation FROM album_preferences WHERE albumName = 'Camera'")
+            .use { cursor ->
+                cursor.moveToFirst()
+                assertEquals("an existing album must not silently switch providers", "ONEDRIVE", cursor.getString(0))
+            }
+        db.query("SELECT location FROM backup_entries WHERE id = 'k1'").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals("a row already uploaded really did go to OneDrive", "ONEDRIVE", cursor.getString(0))
+        }
+        db.close()
+    }
+
     private companion object {
         const val TEST_DB = "migration-test.db"
     }

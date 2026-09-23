@@ -1,0 +1,11 @@
+{
+  "client_id": "400850912934-uspc27q5168r202m50gr0813pfcp89u1.apps.googleusercontent.com",
+  "project_id": "gallerysync-509502",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "redirect_uri": "com.gallery.sync:/oauth2redirect",
+  "scopes": [
+    "https://www.googleapis.com/auth/photoslibrary.readonly.appcreateddata",
+    "https://www.googleapis.com/auth/photoslibrary.appendonly"
+  ]
+}

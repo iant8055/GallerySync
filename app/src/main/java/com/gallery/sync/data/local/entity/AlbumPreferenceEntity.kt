@@ -2,6 +2,7 @@ package com.gallery.sync.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.gallery.sync.domain.backup.BackupLocation
 
 /**
  * What the user chose for an album.
@@ -19,5 +20,13 @@ data class AlbumPreferenceEntity(
 
     @PrimaryKey val albumName: String,
 
-    val mode: AlbumMode
+    val mode: AlbumMode,
+
+    /**
+     * Where this album's uploads go. One destination per album, chosen by the user — never mirrored
+     * to more than one. See TASK-026: this is what Ian described from other apps, a folder-to-provider
+     * mapping, not a fan-out. [BackupLocation.DEFAULT] (OneDrive) for every album until a second
+     * provider actually works and someone chooses it.
+     */
+    val backupLocation: BackupLocation = BackupLocation.DEFAULT
 )

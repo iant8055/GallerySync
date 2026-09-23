@@ -21,6 +21,18 @@ enum class BackupLocation {
 
     /** Whether this location can be switched on in this build. */
     val isUsable: Boolean get() = this == ONEDRIVE
+
+    companion object {
+        /**
+         * Every album's destination, implicitly, before this was a per-album choice at all — see
+         * TASK-026. The migration that added the column existing rows and albums default to this,
+         * and it is not a placeholder: every row in the ledger today genuinely did go to OneDrive.
+         */
+        val DEFAULT = ONEDRIVE
+
+        fun fromNameOrDefault(name: String?): BackupLocation =
+            entries.firstOrNull { it.name == name } ?: DEFAULT
+    }
 }
 
 object BackupLocations {

@@ -3,6 +3,7 @@ package com.gallery.sync.data.local.entity
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.gallery.sync.domain.backup.BackupLocation
 
 /** Where a local file has got to on its way into OneDrive. */
 enum class BackupState {
@@ -159,7 +160,19 @@ data class BackupEntryEntity(
      * Cleared when the file is back on the phone (`clearLocalMissing`), and by a restore that
      * replaces the row, so a file deleted a second time is treated as a new deletion.
      */
-    val cloudDecision: CloudCopyDecision? = null
+    val cloudDecision: CloudCopyDecision? = null,
+
+    /**
+     * Which provider this row's upload actually targeted, or is targeting. See TASK-026.
+     *
+     * Set from the album's [AlbumPreferenceEntity.backupLocation] at the moment a row is created, not
+     * re-read afterwards — a row already `UPLOADED` records where the file genuinely went, a
+     * historical fact, and stays true even if the album's destination is changed later. Nothing is
+     * re-uploaded to a new destination on a switch; only rows created after the switch go there. Every
+     * row before this column existed really did go to OneDrive, which is what [BackupLocation.DEFAULT]
+     * correctly says for them.
+     */
+    val location: BackupLocation = BackupLocation.DEFAULT
 )
 
 /**
