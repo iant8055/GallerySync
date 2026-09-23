@@ -116,6 +116,20 @@
                     android:path="/E7ZHhkRNGcbq5T+gUNCTkroYYMo=" />
             </intent-filter>
         </activity>
+
+        <!--
+            Receives AppAuth's completed/cancelled PendingIntent once the Google sign-in browser
+            tab closes. Never reached by an external Intent — exported="false", no intent-filter —
+            only AppAuthGooglePhotosSignIn's own PendingIntents target it. AppAuth's own
+            RedirectUriReceiverActivity (declared by its AAR via the appAuthRedirectScheme
+            placeholder in app/build.gradle.kts) is what actually catches the browser redirect;
+            this activity is one step further in, after AppAuth's internal management activity
+            resolves that PendingIntent. See GoogleAuthResultActivity.
+        -->
+        <activity
+            android:name=".data.remote.auth.GoogleAuthResultActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
     </application>
 
 </manifest>

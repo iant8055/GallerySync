@@ -1,5 +1,9 @@
 package com.gallery.sync.di
 
+import com.gallery.sync.data.remote.auth.AppAuthGooglePhotosSignIn
+import com.gallery.sync.data.remote.auth.AppAuthGooglePhotosTokenProvider
+import com.gallery.sync.data.remote.auth.GooglePhotosSignIn
+import com.gallery.sync.data.remote.auth.GooglePhotosTokenProvider
 import com.gallery.sync.data.remote.auth.MsalOneDriveSignIn
 import com.gallery.sync.data.remote.auth.MsalOneDriveTokenProvider
 import com.gallery.sync.data.remote.auth.OneDriveSignIn
@@ -57,4 +61,12 @@ interface BindingsModule {
     @Binds
     @Singleton
     fun bindOneDriveSignIn(impl: MsalOneDriveSignIn): OneDriveSignIn
+
+    @Binds
+    @Singleton
+    fun bindGooglePhotosTokenProvider(impl: AppAuthGooglePhotosTokenProvider): GooglePhotosTokenProvider
+
+    @Binds
+    @Singleton
+    fun bindGooglePhotosSignIn(impl: AppAuthGooglePhotosSignIn): GooglePhotosSignIn
 }
