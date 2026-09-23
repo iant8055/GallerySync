@@ -9,9 +9,13 @@ import com.gallery.sync.data.remote.auth.MsalOneDriveTokenProvider
 import com.gallery.sync.data.remote.auth.OneDriveSignIn
 import com.gallery.sync.data.remote.auth.OneDriveTokenProvider
 import com.gallery.sync.data.remote.auth.StoredOneDriveTokenProvider
+import com.gallery.sync.data.repository.GooglePhotosRepositoryImpl
+import com.gallery.sync.data.repository.GooglePhotosUploadRepositoryImpl
 import com.gallery.sync.data.repository.OneDriveDeletionRepositoryImpl
 import com.gallery.sync.data.repository.OneDriveRepositoryImpl
 import com.gallery.sync.data.repository.OneDriveUploadRepositoryImpl
+import com.gallery.sync.domain.repository.GooglePhotosRepository
+import com.gallery.sync.domain.repository.GooglePhotosUploadRepository
 import com.gallery.sync.domain.repository.OneDriveDeletionRepository
 import com.gallery.sync.domain.repository.OneDriveRepository
 import com.gallery.sync.domain.repository.OneDriveUploadRepository
@@ -69,4 +73,14 @@ interface BindingsModule {
     @Binds
     @Singleton
     fun bindGooglePhotosSignIn(impl: AppAuthGooglePhotosSignIn): GooglePhotosSignIn
+
+    @Binds
+    @Singleton
+    fun bindGooglePhotosRepository(impl: GooglePhotosRepositoryImpl): GooglePhotosRepository
+
+    @Binds
+    @Singleton
+    fun bindGooglePhotosUploadRepository(
+        impl: GooglePhotosUploadRepositoryImpl
+    ): GooglePhotosUploadRepository
 }

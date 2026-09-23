@@ -1,6 +1,8 @@
 package com.gallery.sync.di
 
 import com.gallery.sync.BuildConfig
+import com.gallery.sync.data.remote.googlephotos.GooglePhotosApiService
+import com.gallery.sync.data.remote.googlephotos.GooglePhotosAuthInterceptor
 import com.gallery.sync.data.remote.onedrive.GraphApiService
 import com.gallery.sync.data.remote.onedrive.GraphAuthInterceptor
 import com.gallery.sync.data.remote.onedrive.GraphDownloadService
@@ -26,6 +28,7 @@ import javax.inject.Singleton
 object NetworkModule {
 
     private const val GRAPH_BASE_URL = "https://graph.microsoft.com/v1.0/"
+    private const val GOOGLE_PHOTOS_BASE_URL = "https://photoslibrary.googleapis.com/"
     private const val JSON_MEDIA_TYPE = "application/json"
     private const val TIMEOUT_SECONDS = 30L
     private const val UPLOAD_TIMEOUT_SECONDS = 120L
@@ -200,7 +203,53 @@ object NetworkModule {
     @Singleton
     fun provideGraphDownloadService(@DownloadClient retrofit: Retrofit): GraphDownloadService =
         retrofit.create()
+
+    /**
+     * Client for the Google Photos Library API — its own base URL, its own auth interceptor
+     * ([GooglePhotosAuthInterceptor], backed by `GooglePhotosTokenProvider` rather than Graph's),
+     * and the same debug-only body logging with the `Authorization` header redacted as every other
+     * client here. The longer write timeout matters here specifically: unlike Graph, which only
+     * takes a single small request past [TIMEOUT_SECONDS] before switching to chunked uploads, the
+     * Library API's raw-upload endpoint always carries the whole file in one request, video
+     * included.
+     */
+    @Provides
+    @Singleton
+    @GooglePhotosClient
+    fun provideGooglePhotosClient(
+        loggingInterceptor: HttpLoggingInterceptor,
+        authInterceptor: GooglePhotosAuthInterceptor
+    ): OkHttpClient = OkHttpClient.Builder()
+        .addInterceptor(loggingInterceptor)
+        .addInterceptor(authInterceptor)
+        .connectTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+        .readTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)
+        .writeTimeout(UPLOAD_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+        .build()
+
+    @Provides
+    @Singleton
+    @GooglePhotosClient
+    fun provideGooglePhotosRetrofit(
+        @GooglePhotosClient client: OkHttpClient,
+        json: Json
+    ): Retrofit = Retrofit.Builder()
+        .baseUrl(GOOGLE_PHOTOS_BASE_URL)
+        .client(client)
+        .addConverterFactory(json.asConverterFactory(JSON_MEDIA_TYPE.toMediaType()))
+        .build()
+
+    @Provides
+    @Singleton
+    fun provideGooglePhotosApiService(
+        @GooglePhotosClient retrofit: Retrofit
+    ): GooglePhotosApiService = retrofit.create()
 }
+
+/** Marks the client and Retrofit used for the Google Photos Library API. */
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class GooglePhotosClient
 
 /** Marks the unauthenticated client and Retrofit used for pre-authorised upload-session URLs. */
 @Qualifier

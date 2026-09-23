@@ -3,8 +3,8 @@
 Milestone: v0.5.0 (Google Photos + Billing), pulled forward at Ian's request, 22 Sept 2026
 Raised by: Ian, 22 Sept 2026 — competitive research on multi-cloud support, market pricing research, then
 "lets plan out for the multi-platform Pro add on option... $2.49 price point works"
-Status: **IN PROGRESS.** OAuth registered. Room schema migrated (v11 → v12). Provider abstraction and
-Google Photos plumbing being built.
+Status: **IN PROGRESS.** OAuth registered. Room schema migrated (v11 → v12). AppAuth sign-in flow
+built and compiling on-device. Wire client (upload + batchCreate) and BackupEngine dispatch next.
 
 ## What was decided, and why, before any code
 
@@ -141,10 +141,38 @@ nothing had supplied, which broke `processDebugMainManifest` for every build tou
 matching `google_photos_config.json`'s `redirect_uri` scheme. Unrelated to the schema work itself, but
 blocking it, so fixed in the same pass.
 
+## Sign-in — done
+
+`GooglePhotosSignIn` / `GooglePhotosTokenProvider`, mirroring `OneDriveSignIn` / `OneDriveTokenProvider`'s
+split and the reason for it (interactive sign-in needs a foreground `Activity`, silent token acquisition
+doesn't, and the split is what makes the sign-in UI fake-able in tests).
+
+Backed by `net.openid:appauth` — RFC 8252 native-app flow, PKCE, no client secret, no backend server —
+rather than Credential Manager's `requestOfflineAccess`, which assumes a real backend to hold the offline
+token. One extra piece of plumbing OneDrive's MSAL flow didn't need: AppAuth's browser redirect returns
+through its own `RedirectUriReceiverActivity`, not through the calling screen's `onActivityResult`, so
+completion is delivered via `PendingIntent`s to a small internal-only `GoogleAuthResultActivity`
+(`exported="false"`, no intent-filter, never reachable except by our own `PendingIntent`s), which exchanges
+the code for tokens and hands the outcome back through `GoogleSignInResultBridge`, a `CompletableDeferred`
+coordinator.
+
+Tokens live in their own `EncryptedSharedPreferences` file (`EncryptedGoogleAuthStore`), separate from
+OneDrive's — MSAL keeps its own cache and never touches that store, so there's nothing to share, and
+signing out of Google alone can't touch OneDrive's tokens.
+
+`access_type=offline` + `prompt=consent` on the authorization request — otherwise Google only issues a
+refresh token on the *first* consent for a client+account pair, and this would only have shown up on a
+reinstall or a revoked-and-reconnected account, not on first use.
+
+Verified: full app + test compile, unit tests pass (`GoogleSignInResultBridgeTest` — the one piece here
+with no Android dependency), installs and launches clean on the Moto G, no crash-log entries. **Not yet
+exercised end-to-end** — there is no UI entry point to trigger it yet, since the Settings destination
+picker hasn't been built. Worth an actual sign-in round-trip against Ian's real Google account once that
+picker exists.
+
 ## Open, for Ian when there's a moment
 
 - Nothing blocking right now. Will flag here if something needs a decision only he can make.
-- Next up, no decision needed to start: the AppAuth-based Google sign-in flow (PKCE against the Android
-  client), then the Google Photos wire client (raw upload + `batchCreate`), then DI wiring and
+- Next up, no decision needed to start: the Google Photos wire client (raw upload + `batchCreate`), then
   `BackupEngine`'s dispatch. UI (destination picker, Sync/Archive mode restriction, Pro-unlock gating)
-  comes after that.
+  comes after that — and is also where the sign-in flow above finally gets a real on-device test.
