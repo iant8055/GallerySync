@@ -197,10 +197,56 @@ sized to force the multi-chunk loop rather than only the single-chunk case) — 
 clean on the Moto G. **Not yet exercised against the real Photos Library API** — that needs the
 sign-in UI, which doesn't exist yet, and `BackupEngine` actually calling any of this.
 
+## BackupEngine dispatch — started, then stopped on a real question
+
+Read the whole of `uploadPendingWhileHolding` (`BackupEngine.kt`, the loop `BackupWorker` actually
+runs) before touching it, since it's the one place CLAUDE.md's absolute deletion-safety bar and the
+Camera-album "no instant optimise" rule both ultimately rest on. Two things came out of that reading
+that are worth writing down rather than just fixing quietly.
+
+**Found and fixed in the wire client before it ever reached this file:** the naive dispatch —
+"call `googlePhotosUploadRepository.upload` instead of OneDrive's, same downstream handling" —
+would have been a real CLAUDE.md violation. `UploadedItem.sizeBytes` for Google Photos is always the
+*local* size (Google never reports one), so if a Google Photos success were recorded through the
+existing `entryDao.markUploaded(remoteSizeBytes = item.sizeBytes)`, the row's `remoteSizeBytes` would
+always equal `sizeBytes` — and `BackupEntryDao.verifiedInCloud()` (`remoteSizeBytes IS NOT NULL AND
+remoteSizeBytes = sizeBytes`) would read every Google Photos row as byte-verified, forever, even
+though nothing was ever confirmed. That is the exact bar CLAUDE.md says nothing weaker may satisfy.
+Restricting Archive/Sync to OneDrive in the *UI* (already decided, see above) does not stop that row
+from satisfying `verifiedInCloud()` for any *other* code that trusts it — and there are several:
+`CameraOptimisePlan`, the deleted-files "kept vs gone" reconciliation, more. Fixed structurally, not
+by convention: a new DAO method, `markUploadedWithoutSizeVerification`, whose SQL always writes
+`remoteSizeBytes = NULL` — so a Google Photos row can never satisfy `verifiedInCloud()` no matter
+what dispatch code does or later gets changed to. Not yet added to `BackupEntryDao.kt` — the method
+above is designed, not written.
+
+**The one that needs Ian:** `uploadPendingWhileHolding` returns a single `BackupRunResult` with one
+`stoppedBecause: StopReason?`, and `BackupWorker` (`BackupWorker.kt:268`) maps
+`NO_TOKEN`/`UNAUTHORIZED`/`DRIVE_FULL`/`NO_MEDIA_ACCESS` to `Result.failure()` — a **terminal**
+WorkManager outcome, no automatic retry. That contract was built for one provider. Routing a Google
+Photos-specific failure through the same `StopReason.UNAUTHORIZED` would mean a Google Photos sign-out
+or a revoked Google refresh token — something with nothing to do with OneDrive — stops the *entire*
+run, OneDrive uploads included, and marks the whole worker failed. That breaks the "two independent,
+parallel providers" shape TASK-026 already settled on, and it would touch Ian's real backup reliability
+for a Pro feature failure, not just Google Photos'.
+
+**Recommendation, not yet applied:** Google Photos failures never produce a terminal
+`Result.failure()`. OneDrive's loop, its stop reason, and `BackupWorker`'s existing
+retry/failure mapping stay completely untouched — zero behaviour change to the path Ian's phone
+actually depends on. A Google Photos failure this run just leaves those rows `PENDING`/`FAILED` as
+appropriate (same as today's "deferred" and "failed" outcomes) and is picked up by the next natural
+continuation or the periodic six-hourly run — no new terminal state, no new WorkManager mapping
+needed for it at all in v1. Simple, safe default; open to a better one if Ian wants Google Photos
+failures surfaced more promptly than "try again later."
+
+Not implemented pending a yes on that. Everything else in this section (the `refreshLedger` change to
+set a new row's `location` from its album's `backupLocation`, the `BackupEntryDao` method above, and
+the split loop itself) is ready to write as soon as it lands.
+
 ## Open, for Ian when there's a moment
 
-- Nothing blocking right now. Will flag here if something needs a decision only he can make.
-- Next up, no decision needed to start: `BackupEngine`'s per-album dispatch — deciding which
-  repository pair to call based on an album's `BackupLocation`. UI (destination picker, Sync/Archive
-  mode restriction, Pro-unlock gating) comes after that — and is also where the sign-in flow and wire
-  client above finally get a real, on-device, against-Ian's-actual-account test.
+- **The stop-reason question above** — go with the recommendation (Google Photos failures never fail
+  the whole worker run), or something else?
+- Once that's answered: finish `BackupEngine` dispatch, then UI (destination picker, Sync/Archive mode
+  restriction, Pro-unlock gating) — which is also where the sign-in flow and wire client above finally
+  get a real, on-device, against-Ian's-actual-account test.
