@@ -807,7 +807,7 @@ class ReconcileViewModel @Inject constructor(
             val runStartedAt = saved.wizardRunStartedAt
             // A recorded run carries its own total, zero included: a library already wholly in
             // OneDrive sends nothing, and must not fall back to counting the ledger.
-            val total = when {
+            var total = when {
                 knownTotal != null -> knownTotal
                 runStartedAt > 0L || saved.wizardBackupTotal > 0 -> saved.wizardBackupTotal
                 else -> backupEngine.outstandingCountAll()
@@ -831,6 +831,15 @@ class ReconcileViewModel @Inject constructor(
                 }
 
                 if (completed > highWater) highWater = completed
+
+                // The ring must never read 100% while files are still queued. The total is an estimate made
+                // before the run (what the cloud check says is missing), and it can be short — it was for
+                // files bound for a cloud the check knows nothing about, the Moto G showing "84 of 84"
+                // with 2,168 to go. When it is exceeded, grow it to what is actually known.
+                if (completed >= total && remaining > 0) {
+                    total = completed + remaining
+                    if (runStartedAt > 0L) settings.setWizardRun(total, runStartedAt)
+                }
 
                 // A delayed start is over once the backup has visibly begun: a batch executing, a
                 // file landed, or the ledger's pending count moving (a batch of skips can finish
