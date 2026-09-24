@@ -646,7 +646,7 @@ class ReconcileViewModel @Inject constructor(
             // first arm recorded rather than falling back to the whole ledger.
             val saved = settings.current()
             val sendTotal = if (_state.value.result?.isComplete == true || saved.wizardRunStartedAt == 0L) {
-                filesToSend(grandTotal)
+                sendTotal(grandTotal)
             } else {
                 saved.wizardBackupTotal
             }
@@ -667,6 +667,16 @@ class ReconcileViewModel @Inject constructor(
      * figure is what the run will send. An incomplete check falls back to the ledger: a floor
      * presented as a total is the mistake [CloudReconciliation.isComplete] exists to prevent.
      */
+    /**
+     * The card's total. The cloud check discounts what OneDrive already holds, but it knows nothing of
+     * any other cloud, so files bound elsewhere are added back in full. Without this the ring read
+     * "84 of 84", 100%, while 2,168 files were still to go (Moto G, 24 Sept 2026) and Finish never came.
+     */
+    private suspend fun sendTotal(grandTotal: Int): Int {
+        val elsewhere = backupEngine.outstandingCountElsewhere().coerceAtMost(grandTotal)
+        return filesToSend(grandTotal - elsewhere) + elsewhere
+    }
+
     private fun filesToSend(pendingInLedger: Int): Int {
         val checked = _state.value.result?.takeIf { it.isComplete } ?: return pendingInLedger
         return checked.outstanding.files.coerceAtMost(pendingInLedger)
@@ -771,7 +781,7 @@ class ReconcileViewModel @Inject constructor(
 
             // Whether to run at all still follows the ledger — only the card's count changes.
             val grandTotal = backupEngine.outstandingCountAll()
-            val sendTotal = filesToSend(grandTotal)
+            val sendTotal = sendTotal(grandTotal)
             settings.setWizardRun(sendTotal, runStartedAt)
             _state.value = _state.value.copy(backupTotal = sendTotal)
             Logger.i(TAG, "total pending: $grandTotal, to send: $sendTotal")

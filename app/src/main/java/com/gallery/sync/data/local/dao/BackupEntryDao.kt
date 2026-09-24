@@ -552,6 +552,19 @@ interface BackupEntryDao {
     @Query("SELECT COUNT(*) FROM backup_entries WHERE state != :uploaded AND attemptCount < :maxAttempts")
     suspend fun countPendingAll(maxAttempts: Int, uploaded: BackupState = BackupState.UPLOADED): Int
 
+    /**
+     * The part of [countPendingAll] bound for a cloud other than OneDrive. The wizard's cloud check only
+     * knows what OneDrive already holds, so it cannot discount these: they are sent in full.
+     */
+    @Query(
+        "SELECT COUNT(*) FROM backup_entries WHERE state != :uploaded AND attemptCount < :maxAttempts AND location != :oneDrive"
+    )
+    suspend fun countPendingAllElsewhere(
+        maxAttempts: Int,
+        uploaded: BackupState = BackupState.UPLOADED,
+        oneDrive: BackupLocation = BackupLocation.ONEDRIVE
+    ): Int
+
     @Query("SELECT COUNT(*) FROM backup_entries WHERE state = :state")
     fun observeCount(state: BackupState): Flow<Int>
 

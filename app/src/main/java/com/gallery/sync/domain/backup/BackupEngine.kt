@@ -506,6 +506,11 @@ class BackupEngine @Inject constructor(
         entryDao.countPendingAll(MAX_ATTEMPTS)
     }
 
+    /** Of [outstandingCountAll], the files bound for a cloud other than OneDrive. */
+    suspend fun outstandingCountElsewhere(): Int = withContext(dispatcher) {
+        entryDao.countPendingAllElsewhere(MAX_ATTEMPTS)
+    }
+
     /** Files actually sent to OneDrive since [sinceMillis]. See `BackupEntryDao.countUploadedSince`. */
     suspend fun uploadedSince(sinceMillis: Long): Int = withContext(dispatcher) {
         entryDao.countUploadedSince(sinceMillis)
