@@ -66,6 +66,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
+import com.gallery.sync.ui.common.labelRes
 import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.media.MediaAccess
@@ -706,7 +707,7 @@ private fun AlbumModeRow(
                 Text(
                     text = album.cloudSummary(),
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (album.cloudClaim is AlbumCloudClaim.AllPresent && album.googlePhotosSentCount == 0)
+                    color = if (album.cloudClaim is AlbumCloudClaim.AllPresent && album.sentElsewhereCount == 0)
                         MaterialTheme.colorScheme.primary
                     else
                         MaterialTheme.colorScheme.onSurfaceVariant
@@ -1045,17 +1046,17 @@ private fun AlbumCloudClaim.sentence(): String = when (this) {
  */
 @Composable
 private fun AlbumRow.cloudSummary(): String {
-    val oneDriveClause = if (cloudClaim is AlbumCloudClaim.NeverChecked && googlePhotosSentCount > 0) {
+    val oneDriveClause = if (cloudClaim is AlbumCloudClaim.NeverChecked && sentElsewhereCount > 0) {
         null
     } else {
         cloudClaim.sentence()
     }
-    val googlePhotosClause = if (googlePhotosSentCount > 0) {
-        stringResource(R.string.album_cloud_sent_google_photos, googlePhotosSentCount)
-    } else {
-        null
+    // One clause per cloud this album has sent to, in a stable order. "sent", never "verified": none of
+    // these can prove a stored file's size, so the honest word is the weaker one.
+    val sentClauses = sentTo.entries.sortedBy { it.key.ordinal }.map { (location, count) ->
+        stringResource(R.string.album_cloud_sent_to, count, stringResource(location.labelRes()))
     }
-    return listOfNotNull(oneDriveClause, googlePhotosClause).joinToString(" · ")
+    return (listOfNotNull(oneDriveClause) + sentClauses).joinToString(" · ")
 }
 
 /**

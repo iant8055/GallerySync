@@ -145,7 +145,10 @@ data class AlbumRow(
 
     /** Files here sent to Google Photos. See `AlbumBackupCount.googlePhotosSent` for why this is
      *  kept apart from [backedUpCount] rather than folded into it. */
-    val googlePhotosSentCount: Int = 0,
+    val sentElsewhereCount: Int = 0,
+
+    /** Per cloud, how many of this album's files were sent somewhere other than OneDrive. */
+    val sentTo: Map<BackupLocation, Int> = emptyMap(),
 
     /**
      * Where this album's *new* uploads currently go — resolved from its top-level folder
@@ -759,6 +762,9 @@ class BackupViewModel @Inject constructor(
             val storedModes = albumDao.all().associate { it.albumName to it.mode }
             val countsByAlbum = entryDao.albumCounts().associateBy { it.album }
             val cloudByAlbum = cloudStatusDao.all().associateBy { it.albumName }
+            val sentToByAlbum = entryDao.sentByLocation().orEmpty()
+                .groupBy({ it.album }, { it.location to it.sent })
+                .mapValues { it.value.toMap() }
             val prefs = settings.current()
             val defaultMode = prefs.defaultAlbumMode
             // Read after refreshLedger, which seeds a row for every newly found folder.
@@ -788,7 +794,8 @@ class BackupViewModel @Inject constructor(
                     failedCount = counts?.failed ?: 0,
                     everBackedUpCount = counts?.everBackedUp ?: 0,
                     everBackedUpBytes = counts?.everBackedUpBytes ?: 0L,
-                    googlePhotosSentCount = counts?.googlePhotosSent ?: 0,
+                    sentElsewhereCount = counts?.sentElsewhere ?: 0,
+                    sentTo = sentToByAlbum[album.name].orEmpty(),
                     backupLocation = FolderDestination.resolve(
                         album.topLevelFolder, folderLocations, prefs.backupLocation
                     ),
@@ -844,7 +851,8 @@ class BackupViewModel @Inject constructor(
                         savedBytes = counts?.savedBytes ?: 0L,
                         everBackedUpCount = counts?.everBackedUp ?: 0,
                         everBackedUpBytes = counts?.everBackedUpBytes ?: 0L,
-                        googlePhotosSentCount = counts?.googlePhotosSent ?: 0,
+                        sentElsewhereCount = counts?.sentElsewhere ?: 0,
+                        sentTo = sentToByAlbum[name].orEmpty(),
                         // Not on the device, so no folder to resolve against — the fallback is right.
                         backupLocation = prefs.backupLocation
                     )

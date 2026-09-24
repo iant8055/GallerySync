@@ -76,10 +76,10 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
     viewModel: BackupViewModel = hiltViewModel(),
     themeViewModel: ThemeViewModel = hiltViewModel(),
-    googlePhotosViewModel: GooglePhotosViewModel = hiltViewModel()
+    cloudViewModel: CloudProvidersViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val googlePhotosState by googlePhotosViewModel.state.collectAsStateWithLifecycle()
+    val cloudState by cloudViewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var page by remember { mutableStateOf<SupportPage?>(null) }
@@ -185,14 +185,14 @@ fun SettingsScreen(
 
         DestinationSection()
 
-        GooglePhotosSection(viewModel = googlePhotosViewModel)
+        CloudProvidersSection(viewModel = cloudViewModel)
 
         // Only shown once there is a genuine second choice — a picker offering one real option is
         // clutter, not a control. One dropdown per top-level folder (DCIM, Pictures...), never per
         // album. See TASK-026.
         // Also while a folder is still routed there after the trial or purchase lapsed, so it can be moved
         // back — the list must not vanish on the one person who needs it.
-        if ((googlePhotosState.isAvailable || state.folders.any { it.location == BackupLocation.GOOGLE_PHOTOS }) &&
+        if ((cloudState.isAvailable || state.folders.any { it.location != BackupLocation.ONEDRIVE }) &&
             state.folders.isNotEmpty()
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -213,9 +213,10 @@ fun SettingsScreen(
                     ),
                     options = buildList {
                         add(BackupLocation.ONEDRIVE)
-                        if (googlePhotosState.isEntitled || folder.location == BackupLocation.GOOGLE_PHOTOS) {
-                            add(BackupLocation.GOOGLE_PHOTOS)
-                        }
+                        addAll(cloudState.destinations)
+                        // A folder still routed to a cloud that has lapsed or been disconnected keeps
+                        // its current value on the menu, so it reads truthfully and can be moved back.
+                        if (folder.location !in this) add(folder.location)
                     },
                     selected = folder.location,
                     onSelected = { viewModel.setFolderLocation(folder.name, it) },

@@ -101,8 +101,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.gallery.sync.ui.settings.GooglePhotosSection
-import com.gallery.sync.ui.settings.GooglePhotosViewModel
+import com.gallery.sync.ui.common.labelRes
+import com.gallery.sync.ui.settings.CloudProvidersSection
+import com.gallery.sync.ui.settings.CloudProvidersViewModel
+import com.gallery.sync.ui.settings.ProviderState
 import com.gallery.sync.R
 import com.gallery.sync.data.local.media.DiscoveredDirectory
 import com.gallery.sync.data.local.media.ProxyGenerator
@@ -188,7 +190,7 @@ private const val WelcomeMinimumVisibleMillis = 3_000L
 fun SetupTour(
     viewModel: ReconcileViewModel,
     signInViewModel: SignInViewModel? = null,
-    googlePhotosViewModel: GooglePhotosViewModel = hiltViewModel(),
+    cloudViewModel: CloudProvidersViewModel = hiltViewModel(),
     onComplete: () -> Unit,
     onSwitchTab: (Int) -> Unit = {},
     onStepChanged: (Int) -> Unit = {},
@@ -285,11 +287,12 @@ fun SetupTour(
 
     val signInState = signInViewModel?.state?.collectAsStateWithLifecycle()
     val isSignedIn = signInState?.value is SignInUiState.SignedIn
-    val gpState by googlePhotosViewModel.state.collectAsStateWithLifecycle()
+    val cloudState by cloudViewModel.state.collectAsStateWithLifecycle()
     // The user's own answer on step 4: does Google Photos count among the services they use. Not read
     // from anywhere — the wizard collects its own answers — and what step 5 offers depends on whether
-    // Google Photos is actually connected and unlocked (`gpState.isAvailable`), not on this tick.
-    var googlePhotosChosen by rememberSaveable { mutableStateOf(false) }
+    // a cloud is actually connected and unlocked (`cloudState.destinations`), not on these ticks.
+    var chosenCloudNames by rememberSaveable { mutableStateOf(setOf<String>()) }
+    val chosenClouds = chosenCloudNames.mapNotNull { runCatching { BackupLocation.valueOf(it) }.getOrNull() }.toSet()
     val activity = LocalActivity.current
 
     // Re-check the drive once there is an account to check it with.
@@ -323,7 +326,7 @@ fun SetupTour(
     }
 
     fun canAdvance(): Boolean = when (step) {
-        4 -> isSignedIn && (!googlePhotosChosen || gpState.isSignedIn)
+        4 -> isSignedIn && cloudState.providers.filter { it.location in chosenClouds }.all { it.isConnected }
         5 -> state.directoryChecks.values.any { it }
         else -> true
     }
@@ -661,9 +664,12 @@ fun SetupTour(
                                 activity?.let { signInViewModel?.signIn(it) }
                             },
                             onChangeDestination = viewModel::openDestinationChooser,
-                            googlePhotosChosen = googlePhotosChosen,
-                            onGooglePhotosChosenChange = { googlePhotosChosen = it },
-                            googlePhotosViewModel = googlePhotosViewModel
+                            providers = cloudState.providers,
+                            chosen = chosenClouds,
+                            onChosenChange = { location, on ->
+                                chosenCloudNames = if (on) chosenCloudNames + location.name else chosenCloudNames - location.name
+                            },
+                            cloudViewModel = cloudViewModel
                         )
                         5 -> DirectoryDiscoveryContent(
                             state = state,
@@ -673,7 +679,7 @@ fun SetupTour(
                             onRetryGrant = viewModel::retrySafGrant,
                             onSkipGrant = viewModel::skipSafGrant,
                             onKeepNarrowerGrant = viewModel::keepNarrowerGrant,
-                            googlePhotosAvailable = gpState.isAvailable,
+                            destinations = cloudState.destinations,
                             onDestinationChange = viewModel::setFolderDestinationChoice
                         )
                         6 -> BackupOptionsContent(
@@ -1158,7 +1164,7 @@ private fun DirectoryDiscoveryContent(
     onRetryGrant: () -> Unit,
     onSkipGrant: () -> Unit,
     onKeepNarrowerGrant: () -> Unit,
-    googlePhotosAvailable: Boolean,
+    destinations: List<BackupLocation>,
     onDestinationChange: (String, BackupLocation) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -1215,7 +1221,7 @@ private fun DirectoryDiscoveryContent(
                     checked = checked,
                     onToggle = { onToggleDirectory(dir.name) },
                     destination = state.folderDestinations[dir.name] ?: BackupLocation.ONEDRIVE,
-                    offerDestination = googlePhotosAvailable,
+                    destinations = destinations,
                     onDestinationChange = { onDestinationChange(dir.name, it) }
                 )
             }
@@ -1287,7 +1293,7 @@ private fun DirectoryRow(
     onToggle: () -> Unit,
     destination: BackupLocation,
     /** Only when there is a real second choice — Google Photos connected and unlocked. */
-    offerDestination: Boolean,
+    destinations: List<BackupLocation>,
     onDestinationChange: (BackupLocation) -> Unit
 ) {
     val context = LocalContext.current
@@ -1322,8 +1328,12 @@ private fun DirectoryRow(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            if (offerDestination && checked) {
-                FolderDestinationPicker(destination = destination, onChange = onDestinationChange)
+            if (destinations.isNotEmpty() && checked) {
+                FolderDestinationPicker(
+                    destination = destination,
+                    options = listOf(BackupLocation.ONEDRIVE) + destinations,
+                    onChange = onDestinationChange
+                )
             }
         }
     }
@@ -1344,16 +1354,17 @@ private fun CloudStorageContent(
     isSignedIn: Boolean,
     onSignIn: () -> Unit,
     onChangeDestination: () -> Unit,
-    googlePhotosChosen: Boolean,
-    onGooglePhotosChosenChange: (Boolean) -> Unit,
-    googlePhotosViewModel: GooglePhotosViewModel
+    providers: List<ProviderState>,
+    chosen: Set<BackupLocation>,
+    onChosenChange: (BackupLocation, Boolean) -> Unit,
+    cloudViewModel: CloudProvidersViewModel
 ) {
     // The limits are a pop-up with an OK, shown when Google Photos is ticked (Ian, 24 Sept 2026: the
     // inline list was far too long). Ticking is the moment it matters, so it is not shown on return.
     var showLimits by remember { mutableStateOf(false) }
-    val toggleGooglePhotos = { chosen: Boolean ->
-        onGooglePhotosChosenChange(chosen)
-        if (chosen) showLimits = true
+    val toggleProvider = { location: BackupLocation, on: Boolean ->
+        onChosenChange(location, on)
+        if (on) showLimits = true
     }
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
@@ -1417,24 +1428,27 @@ private fun CloudStorageContent(
 
         HorizontalDivider()
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { toggleGooglePhotos(!googlePhotosChosen) },
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Checkbox(checked = googlePhotosChosen, onCheckedChange = { toggleGooglePhotos(it) })
-            Text(
-                text = stringResource(R.string.tour_cloud_google_photos),
-                style = MaterialTheme.typography.bodyLarge
-            )
+        providers.forEach { provider ->
+            val on = provider.location in chosen
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { toggleProvider(provider.location, !on) },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Checkbox(checked = on, onCheckedChange = { toggleProvider(provider.location, it) })
+                Text(
+                    text = stringResource(provider.location.labelRes()),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
         }
 
-        if (googlePhotosChosen) {
-            // The same Connect / Unlock Pro controls Settings uses, over the same account state —
-            // signing in is a fact about the account, not a Settings value.
-            GooglePhotosSection(viewModel = googlePhotosViewModel)
+        if (chosen.isNotEmpty()) {
+            // The same connect / key-entry / trial controls Settings uses, over the same account state —
+            // connecting is a fact about the account, not a Settings value.
+            CloudProvidersSection(only = chosen, showTitle = false, viewModel = cloudViewModel)
         }
 
         if (showLimits) {
@@ -1464,23 +1478,18 @@ private fun CloudStorageContent(
 @Composable
 private fun FolderDestinationPicker(
     destination: BackupLocation,
+    options: List<BackupLocation>,
     onChange: (BackupLocation) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val options = listOf(BackupLocation.ONEDRIVE, BackupLocation.GOOGLE_PHOTOS)
-    @Composable
-    fun label(location: BackupLocation) = stringResource(
-        if (location == BackupLocation.GOOGLE_PHOTOS) R.string.backup_location_google_photos
-        else R.string.backup_location_onedrive
-    )
     Box {
         OutlinedButton(onClick = { expanded = true }) {
-            Text(stringResource(R.string.tour_folder_goes_to, label(destination)), maxLines = 1)
+            Text(stringResource(R.string.tour_folder_goes_to, stringResource(destination.labelRes())), maxLines = 1)
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             options.forEach { option ->
                 DropdownMenuItem(
-                    text = { Text(label(option)) },
+                    text = { Text(stringResource(option.labelRes())) },
                     onClick = {
                         expanded = false
                         onChange(option)

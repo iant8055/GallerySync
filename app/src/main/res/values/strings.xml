@@ -93,6 +93,10 @@
         both are required before Google Photos can be chosen as where new backups go.
     -->
     <string name="google_photos_section_title">Google Photos</string>
+    <string name="cloud_providers_section_title">Other clouds</string>
+    <string name="cloud_enter_keys_action">Enter keys</string>
+    <string name="cloud_keys_dialog_title">Connect %1$s</string>
+    <string name="cloud_cancel">Cancel</string>
     <string name="google_photos_not_connected">Not connected</string>
     <string name="google_photos_connected">Connected</string>
     <string name="google_photos_connect_action">Connect</string>
@@ -360,7 +364,7 @@
         Photos never reports a stored file's size, so this app can never independently confirm one
         the way it does for OneDrive; "sent" is the honest word for what is actually known. TASK-026.
     -->
-    <string name="album_cloud_sent_google_photos">%1$d sent to Google Photos</string>
+    <string name="album_cloud_sent_to">%1$d sent to %2$s</string>
     <string name="album_status_optimized">%1$d optimised</string>
     <!-- Files kept at full size (FilePin): ticked by the user, or put back by Restore. -->
     <string name="album_status_kept">%1$d kept at full size</string>
@@ -1049,15 +1053,15 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_local_granted">All set</string>
 
     <string name="tour_cloud_title">Cloud Storage</string>
-    <string name="tour_cloud_body">Choose the cloud services you use, and sign in to each. OneDrive is where your backups are kept; Google Photos is an optional extra.</string>
+    <string name="tour_cloud_body">Choose the cloud services you use, and sign in to each. OneDrive is where your backups are kept; the others are optional extras.</string>
     <string name="tour_cloud_signed_in">Signed in to OneDrive</string>
     <string name="tour_cloud_destination">Backup destination</string>
     <string name="tour_cloud_change">Change</string>
     <string name="tour_cloud_google_photos">Google Photos (Pro)</string>
-    <string name="tour_cloud_google_photos_limits_title">About Google Photos</string>
+    <string name="tour_cloud_google_photos_limits_title">About the extra clouds</string>
     <string name="tour_cloud_google_photos_limit_backup_only">Backup only — no Archive or Sync.</string>
-    <string name="tour_cloud_google_photos_limit_duplicates">Photos already in Google Photos may be added twice.</string>
-    <string name="tour_cloud_google_photos_limit_restore">Restoring from Google Photos isn\'t available yet.</string>
+    <string name="tour_cloud_google_photos_limit_duplicates">Photos already in that cloud may be added twice.</string>
+    <string name="tour_cloud_google_photos_limit_restore">Restoring from it is not available yet.</string>
     <string name="tour_cloud_google_photos_limit_pro">Free for 30 days, then a one-time purchase.</string>
     <string name="tour_ok">OK</string>
     <string name="tour_folder_goes_to">Goes to: %1$s</string>

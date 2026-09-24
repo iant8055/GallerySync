@@ -107,8 +107,11 @@ data class AlbumBackupCount(
      * satisfy `verifiedInCloud()`, so the UI must never call it "verified" the way it does for
      * OneDrive; "sent" is the honest, weaker word for what this count actually confirms.
      */
-    val googlePhotosSent: Int = 0
+    val sentElsewhere: Int = 0
 )
+
+/** How many of one album's files went to one non-OneDrive location. Counted only while on the phone. */
+data class AlbumLocationCount(val album: String, val location: BackupLocation, val sent: Int)
 
 /** The two identities of a pinned file. See `FilePin.withoutPinned` for why both are carried. */
 data class PinnedKey(val id: String, val mediaStoreId: Long)
@@ -1149,9 +1152,9 @@ interface BackupEntryDao {
                         THEN 1 ELSE 0 END) AS pinned,
                SUM(CASE WHEN state = :failedState AND localMissingSinceEpochMillis IS NULL
                         THEN 1 ELSE 0 END) AS failed,
-               SUM(CASE WHEN state = :uploaded AND location = :googlePhotos
+               SUM(CASE WHEN state = :uploaded AND location != :oneDrive
                         AND localMissingSinceEpochMillis IS NULL
-                        THEN 1 ELSE 0 END) AS googlePhotosSent
+                        THEN 1 ELSE 0 END) AS sentElsewhere
         FROM backup_entries
         GROUP BY album
         """
@@ -1160,8 +1163,22 @@ interface BackupEntryDao {
         uploaded: BackupState = BackupState.UPLOADED,
         pin: AlbumMode = AlbumMode.BACKUP,
         failedState: BackupState = BackupState.FAILED,
-        googlePhotos: BackupLocation = BackupLocation.GOOGLE_PHOTOS
+        oneDrive: BackupLocation = BackupLocation.ONEDRIVE
     ): List<AlbumBackupCount>
+
+    /** Per album and per cloud, what was sent somewhere other than OneDrive. For the cloud line on each album. */
+    @Query(
+        """
+        SELECT album AS album, location AS location, COUNT(*) AS sent
+        FROM backup_entries
+        WHERE state = :uploaded AND location != :oneDrive AND localMissingSinceEpochMillis IS NULL
+        GROUP BY album, location
+        """
+    )
+    suspend fun sentByLocation(
+        uploaded: BackupState = BackupState.UPLOADED,
+        oneDrive: BackupLocation = BackupLocation.ONEDRIVE
+    ): List<AlbumLocationCount>
 
     /**
      * Sets or clears one file's own mode. `null` returns it to following its album.
