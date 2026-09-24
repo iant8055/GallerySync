@@ -186,7 +186,18 @@ fun SettingsScreen(
                     selected = folder.location,
                     onSelected = { viewModel.setFolderLocation(folder.name, it) },
                     optionLabel = { location -> stringResource(location.labelRes()) },
-                    enabled = options.size > 1
+                    enabled = options.size > 1,
+                    // Where in that cloud the folder's files go, so a row reads as one pairing:
+                    // local folder, cloud, place in the cloud.
+                    note = when (folder.location) {
+                        BackupLocation.ONEDRIVE -> stringResource(
+                            R.string.pairing_path, stringResource(folder.location.labelRes()), state.destinationRoot
+                        )
+                        BackupLocation.GOOGLE_PHOTOS -> stringResource(R.string.pairing_path_library)
+                        else -> stringResource(
+                            R.string.pairing_path, stringResource(folder.location.labelRes()), "GallerySync"
+                        )
+                    }
                 )
             }
             SettingDivider()

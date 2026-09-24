@@ -305,6 +305,8 @@ data class BackupUiState(
      */
     /** Albums the user has set a mode on or dismissed the notice for. See [BackupPreferences.acknowledgedAlbums]. */
     val acknowledgedAlbums: Set<String> = emptySet(),
+    /** The OneDrive folder new uploads go into, for the folder-to-cloud pairing in Settings. */
+    val destinationRoot: String = "",
     val backupLocation: BackupLocation = BackupLocation.DEFAULT,
     /** Top-level folders found on the device, each with its own destination. */
     val folders: List<FolderRow> = emptyList(),
@@ -519,6 +521,7 @@ class BackupViewModel @Inject constructor(
                     runBaselineBytes = prefs.runBaselineBytes,
                     backupLocation = prefs.backupLocation,
                     acknowledgedAlbums = prefs.acknowledgedAlbums,
+                    destinationRoot = prefs.destinationRoot,
                     isOptimiseEnabled = prefs.isOptimiseEnabled,
                     optimisePhotos = prefs.optimisePhotos,
                     photoOptimiseMode = prefs.photoOptimiseMode,
