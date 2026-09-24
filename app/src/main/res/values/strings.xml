@@ -331,8 +331,6 @@
     <string name="backup_allow_metered_on">Syncs on Wi-Fi and mobile data.</string>
     <string name="backup_allow_metered_off">Wi-Fi only.</string>
 
-    <string name="settings_default_mode">Default mode for new albums</string>
-    <string name="settings_default_mode_detail">New albums start with this mode. Existing albums are not changed.</string>
 
     <string name="backup_deselect_all">Deselect all</string>
     <string name="backup_select_all">Select all</string>
@@ -1072,7 +1070,7 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_cloud_google_photos_limit_restore">Restoring from it is not available yet.</string>
     <string name="tour_cloud_google_photos_limit_pro">Free for 30 days, then a one-time purchase.</string>
     <string name="tour_ok">OK</string>
-    <string name="settings_default_mode_locked">Locked at Off while more than one cloud is connected, so each new album waits for you to choose where it goes.</string>
+    <string name="album_mode_unavailable">%1$s is not available with %2$s, so nothing happens for this album.</string>
     <string name="feature_restore">RESTORE</string>
     <string name="feature_archive">ARCHIVE</string>
     <string name="feature_sync">SYNC</string>

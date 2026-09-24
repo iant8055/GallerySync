@@ -56,7 +56,6 @@ enum class HelpTopic(
     SETTINGS_DELETION("settings-deletion", R.string.help_settings_deletion_title, R.string.help_settings_deletion_body),
     DELETED_FILES_WINDOW("deleted-files-window", R.string.help_deleted_files_window_title, R.string.help_deleted_files_window_body),
     DIALOG_REMOVE_FROM_ONEDRIVE("dialog-remove-from-onedrive", R.string.help_dialog_remove_from_onedrive_title, R.string.help_dialog_remove_from_onedrive_body),
-    SETTINGS_DEFAULT_MODE("settings-default-mode", R.string.help_settings_default_mode_title, R.string.help_settings_default_mode_body),
     SETTINGS_SECTION_SYNC("settings-section-sync", R.string.help_settings_section_sync_title, R.string.help_settings_section_sync_body),
     SETTINGS_OPTIMISE_PHOTOS("settings-optimise-photos", R.string.help_settings_optimise_photos_title, R.string.help_settings_optimise_photos_body),
     SETTINGS_OPTIMISE_VIDEO("settings-optimise-video", R.string.help_settings_optimise_video_title, R.string.help_settings_optimise_video_body),

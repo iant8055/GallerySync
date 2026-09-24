@@ -75,7 +75,6 @@ data class BackupPreferences(
     val optimiseVideo: Boolean = false,
     /** Whether video is optimised on its own, or on a tap. Only asked when [optimiseVideo]. */
     val videoOptimiseMode: OptimiseMode = OptimiseMode.DEFAULT,
-    val defaultAlbumMode: AlbumMode = AlbumMode.DEFAULT,
     /**
      * Folder in OneDrive that **new** uploads go into.
      *
@@ -299,10 +298,6 @@ class BackupSettings @Inject constructor(
             photoOptimiseMode = OptimiseMode.fromNameOrDefault(stored[KEY_PHOTO_OPTIMISE_MODE]),
             optimiseVideo = stored[KEY_OPTIMISE_VIDEO] ?: false,
             videoOptimiseMode = OptimiseMode.fromNameOrDefault(stored[KEY_VIDEO_OPTIMISE_MODE]),
-            defaultAlbumMode = stored[KEY_DEFAULT_ALBUM_MODE]
-                ?.let { runCatching { AlbumMode.valueOf(it) }.getOrNull() }
-                ?.takeIf { it in AlbumMode.canBeDefault }
-                ?: AlbumMode.DEFAULT,
             // Validated on the way out, not only on the way in. A stored value that is somehow
             // unusable must fall back to the default rather than sending uploads to a path Graph
             // will reject on every file, forever.
@@ -517,9 +512,6 @@ class BackupSettings @Inject constructor(
         context.dataStore.edit { it.remove(KEY_ALBUM_MERGE_WARNINGS) }
     }
 
-    suspend fun setDefaultAlbumMode(mode: AlbumMode) {
-        context.dataStore.edit { it[KEY_DEFAULT_ALBUM_MODE] = mode.name }
-    }
 
     /**
      * Chooses what happens to cloud copies when files leave the phone.
@@ -637,7 +629,6 @@ class BackupSettings @Inject constructor(
         val KEY_OPTIMISE_VIDEO = booleanPreferencesKey("optimise_video")
         val KEY_PHOTO_OPTIMISE_MODE = stringPreferencesKey("photo_optimise_mode")
         val KEY_VIDEO_OPTIMISE_MODE = stringPreferencesKey("video_optimise_mode")
-        val KEY_DEFAULT_ALBUM_MODE = stringPreferencesKey("default_album_mode")
         val KEY_DESTINATION_ROOT = stringPreferencesKey("destination_root")
         val KEY_BACKUP_LOCATION = stringPreferencesKey("backup_location")
         val KEY_MULTI_CLOUD_TRIAL_STARTED_AT = longPreferencesKey("multi_cloud_trial_started_at")

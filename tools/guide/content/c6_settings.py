@@ -310,21 +310,6 @@ CHAPTER = Chapter(
             back in its folder, is left alone.
         """, ui=True),
 
-        topic("settings-default-mode", "Default mode for new albums", """
-            ## What it is
-            A box showing **Off**, **Backup** or **Sync**. It is the mode a brand-new album starts with.
-            Existing albums are not changed. The starting choice is **Off**, so nothing happens to a new
-            album until you decide.
-
-            ## Why Archive is not on the list
-            Archive removes files from the phone. A default that did that would apply to albums you have
-            never seen, and Archive must always be a choice you make about one specific album.
-
-            ## Where it comes from
-            It is used the first time the app sees a new album, for example after you add a folder or a
-            new app creates its own album. It is stored on the phone.
-        """, ui=True),
-
         topic("settings-section-sync", "Sync", """
             ## What it is
             How photos and videos are optimised to save space. Files are only changed after they are

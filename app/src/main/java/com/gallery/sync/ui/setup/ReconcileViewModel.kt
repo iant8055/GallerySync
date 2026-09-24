@@ -137,7 +137,6 @@ data class ReconcileUiState(
     val sourcesLoaded: Boolean = false,
     /** Defaults the wizard offers to set. Each is also reachable from Settings afterwards. */
     val allowMeteredNetwork: Boolean = false,
-    val defaultAlbumMode: AlbumMode = AlbumMode.DEFAULT,
     val isAutoOptimiseEnabled: Boolean = false,
     val optimiseVideo: Boolean = false,
     val videoQuality: VideoQuality = VideoQuality.DEFAULT,
@@ -343,7 +342,6 @@ class ReconcileViewModel @Inject constructor(
                     hasCompletedSetup = prefs.hasCompletedSetup,
                     settingsLoaded = true,
                     allowMeteredNetwork = prefs.allowMeteredNetwork,
-                    defaultAlbumMode = prefs.defaultAlbumMode,
                     isAutoOptimiseEnabled = prefs.isOptimiseEnabled &&
                         prefs.photoOptimiseMode == OptimiseMode.Auto,
                     optimiseVideo = prefs.optimiseVideo,
@@ -368,10 +366,6 @@ class ReconcileViewModel @Inject constructor(
 
     fun setAllowMeteredNetwork(allowed: Boolean) {
         viewModelScope.launch { settings.setAllowMeteredNetwork(allowed) }
-    }
-
-    fun setDefaultAlbumMode(mode: AlbumMode) {
-        viewModelScope.launch { settings.setDefaultAlbumMode(mode) }
     }
 
     /**

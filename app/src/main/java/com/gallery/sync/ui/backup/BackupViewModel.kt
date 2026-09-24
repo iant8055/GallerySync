@@ -298,7 +298,6 @@ data class BackupUiState(
      * any photo outside the granted folders. Consumed by [BackupViewModel.consumeProxyDialogRequest].
      */
     val proxyDialogRequested: Boolean = false,
-    val defaultAlbumMode: AlbumMode = AlbumMode.DEFAULT,
     /**
      * The fallback destination for a folder with no choice of its own. Not a visible control any more
      * (TASK-026, 24 Sept 2026) — the per-folder [folders] list replaces it. See
@@ -508,7 +507,6 @@ class BackupViewModel @Inject constructor(
                     archiveNotifyEnabled = prefs.archiveNotifyEnabled,
                     isPaused = prefs.isPaused,
                     runBaselineBytes = prefs.runBaselineBytes,
-                    defaultAlbumMode = prefs.defaultAlbumMode,
                     backupLocation = prefs.backupLocation,
                     isOptimiseEnabled = prefs.isOptimiseEnabled,
                     optimisePhotos = prefs.optimisePhotos,
@@ -766,7 +764,6 @@ class BackupViewModel @Inject constructor(
                 .groupBy({ it.album }, { it.location to it.sent })
                 .mapValues { it.value.toMap() }
             val prefs = settings.current()
-            val defaultMode = prefs.defaultAlbumMode
             // Read after refreshLedger, which seeds a row for every newly found folder.
             val folderLocations = folderDao.all().orEmpty().associate { it.folderName to it.backupLocation }
 
@@ -777,7 +774,7 @@ class BackupViewModel @Inject constructor(
                 // No write here any more — [BackupEngine.refreshLedger] seeds the row. The fallback
                 // remains only for an album the scanner reports that the ledger has not recorded,
                 // which the screen should still render rather than skip.
-                val mode = storedModes[album.name] ?: CameraAlbum.seeded(album.name, defaultMode)
+                val mode = storedModes[album.name] ?: AlbumMode.DEFAULT
                 if (album.name !in knownBefore && mode.uploads) hasNewUploadAlbums = true
                 AlbumRow(
                     name = album.name,
@@ -1130,10 +1127,6 @@ class BackupViewModel @Inject constructor(
         }
     }
 
-    fun setDefaultAlbumMode(mode: AlbumMode) {
-        viewModelScope.launch { settings.setDefaultAlbumMode(mode) }
-    }
-
     /**
      * Changes where one top-level folder's *new* uploads go. See TASK-026 and [FolderDestination].
      * Nothing already uploaded moves, and nothing is re-uploaded — each file keeps the `location` it
@@ -1182,10 +1175,7 @@ class BackupViewModel @Inject constructor(
     fun setAllAlbums(enabled: Boolean) {
         viewModelScope.launch {
             val albums = _state.value.albums
-            val preferred = _state.value.defaultAlbumMode
-                .takeIf { it != AlbumMode.OFF }
-                ?: AlbumMode.BACKUP
-            val mode = if (enabled) preferred else AlbumMode.OFF
+            val mode = if (enabled) AlbumMode.BACKUP else AlbumMode.OFF
             // Camera never takes Sync, so Select all gives it Backup where everything else gets Sync.
             // Same clamp for an album whose folder is routed to Google Photos — see
             // GooglePhotosDestination.

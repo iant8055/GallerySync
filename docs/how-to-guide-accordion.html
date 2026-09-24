@@ -511,7 +511,7 @@
 <p>It cannot run while you are away. Android requires you to be present to approve removing files, so the app brings you back here instead of doing it silently. If you try to leave the app while files are checked and waiting, it reminds you. See <a class="xref" href="#dialog-exit-warning">“Files ready to Archive (the leaving reminder)”</a>.</p>
 <h4>It is a standing instruction, until the album is empty</h4>
 <p>An album set to Archive stays that way until you change it. Files that arrive in that album while it still holds files, from the camera, a download or a file manager, are covered by the same choice.</p>
-<p>When an Archive run takes the last file off the phone, the album is finished. It leaves the Albums tab and GallerySync forgets its mode. If you later bring the album back with <strong>Restore</strong>, or something creates the folder again, it is a new album and starts at the default mode for new albums, which can never be Archive. That is what stops an album being archived, restored and archived again by itself.</p>
+<p>When an Archive run takes the last file off the phone, the album is finished. It leaves the Albums tab and GallerySync forgets its mode. If you later bring the album back with <strong>Restore</strong>, or something creates the folder again, it is a new album and starts at Off, so it can never come back as Archive. That is what stops an album being archived, restored and archived again by itself.</p>
 <h4>Availability</h4>
 <p>Moving files to the bin needs Android 11 or newer. On older versions Archive is not offered, rather than deleting files with no way back.</p>
   </div></details>
@@ -762,15 +762,6 @@
 <h4>Where it comes from</h4>
 <p>The number and size are the files you ticked in the window behind it. Just before anything is removed the app looks at your phone again, and any file that has come back, or whose name is back in its folder, is left alone.</p>
   </div></details>
-  <details class="topic"><summary>Default mode for new albums</summary>
-  <div class="topic-body" id="settings-default-mode">
-<h4>What it is</h4>
-<p>A box showing <strong>Off</strong>, <strong>Backup</strong> or <strong>Sync</strong>. It is the mode a brand-new album starts with. Existing albums are not changed. The starting choice is <strong>Off</strong>, so nothing happens to a new album until you decide.</p>
-<h4>Why Archive is not on the list</h4>
-<p>Archive removes files from the phone. A default that did that would apply to albums you have never seen, and Archive must always be a choice you make about one specific album.</p>
-<h4>Where it comes from</h4>
-<p>It is used the first time the app sees a new album, for example after you add a folder or a new app creates its own album. It is stored on the phone.</p>
-  </div></details>
   <details class="topic"><summary>Sync</summary>
   <div class="topic-body" id="settings-section-sync">
 <h4>What it is</h4>
@@ -981,7 +972,7 @@
   <details class="topic"><summary>An album has disappeared from my gallery</summary>
   <div class="topic-body" id="faq-album-vanished">
 <p>If it was set to <strong>Archive</strong>, that is what Archive does: its files were moved to your phone's bin once OneDrive was confirmed to hold them. They are not gone. Open the bin to put them back, or use the <strong>Restore</strong> tab to download them again from OneDrive.</p>
-<p>The folder itself is not deleted, but the album has left the Albums tab and its mode has been forgotten, so nothing will archive it again. Open the <strong>Restore</strong> tab to bring it back: it returns as a new album at the default mode.</p>
+<p>The folder itself is not deleted, but the album has left the Albums tab and its mode has been forgotten, so nothing will archive it again. Open the <strong>Restore</strong> tab to bring it back: it returns as a new album, starting at Off.</p>
   </div></details>
   <details class="topic"><summary>A photo looks smaller or lower quality than before</summary>
   <div class="topic-body" id="faq-photo-looks-small">

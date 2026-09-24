@@ -152,7 +152,7 @@ class FolderDestinationTest {
 
 
     @Test
-    fun `a new album in a backup-only cloud folder is seeded at Backup, not the Sync default`() = runTest {
+    fun `a new album is seeded at Off wherever its folder goes`() = runTest {
         givenScanned(
             item("Camera", "DCIM/Camera/", 1L),
             item("Vacation", "Pictures/Vacation/", 2L)
@@ -164,7 +164,7 @@ class FolderDestinationTest {
             )
         )
         whenever(settings.current()).thenReturn(
-            BackupPreferences(backupLocation = BackupLocation.ONEDRIVE, defaultAlbumMode = AlbumMode.SYNC)
+            BackupPreferences(backupLocation = BackupLocation.ONEDRIVE)
         )
 
         engine.refreshLedger()
@@ -172,8 +172,9 @@ class FolderDestinationTest {
         val seeded = argumentCaptor<List<AlbumPreferenceEntity>>()
         verify(albumDao).insertIfNew(seeded.capture())
         val byName = seeded.firstValue.associate { it.albumName to it.mode }
-        // Camera never takes Sync for its own reason; the point here is Vacation, in the Google Photos folder.
-        assertEquals(AlbumMode.BACKUP, byName["Vacation"])
+        // What an album may be set to follows its cloud; where it starts does not. Off always is safe.
+        assertEquals(AlbumMode.OFF, byName["Vacation"])
+        assertEquals(AlbumMode.OFF, byName["Camera"])
     }
     @Test
     fun `newly discovered folders are seeded with the app-wide default, without disturbing an existing choice`() = runTest {

@@ -3002,11 +3002,6 @@ private fun SettingsMockup(
 
         // ── Albums ──
         MockSectionHeader(stringResource(R.string.settings_albums))
-        MockDropdownRow(
-            label = stringResource(R.string.settings_default_mode),
-            value = stringResource(R.string.mode_off)
-        )
-        HorizontalDivider()
         Text(
             text = stringResource(R.string.sources_title),
             style = MaterialTheme.typography.bodyLarge

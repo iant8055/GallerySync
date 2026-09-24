@@ -119,8 +119,8 @@ class CameraAlbumTest {
     )
 
     @Test
-    fun `a new Camera album is seeded at Backup even when the default for new albums is Sync`() = runTest {
-        whenever(settings.current()).thenReturn(BackupPreferences(defaultAlbumMode = AlbumMode.SYNC))
+    fun `every new album, Camera included, is seeded at Off`() = runTest {
+        whenever(settings.current()).thenReturn(BackupPreferences())
         val items = listOf(scanned("Camera", 1L), scanned("Screenshots", 2L))
         whenever(scanner.access()).thenReturn(MediaAccess.FULL)
         whenever(scanner.scanAll()).thenReturn(items)
@@ -137,7 +137,7 @@ class CameraAlbumTest {
         val seeded = argumentCaptor<List<AlbumPreferenceEntity>>()
         verify(albumDao).insertIfNew(seeded.capture())
         val byName = seeded.firstValue.associate { it.albumName to it.mode }
-        assertEquals(AlbumMode.BACKUP, byName["Camera"])
-        assertEquals(AlbumMode.SYNC, byName["Screenshots"])
+        assertEquals(AlbumMode.OFF, byName["Camera"])
+        assertEquals(AlbumMode.OFF, byName["Screenshots"])
     }
 }

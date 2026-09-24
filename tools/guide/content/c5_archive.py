@@ -29,8 +29,8 @@ CHAPTER = Chapter(
 
             When an Archive run takes the last file off the phone, the album is finished. It leaves the
             Albums tab and GallerySync forgets its mode. If you later bring the album back with
-            **Restore**, or something creates the folder again, it is a new album and starts at the
-            default mode for new albums, which can never be Archive. That is what stops an album being
+            **Restore**, or something creates the folder again, it is a new album and starts at Off,
+            so it can never come back as Archive. That is what stops an album being
             archived, restored and archived again by itself.
 
             ## Availability

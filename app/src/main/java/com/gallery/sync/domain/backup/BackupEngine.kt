@@ -269,33 +269,11 @@ class BackupEngine @Inject constructor(
         // opened the album screen saw an empty preference table — which under the old opt-out gate
         // made the whole library eligible.
         //
-        // The mode is the user's configured default for new albums, not [AlbumMode.DEFAULT]:
-        // hardcoding it here would silently disable that setting, since the row would already exist
-        // by the time the screen looked. `canBeDefault` keeps Archive out of it, so seeding can
-        // never arm a mode that removes files.
-        val defaultMode = settings.current().defaultAlbumMode
-        //
-        // Except that the Camera album never starts at Sync (Ian, 20 Sept 2026): a photo taken this
-        // minute must not be shrunk this minute. See [CameraAlbum].
-        //
-        // And an album whose folder goes to a backup-only cloud never starts at Sync or Archive: they are
-        // not available there (Ian, 24 Sept 2026), so seeding writes Backup instead. Only what is written
-        // *here*, from the default, is clamped; a mode the user chose is never rewritten.
-        val locationOfAlbum = items.groupBy { it.album }.mapValues { (_, inAlbum) ->
-            FolderDestination.resolve(
-                inAlbum.firstNotNullOfOrNull { MediaScanRules.topLevelFolderOf(it.relativePath) },
-                folderLocations,
-                defaultLocation
-            )
-        }
-        albumDao.insertIfNew(
-            albumsOnDevice.map {
-                AlbumPreferenceEntity(
-                    it,
-                    GooglePhotosDestination.seeded(locationOfAlbum[it] ?: defaultLocation, CameraAlbum.seeded(it, defaultMode))
-                )
-            }
-        )
+        // Every new album starts at Off (Ian, 24 Sept 2026: there is no default-mode setting any more).
+        // What an album may be set to depends on the cloud its folder goes to (see CloudCapabilities), so a
+        // single starting mode chosen ahead of time could not be right for all of them; Off always is, and it
+        // is the one mode that cannot send or remove anything. The user chooses per album.
+        albumDao.insertIfNew(albumsOnDevice.map { AlbumPreferenceEntity(it, AlbumMode.DEFAULT) })
 
         // Unscoped, deliberately, and used for two things. Pruning asks "does this album still
         // exist on the phone?", and marking asks "is this file still here?" — both are questions

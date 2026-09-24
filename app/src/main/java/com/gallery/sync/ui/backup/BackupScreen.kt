@@ -77,6 +77,7 @@ import com.gallery.sync.domain.backup.AlbumCloudClaim
 import com.gallery.sync.domain.backup.AlbumMergeWarning
 import com.gallery.sync.domain.backup.CameraAlbum
 import com.gallery.sync.domain.backup.GooglePhotosDestination
+import com.gallery.sync.domain.backup.capabilities
 import com.gallery.sync.domain.backup.StopReason
 import com.gallery.sync.ui.common.LabelWithAction
 import com.gallery.sync.ui.common.SignalIcons
@@ -716,6 +717,20 @@ private fun AlbumModeRow(
                     else
                         MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                // A mode chosen earlier that this album's cloud cannot do — the folder was moved to
+                // another cloud afterwards. The user's choice is never rewritten, so say plainly that it is
+                // doing nothing rather than let the pill look active.
+                if (!album.backupLocation.capabilities.allows(album.mode)) {
+                    Text(
+                        text = stringResource(
+                            R.string.album_mode_unavailable,
+                            album.mode.label(),
+                            stringResource(album.backupLocation.labelRes())
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
             }
         }
 

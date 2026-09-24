@@ -150,7 +150,6 @@ fun SettingsScreen(
         // The clouds, one row each, are below. The free tier is ONE cloud, the user's own (Ian, 24 Sept
         // 2026), so there is no longer a locked-on OneDrive box: OneDrive is one choice among the others.
         // What follows here is OneDrive's own account and folder, shown only while OneDrive is connected.
-        val multiCloud = cloudState.connected.size > 1
         val oneDriveConnected = cloudState.providers.any { it.location == BackupLocation.ONEDRIVE && it.isConnected }
 
         if (oneDriveConnected) LabelWithAction(
@@ -221,22 +220,6 @@ fun SettingsScreen(
             stringResource(R.string.settings_albums),
             help = HelpTopic.SETTINGS_SECTION_ALBUMS
         )
-
-        SettingDropdown(
-            label = stringResource(R.string.settings_default_mode),
-            help = HelpTopic.SETTINGS_DEFAULT_MODE,
-            // With more than one cloud connected the default is locked at Off (Ian, 24 Sept 2026): a new
-            // album has to wait for the user to say where it goes. With a backup-only main cloud, Sync is
-            // not on offer as a default, because it is not available there.
-            options = AlbumMode.canBeDefault.filter { cloudState.main.capabilities.allows(it) },
-            selected = if (multiCloud) AlbumMode.OFF else state.defaultAlbumMode,
-            onSelected = viewModel::setDefaultAlbumMode,
-            optionLabel = { it.settingsLabel() },
-            enabled = !multiCloud,
-            note = if (multiCloud) stringResource(R.string.settings_default_mode_locked) else null
-        )
-
-        SettingDivider()
 
         SourcesSection()
 

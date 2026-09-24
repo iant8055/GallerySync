@@ -49,7 +49,7 @@ CHAPTER = Chapter(
 
             The folder itself is not deleted, but the album has left the Albums tab and its mode has been
             forgotten, so nothing will archive it again. Open the **Restore** tab to bring it back: it
-            returns as a new album at the default mode.
+            returns as a new album, starting at Off.
         """),
 
         topic("faq-photo-looks-small", "A photo looks smaller or lower quality than before", """
