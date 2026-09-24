@@ -12,6 +12,7 @@ import com.gallery.sync.data.local.media.MediaAccess
 import com.gallery.sync.data.local.media.MediaScanner
 import com.gallery.sync.data.local.settings.BackupPreferences
 import com.gallery.sync.data.local.settings.BackupSettings
+import com.gallery.sync.domain.billing.BillingRepository
 import com.gallery.sync.domain.repository.GooglePhotosUploadRepository
 import com.gallery.sync.domain.repository.OneDriveRepository
 import com.gallery.sync.domain.repository.OneDriveUploadRepository
@@ -96,6 +97,7 @@ class CameraAlbumTest {
         repository = mock<OneDriveRepository>(),
         uploadRepository = mock<OneDriveUploadRepository>(),
         googlePhotosUploadRepository = mock<GooglePhotosUploadRepository>(),
+        billing = mock<BillingRepository>(),
         proxyMarker = mock(),
         albumIdentity = mock<AlbumIdentityReconciler>(),
         context = mock<Context>(),

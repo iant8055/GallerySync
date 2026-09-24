@@ -21,6 +21,7 @@ import com.gallery.sync.domain.model.FolderPage
 import com.gallery.sync.domain.model.RemoteError
 import com.gallery.sync.domain.model.RemoteMediaNode
 import com.gallery.sync.domain.model.UploadedItem
+import com.gallery.sync.domain.billing.BillingRepository
 import com.gallery.sync.domain.repository.GooglePhotosUploadRepository
 import com.gallery.sync.domain.repository.OneDriveRepository
 import com.gallery.sync.domain.repository.OneDriveUploadRepository
@@ -71,6 +72,7 @@ class DeletedFilesEngineTest {
         repository = repository,
         uploadRepository = uploadRepository,
         googlePhotosUploadRepository = mock<GooglePhotosUploadRepository>(),
+        billing = mock<BillingRepository>(),
         proxyMarker = mock(),
         albumIdentity = identity,
         context = mock<Context>(),
