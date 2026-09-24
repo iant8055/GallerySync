@@ -101,6 +101,12 @@ data class BackupPreferences(
      * [com.gallery.sync.domain.billing.MultiCloudTrial].
      */
     val multiCloudTrialStartedAtEpochMillis: Long? = null,
+    /**
+     * Albums the user has dealt with: set a mode on, or dismissed the "new albums are waiting" notice for.
+     * An album at Off that is not in here is one nobody has chosen for yet, which is what the Albums tab
+     * counts as waiting. Names only, so no schema change; an album that disappears leaves a harmless entry.
+     */
+    val acknowledgedAlbums: Set<String> = emptySet(),
     /** Hour of day the first whole-library backup may begin. */
     val firstBackupStartHour: Int = FirstBackupWindow.DEFAULT_START_HOUR,
     /** Whether that first run waits for the phone to be plugged in. On by default. */
@@ -306,6 +312,7 @@ class BackupSettings @Inject constructor(
                 ?: RemoteRoots.DEFAULT_DESTINATION,
             backupLocation = BackupLocation.fromNameOrDefault(stored[KEY_BACKUP_LOCATION]),
             multiCloudTrialStartedAtEpochMillis = stored[KEY_MULTI_CLOUD_TRIAL_STARTED_AT],
+            acknowledgedAlbums = stored[KEY_ACKNOWLEDGED_ALBUMS] ?: emptySet(),
             firstBackupStartHour = stored[KEY_FIRST_BACKUP_HOUR]
                 ?.takeIf { it in FirstBackupWindow.SELECTABLE_HOURS }
                 ?: FirstBackupWindow.DEFAULT_START_HOUR,
@@ -604,6 +611,12 @@ class BackupSettings @Inject constructor(
         context.dataStore.edit { it[KEY_BACKUP_LOCATION] = location.name }
     }
 
+    /** Marks [names] as dealt with. See [BackupPreferences.acknowledgedAlbums]. */
+    suspend fun acknowledgeAlbums(names: Collection<String>) {
+        if (names.isEmpty()) return
+        context.dataStore.edit { it[KEY_ACKNOWLEDGED_ALBUMS] = (it[KEY_ACKNOWLEDGED_ALBUMS] ?: emptySet()) + names }
+    }
+
     /**
      * Records the start of the multi-cloud trial, once. Returns the start that stands — the one just
      * written, or the earlier one if a trial had already begun. Never overwrites: a second call must not
@@ -632,6 +645,7 @@ class BackupSettings @Inject constructor(
         val KEY_DESTINATION_ROOT = stringPreferencesKey("destination_root")
         val KEY_BACKUP_LOCATION = stringPreferencesKey("backup_location")
         val KEY_MULTI_CLOUD_TRIAL_STARTED_AT = longPreferencesKey("multi_cloud_trial_started_at")
+        val KEY_ACKNOWLEDGED_ALBUMS = stringSetPreferencesKey("acknowledged_albums")
         val KEY_FIRST_BACKUP_HOUR = intPreferencesKey("first_backup_start_hour")
         val KEY_FIRST_BACKUP_CHARGING = booleanPreferencesKey("first_backup_requires_charging")
         val KEY_FIRST_BACKUP_START_AT = longPreferencesKey("first_backup_start_at")

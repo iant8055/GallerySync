@@ -303,6 +303,8 @@ data class BackupUiState(
      * (TASK-026, 24 Sept 2026) — the per-folder [folders] list replaces it. See
      * `BackupPreferences.backupLocation`.
      */
+    /** Albums the user has set a mode on or dismissed the notice for. See [BackupPreferences.acknowledgedAlbums]. */
+    val acknowledgedAlbums: Set<String> = emptySet(),
     val backupLocation: BackupLocation = BackupLocation.DEFAULT,
     /** Top-level folders found on the device, each with its own destination. */
     val folders: List<FolderRow> = emptyList(),
@@ -451,6 +453,14 @@ data class BackupUiState(
 
     /** Whether the Sync now button does anything: files to send, or Manual optimising to run. */
     val canSyncNow: Boolean get() = pendingCount > 0 || manualOptimiseWaiting
+
+    /**
+     * Albums nobody has chosen a mode for yet: at Off, on the phone, and neither set by the user nor
+     * dismissed. Every new album starts at Off (Ian, 24 Sept 2026), so without this a new folder, say a
+     * new WhatsApp album, would silently go unbacked-up. The Albums tab says so.
+     */
+    val waitingAlbums: List<AlbumRow>
+        get() = albums.filter { it.mode == AlbumMode.OFF && it.itemCount > 0 && it.name !in acknowledgedAlbums }
 }
 
 @HiltViewModel
@@ -508,6 +518,7 @@ class BackupViewModel @Inject constructor(
                     isPaused = prefs.isPaused,
                     runBaselineBytes = prefs.runBaselineBytes,
                     backupLocation = prefs.backupLocation,
+                    acknowledgedAlbums = prefs.acknowledgedAlbums,
                     isOptimiseEnabled = prefs.isOptimiseEnabled,
                     optimisePhotos = prefs.optimisePhotos,
                     photoOptimiseMode = prefs.photoOptimiseMode,
@@ -684,6 +695,12 @@ class BackupViewModel @Inject constructor(
                 BackupScheduling.disable(workManager)
             }
         }
+    }
+
+    /** Dismisses the "new albums are waiting" notice for the albums it is showing now. */
+    fun dismissWaitingAlbums() {
+        val names = _state.value.waitingAlbums.map { it.name }
+        viewModelScope.launch { settings.acknowledgeAlbums(names) }
     }
 
     fun setAllowMeteredNetwork(allowed: Boolean) {
@@ -982,6 +999,8 @@ class BackupViewModel @Inject constructor(
         if (!GooglePhotosDestination.canChoose(albumLocation, mode)) return
         viewModelScope.launch {
             albumDao.setPreference(AlbumPreferenceEntity(album, mode))
+            // Choosing a mode, Off included, is the answer the notice asks for.
+            settings.acknowledgeAlbums(listOf(album))
             // Deliberately leaves any duplicate-name warning in place. Only Dismiss removes it (Ian,
             // 16 Sept 2026). Clearing it here also fired when the chosen mode equalled the current
             // one, which removed the card with no visible change and is the likeliest cause of the

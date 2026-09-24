@@ -458,6 +458,19 @@ private fun AlbumList(
                 }
             }
 
+            // New albums start at Off, so a folder that has just appeared would otherwise go unbacked-up
+            // without a word. Says how many are waiting for a choice, and offers to show them.
+            val waiting = state.waitingAlbums.size
+            if (waiting > 0) {
+                item(key = "waiting-albums") {
+                    WaitingAlbumsCard(
+                        count = waiting,
+                        onShow = { modeFilter = AlbumMode.OFF },
+                        onDismiss = viewModel::dismissWaitingAlbums
+                    )
+                }
+            }
+
             // Split by count into columns that scroll together, not a row-major grid. Each column
             // stays alphabetical top to bottom, so you scan one and ignore the other; row-major
             // would put consecutive albums side by side and make the eye zigzag for every item —
@@ -952,6 +965,30 @@ private fun ArchiveConfirmDialog(
  *
  * Theme tokens only: the error container, with text inheriting its content colour.
  */
+@Composable
+private fun WaitingAlbumsCard(count: Int, onShow: () -> Unit, onDismiss: () -> Unit) {
+    Surface(
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        shape = RoundedCornerShape(12.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Text(
+                text = pluralStringResource(R.plurals.albums_waiting, count, count),
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextButton(onClick = onShow) { Text(stringResource(R.string.albums_waiting_show)) }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.albums_waiting_dismiss)) }
+            }
+        }
+    }
+}
+
 @Composable
 private fun AlbumMergeWarningCard(warnings: List<AlbumMergeWarning>, onDismiss: () -> Unit) {
     Surface(
