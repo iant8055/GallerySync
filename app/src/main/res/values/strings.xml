@@ -1213,6 +1213,8 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_progress_optimising_video">Upload finished and verified. Now optimising your videos: nothing is cut, they stay in your gallery, and the full-size originals stay in OneDrive.</string>
     <string name="tour_progress_complete">Congratulations your backup has finished successfully and has been verified. Press Finish.</string>
     <string name="tour_progress_note">You can check progress any time by opening the app.</string>
+    <string name="tour_progress_finish_early">Finish setup</string>
+    <string name="tour_progress_finish_early_note">The backup keeps going in the background. If you swipe GallerySync away from your recent apps it pauses until you open it again.</string>
     <!--
         Stopping a run in progress, so settings can be changed. Asked for by Ian, 4 Sept 2026.
 

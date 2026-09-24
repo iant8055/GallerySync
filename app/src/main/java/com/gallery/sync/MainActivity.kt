@@ -151,13 +151,22 @@ private fun GallerySyncApp(modifier: Modifier = Modifier, initialTab: Int = 0) {
 
         // The window for files deleted from the phone stands in front of the set-up app only, never
         // the wizard: setup is finished and the user is signed in. Ian, 19 Sept 2026.
-        else -> DeletedFilesGate(modifier = modifier) {
-            SignedInApp(
-                accountName = cloudAccountName(cloudState),
-                onSignOut = { cloudViewModel.disconnect(BackupLocation.ONEDRIVE) },
-                initialTab = initialTab,
-                modifier = modifier
-            )
+        // The window about files deleted from the phone asks OneDrive about them, so it only stands in front
+        // of the app while OneDrive is connected; a user whose cloud is another one has nothing to be asked.
+        else -> {
+            val app: @Composable () -> Unit = {
+                SignedInApp(
+                    accountName = cloudAccountName(cloudState),
+                    onSignOut = { cloudViewModel.disconnect(BackupLocation.ONEDRIVE) },
+                    initialTab = initialTab,
+                    modifier = modifier
+                )
+            }
+            if (cloudState.providers.any { it.location == BackupLocation.ONEDRIVE && it.isConnected }) {
+                DeletedFilesGate(modifier = modifier, content = app)
+            } else {
+                app()
+            }
         }
     }
 }

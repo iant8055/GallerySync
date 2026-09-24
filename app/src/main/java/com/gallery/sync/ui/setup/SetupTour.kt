@@ -726,6 +726,20 @@ fun SetupTour(
                             delayTotalMillis = state.firstBackupDelayMillis ?: 0L,
                             clouds = state.cloudProgress,
                             activeCloud = state.activeCloud,
+                            // Setup can be finished while the backup is still going (Ian, 24 Sept 2026: a big library
+                            // to a rate-limited cloud takes hours). Only for a plan with nothing to do after the
+                            // upload: the one-time optimise is driven from this screen and would never run.
+                            onFinishEarly = if (backupPhase == WizardBackupPhase.UPLOADING &&
+                                state.backupCompleted > 0 && !state.libraryChoice.optimisesAtInstall
+                            ) {
+                                {
+                                    // Restores the Recents card: hidden for the wizard, and an app missing from
+                                    // Recents with nothing to explain it is worse than the swipe it guarded.
+                                    viewModel.setRecentsCardHidden(false)
+                                    viewModel.completeSetup()
+                                    onComplete()
+                                }
+                            } else null,
                             onSyncNow = viewModel::startBackupNow
                         )
                     }
@@ -2165,6 +2179,7 @@ private fun BackupProgressContent(
     delayTotalMillis: Long,
     clouds: List<CloudProgress>,
     activeCloud: BackupLocation?,
+    onFinishEarly: (() -> Unit)?,
     onSyncNow: () -> Unit
 ) {
     val uploading = phase == WizardBackupPhase.UPLOADING
@@ -2369,6 +2384,19 @@ private fun BackupProgressContent(
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
         )
+
+        if (onFinishEarly != null) {
+            OutlinedButton(onClick = onFinishEarly, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.tour_progress_finish_early))
+            }
+            Text(
+                text = stringResource(R.string.tour_progress_finish_early_note),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
     }
 }
 
