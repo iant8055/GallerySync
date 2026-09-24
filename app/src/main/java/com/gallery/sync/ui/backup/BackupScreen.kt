@@ -460,7 +460,8 @@ private fun AlbumList(
 
             // New albums start at Off, so a folder that has just appeared would otherwise go unbacked-up
             // without a word. Says how many are waiting for a choice, and offers to show them.
-            val waiting = state.waitingAlbums.size
+            val waitingNames = state.waitingAlbums.map { it.name }.toSet()
+            val waiting = waitingNames.size
             if (waiting > 0) {
                 item(key = "waiting-albums") {
                     WaitingAlbumsCard(
@@ -487,6 +488,7 @@ private fun AlbumList(
                             Box(modifier = Modifier.weight(1f)) {
                                 AlbumModeRow(
                                     album = album,
+                                    isNew = album.name in waitingNames,
                                     context = context,
                                     onTapped = { onAlbumTapped(album) },
                                     onModeSelected = { mode -> onModeSelected(album, mode) }
@@ -657,6 +659,8 @@ private fun ModeFilterChip(
 private fun AlbumModeRow(
     album: AlbumRow,
     context: android.content.Context,
+    /** Nobody has chosen a mode for it yet. Ringed and tagged so it cannot be missed in the list. */
+    isNew: Boolean = false,
     onTapped: () -> Unit,
     onModeSelected: (AlbumMode) -> Unit
 ) {
@@ -665,7 +669,10 @@ private fun AlbumModeRow(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
         color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        border = BorderStroke(
+            if (isNew) 2.dp else 1.dp,
+            if (isNew) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
+        ),
         onClick = onTapped
     ) {
     // A plain Row, not LabelWithAction. That helper stacks its action below the label when the row
@@ -678,13 +685,33 @@ private fun AlbumModeRow(
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = album.name,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = album.name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false)
+                )
+                if (isNew) {
+                    Surface(
+                        color = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        shape = RoundedCornerShape(50)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.album_new_tag),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 2.dp)
+                        )
+                    }
+                }
+            }
             if (album.isArchivedAndEmpty) {
                 // One line. The usual counts would describe files that are not here any more, and
                 // the row's own Archive badge already says the mode stands and can be changed.

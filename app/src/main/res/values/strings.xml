@@ -1080,10 +1080,11 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_ok">OK</string>
     <string name="album_mode_unavailable">%1$s is not available with %2$s, so nothing happens for this album.</string>
     <plurals name="albums_waiting">
-        <item quantity="one">%d new album is waiting for you to choose a mode</item>
-        <item quantity="other">%d new albums are waiting for you to choose a mode</item>
+        <item quantity="one">%d new Album is waiting for you to choose a mode</item>
+        <item quantity="other">%d new Albums are waiting for you to choose a mode</item>
     </plurals>
-    <string name="albums_waiting_show">Show them</string>
+    <string name="albums_waiting_show">Show new Albums</string>
+    <string name="album_new_tag">New</string>
     <string name="albums_waiting_dismiss">Dismiss</string>
     <string name="feature_restore">RESTORE</string>
     <string name="feature_archive">ARCHIVE</string>
