@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.gallery.sync.data.local.media.DiscoveredDirectory
 import com.gallery.sync.data.local.media.MediaScanner
 import com.gallery.sync.domain.backup.BackupEngine
+import com.gallery.sync.domain.backup.BackupLocation
+import com.gallery.sync.domain.backup.SetFolderDestination
 import com.gallery.sync.domain.backup.CloudReconciliation
 import com.gallery.sync.data.local.settings.BackupSettings
 import android.net.Uri
@@ -148,6 +150,11 @@ data class ReconcileUiState(
     val discoveryRunning: Boolean = false,
     /** Which directories the user has checked. Key = directory name, value = checked. */
     val directoryChecks: Map<String, Boolean> = emptyMap(),
+    /**
+     * Where each folder's backups go, as the wizard's own answer (TASK-026). Deliberately not read from
+     * what is already stored: the wizard collects its own answers. A folder with no entry is OneDrive.
+     */
+    val folderDestinations: Map<String, BackupLocation> = emptyMap(),
     /** Persisted wizard step — non-zero means the wizard was interrupted and should resume here. */
     val wizardStep: Int = 0,
     /** Whether the user selected directories in the wizard (separate from SAF grants). */
@@ -230,7 +237,8 @@ class ReconcileViewModel @Inject constructor(
     private val proxyApplier: com.gallery.sync.data.local.media.ProxyApplier,
     private val videoOptimiser: com.gallery.sync.data.local.media.VideoOptimiser,
     private val entryDao: com.gallery.sync.data.local.dao.BackupEntryDao,
-    private val recentsCard: RecentsCard
+    private val recentsCard: RecentsCard,
+    private val setFolderDestination: SetFolderDestination
 ) : ViewModel() {
 
     private val workManager = WorkManager.getInstance(context)
@@ -944,6 +952,26 @@ class ReconcileViewModel @Inject constructor(
         }
     }
 
+    private var saveJob: Job? = null
+
+    /**
+     * Runs the cloud check once the folder choice has actually been written. Sign-in now comes *before*
+     * the folders, so the check that fires at sign-in ran against nothing; this is the run that counts.
+     */
+    fun startWhenFoldersSaved() {
+        viewModelScope.launch {
+            saveJob?.join()
+            start()
+        }
+    }
+
+    /** Records which cloud a folder goes to. Held here until Next; see [saveSelectedDirectories]. */
+    fun setFolderDestinationChoice(name: String, location: BackupLocation) {
+        _state.value = _state.value.copy(
+            folderDestinations = _state.value.folderDestinations + (name to location)
+        )
+    }
+
     /** Toggles a directory's checked state. */
     fun toggleDirectoryCheck(name: String) {
         val current = _state.value.directoryChecks.toMutableMap()
@@ -958,11 +986,17 @@ class ReconcileViewModel @Inject constructor(
      * photos and videos. The selected directory names scope the scan via [TreeScope.isInScope].
      */
     fun saveSelectedDirectories() {
-        viewModelScope.launch {
+        saveJob = viewModelScope.launch {
             val selected = _state.value.directoryChecks
                 .filter { (_, checked) -> checked }
                 .keys
             sources.saveSelectedDirectories(selected)
+            // The wizard's per-folder cloud answers, for the folders actually chosen. Every one is
+            // written, OneDrive included: a folder the user left on OneDrive is an answer too, and
+            // SetFolderDestination also re-points rows the first scan has already queued.
+            setFolderDestination(
+                selected.associateWith { _state.value.folderDestinations[it] ?: BackupLocation.ONEDRIVE }
+            )
         }
     }
 

@@ -397,6 +397,24 @@ signed-in OneDrive session in any case. Compile + full unit suite only.
    wizard-independence rule concerns album modes and the optimise tree; destination is a new concept
    it never covered, so the wizard *does* write folder destinations (that was my misreading and Ian
    corrected it). It must still write no album modes.
+   **Built the same day — compile + unit suite + install/launch only; the wizard cards themselves have
+   NOT been seen running** (reaching them needs a fresh install and a real OneDrive sign-in, which is Ian's to
+   type). What it does now: **step 4 is Cloud Storage, step 5 is the folders** (they were the other way round),
+   steps 6–9 unchanged and `TOTAL_STEPS` still 9. Step 4 lists OneDrive (ticked, fixed — it is the app's base)
+   and Google Photos (Pro, optional); ticking Google Photos shows its limits *before* anything is connected
+   (Backup only / no dedup against the existing library / no restore yet / Pro one-time purchase) and then
+   the same Connect / Unlock Pro controls Settings uses (`GooglePhotosSection`). Next needs OneDrive signed in
+   and, if Google Photos was ticked, Google Photos signed in. Step 5 is the existing permission → scan →
+   tick folders → SAF grants card, and each *ticked* folder gets a "Goes to:" menu when Google Photos is
+   connected and unlocked; the answers are held in `ReconcileUiState.folderDestinations` (deliberately
+   not read from the stored table — the wizard collects its own answers) and written on Next through
+   `SetFolderDestination`, which also re-points rows the first scan already queued. The cloud check now runs
+   from `startWhenFoldersSaved()` after the folders are written, because sign-in now precedes folders and the
+   run that fires at sign-in has nothing to look at. The "What we'll set up" card lists four steps, not five.
+   The guide anchors on steps 4 and 5 were swapped in `DetailAnchors`. **The setup guide's own text
+   (`tools/guide/content/c2_setup.py`) still describes the old order and was not touched** — it had
+   unrelated uncommitted edits of Ian's. Wizard writes no album modes. In practice a user with no Google
+   Photos sees no per-folder menu at all; everything routes to OneDrive as before.
 2. **Trial for more than one cloud.** Choosing a second cloud (wizard or Settings) offers a 30-day
    trial, then requires the $2.49 `pro_unlock`. Plain and upfront. **Hard gate, not an auto-charge**
    (Ian: "definately a hard gate") — Play one-time products cannot auto-charge anyway, so this is local

@@ -999,12 +999,11 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tab_help">Help</string>
 
     <string name="tour_install_title">What we\'ll set up</string>
-    <string name="tour_install_body">There are five simple steps to get you started.</string>
+    <string name="tour_install_body">There are four simple steps to get you started.</string>
+    <string name="tour_install_cloud">Choose your cloud storage and sign in to it</string>
     <string name="tour_install_search">Give permission to search this phone for photos and videos</string>
-    <string name="tour_install_select_gallery">Choose which of the folders it finds you want backed up</string>
+    <string name="tour_install_select_gallery">Choose which of the folders it finds you want backed up, and where each one goes</string>
     <string name="tour_install_grant_gallery">Give permission to change files in those folders</string>
-    <string name="tour_install_grant_cloud">Grant access to your cloud storage</string>
-    <string name="tour_install_select_cloud">Select where backups go in OneDrive</string>
 
     <string name="tour_search_title">Let GallerySync search this phone</string>
     <string name="tour_search_body">First, permission to search. GallerySync needs to find where your photos and videos are located on your device.</string>
@@ -1034,10 +1033,17 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_local_granted">All set</string>
 
     <string name="tour_cloud_title">Cloud Storage</string>
-    <string name="tour_cloud_body">You\'re signed in to OneDrive. Choose where backups are stored.</string>
+    <string name="tour_cloud_body">Choose the cloud services you use, and sign in to each. OneDrive is where your backups are kept; Google Photos is an optional extra.</string>
     <string name="tour_cloud_signed_in">Signed in to OneDrive</string>
     <string name="tour_cloud_destination">Backup destination</string>
     <string name="tour_cloud_change">Change</string>
+    <string name="tour_cloud_google_photos">Google Photos (Pro)</string>
+    <string name="tour_cloud_google_photos_limits_title">Before you choose Google Photos, know that:</string>
+    <string name="tour_cloud_google_photos_limit_backup_only">Folders sent there can only be backed up. Archive and Sync are not available, because Google Photos will not confirm the size of a stored file, so the app could never prove a copy is safe before removing the original.</string>
+    <string name="tour_cloud_google_photos_limit_duplicates">It cannot check what is already in your Google Photos, so a photo that is already there may be added a second time.</string>
+    <string name="tour_cloud_google_photos_limit_restore">Restoring files from Google Photos back onto this phone is not available yet.</string>
+    <string name="tour_cloud_google_photos_limit_pro">It is a Pro feature: a one-time purchase, not a subscription.</string>
+    <string name="tour_folder_goes_to">Goes to: %1$s</string>
 
     <string name="tour_backup_title">Choose your backup plan</string>
 

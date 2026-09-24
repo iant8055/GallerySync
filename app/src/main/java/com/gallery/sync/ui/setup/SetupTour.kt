@@ -35,6 +35,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -97,10 +99,14 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.gallery.sync.ui.settings.GooglePhotosSection
+import com.gallery.sync.ui.settings.GooglePhotosViewModel
 import com.gallery.sync.R
 import com.gallery.sync.data.local.media.DiscoveredDirectory
 import com.gallery.sync.data.local.media.ProxyGenerator
+import com.gallery.sync.domain.backup.BackupLocation
 import com.gallery.sync.domain.backup.LibraryChoice
 import com.gallery.sync.ui.common.formatBytes
 import com.gallery.sync.domain.backup.VideoQuality
@@ -120,13 +126,13 @@ private const val TOTAL_STEPS = 9
 
 /**
  * The cards that end with "For a more detailed explanation Click Here", and the section of the setup
- * guide each one opens. Steps 4 (Choose folders to back up), 5 (Cloud Storage), 6 (Choose your backup
+ * guide each one opens. Steps 4 (Cloud Storage), 5 (Choose folders to back up), 6 (Choose your backup
  * plan) and 8 (Ready to back up); the ids are the guide's topic anchors, and
  * `HowToGuideConsistencyTest` checks that each is on the published setup page.
  */
 internal val DetailAnchors = mapOf(
-    4 to "setup-choose-folders",
-    5 to "setup-cloud",
+    4 to "setup-cloud",
+    5 to "setup-choose-folders",
     6 to "setup-backup-plan",
     8 to "setup-ready"
 )
@@ -182,6 +188,7 @@ private const val WelcomeMinimumVisibleMillis = 3_000L
 fun SetupTour(
     viewModel: ReconcileViewModel,
     signInViewModel: SignInViewModel? = null,
+    googlePhotosViewModel: GooglePhotosViewModel = hiltViewModel(),
     onComplete: () -> Unit,
     onSwitchTab: (Int) -> Unit = {},
     onStepChanged: (Int) -> Unit = {},
@@ -278,12 +285,19 @@ fun SetupTour(
 
     val signInState = signInViewModel?.state?.collectAsStateWithLifecycle()
     val isSignedIn = signInState?.value is SignInUiState.SignedIn
+    val gpState by googlePhotosViewModel.state.collectAsStateWithLifecycle()
+    // The user's own answer on step 4: does Google Photos count among the services they use. Not read
+    // from anywhere — the wizard collects its own answers — and what step 5 offers depends on whether
+    // Google Photos is actually connected and unlocked (`gpState.isAvailable`), not on this tick.
+    var googlePhotosChosen by rememberSaveable { mutableStateOf(false) }
     val activity = LocalActivity.current
 
     // Re-check the drive once there is an account to check it with.
     //
-    // The reconcile fires from the directories flow, which settles at step 4 — one step *before*
-    // sign-in at step 5. With no token every listing fails, so `ReconciliationRules.tallyAlbum`
+    // Written when the folder step (then 4) came one step *before* sign-in (then 5); since 24 Sept 2026
+    // sign-in is step 4 and folders are step 5, so this run now fires before any folder is chosen and
+    // `startWhenFoldersSaved` is the run that counts. The reasoning below is why a check with no token
+    // must not be trusted. The reconcile fires from the directories flow. With no token every listing fails, so `ReconciliationRules.tallyAlbum`
     // files each album under `unchecked` rather than `outstanding`. That is the correct call on its
     // own terms — "could not check" is not "not backed up" — but it leaves `photosOutstanding` and
     // `videosOutstanding` at zero, and every figure downstream is computed from those two. Step 7
@@ -309,8 +323,8 @@ fun SetupTour(
     }
 
     fun canAdvance(): Boolean = when (step) {
-        4 -> state.directoryChecks.values.any { it }
-        5 -> isSignedIn
+        4 -> isSignedIn && (!googlePhotosChosen || gpState.isSignedIn)
+        5 -> state.directoryChecks.values.any { it }
         else -> true
     }
 
@@ -387,10 +401,10 @@ fun SetupTour(
 
     // Discover once permission is in hand. The request itself is **not** fired on arrival: the
     // system dialog cannot be reworded, so landing on it cold is the whole reason it reads as
-    // unexplained. Step 4 states the case first and the user raises the dialog from the card.
+    // unexplained. Step 5 states the case first and the user raises the dialog from the card.
     // Recounted on every visit, not only the first — see ReconcileViewModel.discoverDirectories.
     LaunchedEffect(mediaGranted, step) {
-        if (mediaGranted && step == 4 && !state.discoveryRunning) {
+        if (mediaGranted && step == 5 && !state.discoveryRunning) {
             viewModel.discoverDirectories()
         }
     }
@@ -412,7 +426,10 @@ fun SetupTour(
             safWalkStarted = false
             // Every folder skipped leaves nothing to back up, so stay on the folder card rather than
             // walk on into a cloud check of nothing.
-            if (state.directoryChecks.values.any { it }) step = 5
+            if (state.directoryChecks.values.any { it }) {
+                step = 6
+                if (isSignedIn) viewModel.startWhenFoldersSaved()
+            }
         }
     }
 
@@ -423,12 +440,13 @@ fun SetupTour(
 
     val onNext: () -> Unit = {
         when {
-            step == 4 -> {
+            step == 5 -> {
                 viewModel.saveSelectedDirectories()
                 if (viewModel.buildSafGrantQueue()) {
                     safWalkStarted = true
                 } else {
-                    step = 5
+                    step = 6
+                    if (isSignedIn) viewModel.startWhenFoldersSaved()
                 }
             }
             step == 6 -> {
@@ -636,22 +654,27 @@ fun SetupTour(
                 ) {
                     when (step) {
                         3 -> InstallationStepsContent()
-                        4 -> DirectoryDiscoveryContent(
+                        4 -> CloudStorageContent(
+                            state = state,
+                            isSignedIn = isSignedIn,
+                            onSignIn = {
+                                activity?.let { signInViewModel?.signIn(it) }
+                            },
+                            onChangeDestination = viewModel::openDestinationChooser,
+                            googlePhotosChosen = googlePhotosChosen,
+                            onGooglePhotosChosenChange = { googlePhotosChosen = it },
+                            googlePhotosViewModel = googlePhotosViewModel
+                        )
+                        5 -> DirectoryDiscoveryContent(
                             state = state,
                             hasMediaPermission = mediaGranted,
                             onGrantMediaAccess = ::requestMediaPermission,
                             onToggleDirectory = viewModel::toggleDirectoryCheck,
                             onRetryGrant = viewModel::retrySafGrant,
                             onSkipGrant = viewModel::skipSafGrant,
-                            onKeepNarrowerGrant = viewModel::keepNarrowerGrant
-                        )
-                        5 -> CloudStorageContent(
-                            state = state,
-                            isSignedIn = isSignedIn,
-                            onSignIn = {
-                                activity?.let { signInViewModel?.signIn(it) }
-                            },
-                            onChangeDestination = viewModel::openDestinationChooser
+                            onKeepNarrowerGrant = viewModel::keepNarrowerGrant,
+                            googlePhotosAvailable = gpState.isAvailable,
+                            onDestinationChange = viewModel::setFolderDestinationChoice
                         )
                         6 -> BackupOptionsContent(
                             selected = state.libraryChoice,
@@ -1117,11 +1140,10 @@ private fun InstallationStepsContent() {
         // Listed in the order they actually happen, and naming both grants separately: the two
         // system dialogs look alike and cannot be reworded, so this is the only place the
         // difference between searching and changing can be made before they appear.
+        BulletItem(stringResource(R.string.tour_install_cloud))
         BulletItem(stringResource(R.string.tour_install_search))
         BulletItem(stringResource(R.string.tour_install_select_gallery))
         BulletItem(stringResource(R.string.tour_install_grant_gallery))
-        BulletItem(stringResource(R.string.tour_install_grant_cloud))
-        BulletItem(stringResource(R.string.tour_install_select_cloud))
     }
 }
 
@@ -1135,7 +1157,9 @@ private fun DirectoryDiscoveryContent(
     onToggleDirectory: (String) -> Unit,
     onRetryGrant: () -> Unit,
     onSkipGrant: () -> Unit,
-    onKeepNarrowerGrant: () -> Unit
+    onKeepNarrowerGrant: () -> Unit,
+    googlePhotosAvailable: Boolean,
+    onDestinationChange: (String, BackupLocation) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
@@ -1189,7 +1213,10 @@ private fun DirectoryDiscoveryContent(
                 DirectoryRow(
                     directory = dir,
                     checked = checked,
-                    onToggle = { onToggleDirectory(dir.name) }
+                    onToggle = { onToggleDirectory(dir.name) },
+                    destination = state.folderDestinations[dir.name] ?: BackupLocation.ONEDRIVE,
+                    offerDestination = googlePhotosAvailable,
+                    onDestinationChange = { onDestinationChange(dir.name, it) }
                 )
             }
 
@@ -1257,7 +1284,11 @@ private fun SafGrantIssueNotice(
 private fun DirectoryRow(
     directory: DiscoveredDirectory,
     checked: Boolean,
-    onToggle: () -> Unit
+    onToggle: () -> Unit,
+    destination: BackupLocation,
+    /** Only when there is a real second choice — Google Photos connected and unlocked. */
+    offerDestination: Boolean,
+    onDestinationChange: (BackupLocation) -> Unit
 ) {
     val context = LocalContext.current
     Row(
@@ -1291,18 +1322,31 @@ private fun DirectoryRow(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
+            if (offerDestination && checked) {
+                FolderDestinationPicker(destination = destination, onChange = onDestinationChange)
+            }
         }
     }
 }
 
-// ── Step 5: Cloud Storage ───────────────────────────────────────────────────
+// ── Step 4: Cloud Storage ───────────────────────────────────────────────────
 
+/**
+ * Which cloud services the user uses, and signing in to each. Comes *before* the folders (Ian,
+ * 24 Sept 2026): the folder step needs to know which clouds are actually available to send a folder to.
+ *
+ * OneDrive is the app's base and is listed ticked and fixed. Google Photos is the optional Pro
+ * addition; ticking it states its limits before anything is connected.
+ */
 @Composable
 private fun CloudStorageContent(
     state: ReconcileUiState,
     isSignedIn: Boolean,
     onSignIn: () -> Unit,
-    onChangeDestination: () -> Unit
+    onChangeDestination: () -> Unit,
+    googlePhotosChosen: Boolean,
+    onGooglePhotosChosenChange: (Boolean) -> Unit,
+    googlePhotosViewModel: GooglePhotosViewModel
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
@@ -1313,6 +1357,19 @@ private fun CloudStorageContent(
             text = stringResource(R.string.tour_cloud_body),
             style = MaterialTheme.typography.bodyMedium
         )
+
+        // OneDrive: always part of the setup, so shown ticked and not toggleable.
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Checkbox(checked = true, onCheckedChange = null, enabled = false)
+            Text(
+                text = stringResource(R.string.backup_location_onedrive),
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
 
         if (!isSignedIn) {
             Button(onClick = onSignIn) {
@@ -1348,6 +1405,70 @@ private fun CloudStorageContent(
                 Button(onClick = onChangeDestination) {
                     Text(stringResource(R.string.tour_cloud_change), maxLines = 1)
                 }
+            }
+        }
+
+        HorizontalDivider()
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onGooglePhotosChosenChange(!googlePhotosChosen) },
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Checkbox(checked = googlePhotosChosen, onCheckedChange = { onGooglePhotosChosenChange(it) })
+            Text(
+                text = stringResource(R.string.tour_cloud_google_photos),
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+
+        if (googlePhotosChosen) {
+            Text(
+                text = stringResource(R.string.tour_cloud_google_photos_limits_title),
+                style = MaterialTheme.typography.labelLarge
+            )
+            BulletItem(stringResource(R.string.tour_cloud_google_photos_limit_backup_only))
+            BulletItem(stringResource(R.string.tour_cloud_google_photos_limit_duplicates))
+            BulletItem(stringResource(R.string.tour_cloud_google_photos_limit_restore))
+            BulletItem(stringResource(R.string.tour_cloud_google_photos_limit_pro))
+            // The same Connect / Unlock Pro controls Settings uses, over the same account state —
+            // signing in is a fact about the account, not a Settings value.
+            GooglePhotosSection(viewModel = googlePhotosViewModel)
+        }
+    }
+}
+
+/**
+ * Where one folder's photos and videos go. Offered only when there is a genuine second choice.
+ * A plain menu button rather than a full-width control: it sits under the folder's name and size.
+ */
+@Composable
+private fun FolderDestinationPicker(
+    destination: BackupLocation,
+    onChange: (BackupLocation) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val options = listOf(BackupLocation.ONEDRIVE, BackupLocation.GOOGLE_PHOTOS)
+    @Composable
+    fun label(location: BackupLocation) = stringResource(
+        if (location == BackupLocation.GOOGLE_PHOTOS) R.string.backup_location_google_photos
+        else R.string.backup_location_onedrive
+    )
+    Box {
+        OutlinedButton(onClick = { expanded = true }) {
+            Text(stringResource(R.string.tour_folder_goes_to, label(destination)), maxLines = 1)
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(label(option)) },
+                    onClick = {
+                        expanded = false
+                        onChange(option)
+                    }
+                )
             }
         }
     }

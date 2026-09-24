@@ -26,7 +26,6 @@ import com.gallery.sync.data.local.dao.FolderPreferenceDao
 import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.entity.AlbumPreferenceEntity
-import com.gallery.sync.data.local.entity.FolderPreferenceEntity
 import com.gallery.sync.data.local.entity.BackupState
 import com.gallery.sync.data.local.media.MediaAccess
 import com.gallery.sync.data.local.media.MediaScanner
@@ -42,6 +41,7 @@ import com.gallery.sync.domain.backup.FilePin
 import com.gallery.sync.domain.backup.FolderDestination
 import com.gallery.sync.domain.backup.GooglePhotosDestination
 import com.gallery.sync.domain.backup.ReconcileWithCloud
+import com.gallery.sync.domain.backup.SetFolderDestination
 import com.gallery.sync.domain.backup.MediaAge
 import com.gallery.sync.domain.backup.OptimiseMode
 import com.gallery.sync.domain.backup.OptimiseOnSyncNow
@@ -456,6 +456,7 @@ class BackupViewModel @Inject constructor(
     private val scanner: MediaScanner,
     private val albumDao: AlbumPreferenceDao,
     private val folderDao: FolderPreferenceDao,
+    private val setFolderDestination: SetFolderDestination,
     private val entryDao: BackupEntryDao,
     private val cloudStatusDao: AlbumCloudStatusDao,
     private val reconcile: ReconcileWithCloud,
@@ -1137,9 +1138,7 @@ class BackupViewModel @Inject constructor(
      */
     fun setFolderLocation(folder: String, location: BackupLocation) {
         viewModelScope.launch {
-            folderDao.setPreference(FolderPreferenceEntity(folder, location))
-            val albumsInFolder = _state.value.albums.filter { it.topLevelFolder == folder }.map { it.name }
-            if (albumsInFolder.isNotEmpty()) entryDao.retargetUnsent(albumsInFolder, location)
+            setFolderDestination(folder, location)
             _state.update { current ->
                 current.copy(
                     folders = current.folders.map { if (it.name == folder) it.copy(location = location) else it },

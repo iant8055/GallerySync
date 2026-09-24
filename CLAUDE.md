@@ -243,6 +243,13 @@ Do not file any of it, do not fix it, and do not report it as an inconsistency t
 explanation you are building requires one of these surfaces to write the other, the explanation is
 wrong — discard it rather than checking it.
 
+
+**One deliberate exception, Ian, 24 Sept 2026: which cloud each top-level folder goes to.** The wizard
+asks it (step 5, only when a second cloud is actually connected) and writes the `folder_preferences`
+table, the same table Settings lists. That is not the wizard writing Settings: the table is the
+routing itself, not a Settings value, and the wizard still reads none of it. It writes no album modes
+and no optimise settings, and none of the rules above changed. See TASK-026.
+
 **Settings → *Run setup again* is a testing affordance and will not ship** (Ian, 7 Sept 2026). It is
 there so the wizard can be re-entered without wiping app data while the wizard is still being
 iterated on, and *"once we finally get the Wizard set that setting will go away"*. Do not build on it,
