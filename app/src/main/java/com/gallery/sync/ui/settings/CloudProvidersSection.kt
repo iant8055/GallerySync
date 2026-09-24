@@ -76,16 +76,8 @@ fun CloudProvidersSection(
                 action = {
                     when {
                         state.isBusy -> BusyIndicator()
-                        provider.isConnected -> Column(horizontalAlignment = androidx.compose.ui.Alignment.End) {
-                            OutlinedButton(onClick = { viewModel.disconnect(provider.location) }) {
-                                Text(stringResource(R.string.sign_out_action))
-                            }
-                            // Only in Settings: the wizard has its own way of choosing the main cloud.
-                            if (only == null && provider.location != state.main && state.connected.size > 1) {
-                                TextButton(onClick = { viewModel.setMain(provider.location) }) {
-                                    Text(stringResource(R.string.cloud_make_main_action))
-                                }
-                            }
+                        provider.isConnected -> OutlinedButton(onClick = { viewModel.disconnect(provider.location) }) {
+                            Text(stringResource(R.string.sign_out_action))
                         }
                         provider.kind == ConnectionKind.ACCESS_KEYS -> Button(onClick = { keysFor = provider }) {
                             Text(stringResource(R.string.cloud_enter_keys_action))

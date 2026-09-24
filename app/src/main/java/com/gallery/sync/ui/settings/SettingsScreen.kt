@@ -189,7 +189,12 @@ fun SettingsScreen(
                     enabled = options.size > 1,
                     // Where in that cloud the folder's files go, so a row reads as one pairing:
                     // local folder, cloud, place in the cloud.
-                    note = when (folder.location) {
+                    noteIsWarning = folder.location != cloudState.main && !cloudState.isEntitled,
+                    note = if (folder.location != cloudState.main && !cloudState.isEntitled) {
+                        // Paired with a cloud that is not the free one, with no Pro and no trial: nothing is
+                        // sent there. Say so on the row rather than let it sit silent.
+                        stringResource(R.string.pairing_needs_pro, stringResource(folder.location.labelRes()))
+                    } else when (folder.location) {
                         BackupLocation.ONEDRIVE -> stringResource(
                             R.string.pairing_path, stringResource(folder.location.labelRes()), state.destinationRoot
                         )
@@ -608,7 +613,9 @@ private fun <T> SettingDropdown(
     /** False greys the control: it is set by something else and shown for information. */
     enabled: Boolean = true,
     /** A line under the row saying why it is locked, or anything else worth a sentence. */
-    note: String? = null
+    note: String? = null,
+    /** Draws [note] as a warning: something here is not working. */
+    noteIsWarning: Boolean = false
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -643,7 +650,7 @@ private fun <T> SettingDropdown(
         Text(
             text = it,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = if (noteIsWarning) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
     }

@@ -12,6 +12,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.TextButton
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxWidth
+import com.gallery.sync.ui.common.labelRes
 import androidx.compose.material3.Tab
 import androidx.compose.material3.ScrollableTabRow
 import com.gallery.sync.domain.backup.ExitWarning
@@ -322,6 +329,39 @@ private fun SignedInApp(
                     }
                 },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+        }
+
+        // The trial has ended with more than one cloud connected: ask once which one stays free. Nothing is
+        // moved by the answer, and "Not now" only puts it off until the next launch.
+        var keepFreeDeferred by rememberSaveable { mutableStateOf(false) }
+        if (cloudState.needsKeepFreeQuestion && !keepFreeDeferred && !tourVisible) {
+            AlertDialog(
+                onDismissRequest = { keepFreeDeferred = true },
+                title = { Text(stringResource(R.string.keep_free_title)) },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(stringResource(R.string.keep_free_body))
+                        cloudState.connected.forEach { provider ->
+                            Button(
+                                onClick = { cloudViewModel.keepFree(provider.location) },
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Text(stringResource(R.string.keep_free_keep, stringResource(provider.location.labelRes())))
+                            }
+                        }
+                        OutlinedButton(
+                            onClick = { activity?.let(cloudViewModel::unlockPro) },
+                            enabled = activity != null,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(stringResource(R.string.google_photos_unlock_pro_action))
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { keepFreeDeferred = true }) { Text(stringResource(R.string.keep_free_not_now)) }
+                }
             )
         }
 

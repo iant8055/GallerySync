@@ -107,6 +107,8 @@ data class BackupPreferences(
      * counts as waiting. Names only, so no schema change; an album that disappears leaves a harmless entry.
      */
     val acknowledgedAlbums: Set<String> = emptySet(),
+    /** The user has answered "which cloud do you want to keep free?" after the trial ended. */
+    val keepFreeAnswered: Boolean = false,
     /** Hour of day the first whole-library backup may begin. */
     val firstBackupStartHour: Int = FirstBackupWindow.DEFAULT_START_HOUR,
     /** Whether that first run waits for the phone to be plugged in. On by default. */
@@ -313,6 +315,7 @@ class BackupSettings @Inject constructor(
             backupLocation = BackupLocation.fromNameOrDefault(stored[KEY_BACKUP_LOCATION]),
             multiCloudTrialStartedAtEpochMillis = stored[KEY_MULTI_CLOUD_TRIAL_STARTED_AT],
             acknowledgedAlbums = stored[KEY_ACKNOWLEDGED_ALBUMS] ?: emptySet(),
+            keepFreeAnswered = stored[KEY_KEEP_FREE_ANSWERED] ?: false,
             firstBackupStartHour = stored[KEY_FIRST_BACKUP_HOUR]
                 ?.takeIf { it in FirstBackupWindow.SELECTABLE_HOURS }
                 ?: FirstBackupWindow.DEFAULT_START_HOUR,
@@ -611,6 +614,10 @@ class BackupSettings @Inject constructor(
         context.dataStore.edit { it[KEY_BACKUP_LOCATION] = location.name }
     }
 
+    suspend fun setKeepFreeAnswered() {
+        context.dataStore.edit { it[KEY_KEEP_FREE_ANSWERED] = true }
+    }
+
     /** Marks [names] as dealt with. See [BackupPreferences.acknowledgedAlbums]. */
     suspend fun acknowledgeAlbums(names: Collection<String>) {
         if (names.isEmpty()) return
@@ -646,6 +653,7 @@ class BackupSettings @Inject constructor(
         val KEY_BACKUP_LOCATION = stringPreferencesKey("backup_location")
         val KEY_MULTI_CLOUD_TRIAL_STARTED_AT = longPreferencesKey("multi_cloud_trial_started_at")
         val KEY_ACKNOWLEDGED_ALBUMS = stringSetPreferencesKey("acknowledged_albums")
+        val KEY_KEEP_FREE_ANSWERED = booleanPreferencesKey("keep_free_answered")
         val KEY_FIRST_BACKUP_HOUR = intPreferencesKey("first_backup_start_hour")
         val KEY_FIRST_BACKUP_CHARGING = booleanPreferencesKey("first_backup_requires_charging")
         val KEY_FIRST_BACKUP_START_AT = longPreferencesKey("first_backup_start_at")

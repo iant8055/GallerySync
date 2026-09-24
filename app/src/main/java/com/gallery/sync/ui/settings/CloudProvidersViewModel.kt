@@ -49,7 +49,9 @@ data class CloudProvidersUiState(
     val lastError: String? = null,
     val trial: MultiCloudTrial.State = MultiCloudTrial.State.NotStarted,
     /** False until the first refresh has read what is connected, so the app does not flash the wizard. */
-    val loaded: Boolean = false
+    val loaded: Boolean = false,
+    /** Whether the "which cloud do you want to keep free?" question has been answered. */
+    val keepFreeAnswered: Boolean = false
 ) {
     val connected: List<ProviderState> get() = providers.filter { it.isConnected }
 
@@ -66,6 +68,13 @@ data class CloudProvidersUiState(
     /** What a folder's menu may offer: the main cloud always, the others only with Pro or the trial. */
     val destinations: List<BackupLocation>
         get() = if (isEntitled) connected.map { it.location } else listOf(main)
+
+    /**
+     * The trial has ended, Pro is not bought, and more than one cloud is connected: the one moment the user
+     * has to say which cloud stays free. Asked once. Nothing is moved by the answer — see [CloudProvidersViewModel].
+     */
+    val needsKeepFreeQuestion: Boolean
+        get() = loaded && !isProUnlocked && trial == MultiCloudTrial.State.Ended && !keepFreeAnswered && connected.size > 1
 
     /** Whether a folder menu is worth showing: there is a genuine second choice. */
     val isAvailable: Boolean get() = destinations.size > 1
@@ -106,6 +115,7 @@ class CloudProvidersViewModel @Inject constructor(
                 main = settings.current().backupLocation,
                 isProUnlocked = billing.isPurchased(),
                 trial = entitlement.trialState(),
+                keepFreeAnswered = settings.current().keepFreeAnswered,
                 loaded = true
             )
         }
@@ -145,8 +155,9 @@ class CloudProvidersViewModel @Inject constructor(
     }
 
     /**
-     * Makes [location] the one free cloud. Folders and files still waiting that were bound for the old
-     * main cloud follow it; anything already uploaded keeps its recorded history.
+     * Chooses the one free cloud — in the setup wizard, where folders have not been paired yet and follow the
+     * choice. Never from Settings: a pairing the user set is not rewritten behind their back (Ian, 24 Sept
+     * 2026). Anything already uploaded keeps its recorded history.
      */
     fun setMain(location: BackupLocation) {
         viewModelScope.launch {
@@ -155,6 +166,19 @@ class CloudProvidersViewModel @Inject constructor(
             settings.setBackupLocation(location)
             folderDao.reassign(old, location)
             entryDao.retargetAllUnsent(old, location)
+            refresh()
+        }
+    }
+
+    /**
+     * The answer to "which cloud do you want to keep free?" once the trial has ended. Only changes which cloud
+     * is free; every pairing stays as it is, and a folder paired with another cloud simply waits, with a line
+     * in Settings saying so, until the user re-pairs it or unlocks Pro.
+     */
+    fun keepFree(location: BackupLocation) {
+        viewModelScope.launch {
+            settings.setBackupLocation(location)
+            settings.setKeepFreeAnswered()
             refresh()
         }
     }
