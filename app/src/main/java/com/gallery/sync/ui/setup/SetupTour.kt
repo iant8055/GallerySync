@@ -1397,6 +1397,7 @@ private fun DirectoryRow(
  * The free tier is one cloud, whichever the user has, so the first cloud ticked is the free one (`main`) and
  * each further tick is the paid part: its card also needs the 30-day trial started, or Pro, before Next.
  * Unticking a cloud that is signed in signs it out; `main` follows the first cloud that is still ticked.
+ * There is no Skip on a card (Ian, 24 Sept 2026): Back returns to the checklist, where a cloud is unticked.
  */
 @Composable
 private fun CloudStorageContent(
@@ -1503,11 +1504,6 @@ private fun CloudStorageContent(
                     }
                 }
             }
-
-            TextButton(onClick = {
-                onExtrasChange(current, false)
-                if (cloudState.connected.any { it.location == current }) cloudViewModel.disconnect(current)
-            }) { Text(stringResource(R.string.tour_cloud_skip)) }
         }
 
         limitsFor?.let { (about, isExtra) ->
