@@ -123,7 +123,7 @@ class HowToGuideConsistencyTest {
      */
     @Test
     fun everyWizardDetailLinkLandsOnASectionOfTheSetupPage() {
-        assertEquals(setOf(4, 5, 6, 8), DetailAnchors.keys)
+        assertEquals(setOf(4, 5, 6, 8, 9), DetailAnchors.keys)
         for ((step, anchor) in DetailAnchors) {
             assertTrue("step $step: #$anchor is not on the setup page", "id=\"$anchor\"" in setupGuide)
         }

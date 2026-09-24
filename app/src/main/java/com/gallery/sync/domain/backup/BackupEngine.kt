@@ -506,6 +506,16 @@ class BackupEngine @Inject constructor(
         entryDao.countPendingAll(MAX_ATTEMPTS)
     }
 
+    /** Files sent since [sinceMillis], per cloud. For the wizard's progress card. */
+    suspend fun uploadedSinceByCloud(sinceMillis: Long): Map<BackupLocation, Int> = withContext(dispatcher) {
+        entryDao.uploadedSinceByLocation(sinceMillis).orEmpty().associate { it.location to it.n }
+    }
+
+    /** Files still waiting, per cloud. */
+    suspend fun pendingByCloud(): Map<BackupLocation, Int> = withContext(dispatcher) {
+        entryDao.pendingByLocation(MAX_ATTEMPTS).orEmpty().associate { it.location to it.n }
+    }
+
     /** Of [outstandingCountAll], the files bound for a cloud other than OneDrive. */
     suspend fun outstandingCountElsewhere(): Int = withContext(dispatcher) {
         entryDao.countPendingAllElsewhere(MAX_ATTEMPTS)

@@ -84,6 +84,9 @@ data class SafGrantIssue(
  * network request per album and there are ninety of them, so a screen that waits for the total reads
  * as a hang. The figures climb instead.
  */
+/** One cloud's share of the first backup: how many are sent of how many there are for it. */
+data class CloudProgress(val location: BackupLocation, val done: Int, val total: Int)
+
 data class ReconcileUiState(
     val running: Boolean = false,
     val result: CloudReconciliation? = null,
@@ -144,6 +147,10 @@ data class ReconcileUiState(
     val backupCurrentFile: String = "",
     val backupRunning: Boolean = false,
     val backupFinished: Boolean = false,
+    /** How the first backup splits across clouds, for the progress card. Empty until counted. */
+    val cloudProgress: List<CloudProgress> = emptyList(),
+    /** The cloud a file was most recently sent to, or the next one waiting: the one "Uploading" names. */
+    val activeCloud: BackupLocation? = null,
     /** Directories found by scanning MediaStore, before any grants. */
     val discoveredDirectories: List<DiscoveredDirectory> = emptyList(),
     /** Whether directory discovery is running. */
@@ -816,6 +823,8 @@ class ReconcileViewModel @Inject constructor(
             _state.value = _state.value.copy(backupRunning = true, backupTotal = total)
 
             var highWater = _state.value.backupCompleted
+            var lastDoneByCloud = emptyMap<BackupLocation, Int>()
+            var activeCloud: BackupLocation? = null
             val pendingAtStart = backupEngine.outstandingCountAll()
 
             while (true) {
@@ -840,6 +849,25 @@ class ReconcileViewModel @Inject constructor(
                     total = completed + remaining
                     if (runStartedAt > 0L) settings.setWizardRun(total, runStartedAt)
                 }
+
+                // Per cloud, for the card: done since the run began, and what is still waiting.
+                val doneByCloud = backupEngine.uploadedSinceByCloud(runStartedAt)
+                val waitingByCloud = backupEngine.pendingByCloud()
+                val clouds = (doneByCloud.keys + waitingByCloud.keys).sortedBy { it.ordinal }.map {
+                    val done = doneByCloud[it] ?: 0
+                    CloudProgress(it, done, done + (waitingByCloud[it] ?: 0))
+                }.filter { it.total > 0 }
+                // "Uploading" names the cloud a file has just gone to; between files it keeps the last
+                // one, and when that cloud has nothing left it moves to the next with work waiting.
+                val advanced = clouds
+                    .maxByOrNull { (doneByCloud[it.location] ?: 0) - (lastDoneByCloud[it.location] ?: 0) }
+                    ?.takeIf { (doneByCloud[it.location] ?: 0) > (lastDoneByCloud[it.location] ?: 0) }
+                activeCloud = when {
+                    advanced != null -> advanced.location
+                    activeCloud != null && (waitingByCloud[activeCloud] ?: 0) > 0 -> activeCloud
+                    else -> clouds.firstOrNull { (waitingByCloud[it.location] ?: 0) > 0 }?.location
+                }
+                lastDoneByCloud = doneByCloud
 
                 // A delayed start is over once the backup has visibly begun: a batch executing, a
                 // file landed, or the ledger's pending count moving (a batch of skips can finish
@@ -882,7 +910,9 @@ class ReconcileViewModel @Inject constructor(
 
                 _state.value = _state.value.copy(
                     backupCompleted = highWater,
-                    backupTotal = total
+                    backupTotal = total,
+                    cloudProgress = clouds,
+                    activeCloud = activeCloud
                 )
 
                 kotlinx.coroutines.delay(3000)

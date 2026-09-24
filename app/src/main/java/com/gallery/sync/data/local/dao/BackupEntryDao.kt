@@ -113,6 +113,9 @@ data class AlbumBackupCount(
 /** How many of one album's files went to one non-OneDrive location. Counted only while on the phone. */
 data class AlbumLocationCount(val album: String, val location: BackupLocation, val sent: Int)
 
+/** A count per cloud, for the wizard's progress card. */
+data class LocationCount(val location: BackupLocation, val n: Int)
+
 /** The two identities of a pinned file. See `FilePin.withoutPinned` for why both are carried. */
 data class PinnedKey(val id: String, val mediaStoreId: Long)
 
@@ -300,6 +303,26 @@ interface BackupEntryDao {
         sinceMillis: Long,
         uploaded: BackupState = BackupState.UPLOADED
     ): Int
+
+    /** [countUploadedSince], split by the cloud each file went to. */
+    @Query(
+        "SELECT location AS location, COUNT(*) AS n FROM backup_entries " +
+            "WHERE state = :uploaded AND uploadedAtEpochMillis >= :sinceMillis GROUP BY location"
+    )
+    suspend fun uploadedSinceByLocation(
+        sinceMillis: Long,
+        uploaded: BackupState = BackupState.UPLOADED
+    ): List<LocationCount>
+
+    /** What is still waiting, split by cloud, counted the way [countPendingAll] counts. */
+    @Query(
+        "SELECT location AS location, COUNT(*) AS n FROM backup_entries " +
+            "WHERE state != :uploaded AND attemptCount < :maxAttempts GROUP BY location"
+    )
+    suspend fun pendingByLocation(
+        maxAttempts: Int,
+        uploaded: BackupState = BackupState.UPLOADED
+    ): List<LocationCount>
 
     /**
      * Every key the ledger holds for a file it still intends to upload.

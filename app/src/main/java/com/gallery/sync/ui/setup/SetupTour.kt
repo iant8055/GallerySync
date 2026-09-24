@@ -130,14 +130,15 @@ private const val TOTAL_STEPS = 9
 /**
  * The cards that end with "For a more detailed explanation Click Here", and the section of the setup
  * guide each one opens. Steps 4 (Cloud Storage), 5 (Choose folders to back up), 6 (Choose your backup
- * plan) and 8 (Ready to back up); the ids are the guide's topic anchors, and
+ * plan), 8 (Ready to back up) and 9 (Backup progress); the ids are the guide's topic anchors, and
  * `HowToGuideConsistencyTest` checks that each is on the published setup page.
  */
 internal val DetailAnchors = mapOf(
     4 to "setup-cloud",
     5 to "setup-choose-folders",
     6 to "setup-backup-plan",
-    8 to "setup-ready"
+    8 to "setup-ready",
+    9 to "setup-progress"
 )
 
 /**
@@ -721,6 +722,8 @@ fun SetupTour(
                             optimiseTotal = state.optimiseProgressTotal,
                             remainingMillis = remainingMillis,
                             delayTotalMillis = state.firstBackupDelayMillis ?: 0L,
+                            clouds = state.cloudProgress,
+                            activeCloud = state.activeCloud,
                             onSyncNow = viewModel::startBackupNow
                         )
                     }
@@ -2152,9 +2155,16 @@ private fun BackupProgressContent(
     optimiseTotal: Int,
     remainingMillis: Long,
     delayTotalMillis: Long,
+    clouds: List<CloudProgress>,
+    activeCloud: BackupLocation?,
     onSyncNow: () -> Unit
 ) {
     val uploading = phase == WizardBackupPhase.UPLOADING
+    // The cloud the ring names while uploading, and the others waiting their turn (Ian, 24 Sept 2026: the
+    // ring still measures the whole backup, but says which cloud is being sent to and how far it is).
+    val activeProgress = clouds.firstOrNull { it.location == activeCloud }
+    val startingUpload = total > 0 && completed == 0 && isRunning
+    val showCloud = uploading && activeProgress != null && !startingUpload
     val waiting = phase == WizardBackupPhase.WAITING
     // Each pass drives the ring from its own counters, so it fills three times: upload, photos,
     // video.
@@ -2252,7 +2262,8 @@ private fun BackupProgressContent(
                         countPending -> "…"
                         else -> "$percent%"
                     },
-                    style = MaterialTheme.typography.headlineLarge,
+                    // Larger than before (Ian, 24 Sept 2026), so the overall figure is what the eye lands on.
+                    style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.Bold
                 )
                 // What the phase is, and underneath it how far through. Ian, 4 Sept 2026: the
@@ -2272,8 +2283,12 @@ private fun BackupProgressContent(
                     // Nothing has landed yet: the count would read "0 of 155" through
                     // WorkManager's start-up, the whole first upload and the poll lag behind it,
                     // which looks stuck rather than busy.
-                    total > 0 && completed == 0 && isRunning ->
+                    startingUpload ->
                         stringResource(R.string.tour_progress_starting)
+                    showCloud -> stringResource(
+                        R.string.tour_progress_uploading_cloud,
+                        stringResource(activeProgress!!.location.labelRes())
+                    )
                     total > 0 -> stringResource(
                         R.string.tour_progress_uploading, completed, total
                     )
@@ -2284,6 +2299,9 @@ private fun BackupProgressContent(
                 // No total yet means the phase has started but the batch has not been counted.
                 // "0 of 0" would be worse than saying nothing, so the line is simply absent.
                 val ringCount = when {
+                    showCloud -> stringResource(
+                        R.string.tour_progress_count, activeProgress!!.done, activeProgress.total
+                    )
                     phase != WizardBackupPhase.OPTIMISING_PHOTOS &&
                         phase != WizardBackupPhase.OPTIMISING_VIDEO -> null
                     optimiseTotal > 0 -> stringResource(
@@ -2304,6 +2322,23 @@ private fun BackupProgressContent(
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 }
+            }
+        }
+
+        // The other clouds, waiting their turn, one line each: how many are sent of how many there are.
+        if (uploading) {
+            clouds.filter { it.location != activeCloud && it.done < it.total }.forEach { cloud ->
+                Text(
+                    text = stringResource(
+                        R.string.tour_progress_pending_cloud,
+                        stringResource(cloud.location.labelRes()),
+                        cloud.done,
+                        cloud.total
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
             }
         }
 
