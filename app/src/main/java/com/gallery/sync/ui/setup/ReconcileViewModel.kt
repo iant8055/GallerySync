@@ -87,6 +87,9 @@ data class SafGrantIssue(
 /** One cloud's share of the first backup: how many are sent of how many there are for it. */
 data class CloudProgress(val location: BackupLocation, val done: Int, val total: Int)
 
+/** The wizard step that watches the first backup. Persisted as the step while that backup is running. */
+internal const val WIZARD_BACKUP_STEP = 9
+
 data class ReconcileUiState(
     val running: Boolean = false,
     val result: CloudReconciliation? = null,
@@ -115,6 +118,7 @@ data class ReconcileUiState(
     /** Gate 2, as currently selected. Not applied until the user says so. */
     val libraryChoice: LibraryChoice = LibraryChoice.BACK_UP_EVERYTHING,
     val hasCompletedSetup: Boolean = false,
+    /** The persisted wizard step: [WIZARD_BACKUP_STEP] means the first backup was started. */
     /**
      * Whether stored preferences have been read at least once.
      *
@@ -211,6 +215,14 @@ data class ReconcileUiState(
      * a screen reporting zero outstanding files would announce that everything is already backed up
      * — which is false, and false in the direction that stops someone acting.
      */
+    /**
+     * The first backup has been started and has not finished. **The app is completely unavailable until it
+     * has** — Ian, 24 Sept 2026: a core rule since the beginning. Derived from what is stored rather than from
+     * the wizard having been left open, so nothing that marks setup complete early (a button, a crash, a
+     * process restart) can let the user into a half-backed-up app.
+     */
+    val firstBackupPending: Boolean get() = wizardStep == WIZARD_BACKUP_STEP && !hasCompletedFirstBackup
+
     val hasSources: Boolean get() = directories.isNotEmpty() || hasSelectedDirectories || directoryChecks.values.any { it }
 
     /**
@@ -550,6 +562,18 @@ class ReconcileViewModel @Inject constructor(
     /** Ends guided setup, whether it was completed or skipped. */
     fun completeSetup() {
         viewModelScope.launch { settings.setSetupCompleted(true) }
+    }
+
+    /**
+     * Finishing the wizard after its backup has run to the end. Records the first backup as done in the same
+     * breath, so the app is never held on the progress card by the rule that it stays unavailable until that
+     * backup has finished (see [ReconcileUiState.firstBackupPending]) a moment before the worker noted it.
+     */
+    fun completeSetupAfterBackup() {
+        viewModelScope.launch {
+            settings.markFirstBackupComplete()
+            settings.setSetupCompleted(true)
+        }
     }
 
     /**

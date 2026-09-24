@@ -135,7 +135,7 @@ private fun GallerySyncApp(modifier: Modifier = Modifier, initialTab: Int = 0) {
         return
     }
 
-    val needsSetup = !setupState.hasCompletedSetup || !setupState.hasSources
+    val needsSetup = !setupState.hasCompletedSetup || !setupState.hasSources || setupState.firstBackupPending
 
     when {
         needsSetup || !cloudState.anyConnected -> SignedInApp(

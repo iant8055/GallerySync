@@ -479,7 +479,7 @@ fun SetupTour(
                 // setup. b6e60f2 fixed Finish by emptying the lambda and took Close with it, so
                 // Close did nothing at all until 3 Sept.
                 if (backupComplete) {
-                    viewModel.completeSetup()
+                    viewModel.completeSetupAfterBackup()
                     onComplete()
                 } else {
                     // `finish`, not `finishAndRemoveTask`. Reverted 4 Sept 2026, same evening it
