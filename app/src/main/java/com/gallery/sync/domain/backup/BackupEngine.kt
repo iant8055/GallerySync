@@ -647,7 +647,20 @@ class BackupEngine @Inject constructor(
             // no longer skips the Google Photos loop that follows it.
             var oneDriveStop: StopReason? = null
 
-            for (entry in oneDrivePending) {
+            // The free tier is ONE cloud, whichever the user has (Ian, 24 Sept 2026): the main cloud, which is
+            // the app-wide default destination, always uploads; every other cloud, OneDrive included, needs
+            // Pro or a running trial. Checked here, at the boundary that actually spends the upload, and not
+            // trusted from what the screens offered — a lapsed trial or a refund can outlive a folder choice.
+            // Entitlement is only asked when some pending row is not for the main cloud.
+            @Suppress("UNNECESSARY_SAFE_CALL")
+            val mainCloud = settings.current()?.backupLocation ?: BackupLocation.DEFAULT
+            val entitled = if (pending.any { it.location != mainCloud }) entitlement.isEntitled() else false
+            val allowed = { location: BackupLocation -> location == mainCloud || entitled }
+            if (oneDrivePending.isNotEmpty() && !allowed(BackupLocation.ONEDRIVE)) {
+                Logger.w(TAG, "uploadPending: ${oneDrivePending.size} row(s) for OneDrive, which is not the main cloud, and Pro is not unlocked — skipping this pass")
+            }
+
+            for (entry in if (allowed(BackupLocation.ONEDRIVE)) oneDrivePending else emptyList()) {
                 // `containsKey` rather than `getOrPut`: getOrPut re-runs its lambda whenever the
                 // stored value is null, so a failed album would be listed again for every one of
                 // its pending files — hundreds of requests in the exact network conditions that
@@ -869,17 +882,16 @@ class BackupEngine @Inject constructor(
             // The entitlement is checked once, here, at the boundary that actually spends the user's
             // upload rather than trusted from a stored setting — a refund or a lapsed trial can
             // outlive the choice it depended on. Not entitled means this pass sends nothing to any
-            // of them; OneDrive is never gated.
-            val othersAllowed = otherPending.isEmpty() || entitlement.isEntitled()
-            if (!othersAllowed) {
+            // of them. The main cloud is never gated, and it is not necessarily OneDrive.
+            val otherByLocation = otherPending.groupBy { it.location }.filterKeys { allowed(it) }
+            val heldBack = otherPending.size - otherByLocation.values.sumOf { it.size }
+            if (heldBack > 0) {
                 Logger.w(
                     TAG,
-                    "uploadPending: ${otherPending.size} row(s) routed to a second cloud, " +
+                    "uploadPending: $heldBack row(s) routed to a cloud that is not the main one, " +
                         "but Pro is not unlocked and no trial is running — skipping this pass"
                 )
             }
-
-            val otherByLocation = if (othersAllowed) otherPending.groupBy { it.location } else emptyMap()
             for ((location, rows) in otherByLocation) {
                 val uploader = uploaders.of(location)
                 if (uploader == null || !uploader.isConnected()) {

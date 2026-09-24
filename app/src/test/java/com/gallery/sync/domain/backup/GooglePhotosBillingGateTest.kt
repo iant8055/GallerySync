@@ -9,6 +9,7 @@ import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.entity.BackupState
 import com.gallery.sync.data.local.media.MediaAccess
 import com.gallery.sync.data.local.media.MediaScanner
+import com.gallery.sync.data.local.settings.BackupPreferences
 import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.data.remote.onedrive.UploadSource
 import com.gallery.sync.domain.billing.MultiCloudEntitlement
@@ -43,6 +44,8 @@ class GooglePhotosBillingGateTest {
         on { location } doReturn BackupLocation.GOOGLE_PHOTOS
     }
     private val entitlement: MultiCloudEntitlement = mock()
+    private val settings: BackupSettings = mock()
+    private val oneDriveRepository: OneDriveRepository = mock()
     private val context: Context = mock {
         on { contentResolver } doReturn mock()
     }
@@ -53,8 +56,8 @@ class GooglePhotosBillingGateTest {
         albumDao = mock<AlbumPreferenceDao>(),
         folderDao = mock<FolderPreferenceDao>(),
         unsentDao = mock<UnsentDepartureDao>(),
-        settings = mock<BackupSettings>(),
-        repository = mock<OneDriveRepository>(),
+        settings = settings,
+        repository = oneDriveRepository,
         uploadRepository = mock<OneDriveUploadRepository>(),
         uploaders = CloudUploaders(setOf(googlePhotosUploader)),
         entitlement = entitlement,
@@ -95,6 +98,23 @@ class GooglePhotosBillingGateTest {
         assertEquals(0, result.uploaded)
     }
 
+
+    @Test
+    fun `free tier is one cloud - OneDrive rows wait when another cloud is the main one and Pro is off`() = runTest {
+        whenever(scanner.access()).thenReturn(MediaAccess.FULL)
+        whenever(entryDao.nextPending(any(), any(), any())).thenReturn(
+            listOf(pendingRow.copy(location = BackupLocation.ONEDRIVE))
+        )
+        whenever(entryDao.countPendingInSelectedAlbums(any(), any())).thenReturn(0)
+        whenever(settings.current()).thenReturn(BackupPreferences(backupLocation = BackupLocation.DROPBOX))
+        whenever(entitlement.isEntitled(any())).thenReturn(false)
+
+        val result = engine.uploadPending()
+
+        // Nothing asked of OneDrive at all: no listing, no upload.
+        org.mockito.kotlin.verifyNoInteractions(oneDriveRepository)
+        assertEquals(0, result.uploaded)
+    }
     // The "purchased" case would need to reach ContentUriUploadSource's Uri.parse call, which does
     // not run off-device — the same accepted limitation OneDriveSignIn's own doc comment notes
     // ("a seam for tests only, because Uri.parse does not run off a device"). The gate above is what
