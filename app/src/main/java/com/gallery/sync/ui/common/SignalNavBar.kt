@@ -20,7 +20,12 @@ import androidx.compose.ui.unit.dp
 import com.gallery.sync.ui.theme.LocalGallerySyncColors
 
 /** One place to go. */
-data class NavDestination(val icon: ImageVector, val label: String)
+data class NavDestination(
+    val icon: ImageVector,
+    val label: String,
+    /** Greyed but still tappable: the feature is not available with the user's cloud, and tapping says so. */
+    val dimmed: Boolean = false
+)
 
 /**
  * The app's four destinations, as a floating pill.
@@ -77,7 +82,11 @@ fun SignalNavBar(
                 Surface(
                     shape = RoundedCornerShape(percent = 50),
                     color = if (isSelected) signal.accent else signal.navContainer,
-                    contentColor = if (isSelected) signal.onAccent else signal.onNavContainer,
+                    contentColor = when {
+                        isSelected -> signal.onAccent
+                        destination.dimmed -> signal.onNavContainer.copy(alpha = 0.38f)
+                        else -> signal.onNavContainer
+                    },
                     onClick = { onSelect(index) }
                 ) {
                     Row(

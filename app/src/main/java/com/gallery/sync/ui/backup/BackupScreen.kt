@@ -67,6 +67,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
 import com.gallery.sync.ui.common.labelRes
+import com.gallery.sync.ui.common.CloudFeature
+import com.gallery.sync.ui.common.FeatureUnavailableDialog
+import androidx.compose.ui.draw.alpha
 import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.media.MediaAccess
@@ -643,6 +646,7 @@ private fun AlbumModeRow(
     onTapped: () -> Unit,
     onModeSelected: (AlbumMode) -> Unit
 ) {
+    var blockedMode by remember { mutableStateOf<AlbumMode?>(null) }
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
@@ -722,8 +726,20 @@ private fun AlbumModeRow(
             // could be routed to Google Photos.
             modes = CameraAlbum.modesFor(album.name)
                 .filter { GooglePhotosDestination.canChoose(album.backupLocation, it) },
+            // What this album's cloud cannot do stays on the menu, greyed; choosing it says why
+            // (Ian, 24 Sept 2026). Camera's missing Sync is its own rule and is not shown here.
+            unsupported = CameraAlbum.modesFor(album.name)
+                .filterNot { GooglePhotosDestination.canChoose(album.backupLocation, it) },
+            onUnsupported = { blockedMode = it },
             onModeSelected = onModeSelected
         )
+        blockedMode?.let { mode ->
+            FeatureUnavailableDialog(
+                cloud = album.backupLocation,
+                feature = if (mode == AlbumMode.ARCHIVE) CloudFeature.ARCHIVE else CloudFeature.SYNC,
+                onDismiss = { blockedMode = null }
+            )
+        }
     }
     }
 }
@@ -745,6 +761,9 @@ private fun AlbumModeDropdown(
     current: AlbumMode,
     /** What the menu offers. The Camera album's has no Sync; see `CameraAlbum`. */
     modes: List<AlbumMode>,
+    /** Modes this album's cloud cannot do: drawn greyed, and choosing one calls [onUnsupported]. */
+    unsupported: List<AlbumMode> = emptyList(),
+    onUnsupported: (AlbumMode) -> Unit = {},
     onModeSelected: (AlbumMode) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -840,6 +859,33 @@ private fun AlbumModeDropdown(
                     onClick = {
                         expanded = false
                         if (mode != current) onModeSelected(mode)
+                    }
+                )
+            }
+            unsupported.forEach { mode ->
+                val (itemContainer, itemContent) = mode.pillColors()
+                DropdownMenuItem(
+                    text = {
+                        Surface(
+                            shape = RoundedCornerShape(percent = 50),
+                            color = itemContainer,
+                            contentColor = itemContent,
+                            modifier = Modifier.alpha(0.38f)
+                        ) {
+                            Text(
+                                text = mode.label(),
+                                style = MaterialTheme.typography.labelLarge,
+                                maxLines = 1,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .widthIn(min = MenuPillMinWidth)
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                            )
+                        }
+                    },
+                    onClick = {
+                        expanded = false
+                        onUnsupported(mode)
                     }
                 )
             }
