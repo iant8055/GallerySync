@@ -1091,6 +1091,7 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="feature_unsupported_title">%1$s doesn\'t support %2$s</string>
     <string name="feature_unsupported_body">Please switch to another Cloud Service to enable this feature</string>
     <string name="tour_folder_goes_to">Goes to: %1$s</string>
+    <string name="tour_folder_choose_hint">Choose which cloud each ticked folder goes to.</string>
 
     <string name="tour_backup_title">Choose your backup plan</string>
 

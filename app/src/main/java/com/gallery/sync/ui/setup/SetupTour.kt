@@ -31,6 +31,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.FilledTonalButton
 
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -356,7 +357,15 @@ fun SetupTour(
                     (location == cloudState.main || cloudState.isEntitled)
             } ?: true
         }
-        5 -> state.directoryChecks.values.any { it }
+        // With more than one cloud to send to, every ticked folder must have been given one: none is
+        // filled in for the user.
+        5 -> state.directoryChecks.values.any { it } &&
+            (
+                cloudState.destinations.size < 2 ||
+                    state.directoryChecks.filterValues { it }.keys.all { name ->
+                        state.folderDestinations[name]?.let { it in cloudState.destinations } == true
+                    }
+                )
         else -> true
     }
 
@@ -1256,13 +1265,19 @@ private fun DirectoryDiscoveryContent(
                 color = MaterialTheme.colorScheme.onSurface
             )
         } else {
+            if (destinations.size > 1) {
+                Text(
+                    text = stringResource(R.string.tour_folder_choose_hint),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
             state.discoveredDirectories.forEach { dir ->
                 val checked = state.directoryChecks[dir.name] ?: false
                 DirectoryRow(
                     directory = dir,
                     checked = checked,
                     onToggle = { onToggleDirectory(dir.name) },
-                    destination = state.folderDestinations[dir.name] ?: state.mainCloud,
+                    destination = state.folderDestinations[dir.name]?.takeIf { it in destinations },
                     destinations = destinations,
                     onDestinationChange = { onDestinationChange(dir.name, it) }
                 )
@@ -1333,7 +1348,8 @@ private fun DirectoryRow(
     directory: DiscoveredDirectory,
     checked: Boolean,
     onToggle: () -> Unit,
-    destination: BackupLocation,
+    /** Null until the user has chosen, when there is a choice to make. */
+    destination: BackupLocation?,
     /** Only when there is a real second choice — Google Photos connected and unlocked. */
     destinations: List<BackupLocation>,
     onDestinationChange: (BackupLocation) -> Unit
@@ -1541,19 +1557,40 @@ private fun CloudStorageContent(
  */
 @Composable
 private fun FolderDestinationPicker(
-    destination: BackupLocation,
+    destination: BackupLocation?,
     options: List<BackupLocation>,
     onChange: (BackupLocation) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val label = stringResource(
+        R.string.tour_folder_goes_to,
+        destination?.let { stringResource(it.labelRes()) }.orEmpty()
+    ).trimEnd()
     Box {
-        OutlinedButton(onClick = { expanded = true }) {
-            Text(stringResource(R.string.tour_folder_goes_to, stringResource(destination.labelRes())), maxLines = 1)
+        // Blank until the user chooses (Ian, 24 Sept 2026): with a cloud already filled in, the answer
+        // was one nobody had given. Blank it is ringed and bold, so it reads as a question waiting; once
+        // answered it turns into a filled chip, so the choice stands out instead of blending into the row.
+        if (destination == null) {
+            OutlinedButton(
+                onClick = { expanded = true },
+                border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+            ) {
+                Text(label, maxLines = 1, fontWeight = FontWeight.Bold)
+            }
+        } else {
+            FilledTonalButton(onClick = { expanded = true }) {
+                Text(label, maxLines = 1, fontWeight = FontWeight.Bold)
+            }
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             options.forEach { option ->
                 DropdownMenuItem(
-                    text = { Text(stringResource(option.labelRes())) },
+                    text = {
+                        Text(
+                            text = stringResource(option.labelRes()),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    },
                     onClick = {
                         expanded = false
                         onChange(option)
