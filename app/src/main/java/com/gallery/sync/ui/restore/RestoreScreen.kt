@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -240,7 +241,6 @@ private fun ListHeader(
     viewModel: RestoreViewModel,
     context: android.content.Context
 ) {
-    val signal = LocalGallerySyncColors.current
     val figure = if (state.loading) "—" else state.folders.size.toString()
     val message = state.summary ?: stringResource(
         if (state.rows.isEmpty() && !state.loading && !state.checkingCloud) {
@@ -249,6 +249,28 @@ private fun ListHeader(
             R.string.restore_intro_folders
         }
     )
+    ListHeaderCard(
+        figure = figure,
+        message = message,
+        state = state,
+        // Forced: the button is how the user says "read OneDrive again".
+        onRefresh = { viewModel.refresh(force = true) },
+        onClear = viewModel::clearSelection,
+        context = context
+    )
+}
+
+/** The card itself, apart from the screen state that fills it, so the setup tour can draw the same one. */
+@Composable
+private fun ListHeaderCard(
+    figure: String,
+    message: String,
+    state: RestoreUiState,
+    onRefresh: () -> Unit,
+    onClear: () -> Unit,
+    context: android.content.Context
+) {
+    val signal = LocalGallerySyncColors.current
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -285,9 +307,8 @@ private fun ListHeader(
                 context = context,
                 message = message,
                 firstLabel = stringResource(R.string.retrieve_refresh),
-                // Forced: the button is how the user says "read OneDrive again".
-                onFirst = { viewModel.refresh(force = true) },
-                onClear = viewModel::clearSelection
+                onFirst = onRefresh,
+                onClear = onClear
             )
         }
     }
@@ -854,6 +875,42 @@ private fun RestoreBar(
                 modifier = Modifier.padding(top = 4.dp)
             )
         }
+        }
+    }
+}
+
+/**
+ * The Restore tab as the setup tour draws it behind its cards: the real header and folder cards with
+ * sample folders, so it follows the tab when it is restyled. Inert: the tour lays a layer over it that
+ * swallows touches.
+ */
+@Composable
+fun RestoreTabPreview() {
+    val context = LocalContext.current
+    val mb = 1024L * 1024L
+    val folders = listOf(
+        RestoreFolder("Vacation 2025", restorable = 0, downloadable = 324, bytesToRecover = 2_150 * mb, selectedHere = 324),
+        RestoreFolder("Family Reunion", restorable = 0, downloadable = 156, bytesToRecover = 890 * mb, selectedHere = 0),
+        RestoreFolder("Old Screenshots", restorable = 0, downloadable = 89, bytesToRecover = 245 * mb, selectedHere = 0),
+        RestoreFolder("Work Documents", restorable = 0, downloadable = 43, bytesToRecover = 120 * mb, selectedHere = 0)
+    )
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        ListHeaderCard(
+            figure = folders.size.toString(),
+            message = stringResource(R.string.restore_intro_folders),
+            state = RestoreUiState(),
+            onRefresh = {},
+            onClear = {},
+            context = context
+        )
+        HorizontalDivider()
+        folders.forEach { folder ->
+            FolderCard(folder = folder, enabled = true, onOpen = {}, onSetSelected = {})
         }
     }
 }

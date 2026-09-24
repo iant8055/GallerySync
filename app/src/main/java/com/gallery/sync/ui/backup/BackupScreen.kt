@@ -1546,3 +1546,51 @@ private fun mediaPermissions(): Array<String> =
 // all four and they carry wording that was argued over rather than drafted. The trash note in
 // particular is the app's only statement of CLAUDE.md's rule that a local removal must never be
 // promised as recoverable; it has now been moved twice and lost neither time.
+
+/**
+ * The Albums tab as the setup tour draws it behind its cards.
+ *
+ * The real hero card, mode buttons, run controls and album rows, fed sample data, so the picture
+ * follows the tab when it is restyled. It was a separate drawing and fell behind. Inert: the tour
+ * lays a layer over it that swallows touches.
+ */
+@Composable
+fun AlbumsTabPreview() {
+    val context = LocalContext.current
+    val claim = AlbumCloudClaim.AllPresent(verified = 0, checkedAtEpochMillis = 0L)
+    val mb = 1024L * 1024L
+    val sample = listOf(
+        AlbumRow("Camera", 2847, 18_200 * mb, AlbumMode.BACKUP, backedUpCount = 2847, cloudClaim = claim.copy(verified = 2847)),
+        AlbumRow("Screenshots", 943, 1_800 * mb, AlbumMode.SYNC, backedUpCount = 943, proxiedCount = 943, cloudClaim = claim.copy(verified = 943)),
+        AlbumRow("Downloads", 156, 2_400 * mb, AlbumMode.ARCHIVE, backedUpCount = 156, cloudClaim = claim.copy(verified = 156)),
+        AlbumRow("WhatsApp", 1205, 3_100 * mb, AlbumMode.SYNC, backedUpCount = 1205, proxiedCount = 1205, cloudClaim = claim.copy(verified = 1205))
+    )
+    val state = BackupUiState(hasLoadedCounts = true, pendingCount = 1)
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        HeroCard(
+            label = stringResource(R.string.backup_hero_label),
+            figure = "",
+            actionsAtBottom = true,
+            figureContent = { ModeFilterGrid(selected = null, onSelect = {}) },
+            detail = {
+                Text(
+                    text = stringResource(R.string.albums_mode_totals_label) + " " + stringResource(
+                        R.string.albums_mode_totals, 1, 2, 1, 0
+                    ),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            actions = { HeroActions(state, {}, {}, {}, {}, {}) }
+        )
+        HorizontalDivider()
+        sample.forEach { album ->
+            AlbumModeRow(album = album, context = context, onTapped = {}, onModeSelected = {})
+        }
+    }
+}

@@ -38,7 +38,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -682,4 +684,150 @@ private fun AlbumMode.settingsLabel(): String = when (this) {
     AlbumMode.BACKUP -> stringResource(R.string.mode_backup)
     AlbumMode.SYNC -> stringResource(R.string.mode_sync)
     AlbumMode.ARCHIVE -> stringResource(R.string.mode_archive)
+}
+
+/**
+ * The Settings tab as the setup tour draws it behind its cards.
+ *
+ * Built from this file's own pieces (section bands, rows, link cards) and the real strings, so it cannot
+ * drift when the tab is restyled: it did, twice, while it was a separate drawing. Only the values are
+ * invented. Inert: the tour lays a layer over it that swallows touches.
+ */
+@Composable
+fun SettingsTabPreview(onGuideCardPositioned: ((androidx.compose.ui.geometry.Rect) -> Unit)? = null) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(start = SettingsGutter, end = SettingsGutter, top = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        SectionHeader(stringResource(R.string.settings_general), help = HelpTopic.SETTINGS_SECTION_GENERAL)
+        // The card the tour's Help step rings.
+        Box(
+            modifier = Modifier.reportBounds(onGuideCardPositioned)
+        ) {
+            LinkCard(
+                title = stringResource(R.string.settings_how_to_guide),
+                detail = stringResource(R.string.settings_how_to_guide_detail),
+                onClick = {}
+            )
+        }
+        SettingDivider()
+        SettingDropdown(
+            label = stringResource(R.string.settings_appearance),
+            help = HelpTopic.SETTINGS_APPEARANCE,
+            options = listOf(ThemeMode.SYSTEM),
+            selected = ThemeMode.SYSTEM,
+            onSelected = {},
+            optionLabel = { stringResource(R.string.theme_system) }
+        )
+        SettingDivider()
+        SettingSwitch(
+            label = stringResource(R.string.backup_allow_metered),
+            help = HelpTopic.SETTINGS_MOBILE_DATA,
+            detail = stringResource(R.string.backup_allow_metered_off),
+            checked = false,
+            onCheckedChange = {}
+        )
+
+        SectionHeader(stringResource(R.string.settings_backup), help = HelpTopic.SETTINGS_SECTION_BACKUP)
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                text = stringResource(R.string.backup_folders_heading),
+                style = MaterialTheme.typography.titleSmall
+            )
+            Text(
+                text = stringResource(R.string.backup_folders_explainer),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        listOf("DCIM" to 61, "Pictures" to 25).forEach { (name, files) ->
+            SettingDropdown(
+                label = pluralStringResource(R.plurals.backup_folder_label, files, name, files),
+                options = listOf(BackupLocation.ONEDRIVE),
+                selected = BackupLocation.ONEDRIVE,
+                onSelected = {},
+                optionLabel = { location -> stringResource(location.labelRes()) },
+                enabled = false,
+                note = stringResource(
+                    R.string.pairing_path,
+                    stringResource(BackupLocation.ONEDRIVE.labelRes()),
+                    "Samsung Gallery/DCIM"
+                )
+            )
+        }
+        SettingDivider()
+
+        SectionHeader(stringResource(R.string.settings_albums), help = HelpTopic.SETTINGS_SECTION_ALBUMS)
+        Text(text = stringResource(R.string.sources_title), style = MaterialTheme.typography.bodyLarge)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Checkbox(checked = true, onCheckedChange = null)
+            Text(
+                text = stringResource(
+                    R.string.sources_full_path,
+                    stringResource(R.string.volume_internal),
+                    "DCIM"
+                ),
+                style = MaterialTheme.typography.bodyLarge
+            )
+        }
+
+        SectionHeader(stringResource(R.string.settings_sync), help = HelpTopic.SETTINGS_SECTION_SYNC)
+        SettingSwitch(
+            label = stringResource(R.string.settings_optimise_photos),
+            help = HelpTopic.SETTINGS_OPTIMISE_PHOTOS,
+            checked = false,
+            onCheckedChange = {}
+        )
+        SettingDivider()
+        SettingSwitch(
+            label = stringResource(R.string.settings_optimise_videos),
+            help = HelpTopic.SETTINGS_OPTIMISE_VIDEO,
+            checked = false,
+            onCheckedChange = {}
+        )
+
+        SectionHeader(stringResource(R.string.settings_restore), help = HelpTopic.SETTINGS_SECTION_RESTORE)
+        SettingSwitch(
+            label = stringResource(R.string.settings_show_empty_folders),
+            help = HelpTopic.SETTINGS_SHOW_EMPTY_FOLDERS,
+            checked = false,
+            onCheckedChange = {}
+        )
+
+        SectionHeader(stringResource(R.string.settings_archive), help = HelpTopic.SETTINGS_SECTION_ARCHIVE)
+        SettingDropdown(
+            label = stringResource(R.string.archive_age_label),
+            help = HelpTopic.SETTINGS_ARCHIVE_DEFAULT_AGE,
+            options = listOf(ArchiveAge.DEFAULT),
+            selected = ArchiveAge.DEFAULT,
+            onSelected = {},
+            optionLabel = { age -> age.label() }
+        )
+        SettingSwitch(
+            label = stringResource(R.string.settings_archive_notify),
+            help = HelpTopic.SETTINGS_ARCHIVE_NOTIFY,
+            checked = false,
+            onCheckedChange = {}
+        )
+
+        SettingDivider()
+        LinkCard(
+            title = stringResource(R.string.settings_privacy_policy),
+            detail = stringResource(R.string.settings_privacy_policy_detail),
+            onClick = {}
+        )
+    }
+}
+
+private fun Modifier.reportBounds(
+    report: ((androidx.compose.ui.geometry.Rect) -> Unit)?
+): Modifier = if (report == null) {
+    this
+} else {
+    this.onGloballyPositioned { report(it.boundsInRoot()) }
 }

@@ -65,6 +65,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.input.pointer.pointerInput
+import com.gallery.sync.ui.archive.ArchiveTabPreview
+import com.gallery.sync.ui.backup.AlbumsTabPreview
+import com.gallery.sync.ui.restore.RestoreTabPreview
+import com.gallery.sync.ui.settings.SettingsTabPreview
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -331,7 +336,9 @@ fun SetupTour(
     }
 
     fun canAdvance(): Boolean = when (step) {
-        4 -> cloudState.mainConnected && cloudState.providers.filter { it.location in chosenClouds - cloudState.main }.all { it.isConnected }
+        4 -> (chosenClouds + cloudState.connected.map { it.location }).let { picked ->
+            picked.isNotEmpty() && cloudState.mainConnected && cloudState.providers.filter { it.location in picked }.all { it.isConnected }
+        }
         5 -> state.directoryChecks.values.any { it }
         else -> true
     }
@@ -1353,13 +1360,15 @@ private fun DirectoryRow(
 // ── Step 4: Cloud Storage ───────────────────────────────────────────────────
 
 /**
- * Which cloud the user has, and signing in to it. Comes *before* the folders (Ian, 24 Sept 2026): the
+ * Which clouds the user has, and signing in to each. Comes *before* the folders (Ian, 24 Sept 2026): the
  * folder step needs to know which clouds are actually available to send a folder to.
  *
- * **The free tier is one cloud, whichever the user has** (Ian, 24 Sept 2026: "Free Tier is one Cloud
- * platform only... multi-cloud support is the Pro-Plus plan"). So this is a choice of one — OneDrive is
- * one of the options, not a requirement — followed by an optional "add more clouds", which is the paid
- * part and says so, with the 30-day trial terms, before anything is connected.
+ * One list of every cloud with a box beside it, and the user ticks the ones they need (Ian, 24 Sept 2026:
+ * one list, not two, and move away from OneDrive-centric). Nothing is ticked to start with and no cloud
+ * is a requirement. The free tier is one cloud, whichever the user has, so the first cloud ticked is the free
+ * one (`main`) and each further tick is the paid part, which says so with the 30-day trial terms before
+ * anything is connected. Unticking a cloud that is signed in signs it out; `main` follows the first cloud
+ * that is still ticked.
  */
 @Composable
 private fun CloudStorageContent(
@@ -1370,10 +1379,20 @@ private fun CloudStorageContent(
     onChangeDestination: () -> Unit,
     cloudViewModel: CloudProvidersViewModel
 ) {
-    // Which cloud the limits pop-up is about, or null. Shown when a cloud is picked, because that is the
-    // moment it matters, and not again on return.
-    var limitsFor by remember { mutableStateOf<BackupLocation?>(null) }
+    // Which cloud the limits pop-up is about, and whether it is an extra one. Shown when a cloud is ticked,
+    // because that is the moment it matters, and not again on return.
+    var limitsFor by remember { mutableStateOf<Pair<BackupLocation, Boolean>?>(null) }
     val main = cloudState.main
+    // Ticked in this wizard, plus anything already signed in from before (a return to this step).
+    val selected = extras + cloudState.connected.map { it.location }
+
+    // The free cloud is always one that is ticked. Ticking the first one makes it the free one, and
+    // unticking the free one hands the place to the next.
+    LaunchedEffect(selected, main) {
+        if (selected.isNotEmpty() && main !in selected) {
+            cloudViewModel.setMain(cloudState.providers.first { it.location in selected }.location)
+        }
+    }
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
@@ -1385,43 +1404,42 @@ private fun CloudStorageContent(
             style = MaterialTheme.typography.bodyMedium
         )
 
-        // ── Your cloud (free) ──
-        Text(
-            text = stringResource(R.string.tour_cloud_main_heading),
-            style = MaterialTheme.typography.titleSmall
-        )
         cloudState.providers.forEach { provider ->
+            val location = provider.location
+            val on = location in selected
+            val toggle = { turnOn: Boolean ->
+                onExtrasChange(location, turnOn)
+                if (turnOn) {
+                    val isExtra = selected.isNotEmpty()
+                    if (isExtra || location.capabilities != CloudCapabilities.FULL) limitsFor = location to isExtra
+                } else if (provider.isConnected) {
+                    cloudViewModel.disconnect(location)
+                }
+            }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable {
-                        if (provider.location != main) {
-                            cloudViewModel.setMain(provider.location)
-                            if (provider.location.capabilities != CloudCapabilities.FULL) limitsFor = provider.location
-                        }
-                    },
+                    .clickable { toggle(!on) },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                RadioButton(
-                    selected = provider.location == main,
-                    onClick = {
-                        if (provider.location != main) {
-                            cloudViewModel.setMain(provider.location)
-                            if (provider.location.capabilities != CloudCapabilities.FULL) limitsFor = provider.location
-                        }
-                    }
-                )
+                Checkbox(checked = on, onCheckedChange = { toggle(it) })
                 Text(
-                    text = stringResource(provider.location.labelRes()),
+                    text = stringResource(location.labelRes()),
                     style = MaterialTheme.typography.bodyLarge
                 )
             }
         }
 
-        // The main cloud's own connect controls, and for OneDrive the folder its backups go in.
-        CloudProvidersSection(only = setOf(main), showTitle = false, viewModel = cloudViewModel)
-        if (main == BackupLocation.ONEDRIVE && cloudState.mainConnected) {
+        // The connect / key-entry / trial controls Settings uses, over the same account state, for the
+        // ticked clouds only. Connecting is a fact about the account, not a Settings value.
+        if (selected.isNotEmpty()) {
+            HorizontalDivider()
+            CloudProvidersSection(only = selected, showTitle = false, viewModel = cloudViewModel)
+        }
+
+        // OneDrive's own folder for its backups, once it is ticked and signed in.
+        if (BackupLocation.ONEDRIVE in selected && cloudState.connected.any { it.location == BackupLocation.ONEDRIVE }) {
             // The path takes the slack and the button keeps its own width. SpaceBetween let a
             // long destination squeeze the button until "Change" rendered as "Chang" — a button
             // narrower than its own label, which is how a truncated label happens at all.
@@ -1448,42 +1466,7 @@ private fun CloudStorageContent(
             }
         }
 
-        HorizontalDivider()
-
-        // ── More clouds (Pro) ──
-        Text(
-            text = stringResource(R.string.tour_cloud_more_heading),
-            style = MaterialTheme.typography.titleSmall
-        )
-        cloudState.providers.filter { it.location != main }.forEach { provider ->
-            val on = provider.location in extras
-            val toggle = { turnOn: Boolean ->
-                onExtrasChange(provider.location, turnOn)
-                if (turnOn) limitsFor = provider.location
-            }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { toggle(!on) },
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Checkbox(checked = on, onCheckedChange = { toggle(it) })
-                Text(
-                    text = stringResource(provider.location.labelRes()),
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
-        }
-
-        val chosenExtras = extras - main
-        if (chosenExtras.isNotEmpty()) {
-            // The same connect / key-entry / trial controls Settings uses, over the same account state —
-            // connecting is a fact about the account, not a Settings value.
-            CloudProvidersSection(only = chosenExtras, showTitle = false, viewModel = cloudViewModel)
-        }
-
-        limitsFor?.let { about ->
+        limitsFor?.let { (about, isExtra) ->
             AlertDialog(
                 onDismissRequest = { limitsFor = null },
                 title = { Text(stringResource(R.string.tour_cloud_google_photos_limits_title)) },
@@ -1498,8 +1481,8 @@ private fun CloudStorageContent(
                         if (!caps.restore) {
                             BulletItem(stringResource(R.string.tour_cloud_google_photos_limit_restore))
                         }
-                        // The trial line is about adding a second cloud; the main cloud is free.
-                        if (about != main) {
+                        // The trial line is about adding a further cloud; the first one is free.
+                        if (isExtra) {
                             BulletItem(stringResource(R.string.tour_cloud_google_photos_limit_pro))
                         }
                     }
@@ -2440,7 +2423,22 @@ private fun PhoneScreenBackdrop(
                     // alone — see PhoneScreenBackdrop's shadow note.
                     .onGloballyPositioned { onScreenBounds(it.boundsInRoot()) }
             ) {
-                Box(modifier = Modifier.weight(1f)) { content() }
+                Box(modifier = Modifier.weight(1f)) {
+                    content()
+                    // A picture, not a screen: swallow every touch so nothing behind the tour's
+                    // cards can be pressed.
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .pointerInput(Unit) {
+                                awaitPointerEventScope {
+                                    while (true) {
+                                        awaitPointerEvent().changes.forEach { it.consume() }
+                                    }
+                                }
+                            }
+                    )
+                }
                 SignalNavBar(
                     destinations = destinations,
                     selected = navSelected,
@@ -2510,682 +2508,18 @@ private val PhoneFrameCorner = 36.dp
 // ── Tab Mockups (decorative backgrounds for Step 2 cards) ──────────────────
 
 @Composable
-private fun AlbumsMockup() {
-    val signal = LocalGallerySyncColors.current
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        Surface(
-            color = signal.heroContainer,
-            contentColor = signal.onHero,
-            shape = RoundedCornerShape(28.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                // "All Albums" heading pill
-                Surface(
-                    color = signal.onHero.copy(alpha = 0.0f),
-                    shape = RoundedCornerShape(50),
-                    border = BorderStroke(2.dp, signal.onHero.copy(alpha = 0.35f)),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "All Albums",
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(vertical = 12.dp),
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-                }
-                // Mode filter chips — 2x2 grid
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Surface(
-                        color = signal.backupContainer,
-                        contentColor = signal.onBackupContainer,
-                        shape = RoundedCornerShape(50),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(
-                            text = "Backup",
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                            style = MaterialTheme.typography.labelLarge
-                        )
-                    }
-                    Surface(
-                        color = signal.syncContainer,
-                        contentColor = signal.onSyncContainer,
-                        shape = RoundedCornerShape(50),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(
-                            text = "Sync",
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                            style = MaterialTheme.typography.labelLarge
-                        )
-                    }
-                }
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Surface(
-                        color = signal.archiveContainer,
-                        contentColor = signal.onArchiveContainer,
-                        shape = RoundedCornerShape(50),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(
-                            text = "Archive",
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                            style = MaterialTheme.typography.labelLarge
-                        )
-                    }
-                    Surface(
-                        color = signal.offContainer,
-                        contentColor = signal.onOffContainer,
-                        shape = RoundedCornerShape(50),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(
-                            text = "Off",
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                            style = MaterialTheme.typography.labelLarge
-                        )
-                    }
-                }
-                Text(
-                    text = "Tap to filter by mode",
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth(),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = signal.onHero.copy(alpha = 0.7f)
-                )
-                Text(
-                    text = "5 Albums · 22.6 GB",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "1 Backup · 2 Sync · 1 Archive · 1 Off",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                // Action buttons
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Surface(
-                        color = signal.accent,
-                        contentColor = signal.onAccent,
-                        shape = RoundedCornerShape(50),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(
-                            text = "Sync now",
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                            style = MaterialTheme.typography.labelLarge
-                        )
-                    }
-                    Surface(
-                        color = signal.onHero.copy(alpha = 0.0f),
-                        shape = RoundedCornerShape(50),
-                        border = BorderStroke(1.dp, signal.onHero.copy(alpha = 0.35f)),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(
-                            text = "Rescan",
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                            color = signal.onHero,
-                            style = MaterialTheme.typography.labelLarge
-                        )
-                    }
-                }
-            }
-        }
-        MockAlbumRow("Camera", "2,847 files · 18.2 GB", "Backup")
-        MockAlbumRow("Screenshots", "943 files · 1.8 GB", "Sync")
-        MockAlbumRow("Downloads", "156 files · 2.4 GB", "Archive")
-        MockAlbumRow("WhatsApp", "1,205 files · 3.1 GB", "Sync")
-    }
-}
+private fun AlbumsMockup() = AlbumsTabPreview()
 
 @Composable
-private fun MockAlbumRow(name: String, details: String, mode: String) {
-    val signal = LocalGallerySyncColors.current
-    val (modeColor, modeTextColor) = when (mode) {
-        "Backup" -> signal.backupContainer to signal.onBackupContainer
-        "Sync" -> signal.syncContainer to signal.onSyncContainer
-        "Archive" -> signal.archiveContainer to signal.onArchiveContainer
-        else -> signal.offContainer to signal.onOffContainer
-    }
-
-    Surface(
-        color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(22.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 18.dp, vertical = 14.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.bodyLarge,
-                    maxLines = 1
-                )
-                Text(
-                    text = details,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Surface(
-                color = modeColor,
-                contentColor = modeTextColor,
-                shape = RoundedCornerShape(50)
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = mode, style = MaterialTheme.typography.labelLarge)
-                    Icon(
-                        imageVector = SignalIcons.ChevronDown,
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-            }
-        }
-    }
-}
+private fun RestoreMockup() = RestoreTabPreview()
 
 @Composable
-private fun RestoreMockup() {
-    val signal = LocalGallerySyncColors.current
+private fun ArchiveMockup() = ArchiveTabPreview()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Surface(
-            color = signal.heroContainer,
-            contentColor = signal.onHero,
-            shape = RoundedCornerShape(28.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Folders to Restore",
-                        style = MaterialTheme.typography.titleLarge,
-                        textAlign = TextAlign.Center
-                    )
-                    Text(
-                        text = "6",
-                        style = MaterialTheme.typography.displaySmall
-                    )
-                }
-                Text(
-                    text = "Swipe right to select · left to deselect\nTap to open",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Surface(
-                        color = signal.onHero.copy(alpha = 0.0f),
-                        shape = RoundedCornerShape(50),
-                        border = BorderStroke(1.dp, signal.onHero.copy(alpha = 0.35f)),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(
-                            text = "Refresh",
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                            style = MaterialTheme.typography.labelLarge
-                        )
-                    }
-                    Surface(
-                        color = signal.onHero.copy(alpha = 0.0f),
-                        shape = RoundedCornerShape(50),
-                        border = BorderStroke(1.dp, signal.onHero.copy(alpha = 0.35f)),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(
-                            text = "Clear",
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                            style = MaterialTheme.typography.labelLarge
-                        )
-                    }
-                }
-            }
-        }
-        HorizontalDivider()
-        MockRestoreRow("Vacation 2025", "324 files · 2.1 GB", true)
-        MockRestoreRow("Family Reunion", "156 files · 890 MB", false)
-        MockRestoreRow("Old Screenshots", "89 files · 245 MB", false)
-        MockRestoreRow("Work Documents", "43 files · 120 MB", false)
-    }
-}
-
-@Composable
-private fun MockRestoreRow(name: String, details: String, selected: Boolean) {
-    Surface(
-        color = if (selected) MaterialTheme.colorScheme.primaryContainer
-        else MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(22.dp),
-        border = BorderStroke(
-            if (selected) 2.dp else 1.dp,
-            if (selected) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.outline
-        ),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 18.dp, vertical = 18.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(name, style = MaterialTheme.typography.headlineSmall)
-                Text(
-                    text = details,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Icon(
-                imageVector = if (selected) SignalIcons.Check else SignalIcons.ChevronRight,
-                contentDescription = null,
-                tint = if (selected) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(20.dp)
-            )
-        }
-    }
-}
-
-@Composable
-private fun ArchiveMockup() {
-    val signal = LocalGallerySyncColors.current
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Surface(
-            color = signal.heroContainer,
-            contentColor = signal.onHero,
-            shape = RoundedCornerShape(28.dp),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(
-                modifier = Modifier.padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Files to Archive",
-                        style = MaterialTheme.typography.titleLarge,
-                        textAlign = TextAlign.Center
-                    )
-                    Text(
-                        text = "8",
-                        style = MaterialTheme.typography.displaySmall
-                    )
-                }
-                Text(
-                    text = "Camera, Downloads",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    text = "Every file below is checked against OneDrive first. Nothing leaves the phone until you say so.",
-                    style = MaterialTheme.typography.bodySmall
-                )
-                Surface(
-                    color = signal.onHero.copy(alpha = 0.0f),
-                    shape = RoundedCornerShape(50),
-                    border = BorderStroke(1.dp, signal.onHero.copy(alpha = 0.35f)),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "Check these files",
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                }
-            }
-        }
-        HorizontalDivider()
-        MockArchiveRow("IMG_20250615_142031.jpg", "4.2 MB", true)
-        MockArchiveRow("IMG_20250612_091547.jpg", "3.8 MB", true)
-        MockArchiveRow("VID_20250610_183022.mp4", "148 MB", true)
-        MockArchiveRow("Screenshot_20250608.png", "1.2 MB", false)
-    }
-}
-
-@Composable
-private fun MockArchiveRow(name: String, size: String, confirmed: Boolean) {
-    val signal = LocalGallerySyncColors.current
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 0.dp, vertical = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = name,
-                style = MaterialTheme.typography.bodyMedium,
-                maxLines = 1
-            )
-            Text(
-                text = size,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        Icon(
-            imageVector = if (confirmed) SignalIcons.Check else SignalIcons.Cross,
-            contentDescription = null,
-            tint = if (confirmed) signal.accent
-            else MaterialTheme.colorScheme.error,
-            modifier = Modifier.size(22.dp)
-        )
-    }
-}
-
-/**
- * The Settings tab as a picture of itself.
- *
- * Rebuilt 15 Sept 2026 at Ian's ask — he would rather this were a screenshot of the real tab, and a
- * drawing is the nearest thing that survives a screen changing or being translated. So it mirrors
- * `SettingsScreen` rather than resembling it: the same sections in the same order (General, Albums,
- * Backup, Sync), the same rows, and **the same strings**, read from the same resources. A row that
- * changes wording there changes here; only the sample values are invented.
- *
- * The values are the real defaults — mobile data off, Optimise photos and video off — so the picture
- * cannot teach a setting the app does not ship with. It used to show Optimise photos on, which stopped
- * being true when the default was corrected on 7 Sept.
- */
 @Composable
 private fun SettingsMockup(
     onGuideCardPositioned: ((Rect) -> Unit)? = null
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(start = 16.dp, end = 16.dp, top = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        // ── General ──
-        MockSectionHeader(stringResource(R.string.settings_general))
-        // The card the Help card rings. First in General, as in the real tab.
-        OutlinedCard(
-            modifier = Modifier
-                .fillMaxWidth()
-                .onGloballyPositioned { coords ->
-                    onGuideCardPositioned?.invoke(coords.boundsInRoot())
-                }
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.settings_how_to_guide),
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Text(
-                    text = stringResource(R.string.settings_how_to_guide_detail),
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-        }
-        HorizontalDivider()
-        MockDropdownRow(
-            label = stringResource(R.string.settings_appearance),
-            value = stringResource(R.string.theme_system)
-        )
-        MockSwitchRow(
-            label = stringResource(R.string.backup_allow_metered),
-            detail = stringResource(R.string.backup_allow_metered_off),
-            checked = false
-        )
-        HorizontalDivider()
-
-        // ── Albums ──
-        MockSectionHeader(stringResource(R.string.settings_albums))
-        Text(
-            text = stringResource(R.string.sources_title),
-            style = MaterialTheme.typography.bodyLarge
-        )
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Checkbox(checked = false, onCheckedChange = null)
-            Text(
-                // Two arguments, volume then path — as SourcesSection passes them. One argument
-                // crashed the tour on the Settings card: MissingFormatArgumentException, 15 Sept.
-                text = stringResource(
-                    R.string.sources_full_path,
-                    stringResource(R.string.volume_internal),
-                    "DCIM"
-                ),
-                style = MaterialTheme.typography.bodyLarge
-            )
-        }
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Button(onClick = {}) { Text(stringResource(R.string.sources_add)) }
-            OutlinedButton(onClick = {}, enabled = false) { Text(stringResource(R.string.sources_remove)) }
-        }
-        HorizontalDivider()
-        Text(
-            text = stringResource(R.string.deletion_title),
-            style = MaterialTheme.typography.bodyLarge
-        )
-        MockRadioRow(stringResource(R.string.deletion_leave), selected = true)
-        MockRadioRow(stringResource(R.string.deletion_ask), selected = false)
-        HorizontalDivider()
-
-        // ── Backup ──
-        MockSectionHeader(stringResource(R.string.settings_backup))
-        Row(
-            Modifier.fillMaxWidth(),
-            Arrangement.SpaceBetween,
-            Alignment.CenterVertically
-        ) {
-            Checkbox(checked = true, onCheckedChange = null, enabled = false)
-            Text(
-                text = stringResource(R.string.backup_location_onedrive),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.weight(1f)
-            )
-        }
-        Row(
-            Modifier.fillMaxWidth(),
-            Arrangement.SpaceBetween,
-            Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.backup_account_label),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(text = "user@outlook.com", style = MaterialTheme.typography.bodyLarge)
-            }
-            OutlinedButton(onClick = {}) { Text(stringResource(R.string.sign_out_action)) }
-        }
-        Row(
-            Modifier.fillMaxWidth(),
-            Arrangement.SpaceBetween,
-            Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.destination_title),
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Text(
-                    text = stringResource(R.string.destination_current, "Samsung Gallery/DCIM"),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            OutlinedButton(onClick = {}) { Text(stringResource(R.string.destination_change)) }
-        }
-        HorizontalDivider()
-
-        // ── Sync ──
-        MockSectionHeader(stringResource(R.string.settings_sync))
-        MockSwitchRow(stringResource(R.string.settings_optimise_photos), checked = false)
-        HorizontalDivider()
-        MockSwitchRow(stringResource(R.string.settings_optimise_videos), checked = false)
-        HorizontalDivider()
-
-        // ── The foot of the page: Language is last, as in the real tab ──
-        Text(
-            text = stringResource(R.string.settings_language),
-            style = MaterialTheme.typography.bodyLarge
-        )
-        Text(
-            text = stringResource(R.string.settings_language_detail),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
-/** A Settings switch row, inert: label, optional detail beneath, and the switch on the right. */
-@Composable
-private fun MockSwitchRow(label: String, detail: String? = null, checked: Boolean) {
-    Row(
-        Modifier.fillMaxWidth(),
-        Arrangement.SpaceBetween,
-        Alignment.CenterVertically
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = label, style = MaterialTheme.typography.bodyLarge)
-            if (detail != null) {
-                Text(
-                    text = detail,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-        Switch(
-            checked = checked,
-            onCheckedChange = null,
-            colors = SwitchDefaults.colors(
-                uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                uncheckedBorderColor = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        )
-    }
-}
-
-/** A Settings dropdown row, inert: label on the left, current value in an outlined button. */
-@Composable
-private fun MockDropdownRow(label: String, value: String) {
-    Row(
-        Modifier.fillMaxWidth(),
-        Arrangement.SpaceBetween,
-        Alignment.CenterVertically
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.weight(1f)
-        )
-        OutlinedButton(onClick = {}) { Text(value) }
-    }
-}
-
-/** One of the deletion choices, inert. The default — leave the cloud copy — is the one selected. */
-@Composable
-private fun MockRadioRow(label: String, selected: Boolean) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        RadioButton(selected = selected, onClick = null)
-        Text(text = label, style = MaterialTheme.typography.bodyMedium)
-    }
-}
-
-/**
- * A section header as Settings draws it, help button included.
- *
- * Inert — this is a mockup, and the tour must never put a live control behind a wizard card.
- */
-@Composable
-private fun MockSectionHeader(title: String) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.primary
-        )
-        Icon(
-            imageVector = SignalIcons.Help,
-            contentDescription = null,
-            modifier = Modifier.size(24.dp)
-        )
-    }
-}
+) = SettingsTabPreview(onGuideCardPositioned)
 
 /** Which of step 9's three phases is running. See where it is derived, in the tour body. */
 /**

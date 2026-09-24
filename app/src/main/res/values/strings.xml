@@ -1065,14 +1065,12 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_local_granted">All set</string>
 
     <string name="tour_cloud_title">Cloud Storage</string>
-    <string name="tour_cloud_body">Pick the cloud you use and sign in. That one is free. You can add more clouds too, which is part of Pro.</string>
-    <string name="tour_cloud_main_heading">Your cloud (free)</string>
-    <string name="tour_cloud_more_heading">Add more clouds (Pro, free for 30 days)</string>
+    <string name="tour_cloud_body">Tick the clouds you use, then sign in to each. One cloud is free. Each extra cloud is part of Pro, free for 30 days.</string>
     <string name="tour_cloud_signed_in">Signed in to OneDrive</string>
     <string name="tour_cloud_destination">Backup destination</string>
     <string name="tour_cloud_change">Change</string>
     <string name="tour_cloud_google_photos">Google Photos (Pro)</string>
-    <string name="tour_cloud_google_photos_limits_title">About the extra clouds</string>
+    <string name="tour_cloud_google_photos_limits_title">About this cloud</string>
     <string name="tour_cloud_google_photos_limit_backup_only">Backup only — no Archive or Sync.</string>
     <string name="tour_cloud_google_photos_limit_duplicates">Photos already in that cloud may be added twice.</string>
     <string name="tour_cloud_google_photos_limit_restore">Restoring from it is not available yet.</string>

@@ -51,6 +51,7 @@ import com.gallery.sync.R
 import com.gallery.sync.data.local.media.LocalMediaItem
 import com.gallery.sync.domain.backup.ArchiveAge
 import com.gallery.sync.domain.backup.ArchiveEntry
+import com.gallery.sync.domain.backup.ArchivePlan
 import com.gallery.sync.domain.backup.ArchiveFailure
 import com.gallery.sync.domain.backup.ArchiveMark
 import com.gallery.sync.ui.help.HelpButton
@@ -807,5 +808,46 @@ private fun ArchivePrompt(
                 }
             }
         }
+    }
+}
+
+/**
+ * The Archive tab as the setup tour draws it behind its cards: the real header and file cards with sample
+ * files, so it follows the tab when it is restyled. Inert: the tour lays a layer over it that swallows
+ * touches.
+ */
+@Composable
+fun ArchiveTabPreview() {
+    fun file(id: Long, name: String, album: String, mb: Long, isVideo: Boolean = false) = LocalMediaItem(
+        mediaStoreId = id,
+        contentUri = android.net.Uri.EMPTY,
+        displayName = name,
+        album = album,
+        sizeBytes = mb * 1024L * 1024L,
+        dateModifiedEpochSeconds = 0L,
+        mimeType = if (isVideo) "video/mp4" else "image/jpeg",
+        isVideo = isVideo,
+        relativePath = null
+    )
+
+    val entries = listOf(
+        ArchiveEntry(file(1, "IMG_20250615_142031.jpg", "Camera", 4), ArchiveMark.CONFIRMED),
+        ArchiveEntry(file(2, "IMG_20250612_091547.jpg", "Camera", 4), ArchiveMark.CONFIRMED),
+        ArchiveEntry(file(3, "VID_20250610_183022.mp4", "Camera", 148, isVideo = true), ArchiveMark.CONFIRMED),
+        ArchiveEntry(file(4, "Screenshot_20250608.png", "Downloads", 1), ArchiveMark.FAILED, ArchiveFailure.NOT_BACKED_UP)
+    )
+    val state = ArchiveUiState(
+        plan = ArchivePlan(entries = entries),
+        archiveAlbums = listOf("Camera", "Downloads")
+    )
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        ArchiveHeader(state = state, onValidate = {}, onSetAgeFilter = {})
+        entries.forEach { ArchiveRow(it) }
     }
 }
