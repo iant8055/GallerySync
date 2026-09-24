@@ -2386,7 +2386,7 @@ private fun BackupProgressContent(
         )
 
         if (onFinishEarly != null) {
-            OutlinedButton(onClick = onFinishEarly, modifier = Modifier.fillMaxWidth()) {
+            Button(onClick = onFinishEarly, modifier = Modifier.fillMaxWidth()) {
                 Text(stringResource(R.string.tour_progress_finish_early))
             }
             Text(
