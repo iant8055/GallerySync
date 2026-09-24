@@ -35,9 +35,10 @@ import kotlin.coroutines.resume
  * [BillingRepository] backed by Play Billing Library directly.
  *
  * No backend server, same as the rest of this app — see TASK-026 on why GallerySync has none at
- * all. That means purchase verification is whatever Play's own client library reports
- * ([Purchase.PurchaseState.PURCHASED]), not a server-side receipt check; an acceptable trade for a
- * $2.49 IAP with no server to check against, not one this class can improve on its own.
+ * all. `Purchase.PurchaseState.PURCHASED` alone is Play's client library reporting what it was
+ * told, not proof; [verifySignature] is the local check that stands in for the server-side receipt
+ * check a backend would normally do. Every purchase this class treats as owned has passed it —
+ * see [ownedProUnlockPurchase] and the `PurchaseReceived` branch of [purchase].
  */
 @Singleton
 class PlayBillingRepository @Inject constructor(
@@ -120,9 +121,17 @@ class PlayBillingRepository @Inject constructor(
 
         return when (val outcome = deferred.await()) {
             is FlowOutcome.PurchaseReceived -> {
-                if (!outcome.purchase.isAcknowledged) acknowledge(outcome.purchase)
-                Logger.i(TAG, "pro_unlock purchased")
-                PurchaseOutcome.Success
+                if (!verifySignature(outcome.purchase)) {
+                    // Fails closed: an unverifiable purchase grants nothing, the same as one that
+                    // never happened. This is the one place a fake "purchased" result could try to
+                    // reach the app, since it arrives straight from onPurchasesUpdated rather than
+                    // from ownedProUnlockPurchase's own filtered query.
+                    PurchaseOutcome.Failed("purchase could not be verified")
+                } else {
+                    if (!outcome.purchase.isAcknowledged) acknowledge(outcome.purchase)
+                    Logger.i(TAG, "pro_unlock purchased")
+                    PurchaseOutcome.Success
+                }
             }
 
             FlowOutcome.Cancelled -> PurchaseOutcome.Cancelled
@@ -153,11 +162,27 @@ class PlayBillingRepository @Inject constructor(
         deferred?.let { if (!it.isCompleted) it.complete(outcome) }
     }
 
+    /**
+     * The signed-in account's `pro_unlock` purchase, or null when there isn't one or it fails
+     * [verifySignature]. Every caller of this method gets the verification for free — an
+     * unverifiable purchase reads as "does not exist" everywhere it's used.
+     */
     private suspend fun ownedProUnlockPurchase(): Purchase? {
         if (!ensureConnected()) return null
         val params = QueryPurchasesParams.newBuilder().setProductType(ProductType.INAPP).build()
         val result = client.queryPurchasesAsync(params)
-        return result.purchasesList.firstOrNull { PRO_UNLOCK in it.products }
+        return result.purchasesList.firstOrNull { PRO_UNLOCK in it.products && verifySignature(it) }
+    }
+
+    /**
+     * Verifies [purchase]'s signature against the Play Console Licensing public key. The actual
+     * cryptography is [verifyPurchaseSignature] — a pure function with real unit test coverage;
+     * this is just the seam that pulls the two strings it needs out of a [Purchase].
+     */
+    private fun verifySignature(purchase: Purchase): Boolean {
+        val verified = verifyPurchaseSignature(purchase.originalJson, purchase.signature, LICENSING_PUBLIC_KEY)
+        if (!verified) Logger.e(TAG, "pro_unlock purchase signature did not verify")
+        return verified
     }
 
     private suspend fun queryProUnlockDetails(): ProductDetails? {
@@ -216,5 +241,20 @@ class PlayBillingRepository @Inject constructor(
 
     private companion object {
         const val TAG = "Billing"
+
+        /**
+         * GallerySync's Play Console Licensing public key (Monetization setup → Licensing). A
+         * public key, not a secret — it verifies signatures Play signs with the matching private
+         * key it holds, and shipping it inside the APK is exactly how it's meant to be used.
+         * Leaking it grants nothing: the worst it enables is helping someone patch a cracked APK to
+         * skip verification, which they could do anyway by removing the check itself. Ian, 23 Sept
+         * 2026.
+         */
+        const val LICENSING_PUBLIC_KEY =
+            "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA5JCcXksdQJfdpVq92v52424+oTnTHygpkNCxlU2jxdBIa0i" +
+                "VRMQasp6gcWLlYtEGTjV/1XoiYiYX9vaPpnJZM6fL/Bbag0BCZNew1yIt3hrl1LMjGp24NNg9thWNyv+66rYluZbb" +
+                "KSkqFSaAxyTZAM86zloeBziWLJ/qrD4eBZ4GGsdycfOY1TNyoVsd9tH2+sjaTonr2zFArIhCRfbR+MmH3WO4vYDbg" +
+                "tKlnDhJkcOhQrl/IFbcWwEyJdG5Ac3N5xwQJwED4Bhug9ZEZqZxZfUIdB7aw5VADl+foXlFljQ8tUrPjriO3eMVg6" +
+                "ieljfxcf+yU1QwYCwBup24fwuPqwIDAQAB"
     }
 }
