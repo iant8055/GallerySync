@@ -303,6 +303,16 @@ fun SetupTour(
     // a cloud is actually connected and unlocked (`cloudState.destinations`), not on these ticks.
     var chosenCloudNames by rememberSaveable { mutableStateOf(setOf<String>()) }
     val chosenClouds = chosenCloudNames.mapNotNull { runCatching { BackupLocation.valueOf(it) }.getOrNull() }.toSet()
+    // Step 4 is a checklist first, then one card per ticked cloud, each finished before the next. 0 is the
+    // checklist; k is the k-th ticked cloud's card. In the order the clouds are listed.
+    var cloudPhase by rememberSaveable { mutableIntStateOf(0) }
+    val pickedClouds = (chosenClouds + cloudState.connected.map { it.location }).let { picked ->
+        cloudState.providers.map { it.location }.filter { it in picked }
+    }
+    // Skipping a cloud on its card shrinks the list under the phase; never point past the end.
+    LaunchedEffect(pickedClouds.size) {
+        if (cloudPhase > pickedClouds.size) cloudPhase = pickedClouds.size
+    }
     val activity = LocalActivity.current
 
     // Re-check the drive once there is an account to check it with.
@@ -336,8 +346,15 @@ fun SetupTour(
     }
 
     fun canAdvance(): Boolean = when (step) {
-        4 -> (chosenClouds + cloudState.connected.map { it.location }).let { picked ->
-            picked.isNotEmpty() && cloudState.mainConnected && cloudState.providers.filter { it.location in picked }.all { it.isConnected }
+        4 -> if (cloudPhase == 0) {
+            pickedClouds.isNotEmpty()
+        } else {
+            // A cloud's card is done when it is signed in, and for an extra cloud when the trial or Pro is
+            // in place too, since without it nothing would be sent there.
+            pickedClouds.getOrNull(cloudPhase - 1)?.let { location ->
+                cloudState.providers.any { it.location == location && it.isConnected } &&
+                    (location == cloudState.main || cloudState.isEntitled)
+            } ?: true
         }
         5 -> state.directoryChecks.values.any { it }
         else -> true
@@ -462,6 +479,7 @@ fun SetupTour(
 
     val onNext: () -> Unit = {
         when {
+            step == 4 && cloudPhase < pickedClouds.size -> cloudPhase += 1
             step == 5 -> {
                 viewModel.saveSelectedDirectories()
                 if (viewModel.buildSafGrantQueue()) {
@@ -546,9 +564,13 @@ fun SetupTour(
         }
     }
     val onBack: () -> Unit = {
-        var prev = step - 1
-        if (prev == 7 && !showOptimization) prev = 6
-        if (prev >= 1) step = prev
+        if (step == 4 && cloudPhase > 0) {
+            cloudPhase -= 1
+        } else {
+            var prev = step - 1
+            if (prev == 7 && !showOptimization) prev = 6
+            if (prev >= 1) step = prev
+        }
     }
 
     // Back out of a run in progress — deliberately, and only deliberately.
@@ -680,6 +702,8 @@ fun SetupTour(
                             state = state,
                             cloudState = cloudState,
                             onChangeDestination = viewModel::openDestinationChooser,
+                            phase = cloudPhase,
+                            picked = pickedClouds,
                             extras = chosenClouds,
                             onExtrasChange = { location, on ->
                                 chosenCloudNames = if (on) chosenCloudNames + location.name else chosenCloudNames - location.name
@@ -1363,12 +1387,16 @@ private fun DirectoryRow(
  * Which clouds the user has, and signing in to each. Comes *before* the folders (Ian, 24 Sept 2026): the
  * folder step needs to know which clouds are actually available to send a folder to.
  *
- * One list of every cloud with a box beside it, and the user ticks the ones they need (Ian, 24 Sept 2026:
- * one list, not two, and move away from OneDrive-centric). Nothing is ticked to start with and no cloud
- * is a requirement. The free tier is one cloud, whichever the user has, so the first cloud ticked is the free
- * one (`main`) and each further tick is the paid part, which says so with the 30-day trial terms before
- * anything is connected. Unticking a cloud that is signed in signs it out; `main` follows the first cloud
- * that is still ticked.
+ * Two parts, both on step 4. [phase] 0 is one list of every cloud with a box beside it, and the user ticks
+ * the ones they need (Ian, 24 Sept 2026: one list, not two, and move away from OneDrive-centric). Nothing is
+ * ticked to start with and no cloud is a requirement. Then each ticked cloud gets a card of its own, one at
+ * a time, and the next only comes once that one is fully done (Ian, 24 Sept 2026: sign-ins used to run
+ * straight from OneDrive into Google inside one card). [phase] k is the k-th ticked cloud's card, and Next
+ * stays greyed on it until the cloud is signed in.
+ *
+ * The free tier is one cloud, whichever the user has, so the first cloud ticked is the free one (`main`) and
+ * each further tick is the paid part: its card also needs the 30-day trial started, or Pro, before Next.
+ * Unticking a cloud that is signed in signs it out; `main` follows the first cloud that is still ticked.
  */
 @Composable
 private fun CloudStorageContent(
@@ -1376,6 +1404,8 @@ private fun CloudStorageContent(
     cloudState: CloudProvidersUiState,
     extras: Set<BackupLocation>,
     onExtrasChange: (BackupLocation, Boolean) -> Unit,
+    phase: Int,
+    picked: List<BackupLocation>,
     onChangeDestination: () -> Unit,
     cloudViewModel: CloudProvidersViewModel
 ) {
@@ -1395,75 +1425,89 @@ private fun CloudStorageContent(
     }
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            text = stringResource(R.string.tour_cloud_title),
-            style = MaterialTheme.typography.titleLarge
-        )
-        Text(
-            text = stringResource(R.string.tour_cloud_body),
-            style = MaterialTheme.typography.bodyMedium
-        )
+        val current = if (phase > 0) picked.getOrNull(phase - 1) else null
 
-        cloudState.providers.forEach { provider ->
-            val location = provider.location
-            val on = location in selected
-            val toggle = { turnOn: Boolean ->
-                onExtrasChange(location, turnOn)
-                if (turnOn) {
-                    val isExtra = selected.isNotEmpty()
-                    if (isExtra || location.capabilities != CloudCapabilities.FULL) limitsFor = location to isExtra
-                } else if (provider.isConnected) {
-                    cloudViewModel.disconnect(location)
+        if (current == null) {
+            Text(
+                text = stringResource(R.string.tour_cloud_title),
+                style = MaterialTheme.typography.titleLarge
+            )
+            Text(
+                text = stringResource(R.string.tour_cloud_body),
+                style = MaterialTheme.typography.bodyMedium
+            )
+
+            cloudState.providers.forEach { provider ->
+                val location = provider.location
+                val on = location in selected
+                val toggle = { turnOn: Boolean ->
+                    onExtrasChange(location, turnOn)
+                    if (turnOn) {
+                        val isExtra = selected.isNotEmpty()
+                        if (isExtra || location.capabilities != CloudCapabilities.FULL) limitsFor = location to isExtra
+                    } else if (provider.isConnected) {
+                        cloudViewModel.disconnect(location)
+                    }
                 }
-            }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { toggle(!on) },
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Checkbox(checked = on, onCheckedChange = { toggle(it) })
-                Text(
-                    text = stringResource(location.labelRes()),
-                    style = MaterialTheme.typography.bodyLarge
-                )
-            }
-        }
-
-        // The connect / key-entry / trial controls Settings uses, over the same account state, for the
-        // ticked clouds only. Connecting is a fact about the account, not a Settings value.
-        if (selected.isNotEmpty()) {
-            HorizontalDivider()
-            CloudProvidersSection(only = selected, showTitle = false, viewModel = cloudViewModel)
-        }
-
-        // OneDrive's own folder for its backups, once it is ticked and signed in.
-        if (BackupLocation.ONEDRIVE in selected && cloudState.connected.any { it.location == BackupLocation.ONEDRIVE }) {
-            // The path takes the slack and the button keeps its own width. SpaceBetween let a
-            // long destination squeeze the button until "Change" rendered as "Chang" — a button
-            // narrower than its own label, which is how a truncated label happens at all.
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { toggle(!on) },
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Checkbox(checked = on, onCheckedChange = { toggle(it) })
                     Text(
-                        text = stringResource(R.string.tour_cloud_destination),
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                    Text(
-                        text = state.destinationRoot,
+                        text = stringResource(location.labelRes()),
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }
-                // Filled, not outlined. Outlined read as a label with a box round it here, next to
-                // two lines of plain text; filled is unambiguous.
-                Button(onClick = onChangeDestination) {
-                    Text(stringResource(R.string.tour_cloud_change), maxLines = 1)
+            }
+        } else {
+            // One cloud's card. Signing in, and for an extra cloud starting the trial, both happen here.
+            Text(
+                text = stringResource(R.string.tour_cloud_connect_title, stringResource(current.labelRes())),
+                style = MaterialTheme.typography.titleLarge
+            )
+            Text(
+                text = stringResource(R.string.tour_cloud_connect_progress, phase, picked.size),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            CloudProvidersSection(only = setOf(current), showTitle = false, viewModel = cloudViewModel)
+
+            // OneDrive's own folder for its backups, once it is signed in.
+            if (current == BackupLocation.ONEDRIVE && cloudState.connected.any { it.location == BackupLocation.ONEDRIVE }) {
+                // The path takes the slack and the button keeps its own width. SpaceBetween let a
+                // long destination squeeze the button until "Change" rendered as "Chang" — a button
+                // narrower than its own label, which is how a truncated label happens at all.
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(R.string.tour_cloud_destination),
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                        Text(
+                            text = state.destinationRoot,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
+                    // Filled, not outlined. Outlined read as a label with a box round it here, next to
+                    // two lines of plain text; filled is unambiguous.
+                    Button(onClick = onChangeDestination) {
+                        Text(stringResource(R.string.tour_cloud_change), maxLines = 1)
+                    }
                 }
             }
+
+            TextButton(onClick = {
+                onExtrasChange(current, false)
+                if (cloudState.connected.any { it.location == current }) cloudViewModel.disconnect(current)
+            }) { Text(stringResource(R.string.tour_cloud_skip)) }
         }
 
         limitsFor?.let { (about, isExtra) ->
