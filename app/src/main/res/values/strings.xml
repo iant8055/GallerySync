@@ -1022,9 +1022,9 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_take_tour">Take a tour</string>
 
     <string name="tour_description_title">How the app works</string>
-    <string name="tour_description_body">GallerySync keeps your photos and videos backed up in OneDrive and manages how much space they take on your phone. Here\'s what you\'ll find:</string>
+    <string name="tour_description_body">GallerySync keeps your photos and videos backed up in Cloud Services and manages how much space they take on your phone. Here\'s what you\'ll find:</string>
     <string name="tour_description_tabs">See your folders and choose what to back up</string>
-    <string name="tour_description_navigation">Browse and download files from OneDrive</string>
+    <string name="tour_description_navigation">Browse and download files from Cloud Services</string>
     <string name="tour_description_archive">Review files verified in the cloud and free up space</string>
     <string name="tour_description_settings">Backup destination, optimisation, and preferences</string>
     <string name="tour_description_help">Press any (?) for a quick explanation of that line. For everything in one place, open the How To Guide at the top of Settings.</string>
