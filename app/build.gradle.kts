@@ -1,9 +1,21 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+}
+
+// The upload key for Play App Signing. Gitignored, generated once on 23 Sept 2026 and kept only on
+// Ian's machine — never committed. A clone without keystore.properties still builds a release
+// variant, just an unsigned one, so this is never a hard requirement for anyone else working on the
+// repo.
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val keystoreProperties = Properties().apply {
+    if (keystorePropertiesFile.exists()) load(FileInputStream(keystorePropertiesFile))
 }
 
 android {
@@ -22,9 +34,10 @@ android {
         // anyway.
         //
         // versionCode is a plain incrementing integer with no relationship to the name. Google Play
-        // only ever accepts a higher one, so it is bumped per upload and never reset. Still 1
-        // because nothing has been uploaded.
-        versionCode = 1
+        // only ever accepts a higher one, so it is bumped per upload and never reset. First real
+        // upload was versionCode 1 (Internal Testing, 23 Sept 2026); this is the second, adding the
+        // Billing Library so Play Console will allow the pro_unlock product to be created at all.
+        versionCode = 2
         versionName = "0.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -35,10 +48,24 @@ android {
         manifestPlaceholders["appAuthRedirectScheme"] = "com.gallery.sync"
     }
 
+    signingConfigs {
+        create("release") {
+            if (keystorePropertiesFile.exists()) {
+                storeFile = rootProject.file(keystoreProperties["storeFile"] as String)
+                storePassword = keystoreProperties["storePassword"] as String
+                keyAlias = keystoreProperties["keyAlias"] as String
+                keyPassword = keystoreProperties["keyPassword"] as String
+            }
+        }
+    }
+
     buildTypes {
         release {
             optimization {
                 enable = false
+            }
+            if (keystorePropertiesFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
             }
         }
     }
@@ -137,6 +164,9 @@ dependencies {
 
     // Google identity (AppAuth) — interactive sign-in + PKCE + refresh for the Photos Library API
     implementation(libs.appauth)
+
+    // Play Billing — the pro_unlock IAP. CLAUDE.md's monetization section.
+    implementation(libs.billing.ktx)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockito.core)

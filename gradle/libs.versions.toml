@@ -28,6 +28,10 @@ msal = "6.0.1"
 # 2026). Not abandoned: the repo still had open issues through 2025. A narrow, "done" library
 # implementing a stable protocol (RFC 8252 native-app OAuth + PKCE), not a red flag on its own.
 appauth = "0.11.1"
+# CLAUDE.md: "com.android.billingclient:billing-ktx (latest stable)". Google requires Billing
+# Library 8+ for any new app or update from 31 Aug 2026; 9.1.0 (18 Jun 2026) is current as of
+# checking, 23 Sept 2026.
+billing = "9.1.0"
 mockito = "5.20.0"
 mockitoKotlin = "6.1.0"
 turbine = "1.2.1"
@@ -98,6 +102,10 @@ msal = { group = "com.microsoft.identity.client", name = "msal", version.ref = "
 # expects a backend server, which GallerySync has none of — see TASK-026), so this is the
 # OpenID-Foundation-maintained library Google's own docs point to for the pattern instead.
 appauth = { group = "net.openid", name = "appauth", version.ref = "appauth" }
+
+# Google Play Billing — the pro_unlock one-time in-app purchase. Its own manifest declares the
+# com.android.vending.BILLING permission Play Console requires before any product can be created.
+billing-ktx = { group = "com.android.billingclient", name = "billing-ktx", version.ref = "billing" }
 
 # Testing
 mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
