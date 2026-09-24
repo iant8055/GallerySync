@@ -272,6 +272,16 @@ Play's own cache fresh every call rather than persisting a flag of its own. Comp
 installs and launches clean on the Moto G. Nothing calls it yet — no UI exists to trigger a purchase —
 so it's inert in the running app today, same as the dispatch loop and wire client before it.
 
+**Purchase signature verification, done and pushed.** Ian supplied the Play Console Licensing public
+key. Without it, a purchase was only ever whatever Play's client library reported with no independent
+check — fine normally, weaker on a rooted device where the query result itself could be tampered
+with. Now the local stand-in for the server-side receipt check a backend would do: `verifyPurchaseSignature`
+(`data/billing/PurchaseSignature.kt`) is a pure function using `java.util.Base64` rather than the
+Android one specifically so it runs in a real JVM unit test with a real generated key pair — six
+tests, including the actual forged-purchase case (signed by a different key). Fails closed throughout.
+Both places a purchase can reach the app (the owned-purchase query, and a fresh purchase result) go
+through it.
+
 One thing worth Ian's attention whenever there's a moment, not blocking: Claude in Chrome (the
 browser extension) was used directly against Ian's live, already-authenticated Play Console session
 for parts of this — navigating pages, reading state — never entering credentials, never touching the
