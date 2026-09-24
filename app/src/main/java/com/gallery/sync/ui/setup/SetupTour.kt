@@ -1348,6 +1348,13 @@ private fun CloudStorageContent(
     onGooglePhotosChosenChange: (Boolean) -> Unit,
     googlePhotosViewModel: GooglePhotosViewModel
 ) {
+    // The limits are a pop-up with an OK, shown when Google Photos is ticked (Ian, 24 Sept 2026: the
+    // inline list was far too long). Ticking is the moment it matters, so it is not shown on return.
+    var showLimits by remember { mutableStateOf(false) }
+    val toggleGooglePhotos = { chosen: Boolean ->
+        onGooglePhotosChosenChange(chosen)
+        if (chosen) showLimits = true
+    }
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = stringResource(R.string.tour_cloud_title),
@@ -1413,11 +1420,11 @@ private fun CloudStorageContent(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { onGooglePhotosChosenChange(!googlePhotosChosen) },
+                .clickable { toggleGooglePhotos(!googlePhotosChosen) },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Checkbox(checked = googlePhotosChosen, onCheckedChange = { onGooglePhotosChosenChange(it) })
+            Checkbox(checked = googlePhotosChosen, onCheckedChange = { toggleGooglePhotos(it) })
             Text(
                 text = stringResource(R.string.tour_cloud_google_photos),
                 style = MaterialTheme.typography.bodyLarge
@@ -1425,17 +1432,27 @@ private fun CloudStorageContent(
         }
 
         if (googlePhotosChosen) {
-            Text(
-                text = stringResource(R.string.tour_cloud_google_photos_limits_title),
-                style = MaterialTheme.typography.labelLarge
-            )
-            BulletItem(stringResource(R.string.tour_cloud_google_photos_limit_backup_only))
-            BulletItem(stringResource(R.string.tour_cloud_google_photos_limit_duplicates))
-            BulletItem(stringResource(R.string.tour_cloud_google_photos_limit_restore))
-            BulletItem(stringResource(R.string.tour_cloud_google_photos_limit_pro))
             // The same Connect / Unlock Pro controls Settings uses, over the same account state —
             // signing in is a fact about the account, not a Settings value.
             GooglePhotosSection(viewModel = googlePhotosViewModel)
+        }
+
+        if (showLimits) {
+            AlertDialog(
+                onDismissRequest = { showLimits = false },
+                title = { Text(stringResource(R.string.tour_cloud_google_photos_limits_title)) },
+                text = {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        BulletItem(stringResource(R.string.tour_cloud_google_photos_limit_backup_only))
+                        BulletItem(stringResource(R.string.tour_cloud_google_photos_limit_duplicates))
+                        BulletItem(stringResource(R.string.tour_cloud_google_photos_limit_restore))
+                        BulletItem(stringResource(R.string.tour_cloud_google_photos_limit_pro))
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showLimits = false }) { Text(stringResource(R.string.tour_ok)) }
+                }
+            )
         }
     }
 }
