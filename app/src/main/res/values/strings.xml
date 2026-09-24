@@ -1072,6 +1072,7 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_cloud_google_photos_limit_restore">Restoring from it is not available yet.</string>
     <string name="tour_cloud_google_photos_limit_pro">Free for 30 days, then a one-time purchase.</string>
     <string name="tour_ok">OK</string>
+    <string name="settings_default_mode_locked">Locked at Off while more than one cloud is connected, so each new album waits for you to choose where it goes.</string>
     <string name="feature_restore">RESTORE</string>
     <string name="feature_archive">ARCHIVE</string>
     <string name="feature_sync">SYNC</string>

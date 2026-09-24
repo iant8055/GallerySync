@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.dao.FolderPreferenceDao
+import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.data.remote.auth.SignInResult
 import com.gallery.sync.data.remote.cloud.CloudConnections
@@ -100,6 +101,12 @@ class CloudProvidersViewModel @Inject constructor(
         viewModelScope.launch {
             val providers = connections.offered().map {
                 ProviderState(it.location, it.kind, it.accountLabel(), it.keyFields)
+            }
+            // With more than one cloud connected the default album mode is locked at Off (Ian, 24 Sept 2026),
+            // so a new album waits for the user to choose where it goes. Enforced here as well as greyed
+            // in Settings, so connecting a second cloud by any route takes effect at once.
+            if (providers.count { it.isConnected } > 1 && settings.current().defaultAlbumMode != AlbumMode.OFF) {
+                settings.setDefaultAlbumMode(AlbumMode.OFF)
             }
             _state.value = _state.value.copy(
                 providers = providers,

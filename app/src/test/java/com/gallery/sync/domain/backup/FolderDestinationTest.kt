@@ -6,6 +6,8 @@ import com.gallery.sync.data.local.dao.AlbumPreferenceDao
 import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.dao.FolderPreferenceDao
 import com.gallery.sync.data.local.dao.UnsentDepartureDao
+import com.gallery.sync.data.local.entity.AlbumMode
+import com.gallery.sync.data.local.entity.AlbumPreferenceEntity
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.entity.FolderPreferenceEntity
 import com.gallery.sync.data.local.media.LocalMediaItem
@@ -39,13 +41,14 @@ class FolderDestinationTest {
     private val scanner: MediaScanner = mock()
     private val entryDao: BackupEntryDao = mock()
     private val folderDao: FolderPreferenceDao = mock()
+    private val albumDao: AlbumPreferenceDao = mock()
     private val unsentDao: UnsentDepartureDao = mock()
     private val settings: BackupSettings = mock()
 
     private val engine = BackupEngine(
         scanner = scanner,
         entryDao = entryDao,
-        albumDao = mock<AlbumPreferenceDao>(),
+        albumDao = albumDao,
         folderDao = folderDao,
         unsentDao = unsentDao,
         settings = settings,
@@ -147,6 +150,31 @@ class FolderDestinationTest {
         assertEquals(BackupLocation.GOOGLE_PHOTOS, entries.firstValue.single().location)
     }
 
+
+    @Test
+    fun `a new album in a backup-only cloud folder is seeded at Backup, not the Sync default`() = runTest {
+        givenScanned(
+            item("Camera", "DCIM/Camera/", 1L),
+            item("Vacation", "Pictures/Vacation/", 2L)
+        )
+        whenever(folderDao.all()).thenReturn(
+            listOf(
+                FolderPreferenceEntity("DCIM", BackupLocation.ONEDRIVE),
+                FolderPreferenceEntity("Pictures", BackupLocation.GOOGLE_PHOTOS)
+            )
+        )
+        whenever(settings.current()).thenReturn(
+            BackupPreferences(backupLocation = BackupLocation.ONEDRIVE, defaultAlbumMode = AlbumMode.SYNC)
+        )
+
+        engine.refreshLedger()
+
+        val seeded = argumentCaptor<List<AlbumPreferenceEntity>>()
+        verify(albumDao).insertIfNew(seeded.capture())
+        val byName = seeded.firstValue.associate { it.albumName to it.mode }
+        // Camera never takes Sync for its own reason; the point here is Vacation, in the Google Photos folder.
+        assertEquals(AlbumMode.BACKUP, byName["Vacation"])
+    }
     @Test
     fun `newly discovered folders are seeded with the app-wide default, without disturbing an existing choice`() = runTest {
         givenScanned(

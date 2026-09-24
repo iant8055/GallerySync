@@ -149,6 +149,7 @@ fun SettingsScreen(
         // The clouds, one row each, are below. The free tier is ONE cloud, the user's own (Ian, 24 Sept
         // 2026), so there is no longer a locked-on OneDrive box: OneDrive is one choice among the others.
         // What follows here is OneDrive's own account and folder, shown only while OneDrive is connected.
+        val multiCloud = cloudState.connected.size > 1
         val oneDriveConnected = cloudState.providers.any { it.location == BackupLocation.ONEDRIVE && it.isConnected }
 
         if (oneDriveConnected) LabelWithAction(
@@ -223,10 +224,15 @@ fun SettingsScreen(
         SettingDropdown(
             label = stringResource(R.string.settings_default_mode),
             help = HelpTopic.SETTINGS_DEFAULT_MODE,
-            options = AlbumMode.canBeDefault,
-            selected = state.defaultAlbumMode,
+            // With more than one cloud connected the default is locked at Off (Ian, 24 Sept 2026): a new
+            // album has to wait for the user to say where it goes. With a backup-only main cloud, Sync is
+            // not on offer as a default, because it is not available there.
+            options = AlbumMode.canBeDefault.filter { !(cloudState.main.isBackupOnly && it == AlbumMode.SYNC) },
+            selected = if (multiCloud) AlbumMode.OFF else state.defaultAlbumMode,
             onSelected = viewModel::setDefaultAlbumMode,
-            optionLabel = { it.settingsLabel() }
+            optionLabel = { it.settingsLabel() },
+            enabled = !multiCloud,
+            note = if (multiCloud) stringResource(R.string.settings_default_mode_locked) else null
         )
 
         SettingDivider()
@@ -623,10 +629,15 @@ private fun <T> SettingDropdown(
     options: List<T>,
     selected: T,
     onSelected: (T) -> Unit,
-    optionLabel: @Composable (T) -> String
+    optionLabel: @Composable (T) -> String,
+    /** False greys the control: it is set by something else and shown for information. */
+    enabled: Boolean = true,
+    /** A line under the row saying why it is locked, or anything else worth a sentence. */
+    note: String? = null
 ) {
     var expanded by remember { mutableStateOf(false) }
 
+    Column {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -634,7 +645,7 @@ private fun <T> SettingDropdown(
     ) {
         LabelWithHelp(label, help, modifier = Modifier.weight(1f))
         Box {
-            OutlinedButton(onClick = { expanded = true }) {
+            OutlinedButton(onClick = { expanded = true }, enabled = enabled) {
                 Text(optionLabel(selected), maxLines = 1)
             }
             DropdownMenu(
@@ -652,6 +663,14 @@ private fun <T> SettingDropdown(
                 }
             }
         }
+    }
+    note?.let {
+        Text(
+            text = it,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
     }
 }
 

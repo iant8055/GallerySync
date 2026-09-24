@@ -277,7 +277,25 @@ class BackupEngine @Inject constructor(
         //
         // Except that the Camera album never starts at Sync (Ian, 20 Sept 2026): a photo taken this
         // minute must not be shrunk this minute. See [CameraAlbum].
-        albumDao.insertIfNew(albumsOnDevice.map { AlbumPreferenceEntity(it, CameraAlbum.seeded(it, defaultMode)) })
+        //
+        // And an album whose folder goes to a backup-only cloud never starts at Sync or Archive: they are
+        // not available there (Ian, 24 Sept 2026), so seeding writes Backup instead. Only what is written
+        // *here*, from the default, is clamped; a mode the user chose is never rewritten.
+        val locationOfAlbum = items.groupBy { it.album }.mapValues { (_, inAlbum) ->
+            FolderDestination.resolve(
+                inAlbum.firstNotNullOfOrNull { MediaScanRules.topLevelFolderOf(it.relativePath) },
+                folderLocations,
+                defaultLocation
+            )
+        }
+        albumDao.insertIfNew(
+            albumsOnDevice.map {
+                AlbumPreferenceEntity(
+                    it,
+                    GooglePhotosDestination.seeded(locationOfAlbum[it] ?: defaultLocation, CameraAlbum.seeded(it, defaultMode))
+                )
+            }
+        )
 
         // Unscoped, deliberately, and used for two things. Pruning asks "does this album still
         // exist on the phone?", and marking asks "is this file still here?" — both are questions

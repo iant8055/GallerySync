@@ -525,3 +525,26 @@ something I do. See "Open" below — this is now the actual priority.
   `id`/`filename`/creation time, not a downloadable URL) — a real chunk of work, not a quick add.
 - **The destination-switch confirmation dialog** — the picker shipped without it (Ian: "build picker
   first"). Worth adding now, or fine as-is for a while longer?
+
+## One free cloud, and what each cloud can do — 24 Sept 2026 (Ian)
+
+- **Free tier is ONE cloud, whichever the user has; multi-cloud is the paid plan.** (Corrects an earlier
+  line here and in CLAUDE.md that called it "OneDrive plus the ContentProvider".) The main cloud is the
+  app-wide default destination and always uploads; every other cloud, OneDrive included, needs Pro or the
+  30-day trial, checked at the upload boundary in `BackupEngine`. OneDrive is a `CloudConnection` like the
+  rest; "signed in" means any cloud is connected; the wizard's cloud step is *Your cloud (free)* plus
+  *Add more clouds (Pro)*; plans that optimise are hidden when the main cloud is not OneDrive.
+- **What a cloud cannot do is greyed, with a message.** Restore, Archive and Sync exist only for OneDrive.
+  With no OneDrive connected the Restore and Archive tabs are greyed and tapping one says "<Cloud> doesn't
+  support RESTORE — Please switch to another Cloud Service to enable this feature". In an album whose folder
+  goes to a backup-only cloud, Sync and Archive stay on the mode menu greyed with the same message, and a
+  new album there is seeded at Backup, never at the Sync default. Not seen on the Moto G (its OneDrive is
+  connected). Not done: the deleted-files window still assumes OneDrive.
+- **With more than one cloud connected the default album mode is locked at Off** (Ian): a new album waits
+  for the user to choose where it goes. Greyed in Settings with a line saying why, and enforced in
+  `CloudProvidersViewModel.refresh`. It is not restored when back to one cloud; the user sets it again.
+- **Google Photos is limited to 30 writes a minute per user** on this project (measured). Writes are paced
+  (`WriteRateLimiter`), a 429 stands down 65 s and retries once, and a second leaves the file PENDING. A
+  photo takes about 4.5 s, so a big library takes hours; a quota increase has to be asked of Google.
+- **Wizard progress card** names the cloud being sent to and lists the others as "Pending"; the ring is
+  overall progress and never reads 100% while files are still queued.
