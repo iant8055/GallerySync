@@ -1,5 +1,6 @@
 package com.gallery.sync.di
 
+import com.gallery.sync.data.billing.PlayBillingRepository
 import com.gallery.sync.data.remote.auth.AppAuthGooglePhotosSignIn
 import com.gallery.sync.data.remote.auth.AppAuthGooglePhotosTokenProvider
 import com.gallery.sync.data.remote.auth.GooglePhotosSignIn
@@ -19,6 +20,7 @@ import com.gallery.sync.domain.repository.GooglePhotosUploadRepository
 import com.gallery.sync.domain.repository.OneDriveDeletionRepository
 import com.gallery.sync.domain.repository.OneDriveRepository
 import com.gallery.sync.domain.repository.OneDriveUploadRepository
+import com.gallery.sync.domain.billing.BillingRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -83,4 +85,8 @@ interface BindingsModule {
     fun bindGooglePhotosUploadRepository(
         impl: GooglePhotosUploadRepositoryImpl
     ): GooglePhotosUploadRepository
+
+    @Binds
+    @Singleton
+    fun bindBillingRepository(impl: PlayBillingRepository): BillingRepository
 }
