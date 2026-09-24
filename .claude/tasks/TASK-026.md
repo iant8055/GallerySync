@@ -3,12 +3,15 @@
 Milestone: v0.5.0 (Google Photos + Billing), pulled forward at Ian's request, 22 Sept 2026
 Raised by: Ian, 22 Sept 2026 — competitive research on multi-cloud support, market pricing research, then
 "lets plan out for the multi-platform Pro add on option... $2.49 price point works"
-Status: **IN PROGRESS.** OAuth registered. Play Console app + `pro_unlock` product registered, purchase
-signature verification wired in. Room schema at v13. AppAuth sign-in flow, Google Photos wire client,
-`BackupEngine` dispatch, and `BillingRepository` all built and verified on-device. **Destination model
-changed 23 Sept 2026** — see "One app-wide destination, not per-album" below; this supersedes the
-per-album model described in "What was decided" further down. Remaining: sign-in/purchase trigger UI,
-the destination-switch confirmation, Restore's Google Photos gap.
+Status: **IN PROGRESS — full pipeline built, not yet exercised against a real account.** OAuth and Play
+Console both registered. Schema, sign-in, wire client, `BackupEngine` dispatch (with a real
+`BillingRepository.isPurchased()` gate at the actual upload boundary, not just the picker UI),
+purchase signature verification, the destination model (one app-wide setting, not per-album — see
+below), and the Settings UI to connect/unlock/choose it are all built, committed, and verified by
+compile + full test suite + clean install on the Moto G. **Nothing has been visually verified in the
+running app or tested against a real signed-in account yet** — that's the next and most important
+step. Remaining after that: the destination-switch confirmation dialog, Restore's Google Photos gap
+(deferred, documented).
 
 ## What was decided, and why, before any code
 
@@ -350,19 +353,42 @@ covered by the earlier Archive/Sync-are-OneDrive-only decision, which never actu
 existing files in that album are staying where they are — only new ones follow. Same honesty-first
 shape as the Archive confirmation dialog. Not built yet; see Open.
 
+## Settings UI (Connect / Unlock / choose) — done, 23 Sept 2026
+
+`GooglePhotosViewModel` (sign-in + purchase state, `ui/settings/`) kept separate from
+`BackupViewModel` the way `ThemeViewModel` already is — a focused concern, not one more thing on an
+already-large ViewModel. `GooglePhotosSection` composable: two separate controls (Connect, Unlock
+Pro), not one combined flow, since sign-in and purchase are genuinely different systems with
+different failure modes and collapsing them would hide which one needs retrying. The purchase
+control only appears once signed in — same "never offer an action that cannot succeed" shape as
+`GooglePhotosDestination` restricting Sync/Archive. The destination picker itself
+(`BackupViewModel.setBackupLocation`) only renders once Google Photos is genuinely available —
+signed in *and* purchased — so it's never shown offering one real option.
+
+Found and fixed a small honesty gap while wiring the picker's `when`: the placeholder had
+`BackupLocation.USB_DRIVE` (unbuilt, part of Ian's original Settings sketch) falling back to the
+OneDrive string — wrong if that branch were ever reached, even though `options` never actually
+offers it. Given its own real, unused-for-now label instead.
+
+Verified the same way as the destination-model change before it: compile, full test suite, clean
+install and launch on the Moto G. **Not visually verified** — Settings needs a signed-in OneDrive
+session to reach, this device doesn't have one, and touching sign-in credentials to get one is not
+something I do. See "Open" below — this is now the actual priority.
+
 ## Open, for Ian when there's a moment
 
+- **The whole pipeline needs a real, on-device pass with you present.** Sign in on the Moto G (your
+  real OneDrive account, or however you want to test), open Settings, and: does Connect actually
+  launch the Google sign-in browser tab and come back correctly? Does Unlock Pro launch Play's
+  purchase sheet? Does the license-tester account complete a purchase without being charged? Does
+  the destination picker then appear and actually let you switch? This is the step everything else
+  this session has been building toward and none of it has been seen running yet.
 - The test Google account (`iandev8055@gmail.com`) still needs adding as a test user under the OAuth
   consent screen's Audience tab (Google Cloud Console, not Play Console) before sign-in will work
-  against it — separate from the Play Console tester/license-testing lists already done.
+  against it — separate from the Play Console tester/license-testing lists already done. Needed for
+  the pass above.
 - **Restore + Google Photos: build it this pass, or defer it like Archive/Sync?** Needs its own new
   path either way (Google Photos has no `openStream(itemId)` equivalent — the repository only knows
   `id`/`filename`/creation time, not a downloadable URL) — a real chunk of work, not a quick add.
-- **The destination-switch confirmation dialog** — worth building alongside the picker itself, or
-  fine to ship the picker first and add the warning after?
-- Next to build, no further decision needed to start: the Settings-tab sign-in/purchase trigger UI
-  ("Connect Google Photos", "Unlock Pro"), then the destination picker itself (now: one control in
-  Settings, not per-album) gated on `BillingRepository.isPurchased()` and `GooglePhotosSignIn
-  .currentAccountName()`. This is also where the sign-in flow, wire client, and billing flow all
-  finally get a real, on-device, against-an-actual-account test — everything built so far has been
-  provably inert in the running app until this lands.
+- **The destination-switch confirmation dialog** — the picker shipped without it (Ian: "build picker
+  first"). Worth adding now, or fine as-is for a while longer?
