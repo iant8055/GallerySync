@@ -17,10 +17,27 @@ package com.gallery.sync.domain.backup
 enum class BackupLocation {
     ONEDRIVE,
     GOOGLE_PHOTOS,
-    USB_DRIVE;
+    USB_DRIVE,
+
+    // The other clouds, added together on 24 Sept 2026 (TASK-026): the top of the 2026 rankings that an
+    // Android app can actually write to. The two S3 ones share one adapter. Stored by name, so adding
+    // values is safe — see BackupLocationConverter.
+    GOOGLE_DRIVE,
+    DROPBOX,
+    PCLOUD,
+    IDRIVE_E2,
+    BACKBLAZE_B2;
 
     /** Whether this location can be switched on in this build. */
     val isUsable: Boolean get() = this == ONEDRIVE
+
+    /**
+     * Everything but OneDrive is backup-only for now: no Archive, no Sync (optimise), no Restore.
+     * Those all act on `BackupEntryDao.verifiedInCloud()` and Restore downloads by the OneDrive id, so a
+     * row sent anywhere else must never satisfy either. Each adapter records its rows through
+     * `markUploadedWithoutSizeVerification`, which always leaves the remote size NULL.
+     */
+    val isBackupOnly: Boolean get() = this != ONEDRIVE
 
     companion object {
         /**

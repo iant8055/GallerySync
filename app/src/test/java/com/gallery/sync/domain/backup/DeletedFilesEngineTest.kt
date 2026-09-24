@@ -23,7 +23,7 @@ import com.gallery.sync.domain.model.RemoteError
 import com.gallery.sync.domain.model.RemoteMediaNode
 import com.gallery.sync.domain.model.UploadedItem
 import com.gallery.sync.domain.billing.MultiCloudEntitlement
-import com.gallery.sync.domain.repository.GooglePhotosUploadRepository
+import com.gallery.sync.domain.repository.CloudUploaders
 import com.gallery.sync.domain.repository.OneDriveRepository
 import com.gallery.sync.domain.repository.OneDriveUploadRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -73,7 +73,7 @@ class DeletedFilesEngineTest {
         settings = settings,
         repository = repository,
         uploadRepository = uploadRepository,
-        googlePhotosUploadRepository = mock<GooglePhotosUploadRepository>(),
+        uploaders = mock<CloudUploaders>(),
         entitlement = mock<MultiCloudEntitlement>(),
         proxyMarker = mock(),
         albumIdentity = identity,

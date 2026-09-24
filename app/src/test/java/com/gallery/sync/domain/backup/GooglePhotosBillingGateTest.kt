@@ -12,7 +12,8 @@ import com.gallery.sync.data.local.media.MediaScanner
 import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.data.remote.onedrive.UploadSource
 import com.gallery.sync.domain.billing.MultiCloudEntitlement
-import com.gallery.sync.domain.repository.GooglePhotosUploadRepository
+import com.gallery.sync.domain.repository.CloudUploader
+import com.gallery.sync.domain.repository.CloudUploaders
 import com.gallery.sync.domain.repository.OneDriveRepository
 import com.gallery.sync.domain.repository.OneDriveUploadRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -38,7 +39,9 @@ class GooglePhotosBillingGateTest {
 
     private val scanner: MediaScanner = mock()
     private val entryDao: BackupEntryDao = mock()
-    private val googlePhotosUploadRepository: GooglePhotosUploadRepository = mock()
+    private val googlePhotosUploader: CloudUploader = mock {
+        on { location } doReturn BackupLocation.GOOGLE_PHOTOS
+    }
     private val entitlement: MultiCloudEntitlement = mock()
     private val context: Context = mock {
         on { contentResolver } doReturn mock()
@@ -53,7 +56,7 @@ class GooglePhotosBillingGateTest {
         settings = mock<BackupSettings>(),
         repository = mock<OneDriveRepository>(),
         uploadRepository = mock<OneDriveUploadRepository>(),
-        googlePhotosUploadRepository = googlePhotosUploadRepository,
+        uploaders = CloudUploaders(setOf(googlePhotosUploader)),
         entitlement = entitlement,
         proxyMarker = mock(),
         albumIdentity = mock(),
@@ -88,7 +91,7 @@ class GooglePhotosBillingGateTest {
 
         val result = engine.uploadPending()
 
-        verify(googlePhotosUploadRepository, never()).upload(any<UploadSource>(), any())
+        verify(googlePhotosUploader, never()).upload(any<UploadSource>(), any(), any())
         assertEquals(0, result.uploaded)
     }
 

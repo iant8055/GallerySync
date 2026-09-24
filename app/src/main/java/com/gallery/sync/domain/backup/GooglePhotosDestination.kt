@@ -20,7 +20,7 @@ import com.gallery.sync.data.local.entity.AlbumMode
 object GooglePhotosDestination {
 
     fun modesFor(current: BackupLocation): List<AlbumMode> =
-        if (current == BackupLocation.GOOGLE_PHOTOS) ALLOWED else AlbumMode.entries.toList()
+        if (current.isBackupOnly) ALLOWED else AlbumMode.entries.toList()
 
     fun canChoose(current: BackupLocation, mode: AlbumMode): Boolean = mode in modesFor(current)
 

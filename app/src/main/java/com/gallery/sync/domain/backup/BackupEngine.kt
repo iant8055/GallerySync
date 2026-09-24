@@ -28,7 +28,7 @@ import com.gallery.sync.domain.model.DataResult
 import com.gallery.sync.domain.model.RemoteError
 import com.gallery.sync.domain.model.RemoteMediaNode
 import com.gallery.sync.domain.billing.MultiCloudEntitlement
-import com.gallery.sync.domain.repository.GooglePhotosUploadRepository
+import com.gallery.sync.domain.repository.CloudUploaders
 import com.gallery.sync.domain.repository.OneDriveRepository
 import com.gallery.sync.domain.repository.OneDriveUploadRepository
 import com.gallery.sync.util.Logger
@@ -112,7 +112,7 @@ class BackupEngine @Inject constructor(
     private val settings: BackupSettings,
     private val repository: OneDriveRepository,
     private val uploadRepository: OneDriveUploadRepository,
-    private val googlePhotosUploadRepository: GooglePhotosUploadRepository,
+    private val uploaders: CloudUploaders,
     private val entitlement: MultiCloudEntitlement,
     private val proxyMarker: ProxyMarker,
     private val albumIdentity: AlbumIdentityReconciler,
@@ -622,7 +622,7 @@ class BackupEngine @Inject constructor(
             // stoppedBecause on the BackupRunResult this function returns, and BackupWorker's mapping
             // of it. `pending.size` is still what both loops report progress against, so a run
             // spanning both providers shows one continuous count rather than resetting partway.
-            val (oneDrivePending, googlePhotosPending) = pending.partition {
+            val (oneDrivePending, otherPending) = pending.partition {
                 it.location == BackupLocation.ONEDRIVE
             }
 
@@ -853,108 +853,109 @@ class BackupEngine @Inject constructor(
                 }
             }
 
-            // ---------- Google Photos ----------
+            // ---------- Every other cloud ----------
             //
-            // No remote-index precheck the way the OneDrive loop above has: that exists so a lost
-            // ledger (a reinstall, or a scan that never got the chance to record an upload) does not
-            // produce a renamed duplicate, and the Google Photos equivalent — reconciling against
-            // this app's own items via mediaItems.list — is not built yet; tracked in TASK-026. Until
-            // then a lost Google Photos ledger risks a duplicate upload, not a data-loss risk, so this
-            // is a documented gap rather than a blocker.
+            // Google Drive, Dropbox, pCloud, IDrive e2, Backblaze B2 and Google Photos, one loop per
+            // provider, each independent of OneDrive above and of each other — Ian, 23 Sept 2026: a
+            // failed run on one provider must never stop another backup. A provider's own stop (an
+            // expired token, its own quota) ends *its* loop only and is never written into the
+            // BackupRunResult below, so it can neither fail the worker run nor be reported as though
+            // OneDrive were the reason. Its rows simply stay PENDING/FAILED for the next run.
             //
-            // Independent of oneDriveStop above, by design: see the note where the two lists were
-            // split.
+            // No remote-index precheck the way the OneDrive loop has: that exists so a lost ledger
+            // does not produce a renamed duplicate, and an equivalent for these providers is not built
+            // yet (TASK-026). A lost ledger risks a duplicate upload for them, not data loss.
             //
-            // Checked once, here, rather than trusted from the setting alone. CLAUDE.md: "Gate Google
-            // Photos features behind a BillingRepository.isPurchased() check — now via MultiCloudEntitlement, which adds the trial... never hardcode
-            // purchase state." The Settings picker already keeps `backupLocation` from being *set* to
-            // Google Photos without Pro, but a stored value can outlive the purchase it depended on —
-            // a refund, most plausibly — and this is the boundary that actually spends the user's
-            // upload, so it is the one that must not trust a setting written under different
-            // circumstances. Not purchased simply means this pass sends nothing to Google Photos; the
-            // rows stay PENDING and are picked up whenever `isPurchased()` next says yes.
-            val googlePhotosAllowed = googlePhotosPending.isEmpty() || entitlement.isEntitled()
-            if (!googlePhotosAllowed) {
+            // The entitlement is checked once, here, at the boundary that actually spends the user's
+            // upload rather than trusted from a stored setting — a refund or a lapsed trial can
+            // outlive the choice it depended on. Not entitled means this pass sends nothing to any
+            // of them; OneDrive is never gated.
+            val othersAllowed = otherPending.isEmpty() || entitlement.isEntitled()
+            if (!othersAllowed) {
                 Logger.w(
                     TAG,
-                    "uploadPending: ${googlePhotosPending.size} row(s) routed to Google Photos, " +
-                        "but Pro is not purchased — skipping this pass"
+                    "uploadPending: ${otherPending.size} row(s) routed to a second cloud, " +
+                        "but Pro is not unlocked and no trial is running — skipping this pass"
                 )
             }
 
-            for (entry in if (googlePhotosAllowed) googlePhotosPending else emptyList()) {
-                onProgress(
-                    BackupProgress(
-                        completed = uploaded + skipped + pruned,
-                        total = pending.size,
-                        currentFile = entry.displayName,
-                        currentBytesSent = 0,
-                        currentBytesTotal = entry.sizeBytes
+            val otherByLocation = if (othersAllowed) otherPending.groupBy { it.location } else emptyMap()
+            for ((location, rows) in otherByLocation) {
+                val uploader = uploaders.of(location)
+                if (uploader == null || !uploader.isConnected()) {
+                    Logger.w(TAG, "uploadPending: ${rows.size} row(s) routed to $location, which is not connected")
+                    continue
+                }
+
+                for (entry in rows) {
+                    onProgress(
+                        BackupProgress(
+                            completed = uploaded + skipped + pruned,
+                            total = pending.size,
+                            currentFile = entry.displayName,
+                            currentBytesSent = 0,
+                            currentBytesTotal = entry.sizeBytes
+                        )
                     )
-                )
 
-                val source = ContentUriUploadSource(
-                    resolver = context.contentResolver,
-                    uri = android.net.Uri.parse(entry.contentUri),
-                    displayName = entry.displayName,
-                    sizeBytes = entry.sizeBytes
-                )
+                    val source = ContentUriUploadSource(
+                        resolver = context.contentResolver,
+                        uri = android.net.Uri.parse(entry.contentUri),
+                        displayName = entry.displayName,
+                        sizeBytes = entry.sizeBytes
+                    )
 
-                val result = googlePhotosUploadRepository.upload(
-                    source = source,
-                    onProgress = { sent, total ->
-                        onProgress(
-                            BackupProgress(
-                                completed = uploaded + skipped + pruned,
-                                total = pending.size,
-                                currentFile = entry.displayName,
-                                currentBytesSent = sent,
-                                currentBytesTotal = total
+                    val result = uploader.upload(
+                        source = source,
+                        album = entry.album,
+                        onProgress = { sent, total ->
+                            onProgress(
+                                BackupProgress(
+                                    completed = uploaded + skipped + pruned,
+                                    total = pending.size,
+                                    currentFile = entry.displayName,
+                                    currentBytesSent = sent,
+                                    currentBytesTotal = total
+                                )
                             )
-                        )
-                    }
-                )
+                        }
+                    )
 
-                when (result) {
-                    is DataResult.Success -> {
-                        // Never byte-verified — Google reports no size, ever, on any call. Written
-                        // through markUploadedWithoutSizeVerification, which always leaves
-                        // remoteSizeBytes NULL, so this row can never satisfy verifiedInCloud() and
-                        // can never become Archive/Sync eligible. See that method's doc and TASK-026.
-                        entryDao.markUploadedWithoutSizeVerification(
-                            id = entry.id,
-                            remoteItemId = result.value.id,
-                            uploadedAt = System.currentTimeMillis()
-                        )
-                        uploaded++
-                    }
-
-                    is DataResult.Failure -> {
-                        if (result.error == RemoteError.LocalFileMissing) {
-                            recordDepartures(listOf(entry.id))
-                            entryDao.forget(entry.id)
-                            pruned++
-                            continue
+                    when (result) {
+                        is DataResult.Success -> {
+                            // Never byte-verified: none of these is proven by this app. Written
+                            // through markUploadedWithoutSizeVerification, which always leaves
+                            // remoteSizeBytes NULL, so the row can never satisfy verifiedInCloud() and
+                            // can never become Archive/Sync/Restore eligible. See that method's doc.
+                            entryDao.markUploadedWithoutSizeVerification(
+                                id = entry.id,
+                                remoteItemId = result.value.id,
+                                uploadedAt = System.currentTimeMillis()
+                            )
+                            uploaded++
                         }
 
-                        if (result.error == RemoteError.EmptyLocalFile) {
-                            deferred++
-                            continue
-                        }
+                        is DataResult.Failure -> {
+                            if (result.error == RemoteError.LocalFileMissing) {
+                                recordDepartures(listOf(entry.id))
+                                entryDao.forget(entry.id)
+                                pruned++
+                                continue
+                            }
 
-                        val stop = stopReasonFor(result.error)
-                        if (stop != null) {
-                            // Ends the Google Photos loop only. Never written into the
-                            // BackupRunResult below — a Google Photos-only problem (an expired
-                            // Google token, its own quota) must not fail the whole worker run and
-                            // must not be reported as though OneDrive were the reason. These rows
-                            // are simply left PENDING/FAILED and picked up on the next run, the same
-                            // way a deferred OneDrive file already is today.
-                            Logger.w(TAG, "uploadPending (Google Photos): stopping this provider's loop — $stop")
-                            break
+                            if (result.error == RemoteError.EmptyLocalFile) {
+                                deferred++
+                                continue
+                            }
+
+                            val stop = stopReasonFor(result.error)
+                            if (stop != null) {
+                                Logger.w(TAG, "uploadPending ($location): stopping this provider's loop — $stop")
+                                break
+                            }
+                            entryDao.markFailed(entry.id, result.error.toString())
+                            failed++
                         }
-                        entryDao.markFailed(entry.id, result.error.toString())
-                        failed++
                     }
                 }
             }

@@ -8,7 +8,7 @@ import com.gallery.sync.data.local.dao.UnsentDepartureDao
 import com.gallery.sync.data.local.media.MediaScanner
 import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.domain.billing.MultiCloudEntitlement
-import com.gallery.sync.domain.repository.GooglePhotosUploadRepository
+import com.gallery.sync.domain.repository.CloudUploaders
 import com.gallery.sync.domain.repository.OneDriveRepository
 import com.gallery.sync.domain.repository.OneDriveUploadRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,7 +44,7 @@ class RemainingWorkTest {
         settings = mock<BackupSettings>(),
         repository = mock<OneDriveRepository>(),
         uploadRepository = mock<OneDriveUploadRepository>(),
-        googlePhotosUploadRepository = mock<GooglePhotosUploadRepository>(),
+        uploaders = mock<CloudUploaders>(),
         entitlement = mock<MultiCloudEntitlement>(),
         proxyMarker = mock(),
         albumIdentity = mock(),

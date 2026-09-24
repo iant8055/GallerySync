@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
+import com.gallery.sync.ui.common.labelRes
 import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.settings.ThemeMode
 import com.gallery.sync.domain.backup.ArchiveAge
@@ -218,19 +219,7 @@ fun SettingsScreen(
                     },
                     selected = folder.location,
                     onSelected = { viewModel.setFolderLocation(folder.name, it) },
-                    optionLabel = { location ->
-                        stringResource(
-                            when (location) {
-                                BackupLocation.ONEDRIVE -> R.string.backup_location_onedrive
-                                BackupLocation.GOOGLE_PHOTOS -> R.string.backup_location_google_photos
-                                // Never actually offered — options above lists only the two real
-                                // destinations — but the `when` must stay exhaustive over the enum,
-                                // and a fallback that named the wrong provider would be worse than
-                                // this one never being reached at all.
-                                BackupLocation.USB_DRIVE -> R.string.backup_location_usb_drive
-                            }
-                        )
-                    }
+                    optionLabel = { location -> stringResource(location.labelRes()) }
                 )
             }
         }

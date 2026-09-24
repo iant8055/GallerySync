@@ -113,6 +113,16 @@
     <!-- Not built (see BackupLocation.isUsable) — exists only so the destination picker's option
          label stays exhaustive over the enum rather than guessing at a fallback. -->
     <string name="backup_location_usb_drive">USB drive</string>
+    <string name="backup_location_google_drive">Google Drive</string>
+    <string name="backup_location_dropbox">Dropbox</string>
+    <string name="backup_location_pcloud">pCloud</string>
+    <string name="backup_location_idrive_e2">IDrive e2</string>
+    <string name="backup_location_backblaze_b2">Backblaze B2</string>
+    <string name="cloud_field_endpoint">Endpoint (for example s3.us-west-004.backblazeb2.com)</string>
+    <string name="cloud_field_region">Region (for example us-west-004)</string>
+    <string name="cloud_field_bucket">Bucket name</string>
+    <string name="cloud_field_access_key">Access key ID</string>
+    <string name="cloud_field_secret_key">Secret access key</string>
     <string name="backup_folders_heading">Where each folder goes</string>
     <string name="backup_folders_explainer">New photos and videos in each folder go to the cloud you pick. Anything already sent stays where it is.</string>
     <plurals name="backup_folder_label">
