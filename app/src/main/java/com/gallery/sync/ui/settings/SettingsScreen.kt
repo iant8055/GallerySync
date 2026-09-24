@@ -152,35 +152,16 @@ fun SettingsScreen(
         // What follows here is OneDrive's own account and folder, shown only while OneDrive is connected.
         val oneDriveConnected = cloudState.providers.any { it.location == BackupLocation.ONEDRIVE && it.isConnected }
 
-        // The OneDrive account, named. Its Sign out is on its row in the list of clouds below — this row used to
-        // carry a second one, and two buttons for the same thing read as two different things.
-        if (oneDriveConnected) {
-            accountName?.let {
-                WithHelp(HelpTopic.SETTINGS_ACCOUNT) {
-                    Column {
-                        Text(
-                            text = stringResource(R.string.backup_account_label),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(it, style = MaterialTheme.typography.bodyLarge)
-                    }
-                }
-            }
-        }
-
+        // OneDrive's own folder, while it is connected. The account itself is named on its row in the list of
+        // clouds (Ian, 24 Sept 2026: no separate Account row alongside the clouds).
         if (oneDriveConnected) DestinationSection()
 
-        CloudProvidersSection(viewModel = cloudViewModel)
-
-        // Only shown once there is a genuine second choice — a picker offering one real option is
-        // clutter, not a control. One dropdown per top-level folder (DCIM, Pictures...), never per
-        // album. See TASK-026.
-        // Also while a folder is still routed there after the trial or purchase lapsed, so it can be moved
-        // back — the list must not vanish on the one person who needs it.
-        if ((cloudState.isAvailable || state.folders.any { it.location != BackupLocation.ONEDRIVE }) &&
-            state.folders.isNotEmpty()
-        ) {
+        // Which local folder goes to which cloud — one row each, always shown (Ian, 24 Sept 2026: clean
+        // pairing between a local folder and a cloud). Top-level folders only (DCIM, Pictures...), never
+        // per album. The menu opens only where there is a real choice: with one cloud, or without Pro or
+        // the trial, the pairing is shown and cannot be changed. A folder still paired with a cloud that has
+        // lapsed or been disconnected keeps it on the menu, so it reads truthfully and can be moved back.
+        if (state.folders.isNotEmpty()) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
                     text = stringResource(R.string.backup_folders_heading),
@@ -193,23 +174,26 @@ fun SettingsScreen(
                 )
             }
             state.folders.forEach { folder ->
+                val options = buildList {
+                    addAll(cloudState.destinations)
+                    if (folder.location !in this) add(folder.location)
+                }
                 SettingDropdown(
                     label = pluralStringResource(
                         R.plurals.backup_folder_label, folder.fileCount, folder.name, folder.fileCount
                     ),
-                    options = buildList {
-                        add(BackupLocation.ONEDRIVE)
-                        addAll(cloudState.destinations)
-                        // A folder still routed to a cloud that has lapsed or been disconnected keeps
-                        // its current value on the menu, so it reads truthfully and can be moved back.
-                        if (folder.location !in this) add(folder.location)
-                    },
+                    options = options,
                     selected = folder.location,
                     onSelected = { viewModel.setFolderLocation(folder.name, it) },
-                    optionLabel = { location -> stringResource(location.labelRes()) }
+                    optionLabel = { location -> stringResource(location.labelRes()) },
+                    enabled = options.size > 1
                 )
             }
+            SettingDivider()
         }
+
+        CloudProvidersSection(viewModel = cloudViewModel)
+
 
         // ── Albums ───────────────────────────────────────────────────────────
         SectionHeader(

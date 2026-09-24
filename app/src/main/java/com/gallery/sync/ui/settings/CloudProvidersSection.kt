@@ -33,6 +33,8 @@ import com.gallery.sync.domain.backup.BackupLocation
 import com.gallery.sync.domain.billing.MultiCloudTrial
 import com.gallery.sync.ui.common.LabelWithAction
 import com.gallery.sync.ui.common.labelRes
+import com.gallery.sync.ui.help.HelpTopic
+import com.gallery.sync.ui.help.WithHelp
 
 /**
  * Connect, disconnect and unlock every optional cloud — Settings and the setup wizard both use this.
@@ -59,10 +61,14 @@ fun CloudProvidersSection(
 
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         if (showTitle) {
-            Text(
-                text = stringResource(R.string.cloud_providers_section_title),
-                style = MaterialTheme.typography.titleMedium
-            )
+            // The (?) is the old Account topic: what signing in and out does. The Account row it belonged to
+            // is gone, since every cloud's account is named on its own row here.
+            WithHelp(HelpTopic.SETTINGS_ACCOUNT) {
+                Text(
+                    text = stringResource(R.string.cloud_providers_section_title),
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
         }
 
         state.providers.filter { only == null || it.location in only }.forEach { provider ->
@@ -75,7 +81,7 @@ fun CloudProvidersSection(
                                 Text(stringResource(R.string.sign_out_action))
                             }
                             // Only in Settings: the wizard has its own way of choosing the main cloud.
-                            if (only == null && provider.location != state.main) {
+                            if (only == null && provider.location != state.main && state.connected.size > 1) {
                                 TextButton(onClick = { viewModel.setMain(provider.location) }) {
                                     Text(stringResource(R.string.cloud_make_main_action))
                                 }
