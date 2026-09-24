@@ -3,9 +3,9 @@
 Milestone: v0.5.0 (Google Photos + Billing), pulled forward at Ian's request, 22 Sept 2026
 Raised by: Ian, 22 Sept 2026 — competitive research on multi-cloud support, market pricing research, then
 "lets plan out for the multi-platform Pro add on option... $2.49 price point works"
-Status: **IN PROGRESS.** OAuth registered. Room schema migrated (v11 → v12). AppAuth sign-in flow,
-Google Photos wire client, and `BackupEngine` dispatch all built and verified on-device. UI next —
-see "Open, for Ian" below.
+Status: **IN PROGRESS.** OAuth registered. Play Console app + `pro_unlock` product registered. Room
+schema migrated (v11 → v12). AppAuth sign-in flow, Google Photos wire client, `BackupEngine` dispatch,
+and `BillingRepository` all built and verified on-device. Destination-picker UI next.
 
 ## What was decided, and why, before any code
 
@@ -243,12 +243,49 @@ a `List` query), installs and launches clean on the Moto G, schema migration con
 yet — no UI exists for it — so the new loop is provably a no-op in real-world use today; the OneDrive
 path's actual runtime behaviour is unchanged by construction.
 
+## Play Console + Billing — done (23 Sept 2026)
+
+Play Console app entry created for GallerySync (`com.gallery.sync`), same account as Teleprompter.
+Release signing set up from scratch — nothing existed before this (only a debug keystore, used for
+the OAuth Android client's SHA-1). `gallerysync-release.jks`, Play App Signing, upload key generated
+locally with a random password, kept in `keystore.properties` — both gitignored, never committed. A
+clone without `keystore.properties` still builds a release variant, just unsigned.
+
+Two uploads to Internal Testing were needed. The first (versionCode 1, no Billing dependency yet) hit
+a real wall: Play Console refuses to let you create *any* one-time product until an uploaded build's
+manifest declares `com.android.vending.BILLING` — which only appears once `com.android.billingclient
+:billing-ktx` is actually a dependency. Added it (9.1.0 — CLAUDE.md says "latest stable"; Google
+requires Billing Library 8+ for any new app/update from 31 Aug 2026), rebuilt as versionCode 2,
+re-uploaded, confirmed the permission was present in the merged manifest before handing it over.
+
+Along the way: Play restructured one-time products since CLAUDE.md's monetization section was
+written — a product no longer has a price directly, it needs a separate **purchase option**
+underneath it (Buy/Rent/pre-order, its own price and regional availability), and that purchase
+option is what actually needs activating, not just the product. `pro_unlock` — Durable, $2.49, Buy —
+is live with an active purchase option. License testing (both `iant8055@gmail.com` and the test
+account) and the internal testers list both set.
+
+**`BillingRepository`, done and pushed** (`domain/billing/BillingRepository.kt` /
+`data/billing/PlayBillingRepository.kt`, see that commit for the full design notes): backed by Play
+Billing directly, no backend server (same reasoning as the rest of this app), `isPurchased()` queries
+Play's own cache fresh every call rather than persisting a flag of its own. Compiles, all tests pass,
+installs and launches clean on the Moto G. Nothing calls it yet — no UI exists to trigger a purchase —
+so it's inert in the running app today, same as the dispatch loop and wire client before it.
+
+One thing worth Ian's attention whenever there's a moment, not blocking: Claude in Chrome (the
+browser extension) was used directly against Ian's live, already-authenticated Play Console session
+for parts of this — navigating pages, reading state — never entering credentials, never touching the
+sign-in itself. Flagging it here simply because it's a new way this session touched an external
+account, not because anything about it went wrong.
+
 ## Open, for Ian when there's a moment
 
-- Nothing blocking. Ian is setting up a dedicated test Google account (23 Sept 2026) — same reasoning
-  as the Moto G's disposable OneDrive test account — for when the sign-in UI exists to actually use it.
-  Needs adding as a test user under the OAuth consent screen's Audience tab once it exists.
+- Nothing blocking. The test Google account (`iandev8055@gmail.com`) still needs adding as a test user
+  under the OAuth consent screen's Audience tab (Google Cloud Console, not Play Console) before sign-in
+  will work against it — separate from the Play Console tester/license-testing lists already done.
 - Next: UI — the per-album destination picker, Sync/Archive mode restriction on Google-Photos-routed
   albums (TASK-014's "never offer an action that cannot succeed" rule, the same way Camera's own mode
-  menu already refuses Sync), and Pro-unlock gating. This is also where the sign-in flow and wire
-  client finally get a real, on-device, against-an-actual-account test.
+  menu already refuses Sync), and real Pro-unlock gating via `BillingRepository.isPurchased()`. This is
+  also where the sign-in flow, wire client, and billing flow all finally get a real, on-device,
+  against-an-actual-account test — everything built so far has been provably inert in the running app
+  until this lands.
