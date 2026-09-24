@@ -1,6 +1,7 @@
 package com.gallery.sync.di
 
 import com.gallery.sync.data.remote.auth.GooglePhotosCloudConnection
+import com.gallery.sync.data.remote.auth.OneDriveCloudConnection
 import com.gallery.sync.data.remote.cloud.CloudConnection
 import com.gallery.sync.data.remote.cloud.CloudConnections
 import com.gallery.sync.data.remote.cloud.CloudUploadClient
@@ -32,6 +33,9 @@ abstract class CloudModule {
 
     @Binds @IntoSet
     abstract fun bindGooglePhotosUploader(impl: GooglePhotosCloudUploader): CloudUploader
+
+    @Binds @IntoSet
+    abstract fun bindOneDriveConnection(impl: OneDriveCloudConnection): CloudConnection
 
     @Binds @IntoSet
     abstract fun bindGooglePhotosConnection(impl: GooglePhotosCloudConnection): CloudConnection

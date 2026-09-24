@@ -97,6 +97,8 @@
     <string name="cloud_enter_keys_action">Enter keys</string>
     <string name="cloud_keys_dialog_title">Connect %1$s</string>
     <string name="cloud_cancel">Cancel</string>
+    <string name="cloud_make_main_action">Make main</string>
+    <string name="cloud_main_tag">main (free)</string>
     <string name="google_photos_not_connected">Not connected</string>
     <string name="google_photos_connected">Connected</string>
     <string name="google_photos_connect_action">Connect</string>
@@ -1053,7 +1055,9 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_local_granted">All set</string>
 
     <string name="tour_cloud_title">Cloud Storage</string>
-    <string name="tour_cloud_body">Choose the cloud services you use, and sign in to each. OneDrive is where your backups are kept; the others are optional extras.</string>
+    <string name="tour_cloud_body">Pick the cloud you use and sign in. That one is free. You can add more clouds too, which is part of Pro.</string>
+    <string name="tour_cloud_main_heading">Your cloud (free)</string>
+    <string name="tour_cloud_more_heading">Add more clouds (Pro, free for 30 days)</string>
     <string name="tour_cloud_signed_in">Signed in to OneDrive</string>
     <string name="tour_cloud_destination">Backup destination</string>
     <string name="tour_cloud_change">Change</string>

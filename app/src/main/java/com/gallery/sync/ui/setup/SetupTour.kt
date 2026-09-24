@@ -103,6 +103,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.ui.common.labelRes
 import com.gallery.sync.ui.settings.CloudProvidersSection
+import com.gallery.sync.ui.settings.CloudProvidersUiState
 import com.gallery.sync.ui.settings.CloudProvidersViewModel
 import com.gallery.sync.ui.settings.ProviderState
 import com.gallery.sync.R
@@ -285,9 +286,10 @@ fun SetupTour(
     val showOptimization = state.libraryChoice == LibraryChoice.BACK_UP_AND_FREE_SPACE ||
         state.libraryChoice == LibraryChoice.BACK_UP_AND_OPTIMISE_NEW
 
-    val signInState = signInViewModel?.state?.collectAsStateWithLifecycle()
-    val isSignedIn = signInState?.value is SignInUiState.SignedIn
     val cloudState by cloudViewModel.state.collectAsStateWithLifecycle()
+    // OneDrive specifically: the cloud check and the OneDrive-only steps depend on it being connected, not
+    // on which cloud is the main one.
+    val isSignedIn = cloudState.providers.any { it.location == BackupLocation.ONEDRIVE && it.isConnected }
     // The user's own answer on step 4: does Google Photos count among the services they use. Not read
     // from anywhere — the wizard collects its own answers — and what step 5 offers depends on whether
     // a cloud is actually connected and unlocked (`cloudState.destinations`), not on these ticks.
@@ -326,7 +328,7 @@ fun SetupTour(
     }
 
     fun canAdvance(): Boolean = when (step) {
-        4 -> isSignedIn && cloudState.providers.filter { it.location in chosenClouds }.all { it.isConnected }
+        4 -> cloudState.mainConnected && cloudState.providers.filter { it.location in chosenClouds - cloudState.main }.all { it.isConnected }
         5 -> state.directoryChecks.values.any { it }
         else -> true
     }
@@ -399,6 +401,13 @@ fun SetupTour(
             startAt != null -> viewModel.onDelayElapsed()
             resumeStep == TOTAL_STEPS -> viewModel.observeBackupWorker()
             else -> viewModel.startBackupWorker()
+        }
+    }
+
+    // A main cloud other than OneDrive is backup-only, so a plan that optimises cannot stay chosen.
+    LaunchedEffect(step, cloudState.main, state.libraryChoice) {
+        if (step == 6 && cloudState.main != BackupLocation.ONEDRIVE && state.libraryChoice.optimisesAtInstall) {
+            viewModel.setLibraryChoice(LibraryChoice.BACK_UP_EVERYTHING)
         }
     }
 
@@ -659,14 +668,10 @@ fun SetupTour(
                         3 -> InstallationStepsContent()
                         4 -> CloudStorageContent(
                             state = state,
-                            isSignedIn = isSignedIn,
-                            onSignIn = {
-                                activity?.let { signInViewModel?.signIn(it) }
-                            },
+                            cloudState = cloudState,
                             onChangeDestination = viewModel::openDestinationChooser,
-                            providers = cloudState.providers,
-                            chosen = chosenClouds,
-                            onChosenChange = { location, on ->
+                            extras = chosenClouds,
+                            onExtrasChange = { location, on ->
                                 chosenCloudNames = if (on) chosenCloudNames + location.name else chosenCloudNames - location.name
                             },
                             cloudViewModel = cloudViewModel
@@ -684,6 +689,7 @@ fun SetupTour(
                         )
                         6 -> BackupOptionsContent(
                             selected = state.libraryChoice,
+                            optimiseAvailable = cloudState.main == BackupLocation.ONEDRIVE,
                             onSelect = viewModel::setLibraryChoice
                         )
                         7 -> OptimizationContent(
@@ -1220,7 +1226,7 @@ private fun DirectoryDiscoveryContent(
                     directory = dir,
                     checked = checked,
                     onToggle = { onToggleDirectory(dir.name) },
-                    destination = state.folderDestinations[dir.name] ?: BackupLocation.ONEDRIVE,
+                    destination = state.folderDestinations[dir.name] ?: state.mainCloud,
                     destinations = destinations,
                     onDestinationChange = { onDestinationChange(dir.name, it) }
                 )
@@ -1328,10 +1334,10 @@ private fun DirectoryRow(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            if (destinations.isNotEmpty() && checked) {
+            if (destinations.size > 1 && checked) {
                 FolderDestinationPicker(
                     destination = destination,
-                    options = listOf(BackupLocation.ONEDRIVE) + destinations,
+                    options = destinations,
                     onChange = onDestinationChange
                 )
             }
@@ -1342,30 +1348,28 @@ private fun DirectoryRow(
 // ── Step 4: Cloud Storage ───────────────────────────────────────────────────
 
 /**
- * Which cloud services the user uses, and signing in to each. Comes *before* the folders (Ian,
- * 24 Sept 2026): the folder step needs to know which clouds are actually available to send a folder to.
+ * Which cloud the user has, and signing in to it. Comes *before* the folders (Ian, 24 Sept 2026): the
+ * folder step needs to know which clouds are actually available to send a folder to.
  *
- * OneDrive is the app's base and is listed ticked and fixed. Google Photos is the optional Pro
- * addition; ticking it states its limits before anything is connected.
+ * **The free tier is one cloud, whichever the user has** (Ian, 24 Sept 2026: "Free Tier is one Cloud
+ * platform only... multi-cloud support is the Pro-Plus plan"). So this is a choice of one — OneDrive is
+ * one of the options, not a requirement — followed by an optional "add more clouds", which is the paid
+ * part and says so, with the 30-day trial terms, before anything is connected.
  */
 @Composable
 private fun CloudStorageContent(
     state: ReconcileUiState,
-    isSignedIn: Boolean,
-    onSignIn: () -> Unit,
+    cloudState: CloudProvidersUiState,
+    extras: Set<BackupLocation>,
+    onExtrasChange: (BackupLocation, Boolean) -> Unit,
     onChangeDestination: () -> Unit,
-    providers: List<ProviderState>,
-    chosen: Set<BackupLocation>,
-    onChosenChange: (BackupLocation, Boolean) -> Unit,
     cloudViewModel: CloudProvidersViewModel
 ) {
-    // The limits are a pop-up with an OK, shown when Google Photos is ticked (Ian, 24 Sept 2026: the
-    // inline list was far too long). Ticking is the moment it matters, so it is not shown on return.
-    var showLimits by remember { mutableStateOf(false) }
-    val toggleProvider = { location: BackupLocation, on: Boolean ->
-        onChosenChange(location, on)
-        if (on) showLimits = true
-    }
+    // Which cloud the limits pop-up is about, or null. Shown when a cloud is picked, because that is the
+    // moment it matters, and not again on return.
+    var limitsFor by remember { mutableStateOf<BackupLocation?>(null) }
+    val main = cloudState.main
+
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = stringResource(R.string.tour_cloud_title),
@@ -1376,30 +1380,43 @@ private fun CloudStorageContent(
             style = MaterialTheme.typography.bodyMedium
         )
 
-        // OneDrive: always part of the setup, so shown ticked and not toggleable.
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Checkbox(checked = true, onCheckedChange = null, enabled = false)
-            Text(
-                text = stringResource(R.string.backup_location_onedrive),
-                style = MaterialTheme.typography.bodyLarge
-            )
+        // ── Your cloud (free) ──
+        Text(
+            text = stringResource(R.string.tour_cloud_main_heading),
+            style = MaterialTheme.typography.titleSmall
+        )
+        cloudState.providers.forEach { provider ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        if (provider.location != main) {
+                            cloudViewModel.setMain(provider.location)
+                            if (provider.location != BackupLocation.ONEDRIVE) limitsFor = provider.location
+                        }
+                    },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                RadioButton(
+                    selected = provider.location == main,
+                    onClick = {
+                        if (provider.location != main) {
+                            cloudViewModel.setMain(provider.location)
+                            if (provider.location != BackupLocation.ONEDRIVE) limitsFor = provider.location
+                        }
+                    }
+                )
+                Text(
+                    text = stringResource(provider.location.labelRes()),
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
         }
 
-        if (!isSignedIn) {
-            Button(onClick = onSignIn) {
-                Text(stringResource(R.string.sign_in_action))
-            }
-        } else {
-            Text(
-                text = stringResource(R.string.tour_cloud_signed_in),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary
-            )
-
+        // The main cloud's own connect controls, and for OneDrive the folder its backups go in.
+        CloudProvidersSection(only = setOf(main), showTitle = false, viewModel = cloudViewModel)
+        if (main == BackupLocation.ONEDRIVE && cloudState.mainConnected) {
             // The path takes the slack and the button keeps its own width. SpaceBetween let a
             // long destination squeeze the button until "Change" rendered as "Chang" — a button
             // narrower than its own label, which is how a truncated label happens at all.
@@ -1428,16 +1445,25 @@ private fun CloudStorageContent(
 
         HorizontalDivider()
 
-        providers.forEach { provider ->
-            val on = provider.location in chosen
+        // ── More clouds (Pro) ──
+        Text(
+            text = stringResource(R.string.tour_cloud_more_heading),
+            style = MaterialTheme.typography.titleSmall
+        )
+        cloudState.providers.filter { it.location != main }.forEach { provider ->
+            val on = provider.location in extras
+            val toggle = { turnOn: Boolean ->
+                onExtrasChange(provider.location, turnOn)
+                if (turnOn) limitsFor = provider.location
+            }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { toggleProvider(provider.location, !on) },
+                    .clickable { toggle(!on) },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Checkbox(checked = on, onCheckedChange = { toggleProvider(provider.location, it) })
+                Checkbox(checked = on, onCheckedChange = { toggle(it) })
                 Text(
                     text = stringResource(provider.location.labelRes()),
                     style = MaterialTheme.typography.bodyLarge
@@ -1445,26 +1471,30 @@ private fun CloudStorageContent(
             }
         }
 
-        if (chosen.isNotEmpty()) {
+        val chosenExtras = extras - main
+        if (chosenExtras.isNotEmpty()) {
             // The same connect / key-entry / trial controls Settings uses, over the same account state —
             // connecting is a fact about the account, not a Settings value.
-            CloudProvidersSection(only = chosen, showTitle = false, viewModel = cloudViewModel)
+            CloudProvidersSection(only = chosenExtras, showTitle = false, viewModel = cloudViewModel)
         }
 
-        if (showLimits) {
+        limitsFor?.let { about ->
             AlertDialog(
-                onDismissRequest = { showLimits = false },
+                onDismissRequest = { limitsFor = null },
                 title = { Text(stringResource(R.string.tour_cloud_google_photos_limits_title)) },
                 text = {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         BulletItem(stringResource(R.string.tour_cloud_google_photos_limit_backup_only))
                         BulletItem(stringResource(R.string.tour_cloud_google_photos_limit_duplicates))
                         BulletItem(stringResource(R.string.tour_cloud_google_photos_limit_restore))
-                        BulletItem(stringResource(R.string.tour_cloud_google_photos_limit_pro))
+                        // The trial line is about adding a second cloud; the main cloud is free.
+                        if (about != main) {
+                            BulletItem(stringResource(R.string.tour_cloud_google_photos_limit_pro))
+                        }
                     }
                 },
                 confirmButton = {
-                    TextButton(onClick = { showLimits = false }) { Text(stringResource(R.string.tour_ok)) }
+                    TextButton(onClick = { limitsFor = null }) { Text(stringResource(R.string.tour_ok)) }
                 }
             )
         }
@@ -1505,6 +1535,8 @@ private fun FolderDestinationPicker(
 @Composable
 private fun BackupOptionsContent(
     selected: LibraryChoice,
+    /** Optimising needs copies proven by size, which only OneDrive can give; other clouds are backup-only. */
+    optimiseAvailable: Boolean,
     onSelect: (LibraryChoice) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -1513,7 +1545,7 @@ private fun BackupOptionsContent(
             style = MaterialTheme.typography.titleLarge
         )
 
-        LibraryChoice.entries.forEachIndexed { index, choice ->
+        LibraryChoice.entries.filter { optimiseAvailable || !it.optimisesAtInstall }.forEachIndexed { index, choice ->
             val isSelected = selected == choice
             if (isSelected) {
                 Button(

@@ -40,23 +40,35 @@ data class ProviderState(
  */
 data class CloudProvidersUiState(
     val providers: List<ProviderState> = emptyList(),
+    /** The user's one free cloud: the app-wide default destination. Always uploads. */
+    val main: BackupLocation = BackupLocation.DEFAULT,
     val isProUnlocked: Boolean = false,
     /** A sign-in, key check or purchase is in progress; the buttons disable themselves while true. */
     val isBusy: Boolean = false,
     /** The last thing that went wrong, for a one-line explanation. Cleared on the next attempt. */
     val lastError: String? = null,
-    val trial: MultiCloudTrial.State = MultiCloudTrial.State.NotStarted
+    val trial: MultiCloudTrial.State = MultiCloudTrial.State.NotStarted,
+    /** False until the first refresh has read what is connected, so the app does not flash the wizard. */
+    val loaded: Boolean = false
 ) {
     val connected: List<ProviderState> get() = providers.filter { it.isConnected }
+
+    val anyConnected: Boolean get() = connected.isNotEmpty()
+
+    val mainConnected: Boolean get() = connected.any { it.location == main }
+
+    /** Connected clouds other than the main one — the ones that need Pro or the trial. */
+    val extraConnected: List<ProviderState> get() = connected.filter { it.location != main }
 
     /** Bought, or inside the trial — the one question every gate asks. */
     val isEntitled: Boolean get() = isProUnlocked || trial is MultiCloudTrial.State.Active
 
-    /** Whether a second cloud can actually be chosen for a folder right now. */
-    val isAvailable: Boolean get() = connected.isNotEmpty() && isEntitled
+    /** What a folder's menu may offer: the main cloud always, the others only with Pro or the trial. */
+    val destinations: List<BackupLocation>
+        get() = if (isEntitled) connected.map { it.location } else listOf(main)
 
-    /** What a folder's menu may offer besides OneDrive. */
-    val destinations: List<BackupLocation> get() = if (isEntitled) connected.map { it.location } else emptyList()
+    /** Whether a folder menu is worth showing: there is a genuine second choice. */
+    val isAvailable: Boolean get() = destinations.size > 1
 }
 
 /**
@@ -91,8 +103,10 @@ class CloudProvidersViewModel @Inject constructor(
             }
             _state.value = _state.value.copy(
                 providers = providers,
+                main = settings.current().backupLocation,
                 isProUnlocked = billing.isPurchased(),
-                trial = entitlement.trialState()
+                trial = entitlement.trialState(),
+                loaded = true
             )
         }
     }
@@ -130,18 +144,40 @@ class CloudProvidersViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Makes [location] the one free cloud. Folders and files still waiting that were bound for the old
+     * main cloud follow it; anything already uploaded keeps its recorded history.
+     */
+    fun setMain(location: BackupLocation) {
+        viewModelScope.launch {
+            val old = settings.current().backupLocation
+            if (old == location) return@launch
+            settings.setBackupLocation(location)
+            folderDao.reassign(old, location)
+            entryDao.retargetAllUnsent(old, location)
+            refresh()
+        }
+    }
+
     fun disconnect(location: BackupLocation) {
         viewModelScope.launch {
             connections.of(location)?.signOut()
-            // Never leave a destination pointed at a provider that just became unreachable — the
-            // same reasoning as BackupLocations' "at least one must stay on". Covers every folder
-            // routed there, the fallback default, and files still waiting to go. Files already sent
-            // keep their recorded history: nothing uploaded is touched.
-            folderDao.reassign(location, BackupLocation.ONEDRIVE)
-            entryDao.retargetAllUnsent(location, BackupLocation.ONEDRIVE)
-            if (settings.current().backupLocation == location) {
-                settings.setBackupLocation(BackupLocation.ONEDRIVE)
+            // Never leave a destination pointed at a cloud that just became unreachable. Folders and
+            // files still waiting move to the main cloud — or, if it was the main cloud that went, to
+            // another connected one, and failing that to the default. Files already sent keep their
+            // recorded history: nothing uploaded is touched.
+            val main = settings.current().backupLocation
+            val target = if (location != main) {
+                main
+            } else {
+                connections.offered().firstOrNull { it.location != location && it.accountLabel() != null }?.location
+                    ?: BackupLocation.DEFAULT
             }
+            if (target != location) {
+                folderDao.reassign(location, target)
+                entryDao.retargetAllUnsent(location, target)
+            }
+            if (main == location && target != location) settings.setBackupLocation(target)
             refresh()
         }
     }

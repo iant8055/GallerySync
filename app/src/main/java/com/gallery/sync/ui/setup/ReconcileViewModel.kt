@@ -150,6 +150,8 @@ data class ReconcileUiState(
     val discoveryRunning: Boolean = false,
     /** Which directories the user has checked. Key = directory name, value = checked. */
     val directoryChecks: Map<String, Boolean> = emptyMap(),
+    /** The user's one free cloud, from the app-wide default destination. A folder with no answer goes there. */
+    val mainCloud: BackupLocation = BackupLocation.DEFAULT,
     /**
      * Where each folder's backups go, as the wizard's own answer (TASK-026). Deliberately not read from
      * what is already stored: the wizard collects its own answers. A folder with no entry is OneDrive.
@@ -325,6 +327,7 @@ class ReconcileViewModel @Inject constructor(
             settings.preferences.collect { prefs ->
                 _state.value = _state.value.copy(
                     destinationRoot = prefs.destinationRoot,
+                    mainCloud = prefs.backupLocation,
                     firstBackupStartHour = prefs.firstBackupStartHour,
                     firstBackupRequiresCharging = prefs.firstBackupRequiresCharging,
                     firstBackupStartAtEpochMillis = prefs.firstBackupStartAtEpochMillis,
@@ -995,7 +998,7 @@ class ReconcileViewModel @Inject constructor(
             // written, OneDrive included: a folder the user left on OneDrive is an answer too, and
             // SetFolderDestination also re-points rows the first scan has already queued.
             setFolderDestination(
-                selected.associateWith { _state.value.folderDestinations[it] ?: BackupLocation.ONEDRIVE }
+                selected.associateWith { _state.value.folderDestinations[it] ?: _state.value.mainCloud }
             )
         }
     }

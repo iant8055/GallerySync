@@ -70,8 +70,16 @@ fun CloudProvidersSection(
                 action = {
                     when {
                         state.isBusy -> BusyIndicator()
-                        provider.isConnected -> OutlinedButton(onClick = { viewModel.disconnect(provider.location) }) {
-                            Text(stringResource(R.string.sign_out_action))
+                        provider.isConnected -> Column(horizontalAlignment = androidx.compose.ui.Alignment.End) {
+                            OutlinedButton(onClick = { viewModel.disconnect(provider.location) }) {
+                                Text(stringResource(R.string.sign_out_action))
+                            }
+                            // Only in Settings: the wizard has its own way of choosing the main cloud.
+                            if (only == null && provider.location != state.main) {
+                                TextButton(onClick = { viewModel.setMain(provider.location) }) {
+                                    Text(stringResource(R.string.cloud_make_main_action))
+                                }
+                            }
                         }
                         provider.kind == ConnectionKind.ACCESS_KEYS -> Button(onClick = { keysFor = provider }) {
                             Text(stringResource(R.string.cloud_enter_keys_action))
@@ -87,7 +95,8 @@ fun CloudProvidersSection(
             ) {
                 Column {
                     Text(
-                        text = stringResource(provider.location.labelRes()),
+                        text = stringResource(provider.location.labelRes()) +
+                            if (provider.location == state.main) " · " + stringResource(R.string.cloud_main_tag) else "",
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
@@ -112,7 +121,7 @@ fun CloudProvidersSection(
         // The terms are on screen *before* the trial button, in plain words: 30 days, then a one-time
         // unlock, and nothing charged automatically (Ian, 24 Sept 2026: plain and upfront, a hard
         // gate). Bought is the only state that shows nothing here at all.
-        if (state.connected.isNotEmpty() && !state.isProUnlocked) {
+        if (state.extraConnected.isNotEmpty() && !state.isProUnlocked) {
             val trial = state.trial
             Text(
                 text = when (trial) {

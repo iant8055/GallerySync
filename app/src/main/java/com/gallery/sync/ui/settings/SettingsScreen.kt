@@ -146,23 +146,12 @@ fun SettingsScreen(
             help = HelpTopic.SETTINGS_SECTION_BACKUP
         )
 
-        // A block per place a backup can go, its box at the left of the name (Ian, 20 Sept 2026).
-        // OneDrive is the only one there is, so its box is locked on: there must always be at least one.
-        Column {
-            LocationHeading(
-                title = stringResource(R.string.backup_location_onedrive),
-                checked = true,
-                enabled = BackupLocations.canSwitchOff(BackupLocations.inUse, BackupLocation.ONEDRIVE),
-                onCheckedChange = {}
-            )
-            Text(
-                text = stringResource(R.string.backup_location_last),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+        // The clouds, one row each, are below. The free tier is ONE cloud, the user's own (Ian, 24 Sept
+        // 2026), so there is no longer a locked-on OneDrive box: OneDrive is one choice among the others.
+        // What follows here is OneDrive's own account and folder, shown only while OneDrive is connected.
+        val oneDriveConnected = cloudState.providers.any { it.location == BackupLocation.ONEDRIVE && it.isConnected }
 
-        LabelWithAction(
+        if (oneDriveConnected) LabelWithAction(
             action = {
                 OutlinedButton(onClick = onSignOut) {
                     Text(stringResource(R.string.sign_out_action))
@@ -183,7 +172,7 @@ fun SettingsScreen(
             }
         }
 
-        DestinationSection()
+        if (oneDriveConnected) DestinationSection()
 
         CloudProvidersSection(viewModel = cloudViewModel)
 

@@ -46,6 +46,9 @@ import com.gallery.sync.ui.setup.SetupTour
 import com.gallery.sync.ui.signin.SignInScreen
 import com.gallery.sync.ui.signin.SignInUiState
 import com.gallery.sync.ui.signin.SignInViewModel
+import com.gallery.sync.domain.backup.BackupLocation
+import com.gallery.sync.ui.settings.CloudProvidersUiState
+import com.gallery.sync.ui.settings.CloudProvidersViewModel
 import com.gallery.sync.data.local.settings.ThemeMode
 import com.gallery.sync.ui.theme.GallerySyncTheme
 import com.gallery.sync.ui.theme.ThemeViewModel
@@ -116,11 +119,14 @@ private const val ArchiveTab = 2
 @Composable
 private fun GallerySyncApp(modifier: Modifier = Modifier, initialTab: Int = 0) {
     val signInViewModel: SignInViewModel = hiltViewModel()
-    val signInState by signInViewModel.state.collectAsStateWithLifecycle()
+    // Signed in means *a* cloud is connected, not OneDrive in particular: the free tier is one cloud of
+    // the user's own choosing (Ian, 24 Sept 2026). The same instance the wizard and Settings use.
+    val cloudViewModel: CloudProvidersViewModel = hiltViewModel()
+    val cloudState by cloudViewModel.state.collectAsStateWithLifecycle()
     val setupViewModel: ReconcileViewModel = hiltViewModel()
     val setupState by setupViewModel.state.collectAsStateWithLifecycle()
 
-    if (!setupState.setupDecisionReady) {
+    if (!setupState.setupDecisionReady || !cloudState.loaded) {
         Box(modifier.fillMaxSize())
         return
     }
@@ -128,9 +134,9 @@ private fun GallerySyncApp(modifier: Modifier = Modifier, initialTab: Int = 0) {
     val needsSetup = !setupState.hasCompletedSetup || !setupState.hasSources
 
     when {
-        needsSetup || signInState !is SignInUiState.SignedIn -> SignedInApp(
-            accountName = (signInState as? SignInUiState.SignedIn)?.accountName ?: "",
-            onSignOut = signInViewModel::signOut,
+        needsSetup || !cloudState.anyConnected -> SignedInApp(
+            accountName = cloudAccountName(cloudState),
+            onSignOut = { cloudViewModel.disconnect(BackupLocation.ONEDRIVE) },
             showTour = true,
             setupViewModel = setupViewModel,
             signInViewModel = signInViewModel,
@@ -143,14 +149,21 @@ private fun GallerySyncApp(modifier: Modifier = Modifier, initialTab: Int = 0) {
         // the wizard: setup is finished and the user is signed in. Ian, 19 Sept 2026.
         else -> DeletedFilesGate(modifier = modifier) {
             SignedInApp(
-                accountName = (signInState as SignInUiState.SignedIn).accountName,
-                onSignOut = signInViewModel::signOut,
+                accountName = cloudAccountName(cloudState),
+                onSignOut = { cloudViewModel.disconnect(BackupLocation.ONEDRIVE) },
                 initialTab = initialTab,
                 modifier = modifier
             )
         }
     }
 }
+
+/** A name for the header: the OneDrive account if there is one, otherwise the main cloud's label. */
+private fun cloudAccountName(state: CloudProvidersUiState): String =
+    state.connected.firstOrNull { it.location == BackupLocation.ONEDRIVE }?.accountLabel
+        ?: state.connected.firstOrNull { it.location == state.main }?.accountLabel
+        ?: state.connected.firstOrNull()?.accountLabel
+        ?: ""
 
 /**
  * Backup is first because it is the screen actually used day to day. Settings holds the things

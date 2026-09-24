@@ -6,6 +6,7 @@ import com.gallery.sync.data.remote.googlephotos.GooglePhotosApiService
 import com.gallery.sync.data.remote.googlephotos.dto.BatchCreateRequestDto
 import com.gallery.sync.data.remote.googlephotos.dto.NewMediaItemDto
 import com.gallery.sync.data.remote.googlephotos.dto.SimpleMediaItemDto
+import com.gallery.sync.data.remote.googlephotos.WriteRateLimiter
 import com.gallery.sync.data.remote.googlephotos.toStreamingRequestBody
 import com.gallery.sync.data.remote.onedrive.UploadSource
 import com.gallery.sync.di.IoDispatcher
@@ -16,6 +17,7 @@ import com.gallery.sync.domain.repository.GooglePhotosUploadRepository
 import com.gallery.sync.util.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
 import java.io.EOFException
@@ -36,6 +38,7 @@ import javax.inject.Singleton
 class GooglePhotosUploadRepositoryImpl @Inject constructor(
     private val api: GooglePhotosApiService,
     private val tokenProvider: GooglePhotosTokenProvider,
+    private val rateLimiter: WriteRateLimiter,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
 ) : GooglePhotosUploadRepository {
 
@@ -97,7 +100,8 @@ class GooglePhotosUploadRepositoryImpl @Inject constructor(
         val mimeType = (guessMimeType(source.displayName) ?: OCTET_STREAM_MIME).toMediaType()
         val body = source.toStreamingRequestBody(mimeType, onProgress)
 
-        val response = api.uploadBytes(contentType = mimeType.toString(), body = body)
+        val response = withQuota { api.uploadBytes(contentType = mimeType.toString(), body = body) }
+        if (response.code() == HTTP_TOO_MANY_REQUESTS) return UploadTokenOutcome.Failed(quotaFailure())
 
         if (response.code() == HTTP_UNAUTHORIZED) {
             Logger.w(TAG, "upload: Library API returned 401 on the bytes step, invalidating stored token")
@@ -128,13 +132,16 @@ class GooglePhotosUploadRepositoryImpl @Inject constructor(
         source: UploadSource,
         uploadToken: String
     ): DataResult<UploadedItem> {
-        val response = api.batchCreate(
-            BatchCreateRequestDto(
-                newMediaItems = listOf(
-                    NewMediaItemDto(SimpleMediaItemDto(uploadToken = uploadToken, fileName = source.displayName))
+        val response = withQuota {
+            api.batchCreate(
+                BatchCreateRequestDto(
+                    newMediaItems = listOf(
+                        NewMediaItemDto(SimpleMediaItemDto(uploadToken = uploadToken, fileName = source.displayName))
+                    )
                 )
             )
-        )
+        }
+        if (response.code() == HTTP_TOO_MANY_REQUESTS) return quotaFailure()
 
         if (response.code() == HTTP_UNAUTHORIZED) {
             Logger.w(TAG, "upload: Library API returned 401 on batchCreate, invalidating stored token")
@@ -174,8 +181,35 @@ class GooglePhotosUploadRepositoryImpl @Inject constructor(
         )
     }
 
+    /**
+     * One write call, paced, and retried once after a stand-down if Google still answers 429.
+     * Never marks a file failed for it: see [WriteRateLimiter].
+     */
+    private suspend fun <T> withQuota(call: suspend () -> retrofit2.Response<T>): retrofit2.Response<T> {
+        rateLimiter.acquire()
+        var response = call()
+        if (response.code() == HTTP_TOO_MANY_REQUESTS) {
+            Logger.w(TAG, "upload: Library API quota reached, standing down before one retry")
+            delay(WriteRateLimiter.BACKOFF_MILLIS)
+            rateLimiter.acquire()
+            response = call()
+        }
+        return response
+    }
+
+    /**
+     * Still over quota after standing down. Reported as a network-level stop, which ends only this
+     * provider's pass and leaves the file PENDING with its attempts untouched, rather than as a failure of
+     * the file — the file is fine, the quota is spent.
+     */
+    private fun quotaFailure(): DataResult.Failure {
+        Logger.w(TAG, "upload: Library API quota still spent; leaving the file for the next pass")
+        return DataResult.Failure(RemoteError.Network)
+    }
+
     private companion object {
         const val TAG = "GooglePhotosUpload"
+        const val HTTP_TOO_MANY_REQUESTS = 429
         const val HTTP_UNAUTHORIZED = 401
         const val OCTET_STREAM_MIME = "application/octet-stream"
 
