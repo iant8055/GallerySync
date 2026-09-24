@@ -124,8 +124,12 @@
     <string name="backup_location_pcloud">pCloud</string>
     <string name="backup_location_idrive_e2">IDrive e2</string>
     <string name="backup_location_backblaze_b2">Backblaze B2</string>
-    <string name="cloud_field_endpoint">Endpoint (for example s3.us-west-004.backblazeb2.com)</string>
-    <string name="cloud_field_region">Region (for example us-west-004)</string>
+    <string name="cloud_field_endpoint">Endpoint</string>
+    <string name="cloud_hint_idrive_endpoint">Copy it from your e2 console</string>
+    <string name="cloud_hint_idrive_region">for example us-west-1</string>
+    <string name="cloud_hint_b2_endpoint">s3.us-west-004.backblazeb2.com</string>
+    <string name="cloud_hint_b2_region">us-west-004</string>
+    <string name="cloud_field_region">Region</string>
     <string name="cloud_field_bucket">Bucket name</string>
     <string name="cloud_field_access_key">Access key ID</string>
     <string name="cloud_field_secret_key">Secret access key</string>

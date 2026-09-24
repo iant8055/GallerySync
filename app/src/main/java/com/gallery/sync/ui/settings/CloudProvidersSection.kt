@@ -195,6 +195,7 @@ private fun KeysDialog(
                         value = values.value[field.id].orEmpty(),
                         onValueChange = { values.value = values.value + (field.id to it) },
                         label = { Text(stringResource(field.labelRes)) },
+                        placeholder = field.hintRes?.let { hint -> { Text(stringResource(hint)) } },
                         singleLine = true,
                         visualTransformation = if (field.isSecret) PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
                         keyboardOptions = KeyboardOptions(

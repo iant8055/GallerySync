@@ -13,7 +13,9 @@ data class KeyField(
     val id: String,
     @StringRes val labelRes: Int,
     val isSecret: Boolean = false,
-    val defaultValue: String = ""
+    val defaultValue: String = "",
+    /** Faint example text shown inside the empty box, so the label itself can stay short. */
+    @StringRes val hintRes: Int? = null
 )
 
 /**

@@ -1,6 +1,7 @@
 package com.gallery.sync.data.remote.s3
 
 import android.app.Activity
+import androidx.annotation.StringRes
 import com.gallery.sync.R
 import com.gallery.sync.data.remote.auth.SignInResult
 import com.gallery.sync.data.remote.cloud.CloudConnection
@@ -32,6 +33,8 @@ import java.io.IOException
  */
 abstract class S3CompatibleCloud(
     override val location: BackupLocation,
+    @StringRes endpointHint: Int,
+    @StringRes regionHint: Int,
     private val secrets: EncryptedCloudSecretsStore,
     private val s3: S3Client,
     private val dispatcher: CoroutineDispatcher
@@ -43,8 +46,8 @@ abstract class S3CompatibleCloud(
     override val isOfferedInThisBuild = true
 
     override val keyFields = listOf(
-        KeyField(FIELD_ENDPOINT, R.string.cloud_field_endpoint),
-        KeyField(FIELD_REGION, R.string.cloud_field_region),
+        KeyField(FIELD_ENDPOINT, R.string.cloud_field_endpoint, hintRes = endpointHint),
+        KeyField(FIELD_REGION, R.string.cloud_field_region, hintRes = regionHint),
         KeyField(FIELD_BUCKET, R.string.cloud_field_bucket),
         KeyField(FIELD_ACCESS_KEY, R.string.cloud_field_access_key),
         KeyField(FIELD_SECRET_KEY, R.string.cloud_field_secret_key, isSecret = true)
