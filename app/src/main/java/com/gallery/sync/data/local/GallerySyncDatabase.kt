@@ -11,12 +11,14 @@ import com.gallery.sync.data.local.converter.MediaSourceConverter
 import com.gallery.sync.data.local.dao.AlbumCloudStatusDao
 import com.gallery.sync.data.local.dao.AlbumPreferenceDao
 import com.gallery.sync.data.local.dao.BackupEntryDao
+import com.gallery.sync.data.local.dao.FolderPreferenceDao
 import com.gallery.sync.data.local.dao.MediaFolderDao
 import com.gallery.sync.data.local.dao.MediaItemDao
 import com.gallery.sync.data.local.dao.UnsentDepartureDao
 import com.gallery.sync.data.local.entity.AlbumCloudStatusEntity
 import com.gallery.sync.data.local.entity.AlbumPreferenceEntity
 import com.gallery.sync.data.local.entity.BackupEntryEntity
+import com.gallery.sync.data.local.entity.FolderPreferenceEntity
 import com.gallery.sync.data.local.entity.MediaFolderEntity
 import com.gallery.sync.data.local.entity.MediaItemEntity
 import com.gallery.sync.data.local.entity.UnsentDepartureEntity
@@ -33,8 +35,11 @@ import com.gallery.sync.data.local.entity.UnsentDepartureEntity
  * Version 4 replaces the album on/off flag with a four-valued mode. Version 5 records files that
  * were examined and found not worth proxying. Version 12 gave each ledger row a
  * [com.gallery.sync.domain.backup.BackupLocation] recording where it was actually sent, and briefly
- * gave `album_preferences` one too. Version 13 removed the latter: the destination is one app-wide
- * setting (`BackupPreferences.backupLocation`), not a per-album choice — see TASK-026.
+ * gave `album_preferences` one too. Version 13 removed the latter in favour of one app-wide setting
+ * (`BackupPreferences.backupLocation`). Version 14 landed one day later at a granularity in between
+ * the two: `folder_preferences`, one destination per top-level media folder (`DCIM`, `Pictures`...),
+ * coarser than the per-album choice v13 removed, finer than v13's single app-wide setting, which
+ * stays as the fallback for a folder with no row here. See TASK-026.
  */
 @Database(
     entities = [
@@ -43,9 +48,10 @@ import com.gallery.sync.data.local.entity.UnsentDepartureEntity
         BackupEntryEntity::class,
         AlbumPreferenceEntity::class,
         AlbumCloudStatusEntity::class,
-        UnsentDepartureEntity::class
+        UnsentDepartureEntity::class,
+        FolderPreferenceEntity::class
     ],
-    version = 13,
+    version = 14,
     exportSchema = true
 )
 @TypeConverters(
@@ -68,6 +74,8 @@ abstract class GallerySyncDatabase : RoomDatabase() {
     abstract fun albumCloudStatusDao(): AlbumCloudStatusDao
 
     abstract fun unsentDepartureDao(): UnsentDepartureDao
+
+    abstract fun folderPreferenceDao(): FolderPreferenceDao
 
     companion object {
         const val DATABASE_NAME = "gallery_sync.db"

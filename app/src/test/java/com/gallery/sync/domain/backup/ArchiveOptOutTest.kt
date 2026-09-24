@@ -3,6 +3,7 @@ package com.gallery.sync.domain.backup
 import android.content.Context
 import android.net.Uri
 import com.gallery.sync.data.local.dao.AlbumPreferenceDao
+import com.gallery.sync.data.local.dao.FolderPreferenceDao
 import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.dao.PinnedKey
 import com.gallery.sync.data.local.entity.AlbumMode
@@ -54,6 +55,7 @@ class ArchiveOptOutTest {
         scanner = scanner,
         entryDao = entryDao,
         albumDao = albumDao,
+        folderDao = mock<FolderPreferenceDao>(),
         unsentDao = mock(),
         settings = mock<BackupSettings>(),
         repository = mock<OneDriveRepository>(),

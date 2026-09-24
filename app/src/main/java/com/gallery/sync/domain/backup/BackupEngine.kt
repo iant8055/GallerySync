@@ -2,10 +2,12 @@ package com.gallery.sync.domain.backup
 
 import android.content.Context
 import com.gallery.sync.data.local.dao.AlbumPreferenceDao
+import com.gallery.sync.data.local.dao.FolderPreferenceDao
 import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.dao.UnsentDepartureDao
 import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.entity.AlbumPreferenceEntity
+import com.gallery.sync.data.local.entity.FolderPreferenceEntity
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.entity.BackupState
 import com.gallery.sync.data.local.entity.CloudCopyDecision
@@ -14,6 +16,7 @@ import com.gallery.sync.data.local.entity.backupKeyOf
 import com.gallery.sync.data.local.media.LocalMediaItem
 import com.gallery.sync.data.local.media.MediaAccess
 import com.gallery.sync.data.local.media.MediaScanner
+import com.gallery.sync.data.local.media.MediaScanRules
 import com.gallery.sync.data.local.media.ProxyMarker
 import com.gallery.sync.data.local.media.RestoredAlbum
 import com.gallery.sync.data.local.settings.BackupSettings
@@ -104,6 +107,7 @@ class BackupEngine @Inject constructor(
     private val scanner: MediaScanner,
     private val entryDao: BackupEntryDao,
     private val albumDao: AlbumPreferenceDao,
+    private val folderDao: FolderPreferenceDao,
     private val unsentDao: UnsentDepartureDao,
     private val settings: BackupSettings,
     private val repository: OneDriveRepository,
@@ -213,14 +217,19 @@ class BackupEngine @Inject constructor(
         // the original it replaced — the single most important line in this method.
         val proxied = entryDao.proxiedMediaStoreIds().toSet()
 
-        // Where uploads go, app-wide — see TASK-026. Read once here rather than per item: a row's
+        // Where uploads go — per top-level folder (DCIM, Pictures, Movies...), not one app-wide
+        // setting; see TASK-026, 24 Sept 2026. Read once here rather than per item: a row's
         // `location` is fixed at creation and never re-read afterwards (BackupEntryEntity.location),
-        // so this only ever matters for rows made in this pass. A later change to the setting is
-        // picked up by the next scan, not retroactively.
-        val currentLocation = settings.current().backupLocation
+        // so this only ever matters for rows made in this pass. A later change to a folder's
+        // destination is picked up by the next scan, not retroactively.
+        val folderLocations = folderDao.all().orEmpty().associate { it.folderName to it.backupLocation }
+        // The app-wide setting is still real — it's the fallback for a folder with no row of its
+        // own: never explicitly chosen, or a `RELATIVE_PATH`-less item on API < 29.
+        val defaultLocation = settings.current().backupLocation
 
         val items = scanner.scanAll().filterNot { it.mediaStoreId in proxied }
         val entries = items.map { item ->
+            val folder = MediaScanRules.topLevelFolderOf(item.relativePath)
             BackupEntryEntity(
                 id = backupKeyOf(
                     album = item.album,
@@ -237,12 +246,18 @@ class BackupEngine @Inject constructor(
                 mimeType = item.mimeType,
                 isVideo = item.isVideo,
                 state = BackupState.PENDING,
-                location = currentLocation
+                location = folder?.let { folderLocations[it] } ?: defaultLocation
             )
         }
 
         // IGNORE on conflict, so a rescan never resets an uploaded row back to pending.
         entryDao.insertIfNew(entries)
+
+        // Give every discovered folder a row too, same reasoning and same IGNORE-only-if-absent
+        // shape as seeding album_preferences below — a folder already chosen is never touched, and
+        // a headless run needs the row to exist so the next one can find it.
+        val foldersOnDevice = items.mapNotNull { MediaScanRules.topLevelFolderOf(it.relativePath) }.distinct()
+        folderDao.insertIfNew(foldersOnDevice.map { FolderPreferenceEntity(it, defaultLocation) })
 
         val albumsOnDevice = items.map { it.album }.distinct()
 

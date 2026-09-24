@@ -371,6 +371,62 @@ class MigrationTest {
         db.close()
     }
 
+    @Test
+    fun migrate13To14_producesTheSchemaRoomExpects() {
+        helper.createDatabase(TEST_DB, 13).close()
+
+        helper.runMigrationsAndValidate(TEST_DB, 14, true, Migrations.MIGRATION_13_14).close()
+    }
+
+    @Test
+    fun migrate13To14_startsWithNoFolderPreferences() {
+        // Purely additive, and there is nothing to backfill: no folder has ever had an explicit
+        // choice before this table existed, so every one correctly falls back to the app-wide
+        // setting (BackupPreferences.backupLocation) until the user actually picks something.
+        helper.createDatabase(TEST_DB, 13).close()
+
+        val db = helper.runMigrationsAndValidate(TEST_DB, 14, true, Migrations.MIGRATION_13_14)
+
+        db.query("SELECT COUNT(*) FROM folder_preferences").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals(0, cursor.getInt(0))
+        }
+        db.close()
+    }
+
+    @Test
+    fun migrate13To14_leavesEverythingElseUntouched() {
+        // The whole point of choosing a new table over widening album_preferences again: nothing
+        // about the app-wide setting or the per-row ledger location changes shape or content.
+        helper.createDatabase(TEST_DB, 13).apply {
+            execSQL("INSERT INTO album_preferences (albumName, mode) VALUES ('Camera', 'SYNC')")
+            execSQL(
+                """
+                INSERT INTO backup_entries
+                    (id, mediaStoreId, contentUri, displayName, album, sizeBytes,
+                     dateModifiedEpochSeconds, mimeType, isVideo, state, attemptCount,
+                     isProxied, isProxySkipped, location)
+                VALUES
+                    ('k1', 42, 'content://media/external/images/media/42', 'IMG_1.jpg',
+                     'Camera', 1024, 1700000000, 'image/jpeg', 0, 'UPLOADED', 0, 0, 0, 'ONEDRIVE')
+                """.trimIndent()
+            )
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(TEST_DB, 14, true, Migrations.MIGRATION_13_14)
+
+        db.query("SELECT mode FROM album_preferences WHERE albumName = 'Camera'").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals("SYNC", cursor.getString(0))
+        }
+        db.query("SELECT location FROM backup_entries WHERE id = 'k1'").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals("ONEDRIVE", cursor.getString(0))
+        }
+        db.close()
+    }
+
     private companion object {
         const val TEST_DB = "migration-test.db"
     }

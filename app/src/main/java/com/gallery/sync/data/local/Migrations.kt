@@ -303,10 +303,37 @@ object Migrations {
         }
     }
 
+    /**
+     * 13 → 14: the destination is chosen per top-level folder (`DCIM`, `Pictures`, `Movies`...), not
+     * one app-wide setting. Ian, 24 Sept 2026, one day after the app-wide setting itself landed: "if
+     * the user has multiple cloud storage already... what is the point of bypassing that and putting
+     * everything in OneDrive" — someone who already keeps different folders in different providers
+     * should say so once per folder, not be forced through one destination for the whole device.
+     *
+     * A new table, not a widening of `album_preferences` back to what MIGRATION_12_13 removed —
+     * "folder" here means [com.gallery.sync.data.local.media.MediaScanRules.topLevelFolderOf]'s
+     * granularity, deliberately coarser than an individual album. `BackupPreferences.backupLocation`
+     * (the DataStore setting from v13) is untouched and keeps its job: the fallback for any folder
+     * that has no row here — a folder never explicitly chosen, or one appearing after setup.
+     */
+    val MIGRATION_13_14 = object : Migration(13, 14) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS `folder_preferences` (
+                    `folderName` TEXT NOT NULL,
+                    `backupLocation` TEXT NOT NULL,
+                    PRIMARY KEY(`folderName`)
+                )
+                """.trimIndent()
+            )
+        }
+    }
+
     /** Every migration, in order, for the database builder. */
     val ALL = arrayOf(
         MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7,
         MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12,
-        MIGRATION_12_13
+        MIGRATION_12_13, MIGRATION_13_14
     )
 }

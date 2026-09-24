@@ -163,14 +163,8 @@ class MediaScanner @Inject constructor(
         val allItems = scanEverything()
 
         allItems
-            .filter { it.relativePath != null }
-            .groupBy { item ->
-                // First segment of relativePath: "DCIM/Camera/" -> "DCIM"
-                item.relativePath!!.trim('/').substringBefore('/')
-            }
-            .filter { (name, _) ->
-                name.isNotEmpty() && !name.startsWith(".")
-            }
+            .mapNotNull { item -> MediaScanRules.topLevelFolderOf(item.relativePath)?.let { it to item } }
+            .groupBy({ it.first }, { it.second })
             .map { (name, items) ->
                 DiscoveredDirectory(
                     name = name,

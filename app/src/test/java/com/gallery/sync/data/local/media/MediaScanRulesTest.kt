@@ -58,6 +58,35 @@ class MediaScanRulesTest {
         assertEquals(MediaScanRules.UNKNOWN_ALBUM, MediaScanRules.albumNameOf(null, null))
     }
 
+    // ---------- top-level folder (TASK-026: the destination-choice granularity) ----------
+
+    @Test
+    fun `the first segment of the relative path is the top-level folder`() {
+        assertEquals("DCIM", MediaScanRules.topLevelFolderOf("DCIM/Camera/"))
+        assertEquals("Pictures", MediaScanRules.topLevelFolderOf("Pictures/Screenshots/"))
+    }
+
+    @Test
+    fun `a folder directly under the root has no nested segment to drop`() {
+        assertEquals("Download", MediaScanRules.topLevelFolderOf("Download/"))
+    }
+
+    @Test
+    fun `a null relative path resolves to null, for the caller to fall back to the app default`() {
+        assertEquals(null, MediaScanRules.topLevelFolderOf(null))
+    }
+
+    @Test
+    fun `an empty relative path resolves to null`() {
+        assertEquals(null, MediaScanRules.topLevelFolderOf(""))
+        assertEquals(null, MediaScanRules.topLevelFolderOf("/"))
+    }
+
+    @Test
+    fun `a hidden top-level directory resolves to null, matching discoverDirectories' own filter`() {
+        assertEquals(null, MediaScanRules.topLevelFolderOf(".thumbnails/"))
+    }
+
     // ---------- access resolution ----------
 
     @Test

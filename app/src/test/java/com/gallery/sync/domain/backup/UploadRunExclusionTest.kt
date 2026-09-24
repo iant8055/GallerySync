@@ -2,6 +2,7 @@ package com.gallery.sync.domain.backup
 
 import android.content.Context
 import com.gallery.sync.data.local.dao.AlbumPreferenceDao
+import com.gallery.sync.data.local.dao.FolderPreferenceDao
 import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.dao.UnsentDepartureDao
 import com.gallery.sync.data.local.media.MediaAccess
@@ -41,6 +42,7 @@ class UploadRunExclusionTest {
         scanner = scanner,
         entryDao = entryDao,
         albumDao = mock<AlbumPreferenceDao>(),
+        folderDao = mock<FolderPreferenceDao>(),
         unsentDao = mock<UnsentDepartureDao>(),
         settings = mock<BackupSettings>(),
         repository = mock<OneDriveRepository>(),

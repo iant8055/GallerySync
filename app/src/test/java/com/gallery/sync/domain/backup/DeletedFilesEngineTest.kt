@@ -3,6 +3,7 @@ package com.gallery.sync.domain.backup
 import android.content.Context
 import android.net.Uri
 import com.gallery.sync.data.local.dao.AlbumPreferenceDao
+import com.gallery.sync.data.local.dao.FolderPreferenceDao
 import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.dao.UnsentDepartureDao
 import com.gallery.sync.data.local.dao.UploadedKey
@@ -67,6 +68,7 @@ class DeletedFilesEngineTest {
         scanner = scanner,
         entryDao = entryDao,
         albumDao = albumDao,
+        folderDao = mock<FolderPreferenceDao>(),
         unsentDao = unsentDao,
         settings = settings,
         repository = repository,

@@ -7,6 +7,7 @@ import com.gallery.sync.data.local.Migrations
 import com.gallery.sync.data.local.dao.AlbumCloudStatusDao
 import com.gallery.sync.data.local.dao.AlbumPreferenceDao
 import com.gallery.sync.data.local.dao.BackupEntryDao
+import com.gallery.sync.data.local.dao.FolderPreferenceDao
 import com.gallery.sync.data.local.dao.MediaFolderDao
 import com.gallery.sync.data.local.dao.MediaItemDao
 import com.gallery.sync.data.local.dao.UnsentDepartureDao
@@ -65,4 +66,9 @@ object DatabaseModule {
     @Singleton
     fun provideUnsentDepartureDao(database: GallerySyncDatabase): UnsentDepartureDao =
         database.unsentDepartureDao()
+
+    @Provides
+    @Singleton
+    fun provideFolderPreferenceDao(database: GallerySyncDatabase): FolderPreferenceDao =
+        database.folderPreferenceDao()
 }

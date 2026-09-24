@@ -44,6 +44,23 @@ internal object MediaScanRules {
     }
 
     /**
+     * The top-level folder a file lives under — `"DCIM/Camera/"` -> `"DCIM"` — the granularity a
+     * backup destination is chosen at (Ian, 24 Sept 2026, TASK-026): coarser than an individual
+     * album ("Camera", "1999 car show"), finer than one setting for the whole device.
+     *
+     * Promoted out of [MediaScanner.discoverDirectories], which already grouped by exactly this for
+     * the folder-discovery screen; this is the same rule, reusable, and unit-testable with no device.
+     *
+     * Null when [relativePath] itself is null (no `RELATIVE_PATH` column, API < 29) or resolves to
+     * nothing usable (empty, or a hidden directory) — callers fall back to the app-wide default in
+     * that case, same as an item with no [albumNameOf] match falls back to [UNKNOWN_ALBUM].
+     */
+    fun topLevelFolderOf(relativePath: String?): String? {
+        val folder = relativePath?.trim('/')?.substringBefore('/') ?: return null
+        return folder.takeIf { it.isNotEmpty() && !it.startsWith(".") }
+    }
+
+    /**
      * Works out how much media the app may read.
      *
      * [sdkInt] and [isGranted] are parameters rather than being read from the platform so this can
