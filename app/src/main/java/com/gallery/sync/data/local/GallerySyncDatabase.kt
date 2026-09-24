@@ -31,9 +31,10 @@ import com.gallery.sync.data.local.entity.UnsentDepartureEntity
  *
  * Version 2 adds `backup_entries` and `album_preferences`. Version 3 records photo proxies.
  * Version 4 replaces the album on/off flag with a four-valued mode. Version 5 records files that
- * were examined and found not worth proxying. Version 12 gives each album and each ledger row a
- * [com.gallery.sync.domain.backup.BackupLocation], one destination per album chosen by the user
- * — see TASK-026.
+ * were examined and found not worth proxying. Version 12 gave each ledger row a
+ * [com.gallery.sync.domain.backup.BackupLocation] recording where it was actually sent, and briefly
+ * gave `album_preferences` one too. Version 13 removed the latter: the destination is one app-wide
+ * setting (`BackupPreferences.backupLocation`), not a per-album choice — see TASK-026.
  */
 @Database(
     entities = [
@@ -44,7 +45,7 @@ import com.gallery.sync.data.local.entity.UnsentDepartureEntity
         AlbumCloudStatusEntity::class,
         UnsentDepartureEntity::class
     ],
-    version = 12,
+    version = 13,
     exportSchema = true
 )
 @TypeConverters(

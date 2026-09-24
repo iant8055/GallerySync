@@ -9,6 +9,7 @@ import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.entity.CloudCopyDecision
 import com.gallery.sync.data.local.entity.BackupState
 import com.gallery.sync.data.local.media.RestoredAlbum
+import com.gallery.sync.domain.backup.BackupLocation
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -95,7 +96,18 @@ data class AlbumBackupCount(
      * phone. These are also counted as pending on the card, which is what "not yet in OneDrive" means;
      * this is the part of that number the queue has given up on. See `RetryFailed`.
      */
-    val failed: Int = 0
+    val failed: Int = 0,
+
+    /**
+     * Files here sent to Google Photos. Counted only while the file is on the phone, like the rest.
+     *
+     * Deliberately **not** folded into [backedUp] as a provider-agnostic total: `backedUp` is
+     * progress arithmetic and treats both providers the same for that purpose, but this figure feeds
+     * a very different claim — see `AlbumCloudClaim` and TASK-026. A Google Photos row can never
+     * satisfy `verifiedInCloud()`, so the UI must never call it "verified" the way it does for
+     * OneDrive; "sent" is the honest, weaker word for what this count actually confirms.
+     */
+    val googlePhotosSent: Int = 0
 )
 
 /** The two identities of a pinned file. See `FilePin.withoutPinned` for why both are carried. */
@@ -1108,7 +1120,10 @@ interface BackupEntryDao {
                SUM(CASE WHEN modeOverride = :pin AND localMissingSinceEpochMillis IS NULL
                         THEN 1 ELSE 0 END) AS pinned,
                SUM(CASE WHEN state = :failedState AND localMissingSinceEpochMillis IS NULL
-                        THEN 1 ELSE 0 END) AS failed
+                        THEN 1 ELSE 0 END) AS failed,
+               SUM(CASE WHEN state = :uploaded AND location = :googlePhotos
+                        AND localMissingSinceEpochMillis IS NULL
+                        THEN 1 ELSE 0 END) AS googlePhotosSent
         FROM backup_entries
         GROUP BY album
         """
@@ -1116,7 +1131,8 @@ interface BackupEntryDao {
     suspend fun albumCounts(
         uploaded: BackupState = BackupState.UPLOADED,
         pin: AlbumMode = AlbumMode.BACKUP,
-        failedState: BackupState = BackupState.FAILED
+        failedState: BackupState = BackupState.FAILED,
+        googlePhotos: BackupLocation = BackupLocation.GOOGLE_PHOTOS
     ): List<AlbumBackupCount>
 
     /**

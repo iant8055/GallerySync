@@ -211,12 +211,11 @@ class BackupEngine @Inject constructor(
         // the original it replaced — the single most important line in this method.
         val proxied = entryDao.proxiedMediaStoreIds().toSet()
 
-        // Where each album's uploads go, from the user's own per-album choice — see TASK-026. Read
-        // once here rather than per item: a row's `location` is fixed at creation and never re-read
-        // afterwards (BackupEntryEntity.location), so this lookup only ever matters for rows made in
-        // this pass. An album with no row yet — never touched, or seeded moments from now below —
-        // correctly falls back to BackupLocation.DEFAULT, same as the entity's own default.
-        val albumLocations = albumDao.all().orEmpty().associate { it.albumName to it.backupLocation }
+        // Where uploads go, app-wide — see TASK-026. Read once here rather than per item: a row's
+        // `location` is fixed at creation and never re-read afterwards (BackupEntryEntity.location),
+        // so this only ever matters for rows made in this pass. A later change to the setting is
+        // picked up by the next scan, not retroactively.
+        val currentLocation = settings.current().backupLocation
 
         val items = scanner.scanAll().filterNot { it.mediaStoreId in proxied }
         val entries = items.map { item ->
@@ -236,7 +235,7 @@ class BackupEngine @Inject constructor(
                 mimeType = item.mimeType,
                 isVideo = item.isVideo,
                 state = BackupState.PENDING,
-                location = albumLocations[item.album] ?: BackupLocation.DEFAULT
+                location = currentLocation
             )
         }
 

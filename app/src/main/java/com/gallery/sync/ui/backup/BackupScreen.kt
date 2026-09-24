@@ -71,7 +71,9 @@ import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.media.MediaAccess
 import com.gallery.sync.domain.backup.AlbumCloudClaim
 import com.gallery.sync.domain.backup.AlbumMergeWarning
+import com.gallery.sync.domain.backup.BackupLocation
 import com.gallery.sync.domain.backup.CameraAlbum
+import com.gallery.sync.domain.backup.GooglePhotosDestination
 import com.gallery.sync.domain.backup.StopReason
 import com.gallery.sync.ui.common.LabelWithAction
 import com.gallery.sync.ui.common.SignalIcons
@@ -469,6 +471,7 @@ private fun AlbumList(
                                 AlbumModeRow(
                                     album = album,
                                     context = context,
+                                    backupLocation = state.backupLocation,
                                     onTapped = { onAlbumTapped(album) },
                                     onModeSelected = { mode -> onModeSelected(album, mode) }
                                 )
@@ -638,6 +641,7 @@ private fun ModeFilterChip(
 private fun AlbumModeRow(
     album: AlbumRow,
     context: android.content.Context,
+    backupLocation: BackupLocation,
     onTapped: () -> Unit,
     onModeSelected: (AlbumMode) -> Unit
 ) {
@@ -697,14 +701,15 @@ private fun AlbumModeRow(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                // The cloud line, on its own and sourced from the drive rather than the ledger. It
-                // is only tinted as good news when the drive actually said so — an unchecked album
-                // gets the ordinary colour, because a reassuring green on an unverified claim is
-                // the same lie in a different medium.
+                // The cloud line, on its own and sourced from the drive rather than the ledger where
+                // OneDrive is concerned. It is only tinted as good news when the drive actually said
+                // so — an unchecked album gets the ordinary colour, because a reassuring green on an
+                // unverified claim is the same lie in a different medium. Never tinted for the Google
+                // Photos clause: "sent" is not "verified", see AlbumRow.cloudSummary.
                 Text(
-                    text = album.cloudClaim.sentence(),
+                    text = album.cloudSummary(),
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (album.cloudClaim is AlbumCloudClaim.AllPresent)
+                    color = if (album.cloudClaim is AlbumCloudClaim.AllPresent && album.googlePhotosSentCount == 0)
                         MaterialTheme.colorScheme.primary
                     else
                         MaterialTheme.colorScheme.onSurfaceVariant
@@ -712,7 +717,15 @@ private fun AlbumModeRow(
             }
         }
 
-        AlbumModeDropdown(current = album.mode, modes = CameraAlbum.modesFor(album.name), onModeSelected = onModeSelected)
+        AlbumModeDropdown(
+            current = album.mode,
+            // Camera never offers Sync; Google Photos (as the current app-wide destination) never
+            // offers Sync or Archive. Intersected, not one overriding the other, since Camera itself
+            // could be routed to Google Photos.
+            modes = CameraAlbum.modesFor(album.name)
+                .filter { GooglePhotosDestination.canChoose(backupLocation, it) },
+            onModeSelected = onModeSelected
+        )
     }
     }
 }
@@ -1020,6 +1033,32 @@ private fun AlbumCloudClaim.sentence(): String = when (this) {
         stringResource(R.string.album_cloud_all_present, verified)
     is AlbumCloudClaim.SomeMissing ->
         stringResource(R.string.album_cloud_some_missing, verified, verified + missing)
+}
+
+/**
+ * The cloud line as actually rendered — [AlbumCloudClaim.sentence] plus, when this album has any
+ * Google Photos content, a second clause for it. TASK-026: the two use deliberately different words.
+ * OneDrive's is confirmed against the drive itself and says "verified"; Google Photos has no
+ * equivalent check (it never reports a stored file's size, so nothing here could ever confirm one)
+ * and says the honest, weaker "sent" instead — never the same claim in different words.
+ *
+ * When this album has never had anything go to OneDrive at all, [AlbumCloudClaim.NeverChecked] is
+ * dropped rather than shown beside the Google Photos clause: "not checked against OneDrive" is a
+ * true but pointless thing to say about a provider this album has never touched.
+ */
+@Composable
+private fun AlbumRow.cloudSummary(): String {
+    val oneDriveClause = if (cloudClaim is AlbumCloudClaim.NeverChecked && googlePhotosSentCount > 0) {
+        null
+    } else {
+        cloudClaim.sentence()
+    }
+    val googlePhotosClause = if (googlePhotosSentCount > 0) {
+        stringResource(R.string.album_cloud_sent_google_photos, googlePhotosSentCount)
+    } else {
+        null
+    }
+    return listOfNotNull(oneDriveClause, googlePhotosClause).joinToString(" · ")
 }
 
 /**

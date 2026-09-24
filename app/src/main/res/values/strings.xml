@@ -313,6 +313,12 @@
     <string name="album_cloud_unreachable">Could not reach OneDrive when this was last checked</string>
     <string name="album_cloud_all_present">%1$d verified in OneDrive</string>
     <string name="album_cloud_some_missing">%1$d of %2$d verified in OneDrive</string>
+    <!--
+        Deliberately not "verified" — see AlbumBackupCount.googlePhotosSent's doc comment. Google
+        Photos never reports a stored file's size, so this app can never independently confirm one
+        the way it does for OneDrive; "sent" is the honest word for what is actually known. TASK-026.
+    -->
+    <string name="album_cloud_sent_google_photos">%1$d sent to Google Photos</string>
     <string name="album_status_optimized">%1$d optimised</string>
     <!-- Files kept at full size (FilePin): ticked by the user, or put back by Restore. -->
     <string name="album_status_kept">%1$d kept at full size</string>

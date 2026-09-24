@@ -12,6 +12,7 @@ import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.domain.backup.ArchiveAge
+import com.gallery.sync.domain.backup.BackupLocation
 import com.gallery.sync.domain.backup.LibraryChoice
 import com.gallery.sync.domain.backup.MediaAge
 import com.gallery.sync.domain.backup.OptimiseCutoff
@@ -83,6 +84,18 @@ data class BackupPreferences(
      * [RemoteRoots].
      */
     val destinationRoot: String = RemoteRoots.DEFAULT_DESTINATION,
+    /**
+     * Where **new** uploads go, app-wide — one setting, not per-album. Ian, 23 Sept 2026, after
+     * walking through the per-album alternative: the split-history problem (files already uploaded
+     * stay wherever they are; only new ones follow a destination change) exists either way, and a
+     * single global setting means one timeline to explain instead of one per album, for a capability
+     * — genuinely simultaneous per-album routing — nobody had actually asked for. See TASK-026.
+     *
+     * Exactly [destinationRoot]'s own shape: changing this redirects new files without moving or
+     * re-checking anything already sent. [com.gallery.sync.data.local.entity.BackupEntryEntity
+     * .location] is what remembers where each individual file actually went, frozen at upload time.
+     */
+    val backupLocation: BackupLocation = BackupLocation.DEFAULT,
     /** Hour of day the first whole-library backup may begin. */
     val firstBackupStartHour: Int = FirstBackupWindow.DEFAULT_START_HOUR,
     /** Whether that first run waits for the phone to be plugged in. On by default. */
@@ -290,6 +303,7 @@ class BackupSettings @Inject constructor(
             destinationRoot = stored[KEY_DESTINATION_ROOT]
                 ?.takeIf { RemoteRoots.isValidDestination(it) }
                 ?: RemoteRoots.DEFAULT_DESTINATION,
+            backupLocation = BackupLocation.fromNameOrDefault(stored[KEY_BACKUP_LOCATION]),
             firstBackupStartHour = stored[KEY_FIRST_BACKUP_HOUR]
                 ?.takeIf { it in FirstBackupWindow.SELECTABLE_HOURS }
                 ?: FirstBackupWindow.DEFAULT_START_HOUR,
@@ -582,6 +596,15 @@ class BackupSettings @Inject constructor(
         return true
     }
 
+    /**
+     * Changes where new uploads go, app-wide. Whether [location] is actually choosable right now —
+     * signed in, Pro unlocked — is the caller's job to check first; this just writes the choice.
+     * Nothing already uploaded moves: see [BackupPreferences.backupLocation].
+     */
+    suspend fun setBackupLocation(location: BackupLocation) {
+        context.dataStore.edit { it[KEY_BACKUP_LOCATION] = location.name }
+    }
+
     private companion object {
         val KEY_AUTOMATIC = booleanPreferencesKey("automatic_backup_enabled")
         val KEY_ALLOW_METERED = booleanPreferencesKey("allow_metered_network")
@@ -595,6 +618,7 @@ class BackupSettings @Inject constructor(
         val KEY_VIDEO_OPTIMISE_MODE = stringPreferencesKey("video_optimise_mode")
         val KEY_DEFAULT_ALBUM_MODE = stringPreferencesKey("default_album_mode")
         val KEY_DESTINATION_ROOT = stringPreferencesKey("destination_root")
+        val KEY_BACKUP_LOCATION = stringPreferencesKey("backup_location")
         val KEY_FIRST_BACKUP_HOUR = intPreferencesKey("first_backup_start_hour")
         val KEY_FIRST_BACKUP_CHARGING = booleanPreferencesKey("first_backup_requires_charging")
         val KEY_FIRST_BACKUP_START_AT = longPreferencesKey("first_backup_start_at")

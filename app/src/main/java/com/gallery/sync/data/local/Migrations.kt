@@ -266,9 +266,47 @@ object Migrations {
         }
     }
 
+    /**
+     * 12 → 13: the destination is one app-wide setting, not a per-album choice. Ian, 23 Sept 2026,
+     * after walking through what per-album actually bought over a single setting: nothing that
+     * outweighed one timeline to explain instead of one per album — see `BackupPreferences
+     * .backupLocation`'s doc comment for the full reasoning. `album_preferences.backupLocation`,
+     * added one migration ago and never reachable from any UI, is the only thing this removes.
+     *
+     * `backup_entries.location` is untouched. That column was never the per-album setting — it is
+     * the historical record of where each individual file actually went, frozen at upload time, and
+     * it is exactly as necessary under one global setting as it was under many: the setting can
+     * still change after a file has already been sent, and that file's row has to keep saying where
+     * it truly is.
+     *
+     * SQLite cannot drop a column, so the table is recreated, same shape as MIGRATION_3_4.
+     */
+    val MIGRATION_12_13 = object : Migration(12, 13) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS `album_preferences_new` (
+                    `albumName` TEXT NOT NULL,
+                    `mode` TEXT NOT NULL,
+                    PRIMARY KEY(`albumName`)
+                )
+                """.trimIndent()
+            )
+            db.execSQL(
+                """
+                INSERT INTO `album_preferences_new` (`albumName`, `mode`)
+                SELECT `albumName`, `mode` FROM `album_preferences`
+                """.trimIndent()
+            )
+            db.execSQL("DROP TABLE `album_preferences`")
+            db.execSQL("ALTER TABLE `album_preferences_new` RENAME TO `album_preferences`")
+        }
+    }
+
     /** Every migration, in order, for the database builder. */
     val ALL = arrayOf(
         MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7,
-        MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12
+        MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12,
+        MIGRATION_12_13
     )
 }

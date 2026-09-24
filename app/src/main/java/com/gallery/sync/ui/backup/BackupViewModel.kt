@@ -37,6 +37,7 @@ import com.gallery.sync.domain.backup.CameraOptimisePlan
 import com.gallery.sync.domain.backup.CameraOptimiseSettings
 import com.gallery.sync.domain.backup.CloudConfirmation
 import com.gallery.sync.domain.backup.FilePin
+import com.gallery.sync.domain.backup.GooglePhotosDestination
 import com.gallery.sync.domain.backup.ReconcileWithCloud
 import com.gallery.sync.domain.backup.MediaAge
 import com.gallery.sync.domain.backup.OptimiseMode
@@ -125,7 +126,11 @@ data class AlbumRow(
     val everBackedUpCount: Int = 0,
 
     /** What those uploaded rows occupy in OneDrive — the only non-zero size an archived album has. */
-    val everBackedUpBytes: Long = 0L
+    val everBackedUpBytes: Long = 0L,
+
+    /** Files here sent to Google Photos. See `AlbumBackupCount.googlePhotosSent` for why this is
+     *  kept apart from [backedUpCount] rather than folded into it. */
+    val googlePhotosSentCount: Int = 0
 ) {
     val isEnabled: Boolean get() = mode.uploads
 
@@ -264,6 +269,8 @@ data class BackupUiState(
      */
     val proxyDialogRequested: Boolean = false,
     val defaultAlbumMode: AlbumMode = AlbumMode.DEFAULT,
+    /** Where new uploads go, app-wide. See `BackupPreferences.backupLocation` and TASK-026. */
+    val backupLocation: BackupLocation = BackupLocation.DEFAULT,
     /** The Camera album's manual optimise is queued or running. Drives its button and its list. */
     val cameraOptimising: Boolean = false,
     /** Whether the restore screen lists cloud folders that hold nothing. */
@@ -464,6 +471,7 @@ class BackupViewModel @Inject constructor(
                     isPaused = prefs.isPaused,
                     runBaselineBytes = prefs.runBaselineBytes,
                     defaultAlbumMode = prefs.defaultAlbumMode,
+                    backupLocation = prefs.backupLocation,
                     isOptimiseEnabled = prefs.isOptimiseEnabled,
                     optimisePhotos = prefs.optimisePhotos,
                     photoOptimiseMode = prefs.photoOptimiseMode,
@@ -741,7 +749,8 @@ class BackupViewModel @Inject constructor(
                     savedBytes = counts?.savedBytes ?: 0L,
                     failedCount = counts?.failed ?: 0,
                     everBackedUpCount = counts?.everBackedUp ?: 0,
-                    everBackedUpBytes = counts?.everBackedUpBytes ?: 0L
+                    everBackedUpBytes = counts?.everBackedUpBytes ?: 0L,
+                    googlePhotosSentCount = counts?.googlePhotosSent ?: 0
                 )
             }
 
@@ -779,6 +788,7 @@ class BackupViewModel @Inject constructor(
                         savedBytes = counts?.savedBytes ?: 0L,
                         everBackedUpCount = counts?.everBackedUp ?: 0,
                         everBackedUpBytes = counts?.everBackedUpBytes ?: 0L,
+                        googlePhotosSentCount = counts?.googlePhotosSent ?: 0
                     )
                 }
 
@@ -901,12 +911,11 @@ class BackupViewModel @Inject constructor(
         // The Camera album has no Sync (Ian, 20 Sept 2026). The menu does not offer it; this is the
         // second lock, for anything that reaches here by another route.
         if (!CameraAlbum.canChoose(album, mode)) return
+        // Same second-lock shape for Google Photos: Sync and Archive are never offered while that's
+        // the app-wide destination. See GooglePhotosDestination.
+        if (!GooglePhotosDestination.canChoose(_state.value.backupLocation, mode)) return
         viewModelScope.launch {
-            // setPreference REPLACEs the whole row — a mode change alone must not silently reset
-            // the album's chosen backupLocation back to the default. See TASK-026 and
-            // AlbumPreferenceDao.preferenceOrNull's doc comment.
-            val existingLocation = albumDao.preferenceOrNull(album)?.backupLocation ?: BackupLocation.DEFAULT
-            albumDao.setPreference(AlbumPreferenceEntity(album, mode, existingLocation))
+            albumDao.setPreference(AlbumPreferenceEntity(album, mode))
             // Deliberately leaves any duplicate-name warning in place. Only Dismiss removes it (Ian,
             // 16 Sept 2026). Clearing it here also fired when the chosen mode equalled the current
             // one, which removed the card with no visible change and is the likeliest cause of the
@@ -1085,19 +1094,13 @@ class BackupViewModel @Inject constructor(
                 ?: AlbumMode.BACKUP
             val mode = if (enabled) preferred else AlbumMode.OFF
             // Camera never takes Sync, so Select all gives it Backup where everything else gets Sync.
-            val modeFor = { name: String -> CameraAlbum.seeded(name, mode) }
-            // setPreferences REPLACEs every row — same reason as setAlbumMode above, a bulk mode
-            // change must not silently reset every album's chosen backupLocation to the default.
-            val existingLocations = albumDao.all().associate { it.albumName to it.backupLocation }
-            albumDao.setPreferences(
-                albums.map {
-                    AlbumPreferenceEntity(
-                        it.name,
-                        modeFor(it.name),
-                        existingLocations[it.name] ?: BackupLocation.DEFAULT
-                    )
-                }
-            )
+            // Same clamp for Google Photos, if that's the current destination — see
+            // GooglePhotosDestination.
+            val currentLocation = _state.value.backupLocation
+            val modeFor = { name: String ->
+                GooglePhotosDestination.seeded(currentLocation, CameraAlbum.seeded(name, mode))
+            }
+            albumDao.setPreferences(albums.map { AlbumPreferenceEntity(it.name, modeFor(it.name)) })
             _state.value = _state.value.copy(
                 albums = albums.map { it.copy(mode = modeFor(it.name)) }
             )

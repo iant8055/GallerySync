@@ -67,15 +67,4 @@ interface AlbumPreferenceDao {
     /** The album's chosen mode, or null when the user has never touched it. */
     @Query("SELECT mode FROM album_preferences WHERE albumName = :albumName")
     suspend fun modeOrNull(albumName: String): AlbumMode?
-
-    /**
-     * The album's whole preference row, or null when the user has never touched it.
-     *
-     * Needed anywhere that writes one field of the row without meaning to touch the other — see
-     * [com.gallery.sync.ui.backup.BackupViewModel.setAlbumMode], which reads this first so that
-     * changing an album's mode does not silently reset its [AlbumPreferenceEntity.backupLocation]
-     * back to the default.
-     */
-    @Query("SELECT * FROM album_preferences WHERE albumName = :albumName")
-    suspend fun preferenceOrNull(albumName: String): AlbumPreferenceEntity?
 }

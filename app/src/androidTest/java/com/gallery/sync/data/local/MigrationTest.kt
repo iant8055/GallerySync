@@ -4,6 +4,7 @@ import androidx.room.testing.MigrationTestHelper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -296,6 +297,76 @@ class MigrationTest {
         db.query("SELECT location FROM backup_entries WHERE id = 'k1'").use { cursor ->
             cursor.moveToFirst()
             assertEquals("a row already uploaded really did go to OneDrive", "ONEDRIVE", cursor.getString(0))
+        }
+        db.close()
+    }
+
+    @Test
+    fun migrate12To13_producesTheSchemaRoomExpects() {
+        helper.createDatabase(TEST_DB, 12).close()
+
+        helper.runMigrationsAndValidate(TEST_DB, 13, true, Migrations.MIGRATION_12_13).close()
+    }
+
+    @Test
+    fun migrate12To13_preservesModeAndDropsBackupLocation() {
+        // The destination becomes one app-wide setting, not a per-album column — see TASK-026. Mode
+        // is the one thing this table still exists to remember, and the migration must not lose it
+        // on the way to dropping the column beside it.
+        helper.createDatabase(TEST_DB, 12).apply {
+            execSQL(
+                "INSERT INTO album_preferences (albumName, mode, backupLocation) VALUES " +
+                    "('Camera', 'SYNC', 'ONEDRIVE'), ('CarShow', 'ARCHIVE', 'GOOGLE_PHOTOS')"
+            )
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(TEST_DB, 13, true, Migrations.MIGRATION_12_13)
+
+        db.query("SELECT mode FROM album_preferences WHERE albumName = 'Camera'").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals("SYNC", cursor.getString(0))
+        }
+        db.query("SELECT mode FROM album_preferences WHERE albumName = 'CarShow'").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals("ARCHIVE", cursor.getString(0))
+        }
+        db.query("PRAGMA table_info(album_preferences)").use { cursor ->
+            var sawBackupLocation = false
+            while (cursor.moveToNext()) {
+                if (cursor.getString(cursor.getColumnIndexOrThrow("name")) == "backupLocation") {
+                    sawBackupLocation = true
+                }
+            }
+            assertFalse("backupLocation must be gone, not just unused", sawBackupLocation)
+        }
+        db.close()
+    }
+
+    @Test
+    fun migrate12To13_leavesBackupEntriesLocationUntouched() {
+        // location on backup_entries is a different thing entirely — where a specific row's file
+        // actually went, frozen at upload time — and this migration must not touch it.
+        helper.createDatabase(TEST_DB, 12).apply {
+            execSQL(
+                """
+                INSERT INTO backup_entries
+                    (id, mediaStoreId, contentUri, displayName, album, sizeBytes,
+                     dateModifiedEpochSeconds, mimeType, isVideo, state, attemptCount,
+                     isProxied, isProxySkipped, location)
+                VALUES
+                    ('k1', 42, 'content://media/external/images/media/42', 'IMG_1.jpg',
+                     'Camera', 1024, 1700000000, 'image/jpeg', 0, 'UPLOADED', 0, 0, 0, 'GOOGLE_PHOTOS')
+                """.trimIndent()
+            )
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(TEST_DB, 13, true, Migrations.MIGRATION_12_13)
+
+        db.query("SELECT location FROM backup_entries WHERE id = 'k1'").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals("GOOGLE_PHOTOS", cursor.getString(0))
         }
         db.close()
     }
