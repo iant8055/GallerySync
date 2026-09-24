@@ -32,13 +32,15 @@ design choice.
 Free app on Google Play with a single one-time in-app purchase to unlock Pro.
 
 Free tier:  OneDrive sync, ContentProvider access, core sync engine
-Pro tier:   Google Photos sync (unlocked by IAP)
+Pro tier:   every cloud beyond OneDrive (Google Photos, Google Drive, Dropbox, pCloud, IDrive e2, Backblaze B2),
+            unlocked by the IAP, after an optional 30-day trial that is a hard gate and never an auto-charge
 
 IAP product ID: pro_unlock
 Billing library: com.android.billingclient:billing-ktx (latest stable)
 
 Rules:
-- Gate Google Photos features behind a BillingRepository.isPurchased() check
+- Gate every second cloud behind `MultiCloudEntitlement` (purchased or trial running), which asks
+  BillingRepository.isPurchased() for the purchase half. Every non-OneDrive cloud is backup-only
 - Never gate OneDrive or the ContentProvider — those are always free
 - BillingRepository is the single source of truth for purchase state
 - Never hardcode purchase state — always query BillingRepository

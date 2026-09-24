@@ -434,6 +434,58 @@ signed-in OneDrive session in any case. Compile + full unit suite only.
 3. Deferred, unchanged: Restore from Google Photos; destination-switch confirmation dialog; Google
    Photos dedup via `mediaItems.list`; `BackupLocation.isUsable` is still hardcoded to OneDrive.
 
+## All the optional clouds at once — built 24 Sept 2026
+
+Ian, 24 Sept 2026: *"lets build ALL the optional cloud storage in at one time - rather than piecing it in
+one at a time"*, then *"go poll what are the top 6 or 7 cloud storage options and build for those"*. A web
+poll of 2026 usage and photo-backup rankings gave, for an Android app that can actually write to them:
+**OneDrive** (base), **Google Photos**, **Google Drive**, **Dropbox**, **pCloud**, **IDrive e2** and
+**Backblaze B2**. Left out because they have no third-party upload API: **iCloud** and **Amazon Photos**.
+MEGA and Box were next in line and are not built.
+
+**Shape.** One provider layer, so a new cloud is an adapter and a binding, not another pass through the app:
+`CloudUploader` (engine side) and `CloudConnection` (screen side), both injected as sets in `di/CloudModule`.
+`BackupEngine` runs one independent loop per connected provider behind OneDrive's own untouched path; a
+provider's stop ends only its own loop (Ian, 23 Sept: a failed run on one provider never stops another).
+`CloudProvidersViewModel` / `CloudProvidersSection` list whatever is offered, in Settings and in wizard
+step 4; the per-folder menus offer whichever clouds are connected and entitled; the album cloud line names
+each cloud a file went to ("12 verified in OneDrive · 3 sent to Dropbox"). The 30-day trial and Pro unlock
+cover all of them at once, at the same upload boundary.
+
+**Every one of them is backup-only, and that is structural, not a label.** `BackupLocation.isBackupOnly`
+is true for everything but OneDrive: no Archive, no Sync (optimise), no Restore. Each adapter's row is
+written with `markUploadedWithoutSizeVerification`, so `remoteSizeBytes` is always NULL and no row can
+satisfy `verifiedInCloud()` or `fetchableFromCloud()` — which act on OneDrive ids and OneDrive byte-size
+proof and would be wrong, and for Archive dangerous, for anyone else's. Upgrading a provider (Drive, Dropbox
+and B2 can all report a stored size) is a later, per-provider decision, with its own Restore path.
+
+**What needs nothing from Ian:** IDrive e2 and Backblaze B2 — one S3-compatible adapter (`S3CompatibleCloud`,
+hand-written SigV4, checked against AWS's own published example). The user pastes endpoint, region, bucket
+and their own key pair; keys go to `EncryptedCloudSecretsStore` (AES-256-GCM) and only after a signed
+`HEAD` on the bucket succeeds. https endpoints only. One PUT carries up to 5 GB; larger files are refused
+per file rather than failing half way (multipart is not built).
+
+**What is built but switched off until Ian registers an app** — each is hidden (no button that cannot
+succeed) until its client id is filled in `res/raw/cloud_oauth_config.json`. Ids are public; none of these
+flows uses a client secret.
+- **Google Drive** — same Google Cloud project as Google Photos: enable the Drive API, then paste the
+  Android client id. Scope `drive.file` only (the app sees only what it created). Resumable uploads.
+- **Dropbox** — create an app at dropbox.com/developers, permission `files.content.write`, register the
+  redirect `com.gallery.sync:/dropbox`, paste the app key. PKCE, offline refresh token; files over 100 MB
+  go through an upload session in 8 MiB chunks.
+- **pCloud** — register an app, add the redirect `com.gallery.sync.pcloud:/callback`, paste the client id.
+  Uses pCloud's *token* flow because its code flow needs a client secret; the token arrives in the URL
+  fragment, which AppAuth does not read, hence `PCloudRedirectActivity` (state-checked). EU accounts are
+  routed to the host pCloud reports at sign-in.
+
+**Verified:** 654 unit tests (SigV4 vector; every adapter against a local server incl. Dropbox sessions,
+Drive folder creation, pCloud multipart, error mapping), 55 instrumented tests on the Moto G including the
+migrations, clean install and launch, and wizard step 4 seen on the phone listing Google Photos, IDrive e2
+and Backblaze B2 with the short OK pop-up. **Not verified:** any real upload to any provider — no account
+was used, and the two S3 stores in particular need a real bucket to confirm the signing and the
+unsigned-header details of each provider. The Google sign-in itself is still blocked by the console setting
+noted earlier (`invalid_request`).
+
 ## Settings UI (Connect / Unlock / choose) — done, 23 Sept 2026
 
 `GooglePhotosViewModel` (sign-in + purchase state, `ui/settings/`) kept separate from
