@@ -222,6 +222,7 @@ fun RestoreScreen(
         if (state.hasSelection || state.running) {
             RestoreBar(
                 running = state.running,
+                progress = state.progress,
                 onRestore = viewModel::restoreSelected,
                 onStop = viewModel::stop
             )
@@ -796,15 +797,20 @@ private fun FileCard(
 
 /** The single action. A control while it runs, not a label. */
 @Composable
-private fun RestoreBar(running: Boolean, onRestore: () -> Unit, onStop: () -> Unit) {
+private fun RestoreBar(
+    running: Boolean,
+    progress: RestoreProgress?,
+    onRestore: () -> Unit,
+    onStop: () -> Unit
+) {
     val signal = LocalGallerySyncColors.current
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
+        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
@@ -827,6 +833,27 @@ private fun RestoreBar(running: Boolean, onRestore: () -> Unit, onStop: () -> Un
                     maxLines = 1
                 )
             }
+        }
+
+        // Under the button, where the eye already is: the only sign a restore is under way used to
+        // be the button's own label. Ian, 24 Sept 2026.
+        if (progress != null) {
+            Spacer(Modifier.size(8.dp))
+            LinearProgressIndicator(
+                progress = { progress.fraction },
+                modifier = Modifier.fillMaxWidth()
+            )
+            Text(
+                text = stringResource(
+                    R.string.restore_progress,
+                    progress.finished,
+                    progress.total,
+                    (progress.fraction * 100).toInt()
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
         }
     }
 }

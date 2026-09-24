@@ -7135,3 +7135,6 @@ settings added since and would have been the wrong thing to restore from), launc
 welcome screen immediately: it stayed up. Tapped again after 3.5 seconds: advanced to the tour's second
 step normally. Restored the real DataStore byte-exact (`cmp` equivalent: read-back comparison in Python,
 identical) and relaunched: no crash, straight to the Albums tab as before.
+
+### 24 Sept 2026 — Restore shows progress while it runs (Ian)
+The Restore tab had no sign a run was under way beyond the button reading "Stop restoring". `RestoreBar` now carries a progress bar and "N of M restored · P%" under the button while `running`. Byte-weighted (`RestoreUiState.progress`), a failed file counts as passed. Verified on the Moto G: Car Show (34 files, 105 MB) moved aside, restored from OneDrive, bar and count advanced, folder back to 105 MB. The originals were parked in `/sdcard/Download/CarShow_hold` (duplicates now, can be removed).

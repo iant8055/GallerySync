@@ -693,6 +693,7 @@ full size</string>
     <string name="restore_here_size">Already on this phone · %1$s</string>
     <string name="restore_folder_here">%1$d already on this phone</string>
     <string name="restore_greyed_line">Greyed-out files are already on this phone.</string>
+    <string name="restore_progress">%1$d of %2$d restored · %3$d%%</string>
     <string name="restore_downloading">Working… %1$d%%</string>
     <string name="restore_done_row">Restored to full size</string>
     <string name="restore_downloaded_row">Back on this phone</string>

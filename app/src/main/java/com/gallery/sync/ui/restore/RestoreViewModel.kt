@@ -90,6 +90,9 @@ data class RestoreFolder(
     val total: Int get() = restorable + downloadable
 }
 
+/** Files finished out of files picked, and the byte-weighted fraction of the run, 0..1. */
+data class RestoreProgress(val finished: Int, val total: Int, val fraction: Float)
+
 data class RestoreUiState(
     val rows: List<RestoreRow> = emptyList(),
     val openFolder: String? = null,
@@ -109,6 +112,35 @@ data class RestoreUiState(
     val selectedRows: List<RestoreRow> get() = rows.filter { it.id in selection }
 
     val bytesToRecover: Long get() = selectedRows.sumOf { it.fullBytes - it.localBytes }
+
+    /**
+     * How far the run has got, or null when nothing is running. Ian, 24 Sept 2026: the Stop button
+     * was the only sign a restore was under way.
+     *
+     * Weighted by bytes rather than counted, so one 2 GB video sitting among fifty photos moves the
+     * bar as much as it takes of the time. A file that failed counts as passed: the queue moved on.
+     */
+    val progress: RestoreProgress?
+        get() {
+            if (!running) return null
+            val picked = selectedRows
+            if (picked.isEmpty()) return null
+            val weights = picked.map { (it.fullBytes - it.localBytes).coerceAtLeast(1L) }
+            val finished = picked.count { it.state is RowState.Done || it.state is RowState.Failed }
+            val got = picked.indices.sumOf { i ->
+                val share = when (val s = picked[i].state) {
+                    is RowState.Done, is RowState.Failed -> 1.0
+                    is RowState.Working -> s.percent / 100.0
+                    RowState.Waiting -> 0.0
+                }
+                share * weights[i]
+            }
+            return RestoreProgress(
+                finished = finished,
+                total = picked.size,
+                fraction = (got / weights.sum()).toFloat().coerceIn(0f, 1f)
+            )
+        }
 
     /** The rows on screen: one folder's worth, or none while the folder list is showing. */
     val visibleRows: List<RestoreRow>
