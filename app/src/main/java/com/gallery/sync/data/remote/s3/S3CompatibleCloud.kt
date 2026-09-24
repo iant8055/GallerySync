@@ -4,6 +4,7 @@ import android.app.Activity
 import com.gallery.sync.R
 import com.gallery.sync.data.remote.auth.SignInResult
 import com.gallery.sync.data.remote.cloud.CloudConnection
+import com.gallery.sync.data.remote.cloud.CloudMime
 import com.gallery.sync.data.remote.cloud.ConnectionKind
 import com.gallery.sync.data.remote.cloud.EncryptedCloudSecretsStore
 import com.gallery.sync.data.remote.cloud.KeyField
@@ -19,7 +20,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.io.FileNotFoundException
 import java.io.IOException
-import java.util.Locale
 
 /**
  * Connection and uploading for one S3-compatible store: the user pastes the endpoint, region, bucket
@@ -180,20 +180,6 @@ abstract class S3CompatibleCloud(
 
         fun hostLabel(endpoint: String): String = endpoint.removePrefix("https://")
 
-        fun mimeTypeFor(name: String): String = when (name.substringAfterLast('.', "").lowercase(Locale.ROOT)) {
-            "jpg", "jpeg" -> "image/jpeg"
-            "png" -> "image/png"
-            "gif" -> "image/gif"
-            "webp" -> "image/webp"
-            "heic" -> "image/heic"
-            "heif" -> "image/heif"
-            "mp4" -> "video/mp4"
-            "mov" -> "video/quicktime"
-            "3gp" -> "video/3gpp"
-            "mkv" -> "video/x-matroska"
-            "webm" -> "video/webm"
-            "avi" -> "video/x-msvideo"
-            else -> "application/octet-stream"
-        }
+        fun mimeTypeFor(name: String): String = CloudMime.of(name)
     }
 }

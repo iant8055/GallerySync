@@ -4,6 +4,9 @@ import com.gallery.sync.data.remote.auth.GooglePhotosCloudConnection
 import com.gallery.sync.data.remote.cloud.CloudConnection
 import com.gallery.sync.data.remote.cloud.CloudConnections
 import com.gallery.sync.data.remote.cloud.CloudUploadClient
+import com.gallery.sync.data.remote.cloud.DropboxCloud
+import com.gallery.sync.data.remote.cloud.GoogleDriveCloud
+import com.gallery.sync.data.remote.cloud.PCloudCloud
 import com.gallery.sync.data.remote.s3.BackblazeB2Cloud
 import com.gallery.sync.data.remote.s3.IDriveE2Cloud
 import com.gallery.sync.data.repository.GooglePhotosCloudUploader
@@ -32,6 +35,24 @@ abstract class CloudModule {
 
     @Binds @IntoSet
     abstract fun bindGooglePhotosConnection(impl: GooglePhotosCloudConnection): CloudConnection
+
+    @Binds @IntoSet
+    abstract fun bindGoogleDriveUploader(impl: GoogleDriveCloud): CloudUploader
+
+    @Binds @IntoSet
+    abstract fun bindGoogleDriveConnection(impl: GoogleDriveCloud): CloudConnection
+
+    @Binds @IntoSet
+    abstract fun bindDropboxUploader(impl: DropboxCloud): CloudUploader
+
+    @Binds @IntoSet
+    abstract fun bindDropboxConnection(impl: DropboxCloud): CloudConnection
+
+    @Binds @IntoSet
+    abstract fun bindPCloudUploader(impl: PCloudCloud): CloudUploader
+
+    @Binds @IntoSet
+    abstract fun bindPCloudConnection(impl: PCloudCloud): CloudConnection
 
     @Binds @IntoSet
     abstract fun bindIDriveUploader(impl: IDriveE2Cloud): CloudUploader

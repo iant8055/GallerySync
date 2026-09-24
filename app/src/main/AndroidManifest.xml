@@ -130,6 +130,30 @@
             android:name=".data.remote.auth.GoogleAuthResultActivity"
             android:exported="false"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+        <!-- The OAuth clouds (Google Drive, Dropbox): AppAuth finishes here, like GoogleAuthResultActivity. -->
+        <activity
+            android:name=".data.remote.cloud.CloudAuthResultActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+        <!--
+            pCloud returns its token in the URL fragment, which AppAuth's receiver does not read, so it has
+            its own scheme (com.gallery.sync.pcloud, distinct from AppAuth's com.gallery.sync so the two
+            never compete for a redirect). See PCloudRedirectActivity.
+        -->
+        <activity
+            android:name=".data.remote.cloud.PCloudRedirectActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="com.gallery.sync.pcloud" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

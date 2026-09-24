@@ -1,0 +1,5 @@
+{
+  "google_drive": { "client_id": "", "redirect_uri": "com.gallery.sync:/oauth2redirect" },
+  "dropbox":      { "client_id": "", "redirect_uri": "com.gallery.sync:/dropbox" },
+  "pcloud":       { "client_id": "", "redirect_uri": "com.gallery.sync.pcloud:/callback" }
+}
