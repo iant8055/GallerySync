@@ -91,8 +91,13 @@ fun CloudProvidersSection(
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text(
-                        text = provider.accountLabel
-                            ?: stringResource(R.string.google_photos_not_connected),
+                        // The OAuth clouds have no account name to show, and their label is just the
+                        // provider's own name — repeating it under itself reads as a bug.
+                        text = when (provider.accountLabel) {
+                            null -> stringResource(R.string.google_photos_not_connected)
+                            stringResource(provider.location.labelRes()) -> stringResource(R.string.google_photos_connected)
+                            else -> provider.accountLabel
+                        },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -121,19 +126,20 @@ fun CloudProvidersSection(
             if (state.isBusy) {
                 BusyIndicator()
             } else {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                // Stacked, full width: side by side they squeezed "Unlock Pro" down to "Un" on a 360dp card.
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     if (trial == MultiCloudTrial.State.NotStarted) {
-                        Button(onClick = viewModel::startTrial) {
+                        Button(onClick = viewModel::startTrial, modifier = Modifier.fillMaxWidth()) {
                             Text(stringResource(R.string.google_photos_trial_start_action))
                         }
                     }
                     val unlock = { activity?.let(viewModel::unlockPro); Unit }
                     if (trial == MultiCloudTrial.State.NotStarted) {
-                        OutlinedButton(onClick = unlock, enabled = activity != null) {
+                        OutlinedButton(onClick = unlock, enabled = activity != null, modifier = Modifier.fillMaxWidth()) {
                             Text(stringResource(R.string.google_photos_unlock_pro_action), maxLines = 1)
                         }
                     } else {
-                        Button(onClick = unlock, enabled = activity != null) {
+                        Button(onClick = unlock, enabled = activity != null, modifier = Modifier.fillMaxWidth()) {
                             Text(stringResource(R.string.google_photos_unlock_pro_action), maxLines = 1)
                         }
                     }
