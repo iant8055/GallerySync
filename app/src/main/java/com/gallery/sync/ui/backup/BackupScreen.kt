@@ -67,7 +67,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
 import com.gallery.sync.ui.common.labelRes
-import com.gallery.sync.ui.common.CloudFeature
+import com.gallery.sync.domain.backup.CloudFeature
 import com.gallery.sync.ui.common.FeatureUnavailableDialog
 import androidx.compose.ui.draw.alpha
 import com.gallery.sync.data.local.entity.AlbumMode

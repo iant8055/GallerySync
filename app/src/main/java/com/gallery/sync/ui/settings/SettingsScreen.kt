@@ -52,6 +52,7 @@ import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.settings.ThemeMode
 import com.gallery.sync.domain.backup.ArchiveAge
 import com.gallery.sync.domain.backup.BackupLocation
+import com.gallery.sync.domain.backup.capabilities
 import com.gallery.sync.domain.backup.BackupLocations
 import com.gallery.sync.domain.backup.MediaAge
 import com.gallery.sync.domain.backup.OptimiseMode
@@ -227,7 +228,7 @@ fun SettingsScreen(
             // With more than one cloud connected the default is locked at Off (Ian, 24 Sept 2026): a new
             // album has to wait for the user to say where it goes. With a backup-only main cloud, Sync is
             // not on offer as a default, because it is not available there.
-            options = AlbumMode.canBeDefault.filter { !(cloudState.main.isBackupOnly && it == AlbumMode.SYNC) },
+            options = AlbumMode.canBeDefault.filter { cloudState.main.capabilities.allows(it) },
             selected = if (multiCloud) AlbumMode.OFF else state.defaultAlbumMode,
             onSelected = viewModel::setDefaultAlbumMode,
             optionLabel = { it.settingsLabel() },

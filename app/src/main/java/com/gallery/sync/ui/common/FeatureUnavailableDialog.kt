@@ -8,13 +8,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.gallery.sync.R
 import com.gallery.sync.domain.backup.BackupLocation
+import com.gallery.sync.domain.backup.CloudFeature
 
-/** A feature only OneDrive has today. Named in capitals in the message, as the user asked for it. */
-enum class CloudFeature(@StringRes val nameRes: Int) {
-    RESTORE(R.string.feature_restore),
-    ARCHIVE(R.string.feature_archive),
-    SYNC(R.string.feature_sync)
-}
+/** The feature's name as the message shows it, in capitals as asked for. */
+@get:StringRes
+val CloudFeature.nameRes: Int
+    get() = when (this) {
+        CloudFeature.RESTORE -> R.string.feature_restore
+        CloudFeature.ARCHIVE -> R.string.feature_archive
+        CloudFeature.SYNC -> R.string.feature_sync
+    }
 
 /**
  * What the user gets on trying something their cloud cannot do (Ian, 24 Sept 2026): the feature stays

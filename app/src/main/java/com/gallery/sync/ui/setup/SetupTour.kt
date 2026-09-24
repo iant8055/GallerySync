@@ -110,6 +110,8 @@ import com.gallery.sync.R
 import com.gallery.sync.data.local.media.DiscoveredDirectory
 import com.gallery.sync.data.local.media.ProxyGenerator
 import com.gallery.sync.domain.backup.BackupLocation
+import com.gallery.sync.domain.backup.CloudCapabilities
+import com.gallery.sync.domain.backup.capabilities
 import com.gallery.sync.domain.backup.LibraryChoice
 import com.gallery.sync.ui.common.formatBytes
 import com.gallery.sync.domain.backup.VideoQuality
@@ -407,7 +409,7 @@ fun SetupTour(
 
     // A main cloud other than OneDrive is backup-only, so a plan that optimises cannot stay chosen.
     LaunchedEffect(step, cloudState.main, state.libraryChoice) {
-        if (step == 6 && cloudState.main != BackupLocation.ONEDRIVE && state.libraryChoice.optimisesAtInstall) {
+        if (step == 6 && !cloudState.main.capabilities.sync && state.libraryChoice.optimisesAtInstall) {
             viewModel.setLibraryChoice(LibraryChoice.BACK_UP_EVERYTHING)
         }
     }
@@ -690,7 +692,7 @@ fun SetupTour(
                         )
                         6 -> BackupOptionsContent(
                             selected = state.libraryChoice,
-                            optimiseAvailable = cloudState.main == BackupLocation.ONEDRIVE,
+                            optimiseAvailable = cloudState.main.capabilities.sync,
                             onSelect = viewModel::setLibraryChoice
                         )
                         7 -> OptimizationContent(
@@ -1395,7 +1397,7 @@ private fun CloudStorageContent(
                     .clickable {
                         if (provider.location != main) {
                             cloudViewModel.setMain(provider.location)
-                            if (provider.location != BackupLocation.ONEDRIVE) limitsFor = provider.location
+                            if (provider.location.capabilities != CloudCapabilities.FULL) limitsFor = provider.location
                         }
                     },
                 verticalAlignment = Alignment.CenterVertically,
@@ -1406,7 +1408,7 @@ private fun CloudStorageContent(
                     onClick = {
                         if (provider.location != main) {
                             cloudViewModel.setMain(provider.location)
-                            if (provider.location != BackupLocation.ONEDRIVE) limitsFor = provider.location
+                            if (provider.location.capabilities != CloudCapabilities.FULL) limitsFor = provider.location
                         }
                     }
                 )
@@ -1487,9 +1489,15 @@ private fun CloudStorageContent(
                 title = { Text(stringResource(R.string.tour_cloud_google_photos_limits_title)) },
                 text = {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        BulletItem(stringResource(R.string.tour_cloud_google_photos_limit_backup_only))
+                        // Each line is there because this cloud lacks the thing, not because of its name.
+                        val caps = about.capabilities
+                        if (!caps.archive && !caps.sync) {
+                            BulletItem(stringResource(R.string.tour_cloud_google_photos_limit_backup_only))
+                        }
                         BulletItem(stringResource(R.string.tour_cloud_google_photos_limit_duplicates))
-                        BulletItem(stringResource(R.string.tour_cloud_google_photos_limit_restore))
+                        if (!caps.restore) {
+                            BulletItem(stringResource(R.string.tour_cloud_google_photos_limit_restore))
+                        }
                         // The trial line is about adding a second cloud; the main cloud is free.
                         if (about != main) {
                             BulletItem(stringResource(R.string.tour_cloud_google_photos_limit_pro))

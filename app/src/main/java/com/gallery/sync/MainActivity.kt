@@ -17,7 +17,7 @@ import androidx.compose.material3.ScrollableTabRow
 import com.gallery.sync.domain.backup.ExitWarning
 import com.gallery.sync.ui.backup.BackupViewModel
 import com.gallery.sync.ui.common.ExitWarningDialog
-import com.gallery.sync.ui.common.CloudFeature
+import com.gallery.sync.domain.backup.CloudFeature
 import com.gallery.sync.ui.common.FeatureUnavailableDialog
 import androidx.compose.runtime.LaunchedEffect
 import com.gallery.sync.ui.common.NavDestination
@@ -50,6 +50,7 @@ import com.gallery.sync.ui.signin.SignInScreen
 import com.gallery.sync.ui.signin.SignInUiState
 import com.gallery.sync.ui.signin.SignInViewModel
 import com.gallery.sync.domain.backup.BackupLocation
+import com.gallery.sync.domain.backup.capabilities
 import com.gallery.sync.ui.settings.CloudProvidersUiState
 import com.gallery.sync.ui.settings.CloudProvidersViewModel
 import com.gallery.sync.data.local.settings.ThemeMode
@@ -190,12 +191,14 @@ private fun SignedInApp(
     // are things done once. Restore moved second because it was the tab falling off the right edge
     // of the old row — a quarter of the app reachable only by a scroll gesture nobody knew was
     // there.
-    // Restore and Archive only exist for a backup that went to OneDrive (Ian, 24 Sept 2026). With no
-    // OneDrive connected they stay in the bar, greyed, and tapping one says which cloud cannot do it.
+    // What is live follows the clouds (Ian, 24 Sept 2026: all functionality is based on the cloud service):
+    // a tab is live when at least one connected cloud can do what it does, and otherwise stays in the bar
+    // greyed, where tapping it says which cloud cannot.
     val cloudViewModel: CloudProvidersViewModel = hiltViewModel()
     val cloudState by cloudViewModel.state.collectAsStateWithLifecycle()
-    val oneDriveConnected = cloudState.providers.any { it.location == BackupLocation.ONEDRIVE && it.isConnected }
-    val onlyOneDriveFeaturesLocked = cloudState.loaded && !oneDriveConnected
+    val connectedClouds = cloudState.providers.filter { it.isConnected }.map { it.location }
+    fun featureLocked(feature: CloudFeature?): Boolean =
+        feature != null && cloudState.loaded && connectedClouds.none { it.capabilities.supports(feature) }
     var blockedFeature by remember { mutableStateOf<CloudFeature?>(null) }
     fun featureOfTab(tab: Int): CloudFeature? = when (tab) {
         1 -> CloudFeature.RESTORE
@@ -205,8 +208,8 @@ private fun SignedInApp(
 
     val destinations = listOf(
         NavDestination(SignalIcons.Albums, stringResource(R.string.tab_backup)),
-        NavDestination(SignalIcons.Restore, stringResource(R.string.tab_retrieve), dimmed = onlyOneDriveFeaturesLocked),
-        NavDestination(SignalIcons.CloudCheck, stringResource(R.string.tab_setup), dimmed = onlyOneDriveFeaturesLocked),
+        NavDestination(SignalIcons.Restore, stringResource(R.string.tab_retrieve), dimmed = featureLocked(CloudFeature.RESTORE)),
+        NavDestination(SignalIcons.CloudCheck, stringResource(R.string.tab_setup), dimmed = featureLocked(CloudFeature.ARCHIVE)),
         NavDestination(SignalIcons.Settings, stringResource(R.string.tab_settings))
     )
 
@@ -270,7 +273,7 @@ private fun SignedInApp(
         Box(modifier = Modifier.weight(1f)) {
             // A locked tab is never drawn — not even when something else lands on it, such as the
             // "come of age" notification opening Archive: the same message stands in its place.
-            val lockedFeature = if (onlyOneDriveFeaturesLocked && !tourVisible) featureOfTab(selectedTab) else null
+            val lockedFeature = featureOfTab(selectedTab)?.takeIf { featureLocked(it) && !tourVisible }
             if (lockedFeature != null) {
                 LaunchedEffect(lockedFeature) { blockedFeature = lockedFeature }
                 BackupScreen(onAlbumArchived = {})
@@ -305,7 +308,7 @@ private fun SignedInApp(
                 selected = selectedTab,
                 onSelect = { tab ->
                     if (!tourVisible) {
-                        val locked = if (onlyOneDriveFeaturesLocked) featureOfTab(tab) else null
+                        val locked = featureOfTab(tab)?.takeIf { featureLocked(it) }
                         if (locked != null) blockedFeature = locked else selectedTab = tab
                     }
                 },

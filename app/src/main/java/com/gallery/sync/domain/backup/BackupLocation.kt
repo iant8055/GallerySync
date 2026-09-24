@@ -37,7 +37,7 @@ enum class BackupLocation {
      * row sent anywhere else must never satisfy either. Each adapter records its rows through
      * `markUploadedWithoutSizeVerification`, which always leaves the remote size NULL.
      */
-    val isBackupOnly: Boolean get() = this != ONEDRIVE
+    val isBackupOnly: Boolean get() = capabilities == CloudCapabilities.BACKUP_ONLY
 
     companion object {
         /**
