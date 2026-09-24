@@ -518,6 +518,10 @@ keeps working.
 
 ## v0.5.0 — Google Photos + Billing
 - [ ] Google Play Billing (`pro_unlock`)
+      **In progress, 24 Sept 2026 — see `.claude/tasks/TASK-026.md`, which is the record.** Built and pushed:
+      BillingRepository + signature check, AppAuth Google sign-in, Photos upload client, per-folder destination
+      (schema v14). Not yet exercised on a device with a real account. Wizard folder→cloud step and the
+      30-day multi-cloud hard-gate trial are still to build.
 - [ ] Google Photos adapter (requires OAuth — Ian)
 - [ ] Settings: sync frequency, account management
       **Audited 20 Sept 2026: account management partly there, sync frequency not.** Settings shows the

@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.gallery.sync.data.local.entity.FolderPreferenceEntity
+import com.gallery.sync.domain.backup.BackupLocation
 import kotlinx.coroutines.flow.Flow
 
 /** Mirrors [AlbumPreferenceDao]'s shape exactly, one level up — see [FolderPreferenceEntity]. */
@@ -30,6 +31,10 @@ interface FolderPreferenceDao {
 
     @Query("SELECT * FROM folder_preferences")
     fun observeAll(): Flow<List<FolderPreferenceEntity>>
+
+    /** Moves every folder routed to [from] over to [to] — for when [from] stops being reachable. */
+    @Query("UPDATE folder_preferences SET backupLocation = :to WHERE backupLocation = :from")
+    suspend fun reassign(from: BackupLocation, to: BackupLocation)
 
     @Query("SELECT * FROM folder_preferences")
     suspend fun all(): List<FolderPreferenceEntity>

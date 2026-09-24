@@ -42,7 +42,14 @@ data class MediaAlbum(
      * handful of clips or a hundred photos; "2 videos, 15 images" does not.
      */
     val imageCount: Int = 0,
-    val videoCount: Int = 0
+    val videoCount: Int = 0,
+    /**
+     * The top-level folder this album lives under (`DCIM`, `Pictures`...) — see
+     * [com.gallery.sync.data.local.media.MediaScanRules.topLevelFolderOf] — or null when nothing in
+     * the album reported a usable `RELATIVE_PATH` (API < 29, or an odd location). TASK-026: this is
+     * the destination-choice granularity, one level up from the album itself.
+     */
+    val topLevelFolder: String? = null
 )
 
 /** A top-level directory on the device containing media files, discovered by scanning MediaStore. */

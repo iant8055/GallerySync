@@ -3,6 +3,8 @@ package com.gallery.sync.ui.settings
 import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gallery.sync.data.local.dao.BackupEntryDao
+import com.gallery.sync.data.local.dao.FolderPreferenceDao
 import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.data.remote.auth.GooglePhotosSignIn
 import com.gallery.sync.data.remote.auth.SignInResult
@@ -48,7 +50,9 @@ data class GooglePhotosUiState(
 class GooglePhotosViewModel @Inject constructor(
     private val signIn: GooglePhotosSignIn,
     private val billing: BillingRepository,
-    private val settings: BackupSettings
+    private val settings: BackupSettings,
+    private val folderDao: FolderPreferenceDao,
+    private val entryDao: BackupEntryDao
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(GooglePhotosUiState())
@@ -86,8 +90,12 @@ class GooglePhotosViewModel @Inject constructor(
     fun disconnect() {
         viewModelScope.launch {
             signIn.signOut()
-            // Never leave the app-wide destination pointed at a provider that just became
-            // unreachable — same reasoning as BackupLocations' "at least one must stay on".
+            // Never leave a destination pointed at a provider that just became unreachable — same
+            // reasoning as BackupLocations' "at least one must stay on". Covers every folder routed
+            // here, the fallback default, and files still waiting to go. Files already sent keep their
+            // recorded history: nothing uploaded is touched.
+            folderDao.reassign(BackupLocation.GOOGLE_PHOTOS, BackupLocation.ONEDRIVE)
+            entryDao.retargetAllUnsent(BackupLocation.GOOGLE_PHOTOS, BackupLocation.ONEDRIVE)
             if (settings.current().backupLocation == BackupLocation.GOOGLE_PHOTOS) {
                 settings.setBackupLocation(BackupLocation.ONEDRIVE)
             }

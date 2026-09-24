@@ -107,7 +107,12 @@
     <!-- Not built (see BackupLocation.isUsable) — exists only so the destination picker's option
          label stays exhaustive over the enum rather than guessing at a fallback. -->
     <string name="backup_location_usb_drive">USB drive</string>
-    <string name="backup_location_picker_label">Back up new photos to</string>
+    <string name="backup_folders_heading">Where each folder goes</string>
+    <string name="backup_folders_explainer">New photos and videos in each folder go to the cloud you pick. Anything already sent stays where it is.</string>
+    <plurals name="backup_folder_label">
+        <item quantity="one">%1$s · %2$d file</item>
+        <item quantity="other">%1$s · %2$d files</item>
+    </plurals>
     <string name="settings_sync">Sync</string>
     <string name="settings_sync_folders">Sync folders</string>
     <string name="settings_restore">Restore</string>

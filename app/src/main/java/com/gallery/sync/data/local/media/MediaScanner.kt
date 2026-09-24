@@ -188,7 +188,12 @@ class MediaScanner @Inject constructor(
                     itemCount = items.size,
                     totalBytes = items.sumOf { it.sizeBytes },
                     imageCount = items.count { !it.isVideo },
-                    videoCount = items.count { it.isVideo }
+                    videoCount = items.count { it.isVideo },
+                    // An album's files should all share one top-level folder — it is one physical
+                    // directory — so the first item that resolves one speaks for the whole group.
+                    // Not assumed to be perfectly uniform: a stray item with no RELATIVE_PATH beside
+                    // others that have one is exactly the API < 29 case this falls back for.
+                    topLevelFolder = items.firstNotNullOfOrNull { MediaScanRules.topLevelFolderOf(it.relativePath) }
                 )
             }
             .sortedBy { it.name.lowercase() }

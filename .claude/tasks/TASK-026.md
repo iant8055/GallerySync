@@ -6,8 +6,9 @@ Raised by: Ian, 22 Sept 2026 — competitive research on multi-cloud support, ma
 Status: **IN PROGRESS — full pipeline built, not yet exercised against a real account.** OAuth and Play
 Console both registered. Schema, sign-in, wire client, `BackupEngine` dispatch (with a real
 `BillingRepository.isPurchased()` gate at the actual upload boundary, not just the picker UI),
-purchase signature verification, the destination model (one app-wide setting, not per-album — see
-below), and the Settings UI to connect/unlock/choose it are all built, committed, and verified by
+purchase signature verification, the destination model (**one choice per top-level FOLDER — DCIM,
+Pictures, Movies — 24 Sept 2026; supersedes the one app-wide setting**, see "Destination is per
+folder" below), and the Settings UI to connect/unlock/choose it are all built, committed, and verified by
 compile + full test suite + clean install on the Moto G. **Nothing has been visually verified in the
 running app or tested against a real signed-in account yet** — that's the next and most important
 step. Remaining after that: the destination-switch confirmation dialog, Restore's Google Photos gap
@@ -301,7 +302,7 @@ for parts of this — navigating pages, reading state — never entering credent
 sign-in itself. Flagging it here simply because it's a new way this session touched an external
 account, not because anything about it went wrong.
 
-## One app-wide destination, not per-album — done, 23 Sept 2026
+## One app-wide destination, not per-album — done 23 Sept 2026, SUPERSEDED 24 Sept (see next section)
 
 Ian, walking through the per-album picker before it was built: *"isn't easier just to leave it at root
 access rather than drill down to album level."* Talked through why, and it is easier, for real reasons
@@ -352,6 +353,57 @@ covered by the earlier Archive/Sync-are-OneDrive-only decision, which never actu
 **Also raised, not yet built:** the destination picker doesn't currently warn before a switch that
 existing files in that album are staying where they are — only new ones follow. Same honesty-first
 shape as the Archive confirmation dialog. Not built yet; see Open.
+
+## Destination is per FOLDER — built 24 Sept 2026 (schema v14)
+
+Ian, 24 Sept 2026, correcting the global model: the choice is made per **top-level folder** —
+`DCIM`, `Pictures`, `Movies`, `Camera Roll`, whatever the scan actually finds media under — never per
+album (albums are the user's own sub-folders *inside* those) and not one app-wide setting. Vocabulary
+is Ian's and is worth keeping straight: **folder** = a main root; **album** = a user-created folder
+inside one. A small table maps each folder to a cloud, replacing the global picker in Settings, and the
+user can change it later by hand (e.g. after closing a cloud account).
+
+**Built:**
+- `folder_preferences(folderName PK, backupLocation)` — migration 13→14, `MigrationTest` covers it.
+- `MediaScanRules.topLevelFolderOf(relativePath)` is the one definition of "which folder", shared by
+  `discoverDirectories()` (what the wizard already uses), `scanAlbums()` and `refreshLedger`. Folders
+  are auto-detected per device; nothing hardcoded.
+- `FolderDestination.resolve(folder, chosen, fallback)` — a folder with a row uses it; anything without
+  (never chosen, or no `RELATIVE_PATH` on API < 29) falls back to `BackupPreferences.backupLocation`,
+  which is now an implicit default, not a visible control. `refreshLedger` seeds a row for every newly
+  found folder with `insertIfNew` (IGNORE), so a rescan never overwrites a choice.
+- `BackupViewModel`: `FolderRow`s in state, `AlbumRow.backupLocation` resolved per album,
+  `setFolderLocation`. The Google Photos mode lock (no Sync/Archive) now keys on the album's own
+  resolved location, in both the dropdown and the ViewModel's second lock.
+- Settings: the single picker is replaced by one dropdown per folder, shown only when Google Photos is
+  signed in *and* purchased.
+- Split history is unchanged: a file's `location` is frozen when its row is created. **New this pass:**
+  changing a folder's destination also re-points its *not-yet-sent* rows (`retargetUnsent`, PENDING and
+  FAILED only), so queued files follow the change instead of quietly going where the user just moved
+  away from. Nothing uploaded is touched.
+- Disconnecting Google Photos moves every folder routed there, and their unsent rows, back to OneDrive
+  (`reassign` / `retargetAllUnsent`).
+
+**Not verified on hardware** — no device was attached when this landed, and Settings is behind a
+signed-in OneDrive session in any case. Compile + full unit suite only.
+
+### Still to build, in Ian's order
+
+1. **Wizard.** Ian, 24 Sept 2026: the wizard must offer the same folder→cloud choice, and the flow is
+   *reordered*: (1) list every cloud service we cover; (2) the user picks the ones they use — picking
+   Google Photos shows its limitations (Backup only, no Archive/Sync, no dedup against an existing
+   Google library); (3) sign in to every chosen account; (4) media permission and scan; (5) list the
+   local *folders* and pick a destination for each; then the existing steps 6–9. CLAUDE.md's
+   wizard-independence rule concerns album modes and the optimise tree; destination is a new concept
+   it never covered, so the wizard *does* write folder destinations (that was my misreading and Ian
+   corrected it). It must still write no album modes.
+2. **Trial for more than one cloud.** Choosing a second cloud (wizard or Settings) offers a 30-day
+   trial, then requires the $2.49 `pro_unlock`. Plain and upfront. **Hard gate, not an auto-charge**
+   (Ian: "definately a hard gate") — Play one-time products cannot auto-charge anyway, so this is local
+   trial tracking on top of the existing purchase, and when it lapses the second cloud stops uploading
+   until unlocked. OneDrive and the ContentProvider stay free.
+3. Deferred, unchanged: Restore from Google Photos; destination-switch confirmation dialog; Google
+   Photos dedup via `mediaItems.list`; `BackupLocation.isUsable` is still hardcoded to OneDrive.
 
 ## Settings UI (Connect / Unlock / choose) — done, 23 Sept 2026
 

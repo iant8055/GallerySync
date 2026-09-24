@@ -246,7 +246,7 @@ class BackupEngine @Inject constructor(
                 mimeType = item.mimeType,
                 isVideo = item.isVideo,
                 state = BackupState.PENDING,
-                location = folder?.let { folderLocations[it] } ?: defaultLocation
+                location = FolderDestination.resolve(folder, folderLocations, defaultLocation)
             )
         }
 

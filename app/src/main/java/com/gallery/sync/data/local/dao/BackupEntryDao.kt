@@ -485,6 +485,34 @@ interface BackupEntryDao {
         failed: BackupState = BackupState.FAILED
     ): Int
 
+    /**
+     * Points the not-yet-sent rows of these albums at a new destination. TASK-026: a folder's
+     * destination was changed, and files still waiting to go should follow it rather than go
+     * somewhere the user just moved away from. Only PENDING and FAILED rows — nothing that has been
+     * uploaded is touched, so no file's recorded history changes and nothing is re-uploaded.
+     */
+    @Query(
+        """
+        UPDATE backup_entries SET location = :location
+        WHERE album IN (:albums) AND state IN (:pending, :failed)
+        """
+    )
+    suspend fun retargetUnsent(
+        albums: List<String>,
+        location: BackupLocation,
+        pending: BackupState = BackupState.PENDING,
+        failed: BackupState = BackupState.FAILED
+    )
+
+    /** The same, for every album at once — used when a destination stops being reachable. */
+    @Query("UPDATE backup_entries SET location = :to WHERE location = :from AND state IN (:pending, :failed)")
+    suspend fun retargetAllUnsent(
+        from: BackupLocation,
+        to: BackupLocation,
+        pending: BackupState = BackupState.PENDING,
+        failed: BackupState = BackupState.FAILED
+    )
+
     /** Clears the failure count so the user can retry something that has given up. */
     @Query("UPDATE backup_entries SET state = :pending, attemptCount = 0, lastError = NULL WHERE state = :failed")
     suspend fun resetFailures(

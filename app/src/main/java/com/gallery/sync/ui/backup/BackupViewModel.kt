@@ -22,9 +22,11 @@ import com.gallery.sync.worker.BackupWorker
 import dagger.hilt.android.qualifiers.ApplicationContext
 import com.gallery.sync.data.local.dao.AlbumCloudStatusDao
 import com.gallery.sync.data.local.dao.AlbumPreferenceDao
+import com.gallery.sync.data.local.dao.FolderPreferenceDao
 import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.entity.AlbumPreferenceEntity
+import com.gallery.sync.data.local.entity.FolderPreferenceEntity
 import com.gallery.sync.data.local.entity.BackupState
 import com.gallery.sync.data.local.media.MediaAccess
 import com.gallery.sync.data.local.media.MediaScanner
@@ -37,6 +39,7 @@ import com.gallery.sync.domain.backup.CameraOptimisePlan
 import com.gallery.sync.domain.backup.CameraOptimiseSettings
 import com.gallery.sync.domain.backup.CloudConfirmation
 import com.gallery.sync.domain.backup.FilePin
+import com.gallery.sync.domain.backup.FolderDestination
 import com.gallery.sync.domain.backup.GooglePhotosDestination
 import com.gallery.sync.domain.backup.ReconcileWithCloud
 import com.gallery.sync.domain.backup.MediaAge
@@ -97,6 +100,18 @@ data class AlbumsSummary(
  * photo is *finished*, not *unprotected* — switching it off means "stop spending time on this", and
  * rendering that the same as "not backed up" is alarming and wrong.
  */
+/**
+ * One top-level folder (`DCIM`, `Pictures`...) and where its new uploads go. TASK-026: the destination
+ * is chosen here, one level above the album, and never per album.
+ */
+data class FolderRow(
+    val name: String,
+    val albumCount: Int,
+    val fileCount: Int,
+    val totalBytes: Long,
+    val location: BackupLocation
+)
+
 data class AlbumRow(
     val name: String,
     val itemCount: Int,
@@ -130,7 +145,19 @@ data class AlbumRow(
 
     /** Files here sent to Google Photos. See `AlbumBackupCount.googlePhotosSent` for why this is
      *  kept apart from [backedUpCount] rather than folded into it. */
-    val googlePhotosSentCount: Int = 0
+    val googlePhotosSentCount: Int = 0,
+
+    /**
+     * Where this album's *new* uploads currently go — resolved from its top-level folder
+     * (`MediaAlbum.topLevelFolder`) against the folder-destination map, falling back to the app-wide
+     * default exactly the way [com.gallery.sync.domain.backup.BackupEngine.refreshLedger] resolves
+     * it for real. Not stored on the album itself — there is nothing per-album to store, see
+     * TASK-026 — purely a display/restriction value computed fresh on every [refresh].
+     */
+    val backupLocation: BackupLocation = BackupLocation.DEFAULT,
+
+    /** The top-level folder this album lives under, or null if the scan could not say. */
+    val topLevelFolder: String? = null
 ) {
     val isEnabled: Boolean get() = mode.uploads
 
@@ -269,8 +296,14 @@ data class BackupUiState(
      */
     val proxyDialogRequested: Boolean = false,
     val defaultAlbumMode: AlbumMode = AlbumMode.DEFAULT,
-    /** Where new uploads go, app-wide. See `BackupPreferences.backupLocation` and TASK-026. */
+    /**
+     * The fallback destination for a folder with no choice of its own. Not a visible control any more
+     * (TASK-026, 24 Sept 2026) — the per-folder [folders] list replaces it. See
+     * `BackupPreferences.backupLocation`.
+     */
     val backupLocation: BackupLocation = BackupLocation.DEFAULT,
+    /** Top-level folders found on the device, each with its own destination. */
+    val folders: List<FolderRow> = emptyList(),
     /** The Camera album's manual optimise is queued or running. Drives its button and its list. */
     val cameraOptimising: Boolean = false,
     /** Whether the restore screen lists cloud folders that hold nothing. */
@@ -422,6 +455,7 @@ data class BackupUiState(
 class BackupViewModel @Inject constructor(
     private val scanner: MediaScanner,
     private val albumDao: AlbumPreferenceDao,
+    private val folderDao: FolderPreferenceDao,
     private val entryDao: BackupEntryDao,
     private val cloudStatusDao: AlbumCloudStatusDao,
     private val reconcile: ReconcileWithCloud,
@@ -726,9 +760,12 @@ class BackupViewModel @Inject constructor(
             val cloudByAlbum = cloudStatusDao.all().associateBy { it.albumName }
             val prefs = settings.current()
             val defaultMode = prefs.defaultAlbumMode
+            // Read after refreshLedger, which seeds a row for every newly found folder.
+            val folderLocations = folderDao.all().orEmpty().associate { it.folderName to it.backupLocation }
 
             var hasNewUploadAlbums = false
-            val albums = scanner.scanAlbums().map { album ->
+            val scannedAlbums = scanner.scanAlbums()
+            val albums = scannedAlbums.map { album ->
                 val counts = countsByAlbum[album.name]
                 // No write here any more — [BackupEngine.refreshLedger] seeds the row. The fallback
                 // remains only for an album the scanner reports that the ledger has not recorded,
@@ -750,9 +787,27 @@ class BackupViewModel @Inject constructor(
                     failedCount = counts?.failed ?: 0,
                     everBackedUpCount = counts?.everBackedUp ?: 0,
                     everBackedUpBytes = counts?.everBackedUpBytes ?: 0L,
-                    googlePhotosSentCount = counts?.googlePhotosSent ?: 0
+                    googlePhotosSentCount = counts?.googlePhotosSent ?: 0,
+                    backupLocation = FolderDestination.resolve(
+                        album.topLevelFolder, folderLocations, prefs.backupLocation
+                    ),
+                    topLevelFolder = album.topLevelFolder
                 )
             }
+
+            val folders = scannedAlbums
+                .filter { it.topLevelFolder != null }
+                .groupBy { it.topLevelFolder!! }
+                .map { (name, inFolder) ->
+                    FolderRow(
+                        name = name,
+                        albumCount = inFolder.size,
+                        fileCount = inFolder.sumOf { it.itemCount },
+                        totalBytes = inFolder.sumOf { it.totalBytes },
+                        location = FolderDestination.resolve(name, folderLocations, prefs.backupLocation)
+                    )
+                }
+                .sortedByDescending { it.fileCount }
 
             // Archive albums the scan can no longer see, listed anyway at zero files.
             //
@@ -788,11 +843,14 @@ class BackupViewModel @Inject constructor(
                         savedBytes = counts?.savedBytes ?: 0L,
                         everBackedUpCount = counts?.everBackedUp ?: 0,
                         everBackedUpBytes = counts?.everBackedUpBytes ?: 0L,
-                        googlePhotosSentCount = counts?.googlePhotosSent ?: 0
+                        googlePhotosSentCount = counts?.googlePhotosSent ?: 0,
+                        // Not on the device, so no folder to resolve against — the fallback is right.
+                        backupLocation = prefs.backupLocation
                     )
                 }
 
             _state.value = _state.value.copy(
+                folders = folders,
                 albums = (albums + archivedButEmpty).sortedBy { it.name.lowercase() },
                 isScanning = false
             )
@@ -911,9 +969,11 @@ class BackupViewModel @Inject constructor(
         // The Camera album has no Sync (Ian, 20 Sept 2026). The menu does not offer it; this is the
         // second lock, for anything that reaches here by another route.
         if (!CameraAlbum.canChoose(album, mode)) return
-        // Same second-lock shape for Google Photos: Sync and Archive are never offered while that's
-        // the app-wide destination. See GooglePhotosDestination.
-        if (!GooglePhotosDestination.canChoose(_state.value.backupLocation, mode)) return
+        // Same second-lock shape for Google Photos: Sync and Archive are never offered for an album
+        // whose folder is routed there. See GooglePhotosDestination.
+        val albumLocation = _state.value.albums.firstOrNull { it.name == album }?.backupLocation
+            ?: _state.value.backupLocation
+        if (!GooglePhotosDestination.canChoose(albumLocation, mode)) return
         viewModelScope.launch {
             albumDao.setPreference(AlbumPreferenceEntity(album, mode))
             // Deliberately leaves any duplicate-name warning in place. Only Dismiss removes it (Ian,
@@ -1066,13 +1126,29 @@ class BackupViewModel @Inject constructor(
     }
 
     /**
-     * Changes where new uploads go, app-wide. See TASK-026. Whether [location] is actually available
-     * right now (signed in, Pro unlocked, for anything but OneDrive) is the caller's job to check —
-     * [BackupSettings.setBackupLocation]'s own doc comment says the same. The Settings picker only
-     * ever offers what `GooglePhotosUiState.isAvailable` (`ui.settings.GooglePhotosViewModel`) allows.
+     * Changes where one top-level folder's *new* uploads go. See TASK-026 and [FolderDestination].
+     * Nothing already uploaded moves, and nothing is re-uploaded — each file keeps the `location` it
+     * was given when its row was created. Whether [location] is actually available right now (signed
+     * in, Pro unlocked, for anything but OneDrive) is the caller's job to check; the Settings list
+     * only ever offers what `GooglePhotosUiState.isAvailable` allows.
+     *
+     * Files still waiting to go follow the new choice (see `BackupEntryDao.retargetUnsent`); only
+     * what has already been uploaded keeps its history.
      */
-    fun setBackupLocation(location: BackupLocation) {
-        viewModelScope.launch { settings.setBackupLocation(location) }
+    fun setFolderLocation(folder: String, location: BackupLocation) {
+        viewModelScope.launch {
+            folderDao.setPreference(FolderPreferenceEntity(folder, location))
+            val albumsInFolder = _state.value.albums.filter { it.topLevelFolder == folder }.map { it.name }
+            if (albumsInFolder.isNotEmpty()) entryDao.retargetUnsent(albumsInFolder, location)
+            _state.update { current ->
+                current.copy(
+                    folders = current.folders.map { if (it.name == folder) it.copy(location = location) else it },
+                    albums = current.albums.map {
+                        if (it.topLevelFolder == folder) it.copy(backupLocation = location) else it
+                    }
+                )
+            }
+        }
     }
 
     /** Switches every discovered album on or off at once. */
@@ -1104,11 +1180,14 @@ class BackupViewModel @Inject constructor(
                 ?: AlbumMode.BACKUP
             val mode = if (enabled) preferred else AlbumMode.OFF
             // Camera never takes Sync, so Select all gives it Backup where everything else gets Sync.
-            // Same clamp for Google Photos, if that's the current destination — see
+            // Same clamp for an album whose folder is routed to Google Photos — see
             // GooglePhotosDestination.
-            val currentLocation = _state.value.backupLocation
+            val locationOf = albums.associate { it.name to it.backupLocation }
             val modeFor = { name: String ->
-                GooglePhotosDestination.seeded(currentLocation, CameraAlbum.seeded(name, mode))
+                GooglePhotosDestination.seeded(
+                    locationOf[name] ?: _state.value.backupLocation,
+                    CameraAlbum.seeded(name, mode)
+                )
             }
             albumDao.setPreferences(albums.map { AlbumPreferenceEntity(it.name, modeFor(it.name)) })
             _state.value = _state.value.copy(

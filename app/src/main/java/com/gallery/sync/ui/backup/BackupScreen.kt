@@ -71,7 +71,6 @@ import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.media.MediaAccess
 import com.gallery.sync.domain.backup.AlbumCloudClaim
 import com.gallery.sync.domain.backup.AlbumMergeWarning
-import com.gallery.sync.domain.backup.BackupLocation
 import com.gallery.sync.domain.backup.CameraAlbum
 import com.gallery.sync.domain.backup.GooglePhotosDestination
 import com.gallery.sync.domain.backup.StopReason
@@ -471,7 +470,6 @@ private fun AlbumList(
                                 AlbumModeRow(
                                     album = album,
                                     context = context,
-                                    backupLocation = state.backupLocation,
                                     onTapped = { onAlbumTapped(album) },
                                     onModeSelected = { mode -> onModeSelected(album, mode) }
                                 )
@@ -641,7 +639,6 @@ private fun ModeFilterChip(
 private fun AlbumModeRow(
     album: AlbumRow,
     context: android.content.Context,
-    backupLocation: BackupLocation,
     onTapped: () -> Unit,
     onModeSelected: (AlbumMode) -> Unit
 ) {
@@ -719,11 +716,11 @@ private fun AlbumModeRow(
 
         AlbumModeDropdown(
             current = album.mode,
-            // Camera never offers Sync; Google Photos (as the current app-wide destination) never
+            // Camera never offers Sync; Google Photos (as this album's folder destination) never
             // offers Sync or Archive. Intersected, not one overriding the other, since Camera itself
             // could be routed to Google Photos.
             modes = CameraAlbum.modesFor(album.name)
-                .filter { GooglePhotosDestination.canChoose(backupLocation, it) },
+                .filter { GooglePhotosDestination.canChoose(album.backupLocation, it) },
             onModeSelected = onModeSelected
         )
     }

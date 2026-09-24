@@ -187,27 +187,43 @@ fun SettingsScreen(
         GooglePhotosSection(viewModel = googlePhotosViewModel)
 
         // Only shown once there is a genuine second choice — a picker offering one real option is
-        // clutter, not a control. See TASK-026.
-        if (googlePhotosState.isAvailable) {
-            SettingDropdown(
-                label = stringResource(R.string.backup_location_picker_label),
-                options = listOf(BackupLocation.ONEDRIVE, BackupLocation.GOOGLE_PHOTOS),
-                selected = state.backupLocation,
-                onSelected = viewModel::setBackupLocation,
-                optionLabel = { location ->
-                    stringResource(
-                        when (location) {
-                            BackupLocation.ONEDRIVE -> R.string.backup_location_onedrive
-                            BackupLocation.GOOGLE_PHOTOS -> R.string.backup_location_google_photos
-                            // Never actually offered — options above lists only the two real
-                            // destinations — but the `when` must stay exhaustive over the enum, and a
-                            // fallback that named the wrong provider would be worse than this one
-                            // never being reached at all.
-                            BackupLocation.USB_DRIVE -> R.string.backup_location_usb_drive
-                        }
-                    )
-                }
-            )
+        // clutter, not a control. One dropdown per top-level folder (DCIM, Pictures...), never per
+        // album. See TASK-026.
+        if (googlePhotosState.isAvailable && state.folders.isNotEmpty()) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(
+                    text = stringResource(R.string.backup_folders_heading),
+                    style = MaterialTheme.typography.titleSmall
+                )
+                Text(
+                    text = stringResource(R.string.backup_folders_explainer),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            state.folders.forEach { folder ->
+                SettingDropdown(
+                    label = pluralStringResource(
+                        R.plurals.backup_folder_label, folder.fileCount, folder.name, folder.fileCount
+                    ),
+                    options = listOf(BackupLocation.ONEDRIVE, BackupLocation.GOOGLE_PHOTOS),
+                    selected = folder.location,
+                    onSelected = { viewModel.setFolderLocation(folder.name, it) },
+                    optionLabel = { location ->
+                        stringResource(
+                            when (location) {
+                                BackupLocation.ONEDRIVE -> R.string.backup_location_onedrive
+                                BackupLocation.GOOGLE_PHOTOS -> R.string.backup_location_google_photos
+                                // Never actually offered — options above lists only the two real
+                                // destinations — but the `when` must stay exhaustive over the enum,
+                                // and a fallback that named the wrong provider would be worse than
+                                // this one never being reached at all.
+                                BackupLocation.USB_DRIVE -> R.string.backup_location_usb_drive
+                            }
+                        )
+                    }
+                )
+            }
         }
 
         // ── Albums ───────────────────────────────────────────────────────────
