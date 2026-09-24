@@ -87,6 +87,27 @@
     <string name="backup_location_onedrive">OneDrive</string>
     <string name="backup_location_last">At least one backup location must stay on.</string>
     <string name="backup_account_label">Account</string>
+
+    <!--
+        Google Photos, TASK-026. Pro-gated: connecting and unlocking are two separate steps, and
+        both are required before Google Photos can be chosen as where new backups go.
+    -->
+    <string name="google_photos_section_title">Google Photos</string>
+    <string name="google_photos_not_connected">Not connected</string>
+    <string name="google_photos_connected">Connected</string>
+    <string name="google_photos_connect_action">Connect</string>
+    <!--
+        "Unlock Pro" rather than naming the price here — Play's own purchase sheet states the exact
+        price and currency for the user's own region, and repeating a hardcoded $2.49 risks reading
+        wrong somewhere Play would have shown a correct, converted figure.
+    -->
+    <string name="google_photos_unlock_pro_action">Unlock Pro</string>
+    <string name="google_photos_unlock_pro_detail">Unlocks Google Photos as a backup destination — a one-time purchase, not a subscription.</string>
+    <string name="backup_location_google_photos">Google Photos</string>
+    <!-- Not built (see BackupLocation.isUsable) — exists only so the destination picker's option
+         label stays exhaustive over the enum rather than guessing at a fallback. -->
+    <string name="backup_location_usb_drive">USB drive</string>
+    <string name="backup_location_picker_label">Back up new photos to</string>
     <string name="settings_sync">Sync</string>
     <string name="settings_sync_folders">Sync folders</string>
     <string name="settings_restore">Restore</string>

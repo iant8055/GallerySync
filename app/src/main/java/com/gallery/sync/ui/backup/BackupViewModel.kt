@@ -1065,6 +1065,16 @@ class BackupViewModel @Inject constructor(
         viewModelScope.launch { settings.setDefaultAlbumMode(mode) }
     }
 
+    /**
+     * Changes where new uploads go, app-wide. See TASK-026. Whether [location] is actually available
+     * right now (signed in, Pro unlocked, for anything but OneDrive) is the caller's job to check —
+     * [BackupSettings.setBackupLocation]'s own doc comment says the same. The Settings picker only
+     * ever offers what `GooglePhotosUiState.isAvailable` (`ui.settings.GooglePhotosViewModel`) allows.
+     */
+    fun setBackupLocation(location: BackupLocation) {
+        viewModelScope.launch { settings.setBackupLocation(location) }
+    }
+
     /** Switches every discovered album on or off at once. */
     /**
      * Applies one mode to every album.

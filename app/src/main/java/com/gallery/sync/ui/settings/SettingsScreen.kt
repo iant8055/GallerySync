@@ -74,9 +74,11 @@ fun SettingsScreen(
     onSignOut: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: BackupViewModel = hiltViewModel(),
-    themeViewModel: ThemeViewModel = hiltViewModel()
+    themeViewModel: ThemeViewModel = hiltViewModel(),
+    googlePhotosViewModel: GooglePhotosViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val googlePhotosState by googlePhotosViewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     var page by remember { mutableStateOf<SupportPage?>(null) }
@@ -181,6 +183,32 @@ fun SettingsScreen(
         }
 
         DestinationSection()
+
+        GooglePhotosSection(viewModel = googlePhotosViewModel)
+
+        // Only shown once there is a genuine second choice — a picker offering one real option is
+        // clutter, not a control. See TASK-026.
+        if (googlePhotosState.isAvailable) {
+            SettingDropdown(
+                label = stringResource(R.string.backup_location_picker_label),
+                options = listOf(BackupLocation.ONEDRIVE, BackupLocation.GOOGLE_PHOTOS),
+                selected = state.backupLocation,
+                onSelected = viewModel::setBackupLocation,
+                optionLabel = { location ->
+                    stringResource(
+                        when (location) {
+                            BackupLocation.ONEDRIVE -> R.string.backup_location_onedrive
+                            BackupLocation.GOOGLE_PHOTOS -> R.string.backup_location_google_photos
+                            // Never actually offered — options above lists only the two real
+                            // destinations — but the `when` must stay exhaustive over the enum, and a
+                            // fallback that named the wrong provider would be worse than this one
+                            // never being reached at all.
+                            BackupLocation.USB_DRIVE -> R.string.backup_location_usb_drive
+                        }
+                    )
+                }
+            )
+        }
 
         // ── Albums ───────────────────────────────────────────────────────────
         SectionHeader(
