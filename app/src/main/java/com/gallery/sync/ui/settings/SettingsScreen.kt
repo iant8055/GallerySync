@@ -189,7 +189,11 @@ fun SettingsScreen(
         // Only shown once there is a genuine second choice — a picker offering one real option is
         // clutter, not a control. One dropdown per top-level folder (DCIM, Pictures...), never per
         // album. See TASK-026.
-        if (googlePhotosState.isAvailable && state.folders.isNotEmpty()) {
+        // Also while a folder is still routed there after the trial or purchase lapsed, so it can be moved
+        // back — the list must not vanish on the one person who needs it.
+        if ((googlePhotosState.isAvailable || state.folders.any { it.location == BackupLocation.GOOGLE_PHOTOS }) &&
+            state.folders.isNotEmpty()
+        ) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(
                     text = stringResource(R.string.backup_folders_heading),
@@ -206,7 +210,12 @@ fun SettingsScreen(
                     label = pluralStringResource(
                         R.plurals.backup_folder_label, folder.fileCount, folder.name, folder.fileCount
                     ),
-                    options = listOf(BackupLocation.ONEDRIVE, BackupLocation.GOOGLE_PHOTOS),
+                    options = buildList {
+                        add(BackupLocation.ONEDRIVE)
+                        if (googlePhotosState.isEntitled || folder.location == BackupLocation.GOOGLE_PHOTOS) {
+                            add(BackupLocation.GOOGLE_PHOTOS)
+                        }
+                    },
                     selected = folder.location,
                     onSelected = { viewModel.setFolderLocation(folder.name, it) },
                     optionLabel = { location ->

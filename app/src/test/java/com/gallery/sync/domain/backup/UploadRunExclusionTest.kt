@@ -8,7 +8,7 @@ import com.gallery.sync.data.local.dao.UnsentDepartureDao
 import com.gallery.sync.data.local.media.MediaAccess
 import com.gallery.sync.data.local.media.MediaScanner
 import com.gallery.sync.data.local.settings.BackupSettings
-import com.gallery.sync.domain.billing.BillingRepository
+import com.gallery.sync.domain.billing.MultiCloudEntitlement
 import com.gallery.sync.domain.repository.GooglePhotosUploadRepository
 import com.gallery.sync.domain.repository.OneDriveRepository
 import com.gallery.sync.domain.repository.OneDriveUploadRepository
@@ -48,7 +48,7 @@ class UploadRunExclusionTest {
         repository = mock<OneDriveRepository>(),
         uploadRepository = mock<OneDriveUploadRepository>(),
         googlePhotosUploadRepository = mock<GooglePhotosUploadRepository>(),
-        billing = mock<BillingRepository>(),
+        entitlement = mock<MultiCloudEntitlement>(),
         proxyMarker = mock(),
         albumIdentity = identity,
         context = mock<Context>(),

@@ -415,11 +415,22 @@ signed-in OneDrive session in any case. Compile + full unit suite only.
    (`tools/guide/content/c2_setup.py`) still describes the old order and was not touched** — it had
    unrelated uncommitted edits of Ian's. Wizard writes no album modes. In practice a user with no Google
    Photos sees no per-folder menu at all; everything routes to OneDrive as before.
-2. **Trial for more than one cloud.** Choosing a second cloud (wizard or Settings) offers a 30-day
-   trial, then requires the $2.49 `pro_unlock`. Plain and upfront. **Hard gate, not an auto-charge**
-   (Ian: "definately a hard gate") — Play one-time products cannot auto-charge anyway, so this is local
-   trial tracking on top of the existing purchase, and when it lapses the second cloud stops uploading
-   until unlocked. OneDrive and the ContentProvider stay free.
+2. **Trial for more than one cloud — built 24 Sept 2026.** `MultiCloudTrial` (pure rules: 30 days,
+   `NotStarted` / `Active(daysLeft)` / `Ended`), one timestamp in DataStore
+   (`multiCloudTrialStartedAtEpochMillis`, written once, never overwritten), and `MultiCloudEntitlement`
+   (`isEntitled() = billing.isPurchased() || trial active`) — the only place the two are combined;
+   `BillingRepository` stays the single source of truth for *purchase* state. `BackupEngine` now asks the
+   entitlement, not billing, at the real upload boundary: an ended trial with no purchase leaves Google
+   Photos rows PENDING and OneDrive carries on. **UI, in `GooglePhotosSection` (so Settings and the wizard
+   show the same thing):** once Google Photos is connected and not bought, the terms are on screen in
+   plain words *before* the button — 30 days free, then a one-time unlock ($2.49 or the local price),
+   nothing ever charged automatically, and what happens when it ends — then *Start 30-day free trial* and
+   *Unlock Pro*. Never starts by itself. Settings' per-folder list stays visible while any folder is still
+   on Google Photos after a lapse, so it can be moved back. **Beatable** by reinstall or clock change,
+   accepted and documented in `MultiCloudTrial`: the price of beating it is a second cloud's uploads,
+   never a file at risk. Verified: unit tests (trial rules, entitlement), compile, install/launch on the
+   Moto G, Settings tab seen rendering (Google Photos: Not connected / Connect). **Not seen:** the trial
+   offer itself, which needs a Google sign-in only Ian can do.
 3. Deferred, unchanged: Restore from Google Photos; destination-switch confirmation dialog; Google
    Photos dedup via `mediaItems.list`; `BackupLocation.isUsable` is still hardcoded to OneDrive.
 

@@ -11,7 +11,7 @@ import com.gallery.sync.data.local.media.MediaAccess
 import com.gallery.sync.data.local.media.MediaScanner
 import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.data.remote.onedrive.UploadSource
-import com.gallery.sync.domain.billing.BillingRepository
+import com.gallery.sync.domain.billing.MultiCloudEntitlement
 import com.gallery.sync.domain.repository.GooglePhotosUploadRepository
 import com.gallery.sync.domain.repository.OneDriveRepository
 import com.gallery.sync.domain.repository.OneDriveUploadRepository
@@ -39,7 +39,7 @@ class GooglePhotosBillingGateTest {
     private val scanner: MediaScanner = mock()
     private val entryDao: BackupEntryDao = mock()
     private val googlePhotosUploadRepository: GooglePhotosUploadRepository = mock()
-    private val billing: BillingRepository = mock()
+    private val entitlement: MultiCloudEntitlement = mock()
     private val context: Context = mock {
         on { contentResolver } doReturn mock()
     }
@@ -54,7 +54,7 @@ class GooglePhotosBillingGateTest {
         repository = mock<OneDriveRepository>(),
         uploadRepository = mock<OneDriveUploadRepository>(),
         googlePhotosUploadRepository = googlePhotosUploadRepository,
-        billing = billing,
+        entitlement = entitlement,
         proxyMarker = mock(),
         albumIdentity = mock(),
         context = context,
@@ -84,7 +84,7 @@ class GooglePhotosBillingGateTest {
     @Test
     fun `not purchased means the row is left untouched, not uploaded`() = runTest {
         givenOnePendingGooglePhotosRow()
-        whenever(billing.isPurchased()).thenReturn(false)
+        whenever(entitlement.isEntitled(any())).thenReturn(false)
 
         val result = engine.uploadPending()
 

@@ -27,7 +27,7 @@ import com.gallery.sync.di.IoDispatcher
 import com.gallery.sync.domain.model.DataResult
 import com.gallery.sync.domain.model.RemoteError
 import com.gallery.sync.domain.model.RemoteMediaNode
-import com.gallery.sync.domain.billing.BillingRepository
+import com.gallery.sync.domain.billing.MultiCloudEntitlement
 import com.gallery.sync.domain.repository.GooglePhotosUploadRepository
 import com.gallery.sync.domain.repository.OneDriveRepository
 import com.gallery.sync.domain.repository.OneDriveUploadRepository
@@ -113,7 +113,7 @@ class BackupEngine @Inject constructor(
     private val repository: OneDriveRepository,
     private val uploadRepository: OneDriveUploadRepository,
     private val googlePhotosUploadRepository: GooglePhotosUploadRepository,
-    private val billing: BillingRepository,
+    private val entitlement: MultiCloudEntitlement,
     private val proxyMarker: ProxyMarker,
     private val albumIdentity: AlbumIdentityReconciler,
     @ApplicationContext private val context: Context,
@@ -866,14 +866,14 @@ class BackupEngine @Inject constructor(
             // split.
             //
             // Checked once, here, rather than trusted from the setting alone. CLAUDE.md: "Gate Google
-            // Photos features behind a BillingRepository.isPurchased() check... never hardcode
+            // Photos features behind a BillingRepository.isPurchased() check — now via MultiCloudEntitlement, which adds the trial... never hardcode
             // purchase state." The Settings picker already keeps `backupLocation` from being *set* to
             // Google Photos without Pro, but a stored value can outlive the purchase it depended on —
             // a refund, most plausibly — and this is the boundary that actually spends the user's
             // upload, so it is the one that must not trust a setting written under different
             // circumstances. Not purchased simply means this pass sends nothing to Google Photos; the
             // rows stay PENDING and are picked up whenever `isPurchased()` next says yes.
-            val googlePhotosAllowed = googlePhotosPending.isEmpty() || billing.isPurchased()
+            val googlePhotosAllowed = googlePhotosPending.isEmpty() || entitlement.isEntitled()
             if (!googlePhotosAllowed) {
                 Logger.w(
                     TAG,

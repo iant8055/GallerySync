@@ -96,6 +96,12 @@ data class BackupPreferences(
      * .location] is what remembers where each individual file actually went, frozen at upload time.
      */
     val backupLocation: BackupLocation = BackupLocation.DEFAULT,
+    /**
+     * When the user started the 30-day multi-cloud trial, or null if they never have. Set once and never
+     * moved: starting the trial again after it ended would make it not a trial. See
+     * [com.gallery.sync.domain.billing.MultiCloudTrial].
+     */
+    val multiCloudTrialStartedAtEpochMillis: Long? = null,
     /** Hour of day the first whole-library backup may begin. */
     val firstBackupStartHour: Int = FirstBackupWindow.DEFAULT_START_HOUR,
     /** Whether that first run waits for the phone to be plugged in. On by default. */
@@ -304,6 +310,7 @@ class BackupSettings @Inject constructor(
                 ?.takeIf { RemoteRoots.isValidDestination(it) }
                 ?: RemoteRoots.DEFAULT_DESTINATION,
             backupLocation = BackupLocation.fromNameOrDefault(stored[KEY_BACKUP_LOCATION]),
+            multiCloudTrialStartedAtEpochMillis = stored[KEY_MULTI_CLOUD_TRIAL_STARTED_AT],
             firstBackupStartHour = stored[KEY_FIRST_BACKUP_HOUR]
                 ?.takeIf { it in FirstBackupWindow.SELECTABLE_HOURS }
                 ?: FirstBackupWindow.DEFAULT_START_HOUR,
@@ -605,6 +612,20 @@ class BackupSettings @Inject constructor(
         context.dataStore.edit { it[KEY_BACKUP_LOCATION] = location.name }
     }
 
+    /**
+     * Records the start of the multi-cloud trial, once. Returns the start that stands — the one just
+     * written, or the earlier one if a trial had already begun. Never overwrites: a second call must not
+     * hand out a fresh 30 days.
+     */
+    suspend fun startMultiCloudTrial(nowEpochMillis: Long): Long {
+        var standing = nowEpochMillis
+        context.dataStore.edit { prefs ->
+            val existing = prefs[KEY_MULTI_CLOUD_TRIAL_STARTED_AT]
+            if (existing != null) standing = existing else prefs[KEY_MULTI_CLOUD_TRIAL_STARTED_AT] = nowEpochMillis
+        }
+        return standing
+    }
+
     private companion object {
         val KEY_AUTOMATIC = booleanPreferencesKey("automatic_backup_enabled")
         val KEY_ALLOW_METERED = booleanPreferencesKey("allow_metered_network")
@@ -619,6 +640,7 @@ class BackupSettings @Inject constructor(
         val KEY_DEFAULT_ALBUM_MODE = stringPreferencesKey("default_album_mode")
         val KEY_DESTINATION_ROOT = stringPreferencesKey("destination_root")
         val KEY_BACKUP_LOCATION = stringPreferencesKey("backup_location")
+        val KEY_MULTI_CLOUD_TRIAL_STARTED_AT = longPreferencesKey("multi_cloud_trial_started_at")
         val KEY_FIRST_BACKUP_HOUR = intPreferencesKey("first_backup_start_hour")
         val KEY_FIRST_BACKUP_CHARGING = booleanPreferencesKey("first_backup_requires_charging")
         val KEY_FIRST_BACKUP_START_AT = longPreferencesKey("first_backup_start_at")

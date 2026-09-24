@@ -3,6 +3,7 @@ package com.gallery.sync.ui.settings
 import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -17,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
+import com.gallery.sync.domain.billing.MultiCloudTrial
 import com.gallery.sync.ui.common.LabelWithAction
 
 /**
@@ -72,27 +74,55 @@ fun GooglePhotosSection(
         // Only reachable once signed in — purchasing with nothing to unlock yet would be a control
         // that cannot do anything useful, the same "never offer an action that cannot succeed" rule
         // GooglePhotosDestination follows for Sync and Archive.
+        // Only reachable once signed in — purchasing or trialling with nothing to unlock yet would be a
+        // control that cannot do anything useful, the same "never offer an action that cannot succeed"
+        // rule GooglePhotosDestination follows for Sync and Archive.
+        //
+        // The terms are on screen *before* the trial button, in plain words: 30 days, then a one-time
+        // unlock, and nothing charged automatically (Ian, 24 Sept 2026: plain and upfront, a hard
+        // gate). Bought is the only state that shows nothing here at all.
         if (state.isSignedIn && !state.isProUnlocked) {
-            LabelWithAction(
-                action = {
-                    if (state.isBusy) {
-                        BusyIndicator()
+            val trial = state.trial
+            Text(
+                text = stringResource(
+                    when (trial) {
+                        MultiCloudTrial.State.NotStarted -> R.string.google_photos_trial_offer
+                        is MultiCloudTrial.State.Active -> R.string.google_photos_trial_active_terms
+                        MultiCloudTrial.State.Ended -> R.string.google_photos_trial_ended
+                    },
+                    *(if (trial is MultiCloudTrial.State.Active) arrayOf<Any>(trial.daysLeft) else emptyArray())
+                ),
+                style = MaterialTheme.typography.bodyMedium
+            )
+            if (state.isBusy) {
+                BusyIndicator()
+            } else {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (trial == MultiCloudTrial.State.NotStarted) {
+                        Button(onClick = viewModel::startTrial) {
+                            Text(stringResource(R.string.google_photos_trial_start_action))
+                        }
+                    }
+                    val unlock: @Composable () -> Unit = {
+                        Text(stringResource(R.string.google_photos_unlock_pro_action), maxLines = 1)
+                    }
+                    if (trial == MultiCloudTrial.State.NotStarted) {
+                        OutlinedButton(
+                            onClick = { activity?.let(viewModel::unlockPro) },
+                            enabled = activity != null,
+                            content = { unlock() }
+                        )
                     } else {
                         Button(
                             onClick = { activity?.let(viewModel::unlockPro) },
-                            enabled = activity != null
-                        ) {
-                            Text(stringResource(R.string.google_photos_unlock_pro_action))
-                        }
+                            enabled = activity != null,
+                            content = { unlock() }
+                        )
                     }
                 }
-            ) {
-                Text(
-                    text = stringResource(R.string.google_photos_unlock_pro_detail),
-                    style = MaterialTheme.typography.bodyMedium
-                )
             }
         }
+
 
         state.lastError?.let { error ->
             Text(

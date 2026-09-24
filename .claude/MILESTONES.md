@@ -521,7 +521,7 @@ keeps working.
       **In progress, 24 Sept 2026 — see `.claude/tasks/TASK-026.md`, which is the record.** Built and pushed:
       BillingRepository + signature check, AppAuth Google sign-in, Photos upload client, per-folder destination
       (schema v14) and the wizard's cloud + folder→cloud steps (built 24 Sept, not yet seen on a device). Not yet
-      exercised with a real Google account. The 30-day multi-cloud hard-gate trial is still to build.
+      exercised with a real Google account. The 30-day multi-cloud hard-gate trial is built too (unseen).
 - [ ] Google Photos adapter (requires OAuth — Ian)
 - [ ] Settings: sync frequency, account management
       **Audited 20 Sept 2026: account management partly there, sync frequency not.** Settings shows the

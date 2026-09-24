@@ -102,6 +102,12 @@
         wrong somewhere Play would have shown a correct, converted figure.
     -->
     <string name="google_photos_unlock_pro_action">Unlock Pro</string>
+    <string name="google_photos_trial_start_action">Start 30-day free trial</string>
+    <!-- Plain and upfront, and a hard gate rather than an auto-charge — Ian, 24 Sept 2026. Play cannot
+         auto-charge a one-time product; when the 30 days end the second cloud simply pauses. -->
+    <string name="google_photos_trial_offer">Using more than one cloud is free for 30 days. After that it needs a one-time unlock — $2.49, or your local price — and nothing is ever charged automatically. If you do not unlock it, Google Photos uploads stop and OneDrive carries on as normal.</string>
+    <string name="google_photos_trial_active_terms">Days left in your free trial: %1$d. After that, Google Photos uploads stop until you make the one-time unlock ($2.49, or your local price). Nothing is charged automatically.</string>
+    <string name="google_photos_trial_ended">Your 30-day free trial has ended. Google Photos uploads are paused until you make the one-time unlock ($2.49, or your local price). OneDrive is not affected.</string>
     <string name="google_photos_unlock_pro_detail">Unlocks Google Photos as a backup destination — a one-time purchase, not a subscription.</string>
     <string name="backup_location_google_photos">Google Photos</string>
     <!-- Not built (see BackupLocation.isUsable) — exists only so the destination picker's option
@@ -1042,7 +1048,7 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_cloud_google_photos_limit_backup_only">Folders sent there can only be backed up. Archive and Sync are not available, because Google Photos will not confirm the size of a stored file, so the app could never prove a copy is safe before removing the original.</string>
     <string name="tour_cloud_google_photos_limit_duplicates">It cannot check what is already in your Google Photos, so a photo that is already there may be added a second time.</string>
     <string name="tour_cloud_google_photos_limit_restore">Restoring files from Google Photos back onto this phone is not available yet.</string>
-    <string name="tour_cloud_google_photos_limit_pro">It is a Pro feature: a one-time purchase, not a subscription.</string>
+    <string name="tour_cloud_google_photos_limit_pro">Using it alongside OneDrive is free for 30 days, then it needs a one-time purchase, not a subscription. Nothing is charged automatically.</string>
     <string name="tour_folder_goes_to">Goes to: %1$s</string>
 
     <string name="tour_backup_title">Choose your backup plan</string>
