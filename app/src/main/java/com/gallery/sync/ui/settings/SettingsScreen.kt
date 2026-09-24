@@ -152,13 +152,9 @@ fun SettingsScreen(
         // What follows here is OneDrive's own account and folder, shown only while OneDrive is connected.
         val oneDriveConnected = cloudState.providers.any { it.location == BackupLocation.ONEDRIVE && it.isConnected }
 
-        if (oneDriveConnected) LabelWithAction(
-            action = {
-                OutlinedButton(onClick = onSignOut) {
-                    Text(stringResource(R.string.sign_out_action))
-                }
-            }
-        ) {
+        // The OneDrive account, named. Its Sign out is on its row in the list of clouds below — this row used to
+        // carry a second one, and two buttons for the same thing read as two different things.
+        if (oneDriveConnected) {
             accountName?.let {
                 WithHelp(HelpTopic.SETTINGS_ACCOUNT) {
                     Column {

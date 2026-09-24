@@ -93,7 +93,7 @@
         both are required before Google Photos can be chosen as where new backups go.
     -->
     <string name="google_photos_section_title">Google Photos</string>
-    <string name="cloud_providers_section_title">Other clouds</string>
+    <string name="cloud_providers_section_title">Clouds</string>
     <string name="cloud_enter_keys_action">Enter keys</string>
     <string name="cloud_keys_dialog_title">Connect %1$s</string>
     <string name="cloud_cancel">Cancel</string>
