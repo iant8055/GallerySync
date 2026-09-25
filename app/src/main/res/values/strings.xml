@@ -1209,7 +1209,7 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_progress_scanning">Scanning your library…</string>
     <string name="tour_progress_uploading">Uploading %1$d of %2$d</string>
     <string name="tour_progress_uploading_cloud">Uploading %1$s</string>
-    <string name="tour_progress_pending_cloud">Pending %1$s: %2$d of %3$d</string>
+    <string name="tour_progress_pending_cloud">Pending %1$s: %2$d</string>
     <!--
         Shown while the total is known but nothing has completed yet. Asked for by Ian, 4 Sept 2026:
         the ring sat on "0 of 155" long enough to look stuck.

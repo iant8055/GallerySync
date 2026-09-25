@@ -2391,15 +2391,15 @@ private fun BackupProgressContent(
             }
         }
 
-        // The other clouds, waiting their turn, one line each: how many are sent of how many there are.
+        // The other clouds, waiting their turn, one line each: how many files are still to send. The ring
+        // above already shows progress, so no "x of y" here (Ian, 25 Sept 2026).
         if (uploading) {
             clouds.filter { it.location != activeCloud && it.done < it.total }.forEach { cloud ->
                 Text(
                     text = stringResource(
                         R.string.tour_progress_pending_cloud,
                         stringResource(cloud.location.labelRes()),
-                        cloud.done,
-                        cloud.total
+                        cloud.total - cloud.done
                     ),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.fillMaxWidth(),

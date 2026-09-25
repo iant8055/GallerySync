@@ -221,7 +221,7 @@ CHAPTER = Chapter(
             • **Starting upload.** The total is known and the first file is on its way.
             • **Uploading, with a percentage in the ring.** The ring and the large percentage show the whole backup, across every Cloud you use.
             • **Under the percentage** it names the Cloud being sent to right now (for example **Uploading Google Photos**) and, on the line below, how many are sent of how many there are for that Cloud.
-            • **Below the ring**, each other Cloud that still has files waiting is listed as **Pending** with the same kind of count. When one Cloud finishes, the next one moves into the ring.
+            • **Below the ring**, each other Cloud that still has files waiting is listed as **Pending**, with the number of its files still waiting to be sent. When one Cloud finishes, the next one moves into the ring.
             • Some Clouds take longer than others. Google Photos, for example, only accepts about 27 uploads a minute, so a large library can take hours; the backup carries on in the background if you close the app.
 
             ## When uploading ends
