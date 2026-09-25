@@ -1,5 +1,5 @@
 {
   "google_drive": { "client_id": "400850912934-uspc27q5168r202m50gr0813pfcp89u1.apps.googleusercontent.com", "redirect_uri": "com.gallery.sync:/oauth2redirect" },
-  "dropbox":      { "client_id": "", "redirect_uri": "com.gallery.sync:/dropbox" },
+  "dropbox":      { "client_id": "44e455derzmwzpv", "redirect_uri": "com.gallery.sync:/dropbox" },
   "pcloud":       { "client_id": "", "redirect_uri": "com.gallery.sync.pcloud:/callback" }
 }
