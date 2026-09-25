@@ -154,8 +154,11 @@ fun SettingsScreen(
         // What follows here is OneDrive's own account and folder, shown only while OneDrive is connected.
         val oneDriveConnected = cloudState.providers.any { it.location == BackupLocation.ONEDRIVE && it.isConnected }
 
-        // OneDrive's own folder, while it is connected. The account itself is named on its row in the list of
-        // clouds (Ian, 24 Sept 2026: no separate Account row alongside the clouds).
+        // The clouds come first (Ian, 24 Sept 2026): which clouds are connected is what the pairings below
+        // choose between. OneDrive's own folder follows while it is connected; the account itself is named on
+        // its row in the list (no separate Account row).
+        CloudProvidersSection(viewModel = cloudViewModel)
+
         if (oneDriveConnected) DestinationSection()
 
         // Which local folder goes to which cloud — one row each, always shown (Ian, 24 Sept 2026: clean
@@ -209,8 +212,6 @@ fun SettingsScreen(
             }
             SettingDivider()
         }
-
-        CloudProvidersSection(viewModel = cloudViewModel)
 
 
         // ── Albums ───────────────────────────────────────────────────────────
@@ -731,6 +732,23 @@ fun SettingsTabPreview(onGuideCardPositioned: ((androidx.compose.ui.geometry.Rec
         )
 
         SectionHeader(stringResource(R.string.settings_backup), help = HelpTopic.SETTINGS_SECTION_BACKUP)
+        Text(
+            text = stringResource(R.string.cloud_providers_section_title),
+            style = MaterialTheme.typography.titleMedium
+        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = stringResource(BackupLocation.ONEDRIVE.labelRes()) + " · " + stringResource(R.string.cloud_main_tag),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.weight(1f)
+            )
+            OutlinedButton(onClick = {}) { Text(stringResource(R.string.sign_out_action)) }
+        }
+        SettingDivider()
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 text = stringResource(R.string.backup_folders_heading),
