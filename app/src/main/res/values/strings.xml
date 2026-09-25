@@ -22,7 +22,7 @@
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
     <string name="settings_account">Account</string>
-    <string name="settings_cloud_files">Your cloud files</string>
+    <string name="settings_cloud_files">Your Cloud files</string>
     <string name="settings_open_onedrive">Open OneDrive</string>
     <string name="settings_show_empty_folders">Show empty folders</string>
     <string name="settings_show_empty_folders_on">Restore lists every folder in your backup folders, including ones with nothing in them.</string>
@@ -52,7 +52,7 @@
         overstated every one of them by up to 24 points.
     -->
     <string name="settings_video_quality">Optimise video</string>
-    <string name="settings_video_quality_detail">Old video in Sync albums is replaced by a smaller copy on this phone. The full-quality original stays in your cloud and can be fetched back whenever you want.</string>
+    <string name="settings_video_quality_detail">Old video in Sync albums is replaced by a smaller copy on this phone. The full-quality original stays in your Cloud and can be fetched back whenever you want.</string>
     <string name="video_quality_high">High — 480p</string>
     <string name="video_quality_high_detail">Saves about %1$d%%</string>
     <string name="video_quality_medium">Medium — 720p</string>
@@ -73,7 +73,7 @@
         moment it qualifies whatever its age.
     -->
     <string name="settings_video_age">Optimise video older than</string>
-    <string name="settings_video_age_detail">Only affects the copy on this phone. Video is backed up to your cloud straight away whatever this is set to.</string>
+    <string name="settings_video_age_detail">Only affects the copy on this phone. Video is backed up to your Cloud straight away whatever this is set to.</string>
     <string name="media_age_immediately">Straight away</string>
     <string name="media_age_immediately_warning">Reaches clips shot today. They stay in your gallery and still play, but editing one starts from the smaller copy until you fetch the original back.</string>
     <string name="media_age_one_hour">1 hour</string>
@@ -126,7 +126,7 @@
          auto-charge a one-time product; when the 30 days end the second cloud simply pauses. -->
     <string name="google_photos_trial_offer">Free for 30 days, then a one-time unlock: $2.49 (or your local price). Nothing is charged automatically.</string>
     <string name="google_photos_trial_active_terms">Free trial: %1$d days left. After that, a one-time unlock: $2.49 (or your local price).</string>
-    <string name="google_photos_trial_ended">Trial ended. Google Photos is paused until you unlock Pro (one-time $2.49, or your local price). Your main cloud is not affected.</string>
+    <string name="google_photos_trial_ended">Trial ended. Google Photos is paused until you unlock Pro (one-time $2.49, or your local price). Your main Cloud is not affected.</string>
     <string name="google_photos_unlock_pro_detail">Unlocks Google Photos as a backup destination — a one-time purchase, not a subscription.</string>
     <string name="backup_location_google_photos">Google Photos</string>
     <!-- Not built (see BackupLocation.isUsable) — exists only so the destination picker's option
@@ -152,12 +152,12 @@
     <string name="backup_folders_heading">Where each folder goes</string>
     <string name="pairing_path">Goes to %1$s / %2$s</string>
     <string name="pairing_path_library">Goes to your Google Photos library</string>
-    <string name="pairing_needs_pro">Needs Pro: nothing is being sent to %1$s until you unlock it, or pair this folder with your free cloud.</string>
+    <string name="pairing_needs_pro">Needs Pro: nothing is being sent to %1$s until you unlock it, or pair this folder with your free Cloud.</string>
     <string name="keep_free_title">Your free trial has ended</string>
-    <string name="keep_free_body">Free covers one cloud. Which one do you want to keep free? Uploads to the others pause until you unlock Pro. Nothing you have already sent is touched.</string>
+    <string name="keep_free_body">Free covers one Cloud. Which one do you want to keep free? Uploads to the others pause until you unlock Pro. Nothing you have already sent is touched.</string>
     <string name="keep_free_keep">Keep %1$s free</string>
     <string name="keep_free_not_now">Not now</string>
-    <string name="backup_folders_explainer">New photos and videos in each folder go to the cloud you pick. Anything already sent stays where it is.</string>
+    <string name="backup_folders_explainer">New photos and videos in each folder go to the Cloud you pick. Anything already sent stays where it is.</string>
     <plurals name="backup_folder_label">
         <item quantity="one">%1$s · %2$d file</item>
         <item quantity="other">%1$s · %2$d files</item>
@@ -212,7 +212,7 @@
         by its own "Older than" control — so "and old enough" claimed a wait that photos never do.
         Removed by Ian, 15 Sept 2026, with the leftover photo-age label below it.
     -->
-    <string name="settings_optimise_master_on">Photos and video in Sync albums are replaced by smaller copies once verified in your cloud.</string>
+    <string name="settings_optimise_master_on">Photos and video in Sync albums are replaced by smaller copies once verified in your Cloud.</string>
     <string name="settings_optimise_master_off">Nothing is optimised. Photos and video stay at full size on this phone.</string>
     <string name="settings_optimise_photos">Optimise photos</string>
     <string name="settings_optimise_photos_on">Photos in Sync albums are optimised for storage.</string>
@@ -228,7 +228,7 @@
     <string name="settings_automatic">Automatic sync</string>
     <string name="settings_optimise">Optimise photos</string>
 
-    <string name="settings_optimise_explainer">Optimising replaces the copy on this phone with a smaller version — about 2048 pixels on the long edge, roughly a tenth of the size. The photo stays in your gallery and opens normally in every app, and carries a small cloud badge so you can tell which are optimised. The full-quality original stays in your cloud, untouched.</string>
+    <string name="settings_optimise_explainer">Optimising replaces the copy on this phone with a smaller version — about 2048 pixels on the long edge, roughly a tenth of the size. The photo stays in your gallery and opens normally in every app, and carries a small cloud badge so you can tell which are optimised. The full-quality original stays in your Cloud, untouched.</string>
     <string name="proxy_unsupported">Optimising photos needs Android 11 or newer.</string>
 
     <!-- Sign in -->
@@ -256,8 +256,8 @@
 
     <!-- Remote errors -->
     <string name="error_not_signed_in">Not signed in.</string>
-    <string name="error_unauthorized">Your cloud rejected the sign-in. Try signing out and back in.</string>
-    <string name="error_network">Can\'t reach your cloud. Check your connection.</string>
+    <string name="error_unauthorized">Your Cloud rejected the sign-in. Try signing out and back in.</string>
+    <string name="error_network">Can\'t reach your Cloud. Check your connection.</string>
     <string name="error_local_file_missing">That file is no longer on this phone.</string>
     <!--
         Says "not yet" because it almost always is. A zero-length read means the file was caught
@@ -265,13 +265,13 @@
         app must not do is send the zero bytes: see UploadOutcome.EmptySource.
     -->
     <string name="error_empty_local_file">That file read as empty, so it was not backed up yet.</string>
-    <string name="error_drive_full">Your cloud storage is full. Free up space to continue.</string>
-    <string name="error_http">Your cloud returned an error (%1$d).</string>
+    <string name="error_drive_full">Your Cloud storage is full. Free up space to continue.</string>
+    <string name="error_http">Your Cloud returned an error (%1$d).</string>
     <string name="error_unknown">Something went wrong: %1$s</string>
 
     <!-- Media permission -->
     <string name="permission_needed_title">GallerySync needs access to your photos</string>
-    <string name="permission_needed_detail">It reads the albums you choose so it can sync them to your cloud. It never deletes anything.</string>
+    <string name="permission_needed_detail">It reads the albums you choose so it can sync them to your Cloud. It never deletes anything.</string>
     <string name="permission_partial_title">Only some photos are shared</string>
     <string name="permission_partial_detail">GallerySync can currently see just the photos you picked, so a sync would be incomplete. Grant access to all photos to sync whole albums.</string>
     <string name="permission_grant_action">Grant access</string>
@@ -314,7 +314,7 @@
     <string name="albums_scheduled_summary">%1$d Scheduled to leave this phone</string>
     <!-- What the Archive mode has actually taken off this phone. The only non-zero figures an
          archived album has, since every other count on the card describes local files. -->
-    <string name="albums_archived_summary">%1$d files archived · %2$s in your cloud</string>
+    <string name="albums_archived_summary">%1$d files archived · %2$s in your Cloud</string>
     <string name="albums_scheduled_none">Nothing left to archive</string>
     <!--
         The Albums tab is where modes are chosen, so its hero counts albums, not files. It read
@@ -421,13 +421,13 @@ full size</string>
     <string name="backup_status_uploading_progress">Uploading %1$d of %2$d · %3$s · %4$d%%</string>
     <string name="backup_status_no_permission">No permission to read media.</string>
     <string name="backup_status_uploaded">%1$d uploaded</string>
-    <string name="backup_status_skipped">%1$d already in your cloud</string>
+    <string name="backup_status_skipped">%1$d already in your Cloud</string>
     <string name="backup_status_failed">%1$d failed</string>
     <!--
       Not a failure and not a skip: their album could not be listed, so the run never found out
       whether they were already in OneDrive. They are untouched and the next run tries again.
     -->
-    <string name="backup_status_deferred">%1$d waiting on your cloud</string>
+    <string name="backup_status_deferred">%1$d waiting on your Cloud</string>
     <!-- Files that left the phone. Not failures — the record is simply no longer about anything. -->
     <string name="backup_status_pruned">%1$d no longer on this phone</string>
     <string name="backup_status_remaining">%1$d still to go</string>
@@ -435,8 +435,8 @@ full size</string>
 
     <!-- Why a run stopped early -->
     <string name="backup_stopped_no_token">stopped: not signed in</string>
-    <string name="backup_stopped_unauthorized">stopped: your cloud rejected the sign-in</string>
-    <string name="backup_stopped_drive_full">stopped: your cloud is full</string>
+    <string name="backup_stopped_unauthorized">stopped: your Cloud rejected the sign-in</string>
+    <string name="backup_stopped_drive_full">stopped: your Cloud is full</string>
     <string name="backup_stopped_network">stopped: lost connection</string>
     <string name="backup_stopped_no_media_access">stopped: no access to your photos</string>
 
@@ -485,7 +485,7 @@ full size</string>
         stops being visible; note that the folder itself is never deleted (27 Aug correction in
         MILESTONES), so the case it described can still occur.
     -->
-    <string name="archive_confirm_body">Archive will verify all files are uploaded to the cloud.\n\nArchived files will be moved to your phone\'s Trash/Recycle Bin.\n\nPlease empty your Trash/Recycle Bin to free up storage.</string>
+    <string name="archive_confirm_body">Archive will verify all files are uploaded to the Cloud.\n\nArchived files will be moved to your phone\'s Trash/Recycle Bin.\n\nPlease empty your Trash/Recycle Bin to free up storage.</string>
     <string name="archive_confirm_accept">Archive</string>
     <string name="archive_confirm_cancel">Cancel</string>
 
@@ -520,23 +520,23 @@ full size</string>
     <string name="archive_hero_label_bottom">Archive</string>
     <string name="archive_empty">No album is set to Archive. Nothing here will remove anything from your phone.</string>
     <string name="archive_empty_hint">Set an album to Archive on the Albums tab, and its files will be listed here for checking before anything leaves your phone.</string>
-    <string name="archive_intro">Every file below is checked against your cloud first. Anything that is not there yet is backed up before it is verified.</string>
+    <string name="archive_intro">Every file below is checked against your Cloud first. Anything that is not there yet is backed up before it is verified.</string>
     <string name="archive_validate">Check these files</string>
-    <string name="archive_validating">Checking with your cloud…</string>
+    <string name="archive_validating">Checking with your Cloud…</string>
     <string name="archive_unsupported">This version of Android has no media trash, so removing local copies is not offered here.</string>
 
     <string name="archive_state_backing_up">Backing up…</string>
     <string name="archive_state_removing">Moving to Trash/Recycle Bin…</string>
     <string name="archive_state_removed">Removed from this phone</string>
-    <string name="archive_failed_unchecked">Could not check your cloud — staying on your phone</string>
-    <string name="archive_failed_not_backed_up">Not in your cloud — staying on your phone</string>
+    <string name="archive_failed_unchecked">Could not check your Cloud — staying on your phone</string>
+    <string name="archive_failed_not_backed_up">Not in your Cloud — staying on your phone</string>
     <!--
         Split from the line above on 28 Aug 2026. A zero-byte item on the drive was being reported
         as "Not in OneDrive" — untrue, and it reads as the app having declined to upload rather than
         as a damaged cloud copy. The file stays on the phone either way; only this one is worth the
         user going and looking.
     -->
-    <string name="archive_failed_wrong_size">In your cloud but the wrong size — staying on your phone</string>
+    <string name="archive_failed_wrong_size">In your Cloud but the wrong size — staying on your phone</string>
 
     <!-- The prompt. Ian's wording, with the numbers filled in. -->
     <string name="archive_prompt_all_title">All files validated</string>
@@ -552,7 +552,7 @@ full size</string>
         what was worth keeping from it is the clause about emptying, which belongs in the sentence
         making the claim rather than in a footnote qualifying it.
     -->
-    <string name="archive_prompt_all_body">All files are confirmed in your cloud. Archiving them moves the local copies to your phone\'s Trash/Recycle Bin, and frees %1$s once you empty it.</string>
+    <string name="archive_prompt_all_body">All files are confirmed in your Cloud. Archiving them moves the local copies to your phone\'s Trash/Recycle Bin, and frees %1$s once you empty it.</string>
     <string name="archive_prompt_partial_title">%1$s validated</string>
     <string name="archive_prompt_partial_body">%1$s could not be confirmed and will stay on your phone. Archiving the confirmed ones moves them to your phone\'s Trash/Recycle Bin, and frees %2$s once you empty it.</string>
     <!--
@@ -571,7 +571,7 @@ full size</string>
     -->
     <string name="archive_prompt_continue">Continue</string>
 
-    <string name="archive_none_confirmed">Nothing can be archived. Your cloud did not confirm a single one of these files, so they all stay on your phone.</string>
+    <string name="archive_none_confirmed">Nothing can be archived. Your Cloud did not confirm a single one of these files, so they all stay on your phone.</string>
     <string name="archive_batch_progress">Batch %1$d of %2$d</string>
     <string name="archive_done">%1$s removed from this phone, freeing %2$s.</string>
     <string name="archive_done_none">Nothing was removed.</string>
@@ -591,23 +591,23 @@ full size</string>
     <string name="archive_hidden_by_age_detail">%1$s · too recent for your filter</string>
 
     <string name="notification_channel_archive_ready">Archive ready</string>
-    <string name="notification_channel_archive_ready_description">Files in an Archive album have been confirmed in your cloud and are waiting for you to remove them from this phone.</string>
+    <string name="notification_channel_archive_ready_description">Files in an Archive album have been confirmed in your Cloud and are waiting for you to remove them from this phone.</string>
     <string name="notification_archive_ready_title">Files ready to archive</string>
     <plurals name="notification_archive_ready_body">
-        <item quantity="one">1 file is confirmed in your cloud and ready to leave this phone.</item>
-        <item quantity="other">%1$d files are confirmed in your cloud and ready to leave this phone.</item>
+        <item quantity="one">1 file is confirmed in your Cloud and ready to leave this phone.</item>
+        <item quantity="other">%1$d files are confirmed in your Cloud and ready to leave this phone.</item>
     </plurals>
     <string name="notification_archive_ready_album">In %1$s.</string>
 
     <!-- Live re-check before removing a local copy. -->
-    <string name="removal_checking">Checking your cloud still has these…</string>
+    <string name="removal_checking">Checking your Cloud still has these…</string>
     <!--
         Says what was held back and why, in the user's terms. "Could not check" and "is not there"
         call for different reactions, so they are never merged.
     -->
-    <string name="removal_held_missing">%1$s could not be found in your cloud after all, so nothing was removed for them. They will be backed up again on the next run.</string>
+    <string name="removal_held_missing">%1$s could not be found in your Cloud after all, so nothing was removed for them. They will be backed up again on the next run.</string>
     <string name="removal_held_unchecked">%1$s could not be checked just now. Nothing was removed for them — being unable to ask is not the same as an answer.</string>
-    <string name="removal_none_confirmed">Nothing was removed. Your cloud did not confirm a single one of these files.</string>
+    <string name="removal_none_confirmed">Nothing was removed. Your Cloud did not confirm a single one of these files.</string>
 
     <!--
         The Archive summons. Not a second consent — the album mode is the consent, and CLAUDE.md
@@ -617,15 +617,15 @@ full size</string>
         verified.
     -->
     <string name="archive_ready_title">Ready to remove from this phone</string>
-    <string name="archive_ready_body">%1$s in %2$s are confirmed in your cloud. Removing them frees %3$s here.</string>
+    <string name="archive_ready_body">%1$s in %2$s are confirmed in your Cloud. Removing them frees %3$s here.</string>
     <string name="archive_ready_action">Remove from this phone</string>
 
     <!-- Deletion sync: what happens to the OneDrive copy when a file leaves the phone. -->
     <string name="deletion_title">When you delete a photo/video from this phone</string>
     <string name="deletion_leave">Leave the Cloud copy</string>
-    <string name="deletion_leave_detail">Nothing is ever removed from your cloud. Deleting on your phone only frees space here.</string>
+    <string name="deletion_leave_detail">Nothing is ever removed from your Cloud. Deleting on your phone only frees space here.</string>
     <string name="deletion_ask">Ask me about the Cloud copy</string>
-    <string name="deletion_ask_detail">GallerySync shows you every file that has gone from your phone and asks what to do: delete or keep the copy in your cloud, or back up a file that never made it. For now this covers OneDrive only. It never removes anything on its own.</string>
+    <string name="deletion_ask_detail">GallerySync shows you every file that has gone from your phone and asks what to do: delete or keep the copy in your Cloud, or back up a file that never made it. For now this covers OneDrive only. It never removes anything on its own.</string>
 
     <!--
         The window that opens with the app when files have left the phone since it last appeared.
@@ -636,9 +636,9 @@ full size</string>
     <string name="deleted_checking_skip">Skip for now</string>
     <string name="deleted_files_label_top">Files deleted</string>
     <string name="deleted_files_label_bottom">from phone</string>
-    <string name="deleted_files_intro">These files have been deleted from your phone, but a backup is in OneDrive (%1$s in all). What do you want to do with the OneDrive copies? Tick the ones to delete. The rest are kept.</string>
-    <string name="deleted_files_none_selected">Nothing ticked. Every OneDrive copy is kept.</string>
-    <string name="deleted_files_selected">%1$d ticked · %2$s to be removed from OneDrive</string>
+    <string name="deleted_files_intro">These files have been deleted from your phone, but a backup is in OneDrive (%1$s in all). What do you want to do with the OneDrive copies? Select the ones to delete. The rest are kept.</string>
+    <string name="deleted_files_none_selected">Nothing selected. Every OneDrive copy is kept.</string>
+    <string name="deleted_files_selected">%1$d selected · %2$s to be removed from OneDrive</string>
     <string name="deleted_files_done">Done. This is what happened.</string>
     <string name="deleted_files_remove">Remove %1$d from OneDrive</string>
     <string name="deleted_files_keep_all">Keep all in OneDrive</string>
@@ -655,9 +655,9 @@ full size</string>
     <string name="deleted_result_removed">Moved to the OneDrive recycle bin: %1$s.</string>
     <string name="deleted_result_kept">Left in OneDrive: %1$s.</string>
     <string name="deleted_result_came_back">Back on your phone, so left in OneDrive: %1$s.</string>
-    <string name="deleted_nocopy_intro">These files have been deleted from your phone and no backup can be found in OneDrive (%1$s in all). They are still in your phone\'s trash. What do you want to do with them? Tick the ones to back up to OneDrive. The rest stay in the trash.</string>
-    <string name="deleted_nocopy_none_selected">Nothing ticked. Everything stays in the trash.</string>
-    <string name="deleted_nocopy_selected">%1$d ticked · %2$s to back up</string>
+    <string name="deleted_nocopy_intro">These files have been deleted from your phone and no backup can be found in OneDrive (%1$s in all). They are still in your phone\'s trash. What do you want to do with them? Select the ones to back up to OneDrive. The rest stay in the trash.</string>
+    <string name="deleted_nocopy_none_selected">Nothing selected. Everything stays in the trash.</string>
+    <string name="deleted_nocopy_selected">%1$d selected · %2$s to back up</string>
     <string name="deleted_nocopy_backup">Back up %1$d to OneDrive</string>
     <string name="deleted_nocopy_leave_all">Leave all in the trash</string>
     <string name="deleted_nocopy_will_backup">Will be backed up to OneDrive</string>
@@ -692,7 +692,7 @@ full size</string>
     <string name="restore_intro_files">Swipe right to select / left to deselect  →  Then press Restore</string>
     <!-- Once something is selected the first half changes to say how to undo it. Ian, 19 Sept 2026. -->
     <string name="restore_intro_files_selected">Swipe left to deselect  →  Then press Restore</string>
-    <string name="restore_empty">Nothing in your cloud is missing from this phone, so there is nothing to bring back.</string>
+    <string name="restore_empty">Nothing in your Cloud is missing from this phone, so there is nothing to bring back.</string>
     <string name="restore_selected_summary">%1$d selected · %2$s to recover</string>
     <!-- The same, stacked, for the half-width slot beside "Files in this folder" so it breaks between the two facts and not mid-phrase. -->
     <string name="restore_selected_summary_stacked">%1$d selected\n%2$s to recover</string>
@@ -704,8 +704,8 @@ full size</string>
     <string name="restore_missing_size">Available for download · %1$s</string>
     <!-- Restore lists what OneDrive holds (Ian, 18 Sept 2026), so it says when it is still looking,
          and which files it is not offering and why. -->
-    <string name="restore_checking_cloud">Checking your cloud for more…</string>
-    <string name="restore_cloud_unavailable">Some cloud folders could not be reached, so this list may be incomplete. Press Refresh to try again.</string>
+    <string name="restore_checking_cloud">Checking your Cloud for more…</string>
+    <string name="restore_cloud_unavailable">Some Cloud folders could not be reached, so this list may be incomplete. Press Refresh to try again.</string>
     <string name="restore_here_size">Already on this phone · %1$s</string>
     <string name="restore_folder_here">%1$d already on this phone</string>
     <string name="restore_greyed_line">Greyed-out files are already on this phone.</string>
@@ -891,7 +891,7 @@ full size</string>
         The honest framing. This run is hours long, so saying when it will happen is more useful
         than a progress bar the user has to sit and watch.
     -->
-    <string name="first_backup_explain">The first backup is the big one — everything not already in your cloud. It starts overnight so it does not slow your phone down or eat your data during the day.</string>
+    <string name="first_backup_explain">The first backup is the big one — everything not already in your Cloud. It starts overnight so it does not slow your phone down or eat your data during the day.</string>
     <string name="first_backup_start_label">Starts at</string>
     <string name="first_backup_charging">Only while charging</string>
     <string name="first_backup_charging_detail">A long upload on battery will flatten the phone before it finishes.</string>
@@ -905,25 +905,25 @@ full size</string>
     <!-- First-run topics. One topic exists once; the bubbles, Help and the just-in-time
          prompts all read these. Changing deletion wording here changes it everywhere. -->
     <string name="topic_what_title">What this app does</string>
-    <string name="topic_what_body">It keeps your photos and videos in your cloud and manages how much space they take on your phone. It is not a gallery — your phone’s own gallery keeps doing the viewing, and everything stays there as an ordinary file.</string>
+    <string name="topic_what_body">It keeps your photos and videos in your Cloud and manages how much space they take on your phone. It is not a gallery — your phone’s own gallery keeps doing the viewing, and everything stays there as an ordinary file.</string>
 
     <string name="topic_folders_title">Which folders it looks at</string>
     <string name="topic_folders_body">You choose the folders. Anything outside them is not scanned, not listed, and never touched — so an album you did not pick cannot be given a mode by accident.</string>
 
     <string name="topic_modes_title">Off, Backup and Sync</string>
-    <string name="topic_modes_body">Off leaves an album alone. Backup copies it to your cloud and changes nothing on your phone. Sync copies it and then shrinks the photos to save space, leaving them visible in your gallery. Video is left whole.</string>
+    <string name="topic_modes_body">Off leaves an album alone. Backup copies it to your Cloud and changes nothing on your phone. Sync copies it and then shrinks the photos to save space, leaving them visible in your gallery. Video is left whole.</string>
     <string name="topic_modes_ack">I understand — Sync makes my photos smaller on this phone</string>
 
     <string name="topic_archive_title">Archive</string>
-    <string name="topic_archive_body">Archive takes an album off your phone once every file in it is confirmed in your cloud. It is a standing instruction: anything you add to that album later is covered by the same choice.
+    <string name="topic_archive_body">Archive takes an album off your phone once every file in it is confirmed in your Cloud. It is a standing instruction: anything you add to that album later is covered by the same choice.
 
 The files go to your phone’s Trash/Recycle Bin, where you can put them back. The space they used does not come back until you empty that bin yourself — this app never empties it for you.</string>
     <string name="topic_archive_ack">I understand — Archive takes these files off my phone</string>
 
     <string name="topic_promise_title">What we can promise</string>
-    <string name="topic_promise_body">Before anything is removed or shrunk, your cloud has to confirm it holds the file and report the same size as the copy on your phone. That check is the guarantee, and nothing skips it.
+    <string name="topic_promise_body">Before anything is removed or shrunk, your Cloud has to confirm it holds the file and report the same size as the copy on your phone. That check is the guarantee, and nothing skips it.
 
-Local removals go to your phone’s Trash/Recycle Bin and can be restored for 30 days. We have seen that hold on the phones we tested, but we cannot promise it for every phone — the verified cloud copy is the part that always holds.</string>
+Local removals go to your phone’s Trash/Recycle Bin and can be restored for 30 days. We have seen that hold on the phones we tested, but we cannot promise it for every phone — the verified Cloud copy is the part that always holds.</string>
 
     <!--
         The disclaimer, and it is deliberately not boilerplate. Added 28 Aug 2026, the day a file
@@ -935,9 +935,9 @@ Local removals go to your phone’s Trash/Recycle Bin and can be restored for 30
         here that survives this app being wrong in a way nobody predicted.
     -->
     <string name="topic_verify_title">Check your backups yourself</string>
-    <string name="topic_verify_body">No backup is safe because an app says so, and that includes this one. Software has bugs, cloud accounts expire, and a file can arrive damaged in ways a size check does not catch.
+    <string name="topic_verify_body">No backup is safe because an app says so, and that includes this one. Software has bugs, Cloud accounts expire, and a file can arrive damaged in ways a size check does not catch.
 
-Open your cloud’s own app or website now and then and look at your photos there. Not the list — open a few and check they actually appear. Do it before you empty a recycle bin, because that is the point where the second copy stops existing.
+Open your Cloud’s own app or website now and then and look at your photos there. Not the list — open a few and check they actually appear. Do it before you empty a recycle bin, because that is the point where the second copy stops existing.
 
 For anything you could not bear to lose, keep a copy somewhere this app cannot reach.</string>
     <string name="topic_verify_ack">I understand — I will check my own backups</string>
@@ -946,14 +946,14 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="topic_getting_back_body">The Restore tab lists what this app has shrunk on this phone and puts the full-size original back in place, in its own folder, under its own name. Stopping partway costs nothing and you can run it again.</string>
 
     <string name="topic_optimising_title">Optimising photos</string>
-    <string name="topic_optimising_body">A photo or video is replaced by a smaller version while the full-quality original stays in your cloud. It keeps working everywhere on your phone and you can fetch the original back whenever you want. Only files older than the age you set are touched, so nothing you shot today is affected unless you ask for it.</string>
+    <string name="topic_optimising_body">A photo or video is replaced by a smaller version while the full-quality original stays in your Cloud. It keeps working everywhere on your phone and you can fetch the original back whenever you want. Only files older than the age you set are touched, so nothing you shot today is affected unless you ask for it.</string>
     <string name="topic_optimising_ack">I understand — optimised photos are smaller until I fetch the original</string>
 
     <string name="topic_deleting_title">When you delete a photo from this phone</string>
-    <string name="topic_deleting_body">Nothing happens to the cloud copy unless you say so. The app will not read a missing file as an instruction to delete anything. You can change this later, and it will ask you at the point it first matters.</string>
+    <string name="topic_deleting_body">Nothing happens to the Cloud copy unless you say so. The app will not read a missing file as an instruction to delete anything. You can change this later, and it will ask you at the point it first matters.</string>
 
     <string name="topic_trash_title">Emptying the bin</string>
-    <string name="topic_trash_body">This app never empties a recycle bin — not your gallery’s and not your cloud’s. Whatever gets removed stays recoverable until you empty it yourself, in those apps.</string>
+    <string name="topic_trash_body">This app never empties a recycle bin — not your gallery’s and not your Cloud’s. Whatever gets removed stays recoverable until you empty it yourself, in those apps.</string>
 
     <string name="topic_when_title">When each thing happens</string>
     <string name="topic_when_body">Backing up runs on its own in the background. Archiving and optimising only ever happen while this app is open, because Android requires a tap for them — so if you are waiting for space to be freed, open the app. Restoring only happens when you ask.</string>
@@ -990,11 +990,11 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
          description of each choice survives rather than two that drift. -->
     <string name="wizard_default_mode_body">When a new album appears on your phone later, this is what happens to it. You can change any album at any time.</string>
 
-    <string name="wizard_auto_optimise_body">Optimising replaces photos and video already safe in your cloud with smaller copies on this phone. This decides whether that happens on its own or waits for you to ask.</string>
+    <string name="wizard_auto_optimise_body">Optimising replaces photos and video already safe in your Cloud with smaller copies on this phone. This decides whether that happens on its own or waits for you to ask.</string>
     <string name="wizard_optimise_ask_first">Wait until I open the app</string>
     <string name="wizard_optimise_automatic">Tell me when there is something to optimise</string>
 
-    <string name="wizard_deletion_body">If you delete a photo from your phone, what should happen to the copy in your cloud? You can change this later, and nothing is ever removed without you confirming it.</string>
+    <string name="wizard_deletion_body">If you delete a photo from your phone, what should happen to the copy in your Cloud? You can change this later, and nothing is ever removed without you confirming it.</string>
 
     <string name="wizard_metered_body">Backing up over mobile data can be expensive on a metered plan, and Wi‑Fi only is the safer default — but it is the wrong answer if your data is unlimited and your Wi‑Fi is poor.</string>
     <string name="wizard_metered_wifi_only">Wi‑Fi only</string>
@@ -1025,8 +1025,8 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
          leaving, "OK" could as easily mean "yes, go" as "yes, take me to it". -->
     <string name="exit_warning_title">Files ready to Archive</string>
     <plurals name="exit_warning_body">
-        <item quantity="one">%1$d file is confirmed in your cloud and ready to leave this phone. It stays where it is until you approve the removal.</item>
-        <item quantity="other">%1$d files are confirmed in your cloud and ready to leave this phone. They stay where they are until you approve the removal.</item>
+        <item quantity="one">%1$d file is confirmed in your Cloud and ready to leave this phone. It stays where it is until you approve the removal.</item>
+        <item quantity="other">%1$d files are confirmed in your Cloud and ready to leave this phone. They stay where they are until you approve the removal.</item>
     </plurals>
     <string name="exit_warning_go">Archive now</string>
     <string name="exit_warning_leave">Leave</string>
@@ -1041,14 +1041,14 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_description_body">GallerySync keeps your photos and videos backed up in Cloud Services and manages how much space they take on your phone. Here\'s what you\'ll find:</string>
     <string name="tour_description_tabs">See your folders and choose what to back up</string>
     <string name="tour_description_navigation">Browse and download files from Cloud Services</string>
-    <string name="tour_description_archive">Review files verified in the cloud and free up space</string>
+    <string name="tour_description_archive">Review files verified in the Cloud and free up space</string>
     <string name="tour_description_settings">Backup destination, optimisation, and preferences</string>
     <string name="tour_description_help">Press any (?) for a quick explanation of that line. For everything in one place, open the How To Guide at the top of Settings.</string>
     <string name="tab_help">Help</string>
 
     <string name="tour_install_title">What we\'ll set up</string>
     <string name="tour_install_body">There are four simple steps to get you started.</string>
-    <string name="tour_install_cloud">Choose your cloud storage and sign in to it</string>
+    <string name="tour_install_cloud">Choose your Cloud storage and sign in to it</string>
     <string name="tour_install_search">Give permission to search this phone for photos and videos</string>
     <string name="tour_install_select_gallery">Choose which of the folders it finds you want backed up, and where each one goes</string>
     <string name="tour_install_grant_gallery">Give permission to change files in those folders</string>
@@ -1081,16 +1081,16 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_local_granted">All set</string>
 
     <string name="tour_cloud_title">Cloud Storage</string>
-    <string name="tour_cloud_body">Tick the clouds you use. One cloud is free. Each extra cloud is part of Pro, free for 30 days. You sign in to each one on the next cards.</string>
+    <string name="tour_cloud_body">Select the Clouds you use. One Cloud is free. Each extra Cloud is part of Pro, free for 30 days. You sign in to each one on the next cards.</string>
     <string name="tour_cloud_connect_title">Connect to %1$s</string>
     <string name="tour_cloud_connect_progress">Cloud %1$d of %2$d</string>
     <string name="tour_cloud_signed_in">Signed in to OneDrive</string>
     <string name="tour_cloud_destination">Backup destination</string>
     <string name="tour_cloud_change">Change</string>
     <string name="tour_cloud_google_photos">Google Photos (Pro)</string>
-    <string name="tour_cloud_google_photos_limits_title">About this cloud</string>
+    <string name="tour_cloud_google_photos_limits_title">About this Cloud</string>
     <string name="tour_cloud_google_photos_limit_backup_only">Backup only — no Archive or Sync.</string>
-    <string name="tour_cloud_google_photos_limit_duplicates">Photos already in that cloud may be added twice.</string>
+    <string name="tour_cloud_google_photos_limit_duplicates">Photos already in that Cloud may be added twice.</string>
     <string name="tour_cloud_google_photos_limit_restore">Restoring from it is not available yet.</string>
     <string name="tour_cloud_google_photos_limit_pro">Free for 30 days, then a one-time purchase.</string>
     <string name="tour_ok">OK</string>
@@ -1108,7 +1108,7 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="feature_unsupported_title">%1$s doesn\'t support %2$s</string>
     <string name="feature_unsupported_body">Please switch to another Cloud Service to enable this feature</string>
     <string name="tour_folder_goes_to">Goes to: %1$s</string>
-    <string name="tour_folder_choose_hint">Choose which cloud each ticked folder goes to.</string>
+    <string name="tour_folder_choose_hint">Choose which Cloud each selected folder goes to.</string>
 
     <string name="tour_backup_title">Choose your backup plan</string>
 
@@ -1126,8 +1126,8 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
         and no reason for it. Same principle as `reconcile_incomplete` — never let "could not ask"
         render as an answer.
     -->
-    <string name="tour_optimise_checking">Checking your cloud to work out what this would save…</string>
-    <string name="tour_optimise_unchecked">Your cloud could not be checked just now, so there is no saving to estimate yet. These settings still apply — they act on whatever the first backup sends.</string>
+    <string name="tour_optimise_checking">Checking your Cloud to work out what this would save…</string>
+    <string name="tour_optimise_unchecked">Your Cloud could not be checked just now, so there is no saving to estimate yet. These settings still apply — they act on whatever the first backup sends.</string>
     <string name="tour_optimise_incomplete">Could not check %1$d of your albums, so the real saving is likely to be larger than this.</string>
     <!--
         Reworded 6 Sept 2026, with the population it describes. It used to read "Everything on this
@@ -1235,8 +1235,8 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_progress_optimising_video_label">Optimising video</string>
     <!-- The count on its own line under the phase name. Bare, so either name can sit above it. -->
     <string name="tour_progress_count">%1$d of %2$d</string>
-    <string name="tour_progress_optimising_photos">Upload finished and verified. Now optimising your photos: they stay in your gallery and stay usable, and the full-size originals stay in your cloud.</string>
-    <string name="tour_progress_optimising_video">Upload finished and verified. Now optimising your videos: nothing is cut, they stay in your gallery, and the full-size originals stay in your cloud.</string>
+    <string name="tour_progress_optimising_photos">Upload finished and verified. Now optimising your photos: they stay in your gallery and stay usable, and the full-size originals stay in your Cloud.</string>
+    <string name="tour_progress_optimising_video">Upload finished and verified. Now optimising your videos: nothing is cut, they stay in your gallery, and the full-size originals stay in your Cloud.</string>
     <string name="tour_progress_complete">Congratulations your backup has finished successfully and has been verified. Press Finish.</string>
     <string name="tour_progress_note">You can check progress any time by opening the app.</string>
     <!--
@@ -1249,7 +1249,7 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
         the run is undone.
     -->
     <string name="abort_backup_title">Stop the backup?</string>
-    <string name="abort_backup_body">Uploading stops so you can change your settings. Files already in your cloud stay there, and starting again picks up where this left off rather than sending them twice. Nothing is deleted. Photos already optimised stay optimised, with their full-size originals in your cloud.</string>
+    <string name="abort_backup_body">Uploading stops so you can change your settings. Files already in your Cloud stay there, and starting again picks up where this left off rather than sending them twice. Nothing is deleted. Photos already optimised stay optimised, with their full-size originals in your Cloud.</string>
     <string name="abort_backup_confirm">Stop and go back</string>
     <string name="abort_backup_keep">Keep backing up</string>
 

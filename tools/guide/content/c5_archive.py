@@ -4,22 +4,22 @@ CHAPTER = Chapter(
     id="archive",
     title="The Archive tab",
     intro="Archive is the one place where files leave your phone. It only ever handles albums you "
-          "set to Archive, it checks every file against your cloud first, and it ends with your tap.",
+          "set to Archive, it checks every file against your Cloud first, and it ends with your tap.",
     topics=[
         topic("archive-overview", "How Archive works, step by step", """
             1. **You choose it, once, per album.** On the Albums tab, set an album's mode to **Archive** and confirm. This is your consent. See [[dialog-archive-confirm]].
-            2. **You come here and press Check these files.** Every file in your Archive albums, except any you have chosen to keep on your phone, is checked against the cloud it was sent to. Anything not there yet is sent first and then checked.
+            2. **You come here and press Check these files.** Every file in your Archive albums, except any you have chosen to keep on your phone, is checked against the Cloud it was sent to. Anything not there yet is sent first and then checked.
             3. **The app tells you the result.** Each file gets a tick or a red cross, and a prompt says how many are confirmed and how much room will be freed.
             4. **You say Yes.** The app asks Android to move the confirmed files to your phone's Trash or Recycle Bin. Android shows its own confirmation. See [[dialog-android-trash]].
             5. **You empty the bin when you are ready.** Removed files keep taking their full space until you do, and the app never empties it for you.
 
             ## What "safely" means
-            A file is only removed if its cloud confirms, right then, that it holds the file **and** reports the same size as
-            your copy. A file the cloud does not confirm stays on your phone, and the screen says why. If the cloud cannot be asked at all, for example because you have signed out of it, the file stays too: being unable to ask is not the same as an answer.
+            A file is only removed if its Cloud confirms, right then, that it holds the file **and** reports the same size as
+            your copy. A file the Cloud does not confirm stays on your phone, and the screen says why. If the Cloud cannot be asked at all, for example because you have signed out of it, the file stays too: being unable to ask is not the same as an answer.
 
-            If Sync has already made a photo smaller, the cloud is checked against the size of the **original**, not the smaller copy, so the copy on your phone is never mistaken for the whole file.
+            If Sync has already made a photo smaller, the Cloud is checked against the size of the **original**, not the smaller copy, so the copy on your phone is never mistaken for the whole file.
 
-            ## Which clouds can Archive
+            ## Which Clouds can Archive
             OneDrive, Google Drive, Dropbox, IDrive e2 and Backblaze B2. An album whose files go to Google Photos or pCloud cannot be archived, and says so.
 
             ## What Archive cannot do by itself
@@ -47,7 +47,7 @@ CHAPTER = Chapter(
             ## What it is
             The green card, laid out like the one on the Restore tab. On the left, **Files to** with
             **Archive** directly under it; in the right half, a number. Under them, the names of your
-            Archive albums, then this sentence: **Every file below is checked against your cloud first. Anything
+            Archive albums, then this sentence: **Every file below is checked against your Cloud first. Anything
             that is not there yet is backed up before it is verified.** At the foot of the card, a
             reminder: **To restore archived files or albums, check the Restore tab.**
 
@@ -62,13 +62,13 @@ CHAPTER = Chapter(
             ## What it is
             The button in the green card, and the messages that replace it as the process moves along:
             • **Check these files** starts the check.
-            • **Checking with your cloud...** with a small spinner while the cloud is asked.
+            • **Checking with your Cloud...** with a small spinner while the Cloud is asked.
             • **Batch 1 of 3** while files are being removed. See [[dialog-android-trash]] for why there may be several.
             • **12 files removed from this phone, freeing 340 MB.** or **Nothing was removed.** when it finishes.
 
             ## Where it comes from
             For OneDrive, the check asks for the list of files in each album's folder and compares names and
-            sizes with the files on your phone. For Dropbox, Google Drive, Backblaze B2 and IDrive e2 it asks about each file by the exact address the app recorded when it sent it, and the cloud must say the file is there, not deleted or in its bin, at exactly the size it was. The result messages report what actually happened.
+            sizes with the files on your phone. For Dropbox, Google Drive, Backblaze B2 and IDrive e2 it asks about each file by the exact address the app recorded when it sent it, and the Cloud must say the file is there, not deleted or in its bin, at exactly the size it was. The result messages report what actually happened.
 
             ## Good to know
             "Freeing 340 MB" is a promise about after the bin is emptied. A removed file still takes its
@@ -112,7 +112,7 @@ CHAPTER = Chapter(
             ## What it is
             One rounded card for each file in your Archive albums, in the same style as the file cards on the Restore tab: its name, then its size under it, then a mark on the right. A file you put into an Archive album later appears here too, before anything is archived.
 
-            **Keeping a file on your phone.** Swipe right to select and left to deselect, as everywhere in the app. Swipe a card **left** to deselect it and it fades and reads **Not archiving**. It is left out of every check and every removal, and GallerySync remembers your choice, even after you close the app. Swipe it **right** to select it again and it returns to the list, ready to be archived. A green tick means a file has been checked against your cloud in the current check, so a file you bring back has no tick until the files are checked again, and nothing is removed until they are. Swiping a card that is already that way does nothing, so a run of swipes cannot undo itself. You cannot swipe while a check or a removal is running. If you use a screen reader, each card offers **Deselect (keep on this phone)** or **Select (archive this file)** instead.
+            **Keeping a file on your phone.** Swipe right to select and left to deselect, as everywhere in the app. Swipe a card **left** to deselect it and it fades and reads **Not archiving**. It is left out of every check and every removal, and GallerySync remembers your choice, even after you close the app. Swipe it **right** to select it again and it returns to the list, ready to be archived. A green tick means a file has been checked against your Cloud in the current check, so a file you bring back has no tick until the files are checked again, and nothing is removed until they are. Swiping a card that is already that way does nothing, so a run of swipes cannot undo itself. You cannot swipe while a check or a removal is running. If you use a screen reader, each card offers **Deselect (keep on this phone)** or **Select (archive this file)** instead.
 
             An album with a file you have kept stays set to Archive, so files added to it later are still covered by the mode you set. If you would rather it stopped, change the album's mode on the Albums tab.
 
@@ -120,18 +120,18 @@ CHAPTER = Chapter(
 
             **The mark**
             • **A spinner.** Being checked, backed up or removed.
-            • **A green tick.** Checked against your cloud and confirmed there at the right size, or already removed.
-            • **A red cross.** Your cloud did not confirm it, so it stays on your phone.
+            • **A green tick.** Checked against your Cloud and confirmed there at the right size, or already removed.
+            • **A red cross.** Your Cloud did not confirm it, so it stays on your phone.
             • **Nothing.** Not looked at yet.
 
             **The words under the name**, in place of the size while something is happening:
-            • **Backing up...** The file was not in your cloud, so it is being sent.
+            • **Backing up...** The file was not in your Cloud, so it is being sent.
             • **Moving to Trash/Recycle Bin...** Being removed.
             • **Removed from this phone.**
-            • In red, why a file is staying: **Could not check your cloud**, **Not in your cloud**, or **In your cloud but the wrong size**. Each ends "staying on your phone". "Could not check" and "is not there" are kept separate because they need different reactions. Being unable to ask is not the same as an answer.
+            • In red, why a file is staying: **Could not check your Cloud**, **Not in your Cloud**, or **In your Cloud but the wrong size**. Each ends "staying on your phone". "Could not check" and "is not there" are kept separate because they need different reactions. Being unable to ask is not the same as an answer.
 
             ## Where it comes from
-            For OneDrive, its list of files for each album, compared with the phone, asked once per album. For the other clouds, one question per file.
+            For OneDrive, its list of files for each album, compared with the phone, asked once per album. For the other Clouds, one question per file.
 
             ## Good to know
             The number in the green card counts only the files that will be archived, not the ones you
@@ -143,9 +143,9 @@ CHAPTER = Chapter(
             ## What it is
             After the check, a card asks one question, in one of three forms:
 
-            • **All files validated.** All files are confirmed in your cloud. Archiving them moves the local copies to your phone's Trash/Recycle Bin, and frees the stated amount once you empty it.
+            • **All files validated.** All files are confirmed in your Cloud. Archiving them moves the local copies to your phone's Trash/Recycle Bin, and frees the stated amount once you empty it.
             • **12 files validated.** Some files could not be confirmed and will stay on the phone. Archiving moves only the confirmed ones. The count and size describe only those.
-            • **Nothing can be archived.** Your cloud did not confirm a single file, so they all stay. A single **Continue** button closes the message.
+            • **Nothing can be archived.** Your Cloud did not confirm a single file, so they all stay. A single **Continue** button closes the message.
 
             If there are many files, it also says something like **Android can only ask about 2,000
             files at a time, so this will take 2 separate confirmations.**
@@ -155,7 +155,7 @@ CHAPTER = Chapter(
             • **No** puts the question away. Nothing has been removed, and you can check again later.
 
             ## Where the numbers come from
-            The count is the files your cloud just confirmed. The size is those files' size on your phone.
+            The count is the files your Cloud just confirmed. The size is those files' size on your phone.
             It says "frees" that much once you empty the bin, because the bin keeps the bytes until then.
         """, ui=True),
 
@@ -181,8 +181,8 @@ CHAPTER = Chapter(
         topic("dialog-exit-warning", "Files ready to Archive (the leaving reminder)", """
             ## What it is
             A message that pops up if you try to leave the app with the back gesture while files are
-            checked, confirmed in your cloud and waiting for your approval. It says how many files are
-            **confirmed in your cloud and ready to leave this phone**, and that they stay where they are
+            checked, confirmed in your Cloud and waiting for your approval. It says how many files are
+            **confirmed in your Cloud and ready to leave this phone**, and that they stay where they are
             until you approve the removal.
 
             • **Archive now** takes you to the Archive tab.
@@ -191,7 +191,7 @@ CHAPTER = Chapter(
 
             ## Where it comes from
             The app's check of your Archive albums. The count is files in those albums that are
-            confirmed in your cloud and still on the phone. For now it counts files sent to OneDrive only.
+            confirmed in your Cloud and still on the phone. For now it counts files sent to OneDrive only.
 
             ## Good to know
             It is a reminder, not a guarantee. Android lets an app notice the back gesture and nothing

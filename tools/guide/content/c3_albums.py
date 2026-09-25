@@ -15,7 +15,7 @@ CHAPTER = Chapter(
             ## What happens when you open the tab
             Every time you select the Albums Tab, the app looks at the phone again and asks OneDrive again, so the figures
             are always the current information. You will see the **Rescan** button say
-            **Checking...** while it does. Other clouds are not asked when you open the tab; each one is asked about a file right before that file is shrunk or removed. See [[how-verification-works]].
+            **Checking...** while it does. Other Clouds are not asked when you open the tab; each one is asked about a file right before that file is shrunk or removed. See [[how-verification-works]].
 
             ## Nothing here changes a file by itself
             Choosing a mode is what tells the app what to do with an album. Scrolling, filtering and
@@ -178,23 +178,23 @@ CHAPTER = Chapter(
 
             • **Album name**, for example Camera.
             • **12 files · 340 MB.** How many files the album holds on the phone right now, and their total size. From your phone's media library, inside the chosen folders.
-            • **3 optimised · 4 kept at full size · 2 pending.** A second line that appears only when it has something to say, and shows only the parts that are not zero. Optimised counts files replaced by a smaller copy. Kept at full size counts files Restore has put back and that are still ticked, which GallerySync leaves alone. Pending counts files not yet sent to the Cloud: the number of files on the phone minus the number the app has recorded as sent. **Failed** counts those of the pending files the app has given up on after several attempts; open the album to retry them.
-            • **The cloud line.** The only line that describes the cloud itself. What it says depends on which cloud the album's files went to. See below.
+            • **3 optimised · 4 kept at full size · 2 pending.** A second line that appears only when it has something to say, and shows only the parts that are not zero. Optimised counts files replaced by a smaller copy. Kept at full size counts files Restore has put back and that are still selected, which GallerySync leaves alone. Pending counts files not yet sent to the Cloud: the number of files on the phone minus the number the app has recorded as sent. **Failed** counts those of the pending files the app has given up on after several attempts; open the album to retry them.
+            • **The Cloud line.** The only line that describes the Cloud itself. What it says depends on which Cloud the album's files went to. See below.
             • **All files Archived**, in place of the three lines above, on an Archive album that has nothing left on the phone. This is uncommon now: when an Archive run empties an album, the album leaves this list and its mode is forgotten. See [[modes-in-depth]].
-            • **The mode pill**, at the right, in the mode's colour, with a small arrow. Tap it and choose Off, Backup, Sync or Archive; the current mode is ringed. Choosing Archive first asks you to confirm. See [[dialog-archive-confirm]]. If the cloud an album goes to cannot do that mode, for example Archive for a folder that goes to Google Photos, the album says so, in a line such as **Archive is not available with Google Photos, so nothing happens for this album.**
+            • **The mode pill**, at the right, in the mode's colour, with a small arrow. Tap it and choose Off, Backup, Sync or Archive; the current mode is ringed. Choosing Archive first asks you to confirm. See [[dialog-archive-confirm]]. If the Cloud an album goes to cannot do that mode, for example Archive for a folder that goes to Google Photos, the album says so, in a line such as **Archive is not available with Google Photos, so nothing happens for this album.**
 
             Tap anywhere else on the card to see the album's files. See [[album-detail]].
 
-            ## The cloud line for a OneDrive album
+            ## The Cloud line for a OneDrive album
             • **Not checked against OneDrive yet.** Nobody has asked yet. That is not the same as zero.
             • **Could not reach OneDrive when this was last checked.** The answer is unknown, not bad news.
             • **12 verified in OneDrive**, in green. OneDrive holds every file in the album at the right size.
             • **10 of 12 verified in OneDrive.** Some files are missing there, or are there at a different size.
 
-            OneDrive is asked directly, each time you open the tab or press Rescan. A file counts as **verified** only if OneDrive has a file with the same name in that album's folder **and** reports the same size. It is deliberately not taken from the app's memory of what it once sent, because that memory cannot know if you have since deleted something in your cloud.
+            OneDrive is asked directly, each time you open the tab or press Rescan. A file counts as **verified** only if OneDrive has a file with the same name in that album's folder **and** reports the same size. It is deliberately not taken from the app's memory of what it once sent, because that memory cannot know if you have since deleted something in your Cloud.
 
-            ## The cloud line for any other cloud
-            **15 sent to Backblaze B2**, or Dropbox, Google Drive, IDrive e2, Google Photos or pCloud. If an album's files went to more than one cloud there is one such line for each. It says **sent**, not **verified**, because it is the app's own record: those clouds are not asked when you open the tab. Dropbox, Google Drive, Backblaze B2 and IDrive e2 are asked, one file at a time and right then, before that file is shrunk or removed. See [[how-verification-works]].
+            ## The Cloud line for any other Cloud
+            **15 sent to Backblaze B2**, or Dropbox, Google Drive, IDrive e2, Google Photos or pCloud. If an album's files went to more than one Cloud there is one such line for each. It says **sent**, not **verified**, because it is the app's own record: those Clouds are not asked when you open the tab. Dropbox, Google Drive, Backblaze B2 and IDrive e2 are asked, one file at a time and right then, before that file is shrunk or removed. See [[how-verification-works]].
         """, ui=True),
 
         topic("album-detail", "An album's file list", """
@@ -204,12 +204,12 @@ CHAPTER = Chapter(
             Under the name is a line such as **Backup · 12 files**: its mode and how many files the app
             is tracking. Then the counts ([[album-file-status]]) and, on one line, a **Sort by** box
             ([[album-file-sort]]) and, when some file has one, the **Keep at full size** heading over the
-            tick boxes ([[album-file-pin]]). In the **Camera** album there is also a control to optimise
+            checkboxes ([[album-file-pin]]). In the **Camera** album there is also a control to optimise
             older photos and videos ([[album-camera-optimise]]).
 
             Below the card is one rounded card for each file, in the same style as the Restore tab's
             files. Each shows the file's name and, under it, one line with its size (and **video** if it is
-            a video) followed by its marks. A file that Restore has put back also has a tick box at its
+            a video) followed by its marks. A file that Restore has put back also has a checkbox at its
             right.
 
             If the app has not handled any files in the album yet, it says **No files tracked yet**.
@@ -255,30 +255,30 @@ CHAPTER = Chapter(
 
         topic("album-file-pin", "Keep at full size", """
             ## What it is
-            A tick box at the end of a file in an album's list, under the heading **Keep at full size**.
+            A checkbox at the end of a file in an album's list, under the heading **Keep at full size**.
             It appears only beside files that Restore has put back. A file Restore has not touched has no
-            box. While the box is ticked, GallerySync leaves that one file exactly as it is, whatever
+            box. While the box is selected, GallerySync leaves that one file exactly as it is, whatever
             mode the album is in.
 
-            ## What a tick does
+            ## What selecting it does
             • In a **Sync** album, the file is not replaced by a smaller copy.
             • In an **Archive** album, the file is not moved to the Trash. It stays on the phone, and it is not counted as scheduled to leave.
-            • In a **Backup** or **Off** album it changes nothing today. The tick is remembered, in case you change the album's mode later.
+            • In a **Backup** or **Off** album it changes nothing today. The selection is remembered, in case you change the album's mode later.
 
-            A tick can only make GallerySync do less. It never removes, shrinks or sends anything, so it
+            Selecting it can only make GallerySync do less. It never removes, shrinks or sends anything, so it
             needs no confirmation.
 
-            ## Why Restore ticks them
-            Restore ticks every file it brings back, so a file you have just restored is not shrunk or
-            archived again straight away. Untick it whenever you like. From then on the file follows its
+            ## Why Restore selects them
+            Restore selects every file it brings back, so a file you have just restored is not shrunk or
+            archived again straight away. Deselect it whenever you like. From then on the file follows its
             album's mode again: in a Sync album it can be shrunk the next time optimising runs, and in an
             Archive album it can be offered for archiving again.
 
-            A file you untick keeps its box while the list is open, so a slip can be put right. Once you
-            leave the list, only files that are still ticked show a box.
+            A file you deselect keeps its box while the list is open, so a slip can be put right. Once you
+            leave the list, only files that are still selected show a box.
 
             ## Where it comes from
-            The tick is kept on your phone by GallerySync, for that one file. Ticking does not touch the
+            The selection is kept on your phone by GallerySync, for that one file. Selecting does not touch the
             file itself.
         """, ui=True),
 
@@ -307,7 +307,7 @@ CHAPTER = Chapter(
             was added keeps that setting.
 
             ## Which files are listed
-            • Photos and videos that the Cloud has confirmed, at the same size. A file not yet backed up is never listed. For now this covers files sent to OneDrive: files sent to another cloud are not listed here.
+            • Photos and videos that the Cloud has confirmed, at the same size. A file not yet backed up is never listed. For now this covers files sent to OneDrive: files sent to another Cloud are not listed here.
             • Only files at least as old as the age you chose, by the date your phone holds for each file (the date it was last changed).
             • Photos only if **Optimise photos** is on in Settings, and videos only if **Optimise video** is on. If one is off, the card says so.
             • Not files that have already been made smaller, or that could not be made smaller.
@@ -321,7 +321,7 @@ CHAPTER = Chapter(
             ## Leaving files out
             Swipe right to select and left to deselect, as everywhere in the app. Swipe a file to the left to
             deselect it and keep it at full size: it goes grey and is left out of the count and of the
-            estimate. Swipe it to the right to select it again and put it back on the list. This is the same tick as
+            estimate. Swipe it to the right to select it again and put it back on the list. This is the same choice as
             **Keep at full size** ([[album-file-pin]]), so it can only make the app do less.
 
             ## What the button does
@@ -360,7 +360,7 @@ CHAPTER = Chapter(
         topic("dialog-archive-confirm", "Archive this album?", """
             ## What it is
             A confirmation that appears when you choose **Archive** from an album's mode pill. It says:
-            • Archive will verify all files are uploaded to the cloud.
+            • Archive will verify all files are uploaded to the Cloud.
             • Archived files will be moved to your phone's Trash/Recycle Bin.
             • Please empty your Trash/Recycle Bin to free up storage.
 

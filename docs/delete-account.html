@@ -58,26 +58,43 @@
 <main>
 
   <h1>Delete your account and data</h1>
-  <p class="sub">GallerySync</p>
+  <p class="sub">GallerySync — last updated 25 September 2026</p>
 
   <div class="note">
-    <p><strong>GallerySync does not create an account for you.</strong> You sign in with your
-    existing Microsoft account, and GallerySync only holds a sign-in token on your own device.
-    There is no GallerySync server, and no copy of your data is stored anywhere by us.</p>
+    <p><strong>GallerySync does not create an account for you.</strong> You sign in to your own
+    Cloud accounts (OneDrive, Google, Dropbox, pCloud, IDrive e2, Backblaze B2), and GallerySync only
+    holds a sign-in token or key on your own device. There is no GallerySync server, and no copy of
+    your data is stored anywhere by us.</p>
   </div>
 
   <h2>How to remove your data</h2>
   <ol>
     <li>
-      <strong>Sign out in the app.</strong> Open GallerySync and tap <strong>Sign out</strong>.
-      This removes the app's Microsoft sign-in from your device, so it can no longer reach your
-      OneDrive.
+      <strong>Sign out in the app.</strong> Open GallerySync, go to <strong>Settings</strong>, find
+      <strong>Backup</strong> and tap <strong>Sign out</strong> beside each Cloud you connected. The app
+      warns you first. If some files from that Cloud need restoring, it asks whether to leave them
+      where they are or restore them to your phone first. Signing out removes the app's sign-in or
+      keys for that Cloud from your device, so it can no longer reach that account.
     </li>
     <li>
-      <strong>Revoke GallerySync's access to your Microsoft account.</strong> Go to
-      <a href="https://account.live.com/consent/Manage">account.live.com/consent/Manage</a>,
-      find <strong>GallerySync</strong> in the list, and choose <strong>Remove these
-      permissions</strong>. GallerySync can no longer reach your OneDrive after this.
+      <strong>Withdraw GallerySync's access at the provider.</strong> Do this for each Cloud you used:
+      <ul>
+        <li><strong>OneDrive:</strong> go to
+        <a href="https://account.live.com/consent/Manage">account.live.com/consent/Manage</a>, find
+        <strong>GallerySync</strong>, and choose <strong>Remove these permissions</strong>.</li>
+        <li><strong>Google Drive and Google Photos:</strong> go to
+        <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>,
+        open <strong>GallerySync</strong> under third-party apps and services, and choose
+        <strong>Delete all connections</strong> (the wording may differ slightly).</li>
+        <li><strong>Dropbox:</strong> go to
+        <a href="https://www.dropbox.com/account/connected_apps">dropbox.com/account/connected_apps</a>,
+        find <strong>GallerySync</strong> and choose <strong>Disconnect</strong>.</li>
+        <li><strong>pCloud:</strong> in your pCloud account settings, remove GallerySync from the apps
+        that have access to your account.</li>
+        <li><strong>IDrive e2 and Backblaze B2:</strong> in the provider's own console, delete the
+        access key (IDrive e2) or application key (Backblaze B2) you made for GallerySync. The key stops
+        working immediately.</li>
+      </ul>
     </li>
     <li>
       <strong>Uninstall the app, or clear its storage.</strong> Uninstalling (or choosing
@@ -96,18 +113,18 @@
     </thead>
     <tbody>
       <tr>
-        <td>Microsoft sign-in token</td>
+        <td>Sign-in tokens, and the access keys you typed for IDrive e2 and Backblaze B2</td>
         <td>Encrypted storage on your device</td>
-        <td>Deleted when you sign out or uninstall. Retention period: none.</td>
+        <td>Deleted when you sign out of that Cloud, or uninstall. Retention period: none.</td>
       </tr>
       <tr>
-        <td>Database of your media and their OneDrive copies (names, folders, sizes, dates)</td>
+        <td>Database of your media and their Cloud copies (names, folders, sizes, dates)</td>
         <td>A database on your device</td>
         <td>Deleted when you uninstall or clear the app's storage. It is not cleared by signing out.
         Retention period: none once removed.</td>
       </tr>
       <tr>
-        <td>The app's settings and folder choices</td>
+        <td>The app's settings, folder choices, and the start date of your free trial</td>
         <td>GallerySync's private storage on your device</td>
         <td>Deleted when you uninstall or clear the app's storage. Retention period: none.</td>
       </tr>
@@ -116,29 +133,37 @@
         <td>Your phone's gallery</td>
         <td><strong>Kept.</strong> Removing the app changes none of them. Any that were replaced by
         smaller copies stay as smaller copies, and any moved to your phone's Trash / Recycle Bin stay
-        there until you empty it. The full-size originals are in your OneDrive.</td>
+        there until you empty it. The full-size originals are in your Cloud. To get them back before you
+        remove the app, use Restore, or choose <strong>restore them to the phone first</strong> when you
+        sign out.</td>
       </tr>
       <tr>
-        <td>Your photos and videos in OneDrive</td>
-        <td>Your Microsoft account</td>
+        <td>Your photos and videos in your Cloud accounts</td>
+        <td>Your OneDrive, Google Drive, Google Photos, Dropbox, pCloud, IDrive e2 or Backblaze B2 account</td>
         <td><strong>Kept.</strong> They belong to you. Removing the app or its access does not touch
-        them.</td>
+        them. GallerySync's folders in your Cloud are ordinary folders, and you can delete them there
+        yourself.</td>
+      </tr>
+      <tr>
+        <td>Your Pro purchase, if you made one</td>
+        <td>Google Play</td>
+        <td><strong>Kept by Google Play</strong>, not by GallerySync. It stays with your Google account,
+        so it applies again if you reinstall. Purchases and refunds are managed in Google Play.</td>
       </tr>
     </tbody>
   </table>
 
   <div class="note">
-    <p><strong>GallerySync never permanently deletes anything from your OneDrive.</strong> Removing
-    the app does not remove your photos. If you had turned on the optional setting that asks about
-    OneDrive copies when you delete a photo from your phone, any copies you confirmed were moved to
-    your OneDrive recycle bin, which the app never empties. To delete files stored in OneDrive, use
-    OneDrive itself, or close your Microsoft account at
-    <a href="https://account.microsoft.com/">account.microsoft.com</a>.</p>
+    <p><strong>GallerySync never permanently deletes anything from any Cloud.</strong> Removing
+    the app does not remove your photos. If you had turned on the optional OneDrive setting that asks
+    about OneDrive copies when you delete a photo from your phone, any copies you confirmed were moved
+    to your OneDrive recycle bin, which the app never empties. To delete files stored in a Cloud, use
+    that Cloud's own app or website, or close the account with the provider.</p>
   </div>
 
   <h2>Data held on our servers</h2>
-  <p><strong>None.</strong> GallerySync has no server or backend. It talks only to Microsoft's
-  OneDrive service using your own account. We do not receive, store, or process your photos,
+  <p><strong>None.</strong> GallerySync has no server or backend. It talks only to the Cloud
+  services you connect, using your own accounts. We do not receive, store, or process your photos,
   your file names, or your account details, so there is nothing on our side to delete and no
   retention period to report.</p>
 
@@ -147,7 +172,7 @@
   issue at <a href="https://github.com/iant8055/GallerySync/issues">github.com/iant8055/GallerySync/issues</a>.</p>
 
   <footer>
-    GallerySync — account and data deletion. Last updated 18 September 2026.
+    GallerySync — account and data deletion. Last updated 25 September 2026.
   </footer>
 
 </main>

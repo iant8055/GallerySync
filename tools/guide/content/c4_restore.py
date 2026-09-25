@@ -3,8 +3,8 @@ from model import Chapter, topic
 CHAPTER = Chapter(
     id="restore",
     title="The Restore tab",
-    intro="Restore brings photos and videos back from your cloud to the album they came from. It only "
-          "ever reads from the cloud and writes to your phone, so nothing in your cloud is touched.",
+    intro="Restore brings photos and videos back from your Cloud to the album they came from. It only "
+          "ever reads from the Cloud and writes to your phone, so nothing in your Cloud is touched.",
     topics=[
         topic("restore-overview", "What Restore brings back", """
             Restore lists two kinds of file, side by side in the same folders:
@@ -12,11 +12,11 @@ CHAPTER = Chapter(
             • **To restore.** A photo or video the app has replaced with a smaller copy, and which is still on the phone. Restoring puts the full-size original in its place, in the same album and under the same name.
             • **To download.** A file the app backed up that is no longer in its folder on the phone, most often because its album was archived. Downloading puts it back in the album it came from, under its own name.
 
-            Every file Restore brings back is ticked **Keep at full size**, so it is not shrunk or
-            archived again straight away. You can untick it in the album's file list. See
+            Every file Restore brings back has **Keep at full size** selected, so it is not shrunk or
+            archived again straight away. You can deselect it in the album's file list. See
             [[album-file-pin]].
 
-            ## What your cloud holds
+            ## What your Cloud holds
             • **OneDrive.** Restore lists the photos and videos in your OneDrive backup folders, whoever put them there. It is not limited to what GallerySync uploaded, so an album you archived, a folder from another phone or one added from a computer can all be brought back. Each file goes back into the album with the same name as its OneDrive folder. It is still not a general file browser: only photos and videos, and only in your backup folders.
             • **Dropbox, Google Drive, Backblaze B2 and IDrive e2.** Restore lists what GallerySync sent there from this phone, and fetches each file by the exact address the app recorded when it sent it.
             • **Google Photos and pCloud** cannot be restored from yet.
@@ -47,7 +47,7 @@ CHAPTER = Chapter(
 
             ## Where it comes from
             First the app's own record of what it has optimised or backed up, compared with a look at
-            what is on the phone right now. Then, if OneDrive is one of your clouds, OneDrive itself, folder by folder: **Checking your cloud
+            what is on the phone right now. Then, if OneDrive is one of your Clouds, OneDrive itself, folder by folder: **Checking your Cloud
             for more...** appears under the card while that happens, and anything else OneDrive holds
             is added when it arrives. If a folder cannot be reached the card says so, in red, and the
             list may be incomplete.
@@ -66,7 +66,7 @@ CHAPTER = Chapter(
             One line of text whose wording changes with the situation:
             • **Swipe right to select / left to deselect. Tap to open.** On the folder list.
             • **Swipe right to select / left to deselect → Then press Restore.** Inside a folder. Once you have selected a file, the first half changes to **Swipe left to deselect**. Tapping a file selects or unselects it too. Nothing moves until you press Restore.
-            • **Nothing in your cloud is missing from this phone, so there is nothing to bring back.** When the list is empty.
+            • **Nothing in your Cloud is missing from this phone, so there is nothing to bring back.** When the list is empty.
             • **A result after a restore**, such as **3 back to full quality · 2 back on this phone. 1 unchanged.** or **None recovered. 4 unchanged.** Unchanged means those files were left exactly as they were.
 
             ## Where it comes from
@@ -81,7 +81,7 @@ CHAPTER = Chapter(
             ## Where it comes from
             **Selected** is a count of the files you have chosen across all folders. **To recover** is the
             extra room the restored files will take on your phone: for each file, its full size in
-            the cloud minus what the phone holds now (nothing at all, for a file that has to be downloaded).
+            the Cloud minus what the phone holds now (nothing at all, for a file that has to be downloaded).
 
             ## Good to know
             Make sure the phone has that much free space before you press Restore.
@@ -128,7 +128,7 @@ CHAPTER = Chapter(
             One card per file. **Swipe right** to select it and **swipe left** to deselect it, the same as on the folder list; a selected file is highlighted with a tick. Tapping a card does the same. Repeating a swipe changes nothing.
 
             **The name**, then one of:
-            • **1.2 MB now · 8.4 MB full size.** A smaller copy on the phone, and the size of the original in your cloud. Restoring swaps one for the other.
+            • **1.2 MB now · 8.4 MB full size.** A smaller copy on the phone, and the size of the original in your Cloud. Restoring swaps one for the other.
             • **Available for download · 8.4 MB.** The file is not on the phone at all. Restoring brings it back at this size.
             • **Already on this phone · 8.4 MB.** Greyed out. The phone already has this file at full size, so there is nothing to do. See [[restore-greyed-files]].
 
@@ -137,7 +137,7 @@ CHAPTER = Chapter(
             **When it finishes:**
             • **Restored to full size.** The original replaced the smaller copy.
             • **Back on this phone.** The file was downloaded.
-            • **Could not restore, your file is unchanged**, with the reason in brackets, in red. Nothing was lost. If the reason says to reconnect that cloud, sign in to it again in Settings, and for Dropbox make sure its permissions include reading files.
+            • **Could not restore, your file is unchanged**, with the reason in brackets, in red. Nothing was lost. If the reason says to reconnect that Cloud, sign in to it again in Settings, and for Dropbox make sure its permissions include reading files.
 
             ## Where it comes from
             Names and sizes come from the app's own record, and for OneDrive from its listing of the folder. The percentage comes from the
@@ -151,12 +151,12 @@ CHAPTER = Chapter(
             phone.**
 
             ## Why they are shown at all
-            Your cloud holds every file in the folder. Files the phone already has, at full size, need no
+            Your Cloud holds every file in the folder. Files the phone already has, at full size, need no
             restoring, but leaving them out would make the folder look shorter than it is in OneDrive
             and leave you wondering where they went. So they are listed, and greyed out.
 
             ## Where it comes from
-            The list of what the cloud holds, compared with the photos and videos on the phone, by folder, name and
+            The list of what the Cloud holds, compared with the photos and videos on the phone, by folder, name and
             size. A file counts as here only when all three match.
 
             ## Good to know
@@ -175,8 +175,8 @@ CHAPTER = Chapter(
             While it runs, a progress bar under the button shows how far through you are, for example **3 of 12 restored · 45%**, and each file's own row shows its percentage.
 
             ## What happens
-            Each file is downloaded from the cloud it was sent to, checked, and only then put in place. It needs an
-            internet connection and enough free space. Your cloud is only read, never changed.
+            Each file is downloaded from the Cloud it was sent to, checked, and only then put in place. It needs an
+            internet connection and enough free space. Your Cloud is only read, never changed.
         """),
     ],
 )

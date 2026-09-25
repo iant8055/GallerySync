@@ -74,12 +74,12 @@ class DownloadMissingFile @Inject constructor(
             entry.sizeBytes
         } else {
             entry.remoteSizeBytes
-                ?: return@withContext RestoreInPlaceResult.Failed("no cloud size recorded")
+                ?: return@withContext RestoreInPlaceResult.Failed("no Cloud size recorded")
         }
 
         val opened = if (viaOtherCloud) {
             val downloader = downloaders.of(entry.location)
-                ?: return@withContext RestoreInPlaceResult.Failed("restoring from that cloud is not available yet")
+                ?: return@withContext RestoreInPlaceResult.Failed("restoring from that Cloud is not available yet")
             downloader.openStream(remoteItemId)
         } else {
             repository.openStream(remoteItemId)
@@ -92,7 +92,7 @@ class DownloadMissingFile @Inject constructor(
                 return@withContext when {
                     gone -> RestoreInPlaceResult.GoneFromCloud
                     viaOtherCloud && opened.error == RemoteError.Unauthorized ->
-                        RestoreInPlaceResult.Failed("reconnect that cloud in Settings, and make sure its sign-in or keys allow reading")
+                        RestoreInPlaceResult.Failed("reconnect that Cloud in Settings, and make sure its sign-in or keys allow reading")
                     viaOtherCloud -> RestoreInPlaceResult.Failed("could not reach the cloud")
                     else -> RestoreInPlaceResult.Failed("could not reach OneDrive")
                 }

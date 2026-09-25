@@ -59,28 +59,39 @@
 <main>
 
   <h1>Privacy Policy</h1>
-  <p class="sub">GallerySync — last updated 18 September 2026</p>
+  <p class="sub">GallerySync — last updated 25 September 2026</p>
 
   <div class="note">
-    <p><strong>The short version.</strong> GallerySync sends your photos and videos to your own
-    Microsoft OneDrive account and nowhere else. The developer operates no server, receives none
-    of your data, and cannot see your photos, your file names, or your account. There is no
-    analytics, no advertising, and no tracking of any kind. GallerySync can also change files on
-    your phone and, if you allow it, in your OneDrive &mdash; but only in the ways you choose, and
-    never by permanently deleting anything. <a href="#changes">See exactly what it can change.</a></p>
+    <p><strong>The short version.</strong> GallerySync sends your photos and videos to Cloud
+    storage that <strong>you</strong> choose and own, and nowhere else. The developer operates no
+    server, receives none of your data, and cannot see your photos, your file names, or your
+    accounts. There is no analytics, no advertising, and no tracking of any kind. GallerySync can
+    also change files on your phone, but only in the ways you choose, and it never permanently
+    deletes anything. <a href="#changes">See exactly what it can change.</a></p>
   </div>
 
   <h2>What the app does with your data</h2>
-  <p>GallerySync backs up photos and videos from your device to <strong>your own</strong> OneDrive
-  account. To do that it needs to read the media on your device and to sign in to your Microsoft
-  account.</p>
-  <p>Depending on the choices you make, it can also free up space on your phone once a file is safely
-  in OneDrive, and bring full-size originals back from OneDrive to your phone. Each of these is
-  described under <a href="#changes">What GallerySync can change</a> below.</p>
-  <p>Your photos travel from your device directly to Microsoft's OneDrive service over an encrypted
+  <p>GallerySync backs up photos and videos from your device to <strong>your own</strong> Cloud
+  accounts. To do that it needs to read the media on your device and to sign in to the Cloud
+  services you connect. You can connect any of these:</p>
+  <ul>
+    <li>Microsoft OneDrive</li>
+    <li>Google Drive</li>
+    <li>Google Photos (backup only)</li>
+    <li>Dropbox</li>
+    <li>pCloud (backup only)</li>
+    <li>IDrive e2</li>
+    <li>Backblaze B2</li>
+  </ul>
+  <p>You choose which of your folders goes to which Cloud. Nothing is sent anywhere until you have
+  connected a Cloud and chosen folders.</p>
+  <p>Depending on the choices you make, it can also free up space on your phone once a file is
+  confirmed to be safe in your Cloud, and bring full-size originals back from your Cloud to your
+  phone. Each of these is described under <a href="#changes">What GallerySync can change</a> below.</p>
+  <p>Your photos travel from your device directly to the Cloud service you chose, over an encrypted
   connection. They do not pass through any server belonging to the developer, because no such
-  server exists. Files are uploaded exactly as they are, so they keep whatever information is
-  stored inside them, such as the date, camera details and location.</p>
+  server exists. Files are uploaded exactly as they are, so they keep whatever information is stored
+  inside them, such as the date, camera details and location.</p>
 
   <h2>Data the app handles</h2>
   <table>
@@ -91,32 +102,42 @@
       <tr>
         <td>Photos and videos on your device</td>
         <td>To back them up, at your direction</td>
-        <td>Your OneDrive account. Nowhere else.</td>
+        <td>The Cloud you chose for that folder. Nowhere else.</td>
       </tr>
       <tr>
-        <td>Photos and videos in your OneDrive</td>
+        <td>Photos and videos in your Cloud</td>
         <td>To bring full-size originals back to your phone when you ask</td>
-        <td>Downloaded from your OneDrive to your device</td>
+        <td>Downloaded from your Cloud to your device</td>
       </tr>
       <tr>
-        <td>Names, folders, sizes and dates of your media, and the matching items in your OneDrive</td>
+        <td>Names, folders, sizes and dates of your media, and the matching items in your Cloud</td>
         <td>To know what is already backed up, and what still needs backing up</td>
         <td>A database on your device only</td>
       </tr>
       <tr>
-        <td>Your choices: which folders and albums to use, and the app's settings</td>
+        <td>Your choices: which folders and albums to use, which Cloud each goes to, and the app's settings</td>
         <td>To do what you asked, and to remember it</td>
         <td>Your device only</td>
       </tr>
       <tr>
-        <td>Microsoft sign-in token</td>
-        <td>To access your OneDrive on your behalf</td>
+        <td>Sign-in tokens for OneDrive, Google, Dropbox and pCloud</td>
+        <td>To access your Cloud on your behalf</td>
         <td>Encrypted storage on your device only</td>
       </tr>
       <tr>
-        <td>Your Microsoft account email</td>
+        <td>For IDrive e2 and Backblaze B2: the access key and secret key you type into the app, the bucket name and, for IDrive e2, the endpoint</td>
+        <td>To reach your bucket on your behalf</td>
+        <td>Encrypted storage on your device only</td>
+      </tr>
+      <tr>
+        <td>The name of each connected Cloud account, where the Cloud provides one</td>
         <td>Shown in the app so you know which account is connected</td>
         <td>Displayed on your device only</td>
+      </tr>
+      <tr>
+        <td>The date your free 30-day trial began</td>
+        <td>To know when the trial ends</td>
+        <td>Your device only</td>
       </tr>
     </tbody>
   </table>
@@ -128,15 +149,31 @@
   you anywhere.</p>
 
   <h2>Third parties</h2>
-  <p>GallerySync communicates with <strong>Microsoft</strong> &mdash; to sign you in, and to reach
-  the OneDrive account you sign in with. That is the only network destination the app uses.
-  Microsoft's handling of the data you store with them is governed by the
-  <a href="https://privacy.microsoft.com/privacystatement">Microsoft Privacy Statement</a>.</p>
-  <p>Signing in uses Microsoft's official authentication library. Your password is never seen by
-  GallerySync — you enter it on Microsoft's own sign-in page, and the app only ever receives a
-  token that grants access to your files. GallerySync asks for permission to read and write files
-  in your OneDrive (the Microsoft <code>Files.ReadWrite</code> scope), which is what lets it
-  upload, and bring files back. It does not ask for access to other people's or shared drives.</p>
+  <p>GallerySync communicates only with the Cloud services <strong>you</strong> connect, to sign you
+  in and to reach the account you sign in with, and with Google Play for the purchase described
+  below. Each provider's handling of the data you store with them is governed by its own privacy
+  policy: Microsoft, Google, Dropbox, pCloud, IDrive and Backblaze.</p>
+  <p>For OneDrive, Google Drive, Google Photos, Dropbox and pCloud you sign in on the provider's own
+  page, in your phone's browser. Your password is never seen by GallerySync: the app only ever
+  receives a token that grants the access described below. You can withdraw that access at any time,
+  as described on the <a href="delete-account.html">account and data deletion page</a>.</p>
+  <ul>
+    <li><strong>OneDrive</strong> — read and write files (the Microsoft <code>Files.ReadWrite</code>
+    permission). It does not ask for access to other people's or shared drives.</li>
+    <li><strong>Google Drive</strong> — the <code>drive.file</code> permission only, which lets the app
+    see and change only the files it created itself. It cannot see the rest of your Drive.</li>
+    <li><strong>Google Photos</strong> — permission to add photos and videos, and to read only the
+    ones this app added. It cannot see the rest of your Google Photos library.</li>
+    <li><strong>Dropbox</strong> — permission to read and write files.</li>
+    <li><strong>pCloud</strong> — the access pCloud grants when you approve the app's sign-in.</li>
+    <li><strong>IDrive e2 and Backblaze B2</strong> — these have no sign-in page. You create an access
+    key in the provider's own console and type it into the app. We recommend a key limited to the one
+    bucket you use for GallerySync.</li>
+  </ul>
+  <p><strong>Purchases.</strong> You will receive a 30 Day Free Trial of the GallerySync Pro Version.
+  After your free 30 days you can continue with the Pro Version through a one-time purchase.
+  The purchase is made and processed by Google Play. GallerySync only asks Google Play
+  whether it has been made. Your payment details never reach the app or the developer.</p>
   <p>The app contains <strong>no analytics, no crash reporting, no advertising SDKs</strong>, and no
   other third-party service that collects or transmits your data. If you have chosen to share usage
   and diagnostic data with Google on your device, Google Play may give the developer anonymous crash
@@ -152,68 +189,74 @@
     those folders. Write access is what lets the app replace a photo with a smaller copy, or bring an
     original back, without asking you every time. It is limited to the folders you chose, and you
     can revoke it in Android's settings.</li>
-    <li><strong>Internet and network state</strong> — to upload to OneDrive, and to wait for a
+    <li><strong>Internet and network state</strong> — to upload to your Cloud, and to wait for a
     suitable connection before doing so. By default the app uses Wi-Fi only.</li>
+    <li><strong>Notifications</strong> — used only for the optional <em>Notify when files are ready to
+    archive</em> setting, which is off by default. The app asks for this permission only if you turn
+    that setting on.</li>
   </ul>
   <p>The app does not ask for access to your contacts, location, microphone, camera, calendar or
-  messages, and it does not send notifications.</p>
+  messages.</p>
   <p>You choose which albums are used, and what happens to each one. Albums you leave switched
   off are not backed up.</p>
 
   <h2 id="changes">What GallerySync can change</h2>
-  <p>Backing up only adds copies to your OneDrive and touches nothing on your phone. The changes below
+  <p>Backing up only adds copies to your Cloud and touches nothing on your phone. The changes below
   happen only if you switch them on, and none of them permanently deletes anything.</p>
 
   <h3>On your phone</h3>
   <ul>
-    <li><strong>Smaller copies (Optimise) — off unless you turn it on.</strong> Once the full-size
-    file is confirmed in your OneDrive, the app can replace a photo with a smaller copy (reduced to
-    about 2048 pixels, marked with a small cloud icon) and re-encode a video at a lower resolution.
-    This happens in albums you set to Sync, or, if you choose it during first-time setup, once across
-    the folders you selected there. The full-size original stays in your OneDrive, and the app can
-    bring it back.</li>
-    <li><strong>Archive — only for albums you set to Archive.</strong> The app checks that OneDrive
-    holds a file of the same name and size, then asks Android to move your phone's copy to the
-    phone's Trash / Recycle Bin. Android shows its own confirmation. How long the trash keeps
-    files is decided by Android, not by the app. The space is only returned once the trash is
-    emptied, and <strong>the app never empties it</strong> &mdash; you do.</li>
-    <li><strong>Restore.</strong> The app can download a full-size original from your OneDrive and put
+    <li><strong>Smaller copies (Sync) — only for albums you set to Sync.</strong> Once the
+    full-size file is confirmed in your Cloud, the app can replace a photo with a smaller copy
+    (reduced to about 2048 pixels, marked with a small cloud icon) and re-encode a video at a lower
+    resolution. The full-size original stays in your Cloud, and the app can bring it back. If you choose it during first-time setup, the same can be done once across the folders you selected there.</li>
+    <li><strong>Archive — only for albums you set to Archive.</strong> The app asks your Cloud,
+    at that moment, whether it holds the file at exactly the same size, then asks Android to move
+    your phone's copy to the phone's Trash / Recycle Bin. If the Cloud cannot be asked, nothing is
+    removed. Android shows its own confirmation. How long the trash keeps files is decided by
+    Android, not by the app. The space is only returned once the trash is emptied, and
+    <strong>the app never empties it</strong> &mdash; you do.</li>
+    <li><strong>Restore.</strong> The app can download a full-size original from your Cloud and put
     it back on your phone, in place of the smaller copy or in the album it came from.</li>
   </ul>
+  <p>Sync, Archive and Restore work with OneDrive, Google Drive, Dropbox, IDrive e2 and Backblaze B2.
+  Google Photos and pCloud are backup only.</p>
 
-  <h3>In your OneDrive</h3>
+  <h3>In your Cloud</h3>
   <ul>
-    <li>The app adds copies of your files, and creates folders to hold them. By default it uses a
-    folder named <em>Samsung Gallery / DCIM</em>, matching the layout Samsung's own sync used; you can
-    choose another. It does not overwrite a file that is already there &mdash; a second file with the
-    same name is saved alongside it.</li>
-    <li><strong>By default it never removes anything from OneDrive.</strong> There is an optional
-    setting for what to do when you delete a photo from your phone. If you choose to be asked, the app
-    waits (a week, by default), then shows you a list of the OneDrive copies whose phone files are gone,
-    and moves them to your <strong>OneDrive recycle bin</strong> only after you review the list and
-    confirm. It never empties that recycle bin either.</li>
+    <li>The app adds copies of your files, and creates folders to hold them, named for the album they
+    came from. In Google Drive, Dropbox and pCloud these sit inside a folder named
+    <em>GallerySync</em>. In OneDrive the default is a folder named <em>Samsung Gallery / DCIM</em>,
+    matching the layout Samsung's own sync used.</li>
+    <li><strong>The app never removes anything from your Cloud.</strong> There is one optional
+    setting, for OneDrive only, for what to do when you delete a photo from your phone. If you choose
+    to be asked, the app shows you a list of the OneDrive copies whose phone files are gone, and moves
+    them to your <strong>OneDrive recycle bin</strong> only after you review the list and confirm. It
+    never empties that recycle bin either.</li>
   </ul>
 
   <div class="note">
-    <p>GallerySync never permanently deletes a file, on your phone or in OneDrive. Anything it
+    <p>GallerySync never permanently deletes a file, on your phone or in any Cloud. Anything it
     removes goes to a trash or recycle bin that you can recover it from, and that only you empty.
-    The copy confirmed in your OneDrive is what protects you; the phone's trash is Android's own
+    The copy confirmed in your Cloud is what protects you; the phone's trash is Android's own
     behaviour and may differ between phones.</p>
   </div>
 
   <h2>Storage on your device</h2>
-  <p>GallerySync keeps a local database describing your media and its OneDrive copies, and stores your
+  <p>GallerySync keeps a local database describing your media and its Cloud copies, and stores your
   settings and folder choices. This data lives in the app's private storage, is not readable by other
   apps, and is protected by your device's encryption. The app does not offer your files or this
   database to other apps.</p>
-  <p>Android's automatic backup to your Google account may include the app's settings. It does not
-  include your Microsoft sign-in or the file database, which the app excludes on purpose.</p>
+  <p>Android's automatic backup to your Google account may include some of the app's settings. It does
+  not include your sign-ins, your keys, or the file database, which the app excludes on purpose.</p>
 
   <h2>Deleting your data</h2>
-  <p>You can sign out at any time, which removes the app's Microsoft sign-in from your device.
-  Uninstalling the app, or clearing its storage in Android's settings, removes the local database and
-  settings. Your files in OneDrive stay where they are &mdash; they are yours. Full instructions,
-  including how to revoke the app's access to your Microsoft account, are on the
+  <p>You can sign out of any Cloud at any time in <strong>Settings</strong>. That removes the app's
+  sign-in or keys for that Cloud from your device. If files from that Cloud need restoring, the app
+  first asks whether to leave them there or restore them to your phone. Uninstalling the app, or
+  clearing its storage in Android's settings, removes the local database and settings. Your files in
+  your Cloud stay where they are &mdash; they are yours. Full instructions, including how to withdraw
+  the app's access at each provider, are on the
   <a href="delete-account.html">account and data deletion page</a>.</p>
 
   <h2>Children</h2>
@@ -229,7 +272,7 @@
   <a href="https://github.com/iant8055/GallerySync/issues">github.com/iant8055/GallerySync/issues</a>.</p>
 
   <footer>
-    GallerySync — Privacy Policy. Last updated 18 September 2026.
+    GallerySync — Privacy Policy. Last updated 25 September 2026.
   </footer>
 
 </main>
