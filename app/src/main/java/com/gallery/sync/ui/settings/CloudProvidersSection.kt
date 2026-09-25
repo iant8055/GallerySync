@@ -10,6 +10,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -21,6 +22,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -32,6 +34,7 @@ import com.gallery.sync.data.remote.cloud.ConnectionKind
 import com.gallery.sync.domain.backup.BackupLocation
 import com.gallery.sync.domain.billing.MultiCloudTrial
 import com.gallery.sync.ui.common.LabelWithAction
+import com.gallery.sync.ui.common.formatBytes
 import com.gallery.sync.ui.common.labelRes
 import com.gallery.sync.ui.help.HelpTopic
 import com.gallery.sync.ui.help.WithHelp
@@ -59,6 +62,16 @@ fun CloudProvidersSection(
     val activity = LocalActivity.current
     var keysFor by remember { mutableStateOf<ProviderState?>(null) }
 
+    state.signOut?.let { question ->
+        SignOutDialog(
+            question = question,
+            onContinue = viewModel::continueSignOut,
+            onLeave = viewModel::signOutLeavingFiles,
+            onRestore = viewModel::restoreThenSignOut,
+            onCancel = viewModel::cancelSignOut
+        )
+    }
+
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         if (showTitle) {
             // The (?) is the old Account topic: what signing in and out does. The Account row it belonged to
@@ -76,7 +89,7 @@ fun CloudProvidersSection(
                 action = {
                     when {
                         state.isBusy -> BusyIndicator()
-                        provider.isConnected -> OutlinedButton(onClick = { viewModel.disconnect(provider.location) }) {
+                        provider.isConnected -> OutlinedButton(onClick = { viewModel.requestSignOut(provider.location) }) {
                             Text(stringResource(R.string.sign_out_action))
                         }
                         provider.kind == ConnectionKind.ACCESS_KEYS -> Button(onClick = { keysFor = provider }) {
@@ -171,6 +184,90 @@ fun CloudProvidersSection(
                 keysFor = null
             },
             onDismiss = { keysFor = null }
+        )
+    }
+}
+
+/**
+ * What to do with a cloud's files when signing out of it (Ian, 25 Sept 2026): leave them, or bring them back to the
+ * phone first. Nothing else is offered, and nothing here moves a folder's pairing or removes a file anywhere.
+ */
+@Composable
+private fun SignOutDialog(
+    question: SignOutState,
+    onContinue: () -> Unit,
+    onLeave: () -> Unit,
+    onRestore: () -> Unit,
+    onCancel: () -> Unit
+) {
+    val cloud = stringResource(question.location.labelRes())
+    when (question) {
+        is SignOutState.Warning -> AlertDialog(
+            onDismissRequest = onCancel,
+            title = { Text(stringResource(R.string.cloud_signout_title, cloud)) },
+            text = { Text(stringResource(R.string.cloud_signout_warning, cloud)) },
+            confirmButton = {
+                TextButton(onClick = onContinue) { Text(stringResource(R.string.sign_out_action)) }
+            },
+            dismissButton = {
+                TextButton(onClick = onCancel) { Text(stringResource(R.string.cloud_cancel)) }
+            }
+        )
+
+        is SignOutState.Asking -> AlertDialog(
+            onDismissRequest = onCancel,
+            title = { Text(stringResource(R.string.cloud_signout_files_title)) },
+            text = {
+                Text(
+                    stringResource(
+                        R.string.cloud_signout_body,
+                        question.files,
+                        formatBytes(LocalContext.current, question.bytes)
+                    )
+                )
+            },
+            confirmButton = {
+                Column(horizontalAlignment = androidx.compose.ui.Alignment.End) {
+                    TextButton(onClick = onRestore) { Text(stringResource(R.string.cloud_signout_restore)) }
+                    TextButton(onClick = onLeave) { Text(stringResource(R.string.cloud_signout_leave)) }
+                    TextButton(onClick = onCancel) { Text(stringResource(R.string.cloud_cancel)) }
+                }
+            }
+        )
+
+        // No dismiss: a tap outside must not look like a stop. The button says what it does.
+        is SignOutState.Restoring -> AlertDialog(
+            onDismissRequest = {},
+            title = { Text(stringResource(R.string.cloud_signout_restoring_title, cloud)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    LinearProgressIndicator(
+                        progress = { if (question.total == 0) 0f else question.finished.toFloat() / question.total },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Text(stringResource(R.string.cloud_signout_restoring_progress, question.finished, question.total))
+                    if (question.current.isNotEmpty()) {
+                        Text(question.current, style = MaterialTheme.typography.bodySmall)
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = onCancel) { Text(stringResource(R.string.cloud_signout_stop)) }
+            }
+        )
+
+        is SignOutState.Incomplete -> AlertDialog(
+            onDismissRequest = onCancel,
+            title = { Text(stringResource(R.string.cloud_signout_incomplete_title)) },
+            text = {
+                Text(stringResource(R.string.cloud_signout_incomplete_body, question.restored, question.failed, cloud))
+            },
+            confirmButton = {
+                Column(horizontalAlignment = androidx.compose.ui.Alignment.End) {
+                    TextButton(onClick = onCancel) { Text(stringResource(R.string.cloud_signout_stay)) }
+                    TextButton(onClick = onLeave) { Text(stringResource(R.string.cloud_signout_anyway)) }
+                }
+            }
         )
     }
 }

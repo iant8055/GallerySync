@@ -11,12 +11,15 @@ import com.gallery.sync.data.remote.cloud.CloudConnections
 import com.gallery.sync.data.remote.cloud.ConnectionKind
 import com.gallery.sync.data.remote.cloud.KeyField
 import com.gallery.sync.domain.backup.BackupLocation
+import com.gallery.sync.domain.backup.RestoreEverythingFrom
 import com.gallery.sync.domain.billing.BillingRepository
 import com.gallery.sync.domain.billing.MultiCloudEntitlement
 import com.gallery.sync.domain.billing.MultiCloudTrial
 import com.gallery.sync.domain.billing.PurchaseOutcome
 import com.gallery.sync.util.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,6 +35,28 @@ data class ProviderState(
     val keyFields: List<KeyField> = emptyList()
 ) {
     val isConnected: Boolean get() = accountLabel != null
+}
+
+/** Where the "what do you want to do with the files there?" question has got to. */
+sealed interface SignOutState {
+    val location: BackupLocation
+
+    /** The first step: what signing out means, before anything else is asked. */
+    data class Warning(override val location: BackupLocation) : SignOutState
+
+    /** Asking. [files] and [bytes] are what "restore them" would bring back to full size on this phone. */
+    data class Asking(override val location: BackupLocation, val files: Int, val bytes: Long) : SignOutState
+
+    /** Restoring first; the sign-out follows once every file is back. */
+    data class Restoring(
+        override val location: BackupLocation,
+        val finished: Int,
+        val total: Int,
+        val current: String
+    ) : SignOutState
+
+    /** Some files could not be restored, so the app has not signed out and lets the user decide. */
+    data class Incomplete(override val location: BackupLocation, val restored: Int, val failed: Int) : SignOutState
 }
 
 /**
@@ -51,7 +76,9 @@ data class CloudProvidersUiState(
     /** False until the first refresh has read what is connected, so the app does not flash the wizard. */
     val loaded: Boolean = false,
     /** Whether the "which cloud do you want to keep free?" question has been answered. */
-    val keepFreeAnswered: Boolean = false
+    val keepFreeAnswered: Boolean = false,
+    /** The question shown when the user signs out of a cloud that holds files; null when none is open. */
+    val signOut: SignOutState? = null
 ) {
     val connected: List<ProviderState> get() = providers.filter { it.isConnected }
 
@@ -94,8 +121,11 @@ class CloudProvidersViewModel @Inject constructor(
     private val settings: BackupSettings,
     private val folderDao: FolderPreferenceDao,
     private val entryDao: BackupEntryDao,
-    private val entitlement: MultiCloudEntitlement
+    private val entitlement: MultiCloudEntitlement,
+    private val restoreEverything: RestoreEverythingFrom
 ) : ViewModel() {
+
+    private var restoreJob: Job? = null
 
     private val _state = MutableStateFlow(CloudProvidersUiState())
     val state: StateFlow<CloudProvidersUiState> = _state.asStateFlow()
@@ -180,6 +210,75 @@ class CloudProvidersViewModel @Inject constructor(
             settings.setBackupLocation(location)
             settings.setKeepFreeAnswered()
             refresh()
+        }
+    }
+
+    /**
+     * The sign-out button. Opens a warning first; nothing happens until the user goes on from it (Ian, 25 Sept
+     * 2026). See [continueSignOut].
+     */
+    fun requestSignOut(location: BackupLocation) {
+        _state.value = _state.value.copy(signOut = SignOutState.Warning(location))
+    }
+
+    /**
+     * Past the warning. When the cloud holds files that are not at full size on this phone, ask what to do with
+     * them; with nothing to bring back there is nothing to decide, so it signs out at once. Either way no pairing
+     * moves: see [disconnect].
+     */
+    fun continueSignOut() {
+        val location = _state.value.signOut?.location ?: return
+        viewModelScope.launch {
+            val plan = restoreEverything.plan(location)
+            if (plan.total == 0) {
+                _state.value = _state.value.copy(signOut = null)
+                disconnect(location)
+            } else {
+                _state.value = _state.value.copy(signOut = SignOutState.Asking(location, plan.total, plan.bytes))
+            }
+        }
+    }
+
+    /** Closes the question, or Stops a restore in flight; either way the app stays signed in. */
+    fun cancelSignOut() {
+        restoreJob?.cancel()
+        restoreJob = null
+        _state.value = _state.value.copy(signOut = null)
+    }
+
+    /** "Leave them": sign out and touch nothing. */
+    fun signOutLeavingFiles() {
+        val location = _state.value.signOut?.location ?: return
+        _state.value = _state.value.copy(signOut = null)
+        disconnect(location)
+    }
+
+    /**
+     * "Restore them to the phone": bring every file back while still signed in, then sign out. If any file could
+     * not be restored the app stays signed in and says so, because signing out would end the chance to fetch it.
+     */
+    fun restoreThenSignOut() {
+        val location = _state.value.signOut?.location ?: return
+        if (restoreJob?.isActive == true) return
+        restoreJob = viewModelScope.launch {
+            try {
+                val plan = restoreEverything.plan(location)
+                _state.value = _state.value.copy(signOut = SignOutState.Restoring(location, 0, plan.total, ""))
+                val outcome = restoreEverything.run(plan) { finished, total, current ->
+                    _state.value = _state.value.copy(signOut = SignOutState.Restoring(location, finished, total, current))
+                }
+                if (outcome.failed == 0) {
+                    _state.value = _state.value.copy(signOut = null)
+                    disconnect(location)
+                } else {
+                    _state.value = _state.value.copy(
+                        signOut = SignOutState.Incomplete(location, outcome.restored + outcome.downloaded, outcome.failed)
+                    )
+                }
+            } catch (e: CancellationException) {
+                _state.value = _state.value.copy(signOut = null)
+                throw e
+            }
         }
     }
 
