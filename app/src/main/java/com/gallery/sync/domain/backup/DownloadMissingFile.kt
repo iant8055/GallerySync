@@ -8,6 +8,8 @@ import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.entity.backupKeyOf
 import com.gallery.sync.data.local.media.MediaStoreWriter
+import com.gallery.sync.data.local.media.RestoreFolder
+import com.gallery.sync.data.local.media.SafMediaWriter
 import com.gallery.sync.data.local.media.WriteOutcome
 import com.gallery.sync.di.IoDispatcher
 import com.gallery.sync.domain.model.DataResult
@@ -53,6 +55,7 @@ class DownloadMissingFile @Inject constructor(
     private val repository: OneDriveRepository,
     private val downloaders: CloudDownloaders,
     private val writer: MediaStoreWriter,
+    private val safWriter: SafMediaWriter,
     private val entryDao: BackupEntryDao,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
 ) {
@@ -101,19 +104,41 @@ class DownloadMissingFile @Inject constructor(
 
         // Straight to the album it came from. `expectedBytes` makes the writer reject a short read
         // and discard the half-written row rather than publishing a truncated photo.
-        val outcome = writer.write(
-            displayName = entry.displayName,
-            mimeType = entry.mimeType,
-            relativePath = if (viaOtherCloud) {
-                deviceRelativePathOf(entry.album, entry.isVideo) ?: relativePathFor(entry.album)
-            } else {
-                relativePathFor(entry.album)
-            },
-            isVideo = entry.isVideo,
-            expectedBytes = expected,
-            onProgress = { written -> onProgress(written, expected) },
-            source = { stream }
-        )
+        //
+        // **Into the folder it left, when Android would refuse it there (Ian, 25 Sept 2026).** MediaStore only
+        // creates photos under DCIM or Pictures, so an album at the top of the storage used to come back into
+        // DCIM/<album>: a second folder, and one routed to whatever cloud DCIM goes to. The user's own folder
+        // grant can write there instead, with no dialog, so it is tried first for exactly those albums. The
+        // MediaStore route below is unchanged for everything else, and is the fallback when the grant cannot
+        // be used before anything has been read.
+        val treeFolder = runCatching { safWriter.restoreFolderFor(entry.album, entry.isVideo) }.getOrNull()
+        val viaTree = treeFolder?.let { folder ->
+            safWriter.createFile(
+                folderRelativePath = folder,
+                displayName = entry.displayName,
+                mimeType = entry.mimeType,
+                expectedBytes = expected,
+                onProgress = { written -> onProgress(written, expected) },
+                source = { stream }
+            )
+        }
+        val outcome = if (viaTree != null && viaTree !is WriteOutcome.Unsupported) {
+            viaTree
+        } else {
+            writer.write(
+                displayName = entry.displayName,
+                mimeType = entry.mimeType,
+                relativePath = if (viaOtherCloud) {
+                    deviceRelativePathOf(entry.album, entry.isVideo) ?: relativePathFor(entry.album)
+                } else {
+                    relativePathFor(entry.album)
+                },
+                isVideo = entry.isVideo,
+                expectedBytes = expected,
+                onProgress = { written -> onProgress(written, expected) },
+                source = { stream }
+            )
+        }
 
         when (outcome) {
             is WriteOutcome.Success -> {
@@ -228,11 +253,8 @@ class DownloadMissingFile @Inject constructor(
         )?.use { cursor -> if (cursor.moveToFirst()) cursor.getString(0) else null }
     }.getOrNull()?.takeIf { isWritableRoot(it, isVideo) }
 
-    private fun isWritableRoot(relativePath: String, isVideo: Boolean): Boolean {
-        val primary = relativePath.substringBefore('/')
-        val allowed = if (isVideo) listOf("DCIM", "Movies") else listOf("DCIM", "Pictures")
-        return primary in allowed
-    }
+    private fun isWritableRoot(relativePath: String, isVideo: Boolean): Boolean =
+        RestoreFolder.isWritableRoot(relativePath, isVideo)
 
     private companion object {
         const val TAG = "DownloadMissing"

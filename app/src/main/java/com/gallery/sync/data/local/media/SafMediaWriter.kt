@@ -6,11 +6,17 @@ import android.net.Uri
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.provider.MediaStore
+import java.io.File
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeoutOrNull
 import com.gallery.sync.di.IoDispatcher
 import com.gallery.sync.util.Logger
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import java.io.InputStream
 import java.io.OutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -199,9 +205,183 @@ class SafMediaWriter @Inject constructor(
         return normalisedPath == normalisedRoot || normalisedPath.startsWith("$normalisedRoot/")
     }
 
+
+    // ---- Creating a file where it came from ------------------------------------------------------
+
+    /**
+     * The granted folder an album's restored files should go back into, or null when `MediaStore` can
+     * take them. See [RestoreFolder] for why, and for which folders qualify.
+     */
+    suspend fun restoreFolderFor(album: String, isVideo: Boolean): String? = withContext(dispatcher) {
+        val granted = scopedDirectories.current().filter { it.volume == PRIMARY_VOLUME }
+        RestoreFolder.pick(
+            album = album,
+            isVideo = isVideo,
+            grantedPaths = granted.map { it.relativePath },
+            subFolders = { folder -> subFoldersOf(granted, folder) }
+        )
+    }
+
+    /**
+     * Creates a new file in [folderRelativePath] through the granted tree, fills it from [source], and
+     * returns where MediaStore now has it.
+     *
+     * Nothing here deletes. **[WriteOutcome.Unsupported] means this route is not available for that folder
+     * and nothing was read from [source]**, so the caller can still use the `MediaStore` route with the same
+     * stream. Any other failure comes after the source was read.
+     *
+     * The download goes to a temporary file in the app's own cache first and is checked against
+     * [expectedBytes] before anything appears in the user's folder. That is deliberate: a tree grant cannot
+     * take back a half-written file (deleting through it is forbidden), so a short read has to be caught
+     * while the only thing that exists is the app's own temporary copy.
+     *
+     * If the name is taken, the provider names the new file `photo (1).jpg` rather than overwriting.
+     */
+    suspend fun createFile(
+        folderRelativePath: String,
+        displayName: String,
+        mimeType: String,
+        expectedBytes: Long,
+        onProgress: (bytesWritten: Long) -> Unit = {},
+        source: () -> InputStream
+    ): WriteOutcome = withContext(dispatcher) {
+        val granted = scopedDirectories.current().filter { it.volume == PRIMARY_VOLUME }
+            .firstOrNull { covers(it.relativePath, folderRelativePath) }
+            ?: return@withContext WriteOutcome.Unsupported
+        val treeUri = Uri.parse(granted.treeUri)
+        val parent = ensureFolder(granted, treeUri, folderRelativePath)
+            ?: return@withContext WriteOutcome.Unsupported
+
+        val temp = File.createTempFile("restore-", ".part", context.cacheDir)
+        try {
+            var total = 0L
+            try {
+                temp.outputStream().use { out ->
+                    source().use { input ->
+                        val buffer = ByteArray(BUFFER_BYTES)
+                        while (true) {
+                            // A stop means stop, mid-file, the same as the MediaStore route.
+                            currentCoroutineContext().ensureActive()
+                            val read = input.read(buffer)
+                            if (read <= 0) break
+                            out.write(buffer, 0, read)
+                            total += read
+                            onProgress(total)
+                        }
+                    }
+                }
+            } catch (cancelled: kotlinx.coroutines.CancellationException) {
+                Logger.i(TAG, "restore of $displayName stopped at $total bytes")
+                throw cancelled
+            } catch (error: Throwable) {
+                Logger.e(TAG, "download of $displayName failed: ${error.javaClass.simpleName}")
+                return@withContext WriteOutcome.Failed("could not download the file")
+            }
+
+            if (expectedBytes > 0 && total != expectedBytes) {
+                Logger.e(TAG, "restore of $displayName was short: $total of $expectedBytes bytes")
+                return@withContext WriteOutcome.Failed("incomplete download: $total of $expectedBytes bytes")
+            }
+
+            val document = runCatching {
+                DocumentsContract.createDocument(context.contentResolver, parent, mimeType, displayName)
+            }.getOrNull() ?: return@withContext WriteOutcome.Failed("could not create the file in that folder")
+
+            val copied = runCatching {
+                // Deliberately not cancellable: this copies from the phone's own storage to the phone's own
+                // storage, and stopping half way would leave a partial file that cannot be removed.
+                context.contentResolver.openOutputStream(document, "wt")?.use { out ->
+                    temp.inputStream().use { it.copyTo(out, BUFFER_BYTES) }
+                } ?: return@runCatching -1L
+                temp.length()
+            }.getOrElse {
+                Logger.e(TAG, "copy of $displayName into the folder failed: ${it.javaClass.simpleName}")
+                -1L
+            }
+            if (copied != total) return@withContext WriteOutcome.Failed("could not write the file into that folder")
+
+            val actualName = runCatching {
+                context.contentResolver.query(
+                    document, arrayOf(DocumentsContract.Document.COLUMN_DISPLAY_NAME), null, null, null
+                )?.use { if (it.moveToFirst()) it.getString(0) else null }
+            }.getOrNull() ?: displayName
+
+            val path = "${Environment.getExternalStorageDirectory()}/${folderRelativePath.trim('/')}/$actualName"
+            val indexed = scanAndWait(path, mimeType)
+                ?: return@withContext WriteOutcome.Failed("the file was saved, but Android has not listed it yet")
+
+            Logger.i(TAG, "restored $actualName ($total bytes) into $folderRelativePath through the tree grant")
+            WriteOutcome.Success(indexed, total)
+        } finally {
+            temp.delete()
+        }
+    }
+
+    /** The names of the folders directly inside a granted folder. Empty when [folder] is not itself a grant. */
+    private fun subFoldersOf(granted: List<GrantedDirectory>, folder: String): List<String> {
+        val grant = granted.firstOrNull { it.relativePath.trim('/') == folder.trim('/') } ?: return emptyList()
+        val treeUri = Uri.parse(grant.treeUri)
+        val documentId = runCatching { DocumentsContract.getTreeDocumentId(treeUri) }.getOrNull() ?: return emptyList()
+        return runCatching {
+            val children = DocumentsContract.buildChildDocumentsUriUsingTree(treeUri, documentId)
+            context.contentResolver.query(
+                children,
+                arrayOf(DocumentsContract.Document.COLUMN_DISPLAY_NAME, DocumentsContract.Document.COLUMN_MIME_TYPE),
+                null, null, null
+            )?.use { cursor ->
+                buildList {
+                    while (cursor.moveToNext()) {
+                        if (cursor.getString(1) == DocumentsContract.Document.MIME_TYPE_DIR) add(cursor.getString(0))
+                    }
+                }
+            }.orEmpty()
+        }.getOrDefault(emptyList())
+    }
+
+    /**
+     * The document URI of [folderRelativePath] inside [granted], creating any missing folders on the way.
+     * Creating a folder removes nothing. Null when it cannot be reached.
+     */
+    private fun ensureFolder(granted: GrantedDirectory, treeUri: Uri, folderRelativePath: String): Uri? = runCatching {
+        val rootId = DocumentsContract.getTreeDocumentId(treeUri)
+        val remainder = folderRelativePath.trim('/').removePrefix(granted.relativePath.trim('/')).trim('/')
+        var currentId = rootId
+        if (remainder.isNotEmpty()) {
+            for (segment in remainder.split('/')) {
+                val nextId = "$currentId/$segment"
+                val nextUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, nextId)
+                val exists = context.contentResolver.query(
+                    nextUri, arrayOf(DocumentsContract.Document.COLUMN_DOCUMENT_ID), null, null, null
+                )?.use { it.moveToFirst() } == true
+                if (!exists) {
+                    val parentUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, currentId)
+                    DocumentsContract.createDocument(
+                        context.contentResolver, parentUri, DocumentsContract.Document.MIME_TYPE_DIR, segment
+                    ) ?: return null
+                }
+                currentId = nextId
+            }
+        }
+        DocumentsContract.buildDocumentUriUsingTree(treeUri, currentId)
+    }.getOrNull()
+
+    /** Asks MediaStore to index [path] and waits for the answer, so the row can be adopted straight away. */
+    private suspend fun scanAndWait(path: String, mimeType: String): Uri? = withTimeoutOrNull(SCAN_WAIT_MILLIS) {
+        suspendCancellableCoroutine<Uri?> { continuation ->
+            runCatching {
+                MediaScannerConnection.scanFile(context, arrayOf(path), arrayOf(mimeType)) { _, uri ->
+                    if (continuation.isActive) continuation.resume(uri) { }
+                }
+            }.onFailure { if (continuation.isActive) continuation.resume(null) { } }
+        }
+    }
+
     private data class MediaLocation(val relativePath: String, val displayName: String)
 
     private companion object {
         const val TAG = "SafMediaWriter"
+        const val PRIMARY_VOLUME = "primary"
+        const val BUFFER_BYTES = 64 * 1024
+        const val SCAN_WAIT_MILLIS = 15_000L
     }
 }

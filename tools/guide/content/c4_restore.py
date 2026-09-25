@@ -25,7 +25,7 @@ CHAPTER = Chapter(
             on offer. See [[restore-greyed-files]].
 
             ## Where restored files go
-            A restored file goes back into its own album folder. Android only lets a photo be created under DCIM or Pictures, and a video under DCIM or Movies, so when the album's own folder is somewhere else (a folder at the top of the phone's storage, say, or a photo album under Movies), the files go into **DCIM/** the album's name instead.
+            A restored file goes back into the folder it came from. For a folder you gave GallerySync access to in setup, such as one at the top of the phone's storage, the file is written straight into that folder. Android only lets an app create a photo under DCIM or Pictures, and a video under DCIM or Movies, so for a folder GallerySync has no access to and cannot use that way, the files go into **DCIM/** the album's name instead.
 
             ## Folders first
             The tab always opens on a list of folders (albums), even if there is only one. Swipe a folder

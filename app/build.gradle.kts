@@ -39,8 +39,10 @@ android {
         // Billing Library so Play Console will allow the pro_unlock product to be created at all.
         // The third (26 Sept 2026) carries the multi-cloud work: Dropbox, Google Drive, Backblaze B2,
         // IDrive e2, the sign-out prompt and the rewritten How To Guide.
-        versionCode = 3
-        versionName = "0.3.2"
+        // The fourth (25 Sept 2026) writes a restored file back into the folder it left, through the
+        // folder grant, and carries the wording changes made while testing the third on the Moto G.
+        versionCode = 4
+        versionName = "0.3.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
