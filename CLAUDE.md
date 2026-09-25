@@ -74,6 +74,13 @@ This is absolute and applies to every file, in every location, without exception
   Nothing weaker qualifies. This is the check that has to hold, because it is the only guarantee the
   UI is allowed to make.
 
+  **The same bar for every cloud that can take Archive, added 24 Sept 2026 (TASK-027, Ian).** For Dropbox, Google
+  Drive, Backblaze B2 and IDrive e2 the confirmation is that cloud's own answer, asked **live at the moment of
+  archiving**, about the one object the ledger recorded at upload (`CloudVerifier.sizeOf`): present, not deleted or
+  trashed, at exactly the local size (`BackupEngine.confirmStillInCloud`, decided by `ElsewhereVerdict`). Nothing is
+  trusted from memory: those rows keep `remoteSizeBytes = NULL` on purpose, so no OneDrive-shaped query can act on
+  them. **If the cloud could not be asked, nothing is removed.** Google Photos and pCloud cannot take Archive.
+
   What the rule forbids is removal the user did not choose: uploading, backing up, syncing,
   proxying, a storage budget, or any worker deciding on its own that a file should go. Removal
   follows from a mode the user set, and from nothing else. Note the standing-instruction property —

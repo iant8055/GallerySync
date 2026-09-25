@@ -6,10 +6,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.entity.BackupState
+import com.gallery.sync.domain.backup.BackupLocation
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Before
@@ -110,6 +112,40 @@ class LedgerPruningTest {
             emptyList<BackupEntryEntity>(),
             entryDao.entriesForAlbum("Holiday")
         )
+    }
+
+    /**
+     * TASK-027. Archive can now empty an album held by Dropbox, Drive or S3, and its rows carry no verified size by
+     * design. Forgetting them would erase the only record of where the files are, and Restore could not find them.
+     */
+    @Test
+    fun anUploadedRowOfAnotherCloudSurvivesItsAlbumLeavingTheDevice() = runTest {
+        entryDao.insertIfNew(
+            listOf(
+                entry(album = "Holiday", name = "beach.jpg", state = BackupState.UPLOADED, remoteItemId = "id:ABC")
+                    .copy(location = BackupLocation.DROPBOX)
+            )
+        )
+
+        entryDao.forgetAlbumsNotOnDevice(listOf("Camera"))
+
+        assertNotNull(entryDao.entriesForAlbum("Holiday").firstOrNull())
+        assertEquals(1, entryDao.countRetrievableOutsideDevice(listOf("Camera")))
+    }
+
+    @Test
+    fun aRowOfAnotherCloudThatNeverFinishedUploadingIsStillForgotten() = runTest {
+        entryDao.insertIfNew(
+            listOf(
+                entry(album = "Holiday", name = "a.jpg").copy(location = BackupLocation.DROPBOX),
+                entry(album = "Holiday", name = "b.jpg", state = BackupState.UPLOADED, remoteItemId = "")
+                    .copy(location = BackupLocation.DROPBOX)
+            )
+        )
+
+        entryDao.forgetAlbumsNotOnDevice(listOf("Camera"))
+
+        assertTrue("nothing to fetch, so nothing worth keeping", entryDao.entriesForAlbum("Holiday").isEmpty())
     }
 
     /** Uploaded but never size-checked is not proof, and is not worth keeping either. */

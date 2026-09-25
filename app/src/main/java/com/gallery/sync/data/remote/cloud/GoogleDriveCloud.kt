@@ -11,6 +11,8 @@ import com.gallery.sync.domain.model.RemoteError
 import com.gallery.sync.domain.model.UploadedItem
 import com.gallery.sync.domain.repository.CloudDownloader
 import com.gallery.sync.domain.repository.CloudUploader
+import com.gallery.sync.domain.repository.CloudVerifier
+import com.gallery.sync.domain.repository.RemoteCheck
 import com.gallery.sync.util.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
@@ -45,7 +47,7 @@ class GoogleDriveCloud @Inject constructor(
     private val tokens: AppAuthCloudTokens,
     @param:CloudUploadClient private val client: OkHttpClient,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
-) : CloudConnection, CloudUploader, CloudDownloader {
+) : CloudConnection, CloudUploader, CloudDownloader, CloudVerifier {
 
     override val location = BackupLocation.GOOGLE_DRIVE
 
@@ -100,6 +102,47 @@ class GoogleDriveCloud @Inject constructor(
         } catch (e: IOException) {
             Logger.w(TAG, "download: network failure: ${e.message}")
             DataResult.Failure(RemoteError.Network)
+        }
+    }
+
+    /**
+     * Asks Drive how big a stored file is, for Archive (`files/{id}?fields=size,trashed`). A file in Drive's trash
+     * still answers with a size, so `trashed` is read too: a trashed file is not a copy anyone can rely on, and
+     * counts as [RemoteCheck.Gone]. A definite 404 is Gone; everything else that is not a clear answer is
+     * [RemoteCheck.Unknown], which Archive reads as "do not remove".
+     */
+    override suspend fun sizeOf(remoteItemId: String): RemoteCheck = withContext(dispatcher) {
+        val token = tokens.accessToken(location) ?: return@withContext RemoteCheck.Unknown
+        val url = "$apiBase/drive/v3/files".toHttpUrl().newBuilder()
+            .addPathSegment(remoteItemId)
+            .addQueryParameter("fields", "size,trashed")
+            .build()
+        val request = Request.Builder().url(url).header("Authorization", "Bearer $token").get().build()
+        try {
+            client.newCall(request).execute().use { response ->
+                val body = response.body?.string()
+                when {
+                    response.isSuccessful -> {
+                        val meta = CloudHttp.objectOf(body)
+                        val size = meta?.longOrNull("size")
+                        when {
+                            meta == null || size == null -> RemoteCheck.Unknown
+                            meta.stringOrNull("trashed") == "true" -> RemoteCheck.Gone
+                            else -> RemoteCheck.Present(size)
+                        }
+                    }
+                    response.code == 404 -> RemoteCheck.Gone
+                    else -> {
+                        if (response.code == 401) tokens.invalidate(location)
+                        RemoteCheck.Unknown
+                    }
+                }
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: IOException) {
+            Logger.w(TAG, "check: network failure: ${e.message}")
+            RemoteCheck.Unknown
         }
     }
 

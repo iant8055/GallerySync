@@ -9,13 +9,15 @@ import org.junit.Test
 class CloudCapabilitiesTest {
 
     @Test
-    fun `OneDrive can do everything, four clouds can restore, and Google Photos and pCloud are backup-only for now`() {
+    fun `OneDrive can do everything, four clouds can restore and archive, and Google Photos and pCloud are backup-only for now`() {
         assertEquals(CloudCapabilities.FULL, BackupLocation.ONEDRIVE.capabilities)
-        val restoreOnly = listOf(
+        val restoreAndArchive = listOf(
             BackupLocation.DROPBOX, BackupLocation.GOOGLE_DRIVE, BackupLocation.BACKBLAZE_B2, BackupLocation.IDRIVE_E2
         )
-        restoreOnly.forEach { assertEquals("$it", CloudCapabilities.RESTORE_ONLY, it.capabilities) }
-        BackupLocation.entries.filter { it != BackupLocation.ONEDRIVE && it !in restoreOnly }.forEach {
+        restoreAndArchive.forEach { assertEquals("$it", CloudCapabilities.RESTORE_AND_ARCHIVE, it.capabilities) }
+        // Sync is the one thing none of them has yet: TASK-027 stage 2.
+        restoreAndArchive.forEach { assertFalse("$it", it.capabilities.sync) }
+        BackupLocation.entries.filter { it != BackupLocation.ONEDRIVE && it !in restoreAndArchive }.forEach {
             assertEquals("$it", CloudCapabilities.BACKUP_ONLY, it.capabilities)
         }
     }
@@ -39,6 +41,10 @@ class CloudCapabilitiesTest {
 
     @Test
     fun `the modes on offer for a cloud are the modes its capabilities allow`() {
-        assertEquals(listOf(AlbumMode.OFF, AlbumMode.BACKUP), GooglePhotosDestination.modesFor(BackupLocation.DROPBOX))
+        assertEquals(
+            listOf(AlbumMode.OFF, AlbumMode.BACKUP, AlbumMode.ARCHIVE),
+            GooglePhotosDestination.modesFor(BackupLocation.DROPBOX)
+        )
+        assertEquals(listOf(AlbumMode.OFF, AlbumMode.BACKUP), GooglePhotosDestination.modesFor(BackupLocation.GOOGLE_PHOTOS))
     }
 }

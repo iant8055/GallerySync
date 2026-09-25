@@ -14,6 +14,8 @@ import com.gallery.sync.data.repository.GooglePhotosCloudUploader
 import com.gallery.sync.domain.repository.CloudDownloader
 import com.gallery.sync.domain.repository.CloudDownloaders
 import com.gallery.sync.domain.repository.CloudUploader
+import com.gallery.sync.domain.repository.CloudVerifier
+import com.gallery.sync.domain.repository.CloudVerifiers
 import com.gallery.sync.domain.repository.CloudUploaders
 import dagger.Binds
 import dagger.Module
@@ -52,6 +54,9 @@ abstract class CloudModule {
     abstract fun bindGoogleDriveDownloader(impl: GoogleDriveCloud): CloudDownloader
 
     @Binds @IntoSet
+    abstract fun bindGoogleDriveVerifier(impl: GoogleDriveCloud): CloudVerifier
+
+    @Binds @IntoSet
     abstract fun bindDropboxUploader(impl: DropboxCloud): CloudUploader
 
     @Binds @IntoSet
@@ -59,6 +64,9 @@ abstract class CloudModule {
 
     @Binds @IntoSet
     abstract fun bindDropboxDownloader(impl: DropboxCloud): CloudDownloader
+
+    @Binds @IntoSet
+    abstract fun bindDropboxVerifier(impl: DropboxCloud): CloudVerifier
 
     @Binds @IntoSet
     abstract fun bindPCloudUploader(impl: PCloudCloud): CloudUploader
@@ -82,6 +90,12 @@ abstract class CloudModule {
     abstract fun bindBackblazeDownloader(impl: BackblazeB2Cloud): CloudDownloader
 
     @Binds @IntoSet
+    abstract fun bindIDriveVerifier(impl: IDriveE2Cloud): CloudVerifier
+
+    @Binds @IntoSet
+    abstract fun bindBackblazeVerifier(impl: BackblazeB2Cloud): CloudVerifier
+
+    @Binds @IntoSet
     abstract fun bindBackblazeConnection(impl: BackblazeB2Cloud): CloudConnection
 
     companion object {
@@ -89,6 +103,11 @@ abstract class CloudModule {
         @Singleton
         fun provideCloudUploaders(all: @JvmSuppressWildcards Set<CloudUploader>): CloudUploaders =
             CloudUploaders(all)
+
+        @Provides
+        @Singleton
+        fun provideCloudVerifiers(all: @JvmSuppressWildcards Set<CloudVerifier>): CloudVerifiers =
+            CloudVerifiers(all)
 
         @Provides
         @Singleton

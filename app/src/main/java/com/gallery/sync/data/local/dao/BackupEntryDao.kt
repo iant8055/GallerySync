@@ -733,6 +733,13 @@ interface BackupEntryDao {
      * forgets everything it ever backed up from it. The user cannot get any of it back, and nothing
      * says why. Anything still verified in the cloud is therefore exempt — it is not a stale row, it
      * is the record of a file that can still be fetched.
+     *
+     * ### Rows of the other clouds too (TASK-027)
+     *
+     * A Dropbox, Drive or S3 row is never "verified" in that sense (its size is NULL by design), so this used to
+     * forget it. Once Archive can take those albums off the phone, that would erase the only record of where the
+     * file is, and Restore could not find it. So an uploaded row holding a cloud id is kept whichever cloud it
+     * is, and only OneDrive rows must also carry a matching verified size.
      */
     @Query(
         """
@@ -742,8 +749,10 @@ interface BackupEntryDao {
               state = :uploaded
               AND remoteItemId IS NOT NULL
               AND remoteItemId != ''
-              AND remoteSizeBytes IS NOT NULL
-              AND remoteSizeBytes = sizeBytes
+              AND (
+                  (remoteSizeBytes IS NOT NULL AND remoteSizeBytes = sizeBytes)
+                  OR location != 'ONEDRIVE'
+              )
           )
         """
     )
@@ -760,8 +769,10 @@ interface BackupEntryDao {
           AND state = :uploaded
           AND remoteItemId IS NOT NULL
           AND remoteItemId != ''
-          AND remoteSizeBytes IS NOT NULL
-          AND remoteSizeBytes = sizeBytes
+          AND (
+              (remoteSizeBytes IS NOT NULL AND remoteSizeBytes = sizeBytes)
+              OR location != 'ONEDRIVE'
+          )
         """
     )
     suspend fun countRetrievableOutsideDevice(

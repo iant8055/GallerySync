@@ -12,6 +12,8 @@ import com.gallery.sync.domain.model.UploadedItem
 import java.io.InputStream
 import com.gallery.sync.domain.repository.CloudDownloader
 import com.gallery.sync.domain.repository.CloudUploader
+import com.gallery.sync.domain.repository.CloudVerifier
+import com.gallery.sync.domain.repository.RemoteCheck
 import com.gallery.sync.util.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
@@ -45,7 +47,7 @@ class DropboxCloud @Inject constructor(
     private val tokens: AppAuthCloudTokens,
     @param:CloudUploadClient private val client: OkHttpClient,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
-) : CloudConnection, CloudUploader, CloudDownloader {
+) : CloudConnection, CloudUploader, CloudDownloader, CloudVerifier {
 
     override val location = BackupLocation.DROPBOX
 
@@ -152,6 +154,44 @@ class DropboxCloud @Inject constructor(
         } catch (e: IOException) {
             Logger.w(TAG, "download: network failure: ${e.message}")
             DataResult.Failure(RemoteError.Network)
+        }
+    }
+
+    /**
+     * Asks Dropbox how big a stored file is, for Archive. A one-byte ranged download: the reply carries the file's
+     * metadata in the `Dropbox-API-Result` header, so the size comes from Dropbox itself and no permission beyond the
+     * read one Restore already needs is asked for. A file that is gone answers 409 `path/not_found`. Anything that
+     * is not a definite answer is [RemoteCheck.Unknown], which Archive reads as "do not remove".
+     */
+    override suspend fun sizeOf(remoteItemId: String): RemoteCheck = withContext(dispatcher) {
+        val token = tokens.accessToken(location) ?: return@withContext RemoteCheck.Unknown
+        val request = Request.Builder()
+            .url("$contentBase/2/files/download")
+            .header("Authorization", "Bearer $token")
+            .header("Dropbox-API-Arg", """{"path":${CloudHttp.asciiJsonString(remoteItemId)}}""")
+            .header("Range", "bytes=0-0")
+            .post(ByteArray(0).toRequestBody(null))
+            .build()
+        try {
+            client.newCall(request).execute().use { response ->
+                when {
+                    response.isSuccessful -> {
+                        val meta = CloudHttp.objectOf(response.header("Dropbox-API-Result"))
+                        val size = meta?.longOrNull("size")
+                        if (size == null) RemoteCheck.Unknown else RemoteCheck.Present(size)
+                    }
+                    response.code == 409 && response.body?.string()?.contains("not_found") == true -> RemoteCheck.Gone
+                    else -> {
+                        if (response.code == 401) tokens.invalidate(location)
+                        RemoteCheck.Unknown
+                    }
+                }
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: IOException) {
+            Logger.w(TAG, "check: network failure: ${e.message}")
+            RemoteCheck.Unknown
         }
     }
 

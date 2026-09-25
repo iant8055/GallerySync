@@ -2,6 +2,7 @@ package com.gallery.sync.data.remote.cloud
 
 import com.gallery.sync.domain.model.DataResult
 import com.gallery.sync.domain.model.RemoteError
+import com.gallery.sync.domain.repository.RemoteCheck
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -103,6 +104,63 @@ class DropboxDownloadTest {
             .also { it.apiBase = "http://${server.hostName}:${server.port}" }
         server.enqueue(MockResponse().setResponseCode(404).setBody("""{"error":{"code":404}}"""))
         assertEquals(404, ((drive.openStream("GONE") as DataResult.Failure).error as RemoteError.Http).code)
+    }
+
+    @Test
+    fun `Dropbox reports a stored file's size from the download metadata header`() = runTest {
+        server.enqueue(
+            MockResponse().setResponseCode(206)
+                .setHeader("Dropbox-API-Result", """{"name":"a.jpg","id":"id:A","size":4001494}""")
+                .setBody("x")
+        )
+
+        val check = dropbox().sizeOf("id:A")
+
+        assertEquals(RemoteCheck.Present(4_001_494L), check)
+        val request = server.takeRequest()
+        assertEquals("bytes=0-0", request.getHeader("Range"))
+        assertEquals("""{"path":"id:A"}""", request.getHeader("Dropbox-API-Arg"))
+    }
+
+    @Test
+    fun `Dropbox says Gone for a deleted file and Unknown for anything unclear`() = runTest {
+        val unknown = RemoteCheck.Unknown
+        server.enqueue(MockResponse().setResponseCode(409).setBody("""{"error_summary":"path/not_found/.."}"""))
+        assertEquals(RemoteCheck.Gone, dropbox().sizeOf("id:GONE"))
+
+        server.enqueue(MockResponse().setResponseCode(500).setBody("oops"))
+        assertEquals(unknown, dropbox().sizeOf("id:X"))
+
+        server.enqueue(MockResponse().setResponseCode(206).setBody("x")) // no metadata header at all
+        assertEquals(unknown, dropbox().sizeOf("id:X"))
+
+        server.enqueue(MockResponse().setResponseCode(409).setBody("""{"error_summary":"path/restricted_content/.."}"""))
+        assertEquals(unknown, dropbox().sizeOf("id:X"))
+
+        whenever(tokens.accessToken(any())).thenReturn(null)
+        assertEquals(unknown, dropbox().sizeOf("id:X"))
+    }
+
+    @Test
+    fun `Google Drive reports size, treats trash as gone, and says Unknown when unsure`() = runTest {
+        val drive = GoogleDriveCloud(configs, signIn, tokens, OkHttpClient(), dispatcher)
+            .also { it.apiBase = "http://${server.hostName}:${server.port}" }
+
+        server.enqueue(MockResponse().setBody("""{"size":"6807605","trashed":false}"""))
+        assertEquals(RemoteCheck.Present(6_807_605L), drive.sizeOf("FILE1"))
+        assertEquals("/drive/v3/files/FILE1?fields=size%2Ctrashed", server.takeRequest().path)
+
+        server.enqueue(MockResponse().setBody("""{"size":"6807605","trashed":true}"""))
+        assertEquals(RemoteCheck.Gone, drive.sizeOf("FILE1"))
+
+        server.enqueue(MockResponse().setResponseCode(404).setBody("""{"error":{"code":404}}"""))
+        assertEquals(RemoteCheck.Gone, drive.sizeOf("FILE1"))
+
+        server.enqueue(MockResponse().setResponseCode(500).setBody("oops"))
+        assertEquals(RemoteCheck.Unknown, drive.sizeOf("FILE1"))
+
+        server.enqueue(MockResponse().setBody("""{"trashed":false}""")) // no size reported
+        assertEquals(RemoteCheck.Unknown, drive.sizeOf("FILE1"))
     }
 
     @Test

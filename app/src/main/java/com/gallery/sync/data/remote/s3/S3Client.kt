@@ -58,6 +58,27 @@ class S3Client @Inject constructor(
     }
 
     /**
+     * `HEAD /bucket/key` — whether the object is there and how big it is (`Content-Length`), for Archive. Signed like
+     * every other request. Returns the [Response]; the caller reads the status and header and closes it.
+     */
+    fun headObject(config: S3Config, key: String): Response {
+        val url = urlFor(config, key)
+        val headers = SigV4.sign(
+            method = "HEAD",
+            host = hostOf(url),
+            path = "/${config.bucket}/${SigV4.encodePath(key)}",
+            query = "",
+            payloadSha256Hex = EMPTY_SHA256,
+            region = config.region,
+            accessKey = config.accessKey,
+            secretKey = config.secretKey,
+            now = Date()
+        ).headers
+        val request = Request.Builder().url(url).head().apply { headers.forEach { (k, v) -> header(k, v) } }.build()
+        return client.newCall(request).execute()
+    }
+
+    /**
      * `GET /bucket/key` — the file's bytes, for Restore. Signed like every other request. Returns the
      * [Response]; the caller maps the status and owns (and closes) the body.
      */

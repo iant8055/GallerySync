@@ -43,6 +43,13 @@ data class CloudCapabilities(val restore: Boolean, val archive: Boolean, val syn
 
         /** Can fetch a file back, but the copy is not proved by size, so nothing may be removed or replaced. */
         val RESTORE_ONLY = CloudCapabilities(restore = true, archive = false, sync = false)
+
+        /**
+         * Can fetch a file back and confirm it live by size (`CloudVerifier`), so Archive may remove the local copy
+         * once the cloud has said it is there. Sync is not on: it needs the same proof at the moment it replaces a
+         * file, and its candidate queries and restore-in-place are still OneDrive-shaped. TASK-027 stage 2.
+         */
+        val RESTORE_AND_ARCHIVE = CloudCapabilities(restore = true, archive = true, sync = false)
     }
 }
 
@@ -50,11 +57,11 @@ data class CloudCapabilities(val restore: Boolean, val archive: Boolean, val syn
 val BackupLocation.capabilities: CloudCapabilities
     get() = when (this) {
         BackupLocation.ONEDRIVE -> CloudCapabilities.FULL
-        // Each of these can fetch a file back (`openStream` on its adapter); none is yet proved by size, so no
-        // Archive or Sync. pCloud is not here: its download is not built.
+        // Each of these can fetch a file back (`CloudDownloader`) and confirm one live by size (`CloudVerifier`), so
+        // Restore and Archive are on. Sync is not: TASK-027 stage 2. pCloud is not here: neither is built for it.
         BackupLocation.DROPBOX,
         BackupLocation.GOOGLE_DRIVE,
         BackupLocation.BACKBLAZE_B2,
-        BackupLocation.IDRIVE_E2 -> CloudCapabilities.RESTORE_ONLY
+        BackupLocation.IDRIVE_E2 -> CloudCapabilities.RESTORE_AND_ARCHIVE
         else -> CloudCapabilities.BACKUP_ONLY
     }

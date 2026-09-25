@@ -16,6 +16,8 @@ import com.gallery.sync.domain.model.RemoteError
 import com.gallery.sync.domain.model.UploadedItem
 import com.gallery.sync.domain.repository.CloudDownloader
 import com.gallery.sync.domain.repository.CloudUploader
+import com.gallery.sync.domain.repository.CloudVerifier
+import com.gallery.sync.domain.repository.RemoteCheck
 import com.gallery.sync.util.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
@@ -40,7 +42,7 @@ abstract class S3CompatibleCloud(
     private val secrets: EncryptedCloudSecretsStore,
     private val s3: S3Client,
     private val dispatcher: CoroutineDispatcher
-) : CloudConnection, CloudUploader, CloudDownloader {
+) : CloudConnection, CloudUploader, CloudDownloader, CloudVerifier {
 
     override val kind = ConnectionKind.ACCESS_KEYS
 
@@ -98,6 +100,32 @@ abstract class S3CompatibleCloud(
         } catch (e: IOException) {
             Logger.w(TAG, "connect: could not reach the endpoint")
             SignInResult.Failed(MSG_UNREACHABLE)
+        }
+    }
+
+    /**
+     * Asks the store how big an object is, for Archive: a signed `HEAD` on the key recorded at upload. 200 with a
+     * `Content-Length` is [RemoteCheck.Present]; 404 is [RemoteCheck.Gone]; anything else, including a refused key
+     * and a missing length, is [RemoteCheck.Unknown], which Archive reads as "do not remove".
+     */
+    override suspend fun sizeOf(remoteItemId: String): RemoteCheck = withContext(dispatcher) {
+        val config = loadConfig() ?: return@withContext RemoteCheck.Unknown
+        try {
+            s3.headObject(config, remoteItemId).use { response ->
+                when {
+                    response.isSuccessful -> {
+                        val length = response.header("Content-Length")?.toLongOrNull()
+                        if (length == null) RemoteCheck.Unknown else RemoteCheck.Present(length)
+                    }
+                    response.code == 404 -> RemoteCheck.Gone
+                    else -> RemoteCheck.Unknown
+                }
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: IOException) {
+            Logger.w(TAG, "check: could not reach the endpoint")
+            RemoteCheck.Unknown
         }
     }
 

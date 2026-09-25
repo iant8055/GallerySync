@@ -29,6 +29,8 @@ import com.gallery.sync.domain.model.RemoteError
 import com.gallery.sync.domain.model.RemoteMediaNode
 import com.gallery.sync.domain.billing.MultiCloudEntitlement
 import com.gallery.sync.domain.repository.CloudUploaders
+import com.gallery.sync.domain.repository.RemoteCheck
+import com.gallery.sync.domain.repository.CloudVerifiers
 import com.gallery.sync.domain.repository.OneDriveRepository
 import com.gallery.sync.domain.repository.OneDriveUploadRepository
 import com.gallery.sync.util.Logger
@@ -117,7 +119,9 @@ class BackupEngine @Inject constructor(
     private val proxyMarker: ProxyMarker,
     private val albumIdentity: AlbumIdentityReconciler,
     @ApplicationContext private val context: Context,
-    @param:IoDispatcher private val dispatcher: CoroutineDispatcher
+    @param:IoDispatcher private val dispatcher: CoroutineDispatcher,
+    /** Live proof for the clouds other than OneDrive. Defaults to none, which reads as "could not ask". */
+    private val verifiers: CloudVerifiers = CloudVerifiers(emptySet())
 ) {
 
     /**
@@ -1443,7 +1447,34 @@ class BackupEngine @Inject constructor(
             .filter { it.isProxied }
             .associate { it.mediaStoreId to it.sizeBytes }
 
+        // Files whose ledger row says another cloud holds them are asked of that cloud, live, one object at a
+        // time (TASK-027). Everything else, including a file with no row yet, takes the OneDrive listing below
+        // exactly as before.
+        val keyOf = { item: LocalMediaItem ->
+            backupKeyOf(item.album, item.displayName, item.sizeBytes, item.dateModifiedEpochSeconds)
+        }
+        val rowsByKey = items.map(keyOf).chunked(CONFIRM_CHUNK)
+            .flatMap { entryDao.entriesByIds(it) }
+            .associateBy { it.id }
+
         for (item in items) {
+            val elsewhere = rowsByKey[keyOf(item)]?.takeIf { it.location != BackupLocation.ONEDRIVE }
+            if (elsewhere != null) {
+                val verifier = verifiers.of(elsewhere.location)
+                val uploaded = elsewhere.state == BackupState.UPLOADED && !elsewhere.remoteItemId.isNullOrBlank()
+                val check = if (uploaded && verifier != null) verifier.sizeOf(elsewhere.remoteItemId!!) else null
+                when (ElsewhereVerdict.of(uploaded, verifier != null, check, item.sizeBytes)) {
+                    ElsewhereVerdict.CONFIRMED -> confirmed += item
+                    ElsewhereVerdict.WRONG_SIZE -> {
+                        missing += item
+                        presentAtWrongSize += item.mediaStoreId
+                    }
+                    ElsewhereVerdict.MISSING -> missing += item
+                    ElsewhereVerdict.UNCONFIRMED -> unconfirmed += item
+                }
+                continue
+            }
+
             val index = if (byAlbum.containsKey(item.album)) {
                 byAlbum[item.album]
             } else {
@@ -2024,6 +2055,7 @@ class BackupEngine @Inject constructor(
 
         /** SQLite binds one variable per id and stops at 999, so lists of ids are written in chunks. */
         const val DECISION_CHUNK = 500
+        const val CONFIRM_CHUNK = 500
 
         const val SQL_BATCH = 500
 

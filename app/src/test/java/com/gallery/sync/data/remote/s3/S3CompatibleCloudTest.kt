@@ -6,6 +6,7 @@ import com.gallery.sync.data.remote.onedrive.UploadSource
 import com.gallery.sync.domain.backup.BackupLocation
 import com.gallery.sync.domain.model.DataResult
 import com.gallery.sync.domain.model.RemoteError
+import com.gallery.sync.domain.repository.RemoteCheck
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -124,6 +125,31 @@ class S3CompatibleCloudTest {
 
         server.enqueue(MockResponse().setResponseCode(403).setBody("<Error><Code>AccessDenied</Code></Error>"))
         assertEquals(RemoteError.Unauthorized, (cloud.openStream("any") as DataResult.Failure).error)
+    }
+
+    @Test
+    fun `the size check is a signed HEAD and reads Content-Length`() = runTest {
+        connectedToMockServer()
+        server.enqueue(MockResponse().setResponseCode(200).setHeader("Content-Length", "2500"))
+
+        val check = cloud.sizeOf("GallerySync/Car Show/Car Show 1.jpg")
+
+        assertEquals(RemoteCheck.Present(2_500L), check)
+        val request = server.takeRequest()
+        assertEquals("HEAD", request.method)
+        assertEquals("/photos/GallerySync/Car%20Show/Car%20Show%201.jpg", request.path)
+        assertTrue(request.getHeader("Authorization")!!.startsWith("AWS4-HMAC-SHA256 Credential=AKID/"))
+    }
+
+    @Test
+    fun `the size check says Gone for 404 and Unknown for a refused key or a store error`() = runTest {
+        connectedToMockServer()
+        server.enqueue(MockResponse().setResponseCode(404))
+        assertEquals(RemoteCheck.Gone, cloud.sizeOf("gone"))
+        server.enqueue(MockResponse().setResponseCode(403))
+        assertEquals(RemoteCheck.Unknown, cloud.sizeOf("any"))
+        server.enqueue(MockResponse().setResponseCode(500))
+        assertEquals(RemoteCheck.Unknown, cloud.sizeOf("any"))
     }
 
     @Test

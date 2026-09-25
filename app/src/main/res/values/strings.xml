@@ -301,7 +301,7 @@
     <string name="albums_scheduled_summary">%1$d Scheduled to leave this phone</string>
     <!-- What the Archive mode has actually taken off this phone. The only non-zero figures an
          archived album has, since every other count on the card describes local files. -->
-    <string name="albums_archived_summary">%1$d files archived · %2$s in OneDrive</string>
+    <string name="albums_archived_summary">%1$d files archived · %2$s in your cloud</string>
     <string name="albums_scheduled_none">Nothing left to archive</string>
     <!--
         The Albums tab is where modes are chosen, so its hero counts albums, not files. It read
@@ -507,23 +507,23 @@ full size</string>
     <string name="archive_hero_label_bottom">Archive</string>
     <string name="archive_empty">No album is set to Archive. Nothing here will remove anything from your phone.</string>
     <string name="archive_empty_hint">Set an album to Archive on the Albums tab, and its files will be listed here for checking before anything leaves your phone.</string>
-    <string name="archive_intro">Every file below is checked against OneDrive first. Anything that is not there yet is backed up before it is verified.</string>
+    <string name="archive_intro">Every file below is checked against your cloud first. Anything that is not there yet is backed up before it is verified.</string>
     <string name="archive_validate">Check these files</string>
-    <string name="archive_validating">Checking against OneDrive…</string>
+    <string name="archive_validating">Checking with your cloud…</string>
     <string name="archive_unsupported">This version of Android has no media trash, so removing local copies is not offered here.</string>
 
     <string name="archive_state_backing_up">Backing up…</string>
     <string name="archive_state_removing">Moving to Trash/Recycle Bin…</string>
     <string name="archive_state_removed">Removed from this phone</string>
-    <string name="archive_failed_unchecked">Could not check OneDrive — staying on your phone</string>
-    <string name="archive_failed_not_backed_up">Not in OneDrive — staying on your phone</string>
+    <string name="archive_failed_unchecked">Could not check your cloud — staying on your phone</string>
+    <string name="archive_failed_not_backed_up">Not in your cloud — staying on your phone</string>
     <!--
         Split from the line above on 28 Aug 2026. A zero-byte item on the drive was being reported
         as "Not in OneDrive" — untrue, and it reads as the app having declined to upload rather than
         as a damaged cloud copy. The file stays on the phone either way; only this one is worth the
         user going and looking.
     -->
-    <string name="archive_failed_wrong_size">In OneDrive but the wrong size — staying on your phone</string>
+    <string name="archive_failed_wrong_size">In your cloud but the wrong size — staying on your phone</string>
 
     <!-- The prompt. Ian's wording, with the numbers filled in. -->
     <string name="archive_prompt_all_title">All files validated</string>
@@ -539,7 +539,7 @@ full size</string>
         what was worth keeping from it is the clause about emptying, which belongs in the sentence
         making the claim rather than in a footnote qualifying it.
     -->
-    <string name="archive_prompt_all_body">All files are confirmed in OneDrive. Archiving them moves the local copies to your phone\'s Trash/Recycle Bin, and frees %1$s once you empty it.</string>
+    <string name="archive_prompt_all_body">All files are confirmed in your cloud. Archiving them moves the local copies to your phone\'s Trash/Recycle Bin, and frees %1$s once you empty it.</string>
     <string name="archive_prompt_partial_title">%1$s validated</string>
     <string name="archive_prompt_partial_body">%1$s could not be confirmed and will stay on your phone. Archiving the confirmed ones moves them to your phone\'s Trash/Recycle Bin, and frees %2$s once you empty it.</string>
     <!--
@@ -558,7 +558,7 @@ full size</string>
     -->
     <string name="archive_prompt_continue">Continue</string>
 
-    <string name="archive_none_confirmed">Nothing can be archived. OneDrive did not confirm a single one of these files, so they all stay on your phone.</string>
+    <string name="archive_none_confirmed">Nothing can be archived. Your cloud did not confirm a single one of these files, so they all stay on your phone.</string>
     <string name="archive_batch_progress">Batch %1$d of %2$d</string>
     <string name="archive_done">%1$s removed from this phone, freeing %2$s.</string>
     <string name="archive_done_none">Nothing was removed.</string>
@@ -578,7 +578,7 @@ full size</string>
     <string name="archive_hidden_by_age_detail">%1$s · too recent for your filter</string>
 
     <string name="notification_channel_archive_ready">Archive ready</string>
-    <string name="notification_channel_archive_ready_description">Files in an Archive album have been confirmed in OneDrive and are waiting for you to remove them from this phone.</string>
+    <string name="notification_channel_archive_ready_description">Files in an Archive album have been confirmed in your cloud and are waiting for you to remove them from this phone.</string>
     <string name="notification_archive_ready_title">Files ready to archive</string>
     <plurals name="notification_archive_ready_body">
         <item quantity="one">1 file is verified in OneDrive and ready to leave this phone.</item>
@@ -604,7 +604,7 @@ full size</string>
         verified.
     -->
     <string name="archive_ready_title">Ready to remove from this phone</string>
-    <string name="archive_ready_body">%1$s in %2$s are confirmed in OneDrive. Removing them frees %3$s here.</string>
+    <string name="archive_ready_body">%1$s in %2$s are confirmed in your cloud. Removing them frees %3$s here.</string>
     <string name="archive_ready_action">Remove from this phone</string>
 
     <!-- Deletion sync: what happens to the OneDrive copy when a file leaves the phone. -->

@@ -53,6 +53,9 @@ internal object CloudHttp {
     }
 }
 
+/** A number, whether the provider sent it as a JSON number or as a string (Drive sends sizes as strings). */
+internal fun JsonObject.longOrNull(name: String): Long? = stringOrNull(name)?.toLongOrNull()
+
 // The .content of a JsonPrimitive that is the literal null reads "null"; treat it as absent.
 internal fun JsonObject.stringOrNull(name: String): String? {
     val p = this[name] ?: return null
