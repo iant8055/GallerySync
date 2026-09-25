@@ -64,7 +64,9 @@ class DropboxCloud @Inject constructor(
         location = location,
         authEndpoint = "https://www.dropbox.com/oauth2/authorize",
         tokenEndpoint = "https://api.dropboxapi.com/oauth2/token",
-        scopes = listOf("files.content.write"),
+        // Read as well as write: Restore downloads what was uploaded. A sign-in made before the read scope was
+        // requested has to be repeated (Settings, sign out, connect) before Restore works.
+        scopes = listOf("files.content.write", "files.content.read"),
         // Without offline access Dropbox hands out a token that dies in hours and no refresh token.
         extraParams = mapOf("token_access_type" to "offline")
     )
@@ -130,6 +132,11 @@ class DropboxCloud @Inject constructor(
                 response.close()
                 return@withContext if (response.code == 409 && body?.contains("not_found") == true) {
                     DataResult.Failure(RemoteError.Http(404, body))
+                } else if (response.code == 400 && body?.contains("required scope") == true) {
+                    // Signed in before the read scope was requested, or the app has not been given it in the
+                    // Dropbox console. Not a network problem, and a fresh sign-in is the way through.
+                    Logger.w(TAG, "download: this sign-in lacks the read scope")
+                    DataResult.Failure(RemoteError.Unauthorized)
                 } else {
                     failure(response, body)
                 }

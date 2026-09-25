@@ -89,10 +89,12 @@ class DownloadMissingFile @Inject constructor(
             is DataResult.Failure -> {
                 val gone = (opened.error as? RemoteError.Http)?.code == HTTP_NOT_FOUND
                 Logger.w(TAG, "could not open ${entry.displayName}: ${opened.error}")
-                return@withContext if (gone) {
-                    RestoreInPlaceResult.GoneFromCloud
-                } else {
-                    RestoreInPlaceResult.Failed(if (viaOtherCloud) "could not reach the cloud" else "could not reach OneDrive")
+                return@withContext when {
+                    gone -> RestoreInPlaceResult.GoneFromCloud
+                    viaOtherCloud && opened.error == RemoteError.Unauthorized ->
+                        RestoreInPlaceResult.Failed("sign in to that cloud again in Settings to allow restoring")
+                    viaOtherCloud -> RestoreInPlaceResult.Failed("could not reach the cloud")
+                    else -> RestoreInPlaceResult.Failed("could not reach OneDrive")
                 }
             }
         }
@@ -103,7 +105,7 @@ class DownloadMissingFile @Inject constructor(
             displayName = entry.displayName,
             mimeType = entry.mimeType,
             relativePath = if (viaOtherCloud) {
-                deviceRelativePathOf(entry.album) ?: relativePathFor(entry.album)
+                deviceRelativePathOf(entry.album, entry.isVideo) ?: relativePathFor(entry.album)
             } else {
                 relativePathFor(entry.album)
             },
@@ -209,10 +211,14 @@ class DownloadMissingFile @Inject constructor(
     /**
      * Where the album really lives on this phone, from any file MediaStore still holds in a folder of that
      * name (`Movies/blaze-test/`). Only the other clouds use it: their albums are not all under DCIM, and the
-     * ledger records no top-level folder to say otherwise. Null when the folder is empty or gone, which
-     * leaves the caller on [relativePathFor].
+     * ledger records no top-level folder to say otherwise.
+     *
+     * Only a folder Android lets an app create media in: photos under `DCIM` or `Pictures`, videos under `DCIM`
+     * or `Movies`. A folder made by hand at the top of the storage (`/storage/emulated/0/dropbox/`) is not one, and
+     * MediaStore would refuse the write, so it is treated like a missing folder. Null then, which leaves the caller
+     * on [relativePathFor].
      */
-    private fun deviceRelativePathOf(album: String): String? = runCatching {
+    private fun deviceRelativePathOf(album: String, isVideo: Boolean): String? = runCatching {
         context.contentResolver.query(
             MediaStore.Files.getContentUri("external"),
             arrayOf(MediaStore.MediaColumns.RELATIVE_PATH),
@@ -220,7 +226,13 @@ class DownloadMissingFile @Inject constructor(
             arrayOf(album),
             null
         )?.use { cursor -> if (cursor.moveToFirst()) cursor.getString(0) else null }
-    }.getOrNull()?.takeIf { it.isNotBlank() }
+    }.getOrNull()?.takeIf { isWritableRoot(it, isVideo) }
+
+    private fun isWritableRoot(relativePath: String, isVideo: Boolean): Boolean {
+        val primary = relativePath.substringBefore('/')
+        val allowed = if (isVideo) listOf("DCIM", "Movies") else listOf("DCIM", "Pictures")
+        return primary in allowed
+    }
 
     private companion object {
         const val TAG = "DownloadMissing"

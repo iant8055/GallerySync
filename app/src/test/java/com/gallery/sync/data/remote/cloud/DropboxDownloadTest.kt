@@ -71,6 +71,16 @@ class DropboxDownloadTest {
     }
 
     @Test
+    fun `a sign-in without the read scope is reported as Unauthorized, not as a network problem`() = runTest {
+        server.enqueue(
+            MockResponse().setResponseCode(400).setBody(
+                """{"error_summary":"other/...","user_message":{"text":"not permitted ... does not have the required scope 'files.content.read'"}}"""
+            )
+        )
+        assertEquals(RemoteError.Unauthorized, (dropbox().openStream("id:X") as DataResult.Failure).error)
+    }
+
+    @Test
     fun `an expired token is Unauthorized, and no token means no download`() = runTest {
         server.enqueue(MockResponse().setResponseCode(401).setBody("""{"error_summary":"expired_access_token"}"""))
         assertEquals(RemoteError.Unauthorized, (dropbox().openStream("id:X") as DataResult.Failure).error)
