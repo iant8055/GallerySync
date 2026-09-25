@@ -1,0 +1,4 @@
+Endpoint: s3.us-midwest-1.idrivee2.com
+Region Code: us-midwest-1
+Access key ID: ibWysNQkvij5D9Uv6Wdo
+Secret Access Key: Kvk7uLUE6qxFQlLz91nKzDmaHph4IL3tvpHdTr7M

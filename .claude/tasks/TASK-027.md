@@ -35,7 +35,7 @@ window would send a Dropbox id to Graph). Verification is live, at the moment of
 Not in stage 1: the ready-to-archive notification (`redundantLocalCopies`) still counts only OneDrive-verified rows, so
 an album on another cloud gets no notification. It works from the Archive tab.
 
-## Stage 2 — Sync (built 25 Sept 2026; device test with Ian pending)
+## Stage 2 — Sync (built and device-tested 25 Sept 2026)
 
 Sync replaces the file on the phone with a smaller copy **in place, with no trash step**, so from then on the cloud holds
 the only original. Built:
@@ -63,3 +63,19 @@ for OneDrive only. The ready-to-archive notification still counts only OneDrive-
 Unit: verifier adapters against a local server; the decision from a `RemoteCheck` to confirmed / wrong size / missing /
 unconfirmed; the prune query (androidTest, Room). Device (Moto G, Ian sets the mode, since album modes are only ever
 set by the user): a Dropbox album set to Archive, Check, Android's trash dialog, files in the trash, Restore back.
+
+## Result — device tests, 25 Sept 2026 (Moto G, real accounts)
+
+Every step below ran against the real service, and every restored file matched the size recorded at upload.
+
+| Cloud | Upload | Sync (shrink) | Restore in place | Archive (live check, trash) | Restore archived |
+|---|---|---|---|---|---|
+| Dropbox | yes | yes, 41 files | yes | yes, 36 files | yes |
+| Google Drive | yes | yes, 10 files | yes | yes, 9 files (stage 1) | yes |
+| Backblaze B2 | yes | yes, 12 files | yes | yes, 16 files | yes |
+| IDrive e2 | yes | yes, 10 files | yes | yes, 6 files | yes |
+| pCloud | waiting on pCloud's approval; no download or verifier built | | | | |
+
+Seen on the way, and fixed: signing out of a cloud re-paired its folders to the main cloud (now the user decides; see the sign-out prompt), an album spread over two top-level folders was missing from the folder list, the Sync queue stopped behind a row whose file was gone, and one failing file stopped the whole run (now held, and three in a row still stop it). The Archive check refused 10 Dropbox files while Dropbox was signed out, which is the rule: if the cloud could not be asked, nothing is removed.
+
+Not done: the ready-to-archive notification and the Camera album's manual optimise are OneDrive-only; the (?) help pages and Ian's guide still describe the old layout in places.
