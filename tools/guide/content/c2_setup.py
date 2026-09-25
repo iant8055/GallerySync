@@ -78,6 +78,58 @@ CHAPTER = Chapter(
             screens can tell you how much is left to send.
         """),
 
+        topic("cloud-key-backblaze", "Connecting Backblaze B2: the keys and where to find them", """
+            **Backblaze B2** connects with a key you make in your own Backblaze account, not with a sign-in page. GallerySync only ever writes inside a folder called **GallerySync** in the bucket you choose. It never lists, changes or deletes anything else in the bucket, so an existing bucket is safe to use.
+
+            ## What you need from Backblaze
+            1. **A bucket.** Use one you already have, or make one under **B2 Cloud Storage, Buckets, Create a Bucket**. Keep it **Private**.
+            2. **The bucket's endpoint.** Open the bucket in the list. Its details show an **Endpoint** such as **s3.us-east-005.backblazeb2.com**.
+            3. **An application key for that bucket.** Under **Application Keys**, choose **Add a New Application Key**. Name it (for example **gallerysync**), choose your one bucket rather than **All**, and set the type of access to **Read and Write**. Do not use the Master Application Key: it can do everything in your account.
+            4. **Both halves of the key.** Backblaze shows a **keyID** and an **applicationKey**. The applicationKey is shown once, so copy it before you leave the page. If you lose it, make a new key.
+
+            ## What to enter in GallerySync
+            • **Endpoint:** the address from the bucket, without https://.
+            • **Region:** leave it blank. GallerySync reads it from the endpoint (the **us-east-005** part).
+            • **Bucket name:** the bucket's exact name.
+            • **Access key ID:** the **keyID**. Use all of it: it is long and starts with 005.
+            • **Secret access key:** the **applicationKey**. Tap **Show** to check it before you press **Connect**.
+
+            ## If it says the keys were rejected
+            The message names what to check. In practice it is nearly always a typed character.
+            • **Does not recognise that access key ID:** part of the keyID is missing or wrong.
+            • **The secret key or the region does not match:** a letter in the applicationKey is wrong. Watch for a capital **O** against a zero, a capital **I** against a lowercase **l**, and a capital **J** against a lowercase **j**. Pasting the key avoids all of these.
+            • **Not allowed to use that bucket:** the key was made for a different bucket.
+
+            The key is kept in encrypted storage on your phone and is used only to send your files to this bucket. Backblaze B2 is a second cloud, so it needs Pro, free for 30 days.
+        """),
+
+        topic("cloud-key-idrive", "Connecting IDrive e2: the keys and where to find them", """
+            **IDrive e2** connects with a key you make in your own e2 account, not with a sign-in page. GallerySync only ever writes inside a folder called **GallerySync** in the bucket you choose. It never lists, changes or deletes anything else in the bucket, so an existing bucket is safe to use.
+
+            ## What you need from IDrive e2
+            1. **A bucket.** Use one you already have, or create one in the e2 console. Keep it private.
+            2. **The endpoint for that bucket's region.** The e2 console shows the endpoint address for your region. Copy it exactly.
+            3. **The region name.** The console names the region of the bucket, for example **us-west-1**. Unlike Backblaze, IDrive's endpoint does not contain it, so GallerySync asks for it.
+            4. **An access key.** Create one in the console's access keys section. It gives an **access key ID** and a **secret access key**. The secret is normally shown once, so copy it before you leave the page.
+
+            IDrive changes its console from time to time, so the labels may differ a little from these. The four things above are what matter.
+
+            ## What to enter in GallerySync
+            • **Endpoint:** the address from the console, without https://.
+            • **Region:** the region name from the console.
+            • **Bucket name:** the bucket's exact name.
+            • **Access key ID:** the access key ID.
+            • **Secret access key:** the secret. Tap **Show** to check it before you press **Connect**.
+
+            ## If it says the keys were rejected
+            The message names what to check. In practice it is nearly always a typed character.
+            • **Does not recognise that access key ID:** part of the ID is missing or wrong.
+            • **The secret key or the region does not match:** a letter in the secret is wrong, or the region name is. Watch for a capital **O** against a zero, and a capital **I** against a lowercase **l**. Pasting the key avoids these.
+            • **Not allowed to use that bucket:** the key does not cover that bucket.
+
+            The key is kept in encrypted storage on your phone and is used only to send your files to this bucket. IDrive e2 is a second cloud, so it needs Pro, free for 30 days.
+        """),
+
         topic("setup-search-permission", "Let GallerySync search this phone", """
             **Give search permission** opens Android's own permission screen. GallerySync needs it to
             find out where your photos and videos are stored.

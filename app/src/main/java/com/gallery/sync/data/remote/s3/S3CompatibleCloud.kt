@@ -198,7 +198,9 @@ abstract class S3CompatibleCloud(
             if (endpoint.isEmpty()) return null
             if (!endpoint.contains("://")) endpoint = "https://$endpoint"
             if (!endpoint.startsWith("https://")) return null
-            val region = v(FIELD_REGION)
+            // Left blank, the region is read from the endpoint where the endpoint carries it, which
+            // Backblaze's does (`s3.us-east-005.backblazeb2.com`): one box fewer to get wrong.
+            val region = v(FIELD_REGION).ifEmpty { regionFromEndpoint(endpoint).orEmpty() }
             val bucket = v(FIELD_BUCKET).trim('/')
             val access = v(FIELD_ACCESS_KEY)
             val secret = v(FIELD_SECRET_KEY)
@@ -207,6 +209,16 @@ abstract class S3CompatibleCloud(
         }
 
         fun hostLabel(endpoint: String): String = endpoint.removePrefix("https://")
+
+        private val REGION_IN_HOST = Regex("""^https://s3\.([a-z0-9-]+)\.(backblazeb2|amazonaws)\.com$""")
+
+        /**
+         * The signing region an endpoint names, or null when it does not. Only for hosts whose second
+         * label really is the region (Backblaze B2, Amazon S3); IDrive e2's host is not, so its region
+         * is still asked for.
+         */
+        fun regionFromEndpoint(endpoint: String): String? =
+            REGION_IN_HOST.matchEntire(endpoint.trimEnd('/'))?.groupValues?.get(1)
 
         fun mimeTypeFor(name: String): String = CloudMime.of(name)
     }

@@ -164,6 +164,31 @@
 <h4>What it checks in the background</h4>
 <p>Once you have chosen your folders, the app looks at what OneDrive already holds, so the later screens can tell you how much is left to send.</p>
   </div></details>
+  <details class="topic"><summary>Connecting Backblaze B2: the keys and where to find them</summary>
+  <div class="topic-body" id="cloud-key-backblaze">
+<p><strong>Backblaze B2</strong> connects with a key you make in your own Backblaze account, not with a sign-in page. GallerySync only ever writes inside a folder called <strong>GallerySync</strong> in the bucket you choose. It never lists, changes or deletes anything else in the bucket, so an existing bucket is safe to use.</p>
+<h4>What you need from Backblaze</h4>
+<ol><li><strong>A bucket.</strong> Use one you already have, or make one under <strong>B2 Cloud Storage, Buckets, Create a Bucket</strong>. Keep it <strong>Private</strong>.</li><li><strong>The bucket's endpoint.</strong> Open the bucket in the list. Its details show an <strong>Endpoint</strong> such as <strong>s3.us-east-005.backblazeb2.com</strong>.</li><li><strong>An application key for that bucket.</strong> Under <strong>Application Keys</strong>, choose <strong>Add a New Application Key</strong>. Name it (for example <strong>gallerysync</strong>), choose your one bucket rather than <strong>All</strong>, and set the type of access to <strong>Read and Write</strong>. Do not use the Master Application Key: it can do everything in your account.</li><li><strong>Both halves of the key.</strong> Backblaze shows a <strong>keyID</strong> and an <strong>applicationKey</strong>. The applicationKey is shown once, so copy it before you leave the page. If you lose it, make a new key.</li></ol>
+<h4>What to enter in GallerySync</h4>
+<ul><li><strong>Endpoint:</strong> the address from the bucket, without https://.</li><li><strong>Region:</strong> leave it blank. GallerySync reads it from the endpoint (the <strong>us-east-005</strong> part).</li><li><strong>Bucket name:</strong> the bucket's exact name.</li><li><strong>Access key ID:</strong> the <strong>keyID</strong>. Use all of it: it is long and starts with 005.</li><li><strong>Secret access key:</strong> the <strong>applicationKey</strong>. Tap <strong>Show</strong> to check it before you press <strong>Connect</strong>.</li></ul>
+<h4>If it says the keys were rejected</h4>
+<p>The message names what to check. In practice it is nearly always a typed character.</p>
+<ul><li><strong>Does not recognise that access key ID:</strong> part of the keyID is missing or wrong.</li><li><strong>The secret key or the region does not match:</strong> a letter in the applicationKey is wrong. Watch for a capital <strong>O</strong> against a zero, a capital <strong>I</strong> against a lowercase <strong>l</strong>, and a capital <strong>J</strong> against a lowercase <strong>j</strong>. Pasting the key avoids all of these.</li><li><strong>Not allowed to use that bucket:</strong> the key was made for a different bucket.</li></ul>
+<p>The key is kept in encrypted storage on your phone and is used only to send your files to this bucket. Backblaze B2 is a second cloud, so it needs Pro, free for 30 days.</p>
+  </div></details>
+  <details class="topic"><summary>Connecting IDrive e2: the keys and where to find them</summary>
+  <div class="topic-body" id="cloud-key-idrive">
+<p><strong>IDrive e2</strong> connects with a key you make in your own e2 account, not with a sign-in page. GallerySync only ever writes inside a folder called <strong>GallerySync</strong> in the bucket you choose. It never lists, changes or deletes anything else in the bucket, so an existing bucket is safe to use.</p>
+<h4>What you need from IDrive e2</h4>
+<ol><li><strong>A bucket.</strong> Use one you already have, or create one in the e2 console. Keep it private.</li><li><strong>The endpoint for that bucket's region.</strong> The e2 console shows the endpoint address for your region. Copy it exactly.</li><li><strong>The region name.</strong> The console names the region of the bucket, for example <strong>us-west-1</strong>. Unlike Backblaze, IDrive's endpoint does not contain it, so GallerySync asks for it.</li><li><strong>An access key.</strong> Create one in the console's access keys section. It gives an <strong>access key ID</strong> and a <strong>secret access key</strong>. The secret is normally shown once, so copy it before you leave the page.</li></ol>
+<p>IDrive changes its console from time to time, so the labels may differ a little from these. The four things above are what matter.</p>
+<h4>What to enter in GallerySync</h4>
+<ul><li><strong>Endpoint:</strong> the address from the console, without https://.</li><li><strong>Region:</strong> the region name from the console.</li><li><strong>Bucket name:</strong> the bucket's exact name.</li><li><strong>Access key ID:</strong> the access key ID.</li><li><strong>Secret access key:</strong> the secret. Tap <strong>Show</strong> to check it before you press <strong>Connect</strong>.</li></ul>
+<h4>If it says the keys were rejected</h4>
+<p>The message names what to check. In practice it is nearly always a typed character.</p>
+<ul><li><strong>Does not recognise that access key ID:</strong> part of the ID is missing or wrong.</li><li><strong>The secret key or the region does not match:</strong> a letter in the secret is wrong, or the region name is. Watch for a capital <strong>O</strong> against a zero, and a capital <strong>I</strong> against a lowercase <strong>l</strong>. Pasting the key avoids these.</li><li><strong>Not allowed to use that bucket:</strong> the key does not cover that bucket.</li></ul>
+<p>The key is kept in encrypted storage on your phone and is used only to send your files to this bucket. IDrive e2 is a second cloud, so it needs Pro, free for 30 days.</p>
+  </div></details>
   <details class="topic"><summary>Let GallerySync search this phone</summary>
   <div class="topic-body" id="setup-search-permission">
 <p><strong>Give search permission</strong> opens Android's own permission screen. GallerySync needs it to find out where your photos and videos are stored.</p>

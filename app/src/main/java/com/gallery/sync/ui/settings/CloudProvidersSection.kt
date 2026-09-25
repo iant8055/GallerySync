@@ -183,6 +183,11 @@ private fun KeysDialog(
     onDismiss: () -> Unit
 ) {
     val values = remember { mutableStateOf(provider.keyFields.associate { it.id to it.defaultValue }) }
+    // Secret fields start hidden, and can be shown to check what was typed: a single wrong character in
+    // a long key is the usual reason a store rejects it, and dots hide exactly that.
+    var showSecret by remember { mutableStateOf(false) }
+    var showGuide by remember { mutableStateOf(false) }
+    val guideAnchor = keysGuideAnchor(provider.location)
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.cloud_keys_dialog_title, stringResource(provider.location.labelRes()))) },
@@ -195,12 +200,30 @@ private fun KeysDialog(
                         label = { Text(stringResource(field.labelRes)) },
                         placeholder = field.hintRes?.let { hint -> { Text(stringResource(hint)) } },
                         singleLine = true,
-                        visualTransformation = if (field.isSecret) PasswordVisualTransformation() else androidx.compose.ui.text.input.VisualTransformation.None,
+                        visualTransformation = if (field.isSecret && !showSecret) {
+                            PasswordVisualTransformation()
+                        } else {
+                            androidx.compose.ui.text.input.VisualTransformation.None
+                        },
+                        trailingIcon = if (field.isSecret) {
+                            {
+                                TextButton(onClick = { showSecret = !showSecret }) {
+                                    Text(stringResource(if (showSecret) R.string.cloud_keys_hide else R.string.cloud_keys_show))
+                                }
+                            }
+                        } else {
+                            null
+                        },
                         keyboardOptions = KeyboardOptions(
                             keyboardType = if (field.isSecret) KeyboardType.Password else KeyboardType.Uri
                         ),
                         modifier = Modifier.fillMaxWidth()
                     )
+                }
+                if (guideAnchor != null) {
+                    TextButton(onClick = { showGuide = true }) {
+                        Text(stringResource(R.string.cloud_keys_guide))
+                    }
                 }
             }
         },
@@ -213,6 +236,16 @@ private fun KeysDialog(
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.cloud_cancel)) }
         }
     )
+    if (showGuide && guideAnchor != null) {
+        InAppPageDialog(page = SupportPage.HOW_TO_GUIDE, onDismiss = { showGuide = false }, anchor = guideAnchor)
+    }
+}
+
+/** The How To Guide topic that walks through getting these keys, for the clouds that need them. */
+private fun keysGuideAnchor(location: BackupLocation): String? = when (location) {
+    BackupLocation.BACKBLAZE_B2 -> "cloud-key-backblaze"
+    BackupLocation.IDRIVE_E2 -> "cloud-key-idrive"
+    else -> null
 }
 
 @Composable

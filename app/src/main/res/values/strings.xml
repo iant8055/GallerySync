@@ -128,7 +128,10 @@
     <string name="cloud_hint_idrive_endpoint">Copy it from your e2 console</string>
     <string name="cloud_hint_idrive_region">for example us-west-1</string>
     <string name="cloud_hint_b2_endpoint">s3.us-west-004.backblazeb2.com</string>
-    <string name="cloud_hint_b2_region">us-west-004</string>
+    <string name="cloud_hint_b2_region">Optional: read from the endpoint</string>
+    <string name="cloud_keys_show">Show</string>
+    <string name="cloud_keys_hide">Hide</string>
+    <string name="cloud_keys_guide">Step-by-step guide</string>
     <string name="cloud_field_region">Region</string>
     <string name="cloud_field_bucket">Bucket name</string>
     <string name="cloud_field_access_key">Access key ID</string>
