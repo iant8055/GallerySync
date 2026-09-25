@@ -90,7 +90,7 @@
 <main>
 
   <h1>How To Guide</h1>
-  <p class="sub">GallerySync — last updated 20 September 2026</p>
+  <p class="sub">GallerySync — last updated 25 September 2026</p>
 
   <div class="note">
     <p><strong>Every screen, every line.</strong> This guide explains each part of GallerySync in plain
@@ -121,7 +121,7 @@
   <details class="topic"><summary>The Four Tabs Menu</summary>
   <div class="topic-body" id="tabs-at-a-glance">
 <p>The bar at the bottom of the screen has four tabs. Only the tab you are on shows its name; the other three show just their icon.</p>
-<ul><li><strong>Albums</strong> (folder icon). Where you choose what happens to each album, and where you start or watch a backup. This is the tab you will use most.</li><li><strong>Restore</strong> (cloud icon). Brings things back: full-size originals in place of smaller copies, and files that are in the Cloud but no longer on the phone.</li><li><strong>Archive</strong> (cloud with a tick). Checks the files in your Archive albums against the Cloud, then removes them from the phone once you say yes.</li><li><strong>Settings</strong> (cog). The things you set once and rarely change: appearance, mobile data, where backups go, which folders to watch, and how photos and videos are optimised.</li></ul>
+<ul><li><strong>Albums</strong> (folder icon). Where you choose what happens to each album, and where you start or watch a backup. This is the tab you will use most.</li><li><strong>Restore</strong> (cloud icon). Brings things back: full-size originals in place of smaller copies, and files that are in the Cloud but no longer on the phone.</li><li><strong>Archive</strong> (cloud with a tick). Checks the files in your Archive albums against the Cloud, then removes them from the phone once you say yes.</li><li><strong>Settings</strong> (cog). The things you set once and rarely change: appearance, mobile data, which clouds are connected, which cloud each folder goes to, which folders to watch, and how photos and videos are optimised.</li></ul>
 <p>During first-time setup the bar is hidden and a guided tour walks you through the same four tabs. Look for the <strong>(?)</strong> buttons in the app: each opens a short explanation taken from this guide. You can access the whole guide in <strong>Settings</strong>, under <strong>General</strong> or by clicking "Read More" in any of the pop-up explanations.</p>
   </div></details>
   <details class="topic"><summary>Quick start</summary>
@@ -131,7 +131,7 @@
   </div></details>
   <details class="topic"><summary>Words you will see</summary>
   <div class="topic-body" id="words-you-will-see">
-<ul><li><strong>Album.</strong> A folder of photos and videos on your phone, such as Camera or Screenshots. GallerySync only lists albums inside the folders you chose.</li><li><strong>Mode.</strong> What you want done with an album: <strong>Off</strong>, <strong>Backup</strong>, <strong>Sync</strong> or <strong>Archive</strong>. See <a class="xref" href="#modes-in-depth">“The four modes”</a>.</li><li><strong>Backup.</strong> Copying a file to your Cloud. Your phone's copy is not touched.</li><li><strong>Optimise / optimised.</strong> Replacing a photo or video on the phone with a smaller copy while the full-quality original stays safe in the Cloud. See <a class="xref" href="#how-optimising-works">“How optimising works”</a>.</li><li><strong>Archive.</strong> Removing an album's files from the phone once they are confirmed in the Cloud. The files go to your phone's bin, not into thin air.</li><li><strong>Verified in the Cloud.</strong> The Cloud is asked and confirms it holds the file, at the same size as your phone's copy. See <a class="xref" href="#how-verification-works">“How verification works”</a>.</li><li><strong>Trash / Recycle Bin.</strong> The place removed files wait so you can recover them. Samsung Gallery calls it the Recycle Bin and the Files app calls it Trash. See <a class="xref" href="#where-deleted-files-go">“Where removed files go”</a>.</li><li><strong>Restore.</strong> Putting a full-size original back on the phone.</li><li><strong>Rescan.</strong> Looking at the phone again, and asking the Cloud again, so the numbers are fresh.</li></ul>
+<ul><li><strong>Album.</strong> A folder of photos and videos on your phone, such as Camera or Screenshots. GallerySync only lists albums inside the folders you chose.</li><li><strong>Mode.</strong> What you want done with an album: <strong>Off</strong>, <strong>Backup</strong>, <strong>Sync</strong> or <strong>Archive</strong>. See <a class="xref" href="#modes-in-depth">“The four modes”</a>.</li><li><strong>Cloud.</strong> OneDrive, Google Photos, Google Drive, Dropbox, pCloud, IDrive e2 or Backblaze B2. You choose which ones you use. See <a class="xref" href="#setup-cloud">“Cloud storage: choosing services, signing in and choosing where backups go”</a>.</li><li><strong>Pairing.</strong> Which cloud one of your folders (DCIM, Pictures and so on) sends to. See <a class="xref" href="#settings-destination">“Where each folder goes”</a>.</li><li><strong>Backup.</strong> Copying a file to your Cloud. Your phone's copy is not touched.</li><li><strong>Optimise / optimised.</strong> Replacing a photo or video on the phone with a smaller copy while the full-quality original stays safe in the Cloud. See <a class="xref" href="#how-optimising-works">“How optimising works”</a>.</li><li><strong>Archive.</strong> Removing an album's files from the phone once they are confirmed in the Cloud. The files go to your phone's bin, not into thin air.</li><li><strong>Verified in the Cloud.</strong> The cloud the file was sent to is asked, right then, and confirms it holds the file at the same size as your phone's copy. See <a class="xref" href="#how-verification-works">“How verification works”</a>.</li><li><strong>Trash / Recycle Bin.</strong> The place removed files wait so you can recover them. Samsung Gallery calls it the Recycle Bin and the Files app calls it Trash. See <a class="xref" href="#where-deleted-files-go">“Where removed files go”</a>.</li><li><strong>Restore.</strong> Putting a full-size original back on the phone.</li><li><strong>Rescan.</strong> Looking at the phone again, and asking OneDrive again, so the numbers are fresh.</li></ul>
   </div></details>
   <h2 id="ch-setup">First-time setup</h2>
   <p class="chapter-intro">The first time you open GallerySync, a short guided setup walks you through nine screens. Each one is explained here, including the messages you might meet along the way.</p>
@@ -154,15 +154,18 @@
   </div></details>
   <details class="topic"><summary>Cloud storage: choosing services, signing in and choosing where backups go</summary>
   <div class="topic-body" id="setup-cloud">
-<p>This screen comes first, before your folders, so the next screens know which clouds you can send to. It lists the cloud services GallerySync covers. <strong>OneDrive</strong> is always ticked, because it is where your backups are kept. The others are optional extras: <strong>Google Photos</strong>, <strong>Google Drive</strong>, <strong>Dropbox</strong>, <strong>pCloud</strong>, <strong>IDrive e2</strong> and <strong>Backblaze B2</strong>. Tick the ones you use. A service only appears once the app is set up to connect to it.</p>
-<h4>The extra clouds: what to know before you choose one</h4>
-<ul><li><strong>Backup only.</strong> Folders sent to an extra cloud can be backed up but not Archived or Synced, because the app cannot prove a copy there is safe before removing the original.</li><li><strong>It cannot check what is already in that cloud</strong>, so a photo that is already there may be added a second time.</li><li><strong>Restoring from an extra cloud</strong> back onto this phone is not available yet.</li><li><strong>It is a Pro feature.</strong> Using it alongside OneDrive is free for 30 days, then it needs a one-time purchase, not a subscription. You start the trial yourself with a button, the terms are shown first, and nothing is ever charged automatically. If the trial ends and you do not buy it, Google Photos uploads pause and OneDrive carries on as normal.</li></ul>
-<h4>Signing in</h4>
-<p><strong>Sign in with your Cloud Account</strong> opens the Cloud's own sign-in page. You type your password there, never into GallerySync. The app only receives a permission that lets it work with your Cloud files, and it keeps that permission in encrypted storage on your phone.</p>
-<p>Once signed in, the screen says <strong>Signed in to OneDrive</strong> (for example) and shows <strong>Backup destination</strong>: the Cloud folder where new backups will go. In OneDrive the default folder is Samsung Gallery / DCIM, which matches where Samsung's own sync puts photos, so files already there are recognised and not sent twice. <strong>Change</strong> lets you pick another folder. See <a class="xref" href="#dialog-destination">“Where new backups go (the Change dialog)”</a>.</p>
-<p>Sign in to each extra cloud you ticked. Google Photos, Google Drive, Dropbox and pCloud open the provider's own sign-in page. IDrive e2 and Backblaze B2 ask for the endpoint, region, bucket and the access key pair you created in their console; the app checks them against the bucket before keeping them. <strong>Next</strong> waits until every service you ticked is connected.</p>
+<p>This screen comes first, before your folders, so the next screens know which clouds you can send to. It is one list of the cloud services GallerySync works with: <strong>OneDrive</strong>, <strong>Google Photos</strong>, <strong>Google Drive</strong>, <strong>Dropbox</strong>, <strong>pCloud</strong>, <strong>IDrive e2</strong> and <strong>Backblaze B2</strong>. <strong>Nothing is ticked when you arrive.</strong> Tick the ones you use and press <strong>Next</strong>. A service only appears once the app is set up to connect to it.</p>
+<h4>Your first cloud is free</h4>
+<p>The first cloud you tick is the free one. Each further cloud is part of <strong>Pro</strong>: free for 30 days, then a one-time purchase, not a subscription. You start the trial yourself with a button, the terms are shown first, and nothing is ever charged automatically. If the trial ends and you do not buy it, uploads to the extra clouds pause and your free cloud carries on as normal.</p>
+<h4>What each cloud can do</h4>
+<p>Ticking a cloud can show an <strong>About this cloud</strong> note listing what it cannot do.</p>
+<ul><li><strong>OneDrive, Google Drive, Dropbox, IDrive e2 and Backblaze B2</strong> can Backup, Sync, Archive and Restore.</li><li><strong>Google Photos and pCloud</strong> are <strong>backup only</strong> for now. Files sent there are not optimised, archived or restored by GallerySync, because the app cannot ask them, right then, whether a copy is safe.</li><li><strong>Outside OneDrive, the app cannot see what a cloud already holds</strong>, so a photo that is already there may be added a second time.</li></ul>
+<h4>Signing in, one cloud at a time</h4>
+<p>After <strong>Next</strong>, each cloud you ticked gets its own <strong>Connect</strong> card, headed <strong>Cloud 1 of 3</strong> and so on. Each one is finished before the next begins. <strong>Back</strong> returns to the previous card; there is no skip, so <strong>Next</strong> waits until every cloud you ticked is connected.</p>
+<ul><li><strong>OneDrive, Google Photos, Google Drive, Dropbox and pCloud</strong> open the provider's own sign-in page. You type your password there, never into GallerySync. The app only receives a permission that lets it work with your files, and keeps it in encrypted storage on your phone. Dropbox asks for permission to read as well as write: allow both, or Restore will not work.</li><li><strong>IDrive e2 and Backblaze B2</strong> ask for the endpoint, region, bucket and the access key pair you made in their console. The app checks them against the bucket before keeping them. See <a class="xref" href="#cloud-key-backblaze">“Connecting Backblaze B2: the keys and where to find them”</a> and <a class="xref" href="#cloud-key-idrive">“Connecting IDrive e2: the keys and where to find them”</a>.</li></ul>
+<p>Once OneDrive is signed in, its card says <strong>Signed in to OneDrive</strong> and shows <strong>Backup destination</strong>: the OneDrive folder where new backups will go. The default is Samsung Gallery / DCIM, which matches where Samsung's own sync puts photos, so files already there are recognised and not sent twice. <strong>Change</strong> lets you pick another folder. See <a class="xref" href="#dialog-destination">“Where new backups go (the Change dialog)”</a>.</p>
 <h4>What it checks in the background</h4>
-<p>Once you have chosen your folders, the app looks at what OneDrive already holds, so the later screens can tell you how much is left to send.</p>
+<p>If OneDrive is one of your clouds, then once you have chosen your folders the app looks at what OneDrive already holds, so the later screens can tell you how much is left to send. The other clouds are not checked this way.</p>
   </div></details>
   <details class="topic"><summary>Connecting Backblaze B2: the keys and where to find them</summary>
   <div class="topic-body" id="cloud-key-backblaze">
@@ -174,20 +177,20 @@
 <h4>If it says the keys were rejected</h4>
 <p>The message names what to check. In practice it is nearly always a typed character.</p>
 <ul><li><strong>Does not recognise that access key ID:</strong> part of the keyID is missing or wrong.</li><li><strong>The secret key or the region does not match:</strong> a letter in the applicationKey is wrong. Watch for a capital <strong>O</strong> against a zero, a capital <strong>I</strong> against a lowercase <strong>l</strong>, and a capital <strong>J</strong> against a lowercase <strong>j</strong>. Pasting the key avoids all of these.</li><li><strong>Not allowed to use that bucket:</strong> the key was made for a different bucket.</li></ul>
-<p>The key is kept in encrypted storage on your phone and is used only to send your files to this bucket. Backblaze B2 is a second cloud, so it needs Pro, free for 30 days.</p>
+<p>The key is kept in encrypted storage on your phone and is used only to send your files to this bucket. If Backblaze B2 is not your first cloud, it needs Pro, free for 30 days.</p>
   </div></details>
   <details class="topic"><summary>Connecting IDrive e2: the keys and where to find them</summary>
   <div class="topic-body" id="cloud-key-idrive">
 <p><strong>IDrive e2</strong> connects with a key you make in your own e2 account, not with a sign-in page. GallerySync only ever writes inside a folder called <strong>GallerySync</strong> in the bucket you choose. It never lists, changes or deletes anything else in the bucket, so an existing bucket is safe to use.</p>
 <h4>What you need from IDrive e2</h4>
-<ol><li><strong>A bucket.</strong> Use one you already have, or create one in the e2 console. Keep it private.</li><li><strong>The endpoint for that bucket's region.</strong> The e2 console shows the endpoint address for your region. Copy it exactly.</li><li><strong>The region name.</strong> The console names the region of the bucket, for example <strong>us-west-1</strong>. Unlike Backblaze, IDrive's endpoint does not contain it, so GallerySync asks for it.</li><li><strong>An access key.</strong> Create one in the console's access keys section. It gives an <strong>access key ID</strong> and a <strong>secret access key</strong>. The secret is normally shown once, so copy it before you leave the page.</li></ol>
+<ol><li><strong>A bucket.</strong> Use one you already have, or create one in the e2 console. Keep it private.</li><li><strong>The endpoint for that bucket's region.</strong> This is the address of the region itself, for example <strong>s3.us-west-1.idrivee2.com</strong>. The console may also show an address for the bucket with the bucket's name in front. Do not use that one: GallerySync adds the bucket name itself.</li><li><strong>The region name.</strong> The console names the region of the bucket, for example <strong>us-west-1</strong>. Unlike Backblaze, IDrive's endpoint does not contain it, so GallerySync asks for it.</li><li><strong>An access key.</strong> Create one in the console's access keys section. It gives an <strong>access key ID</strong> and a <strong>secret access key</strong>. The secret is normally shown once, so copy it before you leave the page.</li></ol>
 <p>IDrive changes its console from time to time, so the labels may differ a little from these. The four things above are what matter.</p>
 <h4>What to enter in GallerySync</h4>
 <ul><li><strong>Endpoint:</strong> the address from the console, without https://.</li><li><strong>Region:</strong> the region name from the console.</li><li><strong>Bucket name:</strong> the bucket's exact name.</li><li><strong>Access key ID:</strong> the access key ID.</li><li><strong>Secret access key:</strong> the secret. Tap <strong>Show</strong> to check it before you press <strong>Connect</strong>.</li></ul>
 <h4>If it says the keys were rejected</h4>
 <p>The message names what to check. In practice it is nearly always a typed character.</p>
 <ul><li><strong>Does not recognise that access key ID:</strong> part of the ID is missing or wrong.</li><li><strong>The secret key or the region does not match:</strong> a letter in the secret is wrong, or the region name is. Watch for a capital <strong>O</strong> against a zero, and a capital <strong>I</strong> against a lowercase <strong>l</strong>. Pasting the key avoids these.</li><li><strong>Not allowed to use that bucket:</strong> the key does not cover that bucket.</li></ul>
-<p>The key is kept in encrypted storage on your phone and is used only to send your files to this bucket. IDrive e2 is a second cloud, so it needs Pro, free for 30 days.</p>
+<p>The key is kept in encrypted storage on your phone and is used only to send your files to this bucket. If IDrive e2 is not your first cloud, it needs Pro, free for 30 days.</p>
   </div></details>
   <details class="topic"><summary>Let GallerySync search this phone</summary>
   <div class="topic-body" id="setup-search-permission">
@@ -201,7 +204,7 @@
   <div class="topic-body" id="setup-choose-folders">
 <p>Once it has permission, GallerySync searches and shows the folders it found, each with a selection box. <strong>Select the ones you want GallerySync to access.</strong> DCIM is where most modern Android phones save the photos and videos. Press <strong>Next</strong> to move on.</p>
 <h4>Which cloud each folder goes to</h4>
-<p>If an extra cloud is connected and unlocked, each folder you select shows a <strong>Goes to</strong> button, so you can send DCIM to OneDrive and Pictures to Google Photos, for example. This is chosen per folder (DCIM, Pictures, Movies), never per album inside it. If you only use OneDrive you will not see the button, and everything goes to OneDrive. Files already backed up never move if you change this later, only new files follow the change.</p>
+<p>If more than one cloud is connected, each folder you select shows a <strong>Goes to</strong> button, so you can send DCIM to OneDrive and Pictures to Google Photos, for example. It starts <strong>blank</strong>, so you have to choose: <strong>Next</strong> waits until every folder you selected has a cloud, and the choice is highlighted once you have made it. This is chosen per folder (DCIM, Pictures, Movies), never per album inside it. If you connected only one cloud you will not see the button, and everything goes there. Files already backed up never move if you change this later, only new files follow the change. You can change it any time in Settings. See <a class="xref" href="#settings-destination">“Where each folder goes”</a>.</p>
 <h4>Then Android asks again, once per folder</h4>
 <p>For each selected folder, Android shows its own folder permissions screen to double check this is what you want.  It is limited to the folders you chose, and you can withdraw it in Android's settings or GalleySync's Settings.</p>
 <h4>If permission isn't given to the folder asked for</h4>
@@ -260,9 +263,18 @@
 <p>From top to bottom:</p>
 <ul><li><strong>The green heading.</strong> with four mode buttons that filters the list, some figures about the albums you are looking at, and the controls that start, pause and stop a manual backup.</li><li><strong>A current Status</strong> which appears only while something is happening or just finished.</li><li><strong>The list of albums</strong>, one line each, defaulted to sort in alphabetical order. On a wide screen, such as an unfolded foldable, the list can run in two columns.</li></ul>
 <h4>What happens when you open the tab</h4>
-<p>Every time you select the Albums Tab, the app looks at the phone again and asks the Cloud again, so the figures are always the current information. You will see the <strong>Rescan</strong> button say <strong>Checking the Cloud...</strong> while it does.</p>
+<p>Every time you select the Albums Tab, the app looks at the phone again and asks OneDrive again, so the figures are always the current information. You will see the <strong>Rescan</strong> button say <strong>Checking...</strong> while it does. Other clouds are not asked when you open the tab; each one is asked about a file right before that file is shrunk or removed. See <a class="xref" href="#how-verification-works">“How verification works”</a>.</p>
 <h4>Nothing here changes a file by itself</h4>
 <p>Choosing a mode is what tells the app what to do with an album. Scrolling, filtering and tapping an album to look at it change nothing.</p>
+  </div></details>
+  <details class="topic"><summary>New albums</summary>
+  <div class="topic-body" id="albums-new">
+<h4>What it is</h4>
+<p>When an album appears on your phone that you have not chosen a mode for, a message at the top of the tab says <strong>1 new Album is waiting for you to choose a mode</strong> (or how many). It has two buttons:</p>
+<ul><li><strong>Show new Albums</strong> lists just the albums you have not decided about.</li><li><strong>Dismiss</strong> puts the message away.</li></ul>
+<p>Each such album carries a <strong>New</strong> tag and is highlighted in the list, until you choose a mode for it.</p>
+<h4>Good to know</h4>
+<p>A new album always starts at <strong>Off</strong>, so nothing is sent and nothing is changed until you choose. A new album can never start as Archive.</p>
   </div></details>
   <details class="topic"><summary>The permission message</summary>
   <div class="topic-body" id="albums-permission">
@@ -324,7 +336,7 @@
 <h4>What it is</h4>
 <p>The buttons at the bottom of the green card. They change depending on what is happening.</p>
 <p><strong>When nothing is running</strong></p>
-<ul><li><strong>Sync now</strong> starts a backup, and then optimises anything you set to Manual in Settings. It is greyed out when there is nothing to send and nothing waiting to be optimised, meaning every file in your Backup, Sync and Archive albums is already sent.</li><li><strong>Rescan</strong> looks at the phone again and asks the Cloud again, so all the figures are fresh. While it works it says <strong>Checking the Cloud...</strong> and is disabled.</li></ul>
+<ul><li><strong>Sync now</strong> starts a backup, and then optimises anything you set to Manual in Settings. It is greyed out when there is nothing to send and nothing waiting to be optimised, meaning every file in your Backup, Sync and Archive albums is already sent.</li><li><strong>Rescan</strong> looks at the phone again and asks OneDrive again, so all the figures are fresh. While it works it says <strong>Checking...</strong> and is disabled.</li></ul>
 <p><strong>When a backup is running</strong></p>
 <ul><li>The left side reports instead of acting: <strong>Syncing 37%</strong>. Before the figures are known it just says <strong>Syncing...</strong>.</li><li><strong>Pause</strong> holds everything, including automatic syncs, until you press <strong>Resume</strong>. While paused it reads <strong>Paused at 37%</strong>.</li><li><strong>Stop</strong> ends this run and leaves automatic syncing switched on, so it carries on the next time a new photo appears.</li></ul>
 <p>On a narrow screen, Pause, Resume and Stop become small icons with the same meaning.</p>
@@ -347,12 +359,13 @@
   <details class="topic"><summary>An album card</summary>
   <div class="topic-body" id="albums-list">
 <p>Each album has one card. From top to bottom:</p>
-<ul><li><strong>Album name</strong>, for example Camera.</li><li><strong>12 files · 340 MB.</strong> How many files the album holds on the phone right now, and their total size. From your phone's media library, inside the chosen folders.</li><li><strong>3 optimised · 4 kept at full size · 2 pending.</strong> A second line that appears only when it has something to say, and shows only the parts that are not zero. Optimised counts files replaced by a smaller copy. Kept at full size counts files Restore has put back and that are still ticked, which GallerySync leaves alone. Pending counts files not yet sent to the Cloud: the number of files on the phone minus the number the app has recorded as sent. <strong>Failed</strong> counts those of the pending files the app has given up on after several attempts; open the album to retry them.</li><li><strong>The the Cloud line.</strong> The only line that describes the Cloud itself. Its four forms are listed below.</li><li><strong>All files Archived</strong>, in place of the three lines above, on an Archive album that has nothing left on the phone. This is uncommon now: when an Archive run empties an album, the album leaves this list and its mode is forgotten. See <a class="xref" href="#modes-in-depth">“The four modes”</a>.</li><li><strong>The mode pill</strong>, at the right, in the mode's colour, with a small arrow. Tap it and choose Off, Backup, Sync or Archive; the current mode is ringed. Choosing Archive first asks you to confirm. See <a class="xref" href="#dialog-archive-confirm">“Archive this album?”</a>.</li></ul>
+<ul><li><strong>Album name</strong>, for example Camera.</li><li><strong>12 files · 340 MB.</strong> How many files the album holds on the phone right now, and their total size. From your phone's media library, inside the chosen folders.</li><li><strong>3 optimised · 4 kept at full size · 2 pending.</strong> A second line that appears only when it has something to say, and shows only the parts that are not zero. Optimised counts files replaced by a smaller copy. Kept at full size counts files Restore has put back and that are still ticked, which GallerySync leaves alone. Pending counts files not yet sent to the Cloud: the number of files on the phone minus the number the app has recorded as sent. <strong>Failed</strong> counts those of the pending files the app has given up on after several attempts; open the album to retry them.</li><li><strong>The cloud line.</strong> The only line that describes the cloud itself. What it says depends on which cloud the album's files went to. See below.</li><li><strong>All files Archived</strong>, in place of the three lines above, on an Archive album that has nothing left on the phone. This is uncommon now: when an Archive run empties an album, the album leaves this list and its mode is forgotten. See <a class="xref" href="#modes-in-depth">“The four modes”</a>.</li><li><strong>The mode pill</strong>, at the right, in the mode's colour, with a small arrow. Tap it and choose Off, Backup, Sync or Archive; the current mode is ringed. Choosing Archive first asks you to confirm. See <a class="xref" href="#dialog-archive-confirm">“Archive this album?”</a>. If the cloud an album goes to cannot do that mode, for example Archive for a folder that goes to Google Photos, the album says so, in a line such as <strong>Archive is not available with Google Photos, so nothing happens for this album.</strong></li></ul>
 <p>Tap anywhere else on the card to see the album's files. See <a class="xref" href="#album-detail">“An album's file list”</a>.</p>
-<h4>The four forms of the the Cloud line</h4>
-<ul><li><strong>Not checked against the Cloud yet.</strong> Nobody has asked yet. That is not the same as zero.</li><li><strong>Could not reach the Cloud when this was last checked.</strong> The answer is unknown, not bad news.</li><li><strong>12 verified in the Cloud</strong>, in green. the Cloud holds every file in the album at the right size.</li><li><strong>10 of 12 verified in the Cloud.</strong> Some files are missing there, or are there at a different size.</li></ul>
-<h4>Where the the Cloud line comes from</h4>
-<p>the Cloud is asked directly, each time you open the tab or press Rescan. A file counts as <strong>verified</strong> only if the Cloud has a file with the same name in that album's folder <strong>and</strong> reports the same size. It is deliberately not taken from the app's memory of what it once sent, because that memory cannot know if you have since deleted something in the Cloud.</p>
+<h4>The cloud line for a OneDrive album</h4>
+<ul><li><strong>Not checked against OneDrive yet.</strong> Nobody has asked yet. That is not the same as zero.</li><li><strong>Could not reach OneDrive when this was last checked.</strong> The answer is unknown, not bad news.</li><li><strong>12 verified in OneDrive</strong>, in green. OneDrive holds every file in the album at the right size.</li><li><strong>10 of 12 verified in OneDrive.</strong> Some files are missing there, or are there at a different size.</li></ul>
+<p>OneDrive is asked directly, each time you open the tab or press Rescan. A file counts as <strong>verified</strong> only if OneDrive has a file with the same name in that album's folder <strong>and</strong> reports the same size. It is deliberately not taken from the app's memory of what it once sent, because that memory cannot know if you have since deleted something in your cloud.</p>
+<h4>The cloud line for any other cloud</h4>
+<p><strong>15 sent to Backblaze B2</strong>, or Dropbox, Google Drive, IDrive e2, Google Photos or pCloud. If an album's files went to more than one cloud there is one such line for each. It says <strong>sent</strong>, not <strong>verified</strong>, because it is the app's own record: those clouds are not asked when you open the tab. Dropbox, Google Drive, Backblaze B2 and IDrive e2 are asked, one file at a time and right then, before that file is shrunk or removed. See <a class="xref" href="#how-verification-works">“How verification works”</a>.</p>
   </div></details>
   <details class="topic"><summary>An album&#x27;s file list</summary>
   <div class="topic-body" id="album-detail">
@@ -402,7 +415,7 @@
 <h4>Why Camera has no Sync</h4>
 <p>The Camera album offers <strong>Off</strong>, <strong>Backup</strong> and <strong>Archive</strong>, and not <strong>Sync</strong>. Sync makes a photo smaller as soon as the Cloud has it, which is right for an album you have set aside and wrong for the folder your camera writes to. This control is the alternative: you say how old a photo has to be, and only then is it touched. An album that was already set to Sync before this was added keeps that setting.</p>
 <h4>Which files are listed</h4>
-<ul><li>Photos and videos that the Cloud has confirmed, at the same size. A file not yet backed up is never listed.</li><li>Only files at least as old as the age you chose, by the date your phone holds for each file (the date it was last changed).</li><li>Photos only if <strong>Optimise photos</strong> is on in Settings, and videos only if <strong>Optimise video</strong> is on. If one is off, the card says so.</li><li>Not files that have already been made smaller, or that could not be made smaller.</li></ul>
+<ul><li>Photos and videos that the Cloud has confirmed, at the same size. A file not yet backed up is never listed. For now this covers files sent to OneDrive: files sent to another cloud are not listed here.</li><li>Only files at least as old as the age you chose, by the date your phone holds for each file (the date it was last changed).</li><li>Photos only if <strong>Optimise photos</strong> is on in Settings, and videos only if <strong>Optimise video</strong> is on. If one is off, the card says so.</li><li>Not files that have already been made smaller, or that could not be made smaller.</li></ul>
 <h4>Before you choose</h4>
 <p>The Camera file list shows nothing until you choose an age, and says so. Once you have, it lists only the files that age would optimise, so there is nothing on screen that cannot be swiped. <strong>Cancel</strong> empties it again. A file Restore has put back appears greyed in the list, if it is old enough, marked <strong>Kept at full size</strong>; swipe it right to let it be optimised again.</p>
 <h4>Leaving files out</h4>
@@ -436,19 +449,21 @@
 <p>Samsung Gallery calls it the Recycle Bin and the Files app calls it Trash. It is the same thing. Files stay there for a while and take up their full space until it is emptied, and the app never empties it for you.</p>
   </div></details>
   <h2 id="ch-restore">The Restore tab</h2>
-  <p class="chapter-intro">Restore brings photos and videos back from OneDrive to the album they came from. It only ever reads from OneDrive and writes to your phone, so nothing in OneDrive is touched.</p>
+  <p class="chapter-intro">Restore brings photos and videos back from your cloud to the album they came from. It only ever reads from the cloud and writes to your phone, so nothing in your cloud is touched.</p>
   <details class="topic"><summary>What Restore brings back</summary>
   <div class="topic-body" id="restore-overview">
 <p>Restore lists two kinds of file, side by side in the same folders:</p>
 <ul><li><strong>To restore.</strong> A photo or video the app has replaced with a smaller copy, and which is still on the phone. Restoring puts the full-size original in its place, in the same album and under the same name.</li><li><strong>To download.</strong> A file the app backed up that is no longer in its folder on the phone, most often because its album was archived. Downloading puts it back in the album it came from, under its own name.</li></ul>
 <p>Every file Restore brings back is ticked <strong>Keep at full size</strong>, so it is not shrunk or archived again straight away. You can untick it in the album's file list. See <a class="xref" href="#album-file-pin">“Keep at full size”</a>.</p>
-<h4>What OneDrive holds, not only what this app sent</h4>
-<p>Restore lists the photos and videos in your OneDrive backup folders, whoever put them there. It is not limited to what GallerySync uploaded, so an album you archived, a folder from another phone or one added from a computer can all be brought back. Each file goes back into the album with the same name as its OneDrive folder. It is still not a general file browser: only photos and videos, and only in your backup folders.</p>
+<h4>What your cloud holds</h4>
+<ul><li><strong>OneDrive.</strong> Restore lists the photos and videos in your OneDrive backup folders, whoever put them there. It is not limited to what GallerySync uploaded, so an album you archived, a folder from another phone or one added from a computer can all be brought back. Each file goes back into the album with the same name as its OneDrive folder. It is still not a general file browser: only photos and videos, and only in your backup folders.</li><li><strong>Dropbox, Google Drive, Backblaze B2 and IDrive e2.</strong> Restore lists what GallerySync sent there from this phone, and fetches each file by the exact address the app recorded when it sent it.</li><li><strong>Google Photos and pCloud</strong> cannot be restored from yet.</li></ul>
 <p>A file the phone already has at full size is shown greyed out, so you can see why it is not on offer. See <a class="xref" href="#restore-greyed-files">“Why are some files greyed out?”</a>.</p>
+<h4>Where restored files go</h4>
+<p>A restored file goes back into its own album folder. Android only lets a photo be created under DCIM or Pictures, and a video under DCIM or Movies, so when the album's own folder is somewhere else (a folder at the top of the phone's storage, say, or a photo album under Movies), the files go into <strong>DCIM/</strong> the album's name instead.</p>
 <h4>Folders first</h4>
 <p>The tab always opens on a list of folders (albums), even if there is only one. Swipe a folder to take all of it, or tap it to open it and pick individual files.</p>
 <h4>Safe to try</h4>
-<p>A restore only replaces a smaller copy once the full download has arrived and its size has been checked. If anything goes wrong the file on your phone is left exactly as it was. Stopping partway costs nothing and you can run it again.</p>
+<p>A restore only replaces a smaller copy once the full download has arrived and its size has been checked against the size recorded when the file was sent. If anything goes wrong the file on your phone is left exactly as it was. Stopping partway costs nothing and you can run it again.</p>
   </div></details>
   <details class="topic"><summary>Folders to Restore and Files in this folder</summary>
   <div class="topic-body" id="restore-hero">
@@ -457,9 +472,9 @@
 <ul><li>On the folder list: <strong>Folders to</strong> with <strong>Restore</strong> directly under it, in the left half, and in the right half how many folders have something to bring back.</li><li>Inside a folder: the card is laid out like an album's file list on the Albums tab. The return arrow and the folder's name, large and bold, are in the left half, level with the number of files, which is centred in the right half. Under the number is <strong>Files in this folder</strong>, and once you have selected something, what you have selected is on the same line, in the left half.</li></ul>
 <p>A dash instead of a number means the list is still loading.</p>
 <h4>Where it comes from</h4>
-<p>First the app's own record of what it has optimised or backed up, compared with a look at what is on the phone right now. Then OneDrive itself, folder by folder: <strong>Checking OneDrive for more...</strong> appears under the card while that happens, and anything else OneDrive holds is added when it arrives. If a folder cannot be reached the card says so, in red, and the list may be incomplete.</p>
+<p>First the app's own record of what it has optimised or backed up, compared with a look at what is on the phone right now. Then, if OneDrive is one of your clouds, OneDrive itself, folder by folder: <strong>Checking your cloud for more...</strong> appears under the card while that happens, and anything else OneDrive holds is added when it arrives. If a folder cannot be reached the card says so, in red, and the list may be incomplete.</p>
 <p>OneDrive is read once and remembered, including when the app is closed. Leaving the tab and coming back, or closing the app and opening it again, shows the list straight away, compared with what is on your phone now. If the remembered list is more than ten minutes old, OneDrive is read again behind it; you can also press <strong>Refresh</strong> at any time. Signing out forgets it.</p>
-<p>A folder appears when it has something to bring back. To list every OneDrive folder, even those with nothing to bring back, turn on <strong>Show empty folders</strong> in Settings.</p>
+<p>A folder appears when it has something to bring back. To list every OneDrive folder, even those with nothing to bring back, turn on <strong>Show empty folders</strong> in Settings. That switch only affects OneDrive.</p>
   </div></details>
   <details class="topic"><summary>The message under the number</summary>
   <div class="topic-body" id="restore-message-line">
@@ -474,7 +489,7 @@
 <h4>What it is</h4>
 <p>Appears once you have selected something, in the left half of the green card on the same line as <strong>Files in this folder</strong>: for example <strong>6 selected · 1.2 GB to recover</strong>.</p>
 <h4>Where it comes from</h4>
-<p><strong>Selected</strong> is a count of the files you have chosen across all folders. <strong>To recover</strong> is the extra room the restored files will take on your phone: for each file, its full size in OneDrive minus what the phone holds now (nothing at all, for a file that has to be downloaded).</p>
+<p><strong>Selected</strong> is a count of the files you have chosen across all folders. <strong>To recover</strong> is the extra room the restored files will take on your phone: for each file, its full size in the cloud minus what the phone holds now (nothing at all, for a file that has to be downloaded).</p>
 <h4>Good to know</h4>
 <p>Make sure the phone has that much free space before you press Restore.</p>
   </div></details>
@@ -485,7 +500,7 @@
 <ul><li><strong>Refresh</strong> (on the folder list) reads the list again. Use it after something changed while this tab was open, such as an optimise or archive run.</li><li><strong>Select all</strong> (inside a folder) selects every file listed in that folder.</li><li><strong>Clear</strong> removes every selection, in every folder. It is greyed out when nothing is selected, and it stays in place instead of disappearing so the card does not jump around.</li></ul>
 <p>Both are greyed out while a restore is running.</p>
 <h4>Where it comes from</h4>
-<p><strong>Refresh</strong> repeats both looks: the app's own record and the phone, then OneDrive, whatever the age of the last reading. Reading OneDrive needs the internet.</p>
+<p><strong>Refresh</strong> repeats both looks: the app's own record and the phone, then OneDrive if you use it, whatever the age of the last reading. Reading OneDrive needs the internet.</p>
   </div></details>
   <details class="topic"><summary>The folder list</summary>
   <div class="topic-body" id="restore-folders-list">
@@ -496,28 +511,28 @@
 <ul><li><strong>Tap</strong> a card to open it.</li><li><strong>Swipe right</strong> to select everything in the folder; <strong>swipe left</strong> to deselect it. Repeating a swipe changes nothing, so swiping across several folders cannot accidentally undo a choice you already made. The card slides aside as you pull and shows a tick (or a cross) behind it, ticks against your finger with a short buzz once you have pulled far enough to count, and springs back when you let go.</li></ul>
 <p>Inside a folder, the green card at the top names the folder, and its return arrow takes you back to the list of folders.</p>
 <h4>Where it comes from</h4>
-<p>OneDrive's own listing of the folder, compared with what is on the phone now, together with the app's own record of what it has optimised.</p>
+<p>The app's own record of what it has sent and optimised, and for OneDrive its own listing of the folder, compared with what is on the phone now.</p>
   </div></details>
   <details class="topic"><summary>The file list inside a folder</summary>
   <div class="topic-body" id="restore-files-list">
 <h4>What it is</h4>
 <p>One card per file. <strong>Swipe right</strong> to select it and <strong>swipe left</strong> to deselect it, the same as on the folder list; a selected file is highlighted with a tick. Tapping a card does the same. Repeating a swipe changes nothing.</p>
 <p><strong>The name</strong>, then one of:</p>
-<ul><li><strong>1.2 MB now · 8.4 MB full size.</strong> A smaller copy on the phone, and the size of the original in OneDrive. Restoring swaps one for the other.</li><li><strong>Available for download · 8.4 MB.</strong> The file is not on the phone at all. Restoring brings it back at this size.</li><li><strong>Already on this phone · 8.4 MB.</strong> Greyed out. The phone already has this file at full size, so there is nothing to do. See <a class="xref" href="#restore-greyed-files">“Why are some files greyed out?”</a>.</li></ul>
+<ul><li><strong>1.2 MB now · 8.4 MB full size.</strong> A smaller copy on the phone, and the size of the original in your cloud. Restoring swaps one for the other.</li><li><strong>Available for download · 8.4 MB.</strong> The file is not on the phone at all. Restoring brings it back at this size.</li><li><strong>Already on this phone · 8.4 MB.</strong> Greyed out. The phone already has this file at full size, so there is nothing to do. See <a class="xref" href="#restore-greyed-files">“Why are some files greyed out?”</a>.</li></ul>
 <p><strong>While it works:</strong> <strong>Working... 45%</strong> and a bar.</p>
 <p><strong>When it finishes:</strong></p>
-<ul><li><strong>Restored to full size.</strong> The original replaced the smaller copy.</li><li><strong>Back on this phone.</strong> The file was downloaded.</li><li><strong>Could not restore, your file is unchanged</strong>, with the reason in brackets, in red. Nothing was lost.</li></ul>
+<ul><li><strong>Restored to full size.</strong> The original replaced the smaller copy.</li><li><strong>Back on this phone.</strong> The file was downloaded.</li><li><strong>Could not restore, your file is unchanged</strong>, with the reason in brackets, in red. Nothing was lost. If the reason says to reconnect that cloud, sign in to it again in Settings, and for Dropbox make sure its permissions include reading files.</li></ul>
 <h4>Where it comes from</h4>
-<p>Names and sizes come from OneDrive's listing of the folder. The percentage comes from the download itself.</p>
+<p>Names and sizes come from the app's own record, and for OneDrive from its listing of the folder. The percentage comes from the download itself.</p>
   </div></details>
   <details class="topic"><summary>Why are some files greyed out?</summary>
   <div class="topic-body" id="restore-greyed-files">
 <h4>What it is</h4>
 <p>Inside a folder, some files are faded and cannot be selected. They read <strong>Already on this phone</strong>, with their size. Above the list a line says <strong>Greyed-out files are already on this phone.</strong></p>
 <h4>Why they are shown at all</h4>
-<p>OneDrive holds every file in the folder. Files the phone already has, at full size, need no restoring, but leaving them out would make the folder look shorter than it is in OneDrive and leave you wondering where they went. So they are listed, and greyed out.</p>
+<p>Your cloud holds every file in the folder. Files the phone already has, at full size, need no restoring, but leaving them out would make the folder look shorter than it is in OneDrive and leave you wondering where they went. So they are listed, and greyed out.</p>
 <h4>Where it comes from</h4>
-<p>OneDrive's listing, compared with the photos and videos on the phone, by folder, name and size. A file counts as here only when all three match.</p>
+<p>The list of what the cloud holds, compared with the photos and videos on the phone, by folder, name and size. A file counts as here only when all three match.</p>
 <h4>Good to know</h4>
 <p>A file of the same name but a different size is not offered and not greyed: it might be a photo you edited, and Restore never writes over an edit.</p>
   </div></details>
@@ -526,16 +541,20 @@
 <h4>What it is</h4>
 <p>A wide button along the bottom of the screen. It only appears once you have selected something, or while a restore is running.</p>
 <ul><li><strong>Restore</strong> starts bringing back every selected file, one after another.</li><li><strong>Stop restoring</strong> replaces it while the restore runs. It stops the batch, including the file in progress. Files already brought back stay back.</li></ul>
+<p>While it runs, a progress bar under the button shows how far through you are, for example <strong>3 of 12 restored · 45%</strong>, and each file's own row shows its percentage.</p>
 <h4>What happens</h4>
-<p>Each file is downloaded from your OneDrive, checked, and only then put in place. It needs an internet connection and enough free space. Your OneDrive is only read, never changed.</p>
+<p>Each file is downloaded from the cloud it was sent to, checked, and only then put in place. It needs an internet connection and enough free space. Your cloud is only read, never changed.</p>
   </div></details>
   <h2 id="ch-archive">The Archive tab</h2>
-  <p class="chapter-intro">Archive is the one place where files leave your phone. It only ever handles albums you set to Archive, it checks every file against OneDrive first, and it ends with your tap.</p>
+  <p class="chapter-intro">Archive is the one place where files leave your phone. It only ever handles albums you set to Archive, it checks every file against your cloud first, and it ends with your tap.</p>
   <details class="topic"><summary>How Archive works, step by step</summary>
   <div class="topic-body" id="archive-overview">
-<ol><li><strong>You choose it, once, per album.</strong> On the Albums tab, set an album's mode to <strong>Archive</strong> and confirm. This is your consent. See <a class="xref" href="#dialog-archive-confirm">“Archive this album?”</a>.</li><li><strong>You come here and press Check these files.</strong> Every file in your Archive albums, except any you have chosen to keep on your phone, is checked against OneDrive. Anything not there yet is sent first and then checked.</li><li><strong>The app tells you the result.</strong> Each file gets a tick or a red cross, and a prompt says how many are confirmed and how much room will be freed.</li><li><strong>You say Yes.</strong> The app asks Android to move the confirmed files to your phone's Trash or Recycle Bin. Android shows its own confirmation. See <a class="xref" href="#dialog-android-trash">“Android's own confirmation”</a>.</li><li><strong>You empty the bin when you are ready.</strong> Removed files keep taking their full space until you do, and the app never empties it for you.</li></ol>
+<ol><li><strong>You choose it, once, per album.</strong> On the Albums tab, set an album's mode to <strong>Archive</strong> and confirm. This is your consent. See <a class="xref" href="#dialog-archive-confirm">“Archive this album?”</a>.</li><li><strong>You come here and press Check these files.</strong> Every file in your Archive albums, except any you have chosen to keep on your phone, is checked against the cloud it was sent to. Anything not there yet is sent first and then checked.</li><li><strong>The app tells you the result.</strong> Each file gets a tick or a red cross, and a prompt says how many are confirmed and how much room will be freed.</li><li><strong>You say Yes.</strong> The app asks Android to move the confirmed files to your phone's Trash or Recycle Bin. Android shows its own confirmation. See <a class="xref" href="#dialog-android-trash">“Android's own confirmation”</a>.</li><li><strong>You empty the bin when you are ready.</strong> Removed files keep taking their full space until you do, and the app never empties it for you.</li></ol>
 <h4>What "safely" means</h4>
-<p>A file is only removed if OneDrive confirms it holds the file <strong>and</strong> reports the same size as your copy. A file OneDrive does not confirm stays on your phone, and the screen says why.</p>
+<p>A file is only removed if its cloud confirms, right then, that it holds the file <strong>and</strong> reports the same size as your copy. A file the cloud does not confirm stays on your phone, and the screen says why. If the cloud cannot be asked at all, for example because you have signed out of it, the file stays too: being unable to ask is not the same as an answer.</p>
+<p>If Sync has already made a photo smaller, the cloud is checked against the size of the <strong>original</strong>, not the smaller copy, so the copy on your phone is never mistaken for the whole file.</p>
+<h4>Which clouds can Archive</h4>
+<p>OneDrive, Google Drive, Dropbox, IDrive e2 and Backblaze B2. An album whose files go to Google Photos or pCloud cannot be archived, and says so.</p>
 <h4>What Archive cannot do by itself</h4>
 <p>It cannot run while you are away. Android requires you to be present to approve removing files, so the app brings you back here instead of doing it silently. If you try to leave the app while files are checked and waiting, it reminds you. See <a class="xref" href="#dialog-exit-warning">“Files ready to Archive (the leaving reminder)”</a>.</p>
 <h4>It is a standing instruction, until the album is empty</h4>
@@ -547,7 +566,7 @@
   <details class="topic"><summary>Files to Archive</summary>
   <div class="topic-body" id="archive-hero">
 <h4>What it is</h4>
-<p>The green card, laid out like the one on the Restore tab. On the left, <strong>Files to</strong> with <strong>Archive</strong> directly under it; in the right half, a number. Under them, the names of your Archive albums, then this sentence: <strong>Every file below is checked against OneDrive first. Anything that is not there yet is backed up before it is verified.</strong> At the foot of the card, a reminder: <strong>To restore archived files or albums, check the Restore tab.</strong></p>
+<p>The green card, laid out like the one on the Restore tab. On the left, <strong>Files to</strong> with <strong>Archive</strong> directly under it; in the right half, a number. Under them, the names of your Archive albums, then this sentence: <strong>Every file below is checked against your cloud first. Anything that is not there yet is backed up before it is verified.</strong> At the foot of the card, a reminder: <strong>To restore archived files or albums, check the Restore tab.</strong></p>
 <h4>Where it comes from</h4>
 <p>The number is a live count of the files on the phone, in albums set to Archive, that will be archived. Files you have swiped out of Archive are not counted. When you arrive it is worked out from the phone; it does not need the internet. The album names are the albums you set to Archive.</p>
   </div></details>
@@ -555,9 +574,9 @@
   <div class="topic-body" id="archive-check-button">
 <h4>What it is</h4>
 <p>The button in the green card, and the messages that replace it as the process moves along:</p>
-<ul><li><strong>Check these files</strong> starts the check.</li><li><strong>Checking against OneDrive...</strong> with a small spinner while OneDrive is asked.</li><li><strong>Batch 1 of 3</strong> while files are being removed. See <a class="xref" href="#dialog-android-trash">“Android's own confirmation”</a> for why there may be several.</li><li><strong>12 files removed from this phone, freeing 340 MB.</strong> or <strong>Nothing was removed.</strong> when it finishes.</li></ul>
+<ul><li><strong>Check these files</strong> starts the check.</li><li><strong>Checking with your cloud...</strong> with a small spinner while the cloud is asked.</li><li><strong>Batch 1 of 3</strong> while files are being removed. See <a class="xref" href="#dialog-android-trash">“Android's own confirmation”</a> for why there may be several.</li><li><strong>12 files removed from this phone, freeing 340 MB.</strong> or <strong>Nothing was removed.</strong> when it finishes.</li></ul>
 <h4>Where it comes from</h4>
-<p>The check asks OneDrive for the list of files in each album's folder and compares names and sizes with the files on your phone. The result messages report what actually happened.</p>
+<p>For OneDrive, the check asks for the list of files in each album's folder and compares names and sizes with the files on your phone. For Dropbox, Google Drive, Backblaze B2 and IDrive e2 it asks about each file by the exact address the app recorded when it sent it, and the cloud must say the file is there, not deleted or in its bin, at exactly the size it was. The result messages report what actually happened.</p>
 <h4>Good to know</h4>
 <p>"Freeing 340 MB" is a promise about after the bin is emptied. A removed file still takes its space in the bin, so the room does not come back at the moment you tap.</p>
   </div></details>
@@ -583,15 +602,15 @@
   <div class="topic-body" id="archive-file-list">
 <h4>What it is</h4>
 <p>One rounded card for each file in your Archive albums, in the same style as the file cards on the Restore tab: its name, then its size under it, then a mark on the right. A file you put into an Archive album later appears here too, before anything is archived.</p>
-<p><strong>Keeping a file on your phone.</strong> Swipe right to select and left to deselect, as everywhere in the app. Swipe a card <strong>left</strong> to deselect it and it fades and reads <strong>Not archiving</strong>. It is left out of every check and every removal, and GallerySync remembers your choice, even after you close the app. Swipe it <strong>right</strong> to select it again and it returns to the list, ready to be archived. A green tick means a file has been checked against OneDrive in the current check, so a file you bring back has no tick until the files are checked again, and nothing is removed until they are. Swiping a card that is already that way does nothing, so a run of swipes cannot undo itself. You cannot swipe while a check or a removal is running. If you use a screen reader, each card offers <strong>Deselect (keep on this phone)</strong> or <strong>Select (archive this file)</strong> instead.</p>
+<p><strong>Keeping a file on your phone.</strong> Swipe right to select and left to deselect, as everywhere in the app. Swipe a card <strong>left</strong> to deselect it and it fades and reads <strong>Not archiving</strong>. It is left out of every check and every removal, and GallerySync remembers your choice, even after you close the app. Swipe it <strong>right</strong> to select it again and it returns to the list, ready to be archived. A green tick means a file has been checked against your cloud in the current check, so a file you bring back has no tick until the files are checked again, and nothing is removed until they are. Swiping a card that is already that way does nothing, so a run of swipes cannot undo itself. You cannot swipe while a check or a removal is running. If you use a screen reader, each card offers <strong>Deselect (keep on this phone)</strong> or <strong>Select (archive this file)</strong> instead.</p>
 <p>An album with a file you have kept stays set to Archive, so files added to it later are still covered by the mode you set. If you would rather it stopped, change the album's mode on the Albums tab.</p>
 <p><strong>A file younger than your age filter</strong> fades the same way and reads <strong>too recent for your filter</strong> instead of <strong>Not archiving</strong>. See <a class="xref" href="#archive-age-filter">“Only show files older than…”</a>. It still swipes: swiping it left pins it permanently, which is a stronger version of the same thing.</p>
 <p><strong>The mark</strong></p>
-<ul><li><strong>A spinner.</strong> Being checked, backed up or removed.</li><li><strong>A green tick.</strong> Checked against OneDrive and confirmed there at the right size, or already removed.</li><li><strong>A red cross.</strong> OneDrive did not confirm it, so it stays on your phone.</li><li><strong>Nothing.</strong> Not looked at yet.</li></ul>
+<ul><li><strong>A spinner.</strong> Being checked, backed up or removed.</li><li><strong>A green tick.</strong> Checked against your cloud and confirmed there at the right size, or already removed.</li><li><strong>A red cross.</strong> Your cloud did not confirm it, so it stays on your phone.</li><li><strong>Nothing.</strong> Not looked at yet.</li></ul>
 <p><strong>The words under the name</strong>, in place of the size while something is happening:</p>
-<ul><li><strong>Backing up...</strong> The file was not in OneDrive, so it is being sent.</li><li><strong>Moving to Trash/Recycle Bin...</strong> Being removed.</li><li><strong>Removed from this phone.</strong></li><li>In red, why a file is staying: <strong>Could not check OneDrive</strong>, <strong>Not in OneDrive</strong>, or <strong>In OneDrive but the wrong size</strong>. Each ends "staying on your phone". "Could not check" and "is not there" are kept separate because they need different reactions. Being unable to ask is not the same as an answer.</li></ul>
+<ul><li><strong>Backing up...</strong> The file was not in your cloud, so it is being sent.</li><li><strong>Moving to Trash/Recycle Bin...</strong> Being removed.</li><li><strong>Removed from this phone.</strong></li><li>In red, why a file is staying: <strong>Could not check your cloud</strong>, <strong>Not in your cloud</strong>, or <strong>In your cloud but the wrong size</strong>. Each ends "staying on your phone". "Could not check" and "is not there" are kept separate because they need different reactions. Being unable to ask is not the same as an answer.</li></ul>
 <h4>Where it comes from</h4>
-<p>OneDrive's list of files for each album, compared with the phone. It asks once per album, not once per file.</p>
+<p>For OneDrive, its list of files for each album, compared with the phone, asked once per album. For the other clouds, one question per file.</p>
 <h4>Good to know</h4>
 <p>The number in the green card counts only the files that will be archived, not the ones you have kept. A kept file is the same setting as <strong>Keep at full size</strong> on the Albums tab, so it is counted there as well.</p>
   </div></details>
@@ -599,12 +618,12 @@
   <div class="topic-body" id="archive-prompt">
 <h4>What it is</h4>
 <p>After the check, a card asks one question, in one of three forms:</p>
-<ul><li><strong>All files validated.</strong> All files are confirmed in OneDrive. Archiving them moves the local copies to your phone's Trash/Recycle Bin, and frees the stated amount once you empty it.</li><li><strong>12 files validated.</strong> Some files could not be confirmed and will stay on the phone. Archiving moves only the confirmed ones. The count and size describe only those.</li><li><strong>Nothing can be archived.</strong> OneDrive did not confirm a single file, so they all stay. A single <strong>Continue</strong> button closes the message.</li></ul>
+<ul><li><strong>All files validated.</strong> All files are confirmed in your cloud. Archiving them moves the local copies to your phone's Trash/Recycle Bin, and frees the stated amount once you empty it.</li><li><strong>12 files validated.</strong> Some files could not be confirmed and will stay on the phone. Archiving moves only the confirmed ones. The count and size describe only those.</li><li><strong>Nothing can be archived.</strong> Your cloud did not confirm a single file, so they all stay. A single <strong>Continue</strong> button closes the message.</li></ul>
 <p>If there are many files, it also says something like <strong>Android can only ask about 2,000 files at a time, so this will take 2 separate confirmations.</strong></p>
 <p><strong>Do you want to continue?</strong></p>
 <ul><li><strong>Yes</strong> asks Android to move the confirmed files to the bin. Android then shows its own confirmation.</li><li><strong>No</strong> puts the question away. Nothing has been removed, and you can check again later.</li></ul>
 <h4>Where the numbers come from</h4>
-<p>The count is the files OneDrive just confirmed. The size is those files' size on your phone. It says "frees" that much once you empty the bin, because the bin keeps the bytes until then.</p>
+<p>The count is the files your cloud just confirmed. The size is those files' size on your phone. It says "frees" that much once you empty the bin, because the bin keeps the bytes until then.</p>
   </div></details>
   <details class="topic"><summary>Android&#x27;s own confirmation</summary>
   <div class="topic-body" id="dialog-android-trash">
@@ -620,10 +639,10 @@
   <details class="topic"><summary>Files ready to Archive (the leaving reminder)</summary>
   <div class="topic-body" id="dialog-exit-warning">
 <h4>What it is</h4>
-<p>A message that pops up if you try to leave the app with the back gesture while files are checked, confirmed in OneDrive and waiting for your approval. It says how many files are <strong>verified in OneDrive and ready to leave this phone</strong>, and that they stay where they are until you approve the removal.</p>
+<p>A message that pops up if you try to leave the app with the back gesture while files are checked, confirmed in your cloud and waiting for your approval. It says how many files are <strong>confirmed in your cloud and ready to leave this phone</strong>, and that they stay where they are until you approve the removal.</p>
 <ul><li><strong>Archive now</strong> takes you to the Archive tab.</li><li><strong>Leave</strong> closes the app. Nothing is removed.</li><li>Tapping outside the message keeps you where you were.</li></ul>
 <h4>Where it comes from</h4>
-<p>The app's check of your Archive albums. The count is files in those albums that are confirmed in OneDrive and still on the phone.</p>
+<p>The app's check of your Archive albums. The count is files in those albums that are confirmed in your cloud and still on the phone. For now it counts files sent to OneDrive only.</p>
 <h4>Good to know</h4>
 <p>It is a reminder, not a guarantee. Android lets an app notice the back gesture and nothing else, so pressing Home or swiping the app away from the recent-apps list will not show it. The Archive tab is always there when you come back.</p>
   </div></details>
@@ -680,35 +699,38 @@
   <details class="topic"><summary>Backup</summary>
   <div class="topic-body" id="settings-section-backup">
 <h4>What it is</h4>
-<p>Where your photos and videos are backed up to. For now that is OneDrive: its name with a box to the left of it, then the connected <strong>Account</strong> with its <strong>Sign out</strong> button, and <strong>Current folder location</strong> with a <strong>Change</strong> button.</p>
-<h4>At least one backup location</h4>
-<p>The box beside a location is there for switching it on or off, but the last one left on cannot be switched off: a backup that goes nowhere protects nothing. OneDrive is the only location there is, so its box stays ticked and greyed out, and you will see <strong>At least one backup location must stay on.</strong></p>
+<p>Which clouds your photos and videos go to, and which cloud each folder goes to. It has two parts:</p>
+<ul><li><strong>Clouds.</strong> One row for each cloud, with its account and a <strong>Sign out</strong> or <strong>Connect</strong> button. See <a class="xref" href="#settings-account">“Your clouds and Sign out”</a>.</li><li><strong>Where each folder goes.</strong> One row for each folder GallerySync watches. See <a class="xref" href="#settings-destination">“Where each folder goes”</a>.</li></ul>
+<h4>Your first cloud is free</h4>
+<p>The cloud marked <strong>main (free)</strong> is your free one, and it is never switched off by the trial ending. Any other cloud needs <strong>Pro</strong>, free for 30 days, then a one-time purchase. Once you have connected a second cloud, this section also shows the trial terms and an <strong>Unlock Pro</strong> button. Nothing is ever charged automatically.</p>
 <h4>Good to know</h4>
-<p>Changing the folder does not affect files already backed up.</p>
+<p>Changing where a folder goes does not affect files already backed up.</p>
   </div></details>
-  <details class="topic"><summary>Your account and Sign out</summary>
+  <details class="topic"><summary>Your clouds and Sign out</summary>
   <div class="topic-body" id="settings-account">
 <h4>What it is</h4>
-<p>The Microsoft account the app is connected to, shown as the email address, with a <strong>Sign out</strong> button.</p>
-<h4>Where it comes from</h4>
-<p>Microsoft tells the app which account you signed in with. It is shown on your phone only and is not sent anywhere else.</p>
+<p>One row for each cloud. It shows the account it is connected to (or <strong>Not connected</strong>), with a <strong>Sign out</strong> button when connected, or <strong>Connect</strong> or <strong>Enter keys</strong> when not. OneDrive, Google Photos, Google Drive, Dropbox and pCloud sign in on the provider's own page. IDrive e2 and Backblaze B2 ask for keys you made in their console. See <a class="xref" href="#cloud-key-backblaze">“Connecting Backblaze B2: the keys and where to find them”</a> and <a class="xref" href="#cloud-key-idrive">“Connecting IDrive e2: the keys and where to find them”</a>.</p>
 <h4>What Sign out does</h4>
-<p>It removes the app's Microsoft sign-in from your phone. Nothing in your OneDrive is touched, and your files stay where they are. Backups stop until you sign in again, and the app will ask you to.</p>
-<p>To also cancel the app's access from Microsoft's side, follow the steps on the Delete Account Info page in Settings.</p>
+<p>Pressing <strong>Sign out</strong> first shows a warning: GallerySync stops backing up to that cloud until you sign in again, nothing is deleted, the files already there stay there, and folders paired with that cloud wait for you. Then, <strong>only if that cloud holds files that are not at full size on this phone</strong> (photos shrunk by Sync, or files Archive took off the phone), it asks what you want done with them:</p>
+<ul><li><strong>Restore them to the phone first.</strong> Every one comes back from the cloud, each checked against its recorded size, with a progress bar and a <strong>Stop, stay signed in</strong> button. GallerySync signs out only when every file is back. If some could not be restored it stays signed in and offers <strong>Sign out anyway</strong> or <strong>Stay signed in</strong>, so you can try again.</li><li><strong>Leave them there.</strong> Signs out and changes nothing.</li><li><strong>Cancel.</strong> Stays signed in.</li></ul>
+<p>With nothing to bring back, it signs out straight after the warning.</p>
+<p>Signing out never moves a folder to another cloud, and never removes a file anywhere. The folders stay paired with the cloud you signed out of, and their new files wait until you sign in again. To send a folder somewhere else, change it under <strong>Where each folder goes</strong>. To also cancel the app's access from the provider's side, follow the steps on the Delete Account Info page in Settings.</p>
   </div></details>
-  <details class="topic"><summary>Current folder location</summary>
+  <details class="topic"><summary>Where each folder goes</summary>
   <div class="topic-body" id="settings-destination">
 <h4>What it is</h4>
-<p>The OneDrive folder where new backups are placed, written like <strong>OneDrive / Samsung Gallery/DCIM</strong>, with a <strong>Change</strong> button.</p>
-<h4>Where it comes from</h4>
-<p>It starts as <strong>Samsung Gallery/DCIM</strong>, the same place Samsung's own sync used, which is how the app finds what is already there and avoids sending it twice. If you have changed it, your choice is stored on the phone.</p>
+<p>One row for each top-level folder GallerySync watches (DCIM, Pictures, Movies and so on), with the cloud that folder sends to, and under it where in that cloud the files go, for example <strong>Goes to OneDrive / Samsung Gallery/DCIM</strong> or <strong>Goes to Dropbox / GallerySync</strong>. It is chosen per folder, never per album inside it.</p>
+<h4>Changing it</h4>
+<p>Tap the cloud to choose another. The menu only opens when there is a real choice: with one cloud, or without Pro or the trial, the pairing is shown but cannot be changed. A folder still paired with a cloud that has been signed out keeps it on the menu, so you can see it and move it back.</p>
 <h4>Changing it is safe</h4>
-<p>Only new uploads move. The old folder stays in the search, so nothing already uploaded is lost and nothing is sent twice. See <a class="xref" href="#dialog-destination">“Where new backups go (the Change dialog)”</a>.</p>
+<p>Only new files follow the change, and any file still waiting to be sent goes to the new cloud. Files already sent stay where they are and are never re-sent. A folder paired with a cloud that is not your free one, with no Pro and no trial, sends nothing, and the row says so.</p>
+<h4>Good to know</h4>
+<p>An album that has files in two folders with the same name (for example <strong>DCIM/Holiday</strong> and <strong>Movies/Holiday</strong>) is one album to GallerySync. Each file still goes to the cloud of the folder it is in, and both folders appear in this list.</p>
   </div></details>
   <details class="topic"><summary>Where new backups go (the Change dialog)</summary>
   <div class="topic-body" id="dialog-destination">
 <h4>What it is</h4>
-<p>A dialog opened by <strong>Change</strong>:</p>
+<p>This dialog belongs to the OneDrive folder chooser, which is not on the Settings tab in this version: new OneDrive backups go to Samsung Gallery/DCIM. It is described here for when it returns. A dialog opened by <strong>Change</strong>:</p>
 <ul><li><strong>Folder in OneDrive.</strong> A box holding the folder path. Use a plain path like <strong>Pictures/Backup</strong>, with no slash at the start or end. An unusable path shows <strong>That folder path cannot be used.</strong></li><li><strong>A note.</strong> New photos and videos will go here. The files already backed up stay where they are, and GallerySync keeps looking in the old folder too, so nothing is uploaded twice. It shows the number of files already backed up when it knows it.</li><li><strong>Browse...</strong> opens a picker so you can pick a folder from OneDrive. See <a class="xref" href="#dialog-folder-picker">“Choose a folder (the OneDrive picker)”</a>.</li><li><strong>Reset to default.</strong> Appears when the path is not the default. Puts back Samsung Gallery/DCIM.</li><li><strong>Use this folder</strong> saves. <strong>Cancel</strong> closes without changing anything.</li></ul>
 <h4>Where it comes from</h4>
 <p>The default and the count of files already backed up come from the app's own record on the phone.</p>
@@ -716,7 +738,7 @@
   <details class="topic"><summary>Choose a folder (the OneDrive picker)</summary>
   <div class="topic-body" id="dialog-folder-picker">
 <h4>What it is</h4>
-<p>A list of the folders in your OneDrive, starting at the top (<strong>OneDrive</strong>).</p>
+<p>Part of the OneDrive folder chooser, which is not on the Settings tab in this version. A list of the folders in your OneDrive, starting at the top (<strong>OneDrive</strong>).</p>
 <ul><li>Tap a folder to go into it. <strong>Up one folder</strong> goes back.</li><li><strong>Use this folder</strong> picks the one you are looking at.</li><li><strong>New folder</strong> asks for a <strong>Folder name</strong> and <strong>Create</strong>s it in OneDrive. If the name is already taken it says <strong>Could not create that folder.</strong></li><li><strong>Show more</strong> loads more folders when a long list has been cut short.</li><li><strong>No folders here.</strong> The folder you are in has no folders inside it.</li><li><strong>Could not reach OneDrive.</strong> with <strong>Try again</strong>, if the connection failed.</li></ul>
 <h4>Where it comes from</h4>
 <p>OneDrive itself, live. It only lists folders, never your photos.</p>
@@ -724,7 +746,7 @@
   <details class="topic"><summary>Albums</summary>
   <div class="topic-body" id="settings-section-albums">
 <h4>What it is</h4>
-<p>The mode a brand new album starts with, which folders to watch, and what happens to cloud copies when you delete from this phone, in that order and with a thin line between them.</p>
+<p>Which folders GallerySync watches, and what happens to cloud copies when you delete from this phone, in that order and with a thin line between them. A brand new album always starts at <strong>Off</strong>: there is no setting for that.</p>
   </div></details>
   <details class="topic"><summary>Folders to back up</summary>
   <div class="topic-body" id="settings-folders">
@@ -752,11 +774,13 @@
   <div class="topic-body" id="settings-deletion">
 <h4>What it is</h4>
 <p>Two choices, one selected at a time:</p>
-<ul><li><strong>Leave the OneDrive copy</strong> (the starting choice). Nothing is ever removed from OneDrive. Deleting on your phone only frees space here.</li><li><strong>Ask me about the OneDrive copy.</strong> When you open the app after files have gone from your phone, a window lists them, whether or not the app ever backed them up, and asks what you want done: delete or keep their OneDrive copies, or back up the ones that never made it. It never removes anything on its own. See <a class="xref" href="#deleted-files-window">“Files deleted from your phone (the window that opens with the app)”</a>.</li></ul>
+<ul><li><strong>Leave the Cloud copy</strong> (the starting choice). Nothing is ever removed from your cloud. Deleting on your phone only frees space here.</li><li><strong>Ask me about the Cloud copy.</strong> When you open the app after files have gone from your phone, a window lists them, whether or not the app ever backed them up, and asks what you want done: delete or keep their copies in your cloud, or back up the ones that never made it. It never removes anything on its own. See <a class="xref" href="#deleted-files-window">“Files deleted from your phone (the window that opens with the app)”</a>.</li></ul>
+<h4>For now, OneDrive only</h4>
+<p>The window that asks works on copies in OneDrive. The copies in any other cloud are left alone under either choice: nothing is ever removed from them.</p>
 <h4>Why Leave is the default</h4>
-<p>A copy left in OneDrive costs a little storage. A copy removed by mistake could cost you the photo, because the one on your phone is already gone.</p>
+<p>A copy left in your cloud costs a little storage. A copy removed by mistake could cost you the photo, because the one on your phone is already gone.</p>
 <h4>Good to know</h4>
-<p>The app never treats a missing file as an instruction to delete. Under <strong>Ask</strong> it asks you first, and nothing in OneDrive moves without your say-so.</p>
+<p>The app never treats a missing file as an instruction to delete. Under <strong>Ask</strong> it asks you first, and nothing in your cloud moves without your say-so.</p>
   </div></details>
   <details class="topic"><summary>Files deleted from your phone (the window that opens with the app)</summary>
   <div class="topic-body" id="deleted-files-window">
@@ -794,16 +818,16 @@
   <details class="topic"><summary>Sync</summary>
   <div class="topic-body" id="settings-section-sync">
 <h4>What it is</h4>
-<p>How photos and videos are optimised to save space. Files are only changed after they are verified in OneDrive, and only inside albums you set to Sync.</p>
+<p>How photos and videos are optimised to save space. Files are only changed after they are verified in your cloud, and only inside albums you set to Sync. Sync works with OneDrive, Google Drive, Dropbox, IDrive e2 and Backblaze B2.</p>
   </div></details>
   <details class="topic"><summary>Optimise photos</summary>
   <div class="topic-body" id="settings-optimise-photos">
 <h4>What it is</h4>
 <p>A switch. Off is the starting choice. On says <strong>Photos in Sync albums are optimised for storage.</strong> A <strong>Mode</strong> row appears under it, and it decides when this happens. See <a class="xref" href="#settings-optimise-mode">“Mode: Automatic or Manual”</a>.</p>
 <h4>What optimising a photo does</h4>
-<p>The photo on your phone is replaced with a smaller copy, reduced to about 2048 pixels on the long edge and roughly a tenth of the size. It stays in your gallery and opens normally in every app, and carries a small cloud badge so you can tell which ones are optimised. The full-quality original stays in OneDrive, untouched. Photos are optimised whatever their age.</p>
+<p>The photo on your phone is replaced with a smaller copy, reduced to about 2048 pixels on the long edge and roughly a tenth of the size. It stays in your gallery and opens normally in every app, and carries a small cloud badge so you can tell which ones are optimised. The full-quality original stays in your cloud, untouched. Photos are optimised whatever their age.</p>
 <h4>Only in Sync albums</h4>
-<p>Backup and Archive albums never optimise, and Off does nothing. A photo is only ever optimised after OneDrive has confirmed it holds the original at the same size, and a photo that would not get smaller is left alone. A photo you have set to <strong>Keep at full size</strong> is never touched.</p>
+<p>Backup and Archive albums never optimise, and Off does nothing. A photo is only ever optimised after its cloud has confirmed, right then, that it holds the original at the same size, and a photo that would not get smaller is left alone. A photo you have set to <strong>Keep at full size</strong> is never touched.</p>
 <p>See <a class="xref" href="#how-optimising-works">“How optimising works”</a>.</p>
   </div></details>
   <details class="topic"><summary>Optimise video</summary>
@@ -811,10 +835,10 @@
 <h4>What it is</h4>
 <p>A switch. Off is the starting choice. Turning it on reveals <strong>Mode</strong>, <strong>Older than</strong> and <strong>Quality</strong>.</p>
 <h4>What it does</h4>
-<p>Old video in Sync albums is replaced by a smaller copy on your phone. The full-quality original stays in OneDrive, and the Restore tab brings it back. Nothing is ever cut: shortening a clip is the one thing optimising never does, and the smaller copy is checked against the original's length before it replaces anything.</p>
+<p>Old video in Sync albums is replaced by a smaller copy on your phone. The full-quality original stays in your cloud, and the Restore tab brings it back. Nothing is ever cut: shortening a clip is the one thing optimising never does, and the smaller copy is checked against the original's length before it replaces anything.</p>
 <h4>Which clips it touches</h4>
 <p>A clip has to pass every one of these:</p>
-<ul><li>It is in an album set to <strong>Sync</strong>.</li><li>OneDrive has confirmed it at the same size.</li><li>It is older than the age you chose.</li><li>It is in a folder you gave GallerySync access to. A clip anywhere else is left alone.</li><li>It has not been optimised already, and has not been found already small enough to leave.</li></ul>
+<ul><li>It is in an album set to <strong>Sync</strong>.</li><li>Its cloud has confirmed it at the same size.</li><li>It is older than the age you chose.</li><li>It is in a folder you gave GallerySync access to. A clip anywhere else is left alone.</li><li>It has not been optimised already, and has not been found already small enough to leave.</li></ul>
 <h4>When it happens</h4>
 <p><strong>Automatic</strong> starts by itself, and only while the phone is charging, because re-encoding video is the heaviest thing the app does. It starts:</p>
 <ul><li>When a backup run finishes everything. That happens after every new video, when you switch an album to Sync, and on the six-hourly check, which is also how a clip that has just grown older than your chosen age is noticed.</li><li>When you change Optimise video, Mode or Older than.</li></ul>
@@ -826,7 +850,7 @@
   <div class="topic-body" id="settings-optimise-mode">
 <h4>What it is</h4>
 <p>A box under <strong>Optimise photos</strong> (and another under <strong>Optimise video</strong>) showing <strong>Automatic</strong> or <strong>Manual</strong>. It decides when optimising happens.</p>
-<ul><li><strong>Automatic.</strong> As soon as a file reaches an album set to <strong>Sync</strong>, or an album is switched to Sync. The file is sent to OneDrive first and optimised the moment OneDrive has confirmed it. Photos are optimised in the background, with no prompt, for folders you gave access to during setup. Video waits for the phone to be charging.</li><li><strong>Manual.</strong> Nothing happens until you press <strong>Sync now</strong> on the Albums tab. That sends whatever is waiting and then optimises. <strong>Sync now</strong> can be pressed even when nothing is left to send, if something is ready to optimise. See <a class="xref" href="#albums-run-controls">“Sync now, Rescan, Pause, Resume and Stop”</a>.</li></ul>
+<ul><li><strong>Automatic.</strong> As soon as a file reaches an album set to <strong>Sync</strong>, or an album is switched to Sync. The file is sent to its cloud first and optimised the moment the cloud has confirmed it. Photos are optimised in the background, with no prompt, for folders you gave access to during setup. Video waits for the phone to be charging.</li><li><strong>Manual.</strong> Nothing happens until you press <strong>Sync now</strong> on the Albums tab. That sends whatever is waiting and then optimises. <strong>Sync now</strong> can be pressed even when nothing is left to send, if something is ready to optimise. See <a class="xref" href="#albums-run-controls">“Sync now, Rescan, Pause, Resume and Stop”</a>.</li></ul>
 <h4>Photos outside the folders you gave access to</h4>
 <p>The app cannot change these on its own. Android asks you to confirm them, so they wait until you open the app (Automatic) or press <strong>Sync now</strong> (Manual), and the prompt then appears.</p>
 <h4>Good to know</h4>
@@ -837,7 +861,7 @@
 <h4>What it is</h4>
 <p>A box that sets how old a video must be before it can be optimised: <strong>Straight away</strong>, <strong>1 hour</strong>, <strong>12 hours</strong>, <strong>1 day</strong> or <strong>1 week</strong>.</p>
 <h4>What it covers</h4>
-<p>Only the copy on this phone. A video is backed up to OneDrive straight away whatever this is set to. Age is worked out for each file separately, from when it was last modified.</p>
+<p>Only the copy on this phone. A video is backed up to your cloud straight away whatever this is set to. Age is worked out for each file separately, from when it was last modified.</p>
 <h4>Good to know about "Straight away"</h4>
 <p>It reaches clips shot today. They stay in your gallery and still play, but editing one starts from the smaller copy until you fetch the original back with Restore. When you choose it, a warning saying so appears under the setting.</p>
 <p>See <a class="xref" href="#settings-optimise-video">“Optimise video”</a> for when it happens.</p>
@@ -850,7 +874,7 @@
 <h4>Where the figures come from</h4>
 <p>They were measured on real clips and are typical, not promised. They depend on the content. The word "High" means the most shrinking, not the highest picture quality.</p>
 <h4>Good to know</h4>
-<p>Optimising re-encodes the clip at a lower resolution. Nothing is cut, and it stays in your gallery. The full-quality original stays in OneDrive.</p>
+<p>Optimising re-encodes the clip at a lower resolution. Nothing is cut, and it stays in your gallery. The full-quality original stays in your cloud.</p>
   </div></details>
   <details class="topic"><summary>Restore (Settings)</summary>
   <div class="topic-body" id="settings-section-restore">
@@ -862,7 +886,7 @@
 <h4>What it is</h4>
 <p>A switch. Off is the starting choice. The wording says: on lists every folder in your backup folders, including ones with nothing in them; off lists only folders that have something to bring back.</p>
 <h4>What it changes</h4>
-<p>The Restore tab lists the folders in your OneDrive backup folders that have something to bring back. Turn this on and it lists every folder, including those where every file is already on the phone. Off is right for most people.</p>
+<p>The Restore tab lists the folders in your OneDrive backup folders that have something to bring back. Turn this on and it lists every folder, including those where every file is already on the phone. Off is right for most people. It only affects OneDrive: other clouds list only what the app sent.</p>
   </div></details>
   <details class="topic"><summary>Archive (Settings)</summary>
   <div class="topic-body" id="settings-section-archive">
@@ -882,7 +906,7 @@
   <details class="topic"><summary>Notify when files are ready to archive</summary>
   <div class="topic-body" id="settings-archive-notify">
 <h4>What it is</h4>
-<p>A switch, off by default. On, GallerySync asks Android for permission to post notifications, then lets you know when files in an Archive album have been confirmed in OneDrive and are ready to leave your phone.</p>
+<p>A switch, off by default. On, GallerySync asks Android for permission to post notifications, then lets you know when files in an Archive album have been confirmed in your cloud and are ready to leave your phone. For now it only covers files sent to OneDrive.</p>
 <h4>Why it is not the only way to find out</h4>
 <p>The Albums tab already shows this, and a reminder appears if you try to leave the app with files waiting. Those need no permission and cannot be silently switched off. A notification can — Android may refuse it, or you can turn it off later in your phone's own Settings, outside this app entirely — so it is offered as an extra, never as the only way you would know.</p>
 <h4>Good to know</h4>
@@ -891,7 +915,7 @@
   <details class="topic"><summary>The three link cards at the bottom</summary>
   <div class="topic-body" id="settings-about-cards">
 <p>Below the sections are three cards. Tap one to open its page inside the app.</p>
-<ul><li><strong>Privacy Policy.</strong> How GallerySync handles your photos, videos and account.</li><li><strong>Delete Account Info.</strong> How to sign out, remove the app's access to your Microsoft account, and clear its data.</li><li><strong>Contact Info.</strong> Questions or problems? It shows the address, which you can select and copy with <strong>Copy address</strong>. It does not open a mail app.</li></ul>
+<ul><li><strong>Privacy Policy.</strong> How GallerySync handles your photos, videos and account.</li><li><strong>Delete Account Info.</strong> How to sign out, remove the app's access to your cloud accounts, and clear its data.</li><li><strong>Contact Info.</strong> Questions or problems? It shows the address, which you can select and copy with <strong>Copy address</strong>. It does not open a mail app.</li></ul>
 <p>The How To Guide card is not down here: it is the first card in General. See <a class="xref" href="#settings-how-to-guide-card">“The How To Guide card”</a>.</p>
 <p>The Privacy Policy and Delete Account Info pages are shown from the internet, so they need a connection. If a page cannot be loaded you will see <strong>This page could not be loaded</strong>, with <strong>Open in browser</strong> to try it there. Close returns you to Settings.</p>
   </div></details>
@@ -900,7 +924,9 @@
   <details class="topic"><summary>The four modes</summary>
   <div class="topic-body" id="modes-in-depth">
 <p>Every album has exactly one mode. You set it with the coloured pill on the album's card, on the Albums tab. The cloud copy is identical in the three modes that upload; what differs is what happens to the file <strong>on your phone</strong>.</p>
-<ul><li><strong>Off.</strong> Nothing is sent and nothing on the phone is touched. This is where every album starts. It means "I have not decided, or I do not want this album looked after".</li><li><strong>Backup.</strong> Copies the album to OneDrive and leaves the phone alone, always. The safe choice, and the one to pick when you are unsure.</li><li><strong>Sync.</strong> Backs up, and also makes the album eligible for optimising: photos can be replaced by smaller copies that stay in your gallery. Optimising itself is controlled in Settings, under Sync, and is off until you switch it on.</li><li><strong>Archive.</strong> Backs up, verifies, and then takes the files off the phone into its Trash/Recycle Bin, after your tap. The album leaves your gallery. The only mode that removes files. It is a standing instruction while the album holds files: files added to it later are covered too. Once Archive has emptied the album, the album leaves the list and its mode is forgotten.</li></ul>
+<ul><li><strong>Off.</strong> Nothing is sent and nothing on the phone is touched. This is where every album starts. It means "I have not decided, or I do not want this album looked after".</li><li><strong>Backup.</strong> Copies the album to your cloud and leaves the phone alone, always. The safe choice, and the one to pick when you are unsure.</li><li><strong>Sync.</strong> Backs up, and also makes the album eligible for optimising: photos can be replaced by smaller copies that stay in your gallery. Optimising itself is controlled in Settings, under Sync, and is off until you switch it on.</li><li><strong>Archive.</strong> Backs up, verifies, and then takes the files off the phone into its Trash/Recycle Bin, after your tap. The album leaves your gallery. The only mode that removes files. It is a standing instruction while the album holds files: files added to it later are covered too. Once Archive has emptied the album, the album leaves the list and its mode is forgotten.</li></ul>
+<h4>What each cloud can do</h4>
+<p>Backup works with every cloud. <strong>Sync</strong> and <strong>Archive</strong> need a cloud that GallerySync can ask, at the moment it matters, whether a file is safe: OneDrive, Google Drive, Dropbox, IDrive e2 and Backblaze B2. Google Photos and pCloud are backup only for now. If an album goes to one of those, choosing Sync or Archive shows a message and nothing happens for that album.</p>
 <h4>The Camera album has no Sync</h4>
 <p>Camera offers <strong>Off</strong>, <strong>Backup</strong> and <strong>Archive</strong>. Sync would make a new photo smaller the moment it is backed up, so Camera has a separate control instead: choose an age and optimise only what is already old. See <a class="xref" href="#album-camera-optimise">“Optimise older photos and videos in Camera”</a>.</p>
 <h4>Only you set a mode</h4>
@@ -912,25 +938,27 @@
   </div></details>
   <details class="topic"><summary>How verification works</summary>
   <div class="topic-body" id="how-verification-works">
-<p>Before the app shrinks or removes anything on your phone, it makes sure a good copy exists in OneDrive. That check is the guarantee, and nothing skips it.</p>
+<p>Before the app shrinks or removes anything on your phone, it makes sure a good copy exists in your cloud, and it asks the cloud itself, right then. That check is the guarantee, and nothing skips it.</p>
 <h4>The test</h4>
-<p>OneDrive is asked for the list of files in the album's folder. A file on your phone is <strong>verified</strong> only if OneDrive lists a file with the <strong>same name</strong> and reports the <strong>same size</strong>. Anything less, such as missing, or present at a different size, is not verified.</p>
+<ul><li><strong>OneDrive</strong> is asked for the list of files in the album's folder. A file on your phone is <strong>verified</strong> only if OneDrive lists a file with the <strong>same name</strong> and reports the <strong>same size</strong>.</li><li><strong>Dropbox, Google Drive, Backblaze B2 and IDrive e2</strong> are asked about the one file, by the exact address the app recorded when it sent it. The cloud must say the file is there, not deleted and not in its bin, at exactly the size the phone's copy was. If Sync has already made a photo smaller, the size it must match is the original's.</li></ul>
+<p>Anything less, such as missing, deleted, or present at a different size, is not verified.</p>
 <h4>When it is done</h4>
-<ul><li>On the Albums tab, every time you open it or press Rescan, for the OneDrive line of each album.</li><li>On the Archive tab, when you press Check these files, and the files not found are sent first.</li></ul>
+<ul><li>On the Albums tab, every time you open it or press Rescan, for the OneDrive line of each album.</li><li>On the Archive tab, when you press Check these files, and the files not found are sent first. Files sent to another cloud are asked about there, and again just before removal.</li><li>Just before Sync replaces a photo or video with a smaller copy.</li></ul>
+<p>Nothing is remembered from an earlier check. A file deleted from your cloud by hand would otherwise be trusted for ever.</p>
 <h4>Three different answers</h4>
-<ul><li><strong>Verified.</strong> OneDrive has it.</li><li><strong>Not there, or the wrong size.</strong> The file stays on your phone, and the app says so.</li><li><strong>Could not check.</strong> The internet failed or OneDrive did not answer. That is not the same as "missing", and nothing is removed on the strength of an unanswered question.</li></ul>
+<ul><li><strong>Verified.</strong> The cloud has it.</li><li><strong>Not there, or the wrong size.</strong> The file stays on your phone, and the app says so.</li><li><strong>Could not check.</strong> The internet failed, you are signed out, or the cloud did not answer. That is not the same as "missing", and nothing is removed or shrunk on the strength of an unanswered question.</li></ul>
 <h4>What it cannot promise</h4>
-<p>A size check cannot catch every kind of damage. So keep an eye on your own backups: open OneDrive now and then and open a few photos, and do it before you empty any bin. For anything you could not bear to lose, keep a copy somewhere this app cannot reach.</p>
+<p>A size check cannot catch every kind of damage. So keep an eye on your own backups: open your cloud's own app or website now and then and open a few photos, and do it before you empty any bin. For anything you could not bear to lose, keep a copy somewhere this app cannot reach.</p>
   </div></details>
   <details class="topic"><summary>How optimising works</summary>
   <div class="topic-body" id="how-optimising-works">
 <p>Optimising swaps a file on your phone for a smaller copy of itself. The point is to let the phone stop filling up while everything stays in your gallery.</p>
 <h4>Photos</h4>
-<ul><li>The copy is reduced to about <strong>2048 pixels on the long edge</strong>, roughly a tenth of the size.</li><li>It keeps its name and place, so your gallery shows it as usual, and it keeps information such as date and location.</li><li>It carries a small <strong>cloud badge</strong> so you can tell it has been optimised.</li><li>The <strong>full-quality original stays in OneDrive</strong>, untouched.</li><li>A photo that would not get smaller is left as it is.</li></ul>
+<ul><li>The copy is reduced to about <strong>2048 pixels on the long edge</strong>, roughly a tenth of the size.</li><li>It keeps its name and place, so your gallery shows it as usual, and it keeps information such as date and location.</li><li>It carries a small <strong>cloud badge</strong> so you can tell it has been optimised.</li><li>The <strong>full-quality original stays in your cloud</strong>, untouched.</li><li>A photo that would not get smaller is left as it is.</li></ul>
 <h4>Video</h4>
 <ul><li>A clip is re-encoded at a lower resolution: <strong>480p</strong> (High, the most shrinking), <strong>720p</strong> (Medium) or <strong>1080p</strong> (Low). Nothing is ever cut, so a clip is never shortened.</li><li>It stays in your gallery under its own name.</li><li>It happens in the background, a few clips at a time. Automatic waits for the phone to be charging; Manual starts when you press <strong>Sync now</strong>. First-time setup also optimises video once, if you chose a plan that includes it.</li><li>Only clips old enough to pass the age you set are touched, and a clip that would not get smaller is left as it is and not offered again.</li></ul>
 <h4>The rules it always follows</h4>
-<ul><li>Only files inside albums set to <strong>Sync</strong>.</li><li>Only files OneDrive has confirmed, at the same size.</li><li>Never anything permanently deleted: the original is in OneDrive.</li></ul>
+<ul><li>Only files inside albums set to <strong>Sync</strong>.</li><li>Only files whose cloud has confirmed the original, at the same size, right then.</li><li>Never anything permanently deleted: the original is in your cloud.</li></ul>
 <h4>Getting the original back</h4>
 <p>Open the <strong>Restore</strong> tab, choose the folder or files, and press <strong>Restore</strong>. The original replaces the smaller copy in the same place. Editing an optimised photo starts from the smaller copy, so restore first if you want the full detail.</p>
   </div></details>
@@ -943,8 +971,8 @@
 <p>Open that bin to put files back.</p>
 <h4>The space is not freed at once</h4>
 <p>A file in the bin still takes its full space. Room only returns when you <strong>empty the bin yourself</strong>, or when the time runs out. The app never empties it, and every "frees X" message means "frees X once the bin is emptied".</p>
-<h4>In OneDrive</h4>
-<p>If you use the option to be asked about OneDrive copies after deleting on your phone, files you approve go to your <strong>OneDrive recycle bin</strong>, where you can restore them. The app never empties that either.</p>
+<h4>In your cloud</h4>
+<p>If you use the option to be asked about OneDrive copies after deleting on your phone, files you approve go to your <strong>OneDrive recycle bin</strong>, where you can restore them. The app never empties that either. It never deletes anything in Google Drive, Dropbox, IDrive e2, Backblaze B2, Google Photos or pCloud.</p>
   </div></details>
   <details class="topic"><summary>When things happen</summary>
   <div class="topic-body" id="background-work">
@@ -953,7 +981,7 @@
 <ul><li>A short while after new photos or videos appear.</li><li>A safety check about every six hours.</li><li>Only on Wi-Fi, unless <strong>Use mobile data</strong> is on, and only when the battery and storage are not low.</li></ul>
 <p><strong>Sync now</strong> starts a run straight away, whether or not the phone is charging.</p>
 <h4>Optimising photos</h4>
-<p><strong>Automatic</strong> happens as soon as a file reaches a Sync album, or an album is switched to Sync: after the file has been sent and confirmed in OneDrive, and in the background. <strong>Manual</strong> happens when you press <strong>Sync now</strong> on the Albums tab. Photos outside the folders you gave access to need Android's confirmation, so they wait until you open the app or press <strong>Sync now</strong>.</p>
+<p><strong>Automatic</strong> happens as soon as a file reaches a Sync album, or an album is switched to Sync: after the file has been sent and confirmed in its cloud, and in the background. <strong>Manual</strong> happens when you press <strong>Sync now</strong> on the Albums tab. Photos outside the folders you gave access to need Android's confirmation, so they wait until you open the app or press <strong>Sync now</strong>.</p>
 <h4>Optimising video</h4>
 <p><strong>Automatic</strong> starts after a backup run has finished everything, when an album is switched to Sync, and when you change the video settings, and it waits for the phone to be charging. <strong>Manual</strong> starts when you press <strong>Sync now</strong>, straight away. It runs in the background and you can close the app.</p>
 <h4>Archiving</h4>
@@ -965,13 +993,13 @@
   </div></details>
   <details class="topic"><summary>Where your data lives</summary>
   <div class="topic-body" id="where-your-data-lives">
-<ul><li><strong>Your photos and videos</strong> go from your phone directly to your own OneDrive account, over an encrypted connection. GallerySync has no server, so they never pass through anything belonging to the developer.</li><li><strong>Your Microsoft sign-in</strong> is kept in encrypted storage on your phone. You type your password on Microsoft's own page, never into the app.</li><li><strong>The app's own record</strong> of what it has sent, its settings and your folder choices are kept in private storage on your phone, not readable by other apps.</li><li><strong>The developer collects nothing:</strong> no analytics, no crash reporting, no advertising.</li></ul>
-<p>The full details are in the <strong>Privacy Policy</strong> card at the bottom of Settings. To sign out, remove the app's access to your Microsoft account, or clear its data, use the <strong>Delete Account Info</strong> card.</p>
+<ul><li><strong>Your photos and videos</strong> go from your phone directly to your own cloud accounts, over an encrypted connection. GallerySync has no server, so they never pass through anything belonging to the developer.</li><li><strong>Your sign-ins and keys</strong> are kept in encrypted storage on your phone. You type your password on the provider's own page, never into the app. The keys for IDrive e2 and Backblaze B2 are typed into the app once and kept encrypted.</li><li><strong>The app's own record</strong> of what it has sent, its settings and your folder choices are kept in private storage on your phone, not readable by other apps.</li><li><strong>The developer collects nothing:</strong> no analytics, no crash reporting, no advertising.</li></ul>
+<p>The full details are in the <strong>Privacy Policy</strong> card at the bottom of Settings. To sign out, remove the app's access to your cloud accounts, or clear its data, use the <strong>Delete Account Info</strong> card.</p>
   </div></details>
   <details class="topic"><summary>Why the numbers may differ from your gallery app</summary>
   <div class="topic-body" id="numbers-explained">
 <p>The counts in GallerySync answer a narrower question than your gallery does. They count:</p>
-<ul><li>Only files <strong>on the phone right now</strong>.</li><li>Only inside the <strong>folders you chose</strong>.</li><li>Not files in your phone's <strong>Trash</strong>.</li><li>Not the small <strong>Restored</strong> album, whose files are already in OneDrive.</li></ul>
+<ul><li>Only files <strong>on the phone right now</strong>.</li><li>Only inside the <strong>folders you chose</strong>.</li><li>Not files in your phone's <strong>Trash</strong>.</li><li>Not the small <strong>Restored</strong> album, whose files are already in your cloud.</li></ul>
 <p>Your gallery app may also show cloud-only items, or group folders differently. Neither number is wrong; they are counting different things. Each figure in GallerySync says what it counts, and the <strong>(?)</strong> beside it says where it comes from.</p>
   </div></details>
   <h2 id="ch-help">Questions and problems</h2>
@@ -988,36 +1016,54 @@
   </div></details>
   <details class="topic"><summary>An album says Not checked against OneDrive yet</summary>
   <div class="topic-body" id="faq-not-checked-yet">
-<p>The app has not asked OneDrive about that album yet. It asks when you open the Albums tab or press <strong>Rescan</strong>, so give it a moment, and check you are signed in and connected. If it says <strong>Could not reach OneDrive when this was last checked</strong>, the connection failed, so try <strong>Rescan</strong> again.</p>
+<p>This line only appears on albums whose files go to OneDrive. The app has not asked OneDrive about that album yet. It asks when you open the Albums tab or press <strong>Rescan</strong>, so give it a moment, and check you are signed in and connected. If it says <strong>Could not reach OneDrive when this was last checked</strong>, the connection failed, so try <strong>Rescan</strong> again.</p>
+<p>An album whose files go to another cloud says something like <strong>15 sent to Dropbox</strong> instead. See <a class="xref" href="#albums-list">“An album card”</a>.</p>
   </div></details>
-  <details class="topic"><summary>The backup stopped because OneDrive is full</summary>
+  <details class="topic"><summary>The backup stopped because my cloud is full</summary>
   <div class="topic-body" id="faq-onedrive-full">
-<p>The status line says <strong>stopped: OneDrive is full</strong>. Nothing is lost: files already sent are safe and the rest are waiting. Free some room in OneDrive, or add storage with Microsoft, then press <strong>Sync now</strong>.</p>
+<p>The status line says <strong>stopped: your cloud is full</strong>. Nothing is lost: files already sent are safe and the rest are waiting. Free some room in that cloud, or add storage with its provider, then press <strong>Sync now</strong>.</p>
   </div></details>
   <details class="topic"><summary>I archived an album but my phone has no more space</summary>
   <div class="topic-body" id="faq-space-not-freed">
-<p>Archived files are in your phone's Trash or Recycle Bin, and they take their full space until the bin is emptied. Open the bin in your gallery app (or the Files app) and empty it. Do that once you are happy the files are safe in OneDrive; the app never empties it for you. See <a class="xref" href="#where-deleted-files-go">“Where removed files go”</a>.</p>
+<p>Archived files are in your phone's Trash or Recycle Bin, and they take their full space until the bin is emptied. Open the bin in your gallery app (or the Files app) and empty it. Do that once you are happy the files are safe in your cloud; the app never empties it for you. See <a class="xref" href="#where-deleted-files-go">“Where removed files go”</a>.</p>
   </div></details>
   <details class="topic"><summary>An album has disappeared from my gallery</summary>
   <div class="topic-body" id="faq-album-vanished">
-<p>If it was set to <strong>Archive</strong>, that is what Archive does: its files were moved to your phone's bin once OneDrive was confirmed to hold them. They are not gone. Open the bin to put them back, or use the <strong>Restore</strong> tab to download them again from OneDrive.</p>
+<p>If it was set to <strong>Archive</strong>, that is what Archive does: its files were moved to your phone's bin once your cloud was confirmed to hold them. They are not gone. Open the bin to put them back, or use the <strong>Restore</strong> tab to download them again from your cloud.</p>
 <p>The folder itself is not deleted, but the album has left the Albums tab and its mode has been forgotten, so nothing will archive it again. Open the <strong>Restore</strong> tab to bring it back: it returns as a new album, starting at Off.</p>
   </div></details>
   <details class="topic"><summary>A photo looks smaller or lower quality than before</summary>
   <div class="topic-body" id="faq-photo-looks-small">
-<p>It has probably been optimised: replaced by a smaller copy, marked with a small cloud badge. The full-quality original is safe in OneDrive. Open the <strong>Restore</strong> tab, find the folder, and restore it to put the original back in place.</p>
+<p>It has probably been optimised: replaced by a smaller copy, marked with a small cloud badge. The full-quality original is safe in your cloud. Open the <strong>Restore</strong> tab, find the folder, and restore it to put the original back in place.</p>
   </div></details>
   <details class="topic"><summary>The Restore tab says there is nothing to bring back</summary>
   <div class="topic-body" id="faq-restore-empty">
-<p>Restore only lists things GallerySync has changed on this phone: photos and videos it has replaced with smaller copies, and files it backed up that are no longer in their folder. If you have not optimised or archived anything, the list is empty, and that is right. For anything else in your OneDrive, open the OneDrive app.</p>
+<p>Restore only lists things GallerySync has changed on this phone: photos and videos it has replaced with smaller copies, and files it backed up that are no longer in their folder. If you have not optimised or archived anything, the list is empty, and that is right. For anything else in your cloud, open that cloud's own app or website. If you use OneDrive, the tab also lists the photos and videos in your OneDrive backup folders that this phone does not have.</p>
   </div></details>
   <details class="topic"><summary>Backups seem to stop when I close the app</summary>
   <div class="topic-body" id="faq-backup-stops-when-closed">
 <p>Leaving with the back gesture or the Home button is fine: backing up carries on. Swiping the app away from the recent-apps list is different, because Android can then stop the app's background jobs until you next open it. If you swiped it away, open the app again and the backup picks up where it left off, without sending anything twice.</p>
   </div></details>
-  <details class="topic"><summary>I signed in with the wrong Microsoft account</summary>
+  <details class="topic"><summary>I signed in to a cloud with the wrong account</summary>
   <div class="topic-body" id="faq-wrong-account">
-<p>Go to <strong>Settings</strong>, <strong>Backup</strong>, and press <strong>Sign out</strong>, then sign in with the right account. Files already sent to the first account stay there. If you want to withdraw the app's access from that account, follow the Delete Account Info page.</p>
+<p>Go to <strong>Settings</strong>, <strong>Backup</strong>, and press <strong>Sign out</strong> beside that cloud, then sign in with the right account. See <a class="xref" href="#settings-account">“Your clouds and Sign out”</a>. It may ask what to do with files there: <strong>Leave them there</strong> is the usual answer. Files already sent to the first account stay there, and the folders paired with that cloud stay paired, so new files carry on to the right account once you sign in. If you want to withdraw the app's access from the first account, follow the Delete Account Info page.</p>
+  </div></details>
+  <details class="topic"><summary>I signed out of a cloud and its folders stopped sending</summary>
+  <div class="topic-body" id="faq-folder-waiting">
+<p>That is what signing out means. Signing out never moves a folder to another cloud: the folder stays paired with the cloud you signed out of, and its new files wait, safe on your phone, until you sign in to that cloud again. Nothing is lost and nothing is sent anywhere else.</p>
+<p>To send a folder to a different cloud instead, change it under <strong>Where each folder goes</strong> in Settings. See <a class="xref" href="#settings-destination">“Where each folder goes”</a>.</p>
+  </div></details>
+  <details class="topic"><summary>IDrive e2 or Backblaze B2 says my keys were rejected</summary>
+  <div class="topic-body" id="faq-keys-rejected">
+<p>The message names what to check, and it is nearly always a mistyped character. Check the endpoint (the address of the region, without https://), the region, the bucket name and the two keys. Tap <strong>Show</strong> on the secret and read it against the console. Watch for a capital <strong>O</strong> against a zero, a capital <strong>I</strong> against a lowercase <strong>l</strong>, and a capital <strong>J</strong> against a lowercase <strong>j</strong>. Pasting the keys avoids all of these. See <a class="xref" href="#cloud-key-backblaze">“Connecting Backblaze B2: the keys and where to find them”</a> and <a class="xref" href="#cloud-key-idrive">“Connecting IDrive e2: the keys and where to find them”</a>.</p>
+  </div></details>
+  <details class="topic"><summary>Archive says it could not check my cloud</summary>
+  <div class="topic-body" id="faq-could-not-check">
+<p>The app could not get an answer from the cloud, so it removed nothing: being unable to ask is not the same as an answer. Check you are online and still signed in to that cloud in Settings, then press <strong>Check these files</strong> again. A file stays on your phone until its cloud confirms it.</p>
+  </div></details>
+  <details class="topic"><summary>Restore says to reconnect that cloud</summary>
+  <div class="topic-body" id="faq-reconnect-cloud">
+<p>The cloud refused the request to read the file. Sign in to it again in Settings. For Dropbox, make sure the app's permissions include reading files as well as writing them. For IDrive e2 and Backblaze B2, make sure the key you made allows reading the bucket. The file on your phone was left exactly as it was.</p>
   </div></details>
   <details class="topic"><summary>The app says only some photos are shared</summary>
   <div class="topic-body" id="faq-only-some-photos">
@@ -1026,11 +1072,11 @@
   <details class="topic"><summary>Contact, privacy and deleting your data</summary>
   <div class="topic-body" id="contact-and-privacy">
 <p>All three are cards at the bottom of the Settings tab.</p>
-<ul><li><strong>Contact Info</strong> shows the address to write to, with a button that copies it.</li><li><strong>Privacy Policy</strong> says what the app does with your data. In short, it sends your files to your own OneDrive and nowhere else, and the developer collects nothing.</li><li><strong>Delete Account Info</strong> explains how to sign out, remove the app's access from your Microsoft account, and clear its data from your phone. Your files in OneDrive stay where they are.</li></ul>
+<ul><li><strong>Contact Info</strong> shows the address to write to, with a button that copies it.</li><li><strong>Privacy Policy</strong> says what the app does with your data. In short, it sends your files to your own cloud accounts and nowhere else, and the developer collects nothing.</li><li><strong>Delete Account Info</strong> explains how to sign out, remove the app's access from your cloud accounts, and clear its data from your phone. Your files in your cloud stay where they are.</li></ul>
   </div></details>
 
   <footer>
-    GallerySync — How To Guide. Last updated 20 September 2026.
+    GallerySync — How To Guide. Last updated 25 September 2026.
   </footer>
 
 </main>

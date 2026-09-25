@@ -47,7 +47,7 @@ CHAPTER = Chapter(
             • **Albums** (folder icon). Where you choose what happens to each album, and where you start or watch a backup. This is the tab you will use most.
             • **Restore** (cloud icon). Brings things back: full-size originals in place of smaller copies, and files that are in the Cloud but no longer on the phone.
             • **Archive** (cloud with a tick). Checks the files in your Archive albums against the Cloud, then removes them from the phone once you say yes.
-            • **Settings** (cog). The things you set once and rarely change: appearance, mobile data, where backups go, which folders to watch, and how photos and videos are optimised.
+            • **Settings** (cog). The things you set once and rarely change: appearance, mobile data, which clouds are connected, which cloud each folder goes to, which folders to watch, and how photos and videos are optimised.
 
             During first-time setup the bar is hidden and a guided tour walks you through the same four
             tabs. Look for the **(?)** buttons in the app: each opens a short explanation taken from this
@@ -68,13 +68,15 @@ CHAPTER = Chapter(
         topic("words-you-will-see", "Words you will see", """
             • **Album.** A folder of photos and videos on your phone, such as Camera or Screenshots. GallerySync only lists albums inside the folders you chose.
             • **Mode.** What you want done with an album: **Off**, **Backup**, **Sync** or **Archive**. See [[modes-in-depth]].
+            • **Cloud.** OneDrive, Google Photos, Google Drive, Dropbox, pCloud, IDrive e2 or Backblaze B2. You choose which ones you use. See [[setup-cloud]].
+            • **Pairing.** Which cloud one of your folders (DCIM, Pictures and so on) sends to. See [[settings-destination]].
             • **Backup.** Copying a file to your Cloud. Your phone's copy is not touched.
             • **Optimise / optimised.** Replacing a photo or video on the phone with a smaller copy while the full-quality original stays safe in the Cloud. See [[how-optimising-works]].
             • **Archive.** Removing an album's files from the phone once they are confirmed in the Cloud. The files go to your phone's bin, not into thin air.
-            • **Verified in the Cloud.** The Cloud is asked and confirms it holds the file, at the same size as your phone's copy. See [[how-verification-works]].
+            • **Verified in the Cloud.** The cloud the file was sent to is asked, right then, and confirms it holds the file at the same size as your phone's copy. See [[how-verification-works]].
             • **Trash / Recycle Bin.** The place removed files wait so you can recover them. Samsung Gallery calls it the Recycle Bin and the Files app calls it Trash. See [[where-deleted-files-go]].
             • **Restore.** Putting a full-size original back on the phone.
-            • **Rescan.** Looking at the phone again, and asking the Cloud again, so the numbers are fresh.
+            • **Rescan.** Looking at the phone again, and asking OneDrive again, so the numbers are fresh.
         """),
     ],
 )

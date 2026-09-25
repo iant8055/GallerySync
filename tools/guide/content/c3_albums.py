@@ -13,13 +13,25 @@ CHAPTER = Chapter(
             • **The list of albums**, one line each, defaulted to sort in alphabetical order. On a wide screen, such as an unfolded foldable, the list can run in two columns.
 
             ## What happens when you open the tab
-            Every time you select the Albums Tab, the app looks at the phone again and asks the Cloud again, so the figures
+            Every time you select the Albums Tab, the app looks at the phone again and asks OneDrive again, so the figures
             are always the current information. You will see the **Rescan** button say
-            **Checking the Cloud...** while it does.
+            **Checking...** while it does. Other clouds are not asked when you open the tab; each one is asked about a file right before that file is shrunk or removed. See [[how-verification-works]].
 
             ## Nothing here changes a file by itself
             Choosing a mode is what tells the app what to do with an album. Scrolling, filtering and
             tapping an album to look at it change nothing.
+        """),
+
+        topic("albums-new", "New albums", """
+            ## What it is
+            When an album appears on your phone that you have not chosen a mode for, a message at the top of the tab says **1 new Album is waiting for you to choose a mode** (or how many). It has two buttons:
+            • **Show new Albums** lists just the albums you have not decided about.
+            • **Dismiss** puts the message away.
+
+            Each such album carries a **New** tag and is highlighted in the list, until you choose a mode for it.
+
+            ## Good to know
+            A new album always starts at **Off**, so nothing is sent and nothing is changed until you choose. A new album can never start as Archive.
         """),
 
         topic("albums-permission", "The permission message", """
@@ -119,7 +131,7 @@ CHAPTER = Chapter(
 
             **When nothing is running**
             • **Sync now** starts a backup, and then optimises anything you set to Manual in Settings. It is greyed out when there is nothing to send and nothing waiting to be optimised, meaning every file in your Backup, Sync and Archive albums is already sent.
-            • **Rescan** looks at the phone again and asks the Cloud again, so all the figures are fresh. While it works it says **Checking the Cloud...** and is disabled.
+            • **Rescan** looks at the phone again and asks OneDrive again, so all the figures are fresh. While it works it says **Checking...** and is disabled.
 
             **When a backup is running**
             • The left side reports instead of acting: **Syncing 37%**. Before the figures are known it just says **Syncing...**.
@@ -167,23 +179,22 @@ CHAPTER = Chapter(
             • **Album name**, for example Camera.
             • **12 files · 340 MB.** How many files the album holds on the phone right now, and their total size. From your phone's media library, inside the chosen folders.
             • **3 optimised · 4 kept at full size · 2 pending.** A second line that appears only when it has something to say, and shows only the parts that are not zero. Optimised counts files replaced by a smaller copy. Kept at full size counts files Restore has put back and that are still ticked, which GallerySync leaves alone. Pending counts files not yet sent to the Cloud: the number of files on the phone minus the number the app has recorded as sent. **Failed** counts those of the pending files the app has given up on after several attempts; open the album to retry them.
-            • **The the Cloud line.** The only line that describes the Cloud itself. Its four forms are listed below.
+            • **The cloud line.** The only line that describes the cloud itself. What it says depends on which cloud the album's files went to. See below.
             • **All files Archived**, in place of the three lines above, on an Archive album that has nothing left on the phone. This is uncommon now: when an Archive run empties an album, the album leaves this list and its mode is forgotten. See [[modes-in-depth]].
-            • **The mode pill**, at the right, in the mode's colour, with a small arrow. Tap it and choose Off, Backup, Sync or Archive; the current mode is ringed. Choosing Archive first asks you to confirm. See [[dialog-archive-confirm]].
+            • **The mode pill**, at the right, in the mode's colour, with a small arrow. Tap it and choose Off, Backup, Sync or Archive; the current mode is ringed. Choosing Archive first asks you to confirm. See [[dialog-archive-confirm]]. If the cloud an album goes to cannot do that mode, for example Archive for a folder that goes to Google Photos, the album says so, in a line such as **Archive is not available with Google Photos, so nothing happens for this album.**
 
             Tap anywhere else on the card to see the album's files. See [[album-detail]].
 
-            ## The four forms of the the Cloud line
-            • **Not checked against the Cloud yet.** Nobody has asked yet. That is not the same as zero.
-            • **Could not reach the Cloud when this was last checked.** The answer is unknown, not bad news.
-            • **12 verified in the Cloud**, in green. the Cloud holds every file in the album at the right size.
-            • **10 of 12 verified in the Cloud.** Some files are missing there, or are there at a different size.
+            ## The cloud line for a OneDrive album
+            • **Not checked against OneDrive yet.** Nobody has asked yet. That is not the same as zero.
+            • **Could not reach OneDrive when this was last checked.** The answer is unknown, not bad news.
+            • **12 verified in OneDrive**, in green. OneDrive holds every file in the album at the right size.
+            • **10 of 12 verified in OneDrive.** Some files are missing there, or are there at a different size.
 
-            ## Where the the Cloud line comes from
-            the Cloud is asked directly, each time you open the tab or press Rescan. A file counts as
-            **verified** only if the Cloud has a file with the same name in that album's folder **and**
-            reports the same size. It is deliberately not taken from the app's memory of what it once
-            sent, because that memory cannot know if you have since deleted something in the Cloud.
+            OneDrive is asked directly, each time you open the tab or press Rescan. A file counts as **verified** only if OneDrive has a file with the same name in that album's folder **and** reports the same size. It is deliberately not taken from the app's memory of what it once sent, because that memory cannot know if you have since deleted something in your cloud.
+
+            ## The cloud line for any other cloud
+            **15 sent to Backblaze B2**, or Dropbox, Google Drive, IDrive e2, Google Photos or pCloud. If an album's files went to more than one cloud there is one such line for each. It says **sent**, not **verified**, because it is the app's own record: those clouds are not asked when you open the tab. Dropbox, Google Drive, Backblaze B2 and IDrive e2 are asked, one file at a time and right then, before that file is shrunk or removed. See [[how-verification-works]].
         """, ui=True),
 
         topic("album-detail", "An album's file list", """
@@ -296,7 +307,7 @@ CHAPTER = Chapter(
             was added keeps that setting.
 
             ## Which files are listed
-            • Photos and videos that the Cloud has confirmed, at the same size. A file not yet backed up is never listed.
+            • Photos and videos that the Cloud has confirmed, at the same size. A file not yet backed up is never listed. For now this covers files sent to OneDrive: files sent to another cloud are not listed here.
             • Only files at least as old as the age you chose, by the date your phone holds for each file (the date it was last changed).
             • Photos only if **Optimise photos** is on in Settings, and videos only if **Optimise video** is on. If one is off, the card says so.
             • Not files that have already been made smaller, or that could not be made smaller.

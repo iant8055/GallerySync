@@ -51,31 +51,26 @@ CHAPTER = Chapter(
         """),
 
         topic("setup-cloud", "Cloud storage: choosing services, signing in and choosing where backups go", """
-            This screen comes first, before your folders, so the next screens know which clouds you can send to. It lists
-            the cloud services GallerySync covers. **OneDrive** is always ticked, because it is where your backups are kept.
-            The others are optional extras: **Google Photos**, **Google Drive**, **Dropbox**, **pCloud**, **IDrive e2** and **Backblaze B2**. Tick the ones you use. A service only appears once the app is set up to connect to it.
+            This screen comes first, before your folders, so the next screens know which clouds you can send to. It is one list of the cloud services GallerySync works with: **OneDrive**, **Google Photos**, **Google Drive**, **Dropbox**, **pCloud**, **IDrive e2** and **Backblaze B2**. **Nothing is ticked when you arrive.** Tick the ones you use and press **Next**. A service only appears once the app is set up to connect to it.
 
-            ## The extra clouds: what to know before you choose one
-            • **Backup only.** Folders sent to an extra cloud can be backed up but not Archived or Synced, because the app cannot prove a copy there is safe before removing the original.
-            • **It cannot check what is already in that cloud**, so a photo that is already there may be added a second time.
-            • **Restoring from an extra cloud** back onto this phone is not available yet.
-            • **It is a Pro feature.** Using it alongside OneDrive is free for 30 days, then it needs a one-time purchase, not a subscription. You start the trial yourself with a button, the terms are shown first, and nothing is ever charged automatically. If the trial ends and you do not buy it, Google Photos uploads pause and OneDrive carries on as normal.
+            ## Your first cloud is free
+            The first cloud you tick is the free one. Each further cloud is part of **Pro**: free for 30 days, then a one-time purchase, not a subscription. You start the trial yourself with a button, the terms are shown first, and nothing is ever charged automatically. If the trial ends and you do not buy it, uploads to the extra clouds pause and your free cloud carries on as normal.
 
-            ## Signing in
-            **Sign in with your Cloud Account** opens the Cloud's own sign-in page. You type your password there,
-            never into GallerySync. The app only receives a permission that lets it work with your Cloud
-            files, and it keeps that permission in encrypted storage on your phone.
+            ## What each cloud can do
+            Ticking a cloud can show an **About this cloud** note listing what it cannot do.
+            • **OneDrive, Google Drive, Dropbox, IDrive e2 and Backblaze B2** can Backup, Sync, Archive and Restore.
+            • **Google Photos and pCloud** are **backup only** for now. Files sent there are not optimised, archived or restored by GallerySync, because the app cannot ask them, right then, whether a copy is safe.
+            • **Outside OneDrive, the app cannot see what a cloud already holds**, so a photo that is already there may be added a second time.
 
-            Once signed in, the screen says **Signed in to OneDrive** (for example) and shows **Backup destination**: the
-            Cloud folder where new backups will go. In OneDrive the default folder is Samsung Gallery / DCIM, which
-            matches where Samsung's own sync puts photos, so files already there are recognised and not
-            sent twice. **Change** lets you pick another folder.{{full: See [[dialog-destination]].}}
+            ## Signing in, one cloud at a time
+            After **Next**, each cloud you ticked gets its own **Connect** card, headed **Cloud 1 of 3** and so on. Each one is finished before the next begins. **Back** returns to the previous card; there is no skip, so **Next** waits until every cloud you ticked is connected.
+            • **OneDrive, Google Photos, Google Drive, Dropbox and pCloud** open the provider's own sign-in page. You type your password there, never into GallerySync. The app only receives a permission that lets it work with your files, and keeps it in encrypted storage on your phone. Dropbox asks for permission to read as well as write: allow both, or Restore will not work.
+            • **IDrive e2 and Backblaze B2** ask for the endpoint, region, bucket and the access key pair you made in their console. The app checks them against the bucket before keeping them. See [[cloud-key-backblaze]] and [[cloud-key-idrive]].
 
-            Sign in to each extra cloud you ticked. Google Photos, Google Drive, Dropbox and pCloud open the provider's own sign-in page. IDrive e2 and Backblaze B2 ask for the endpoint, region, bucket and the access key pair you created in their console; the app checks them against the bucket before keeping them. **Next** waits until every service you ticked is connected.
+            Once OneDrive is signed in, its card says **Signed in to OneDrive** and shows **Backup destination**: the OneDrive folder where new backups will go. The default is Samsung Gallery / DCIM, which matches where Samsung's own sync puts photos, so files already there are recognised and not sent twice. **Change** lets you pick another folder.{{full: See [[dialog-destination]].}}
 
             ## What it checks in the background
-            Once you have chosen your folders, the app looks at what OneDrive already holds, so the later
-            screens can tell you how much is left to send.
+            If OneDrive is one of your clouds, then once you have chosen your folders the app looks at what OneDrive already holds, so the later screens can tell you how much is left to send. The other clouds are not checked this way.
         """),
 
         topic("cloud-key-backblaze", "Connecting Backblaze B2: the keys and where to find them", """
@@ -100,7 +95,7 @@ CHAPTER = Chapter(
             • **The secret key or the region does not match:** a letter in the applicationKey is wrong. Watch for a capital **O** against a zero, a capital **I** against a lowercase **l**, and a capital **J** against a lowercase **j**. Pasting the key avoids all of these.
             • **Not allowed to use that bucket:** the key was made for a different bucket.
 
-            The key is kept in encrypted storage on your phone and is used only to send your files to this bucket. Backblaze B2 is a second cloud, so it needs Pro, free for 30 days.
+            The key is kept in encrypted storage on your phone and is used only to send your files to this bucket. If Backblaze B2 is not your first cloud, it needs Pro, free for 30 days.
         """),
 
         topic("cloud-key-idrive", "Connecting IDrive e2: the keys and where to find them", """
@@ -108,7 +103,7 @@ CHAPTER = Chapter(
 
             ## What you need from IDrive e2
             1. **A bucket.** Use one you already have, or create one in the e2 console. Keep it private.
-            2. **The endpoint for that bucket's region.** The e2 console shows the endpoint address for your region. Copy it exactly.
+            2. **The endpoint for that bucket's region.** This is the address of the region itself, for example **s3.us-west-1.idrivee2.com**. The console may also show an address for the bucket with the bucket's name in front. Do not use that one: GallerySync adds the bucket name itself.
             3. **The region name.** The console names the region of the bucket, for example **us-west-1**. Unlike Backblaze, IDrive's endpoint does not contain it, so GallerySync asks for it.
             4. **An access key.** Create one in the console's access keys section. It gives an **access key ID** and a **secret access key**. The secret is normally shown once, so copy it before you leave the page.
 
@@ -127,7 +122,7 @@ CHAPTER = Chapter(
             • **The secret key or the region does not match:** a letter in the secret is wrong, or the region name is. Watch for a capital **O** against a zero, and a capital **I** against a lowercase **l**. Pasting the key avoids these.
             • **Not allowed to use that bucket:** the key does not cover that bucket.
 
-            The key is kept in encrypted storage on your phone and is used only to send your files to this bucket. IDrive e2 is a second cloud, so it needs Pro, free for 30 days.
+            The key is kept in encrypted storage on your phone and is used only to send your files to this bucket. If IDrive e2 is not your first cloud, it needs Pro, free for 30 days.
         """),
 
         topic("setup-search-permission", "Let GallerySync search this phone", """
@@ -149,7 +144,7 @@ CHAPTER = Chapter(
             Once it has permission, GallerySync searches and shows the folders it found, each with a selection box. **Select the ones you want GallerySync to access.** DCIM is where most modern Android phones save the photos and videos. Press **Next** to move on.
 
             ## Which cloud each folder goes to
-            If an extra cloud is connected and unlocked, each folder you select shows a **Goes to** button, so you can send DCIM to OneDrive and Pictures to Google Photos, for example. This is chosen per folder (DCIM, Pictures, Movies), never per album inside it. If you only use OneDrive you will not see the button, and everything goes to OneDrive. Files already backed up never move if you change this later, only new files follow the change.
+            If more than one cloud is connected, each folder you select shows a **Goes to** button, so you can send DCIM to OneDrive and Pictures to Google Photos, for example. It starts **blank**, so you have to choose: **Next** waits until every folder you selected has a cloud, and the choice is highlighted once you have made it. This is chosen per folder (DCIM, Pictures, Movies), never per album inside it. If you connected only one cloud you will not see the button, and everything goes there. Files already backed up never move if you change this later, only new files follow the change. You can change it any time in Settings.{{full: See [[settings-destination]].}}
 
             ## Then Android asks again, once per folder
             For each selected folder, Android shows its own folder permissions screen to double check this is what you want.  It is

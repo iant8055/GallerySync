@@ -3,8 +3,8 @@ from model import Chapter, topic
 CHAPTER = Chapter(
     id="restore",
     title="The Restore tab",
-    intro="Restore brings photos and videos back from OneDrive to the album they came from. It only "
-          "ever reads from OneDrive and writes to your phone, so nothing in OneDrive is touched.",
+    intro="Restore brings photos and videos back from your cloud to the album they came from. It only "
+          "ever reads from the cloud and writes to your phone, so nothing in your cloud is touched.",
     topics=[
         topic("restore-overview", "What Restore brings back", """
             Restore lists two kinds of file, side by side in the same folders:
@@ -16,15 +16,16 @@ CHAPTER = Chapter(
             archived again straight away. You can untick it in the album's file list. See
             [[album-file-pin]].
 
-            ## What OneDrive holds, not only what this app sent
-            Restore lists the photos and videos in your OneDrive backup folders, whoever put them there.
-            It is not limited to what GallerySync uploaded, so an album you archived, a folder from
-            another phone or one added from a computer can all be brought back. Each file goes back into
-            the album with the same name as its OneDrive folder. It is still not a general file
-            browser: only photos and videos, and only in your backup folders.
+            ## What your cloud holds
+            • **OneDrive.** Restore lists the photos and videos in your OneDrive backup folders, whoever put them there. It is not limited to what GallerySync uploaded, so an album you archived, a folder from another phone or one added from a computer can all be brought back. Each file goes back into the album with the same name as its OneDrive folder. It is still not a general file browser: only photos and videos, and only in your backup folders.
+            • **Dropbox, Google Drive, Backblaze B2 and IDrive e2.** Restore lists what GallerySync sent there from this phone, and fetches each file by the exact address the app recorded when it sent it.
+            • **Google Photos and pCloud** cannot be restored from yet.
 
             A file the phone already has at full size is shown greyed out, so you can see why it is not
             on offer. See [[restore-greyed-files]].
+
+            ## Where restored files go
+            A restored file goes back into its own album folder. Android only lets a photo be created under DCIM or Pictures, and a video under DCIM or Movies, so when the album's own folder is somewhere else (a folder at the top of the phone's storage, say, or a photo album under Movies), the files go into **DCIM/** the album's name instead.
 
             ## Folders first
             The tab always opens on a list of folders (albums), even if there is only one. Swipe a folder
@@ -32,7 +33,7 @@ CHAPTER = Chapter(
 
             ## Safe to try
             A restore only replaces a smaller copy once the full download has arrived and its size has
-            been checked. If anything goes wrong the file on your phone is left exactly as it was.
+            been checked against the size recorded when the file was sent. If anything goes wrong the file on your phone is left exactly as it was.
             Stopping partway costs nothing and you can run it again.
         """),
 
@@ -46,7 +47,7 @@ CHAPTER = Chapter(
 
             ## Where it comes from
             First the app's own record of what it has optimised or backed up, compared with a look at
-            what is on the phone right now. Then OneDrive itself, folder by folder: **Checking OneDrive
+            what is on the phone right now. Then, if OneDrive is one of your clouds, OneDrive itself, folder by folder: **Checking your cloud
             for more...** appears under the card while that happens, and anything else OneDrive holds
             is added when it arrives. If a folder cannot be reached the card says so, in red, and the
             list may be incomplete.
@@ -57,7 +58,7 @@ CHAPTER = Chapter(
             is read again behind it; you can also press **Refresh** at any time. Signing out forgets it.
 
             A folder appears when it has something to bring back. To list every OneDrive folder, even
-            those with nothing to bring back, turn on **Show empty folders** in Settings.
+            those with nothing to bring back, turn on **Show empty folders** in Settings. That switch only affects OneDrive.
         """, ui=True),
 
         topic("restore-message-line", "The message under the number", """
@@ -80,7 +81,7 @@ CHAPTER = Chapter(
             ## Where it comes from
             **Selected** is a count of the files you have chosen across all folders. **To recover** is the
             extra room the restored files will take on your phone: for each file, its full size in
-            OneDrive minus what the phone holds now (nothing at all, for a file that has to be downloaded).
+            the cloud minus what the phone holds now (nothing at all, for a file that has to be downloaded).
 
             ## Good to know
             Make sure the phone has that much free space before you press Restore.
@@ -97,7 +98,7 @@ CHAPTER = Chapter(
             Both are greyed out while a restore is running.
 
             ## Where it comes from
-            **Refresh** repeats both looks: the app's own record and the phone, then OneDrive, whatever
+            **Refresh** repeats both looks: the app's own record and the phone, then OneDrive if you use it, whatever
             the age of the last reading. Reading OneDrive needs the internet.
         """, ui=True),
 
@@ -119,8 +120,7 @@ CHAPTER = Chapter(
             back to the list of folders.
 
             ## Where it comes from
-            OneDrive's own listing of the folder, compared with what is on the phone now, together with
-            the app's own record of what it has optimised.
+            The app's own record of what it has sent and optimised, and for OneDrive its own listing of the folder, compared with what is on the phone now.
         """),
 
         topic("restore-files-list", "The file list inside a folder", """
@@ -128,7 +128,7 @@ CHAPTER = Chapter(
             One card per file. **Swipe right** to select it and **swipe left** to deselect it, the same as on the folder list; a selected file is highlighted with a tick. Tapping a card does the same. Repeating a swipe changes nothing.
 
             **The name**, then one of:
-            • **1.2 MB now · 8.4 MB full size.** A smaller copy on the phone, and the size of the original in OneDrive. Restoring swaps one for the other.
+            • **1.2 MB now · 8.4 MB full size.** A smaller copy on the phone, and the size of the original in your cloud. Restoring swaps one for the other.
             • **Available for download · 8.4 MB.** The file is not on the phone at all. Restoring brings it back at this size.
             • **Already on this phone · 8.4 MB.** Greyed out. The phone already has this file at full size, so there is nothing to do. See [[restore-greyed-files]].
 
@@ -137,10 +137,10 @@ CHAPTER = Chapter(
             **When it finishes:**
             • **Restored to full size.** The original replaced the smaller copy.
             • **Back on this phone.** The file was downloaded.
-            • **Could not restore, your file is unchanged**, with the reason in brackets, in red. Nothing was lost.
+            • **Could not restore, your file is unchanged**, with the reason in brackets, in red. Nothing was lost. If the reason says to reconnect that cloud, sign in to it again in Settings, and for Dropbox make sure its permissions include reading files.
 
             ## Where it comes from
-            Names and sizes come from OneDrive's listing of the folder. The percentage comes from the
+            Names and sizes come from the app's own record, and for OneDrive from its listing of the folder. The percentage comes from the
             download itself.
         """),
 
@@ -151,12 +151,12 @@ CHAPTER = Chapter(
             phone.**
 
             ## Why they are shown at all
-            OneDrive holds every file in the folder. Files the phone already has, at full size, need no
+            Your cloud holds every file in the folder. Files the phone already has, at full size, need no
             restoring, but leaving them out would make the folder look shorter than it is in OneDrive
             and leave you wondering where they went. So they are listed, and greyed out.
 
             ## Where it comes from
-            OneDrive's listing, compared with the photos and videos on the phone, by folder, name and
+            The list of what the cloud holds, compared with the photos and videos on the phone, by folder, name and
             size. A file counts as here only when all three match.
 
             ## Good to know
@@ -172,9 +172,11 @@ CHAPTER = Chapter(
             • **Restore** starts bringing back every selected file, one after another.
             • **Stop restoring** replaces it while the restore runs. It stops the batch, including the file in progress. Files already brought back stay back.
 
+            While it runs, a progress bar under the button shows how far through you are, for example **3 of 12 restored · 45%**, and each file's own row shows its percentage.
+
             ## What happens
-            Each file is downloaded from your OneDrive, checked, and only then put in place. It needs an
-            internet connection and enough free space. Your OneDrive is only read, never changed.
+            Each file is downloaded from the cloud it was sent to, checked, and only then put in place. It needs an
+            internet connection and enough free space. Your cloud is only read, never changed.
         """),
     ],
 )

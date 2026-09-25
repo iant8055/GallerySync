@@ -89,56 +89,49 @@ CHAPTER = Chapter(
 
         topic("settings-section-backup", "Backup", """
             ## What it is
-            Where your photos and videos are backed up to. For now that is OneDrive: its name with a box
-            to the left of it, then the connected **Account** with its **Sign out** button, and
-            **Current folder location** with a **Change** button.
+            Which clouds your photos and videos go to, and which cloud each folder goes to. It has two parts:
+            • **Clouds.** One row for each cloud, with its account and a **Sign out** or **Connect** button. See [[settings-account]].
+            • **Where each folder goes.** One row for each folder GallerySync watches. See [[settings-destination]].
 
-            ## At least one backup location
-            The box beside a location is there for switching it on or off, but the last one left on
-            cannot be switched off: a backup that goes nowhere protects nothing. OneDrive is the only
-            location there is, so its box stays ticked and greyed out, and you will see **At least one
-            backup location must stay on.**
+            ## Your first cloud is free
+            The cloud marked **main (free)** is your free one, and it is never switched off by the trial ending. Any other cloud needs **Pro**, free for 30 days, then a one-time purchase. Once you have connected a second cloud, this section also shows the trial terms and an **Unlock Pro** button. Nothing is ever charged automatically.
 
             ## Good to know
-            Changing the folder does not affect files already backed up.
+            Changing where a folder goes does not affect files already backed up.
         """, ui=True),
 
-        topic("settings-account", "Your account and Sign out", """
+        topic("settings-account", "Your clouds and Sign out", """
             ## What it is
-            The Microsoft account the app is connected to, shown as the email address, with a **Sign out**
-            button.
-
-            ## Where it comes from
-            Microsoft tells the app which account you signed in with. It is shown on your phone only and
-            is not sent anywhere else.
+            One row for each cloud. It shows the account it is connected to (or **Not connected**), with a **Sign out** button when connected, or **Connect** or **Enter keys** when not. OneDrive, Google Photos, Google Drive, Dropbox and pCloud sign in on the provider's own page. IDrive e2 and Backblaze B2 ask for keys you made in their console. See [[cloud-key-backblaze]] and [[cloud-key-idrive]].
 
             ## What Sign out does
-            It removes the app's Microsoft sign-in from your phone. Nothing in your OneDrive is touched,
-            and your files stay where they are. Backups stop until you sign in again, and the app will
-            ask you to.
+            Pressing **Sign out** first shows a warning: GallerySync stops backing up to that cloud until you sign in again, nothing is deleted, the files already there stay there, and folders paired with that cloud wait for you. Then, **only if that cloud holds files that are not at full size on this phone** (photos shrunk by Sync, or files Archive took off the phone), it asks what you want done with them:
+            • **Restore them to the phone first.** Every one comes back from the cloud, each checked against its recorded size, with a progress bar and a **Stop, stay signed in** button. GallerySync signs out only when every file is back. If some could not be restored it stays signed in and offers **Sign out anyway** or **Stay signed in**, so you can try again.
+            • **Leave them there.** Signs out and changes nothing.
+            • **Cancel.** Stays signed in.
 
-            To also cancel the app's access from Microsoft's side, follow the steps on the Delete Account
-            Info page in Settings.
+            With nothing to bring back, it signs out straight after the warning.
+
+            Signing out never moves a folder to another cloud, and never removes a file anywhere. The folders stay paired with the cloud you signed out of, and their new files wait until you sign in again. To send a folder somewhere else, change it under **Where each folder goes**. To also cancel the app's access from the provider's side, follow the steps on the Delete Account Info page in Settings.
         """, ui=True),
 
-        topic("settings-destination", "Current folder location", """
+        topic("settings-destination", "Where each folder goes", """
             ## What it is
-            The OneDrive folder where new backups are placed, written like **OneDrive / Samsung Gallery/DCIM**,
-            with a **Change** button.
+            One row for each top-level folder GallerySync watches (DCIM, Pictures, Movies and so on), with the cloud that folder sends to, and under it where in that cloud the files go, for example **Goes to OneDrive / Samsung Gallery/DCIM** or **Goes to Dropbox / GallerySync**. It is chosen per folder, never per album inside it.
 
-            ## Where it comes from
-            It starts as **Samsung Gallery/DCIM**, the same place Samsung's own sync used, which is how
-            the app finds what is already there and avoids sending it twice. If you have changed it, your
-            choice is stored on the phone.
+            ## Changing it
+            Tap the cloud to choose another. The menu only opens when there is a real choice: with one cloud, or without Pro or the trial, the pairing is shown but cannot be changed. A folder still paired with a cloud that has been signed out keeps it on the menu, so you can see it and move it back.
 
             ## Changing it is safe
-            Only new uploads move. The old folder stays in the search, so nothing already uploaded is
-            lost and nothing is sent twice. See [[dialog-destination]].
+            Only new files follow the change, and any file still waiting to be sent goes to the new cloud. Files already sent stay where they are and are never re-sent. A folder paired with a cloud that is not your free one, with no Pro and no trial, sends nothing, and the row says so.
+
+            ## Good to know
+            An album that has files in two folders with the same name (for example **DCIM/Holiday** and **Movies/Holiday**) is one album to GallerySync. Each file still goes to the cloud of the folder it is in, and both folders appear in this list.
         """, ui=True),
 
         topic("dialog-destination", "Where new backups go (the Change dialog)", """
             ## What it is
-            A dialog opened by **Change**:
+            This dialog belongs to the OneDrive folder chooser, which is not on the Settings tab in this version: new OneDrive backups go to Samsung Gallery/DCIM. It is described here for when it returns. A dialog opened by **Change**:
 
             • **Folder in OneDrive.** A box holding the folder path. Use a plain path like **Pictures/Backup**, with no slash at the start or end. An unusable path shows **That folder path cannot be used.**
             • **A note.** New photos and videos will go here. The files already backed up stay where they are, and GallerySync keeps looking in the old folder too, so nothing is uploaded twice. It shows the number of files already backed up when it knows it.
@@ -152,7 +145,7 @@ CHAPTER = Chapter(
 
         topic("dialog-folder-picker", "Choose a folder (the OneDrive picker)", """
             ## What it is
-            A list of the folders in your OneDrive, starting at the top (**OneDrive**).
+            Part of the OneDrive folder chooser, which is not on the Settings tab in this version. A list of the folders in your OneDrive, starting at the top (**OneDrive**).
 
             • Tap a folder to go into it. **Up one folder** goes back.
             • **Use this folder** picks the one you are looking at.
@@ -167,8 +160,8 @@ CHAPTER = Chapter(
 
         topic("settings-section-albums", "Albums", """
             ## What it is
-            The mode a brand new album starts with, which folders to watch, and what happens to cloud
-            copies when you delete from this phone, in that order and with a thin line between them.
+            Which folders GallerySync watches, and what happens to cloud
+            copies when you delete from this phone, in that order and with a thin line between them. A brand new album always starts at **Off**: there is no setting for that.
         """, ui=True),
 
         topic("settings-folders", "Folders to back up", """
@@ -217,16 +210,19 @@ CHAPTER = Chapter(
             ## What it is
             Two choices, one selected at a time:
 
-            • **Leave the OneDrive copy** (the starting choice). Nothing is ever removed from OneDrive. Deleting on your phone only frees space here.
-            • **Ask me about the OneDrive copy.** When you open the app after files have gone from your phone, a window lists them, whether or not the app ever backed them up, and asks what you want done: delete or keep their OneDrive copies, or back up the ones that never made it. It never removes anything on its own. See [[deleted-files-window]].
+            • **Leave the Cloud copy** (the starting choice). Nothing is ever removed from your cloud. Deleting on your phone only frees space here.
+            • **Ask me about the Cloud copy.** When you open the app after files have gone from your phone, a window lists them, whether or not the app ever backed them up, and asks what you want done: delete or keep their copies in your cloud, or back up the ones that never made it. It never removes anything on its own. See [[deleted-files-window]].
+
+            ## For now, OneDrive only
+            The window that asks works on copies in OneDrive. The copies in any other cloud are left alone under either choice: nothing is ever removed from them.
 
             ## Why Leave is the default
-            A copy left in OneDrive costs a little storage. A copy removed by mistake could cost you the
+            A copy left in your cloud costs a little storage. A copy removed by mistake could cost you the
             photo, because the one on your phone is already gone.
 
             ## Good to know
             The app never treats a missing file as an instruction to delete. Under **Ask** it asks you
-            first, and nothing in OneDrive moves without your say-so.
+            first, and nothing in your cloud moves without your say-so.
         """, ui=True),
 
         topic("deleted-files-window", "Files deleted from your phone (the window that opens with the app)", """
@@ -313,7 +309,7 @@ CHAPTER = Chapter(
         topic("settings-section-sync", "Sync", """
             ## What it is
             How photos and videos are optimised to save space. Files are only changed after they are
-            verified in OneDrive, and only inside albums you set to Sync.
+            verified in your cloud, and only inside albums you set to Sync. Sync works with OneDrive, Google Drive, Dropbox, IDrive e2 and Backblaze B2.
         """, ui=True),
 
         topic("settings-optimise-photos", "Optimise photos", """
@@ -326,11 +322,11 @@ CHAPTER = Chapter(
             The photo on your phone is replaced with a smaller copy, reduced to about 2048 pixels on the
             long edge and roughly a tenth of the size. It stays in your gallery and opens normally in every
             app, and carries a small cloud badge so you can tell which ones are optimised. The full-quality
-            original stays in OneDrive, untouched. Photos are optimised whatever their age.
+            original stays in your cloud, untouched. Photos are optimised whatever their age.
 
             ## Only in Sync albums
             Backup and Archive albums never optimise, and Off does nothing. A photo is only ever
-            optimised after OneDrive has confirmed it holds the original at the same size, and a
+            optimised after its cloud has confirmed, right then, that it holds the original at the same size, and a
             photo that would not get smaller is left alone. A photo you have set to **Keep at full
             size** is never touched.
 
@@ -344,14 +340,14 @@ CHAPTER = Chapter(
 
             ## What it does
             Old video in Sync albums is replaced by a smaller copy on your phone. The full-quality
-            original stays in OneDrive, and the Restore tab brings it back. Nothing is ever cut:
+            original stays in your cloud, and the Restore tab brings it back. Nothing is ever cut:
             shortening a clip is the one thing optimising never does, and the smaller copy is checked
             against the original's length before it replaces anything.
 
             ## Which clips it touches
             A clip has to pass every one of these:
             • It is in an album set to **Sync**.
-            • OneDrive has confirmed it at the same size.
+            • Its cloud has confirmed it at the same size.
             • It is older than the age you chose.
             • It is in a folder you gave GallerySync access to. A clip anywhere else is left alone.
             • It has not been optimised already, and has not been found already small enough to leave.
@@ -376,7 +372,7 @@ CHAPTER = Chapter(
             A box under **Optimise photos** (and another under **Optimise video**) showing
             **Automatic** or **Manual**. It decides when optimising happens.
 
-            • **Automatic.** As soon as a file reaches an album set to **Sync**, or an album is switched to Sync. The file is sent to OneDrive first and optimised the moment OneDrive has confirmed it. Photos are optimised in the background, with no prompt, for folders you gave access to during setup. Video waits for the phone to be charging.
+            • **Automatic.** As soon as a file reaches an album set to **Sync**, or an album is switched to Sync. The file is sent to its cloud first and optimised the moment the cloud has confirmed it. Photos are optimised in the background, with no prompt, for folders you gave access to during setup. Video waits for the phone to be charging.
             • **Manual.** Nothing happens until you press **Sync now** on the Albums tab. That sends whatever is waiting and then optimises. **Sync now** can be pressed even when nothing is left to send, if something is ready to optimise. See [[albums-run-controls]].
 
             ## Photos outside the folders you gave access to
@@ -394,7 +390,7 @@ CHAPTER = Chapter(
             hour**, **12 hours**, **1 day** or **1 week**.
 
             ## What it covers
-            Only the copy on this phone. A video is backed up to OneDrive straight away whatever this is
+            Only the copy on this phone. A video is backed up to your cloud straight away whatever this is
             set to. Age is worked out for each file separately, from when it was last modified.
 
             ## Good to know about "Straight away"
@@ -420,7 +416,7 @@ CHAPTER = Chapter(
 
             ## Good to know
             Optimising re-encodes the clip at a lower resolution. Nothing is cut, and it stays in your
-            gallery. The full-quality original stays in OneDrive.
+            gallery. The full-quality original stays in your cloud.
         """, ui=True),
 
         topic("settings-section-restore", "Restore (Settings)", """
@@ -437,7 +433,7 @@ CHAPTER = Chapter(
             ## What it changes
             The Restore tab lists the folders in your OneDrive backup folders that have something to
             bring back. Turn this on and it lists every folder, including those where every file is
-            already on the phone. Off is right for most people.
+            already on the phone. Off is right for most people. It only affects OneDrive: other clouds list only what the app sent.
         """, ui=True),
 
         topic("settings-section-archive", "Archive (Settings)", """
@@ -467,7 +463,7 @@ CHAPTER = Chapter(
             ## What it is
             A switch, off by default. On, GallerySync asks Android for permission to post
             notifications, then lets you know when files in an Archive album have been confirmed in
-            OneDrive and are ready to leave your phone.
+            your cloud and are ready to leave your phone. For now it only covers files sent to OneDrive.
 
             ## Why it is not the only way to find out
             The Albums tab already shows this, and a reminder appears if you try to leave the app with
@@ -487,7 +483,7 @@ CHAPTER = Chapter(
             Below the sections are three cards. Tap one to open its page inside the app.
 
             • **Privacy Policy.** How GallerySync handles your photos, videos and account.
-            • **Delete Account Info.** How to sign out, remove the app's access to your Microsoft account, and clear its data.
+            • **Delete Account Info.** How to sign out, remove the app's access to your cloud accounts, and clear its data.
             • **Contact Info.** Questions or problems? It shows the address, which you can select and copy with **Copy address**. It does not open a mail app.
 
             The How To Guide card is not down here: it is the first card in General. See

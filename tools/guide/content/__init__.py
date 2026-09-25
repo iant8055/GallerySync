@@ -10,7 +10,7 @@ from . import (
     c8_help,
 )
 
-LAST_UPDATED = "20 September 2026"
+LAST_UPDATED = "25 September 2026"
 
 CHAPTERS = [
     c1_start.CHAPTER,

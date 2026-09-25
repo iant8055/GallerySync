@@ -12,9 +12,12 @@ CHAPTER = Chapter(
             what happens to the file **on your phone**.
 
             • **Off.** Nothing is sent and nothing on the phone is touched. This is where every album starts. It means "I have not decided, or I do not want this album looked after".
-            • **Backup.** Copies the album to OneDrive and leaves the phone alone, always. The safe choice, and the one to pick when you are unsure.
+            • **Backup.** Copies the album to your cloud and leaves the phone alone, always. The safe choice, and the one to pick when you are unsure.
             • **Sync.** Backs up, and also makes the album eligible for optimising: photos can be replaced by smaller copies that stay in your gallery. Optimising itself is controlled in Settings, under Sync, and is off until you switch it on.
             • **Archive.** Backs up, verifies, and then takes the files off the phone into its Trash/Recycle Bin, after your tap. The album leaves your gallery. The only mode that removes files. It is a standing instruction while the album holds files: files added to it later are covered too. Once Archive has emptied the album, the album leaves the list and its mode is forgotten.
+
+            ## What each cloud can do
+            Backup works with every cloud. **Sync** and **Archive** need a cloud that GallerySync can ask, at the moment it matters, whether a file is safe: OneDrive, Google Drive, Dropbox, IDrive e2 and Backblaze B2. Google Photos and pCloud are backup only for now. If an album goes to one of those, choosing Sync or Archive shows a message and nothing happens for that album.
 
             ## The Camera album has no Sync
             Camera offers **Off**, **Backup** and **Archive**. Sync would make a new photo smaller the
@@ -40,25 +43,29 @@ CHAPTER = Chapter(
 
         topic("how-verification-works", "How verification works", """
             Before the app shrinks or removes anything on your phone, it makes sure a good copy exists in
-            OneDrive. That check is the guarantee, and nothing skips it.
+            your cloud, and it asks the cloud itself, right then. That check is the guarantee, and nothing skips it.
 
             ## The test
-            OneDrive is asked for the list of files in the album's folder. A file on your phone is
-            **verified** only if OneDrive lists a file with the **same name** and reports the **same
-            size**. Anything less, such as missing, or present at a different size, is not verified.
+            • **OneDrive** is asked for the list of files in the album's folder. A file on your phone is **verified** only if OneDrive lists a file with the **same name** and reports the **same size**.
+            • **Dropbox, Google Drive, Backblaze B2 and IDrive e2** are asked about the one file, by the exact address the app recorded when it sent it. The cloud must say the file is there, not deleted and not in its bin, at exactly the size the phone's copy was. If Sync has already made a photo smaller, the size it must match is the original's.
+
+            Anything less, such as missing, deleted, or present at a different size, is not verified.
 
             ## When it is done
             • On the Albums tab, every time you open it or press Rescan, for the OneDrive line of each album.
-            • On the Archive tab, when you press Check these files, and the files not found are sent first.
+            • On the Archive tab, when you press Check these files, and the files not found are sent first. Files sent to another cloud are asked about there, and again just before removal.
+            • Just before Sync replaces a photo or video with a smaller copy.
+
+            Nothing is remembered from an earlier check. A file deleted from your cloud by hand would otherwise be trusted for ever.
 
             ## Three different answers
-            • **Verified.** OneDrive has it.
+            • **Verified.** The cloud has it.
             • **Not there, or the wrong size.** The file stays on your phone, and the app says so.
-            • **Could not check.** The internet failed or OneDrive did not answer. That is not the same as "missing", and nothing is removed on the strength of an unanswered question.
+            • **Could not check.** The internet failed, you are signed out, or the cloud did not answer. That is not the same as "missing", and nothing is removed or shrunk on the strength of an unanswered question.
 
             ## What it cannot promise
             A size check cannot catch every kind of damage. So keep an eye on your own backups: open
-            OneDrive now and then and open a few photos, and do it before you empty any bin. For
+            your cloud's own app or website now and then and open a few photos, and do it before you empty any bin. For
             anything you could not bear to lose, keep a copy somewhere this app cannot reach.
         """),
 
@@ -70,7 +77,7 @@ CHAPTER = Chapter(
             • The copy is reduced to about **2048 pixels on the long edge**, roughly a tenth of the size.
             • It keeps its name and place, so your gallery shows it as usual, and it keeps information such as date and location.
             • It carries a small **cloud badge** so you can tell it has been optimised.
-            • The **full-quality original stays in OneDrive**, untouched.
+            • The **full-quality original stays in your cloud**, untouched.
             • A photo that would not get smaller is left as it is.
 
             ## Video
@@ -81,8 +88,8 @@ CHAPTER = Chapter(
 
             ## The rules it always follows
             • Only files inside albums set to **Sync**.
-            • Only files OneDrive has confirmed, at the same size.
-            • Never anything permanently deleted: the original is in OneDrive.
+            • Only files whose cloud has confirmed the original, at the same size, right then.
+            • Never anything permanently deleted: the original is in your cloud.
 
             ## Getting the original back
             Open the **Restore** tab, choose the folder or files, and press **Restore**. The original
@@ -109,10 +116,10 @@ CHAPTER = Chapter(
             yourself**, or when the time runs out. The app never empties it, and every "frees X" message
             means "frees X once the bin is emptied".
 
-            ## In OneDrive
+            ## In your cloud
             If you use the option to be asked about OneDrive copies after deleting on your phone, files
             you approve go to your **OneDrive recycle bin**, where you can restore them. The app never
-            empties that either.
+            empties that either. It never deletes anything in Google Drive, Dropbox, IDrive e2, Backblaze B2, Google Photos or pCloud.
         """),
 
         topic("background-work", "When things happen", """
@@ -126,7 +133,7 @@ CHAPTER = Chapter(
 
             ## Optimising photos
             **Automatic** happens as soon as a file reaches a Sync album, or an album is switched to Sync:
-            after the file has been sent and confirmed in OneDrive, and in the background. **Manual**
+            after the file has been sent and confirmed in its cloud, and in the background. **Manual**
             happens when you press **Sync now** on the Albums tab. Photos outside the folders you gave
             access to need Android's confirmation, so they wait until you open the app or press **Sync now**.
 
@@ -151,13 +158,13 @@ CHAPTER = Chapter(
         """),
 
         topic("where-your-data-lives", "Where your data lives", """
-            • **Your photos and videos** go from your phone directly to your own OneDrive account, over an encrypted connection. GallerySync has no server, so they never pass through anything belonging to the developer.
-            • **Your Microsoft sign-in** is kept in encrypted storage on your phone. You type your password on Microsoft's own page, never into the app.
+            • **Your photos and videos** go from your phone directly to your own cloud accounts, over an encrypted connection. GallerySync has no server, so they never pass through anything belonging to the developer.
+            • **Your sign-ins and keys** are kept in encrypted storage on your phone. You type your password on the provider's own page, never into the app. The keys for IDrive e2 and Backblaze B2 are typed into the app once and kept encrypted.
             • **The app's own record** of what it has sent, its settings and your folder choices are kept in private storage on your phone, not readable by other apps.
             • **The developer collects nothing:** no analytics, no crash reporting, no advertising.
 
             The full details are in the **Privacy Policy** card at the bottom of Settings. To sign out,
-            remove the app's access to your Microsoft account, or clear its data, use the **Delete Account
+            remove the app's access to your cloud accounts, or clear its data, use the **Delete Account
             Info** card.
         """),
 
@@ -167,7 +174,7 @@ CHAPTER = Chapter(
             • Only files **on the phone right now**.
             • Only inside the **folders you chose**.
             • Not files in your phone's **Trash**.
-            • Not the small **Restored** album, whose files are already in OneDrive.
+            • Not the small **Restored** album, whose files are already in your cloud.
 
             Your gallery app may also show cloud-only items, or group folders differently. Neither
             number is wrong; they are counting different things. Each figure in GallerySync says what it
