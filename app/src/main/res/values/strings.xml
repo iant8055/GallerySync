@@ -622,10 +622,10 @@ full size</string>
 
     <!-- Deletion sync: what happens to the OneDrive copy when a file leaves the phone. -->
     <string name="deletion_title">When you delete a photo/video from this phone</string>
-    <string name="deletion_leave">Leave the OneDrive copy</string>
-    <string name="deletion_leave_detail">Nothing is ever removed from OneDrive. Deleting on your phone only frees space here.</string>
-    <string name="deletion_ask">Ask me about the OneDrive copy</string>
-    <string name="deletion_ask_detail">GallerySync shows you every file that has gone from your phone and asks what to do: delete or keep the OneDrive copy, or back up a file that never made it. It never removes anything on its own.</string>
+    <string name="deletion_leave">Leave the Cloud copy</string>
+    <string name="deletion_leave_detail">Nothing is ever removed from your cloud. Deleting on your phone only frees space here.</string>
+    <string name="deletion_ask">Ask me about the Cloud copy</string>
+    <string name="deletion_ask_detail">GallerySync shows you every file that has gone from your phone and asks what to do: delete or keep the copy in your cloud, or back up a file that never made it. For now this covers OneDrive only. It never removes anything on its own.</string>
 
     <!--
         The window that opens with the app when files have left the phone since it last appeared.
