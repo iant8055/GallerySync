@@ -100,7 +100,7 @@
     <string name="cloud_signout_title">Sign out of %1$s?</string>
     <string name="cloud_signout_warning">GallerySync will stop backing up to %1$s until you sign in again. Nothing is deleted, and the files already there stay there. Folders paired with %1$s wait for you.</string>
     <string name="cloud_signout_files_title">What about the files there?</string>
-    <string name="cloud_signout_body">%2$d files (%3$s) there are not at full size on this phone. What do you want to do with them?</string>
+    <string name="cloud_signout_body">%1$d files (%2$s) there are not at full size on this phone. What do you want to do with them?</string>
     <string name="cloud_signout_leave">Leave them there</string>
     <string name="cloud_signout_restore">Restore them to the phone first</string>
     <string name="cloud_signout_restoring_title">Restoring from %1$s</string>
