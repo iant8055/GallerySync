@@ -183,25 +183,17 @@ class CloudProvidersViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Signs out and changes nothing else. A folder paired with this cloud stays paired, and its unsent files
+     * stay routed to it: the upload pass skips a cloud that is not connected without failing anything, so they
+     * simply wait. Signing out is not a decision about where files go: the user may have done it to switch
+     * accounts, or by accident, or want the files kept where they are (Ian, 25 Sept 2026, after signing out of
+     * Dropbox to change account quietly moved his `dropbox` folder to OneDrive). Moving a folder is the user's
+     * choice, made in the folder's own menu in Settings.
+     */
     fun disconnect(location: BackupLocation) {
         viewModelScope.launch {
             connections.of(location)?.signOut()
-            // Never leave a destination pointed at a cloud that just became unreachable. Folders and
-            // files still waiting move to the main cloud — or, if it was the main cloud that went, to
-            // another connected one, and failing that to the default. Files already sent keep their
-            // recorded history: nothing uploaded is touched.
-            val main = settings.current().backupLocation
-            val target = if (location != main) {
-                main
-            } else {
-                connections.offered().firstOrNull { it.location != location && it.accountLabel() != null }?.location
-                    ?: BackupLocation.DEFAULT
-            }
-            if (target != location) {
-                folderDao.reassign(location, target)
-                entryDao.retargetAllUnsent(location, target)
-            }
-            if (main == location && target != location) settings.setBackupLocation(target)
             refresh()
         }
     }
