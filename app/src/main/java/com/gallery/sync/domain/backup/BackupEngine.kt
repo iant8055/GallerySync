@@ -1040,7 +1040,12 @@ class BackupEngine @Inject constructor(
         }
 
         RestoreScope.notOnTheDevice(
-            candidates = entryDao.fetchableFromCloud(),
+            candidates = entryDao.fetchableFromCloud() +
+                entryDao.fetchableElsewhere(
+                    BackupLocation.entries
+                        .filter { it != BackupLocation.ONEDRIVE && it.capabilities.restore }
+                        .map { it.name }
+                ),
             presentOnDevice = present,
             // The size the file has on the phone, so an optimised photo still in its folder matches
             // its own proxy and is not offered as a download. See RestoreScope.onDiskSizeBytes.

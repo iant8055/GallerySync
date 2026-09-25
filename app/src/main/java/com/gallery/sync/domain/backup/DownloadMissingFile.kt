@@ -12,6 +12,7 @@ import com.gallery.sync.data.local.media.WriteOutcome
 import com.gallery.sync.di.IoDispatcher
 import com.gallery.sync.domain.model.DataResult
 import com.gallery.sync.domain.model.RemoteError
+import com.gallery.sync.domain.repository.CloudDownloaders
 import com.gallery.sync.domain.repository.OneDriveRepository
 import com.gallery.sync.util.Logger
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -50,6 +51,7 @@ import javax.inject.Singleton
 class DownloadMissingFile @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val repository: OneDriveRepository,
+    private val downloaders: CloudDownloaders,
     private val writer: MediaStoreWriter,
     private val entryDao: BackupEntryDao,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
@@ -63,10 +65,26 @@ class DownloadMissingFile @Inject constructor(
             ?: return@withContext RestoreInPlaceResult.Failed(
                 "OneDrive has not been checked for this file yet. Press Refresh and try again."
             )
-        val expected = entry.remoteSizeBytes
-            ?: return@withContext RestoreInPlaceResult.Failed("no cloud size recorded")
 
-        val stream = when (val opened = repository.openStream(remoteItemId)) {
+        // OneDrive's copy was proved by size, so that is what the download is checked against. Another
+        // cloud's was not (it is recorded unverified), so the download is checked against the size the phone
+        // had when it sent the file: the writer still rejects a short read and discards the half-written row.
+        val viaOtherCloud = entry.location != BackupLocation.ONEDRIVE
+        val expected = if (viaOtherCloud) {
+            entry.sizeBytes
+        } else {
+            entry.remoteSizeBytes
+                ?: return@withContext RestoreInPlaceResult.Failed("no cloud size recorded")
+        }
+
+        val opened = if (viaOtherCloud) {
+            val downloader = downloaders.of(entry.location)
+                ?: return@withContext RestoreInPlaceResult.Failed("restoring from that cloud is not available yet")
+            downloader.openStream(remoteItemId)
+        } else {
+            repository.openStream(remoteItemId)
+        }
+        val stream = when (opened) {
             is DataResult.Success -> opened.value
             is DataResult.Failure -> {
                 val gone = (opened.error as? RemoteError.Http)?.code == HTTP_NOT_FOUND
@@ -74,7 +92,7 @@ class DownloadMissingFile @Inject constructor(
                 return@withContext if (gone) {
                     RestoreInPlaceResult.GoneFromCloud
                 } else {
-                    RestoreInPlaceResult.Failed("could not reach OneDrive")
+                    RestoreInPlaceResult.Failed(if (viaOtherCloud) "could not reach the cloud" else "could not reach OneDrive")
                 }
             }
         }
@@ -84,7 +102,11 @@ class DownloadMissingFile @Inject constructor(
         val outcome = writer.write(
             displayName = entry.displayName,
             mimeType = entry.mimeType,
-            relativePath = relativePathFor(entry.album),
+            relativePath = if (viaOtherCloud) {
+                deviceRelativePathOf(entry.album) ?: relativePathFor(entry.album)
+            } else {
+                relativePathFor(entry.album)
+            },
             isVideo = entry.isVideo,
             expectedBytes = expected,
             onProgress = { written -> onProgress(written, expected) },
@@ -183,6 +205,22 @@ class DownloadMissingFile @Inject constructor(
 
     /** MediaStore album names are bucket names; a write needs the relative path that produces one. */
     private fun relativePathFor(album: String): String = "DCIM/$album/"
+
+    /**
+     * Where the album really lives on this phone, from any file MediaStore still holds in a folder of that
+     * name (`Movies/blaze-test/`). Only the other clouds use it: their albums are not all under DCIM, and the
+     * ledger records no top-level folder to say otherwise. Null when the folder is empty or gone, which
+     * leaves the caller on [relativePathFor].
+     */
+    private fun deviceRelativePathOf(album: String): String? = runCatching {
+        context.contentResolver.query(
+            MediaStore.Files.getContentUri("external"),
+            arrayOf(MediaStore.MediaColumns.RELATIVE_PATH),
+            "${MediaStore.MediaColumns.BUCKET_DISPLAY_NAME} = ?",
+            arrayOf(album),
+            null
+        )?.use { cursor -> if (cursor.moveToFirst()) cursor.getString(0) else null }
+    }.getOrNull()?.takeIf { it.isNotBlank() }
 
     private companion object {
         const val TAG = "DownloadMissing"

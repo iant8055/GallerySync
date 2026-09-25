@@ -897,6 +897,30 @@ interface BackupEntryDao {
     suspend fun fetchableFromCloud(uploaded: BackupState = BackupState.UPLOADED): List<BackupEntryEntity>
 
     /**
+     * The same question for the clouds other than OneDrive that Restore can fetch from.
+     *
+     * Their rows are recorded without a verified size (`remoteSizeBytes` is NULL, so they can never satisfy
+     * [fetchableFromCloud] or `verifiedInCloud`, which is what keeps Archive and Sync away from them), so this
+     * asks for the id the cloud returned instead. [locations] are location names, so only clouds whose
+     * adapter can download are ever asked for. The caller checks each against the phone, per folder, exactly
+     * as it does for OneDrive.
+     */
+    @Query(
+        """
+        SELECT * FROM backup_entries
+        WHERE state = :uploaded
+          AND remoteItemId IS NOT NULL
+          AND remoteItemId != ''
+          AND location IN (:locations)
+        ORDER BY album, displayName
+        """
+    )
+    suspend fun fetchableElsewhere(
+        locations: List<String>,
+        uploaded: BackupState = BackupState.UPLOADED
+    ): List<BackupEntryEntity>
+
+    /**
      * Gives an uploaded row the OneDrive item id it never recorded.
      *
      * Bookkeeping only: it removes nothing anywhere and touches only a row whose id is empty. Rows

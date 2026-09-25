@@ -11,15 +11,16 @@ enum class CloudFeature { RESTORE, ARCHIVE, SYNC }
  * now asks this instead: which album modes are on offer, whether the Restore and Archive tabs are live,
  * whether a plan that optimises can be chosen.
  *
- * All three rest on the same thing: **the cloud can prove a copy is there by its size**, and the app has
- * a way to fetch it back. Archive removes the local file only after that proof, Sync shrinks it only after
- * it, and Restore downloads it. So a capability is turned on for a cloud only when its adapter records the
- * verified remote size (`markUploaded`, not `markUploadedWithoutSizeVerification`) *and* Restore can
- * download from it — never by editing this table alone.
+ * **Restore** needs only a way to fetch the file back (`CloudDownloader`): it adds a file to the phone and the
+ * writer checks the finished download against the size the phone recorded at upload, so it cannot cost anything.
+ * **Archive** and **Sync** also need **proof the cloud copy is there by its size**, because they remove or
+ * replace the local file: they are turned on for a cloud only when its adapter records the verified remote size
+ * (`markUploaded`, not `markUploadedWithoutSizeVerification`) and the removal paths can check it. Never by
+ * editing this table alone.
  *
- * Today that is OneDrive only. Google Photos can never have them: it reports no size for a stored file.
- * Google Drive, Dropbox, IDrive e2, Backblaze B2 and pCloud can report one, so they are the next to earn
- * these, one cloud at a time.
+ * Today OneDrive has all three and Dropbox has Restore. Google Photos can never have any: it reports no size
+ * for a stored file and gives no reliable way to fetch the original back. Google Drive, IDrive e2, Backblaze
+ * B2 and pCloud can, so they are the next to earn them, one cloud at a time.
  */
 data class CloudCapabilities(val restore: Boolean, val archive: Boolean, val sync: Boolean) {
 
@@ -46,5 +47,7 @@ data class CloudCapabilities(val restore: Boolean, val archive: Boolean, val syn
 val BackupLocation.capabilities: CloudCapabilities
     get() = when (this) {
         BackupLocation.ONEDRIVE -> CloudCapabilities.FULL
+        // Can fetch a file back (`DropboxCloud.openStream`); not yet proved by size, so no Archive or Sync.
+        BackupLocation.DROPBOX -> CloudCapabilities(restore = true, archive = false, sync = false)
         else -> CloudCapabilities.BACKUP_ONLY
     }

@@ -9,6 +9,8 @@ import com.gallery.sync.domain.backup.BackupLocation
 import com.gallery.sync.domain.model.DataResult
 import com.gallery.sync.domain.model.RemoteError
 import com.gallery.sync.domain.model.UploadedItem
+import java.io.InputStream
+import com.gallery.sync.domain.repository.CloudDownloader
 import com.gallery.sync.domain.repository.CloudUploader
 import com.gallery.sync.util.Logger
 import kotlinx.coroutines.CancellationException
@@ -43,7 +45,7 @@ class DropboxCloud @Inject constructor(
     private val tokens: AppAuthCloudTokens,
     @param:CloudUploadClient private val client: OkHttpClient,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
-) : CloudConnection, CloudUploader {
+) : CloudConnection, CloudUploader, CloudDownloader {
 
     override val location = BackupLocation.DROPBOX
 
@@ -104,6 +106,44 @@ class DropboxCloud @Inject constructor(
             throw e
         } catch (e: IOException) {
             Logger.w(TAG, "upload: network failure: ${e.message}")
+            DataResult.Failure(RemoteError.Network)
+        }
+    }
+
+    /**
+     * Opens a file for Restore. `remoteItemId` is the `id:…` Dropbox returned at upload, which its download
+     * endpoint accepts in place of a path, so the file is found even if it was moved or renamed in Dropbox.
+     * A file that is no longer there answers 409 `path/not_found`, reported as a 404 so Restore says it is gone.
+     */
+    override suspend fun openStream(remoteItemId: String): DataResult<InputStream> = withContext(dispatcher) {
+        val token = tokens.accessToken(location) ?: return@withContext DataResult.Failure(RemoteError.NoToken)
+        val request = Request.Builder()
+            .url("$contentBase/2/files/download")
+            .header("Authorization", "Bearer $token")
+            .header("Dropbox-API-Arg", """{"path":${CloudHttp.asciiJsonString(remoteItemId)}}""")
+            .post(ByteArray(0).toRequestBody(null))
+            .build()
+        try {
+            val response = client.newCall(request).execute()
+            if (!response.isSuccessful) {
+                val body = response.body?.string()
+                response.close()
+                return@withContext if (response.code == 409 && body?.contains("not_found") == true) {
+                    DataResult.Failure(RemoteError.Http(404, body))
+                } else {
+                    failure(response, body)
+                }
+            }
+            val stream = response.body?.byteStream()
+                ?: run {
+                    response.close()
+                    return@withContext DataResult.Failure(RemoteError.Unknown(IOException("Dropbox sent no file")))
+                }
+            DataResult.Success(stream)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: IOException) {
+            Logger.w(TAG, "download: network failure: ${e.message}")
             DataResult.Failure(RemoteError.Network)
         }
     }

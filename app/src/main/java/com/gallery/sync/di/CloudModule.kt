@@ -11,6 +11,8 @@ import com.gallery.sync.data.remote.cloud.PCloudCloud
 import com.gallery.sync.data.remote.s3.BackblazeB2Cloud
 import com.gallery.sync.data.remote.s3.IDriveE2Cloud
 import com.gallery.sync.data.repository.GooglePhotosCloudUploader
+import com.gallery.sync.domain.repository.CloudDownloader
+import com.gallery.sync.domain.repository.CloudDownloaders
 import com.gallery.sync.domain.repository.CloudUploader
 import com.gallery.sync.domain.repository.CloudUploaders
 import dagger.Binds
@@ -53,6 +55,9 @@ abstract class CloudModule {
     abstract fun bindDropboxConnection(impl: DropboxCloud): CloudConnection
 
     @Binds @IntoSet
+    abstract fun bindDropboxDownloader(impl: DropboxCloud): CloudDownloader
+
+    @Binds @IntoSet
     abstract fun bindPCloudUploader(impl: PCloudCloud): CloudUploader
 
     @Binds @IntoSet
@@ -75,6 +80,11 @@ abstract class CloudModule {
         @Singleton
         fun provideCloudUploaders(all: @JvmSuppressWildcards Set<CloudUploader>): CloudUploaders =
             CloudUploaders(all)
+
+        @Provides
+        @Singleton
+        fun provideCloudDownloaders(all: @JvmSuppressWildcards Set<CloudDownloader>): CloudDownloaders =
+            CloudDownloaders(all)
 
         @Provides
         @Singleton
