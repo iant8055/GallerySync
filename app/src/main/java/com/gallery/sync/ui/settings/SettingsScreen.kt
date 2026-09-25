@@ -149,17 +149,14 @@ fun SettingsScreen(
             help = HelpTopic.SETTINGS_SECTION_BACKUP
         )
 
-        // The clouds, one row each, are below. The free tier is ONE cloud, the user's own (Ian, 24 Sept
-        // 2026), so there is no longer a locked-on OneDrive box: OneDrive is one choice among the others.
-        // What follows here is OneDrive's own account and folder, shown only while OneDrive is connected.
-        val oneDriveConnected = cloudState.providers.any { it.location == BackupLocation.ONEDRIVE && it.isConnected }
-
+        // The free tier is ONE cloud, the user's own (Ian, 24 Sept 2026), so there is no locked-on OneDrive
+        // box: OneDrive is one choice among the others.
         // The clouds come first (Ian, 24 Sept 2026): which clouds are connected is what the pairings below
-        // choose between. OneDrive's own folder follows while it is connected; the account itself is named on
-        // its row in the list (no separate Account row).
+        // choose between. The account itself is named on its row in the list (no separate Account row), and
+        // there is no separate "Current folder location" section either: each pairing below already says
+        // where in its cloud the folder goes. `DestinationSection` is kept, unused, for the OneDrive folder
+        // chooser if it is wanted back.
         CloudProvidersSection(viewModel = cloudViewModel)
-
-        if (oneDriveConnected) DestinationSection()
 
         // Which local folder goes to which cloud — one row each, always shown (Ian, 24 Sept 2026: clean
         // pairing between a local folder and a cloud). Top-level folders only (DCIM, Pictures...), never
