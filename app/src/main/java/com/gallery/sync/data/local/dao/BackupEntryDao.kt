@@ -1057,6 +1057,11 @@ interface BackupEntryDao {
               )
           )
           AND isProxied = 0
+          -- Only a file that is still on the phone. A row whose file has gone (Archive removed it on purpose, or it
+          -- is missing) has nothing to shrink, and trying stops the whole run behind it: 25 Sept 2026, Temp0's
+          -- archived rows led the queue and failed on the trashed file, so nothing after them was optimised.
+          AND localMissingSinceEpochMillis IS NULL
+          AND (cloudDecision IS NULL OR cloudDecision != 'ARCHIVED')
           AND isProxySkipped = 0
           AND isVideo = 0
           -- No age clause, and that is a decision rather than an omission. Ian, 19 Aug 2026,
@@ -1106,6 +1111,11 @@ interface BackupEntryDao {
               )
           )
           AND isProxied = 0
+          -- Only a file that is still on the phone. A row whose file has gone (Archive removed it on purpose, or it
+          -- is missing) has nothing to shrink, and trying stops the whole run behind it: 25 Sept 2026, Temp0's
+          -- archived rows led the queue and failed on the trashed file, so nothing after them was optimised.
+          AND localMissingSinceEpochMillis IS NULL
+          AND (cloudDecision IS NULL OR cloudDecision != 'ARCHIVED')
           AND isProxySkipped = 0
           AND isVideo = 0
           -- Gate 2 #3, and the only thing separating it from #2. Zero means every verified photo;
@@ -1158,6 +1168,11 @@ interface BackupEntryDao {
               )
           )
           AND isProxied = 0
+          -- Only a file that is still on the phone. A row whose file has gone (Archive removed it on purpose, or it
+          -- is missing) has nothing to shrink, and trying stops the whole run behind it: 25 Sept 2026, Temp0's
+          -- archived rows led the queue and failed on the trashed file, so nothing after them was optimised.
+          AND localMissingSinceEpochMillis IS NULL
+          AND (cloudDecision IS NULL OR cloudDecision != 'ARCHIVED')
           AND isProxySkipped = 0
           AND dateModifiedEpochSeconds <= :modifiedBeforeEpochSeconds
           AND (:cutoffMillis = 0 OR uploadedAtEpochMillis >= :cutoffMillis)
@@ -1201,6 +1216,11 @@ interface BackupEntryDao {
               )
           )
           AND isProxied = 0
+          -- Only a file that is still on the phone. A row whose file has gone (Archive removed it on purpose, or it
+          -- is missing) has nothing to shrink, and trying stops the whole run behind it: 25 Sept 2026, Temp0's
+          -- archived rows led the queue and failed on the trashed file, so nothing after them was optimised.
+          AND localMissingSinceEpochMillis IS NULL
+          AND (cloudDecision IS NULL OR cloudDecision != 'ARCHIVED')
           AND isProxySkipped = 0
           -- See the note on the photo query above: zero is every verified clip, a timestamp is
           -- only what this run uploaded.

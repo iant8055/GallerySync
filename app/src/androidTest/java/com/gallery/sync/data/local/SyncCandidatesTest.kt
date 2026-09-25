@@ -8,6 +8,7 @@ import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.entity.AlbumPreferenceEntity
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.entity.BackupState
+import com.gallery.sync.data.local.entity.CloudCopyDecision
 import com.gallery.sync.domain.backup.BackupLocation
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -50,7 +51,9 @@ class SyncCandidatesTest {
         remoteId: String? = "id:$name",
         remoteSize: Long? = null,
         isVideo: Boolean = false,
-        proxied: Boolean = false
+        proxied: Boolean = false,
+        missingSince: Long? = null,
+        decision: CloudCopyDecision? = null
     ) = BackupEntryEntity(
         id = "Sync/$name",
         mediaStoreId = name.hashCode().toLong(),
@@ -66,6 +69,8 @@ class SyncCandidatesTest {
         remoteSizeBytes = remoteSize,
         isProxied = proxied,
         localProxySizeBytes = if (proxied) 400L else null,
+        localMissingSinceEpochMillis = missingSince,
+        cloudDecision = decision,
         location = location
     )
 
@@ -125,5 +130,23 @@ class SyncCandidatesTest {
         val names = entryDao.restorableProxies().map { it.displayName }.toSet()
 
         assertEquals(setOf("dropbox.jpg", "onedrive.jpg"), names)
+    }
+
+    /**
+     * 25 Sept 2026: Temp0's rows for files Archive had removed led the Sync queue, failed on the trashed file, and
+     * stopped every photo behind them. A row whose file is gone has nothing to shrink.
+     */
+    @Test
+    fun rowsWhoseFileHasGoneAreNeverCandidates() = runTest {
+        entryDao.insertIfNew(
+            listOf(
+                row("here.jpg", BackupLocation.DROPBOX),
+                row("archived.jpg", BackupLocation.DROPBOX, decision = CloudCopyDecision.ARCHIVED),
+                row("missing.jpg", BackupLocation.ONEDRIVE, remoteSize = 1_024L, missingSince = 5L)
+            )
+        )
+
+        assertEquals(setOf("here.jpg"), entryDao.proxyCandidates().map { it.displayName }.toSet())
+        assertEquals(setOf("here.jpg"), entryDao.proxyCandidatesAll(cutoffMillis = 0L).map { it.displayName }.toSet())
     }
 }
