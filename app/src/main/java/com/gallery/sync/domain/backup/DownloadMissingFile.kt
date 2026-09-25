@@ -92,7 +92,7 @@ class DownloadMissingFile @Inject constructor(
                 return@withContext when {
                     gone -> RestoreInPlaceResult.GoneFromCloud
                     viaOtherCloud && opened.error == RemoteError.Unauthorized ->
-                        RestoreInPlaceResult.Failed("sign in to that cloud again in Settings to allow restoring")
+                        RestoreInPlaceResult.Failed("reconnect that cloud in Settings, and make sure its sign-in or keys allow reading")
                     viaOtherCloud -> RestoreInPlaceResult.Failed("could not reach the cloud")
                     else -> RestoreInPlaceResult.Failed("could not reach OneDrive")
                 }

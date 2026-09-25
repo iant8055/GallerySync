@@ -49,6 +49,9 @@ abstract class CloudModule {
     abstract fun bindGoogleDriveConnection(impl: GoogleDriveCloud): CloudConnection
 
     @Binds @IntoSet
+    abstract fun bindGoogleDriveDownloader(impl: GoogleDriveCloud): CloudDownloader
+
+    @Binds @IntoSet
     abstract fun bindDropboxUploader(impl: DropboxCloud): CloudUploader
 
     @Binds @IntoSet
@@ -71,6 +74,12 @@ abstract class CloudModule {
 
     @Binds @IntoSet
     abstract fun bindIDriveConnection(impl: IDriveE2Cloud): CloudConnection
+
+    @Binds @IntoSet
+    abstract fun bindIDriveDownloader(impl: IDriveE2Cloud): CloudDownloader
+
+    @Binds @IntoSet
+    abstract fun bindBackblazeDownloader(impl: BackblazeB2Cloud): CloudDownloader
 
     @Binds @IntoSet
     abstract fun bindBackblazeConnection(impl: BackblazeB2Cloud): CloudConnection

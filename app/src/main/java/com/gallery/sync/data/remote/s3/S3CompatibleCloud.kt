@@ -14,6 +14,7 @@ import com.gallery.sync.domain.backup.BackupLocation
 import com.gallery.sync.domain.model.DataResult
 import com.gallery.sync.domain.model.RemoteError
 import com.gallery.sync.domain.model.UploadedItem
+import com.gallery.sync.domain.repository.CloudDownloader
 import com.gallery.sync.domain.repository.CloudUploader
 import com.gallery.sync.util.Logger
 import kotlinx.coroutines.CancellationException
@@ -21,6 +22,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.io.InputStream
 
 /**
  * Connection and uploading for one S3-compatible store: the user pastes the endpoint, region, bucket
@@ -38,7 +40,7 @@ abstract class S3CompatibleCloud(
     private val secrets: EncryptedCloudSecretsStore,
     private val s3: S3Client,
     private val dispatcher: CoroutineDispatcher
-) : CloudConnection, CloudUploader {
+) : CloudConnection, CloudUploader, CloudDownloader {
 
     override val kind = ConnectionKind.ACCESS_KEYS
 
@@ -96,6 +98,40 @@ abstract class S3CompatibleCloud(
         } catch (e: IOException) {
             Logger.w(TAG, "connect: could not reach the endpoint")
             SignInResult.Failed(MSG_UNREACHABLE)
+        }
+    }
+
+    /**
+     * Opens a file for Restore. `remoteItemId` is the object key recorded at upload
+     * (`GallerySync/<album>/<name>`). A key that is gone answers 404; a key without read access answers 403,
+     * reported as Unauthorized so Restore can tell the user the keys must allow reading.
+     */
+    override suspend fun openStream(remoteItemId: String): DataResult<InputStream> = withContext(dispatcher) {
+        val config = loadConfig() ?: return@withContext DataResult.Failure(RemoteError.NoToken)
+        try {
+            val response = s3.getObject(config, remoteItemId)
+            if (response.isSuccessful) {
+                val stream = response.body?.byteStream()
+                if (stream == null) {
+                    response.close()
+                    DataResult.Failure(RemoteError.Unknown(IOException("the store sent no file")))
+                } else {
+                    DataResult.Success(stream)
+                }
+            } else {
+                val code = response.code
+                val body = response.body?.string()
+                response.close()
+                when (code) {
+                    401, 403 -> DataResult.Failure(RemoteError.Unauthorized)
+                    else -> DataResult.Failure(RemoteError.Http(code, body))
+                }
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: IOException) {
+            Logger.w(TAG, "download: could not reach the endpoint")
+            DataResult.Failure(RemoteError.Network)
         }
     }
 

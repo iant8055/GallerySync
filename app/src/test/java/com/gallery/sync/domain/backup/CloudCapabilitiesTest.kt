@@ -9,13 +9,13 @@ import org.junit.Test
 class CloudCapabilitiesTest {
 
     @Test
-    fun `OneDrive can do everything, Dropbox can restore, and every other cloud is backup-only for now`() {
+    fun `OneDrive can do everything, four clouds can restore, and Google Photos and pCloud are backup-only for now`() {
         assertEquals(CloudCapabilities.FULL, BackupLocation.ONEDRIVE.capabilities)
-        assertEquals(
-            CloudCapabilities(restore = true, archive = false, sync = false),
-            BackupLocation.DROPBOX.capabilities
+        val restoreOnly = listOf(
+            BackupLocation.DROPBOX, BackupLocation.GOOGLE_DRIVE, BackupLocation.BACKBLAZE_B2, BackupLocation.IDRIVE_E2
         )
-        BackupLocation.entries.filter { it != BackupLocation.ONEDRIVE && it != BackupLocation.DROPBOX }.forEach {
+        restoreOnly.forEach { assertEquals("$it", CloudCapabilities.RESTORE_ONLY, it.capabilities) }
+        BackupLocation.entries.filter { it != BackupLocation.ONEDRIVE && it !in restoreOnly }.forEach {
             assertEquals("$it", CloudCapabilities.BACKUP_ONLY, it.capabilities)
         }
     }

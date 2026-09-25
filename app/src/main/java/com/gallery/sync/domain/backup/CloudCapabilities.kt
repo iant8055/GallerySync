@@ -40,6 +40,9 @@ data class CloudCapabilities(val restore: Boolean, val archive: Boolean, val syn
     companion object {
         val FULL = CloudCapabilities(restore = true, archive = true, sync = true)
         val BACKUP_ONLY = CloudCapabilities(restore = false, archive = false, sync = false)
+
+        /** Can fetch a file back, but the copy is not proved by size, so nothing may be removed or replaced. */
+        val RESTORE_ONLY = CloudCapabilities(restore = true, archive = false, sync = false)
     }
 }
 
@@ -47,7 +50,11 @@ data class CloudCapabilities(val restore: Boolean, val archive: Boolean, val syn
 val BackupLocation.capabilities: CloudCapabilities
     get() = when (this) {
         BackupLocation.ONEDRIVE -> CloudCapabilities.FULL
-        // Can fetch a file back (`DropboxCloud.openStream`); not yet proved by size, so no Archive or Sync.
-        BackupLocation.DROPBOX -> CloudCapabilities(restore = true, archive = false, sync = false)
+        // Each of these can fetch a file back (`openStream` on its adapter); none is yet proved by size, so no
+        // Archive or Sync. pCloud is not here: its download is not built.
+        BackupLocation.DROPBOX,
+        BackupLocation.GOOGLE_DRIVE,
+        BackupLocation.BACKBLAZE_B2,
+        BackupLocation.IDRIVE_E2 -> CloudCapabilities.RESTORE_ONLY
         else -> CloudCapabilities.BACKUP_ONLY
     }

@@ -58,6 +58,27 @@ class S3Client @Inject constructor(
     }
 
     /**
+     * `GET /bucket/key` — the file's bytes, for Restore. Signed like every other request. Returns the
+     * [Response]; the caller maps the status and owns (and closes) the body.
+     */
+    fun getObject(config: S3Config, key: String): Response {
+        val url = urlFor(config, key)
+        val headers = SigV4.sign(
+            method = "GET",
+            host = hostOf(url),
+            path = "/${config.bucket}/${SigV4.encodePath(key)}",
+            query = "",
+            payloadSha256Hex = EMPTY_SHA256,
+            region = config.region,
+            accessKey = config.accessKey,
+            secretKey = config.secretKey,
+            now = Date()
+        ).headers
+        val request = Request.Builder().url(url).get().apply { headers.forEach { (k, v) -> header(k, v) } }.build()
+        return client.newCall(request).execute()
+    }
+
+    /**
      * Asks why a request was refused. A HEAD comes back with no body, so a refused key check cannot say
      * whether the key ID, the secret or the region was wrong; a one-item listing answers with S3's own
      * error document. Returns its `Code` (for example `SignatureDoesNotMatch`), or null if it says none.

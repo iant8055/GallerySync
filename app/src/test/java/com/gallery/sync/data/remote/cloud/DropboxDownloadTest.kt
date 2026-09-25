@@ -81,6 +81,31 @@ class DropboxDownloadTest {
     }
 
     @Test
+    fun `Google Drive opens a file by its id with alt media`() = runTest {
+        val drive = GoogleDriveCloud(configs, signIn, tokens, OkHttpClient(), dispatcher)
+            .also { it.apiBase = "http://${server.hostName}:${server.port}" }
+        val bytes = ByteArray(1_500) { (it % 240).toByte() }
+        server.enqueue(MockResponse().setBody(okio.Buffer().write(bytes)))
+
+        val result = drive.openStream("FILE1")
+
+        assertTrue(result.toString(), result is DataResult.Success)
+        assertArrayEquals(bytes, (result as DataResult.Success).value.use { it.readBytes() })
+        val request = server.takeRequest()
+        assertEquals("GET", request.method)
+        assertEquals("/drive/v3/files/FILE1?alt=media", request.path)
+        assertEquals("Bearer TOKEN", request.getHeader("Authorization"))
+    }
+
+    @Test
+    fun `Google Drive reports a deleted file as 404`() = runTest {
+        val drive = GoogleDriveCloud(configs, signIn, tokens, OkHttpClient(), dispatcher)
+            .also { it.apiBase = "http://${server.hostName}:${server.port}" }
+        server.enqueue(MockResponse().setResponseCode(404).setBody("""{"error":{"code":404}}"""))
+        assertEquals(404, ((drive.openStream("GONE") as DataResult.Failure).error as RemoteError.Http).code)
+    }
+
+    @Test
     fun `an expired token is Unauthorized, and no token means no download`() = runTest {
         server.enqueue(MockResponse().setResponseCode(401).setBody("""{"error_summary":"expired_access_token"}"""))
         assertEquals(RemoteError.Unauthorized, (dropbox().openStream("id:X") as DataResult.Failure).error)

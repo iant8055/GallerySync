@@ -9,6 +9,7 @@ import com.gallery.sync.domain.backup.BackupLocation
 import com.gallery.sync.domain.model.DataResult
 import com.gallery.sync.domain.model.RemoteError
 import com.gallery.sync.domain.model.UploadedItem
+import com.gallery.sync.domain.repository.CloudDownloader
 import com.gallery.sync.domain.repository.CloudUploader
 import com.gallery.sync.util.Logger
 import kotlinx.coroutines.CancellationException
@@ -21,6 +22,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.io.InputStream
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -43,7 +45,7 @@ class GoogleDriveCloud @Inject constructor(
     private val tokens: AppAuthCloudTokens,
     @param:CloudUploadClient private val client: OkHttpClient,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
-) : CloudConnection, CloudUploader {
+) : CloudConnection, CloudUploader, CloudDownloader {
 
     override val location = BackupLocation.GOOGLE_DRIVE
 
@@ -66,6 +68,40 @@ class GoogleDriveCloud @Inject constructor(
         extraParams = mapOf("access_type" to "offline"),
         prompt = "consent"
     )
+
+    /**
+     * Opens a file for Restore by the file id recorded at upload (`files/{id}?alt=media`). The `drive.file`
+     * scope covers reading what this app created, so no new permission is asked for. A file deleted from Drive
+     * answers 404, which Restore reports as gone from the cloud.
+     */
+    override suspend fun openStream(remoteItemId: String): DataResult<InputStream> = withContext(dispatcher) {
+        val token = tokens.accessToken(location) ?: return@withContext DataResult.Failure(RemoteError.NoToken)
+        val url = "$apiBase/drive/v3/files".toHttpUrl().newBuilder()
+            .addPathSegment(remoteItemId)
+            .addQueryParameter("alt", "media")
+            .build()
+        val request = Request.Builder().url(url).header("Authorization", "Bearer $token").get().build()
+        try {
+            val response = client.newCall(request).execute()
+            if (!response.isSuccessful) {
+                val body = response.body?.string()
+                response.close()
+                if (response.code == 401) tokens.invalidate(location)
+                return@withContext CloudHttp.failureFor(response, body)
+            }
+            val stream = response.body?.byteStream()
+                ?: run {
+                    response.close()
+                    return@withContext DataResult.Failure(RemoteError.Unknown(IOException("Drive sent no file")))
+                }
+            DataResult.Success(stream)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: IOException) {
+            Logger.w(TAG, "download: network failure: ${e.message}")
+            DataResult.Failure(RemoteError.Network)
+        }
+    }
 
     override suspend fun accountLabel(): String? = if (tokens.isSignedIn(location)) LABEL else null
 

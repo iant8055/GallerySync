@@ -101,6 +101,32 @@ class S3CompatibleCloudTest {
     }
 
     @Test
+    fun `restore gets the object by its key with a signed request`() = runTest {
+        connectedToMockServer()
+        server.enqueue(MockResponse().setBody(okio.Buffer().write(bytes)))
+
+        val result = cloud.openStream("GallerySync/Car Show/Car Show 1.jpg")
+
+        assertTrue(result.toString(), result is DataResult.Success)
+        val read = (result as DataResult.Success).value.use { it.readBytes() }
+        assertEquals(bytes.toList(), read.toList())
+        val request = server.takeRequest()
+        assertEquals("GET", request.method)
+        assertEquals("/photos/GallerySync/Car%20Show/Car%20Show%201.jpg", request.path)
+        assertTrue(request.getHeader("Authorization")!!.startsWith("AWS4-HMAC-SHA256 Credential=AKID/"))
+    }
+
+    @Test
+    fun `restore reports a missing object as 404 and a refused key as Unauthorized`() = runTest {
+        connectedToMockServer()
+        server.enqueue(MockResponse().setResponseCode(404).setBody("<Error><Code>NoSuchKey</Code></Error>"))
+        assertEquals(404, ((cloud.openStream("gone") as DataResult.Failure).error as RemoteError.Http).code)
+
+        server.enqueue(MockResponse().setResponseCode(403).setBody("<Error><Code>AccessDenied</Code></Error>"))
+        assertEquals(RemoteError.Unauthorized, (cloud.openStream("any") as DataResult.Failure).error)
+    }
+
+    @Test
     fun `not connected means NoToken, with no network call`() = runTest {
         val result = cloud.upload(source, "Car Show")
         assertEquals(DataResult.Failure(RemoteError.NoToken), result)
