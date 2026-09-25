@@ -110,11 +110,11 @@ CHAPTER = Chapter(
             • **8 to restore · 4 to download.** How many are smaller copies that would be swapped for full size, and how many are missing from the phone and would be downloaded.
             • **3 already on this phone**, when some of the folder's files are here at full size. They are greyed out inside the folder. See [[restore-greyed-files]].
             • **3 selected here**, when only some of the folder is selected.
-            • **A tick**, when the whole folder is selected. Otherwise an arrow showing that it opens.
+            • **A check mark**, when the whole folder is selected. Otherwise an arrow showing that it opens.
 
             ## How to use it
             • **Tap** a card to open it.
-            • **Swipe right** to select everything in the folder; **swipe left** to deselect it. Repeating a swipe changes nothing, so swiping across several folders cannot accidentally undo a choice you already made. The card slides aside as you pull and shows a tick (or a cross) behind it, ticks against your finger with a short buzz once you have pulled far enough to count, and springs back when you let go.
+            • **Swipe right** to select everything in the folder; **swipe left** to deselect it. Repeating a swipe changes nothing, so swiping across several folders cannot accidentally undo a choice you already made. The card slides aside as you pull and shows a check mark (or a cross) behind it, ticks against your finger with a short buzz once you have pulled far enough to count, and springs back when you let go.
 
             Inside a folder, the green card at the top names the folder, and its return arrow takes you
             back to the list of folders.
@@ -125,7 +125,7 @@ CHAPTER = Chapter(
 
         topic("restore-files-list", "The file list inside a folder", """
             ## What it is
-            One card per file. **Swipe right** to select it and **swipe left** to deselect it, the same as on the folder list; a selected file is highlighted with a tick. Tapping a card does the same. Repeating a swipe changes nothing.
+            One card per file. **Swipe right** to select it and **swipe left** to deselect it, the same as on the folder list; a selected file is highlighted with a check mark. Tapping a card does the same. Repeating a swipe changes nothing.
 
             **The name**, then one of:
             • **1.2 MB now · 8.4 MB full size.** A smaller copy on the phone, and the size of the original in your Cloud. Restoring swaps one for the other.

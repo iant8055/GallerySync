@@ -9,7 +9,7 @@ CHAPTER = Chapter(
         topic("archive-overview", "How Archive works, step by step", """
             1. **You choose it, once, per album.** On the Albums tab, set an album's mode to **Archive** and confirm. This is your consent. See [[dialog-archive-confirm]].
             2. **You come here and press Check these files.** Every file in your Archive albums, except any you have chosen to keep on your phone, is checked against the Cloud it was sent to. Anything not there yet is sent first and then checked.
-            3. **The app tells you the result.** Each file gets a tick or a red cross, and a prompt says how many are confirmed and how much room will be freed.
+            3. **The app tells you the result.** Each file gets a check mark or a red cross, and a prompt says how many are confirmed and how much room will be freed.
             4. **You say Yes.** The app asks Android to move the confirmed files to your phone's Trash or Recycle Bin. Android shows its own confirmation. See [[dialog-android-trash]].
             5. **You empty the bin when you are ready.** Removed files keep taking their full space until you do, and the app never empties it for you.
 
@@ -112,7 +112,7 @@ CHAPTER = Chapter(
             ## What it is
             One rounded card for each file in your Archive albums, in the same style as the file cards on the Restore tab: its name, then its size under it, then a mark on the right. A file you put into an Archive album later appears here too, before anything is archived.
 
-            **Keeping a file on your phone.** Swipe right to select and left to deselect, as everywhere in the app. Swipe a card **left** to deselect it and it fades and reads **Not archiving**. It is left out of every check and every removal, and GallerySync remembers your choice, even after you close the app. Swipe it **right** to select it again and it returns to the list, ready to be archived. A green tick means a file has been checked against your Cloud in the current check, so a file you bring back has no tick until the files are checked again, and nothing is removed until they are. Swiping a card that is already that way does nothing, so a run of swipes cannot undo itself. You cannot swipe while a check or a removal is running. If you use a screen reader, each card offers **Deselect (keep on this phone)** or **Select (archive this file)** instead.
+            **Keeping a file on your phone.** Swipe right to select and left to deselect, as everywhere in the app. Swipe a card **left** to deselect it and it fades and reads **Not archiving**. It is left out of every check and every removal, and GallerySync remembers your choice, even after you close the app. Swipe it **right** to select it again and it returns to the list, ready to be archived. A green check mark means a file has been checked against your Cloud in the current check, so a file you bring back has no check mark until the files are checked again, and nothing is removed until they are. Swiping a card that is already that way does nothing, so a run of swipes cannot undo itself. You cannot swipe while a check or a removal is running. If you use a screen reader, each card offers **Deselect (keep on this phone)** or **Select (archive this file)** instead.
 
             An album with a file you have kept stays set to Archive, so files added to it later are still covered by the mode you set. If you would rather it stopped, change the album's mode on the Albums tab.
 
@@ -120,7 +120,7 @@ CHAPTER = Chapter(
 
             **The mark**
             • **A spinner.** Being checked, backed up or removed.
-            • **A green tick.** Checked against your Cloud and confirmed there at the right size, or already removed.
+            • **A green check mark.** Checked against your Cloud and confirmed there at the right size, or already removed.
             • **A red cross.** Your Cloud did not confirm it, so it stays on your phone.
             • **Nothing.** Not looked at yet.
 

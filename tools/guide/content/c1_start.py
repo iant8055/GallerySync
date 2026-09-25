@@ -46,7 +46,7 @@ CHAPTER = Chapter(
 
             • **Albums** (folder icon). Where you choose what happens to each album, and where you start or watch a backup. This is the tab you will use most.
             • **Restore** (cloud icon). Brings things back: full-size originals in place of smaller copies, and files that are in the Cloud but no longer on the phone.
-            • **Archive** (cloud with a tick). Checks the files in your Archive albums against the Cloud, then removes them from the phone once you say yes.
+            • **Archive** (cloud with a check mark). Checks the files in your Archive albums against the Cloud, then removes them from the phone once you say yes.
             • **Settings** (cog). The things you set once and rarely change: appearance, mobile data, which Clouds are connected, which Cloud each folder goes to, which folders to watch, and how photos and videos are optimised.
 
             During first-time setup the bar is hidden and a guided tour walks you through the same four
