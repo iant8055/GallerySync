@@ -1171,7 +1171,7 @@ private fun AlbumCloudClaim.sentence(): String = when (this) {
  */
 @Composable
 private fun AlbumRow.cloudSummary(): String {
-    val oneDriveClause = if (cloudClaim is AlbumCloudClaim.NeverChecked && sentElsewhereCount > 0) {
+    val oneDriveClause = if (!showsOneDriveClause || (cloudClaim is AlbumCloudClaim.NeverChecked && sentElsewhereCount > 0)) {
         null
     } else {
         cloudClaim.sentence()

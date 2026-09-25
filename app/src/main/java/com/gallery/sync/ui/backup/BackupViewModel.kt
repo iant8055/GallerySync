@@ -164,6 +164,15 @@ data class AlbumRow(
 ) {
     val isEnabled: Boolean get() = mode.uploads
 
+    /**
+     * Whether this album's cloud line should mention OneDrive at all.
+     *
+     * Not when everything it has sent went to another cloud: "0 of 46 verified in OneDrive" said of an album
+     * that belongs to Dropbox reads as a fault, when OneDrive was never meant to hold it (Ian, 24 Sept 2026).
+     * Shown when any of its files went to OneDrive, and when nothing has been sent anywhere yet.
+     */
+    val showsOneDriveClause: Boolean get() = !(sentElsewhereCount > 0 && (backedUpCount - sentElsewhereCount) <= 0)
+
     val backedUpOnly: Int get() = (backedUpCount - proxiedCount).coerceAtLeast(0)
 
     val status: AlbumStatus
