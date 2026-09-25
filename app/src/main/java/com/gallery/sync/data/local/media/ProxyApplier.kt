@@ -10,6 +10,7 @@ import android.provider.MediaStore
 import androidx.exifinterface.media.ExifInterface
 import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.domain.backup.CloudOriginalCheck
+import com.gallery.sync.domain.backup.FailureStreak
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.di.IoDispatcher
@@ -29,10 +30,10 @@ sealed interface ProxyOutcome {
     data class Completed(val proxiedCount: Int, val bytesReclaimed: Long) : ProxyOutcome
 
     /**
-     * A file could not be replaced even after retrying, so the run stopped there.
+     * Several files in a row could not be replaced even after retrying, so the run stopped at the last.
      *
-     * Everything before it is done and recorded; nothing after it was touched. A predictable
-     * half-finished state is worth more than an unpredictable mostly-finished one.
+     * Everything before it is done and recorded; nothing after it was touched. A single failing file no
+     * longer stops a run: it is held back and the run goes on (see [FailureStreak]).
      */
     data class Stopped(
         val proxiedCount: Int,
@@ -64,8 +65,10 @@ data class ConsentSplit(val inside: List<BackupEntryEntity>, val outside: List<B
  *  - the proxy is generated and decoded back before the original is touched
  *  - a failing file is retried before it is treated as fatal, because a locked file or a momentary
  *    IO error should not halt a two-hundred-photo run
- *  - a file that still fails stops the run rather than being skipped, because "which photos are
- *    still full quality" must remain answerable
+ *  - a file that still fails is left as it was, not recorded as proxied, and held back for a while so
+ *    the rest of the queue is not stuck behind it. "Which photos are still full quality" stays
+ *    answerable because only [BackupEntryEntity.isProxied] says a photo was shrunk. Three failures in
+ *    a row stop the run (see [FailureStreak]), since that points at the run and not the file.
  */
 @Singleton
 class ProxyApplier @Inject constructor(
@@ -227,7 +230,9 @@ class ProxyApplier @Inject constructor(
 
         var proxied = 0
         var skipped = 0
+        var failed = 0
         var reclaimed = 0L
+        val streak = FailureStreak()
 
         // Reported per file so a caller can say how far through it is. A photo is quick, but a
         // whole library of them is not, and the wizard has no other way to tell.
@@ -238,6 +243,7 @@ class ProxyApplier @Inject constructor(
                 is FileResult.Replaced -> {
                     proxied++
                     reclaimed += entry.sizeBytes - result.newSizeBytes
+                    streak.succeeded()
                 }
 
                 // Not a failure: an image already at or under the target size, or already a proxy.
@@ -246,25 +252,36 @@ class ProxyApplier @Inject constructor(
                 FileResult.NotWorthwhile -> {
                     entryDao.markProxySkipped(entry.id)
                     skipped++
+                    streak.succeeded()
                 }
 
                 // The cloud would not confirm the original, so nothing was touched. Not a failure and not a
                 // permanent verdict: it is skipped for now and offered again later.
                 FileResult.Held -> Logger.d(TAG, "${entry.displayName}: cloud original not confirmed, left as it is")
 
+                // One file that cannot be written is left for later and the run goes on; a run of them is a problem
+                // with the run itself and stops it, as it always did (see FailureStreak).
                 is FileResult.Failed -> {
-                    Logger.e(TAG, "stopping: ${entry.displayName} — ${result.reason}")
-                    return@withContext ProxyOutcome.Stopped(
-                        proxiedCount = proxied,
-                        bytesReclaimed = reclaimed,
-                        failedFile = entry.displayName,
-                        reason = result.reason
-                    )
+                    failed++
+                    originals.holdFailed(entry, result.reason)
+                    if (streak.failed()) {
+                        Logger.e(TAG, "stopping: ${entry.displayName} — ${result.reason}")
+                        return@withContext ProxyOutcome.Stopped(
+                            proxiedCount = proxied,
+                            bytesReclaimed = reclaimed,
+                            failedFile = entry.displayName,
+                            reason = result.reason
+                        )
+                    }
                 }
             }
         }
 
-        Logger.i(TAG, "proxied $proxied files, reclaimed $reclaimed bytes, $skipped not worth proxying")
+        Logger.i(
+            TAG,
+            "proxied $proxied files, reclaimed $reclaimed bytes, $skipped not worth proxying" +
+                if (failed > 0) ", $failed left for later" else ""
+        )
         ProxyOutcome.Completed(proxied, reclaimed)
     }
 

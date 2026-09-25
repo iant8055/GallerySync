@@ -38,6 +38,15 @@ class CloudOriginalCheck @Inject constructor(
         return false
     }
 
+    /**
+     * Skips a file that could not be written for now, so the rest of the queue is not stuck behind it. Held in memory
+     * for the same six hours, so the next start tries it again.
+     */
+    fun holdFailed(entry: BackupEntryEntity, reason: String) {
+        heldUntil[entry.id] = clock() + HOLD_MILLIS
+        Logger.w(TAG, "holding ${entry.displayName}: could not be replaced ($reason)")
+    }
+
     /** Whether [entry]'s original may be replaced right now. Fails closed. */
     suspend fun confirms(entry: BackupEntryEntity): Boolean {
         if (entry.location == BackupLocation.ONEDRIVE) return true
