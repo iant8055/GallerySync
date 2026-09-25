@@ -6,6 +6,8 @@ import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.DriveListingStore
 import com.gallery.sync.data.local.settings.BackupSettings
+import com.gallery.sync.data.remote.cloud.CloudConnections
+import com.gallery.sync.domain.backup.BackupLocation
 import com.gallery.sync.domain.backup.BackupEngine
 import com.gallery.sync.domain.backup.DriveListing
 import com.gallery.sync.domain.backup.DownloadMissingFile
@@ -184,7 +186,8 @@ class RestoreViewModel @Inject constructor(
     private val restorer: RestoreProxyInPlace,
     private val downloader: DownloadMissingFile,
     private val settings: BackupSettings,
-    private val listingStore: DriveListingStore
+    private val listingStore: DriveListingStore,
+    private val connections: CloudConnections
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(RestoreUiState())
@@ -227,6 +230,15 @@ class RestoreViewModel @Inject constructor(
                 loading = _state.value.rows.isEmpty(),
                 showEmptyFolders = settings.current().showEmptyCloudFolders
             )
+
+            // Without OneDrive there is no drive to list, and asking anyway ended in a warning about OneDrive
+            // for someone who does not use it (Ian, 24 Sept 2026: move away from OneDrive-centric). The
+            // ledger's rows still cover every other cloud that can restore, so show those and stop.
+            if (connections.of(BackupLocation.ONEDRIVE)?.accountLabel() == null) {
+                driveListing = null
+                publishFrom(null, checkingCloud = false)
+                return@launch
+            }
 
             // First, straight away and with no network: the ledger's rows, and the last OneDrive
             // listing compared with the phone as it is now. A listing already in hand means the list
@@ -404,7 +416,7 @@ class RestoreViewModel @Inject constructor(
 
                         RestoreInPlaceResult.GoneFromCloud -> {
                             failed++
-                            setRow(row.id, RowState.Failed("no longer in OneDrive"))
+                            setRow(row.id, RowState.Failed("no longer in the cloud"))
                         }
 
                         RestoreInPlaceResult.NotCovered -> {

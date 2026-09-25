@@ -65,7 +65,7 @@ CHAPTER = Chapter(
             One line of text whose wording changes with the situation:
             • **Swipe right to select / left to deselect. Tap to open.** On the folder list.
             • **Swipe right to select / left to deselect → Then press Restore.** Inside a folder. Once you have selected a file, the first half changes to **Swipe left to deselect**. Tapping a file selects or unselects it too. Nothing moves until you press Restore.
-            • **Nothing in OneDrive is missing from this phone, so there is nothing to bring back.** When the list is empty.
+            • **Nothing in your cloud is missing from this phone, so there is nothing to bring back.** When the list is empty.
             • **A result after a restore**, such as **3 back to full quality · 2 back on this phone. 1 unchanged.** or **None recovered. 4 unchanged.** Unchanged means those files were left exactly as they were.
 
             ## Where it comes from

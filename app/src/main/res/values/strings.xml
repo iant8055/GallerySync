@@ -679,7 +679,7 @@ full size</string>
     <string name="restore_intro_files">Swipe right to select / left to deselect  →  Then press Restore</string>
     <!-- Once something is selected the first half changes to say how to undo it. Ian, 19 Sept 2026. -->
     <string name="restore_intro_files_selected">Swipe left to deselect  →  Then press Restore</string>
-    <string name="restore_empty">Nothing in OneDrive is missing from this phone, so there is nothing to bring back.</string>
+    <string name="restore_empty">Nothing in your cloud is missing from this phone, so there is nothing to bring back.</string>
     <string name="restore_selected_summary">%1$d selected · %2$s to recover</string>
     <!-- The same, stacked, for the half-width slot beside "Files in this folder" so it breaks between the two facts and not mid-phrase. -->
     <string name="restore_selected_summary_stacked">%1$d selected\n%2$s to recover</string>
