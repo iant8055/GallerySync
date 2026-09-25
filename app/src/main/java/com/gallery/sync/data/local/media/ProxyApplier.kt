@@ -9,6 +9,7 @@ import android.os.Build
 import android.provider.MediaStore
 import androidx.exifinterface.media.ExifInterface
 import com.gallery.sync.data.local.dao.BackupEntryDao
+import com.gallery.sync.domain.backup.CloudOriginalCheck
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.di.IoDispatcher
@@ -74,6 +75,7 @@ class ProxyApplier @Inject constructor(
     private val entryDao: BackupEntryDao,
     private val settings: BackupSettings,
     private val albumIdentity: AlbumIdentityReconciler,
+    private val originals: CloudOriginalCheck,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
 ) {
 
@@ -118,7 +120,9 @@ class ProxyApplier @Inject constructor(
         recorded: List<BackupEntryEntity>
     ): List<BackupEntryEntity> = withContext(dispatcher) {
         if (!isSupported()) return@withContext emptyList()
-        val live = recorded.filter { stillOnDevice(Uri.parse(it.contentUri)) }
+        // A file whose cloud original could not be confirmed a moment ago is left out for a while, or it would be the
+        // first candidate of every batch and the chain would never end. See CloudOriginalCheck.
+        val live = recorded.filter { stillOnDevice(Uri.parse(it.contentUri)) && !originals.isHeld(it.id) }
 
         val missing = recorded.size - live.size
         if (missing > 0) {
@@ -244,6 +248,10 @@ class ProxyApplier @Inject constructor(
                     skipped++
                 }
 
+                // The cloud would not confirm the original, so nothing was touched. Not a failure and not a
+                // permanent verdict: it is skipped for now and offered again later.
+                FileResult.Held -> Logger.d(TAG, "${entry.displayName}: cloud original not confirmed, left as it is")
+
                 is FileResult.Failed -> {
                     Logger.e(TAG, "stopping: ${entry.displayName} — ${result.reason}")
                     return@withContext ProxyOutcome.Stopped(
@@ -271,7 +279,7 @@ class ProxyApplier @Inject constructor(
 
         repeat(MAX_ATTEMPTS) { attempt ->
             when (val result = proxyOnce(entry)) {
-                is FileResult.Replaced, FileResult.NotWorthwhile -> return result
+                is FileResult.Replaced, FileResult.NotWorthwhile, FileResult.Held -> return result
                 is FileResult.Failed -> {
                     lastReason = result.reason
                     Logger.w(
@@ -287,6 +295,10 @@ class ProxyApplier @Inject constructor(
 
     private suspend fun proxyOnce(entry: BackupEntryEntity): FileResult {
         val uri = Uri.parse(entry.contentUri)
+
+        // The last question before the original is overwritten in place: is it really in the cloud, right now?
+        // OneDrive rows pass on the size Graph recorded; every other cloud is asked. TASK-027.
+        if (!originals.confirms(entry)) return FileResult.Held
 
         val proxy = when (val result = generator.generate(uri, entry.displayName)) {
             is ProxyResult.Created -> result.proxy
@@ -360,6 +372,9 @@ class ProxyApplier @Inject constructor(
 
         /** Examined and permanently not worth proxying. Recorded so it stops being offered. */
         data object NotWorthwhile : FileResult
+
+        /** The cloud did not confirm the original, so the file was not touched and nothing is recorded. */
+        data object Held : FileResult
 
         data class Failed(val reason: String) : FileResult
     }

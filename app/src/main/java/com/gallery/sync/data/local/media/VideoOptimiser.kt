@@ -4,6 +4,7 @@ import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
 import com.gallery.sync.data.local.dao.BackupEntryDao
+import com.gallery.sync.domain.backup.CloudOriginalCheck
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.di.IoDispatcher
@@ -93,6 +94,7 @@ class VideoOptimiser @Inject constructor(
     private val safWriter: SafMediaWriter,
     private val settings: BackupSettings,
     private val albumIdentity: AlbumIdentityReconciler,
+    private val originals: CloudOriginalCheck,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
 ) {
 
@@ -186,6 +188,9 @@ class VideoOptimiser @Inject constructor(
     ): VideoOptimiseResult {
         val uri = Uri.parse(entry.contentUri)
 
+        // Before minutes of encoding, and long before the overwrite: the cloud must confirm the original. TASK-027.
+        if (!originals.confirms(entry)) return running
+
         return when (val outcome = transcoder.transcode(uri, entry.displayName, quality)) {
             is TranscodeResult.NotWorthwhile -> {
                 Logger.d(TAG, "${entry.displayName}: ${outcome.reason}")
@@ -272,7 +277,7 @@ class VideoOptimiser @Inject constructor(
         val ready = mutableListOf<BackupEntryEntity>()
         var outside = 0
         for (entry in pool) {
-            if (entry.id in exclude) continue
+            if (entry.id in exclude || originals.isHeld(entry.id)) continue
             when (safWriter.coverage(Uri.parse(entry.contentUri))) {
                 SafCoverage.COVERED -> ready += entry
                 SafCoverage.OUTSIDE -> outside++
@@ -343,6 +348,9 @@ class VideoOptimiser @Inject constructor(
         running: VideoOptimiseResult
     ): VideoOptimiseResult {
         val uri = Uri.parse(entry.contentUri)
+
+        // The cloud must confirm the original before anything is spent on it. TASK-027.
+        if (!originals.confirms(entry)) return running
 
         // Coverage was settled before this was called, by [eligible]: spending seconds of encode on a
         // clip we then cannot write would be the most expensive way to discover it.

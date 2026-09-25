@@ -10,6 +10,7 @@ import com.gallery.sync.data.local.entity.CloudCopyDecision
 import com.gallery.sync.data.local.entity.BackupState
 import com.gallery.sync.data.local.media.RestoredAlbum
 import com.gallery.sync.domain.backup.BackupLocation
+import com.gallery.sync.domain.backup.SyncLocations
 import kotlinx.coroutines.flow.Flow
 
 /**
@@ -845,7 +846,10 @@ interface BackupEntryDao {
         SELECT * FROM backup_entries
         WHERE isProxied = 1
           AND remoteItemId IS NOT NULL
-          AND remoteSizeBytes IS NOT NULL
+          AND (
+              remoteSizeBytes IS NOT NULL
+              OR location IN (${SyncLocations.SQL_LIST})
+          )
           AND localMissingSinceEpochMillis IS NULL
         ORDER BY album, displayName
         """
@@ -1045,8 +1049,13 @@ interface BackupEntryDao {
         """
         SELECT * FROM backup_entries
         WHERE state = :uploaded
-          AND remoteSizeBytes IS NOT NULL
-          AND remoteSizeBytes = sizeBytes
+          AND (
+              (remoteSizeBytes IS NOT NULL AND remoteSizeBytes = sizeBytes)
+              OR (
+                  location IN (${SyncLocations.SQL_LIST})
+                  AND remoteItemId IS NOT NULL AND remoteItemId != ''
+              )
+          )
           AND isProxied = 0
           AND isProxySkipped = 0
           AND isVideo = 0
@@ -1089,8 +1098,13 @@ interface BackupEntryDao {
         """
         SELECT * FROM backup_entries
         WHERE state = :uploaded
-          AND remoteSizeBytes IS NOT NULL
-          AND remoteSizeBytes = sizeBytes
+          AND (
+              (remoteSizeBytes IS NOT NULL AND remoteSizeBytes = sizeBytes)
+              OR (
+                  location IN (${SyncLocations.SQL_LIST})
+                  AND remoteItemId IS NOT NULL AND remoteItemId != ''
+              )
+          )
           AND isProxied = 0
           AND isProxySkipped = 0
           AND isVideo = 0
@@ -1136,8 +1150,13 @@ interface BackupEntryDao {
         SELECT * FROM backup_entries
         WHERE state = :uploaded
           AND isVideo = 1
-          AND remoteSizeBytes IS NOT NULL
-          AND remoteSizeBytes = sizeBytes
+          AND (
+              (remoteSizeBytes IS NOT NULL AND remoteSizeBytes = sizeBytes)
+              OR (
+                  location IN (${SyncLocations.SQL_LIST})
+                  AND remoteItemId IS NOT NULL AND remoteItemId != ''
+              )
+          )
           AND isProxied = 0
           AND isProxySkipped = 0
           AND dateModifiedEpochSeconds <= :modifiedBeforeEpochSeconds
@@ -1174,8 +1193,13 @@ interface BackupEntryDao {
         SELECT * FROM backup_entries
         WHERE state = :uploaded
           AND isVideo = 1
-          AND remoteSizeBytes IS NOT NULL
-          AND remoteSizeBytes = sizeBytes
+          AND (
+              (remoteSizeBytes IS NOT NULL AND remoteSizeBytes = sizeBytes)
+              OR (
+                  location IN (${SyncLocations.SQL_LIST})
+                  AND remoteItemId IS NOT NULL AND remoteItemId != ''
+              )
+          )
           AND isProxied = 0
           AND isProxySkipped = 0
           -- See the note on the photo query above: zero is every verified clip, a timestamp is

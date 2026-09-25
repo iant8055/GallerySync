@@ -35,12 +35,28 @@ window would send a Dropbox id to Graph). Verification is live, at the moment of
 Not in stage 1: the ready-to-archive notification (`redundantLocalCopies`) still counts only OneDrive-verified rows, so
 an album on another cloud gets no notification. It works from the Archive tab.
 
-## Stage 2 — Sync (separate, after Stage 1 is proven on the phone)
+## Stage 2 — Sync (built 25 Sept 2026; device test with Ian pending)
 
-Sync replaces a file with a smaller copy, then relies on the cloud original to restore it. The candidate queries
-(`remoteSizeBytes = sizeBytes`), `RestoreProxyInPlace`, the wizard's optimise plans and the Camera optimise all assume a
-remembered, OneDrive-shaped proof. Each needs a live check or an adapter. Designed once Stage 1 has shown the verifier
-approach holds.
+Sync replaces the file on the phone with a smaller copy **in place, with no trash step**, so from then on the cloud holds
+the only original. Built:
+
+1. **`CloudOriginalCheck`** — the gate before every overwrite (`ProxyApplier.proxyOnce`, `VideoOptimiser.optimise`,
+   `VideoOptimiser.optimiseForWizard`). OneDrive rows pass on the size Graph recorded, as before. Any other cloud is asked
+   live through its `CloudVerifier`, and the original must be present at exactly its size (`ElsewhereVerdict`). Anything
+   else, including "could not ask", leaves the file untouched.
+2. **Held, not failed.** A file that fails the gate is skipped by the candidate lists for six hours, in memory only, and
+   nothing is written to its row. Without that it would be first in every batch and the re-queueing chain would never end.
+3. **Candidate queries** (`proxyCandidates`, `proxyCandidatesAll`, `videoOptimiseCandidates`, `videoOptimiseCandidatesAll`)
+   also return uploaded rows holding a cloud id for the clouds in `SyncLocations` (a SQL list; `SyncLocationsTest` keeps it
+   equal to the capability table). Google Photos and pCloud never appear.
+4. **`RestoreProxyInPlace`** downloads through `CloudDownloader` for these rows and checks the finished download against
+   the original's recorded size before the proxy is touched. `restorableProxies` lists them.
+5. **Archive of an optimised file**: `confirmStillInCloud` finds the row by MediaStore id (the rewrite changed the key) and
+   checks the cloud against the ORIGINAL's size, not the proxy's.
+6. `CloudCapabilities.FULL` for Dropbox, Google Drive, Backblaze B2 and IDrive e2.
+
+Left as it was: the Camera album's manual optimise (`CameraOptimise`) still needs a remembered OneDrive size, so it works
+for OneDrive only. The ready-to-archive notification still counts only OneDrive-verified rows.
 
 ## Test plan
 

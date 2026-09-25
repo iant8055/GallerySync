@@ -18,7 +18,7 @@ enum class CloudFeature { RESTORE, ARCHIVE, SYNC }
  * (`markUploaded`, not `markUploadedWithoutSizeVerification`) and the removal paths can check it. Never by
  * editing this table alone.
  *
- * Today OneDrive has all three and Dropbox has Restore. Google Photos can never have any: it reports no size
+ * Today OneDrive, Dropbox, Google Drive, Backblaze B2 and IDrive e2 have all three. Google Photos can never have any: it reports no size
  * for a stored file and gives no reliable way to fetch the original back. Google Drive, IDrive e2, Backblaze
  * B2 and pCloud can, so they are the next to earn them, one cloud at a time.
  */
@@ -44,12 +44,7 @@ data class CloudCapabilities(val restore: Boolean, val archive: Boolean, val syn
         /** Can fetch a file back, but the copy is not proved by size, so nothing may be removed or replaced. */
         val RESTORE_ONLY = CloudCapabilities(restore = true, archive = false, sync = false)
 
-        /**
-         * Can fetch a file back and confirm it live by size (`CloudVerifier`), so Archive may remove the local copy
-         * once the cloud has said it is there. Sync is not on: it needs the same proof at the moment it replaces a
-         * file, and its candidate queries and restore-in-place are still OneDrive-shaped. TASK-027 stage 2.
-         */
-        val RESTORE_AND_ARCHIVE = CloudCapabilities(restore = true, archive = true, sync = false)
+
     }
 }
 
@@ -57,11 +52,13 @@ data class CloudCapabilities(val restore: Boolean, val archive: Boolean, val syn
 val BackupLocation.capabilities: CloudCapabilities
     get() = when (this) {
         BackupLocation.ONEDRIVE -> CloudCapabilities.FULL
-        // Each of these can fetch a file back (`CloudDownloader`) and confirm one live by size (`CloudVerifier`), so
-        // Restore and Archive are on. Sync is not: TASK-027 stage 2. pCloud is not here: neither is built for it.
+        // Each of these can fetch a file back (`CloudDownloader`) and confirm one live by size (`CloudVerifier`), and
+        // the removal and overwrite paths ask that at the moment they act (`ElsewhereVerdict`, `CloudOriginalCheck`),
+        // so all three features are on. Keep this list and `SyncLocations` in step: `SyncLocationsTest` checks it.
+        // pCloud is not here: neither a download nor a verifier is built for it.
         BackupLocation.DROPBOX,
         BackupLocation.GOOGLE_DRIVE,
         BackupLocation.BACKBLAZE_B2,
-        BackupLocation.IDRIVE_E2 -> CloudCapabilities.RESTORE_AND_ARCHIVE
+        BackupLocation.IDRIVE_E2 -> CloudCapabilities.FULL
         else -> CloudCapabilities.BACKUP_ONLY
     }

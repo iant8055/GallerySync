@@ -1453,17 +1453,25 @@ class BackupEngine @Inject constructor(
         val keyOf = { item: LocalMediaItem ->
             backupKeyOf(item.album, item.displayName, item.sizeBytes, item.dateModifiedEpochSeconds)
         }
-        val rowsByKey = items.map(keyOf).chunked(CONFIRM_CHUNK)
+        // An optimised file has been rewritten in place, so its key (built from size and mtime) no longer matches
+        // its row; the MediaStore id is what still does. The row keeps the ORIGINAL's size, which is what the
+        // cloud must report.
+        val proxiedRowIds = entryDao.uploadedKeys().filter { it.isProxied }.associate { it.mediaStoreId to it.id }
+        val rowsByKey = (items.map(keyOf) + items.mapNotNull { proxiedRowIds[it.mediaStoreId] })
+            .distinct()
+            .chunked(CONFIRM_CHUNK)
             .flatMap { entryDao.entriesByIds(it) }
             .associateBy { it.id }
 
         for (item in items) {
-            val elsewhere = rowsByKey[keyOf(item)]?.takeIf { it.location != BackupLocation.ONEDRIVE }
+            val row = rowsByKey[keyOf(item)] ?: proxiedRowIds[item.mediaStoreId]?.let { rowsByKey[it] }
+            val elsewhere = row?.takeIf { it.location != BackupLocation.ONEDRIVE }
             if (elsewhere != null) {
                 val verifier = verifiers.of(elsewhere.location)
                 val uploaded = elsewhere.state == BackupState.UPLOADED && !elsewhere.remoteItemId.isNullOrBlank()
                 val check = if (uploaded && verifier != null) verifier.sizeOf(elsewhere.remoteItemId!!) else null
-                when (ElsewhereVerdict.of(uploaded, verifier != null, check, item.sizeBytes)) {
+                val expectedSize = if (elsewhere.isProxied) elsewhere.sizeBytes else item.sizeBytes
+                when (ElsewhereVerdict.of(uploaded, verifier != null, check, expectedSize)) {
                     ElsewhereVerdict.CONFIRMED -> confirmed += item
                     ElsewhereVerdict.WRONG_SIZE -> {
                         missing += item

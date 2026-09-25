@@ -141,6 +141,30 @@ class ArchiveElsewhereTest {
     }
 
     @Test
+    fun `an optimised file is found by its MediaStore id and checked against the original's size`() = runTest {
+        // On the phone the file is now a 400-byte proxy (new key); the row still holds the 1000-byte original.
+        val proxyOnPhone = item("p.jpg", 7, size = 400L)
+        val original = item("p.jpg", 7, size = 1_000L)
+        val row = rowFor(original, "id:P").copy(isProxied = true, localProxySizeBytes = 400L)
+        whenever(entryDao.uploadedKeys()).thenReturn(
+            listOf(com.gallery.sync.data.local.dao.UploadedKey(row.id, "p.jpg", 1_000L, 7L, true))
+        )
+        whenever(entryDao.entriesByIds(any())).thenReturn(listOf(row))
+        answers["id:P"] = RemoteCheck.Present(1_000L)
+
+        val result = engine().confirmStillInCloud(listOf(proxyOnPhone))
+
+        assertEquals(listOf(proxyOnPhone), result.confirmed)
+        assertEquals(listOf("id:P"), asked)
+
+        // The cloud holding only the proxy's size is not the original.
+        answers["id:P"] = RemoteCheck.Present(400L)
+        val wrong = engine().confirmStillInCloud(listOf(proxyOnPhone))
+        assertTrue(wrong.confirmed.isEmpty())
+        assertEquals(setOf(proxyOnPhone.mediaStoreId), wrong.presentAtWrongSize)
+    }
+
+    @Test
     fun `a row not yet uploaded is missing, and the cloud is not asked`() = runTest {
         val pending = item("pending.jpg", 1)
         val noId = item("noid.jpg", 2)

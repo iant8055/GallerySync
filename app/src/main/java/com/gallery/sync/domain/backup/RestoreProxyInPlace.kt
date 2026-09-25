@@ -10,6 +10,7 @@ import com.gallery.sync.data.local.entity.backupKeyOf
 import com.gallery.sync.data.local.media.SafMediaWriter
 import com.gallery.sync.domain.model.DataResult
 import com.gallery.sync.domain.model.RemoteError
+import com.gallery.sync.domain.repository.CloudDownloaders
 import com.gallery.sync.domain.repository.OneDriveRepository
 import com.gallery.sync.di.IoDispatcher
 import com.gallery.sync.util.Logger
@@ -74,6 +75,7 @@ sealed interface RestoreInPlaceResult {
 class RestoreProxyInPlace @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val repository: OneDriveRepository,
+    private val downloaders: CloudDownloaders,
     private val safWriter: SafMediaWriter,
     private val entryDao: BackupEntryDao,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
@@ -87,8 +89,16 @@ class RestoreProxyInPlace @Inject constructor(
             ?: return@withContext RestoreInPlaceResult.Failed(
                 "OneDrive has not been checked for this file yet. Press Refresh and try again."
             )
-        val expected = entry.remoteSizeBytes
-            ?: return@withContext RestoreInPlaceResult.Failed("no cloud size recorded")
+        // OneDrive's original was proved by size; another cloud's is checked against the size the phone recorded when
+        // it sent the file (`sizeBytes`, which a proxy never overwrites). The proxy stays untouched unless every
+        // byte arrives and the count matches, whichever cloud it came from.
+        val viaOtherCloud = entry.location != BackupLocation.ONEDRIVE
+        val expected = if (viaOtherCloud) {
+            entry.sizeBytes
+        } else {
+            entry.remoteSizeBytes
+                ?: return@withContext RestoreInPlaceResult.Failed("no cloud size recorded")
+        }
         val uri = Uri.parse(entry.contentUri)
 
         // Asked before a byte moves. A file outside every granted tree cannot be rewritten without
@@ -100,7 +110,7 @@ class RestoreProxyInPlace @Inject constructor(
 
         val staging = File(context.cacheDir, "restore-${entry.mediaStoreId}.tmp")
         try {
-            when (val downloaded = downloadTo(staging, remoteItemId, expected, onProgress)) {
+            when (val downloaded = downloadTo(staging, entry.location, remoteItemId, expected, onProgress)) {
                 is Download.Failed -> return@withContext downloaded.result
                 Download.Ok -> Unit
             }
@@ -145,21 +155,32 @@ class RestoreProxyInPlace @Inject constructor(
 
     private suspend fun downloadTo(
         staging: File,
+        location: BackupLocation,
         remoteItemId: String,
         expected: Long,
         onProgress: (Long, Long) -> Unit
     ): Download {
-        val stream = when (val opened = repository.openStream(remoteItemId)) {
+        val viaOtherCloud = location != BackupLocation.ONEDRIVE
+        val opened = if (viaOtherCloud) {
+            val downloader = downloaders.of(location)
+                ?: return Download.Failed(RestoreInPlaceResult.Failed("restoring from that cloud is not available yet"))
+            downloader.openStream(remoteItemId)
+        } else {
+            repository.openStream(remoteItemId)
+        }
+        val stream = when (opened) {
             is DataResult.Success -> opened.value
             is DataResult.Failure -> {
                 // A 404 for an item id is final: the file has been removed from the drive. Anything
                 // else — no token, a dropped connection — is worth trying again later.
                 val gone = (opened.error as? RemoteError.Http)?.code == HTTP_NOT_FOUND
                 return Download.Failed(
-                    if (gone) {
-                        RestoreInPlaceResult.GoneFromCloud
-                    } else {
-                        RestoreInPlaceResult.Failed("could not reach OneDrive")
+                    when {
+                        gone -> RestoreInPlaceResult.GoneFromCloud
+                        viaOtherCloud && opened.error == RemoteError.Unauthorized ->
+                            RestoreInPlaceResult.Failed("reconnect that cloud in Settings, and make sure its sign-in or keys allow reading")
+                        viaOtherCloud -> RestoreInPlaceResult.Failed("could not reach the cloud")
+                        else -> RestoreInPlaceResult.Failed("could not reach OneDrive")
                     }
                 )
             }
