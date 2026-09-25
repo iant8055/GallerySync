@@ -15,7 +15,7 @@ CHAPTER = Chapter(
             1. A welcome screen, a short tour, and a summary of what's ahead. See [[setup-welcome-tour]].
             2. Which Cloud services you use, and signing in to each. See [[setup-cloud]].
             3. Permission to look for photos and videos on your phone, then which folders to back up and which Cloud each one goes to. See [[setup-choose-folders]].
-            4. Your backup plan: one of four choices about the photos and videos already on the phone.
+            4. Your Backup Plan: one of four choices about the photos and videos already on the phone.
             5. Only for two of the plans: how much to optimise.
             6. When the first backup should start.
             7. The first backup itself, with progress.
@@ -160,7 +160,7 @@ CHAPTER = Chapter(
             **Nothing is uploaded, scanned or changed in a folder you did not choose.**
         """),
 
-        topic("setup-backup-plan", "Choose your backup plan", """
+        topic("setup-backup-plan", "Choose your Backup Plan", """
             You have four basic initial options about how to backup the photos and videos already on your phone. **None of the four options removes
             anything from your phone.**
 

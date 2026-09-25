@@ -1110,7 +1110,7 @@ For anything you could not bear to lose, keep a copy somewhere this app cannot r
     <string name="tour_folder_goes_to">Goes to: %1$s</string>
     <string name="tour_folder_choose_hint">Choose which Cloud each selected folder goes to.</string>
 
-    <string name="tour_backup_title">Choose your backup plan</string>
+    <string name="tour_backup_title">Choose your Backup Plan</string>
 
     <string name="tour_optimise_title">Optimisation Settings</string>
     <string name="tour_optimise_body">Optimisation allows you to free up storage space on your phone while still being able to see all your photos and videos on your Gallery.</string>
