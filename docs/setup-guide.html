@@ -100,92 +100,96 @@
   <p class="chapter-intro">The first time you open GallerySync, a short guided setup walks you through nine screens. Each one is explained here, including the messages you might meet along the way.</p>
   <details class="topic"><summary>How the setup works</summary>
   <div class="topic-body" id="setup-overview">
-<p>Setup is a series of cards. <strong>Next</strong> moves on and <strong>Back</strong> returns to the previous card. You can only move on when a card has what it needs: for example, at least one folder must be ticked, and you must be signed in before the cloud card lets you continue.</p>
+<p>Setup is a series of sreens. <strong>Next</strong> moves on and <strong>Back</strong> returns to the previous screen. You can only move on when a screen has what it needs: for example, at least one folder must be selected to backup and you must signed into your Cloud Account before the screen lets you continue.</p>
 <h4>What you will be asked, in order</h4>
-<ol><li>A welcome card, a short tour, and a summary of what's ahead. See <a class="xref" href="#setup-welcome-tour">“Welcome, the tour, and what will be set up”</a>.</li><li>Permission to look for photos and videos on your phone, then which folders to look after.</li><li>Signing in to your Microsoft account, and where in OneDrive backups go.</li><li>Your backup plan: one of four choices about the photos and videos already on the phone.</li><li>Only for two of the plans: how much to optimise.</li><li>When the first backup should start.</li><li>The first backup itself, with progress.</li></ol>
+<ol><li>A welcome screen, a short tour, and a summary of what's ahead. See <a class="xref" href="#setup-welcome-tour">“Welcome, the tour, and what will be set up”</a>.</li><li>Which cloud services you use, and signing in to each. See <a class="xref" href="#setup-cloud">“Cloud storage: choosing services, signing in and choosing where backups go”</a>.</li><li>Permission to look for photos and videos on your phone, then which folders to back up and which cloud each one goes to. See <a class="xref" href="#setup-choose-folders">“Choose folders to back up”</a>.</li><li>Your backup plan: one of four choices about the photos and videos already on the phone.</li><li>Only for two of the plans: how much to optimise.</li><li>When the first backup should start.</li><li>The first backup itself, with progress.</li></ol>
 <h4>Good to know</h4>
-<p>The first backup is the big one, because it sends everything that is not already in OneDrive. It can take hours. If you leave the app while it runs, it carries on in the background, and when you come back setup picks up at the progress card. If you chose a plan that backs up, the setup cards stay in front of the app until the first backup has finished and been checked.</p>
+<p>The first backup is the big one, because it sends everything that is not already in the Cloud. It could take hours. But you can monitor its progress.  If you leave the app while the backup is running, it will carry on in the background. When you come back you can see the progress screen. If will always come to that Progress Screen until the first backup has finished and been checked.</p>
 <p>Setup answers apply to the first run only. See <a class="xref" href="#setup-and-settings">“Setup and Settings are separate”</a>.</p>
   </div></details>
   <details class="topic"><summary>Welcome, the tour, and what will be set up</summary>
   <div class="topic-body" id="setup-welcome-tour">
-<p><strong>The welcome card.</strong> A picture that says "Welcome to GallerySync". Tap anywhere to continue, once it has been on screen a moment — a tap in the first instant, such as the one that opened the app, does not count, so the card cannot vanish before it has actually been seen.</p>
-<p><strong>The tour.</strong> Five short cards, one for each of the four tabs (Albums, Restore, Archive and Settings) and one for Help. Each points at its tab and says in a sentence what it is for. The Help card explains that a <strong>(?)</strong> button gives a quick explanation of the line beside it, and rings the <strong>How To Guide</strong> card at the top of Settings, which explains everything in one place.</p>
-<p><strong>What we'll set up.</strong> A checklist of the five things ahead:</p>
-<ul><li>Give permission to search this phone for photos and videos.</li><li>Choose which of the folders it finds you want backed up.</li><li>Give permission to change files in those folders.</li><li>Grant access to your cloud storage.</li><li>Select where backups go in OneDrive.</li></ul>
-<p>The checklist is only a preview; nothing is changed by reading it.</p>
-<p><strong>The link to this explanation.</strong> The <strong>What we'll set up</strong> card ends with <strong>For a more detailed breakdown of the set up process click here</strong>. It opens this explanation on its own, as a page you can read at any point during setup. It is the only part of the guide you can open until setup is finished.</p>
+<p><strong>The Welcome screen.</strong> A picture that says "Welcome to GallerySync". Tap anywhere to continue, once it has been on screen a moment — a tap in the first instant, such as the one that opened the app, does not count, so the screen cannot vanish before it has actually been seen.</p>
+<p><strong>The tour.</strong> Five short screens, one for each of the four tabs (Albums, Restore, Archive and Settings) and one for Help. Each points at its tab and says in a sentence what it is for. The Help screen explains that a <strong>(?)</strong> button gives a quick explanation of the line beside it, and rings the <strong>How To Guide</strong> screen at the top of Settings, which explains everything in one place.</p>
+<p><strong>What we'll set up.</strong> A checklist of the four things ahead:</p>
+<ul><li>Choose your cloud storage and sign in to it.</li><li>Give permission to search this phone for photos and videos.</li><li>Choose which of the folders it finds you want backed up, and where each one goes.</li><li>Give permission to change files in those folders.</li></ul>
+<p><strong>The link to this explanation.</strong> The <strong>What we'll set up</strong> screen ends with <strong>For a more detailed breakdown of the set up process click here</strong>. It opens this explanation on its own, as a page you can read at any point during setup. It is the only part of the guide you can open until setup is finished.</p>
+  </div></details>
+  <details class="topic"><summary>Cloud storage: choosing services, signing in and choosing where backups go</summary>
+  <div class="topic-body" id="setup-cloud">
+<p>This screen comes first, before your folders, so the next screens know which clouds you can send to. It lists the cloud services GallerySync covers. <strong>OneDrive</strong> is always ticked, because it is where your backups are kept. The others are optional extras: <strong>Google Photos</strong>, <strong>Google Drive</strong>, <strong>Dropbox</strong>, <strong>pCloud</strong>, <strong>IDrive e2</strong> and <strong>Backblaze B2</strong>. Tick the ones you use. A service only appears once the app is set up to connect to it.</p>
+<h4>The extra clouds: what to know before you choose one</h4>
+<ul><li><strong>Backup only.</strong> Folders sent to an extra cloud can be backed up but not Archived or Synced, because the app cannot prove a copy there is safe before removing the original.</li><li><strong>It cannot check what is already in that cloud</strong>, so a photo that is already there may be added a second time.</li><li><strong>Restoring from an extra cloud</strong> back onto this phone is not available yet.</li><li><strong>It is a Pro feature.</strong> Using it alongside OneDrive is free for 30 days, then it needs a one-time purchase, not a subscription. You start the trial yourself with a button, the terms are shown first, and nothing is ever charged automatically. If the trial ends and you do not buy it, Google Photos uploads pause and OneDrive carries on as normal.</li></ul>
+<h4>Signing in</h4>
+<p><strong>Sign in with your Cloud Account</strong> opens the Cloud's own sign-in page. You type your password there, never into GallerySync. The app only receives a permission that lets it work with your Cloud files, and it keeps that permission in encrypted storage on your phone.</p>
+<p>Once signed in, the screen says <strong>Signed in to OneDrive</strong> (for example) and shows <strong>Backup destination</strong>: the Cloud folder where new backups will go. In OneDrive the default folder is Samsung Gallery / DCIM, which matches where Samsung's own sync puts photos, so files already there are recognised and not sent twice. <strong>Change</strong> lets you pick another folder.</p>
+<p>Sign in to each extra cloud you ticked. Google Photos, Google Drive, Dropbox and pCloud open the provider's own sign-in page. IDrive e2 and Backblaze B2 ask for the endpoint, region, bucket and the access key pair you created in their console; the app checks them against the bucket before keeping them. <strong>Next</strong> waits until every service you ticked is connected.</p>
+<h4>What it checks in the background</h4>
+<p>Once you have chosen your folders, the app looks at what OneDrive already holds, so the later screens can tell you how much is left to send.</p>
   </div></details>
   <details class="topic"><summary>Let GallerySync search this phone</summary>
   <div class="topic-body" id="setup-search-permission">
 <p><strong>Give search permission</strong> opens Android's own permission screen. GallerySync needs it to find out where your photos and videos are stored.</p>
-<h4>Why it asks first, on its own card</h4>
-<p>Android's permission wording cannot be changed by any app, so the card explains why before you see it.</p>
+<h4>Why it asks first, on its own screen</h4>
+<p>Android's permission wording cannot be changed by any app, so the screen explains why before you see it.</p>
 <h4>Good to know</h4>
 <p>On Android 14 and later you may be offered "Select photos" instead of "Allow all". If you share only some photos, GallerySync can only see those, so a backup would be incomplete. The Albums tab warns you when this is the case. To sync whole albums, allow access to all photos.</p>
   </div></details>
   <details class="topic"><summary>Choose folders to back up</summary>
   <div class="topic-body" id="setup-choose-folders">
-<p>Once it has permission, GallerySync searches and shows the folders it found, each with a tick box. <strong>Tick the ones you want looked after.</strong> DCIM is where most phones keep the camera roll, so it is what most people choose. Press <strong>Next</strong> to move on.</p>
+<p>Once it has permission, GallerySync searches and shows the folders it found, each with a selection box. <strong>Select the ones you want GallerySync to access.</strong> DCIM is where most modern Android phones save the photos and videos. Press <strong>Next</strong> to move on.</p>
+<h4>Which cloud each folder goes to</h4>
+<p>If an extra cloud is connected and unlocked, each folder you select shows a <strong>Goes to</strong> button, so you can send DCIM to OneDrive and Pictures to Google Photos, for example. This is chosen per folder (DCIM, Pictures, Movies), never per album inside it. If you only use OneDrive you will not see the button, and everything goes to OneDrive. Files already backed up never move if you change this later, only new files follow the change.</p>
 <h4>Then Android asks again, once per folder</h4>
-<p>For each ticked folder, Android shows its own folder picker so you can give GallerySync lasting access to that folder. This second permission is what allows the app to swap a photo for a smaller copy, or bring an original back, without asking you every time. It is limited to the folders you chose, and you can withdraw it in Android's settings.</p>
-<h4>If the picker does not give the folder asked for</h4>
-<p>A card appears above the list saying what happened and what it means for the backup:</p>
-<ul><li><strong>No access was given.</strong> Nothing in that folder can be backed up or optimised. Choose <strong>Try again</strong> or <strong>Skip</strong> that folder, which leaves it out of the backup.</li><li><strong>You chose a folder inside it</strong> (for example DCIM/Camera instead of DCIM). Only that inner folder would be backed up and the rest of DCIM left out. Choose <strong>Choose all</strong> to try again, or <strong>Keep</strong> the narrower choice.</li><li><strong>You chose a different folder.</strong> It is not used, because GallerySync needs access to the ticked folder itself. Try again or skip.</li><li><strong>The choice cannot be used.</strong> Same options.</li></ul>
-<p>Nothing is uploaded, scanned or changed in a folder you did not choose.</p>
-  </div></details>
-  <details class="topic"><summary>Cloud storage: signing in and choosing where backups go</summary>
-  <div class="topic-body" id="setup-cloud">
-<p><strong>Sign in with Microsoft</strong> opens Microsoft's own sign-in page. You type your password there, never into GallerySync. The app only receives a token that lets it work with your OneDrive files, and it keeps that token in encrypted storage on your phone.</p>
-<p>Once signed in, the card says <strong>Signed in to OneDrive</strong> and shows <strong>Backup destination</strong>: the OneDrive folder where new backups will go. By default this is Samsung Gallery / DCIM, which matches where Samsung's own sync puts photos, so files already there are recognised and not sent twice. <strong>Change</strong> lets you pick another folder.</p>
-<h4>What it checks in the background</h4>
-<p>As soon as you are signed in, the app looks at what OneDrive already holds, so the next cards can tell you how much is left to send.</p>
+<p>For each selected folder, Android shows its own folder permissions screen to double check this is what you want.  It is limited to the folders you chose, and you can withdraw it in Android's settings or GalleySync's Settings.</p>
+<h4>If permission isn't given to the folder asked for</h4>
+<p>A screen appears above the list saying what happened and what it means for the backup:</p>
+<ul><li><strong>No access was given.</strong> Nothing in that folder can be backed up or optimised. Choose <strong>Try again</strong> or <strong>Skip</strong> that folder, which leaves it out of the backup.</li><li><strong>You chose a folder inside it</strong> (for example DCIM/Camera instead of DCIM). Only that inner folder would be backed up and the rest of DCIM left out. Choose <strong>Choose all</strong> to try again, or <strong>Keep</strong> the narrower choice.</li><li><strong>You chose a different folder.</strong> It is not used, because GallerySync needs access to the selected folder itself. Try again or skip.</li><li><strong>The choice cannot be used.</strong> Same options.</li></ul>
+<p><strong>Nothing is uploaded, scanned or changed in a folder you did not choose.</strong></p>
   </div></details>
   <details class="topic"><summary>Choose your backup plan</summary>
   <div class="topic-body" id="setup-backup-plan">
-<p>One choice about the photos and videos <strong>already on your phone</strong>. None of the four removes anything from your phone.</p>
-<ul><li><strong>1. Check cloud storage and back up everything that isn't already backed up.</strong> Sends whatever OneDrive does not already have. Nothing on your phone changes and no space is freed.</li><li><strong>2. Everything in 1, plus optimise all files on the phone.</strong> Also replaces photos and videos with smaller copies, for the most space saved. The originals stay in OneDrive.</li><li><strong>3. Everything in 1, but only optimise newly backed-up files.</strong> Smaller copies only for files this first backup sends, for a moderate saving. It shows how many files are not backed up yet, and on a phone already synced to OneDrive that may be a small share of the library.</li><li><strong>4. Check cloud storage but do not back up any new files.</strong> No upload and no space saved. You choose which albums to back up or sync yourself, on the Albums tab.</li></ul>
+<p>You have four basic initial options about how to backup the photos and videos already on your phone. <strong>None of the four options removes anything from your phone.</strong></p>
+<ul><li><strong>1. Check cloud storage and back up everything that isn't already backed up.</strong> Sends whatever isn't currently on your Cloud. Nothing on your phone changes and no space is freed.</li><li><strong>2. Everything in 1, plus optimise all files on the phone.</strong> Also replaces photos and videos with optimized copies, for the most space saved. The originals stay in Cloud.</li><li><strong>3. Everything in 1, but only optimise newly backed-up files.</strong> Optimized copies only for files this first backup sends, for a moderate saving. It shows how many files are not backed up yet, and on a phone already synced to Cloud that may be a small share of the library.</li><li><strong>4. Check cloud storage but do not back up any new files.</strong> No upload and no space saved. You choose individually which albums to back up or sync yourself, on the Albums tab.</li></ul>
 <h4>Good to know</h4>
-<p><strong>Plan 1 is selected when you arrive</strong>, so pressing Next without choosing means backing up everything that is not already in OneDrive. Change it before you press Next if that is not what you want.</p>
-<p>Plans 2 and 3 use one-time optimising during setup. Plan 4 uploads nothing, so setup ends early and no first backup runs.</p>
+<p><strong>Plan 1 is selected when you arrive</strong>, so pressing Next without choosing means backing up everything that is not already in Cloud. Change it before you press Next if that is not what you want.</p>
+<p>Plans 2 and 3 use one-time optimisation during setup. Plan 4 uploads nothing, so setup ends and the app opens.</p>
 <p>None of the four plans sets an album's mode. After the first backup your albums still show <strong>Off</strong>, and that is correct: only you set modes, on the Albums tab.</p>
   </div></details>
   <details class="topic"><summary>Optimisation settings during setup</summary>
   <div class="topic-body" id="setup-optimise">
-<p>You only see this card if you chose plan 2 or plan 3. It asks how much to shrink.</p>
-<ul><li><strong>Optimise photos</strong> and <strong>Optimise video</strong> are on/off switches.</li><li><strong>Video optimisation level</strong> appears when video is on: <strong>High</strong> (480p, the smallest), <strong>Medium</strong> (720p) or <strong>Low</strong> (1080p, the least shrinking).</li><li>Under each switch the card estimates the saving, and a <strong>Total estimated savings</strong> line adds them up.</li></ul>
+<p>You only see this screen if you chose plan 2 or plan 3. It asks how much to shrink.</p>
+<ul><li><strong>Optimise photos</strong> and <strong>Optimise video</strong> are on/off switches.</li><li><strong>Video optimisation level</strong> appears when video is on: <strong>High</strong> (480p, the smallest), <strong>Medium</strong> (720p) or <strong>Low</strong> (1080p, the least shrinking).</li><li>Under each switch you are presented with estimated space saving for each option, and a <strong>Total estimated savings</strong> line adds them up.</li></ul>
 <h4>Where the estimates come from</h4>
-<p>The app has just asked OneDrive what it holds and has counted the photos and videos in your chosen folders. It multiplies the sizes by the typical saving for each setting. They are estimates, and real results vary with what is in your files.</p>
-<h4>Messages you may see instead of a figure</h4>
-<ul><li><strong>Checking OneDrive to work out what this would save.</strong> Still counting.</li><li><strong>OneDrive could not be checked just now.</strong> No estimate yet. The switches still apply to whatever the first backup sends.</li><li><strong>Could not check some of your albums.</strong> The saving is a floor: the real figure is likely to be larger.</li><li><strong>No photos or videos were found in the folders you chose.</strong> Nothing to optimise.</li></ul>
+<p>The app has just asked Cloud what it holds and has counted the photos and videos in your chosen folders. It multiplies the sizes by the typical saving for each setting. They are estimates, and real results may vary with what is in your files.</p>
   </div></details>
   <details class="topic"><summary>Ready to back up</summary>
   <div class="topic-body" id="setup-ready">
 <p>Shows <strong>how much you have selected to back up</strong> and, if optimising is on, <strong>how much space you will save on the phone</strong>. Then it asks <strong>Do you want to perform backup now?</strong></p>
 <ul><li><strong>Right now</strong> starts straight away.</li><li><strong>Start in 1 hour</strong> (or the delay you pick) starts later. Seven delay buttons appear: <strong>3m, 1h, 2h, 4h, 8h, 12h and 24h</strong>.</li></ul>
-<h4>Two notes on the card</h4>
+<h4>Two notes on the screen</h4>
 <ul><li>A delayed backup may start a little after the set time. Android batches background work for apps that have not been opened recently.</li><li>For the security of your data, the app is unavailable until a backup has been successfully completed and verified.</li></ul>
-<p>A delayed backup also needs the phone to be plugged in to start on its own.</p>
+<p><strong>A delayed backup also needs the phone to be plugged in to start on its own.</strong></p>
   </div></details>
   <details class="topic"><summary>Backup progress</summary>
   <div class="topic-body" id="setup-progress">
-<p>The last card follows the first backup from start to finish.</p>
+<p>The last screen follows the first backup from start to finish.</p>
 <h4>While it waits</h4>
 <p><strong>Waiting to start</strong> shows a countdown ("until backup starts"). The backup will start on its own, even if you close the app, as long as the phone is plugged in. <strong>SYNC NOW</strong> starts it immediately whatever the battery level.</p>
 <h4>While it runs</h4>
-<ul><li><strong>Scanning your library.</strong> Getting ready.</li><li><strong>Starting upload.</strong> The total is known and the first file is on its way.</li><li><strong>Uploading 5 of 155.</strong> A ring and a count show progress.</li></ul>
+<ul><li><strong>Scanning your library.</strong> Getting ready.</li><li><strong>Starting upload.</strong> The total is known and the first file is on its way.</li><li><strong>Uploading, with a percentage in the ring.</strong> The ring and the large percentage show the whole backup, across every cloud you use.</li><li><strong>Under the percentage</strong> it names the cloud being sent to right now (for example <strong>Uploading Google Photos</strong>) and, on the line below, how many are sent of how many there are for that cloud.</li><li><strong>Below the ring</strong>, each other cloud that still has files waiting is listed as <strong>Pending</strong> with the same kind of count. When one cloud finishes, the next one moves into the ring.</li><li>Some clouds take longer than others. Google Photos, for example, only accepts about 27 uploads a minute, so a large library can take hours; the backup carries on in the background if you close the app.</li></ul>
 <h4>When uploading ends</h4>
-<p>The card then says the upload finished and was verified, and moves through <strong>Optimising photos</strong> and <strong>Optimising video</strong> with a count for each, when your plan includes them. Photos stay in your gallery and stay usable; nothing is cut from your videos.</p>
+<p>The screen then says the upload finished and was verified, and moves through <strong>Optimising photos</strong> and <strong>Optimising video</strong> with a count for each, when your plan includes them. Photos stay in your gallery and stay usable; nothing is cut from your videos.</p>
 <h4>Finishing</h4>
-<p>When everything is done the card says the backup finished successfully and has been verified, and the button changes to <strong>Finish</strong>. While it is still running the button says <strong>Close</strong>, which closes the app while the backup carries on.</p>
+<p>When everything is done the screen says the backup finished successfully and has been verified, and the button changes to <strong>Finish</strong>. While it is still running the button says <strong>Close</strong>, which closes the app while the backup carries on.</p>
 <h4>Cancel</h4>
-<p><strong>Cancel</strong> (in place of Back) asks <strong>Stop the backup?</strong>. Stopping keeps everything already in OneDrive, resumes later where it left off without sending files twice, and deletes nothing. Photos already optimised stay optimised, with their originals in OneDrive.</p>
+<p><strong>Cancel</strong> (in place of Back) asks <strong>Stop the backup?</strong>. Stopping keeps everything already in the Cloud, resumes later where it left off without sending files twice, and deletes nothing. Photos already optimised stay optimised, with their originals in Cloud.</p>
   </div></details>
   <details class="topic"><summary>Setup and Settings are separate</summary>
   <div class="topic-body" id="setup-and-settings">
 <p>What you answer during first-time setup and what you see in the <strong>Settings</strong> tab are two separate things. Neither reads or changes the other.</p>
-<ul><li>Setup collects its own answers and acts once, on files already on the phone.</li><li>A setup answer may leave nothing behind in Settings, and Settings may show something different from what a setup card showed. That is normal.</li><li>Setup never sets an album's mode. Only you set modes, on the Albums tab.</li></ul>
-<p>So if a card in setup looks different from the matching row in Settings, nothing is wrong.</p>
+<ul><li>Setup collects its own answers and acts once, on files already on the phone.</li><li>A setup answer may leave nothing behind in Settings, and Settings may show something different from what a setup screen showed. That is normal.</li><li>Setup never sets an album's mode. Only you set modes, on the Albums tab.</li></ul>
+<p>So if a screen in setup looks different from the matching row in Settings, nothing is wrong.</p>
   </div></details>
 
   <footer>

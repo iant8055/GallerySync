@@ -4,19 +4,18 @@ CHAPTER = Chapter(
     id="albums",
     title="The Albums tab",
     intro="The tab you will use most. A green card at the top summarises your albums and holds the "
-          "run controls; below it is one card per album, each with a coloured pill for choosing what "
-          "happens to that album.",
+          "run controls; below it is one line per album, each with a coloured button for choosing the album mode.",
     topics=[
         topic("albums-overview", "How the Albums tab is laid out", """
             From top to bottom:
-            • **The green card.** A heading and four mode buttons that narrow the list, some figures about the albums you are looking at, and the controls that start, pause and stop a backup.
-            • **A line of status** under the card, only while something is happening or just finished.
-            • **The list of albums**, one card each, in alphabetical order. On a wide screen, such as an unfolded foldable, the list runs in two columns.
+            • **The green heading.** with four mode buttons that filters the list, some figures about the albums you are looking at, and the controls that start, pause and stop a manual backup.
+            • **A current Status** which appears only while something is happening or just finished.
+            • **The list of albums**, one line each, defaulted to sort in alphabetical order. On a wide screen, such as an unfolded foldable, the list can run in two columns.
 
             ## What happens when you open the tab
-            Every time you arrive, the app looks at the phone again and asks OneDrive again, so the figures
-            are fresh rather than left over from the last time. You will see the **Rescan** button say
-            **Checking OneDrive...** while it does.
+            Every time you select the Albums Tab, the app looks at the phone again and asks the Cloud again, so the figures
+            are always the current information. You will see the **Rescan** button say
+            **Checking the Cloud...** while it does.
 
             ## Nothing here changes a file by itself
             Choosing a mode is what tells the app what to do with an album. Scrolling, filtering and
@@ -26,7 +25,7 @@ CHAPTER = Chapter(
         topic("albums-permission", "The permission message", """
             ## What it is
             A message at the top of the tab, in one of two forms:
-            • **GallerySync needs access to your photos.** The app cannot see any albums yet. It reads the albums you choose so it can sync them to OneDrive, and it never deletes anything.
+            • **GallerySync needs access to your photos.** The app cannot see any albums yet. It reads the albums you choose so it can sync them to the Cloud, and it never deletes anything.
             • **Only some photos are shared.** Android is letting the app see just the photos you picked, so a sync would be incomplete. The albums it can see are still listed below.
 
             The **Grant access** button opens Android's permission screen.
@@ -80,8 +79,8 @@ CHAPTER = Chapter(
             With a filter such as Archive, where the albums may hold no files, the line is left out.
 
             ## Good to know
-            This line comes from the app's own record. For OneDrive's own answer, look at the last line
-            of each album card, which says how many files OneDrive has confirmed.
+            This line comes from the app's own record. For the Cloud's own answer, look at the last line
+            of each album card, which says how many files the Cloud has confirmed.
         """, ui=True),
 
         topic("albums-optimised-line", "Optimised and Saved", """
@@ -96,14 +95,14 @@ CHAPTER = Chapter(
 
             ## Good to know
             Optimised files stay in your gallery and open as normal. The full-quality original is in
-            OneDrive, and the Restore tab brings it back. See [[how-optimising-works]].
+            the Cloud, and the Restore tab brings it back. See [[how-optimising-works]].
         """, ui=True),
 
         topic("albums-archive-lines", "Files archived and Scheduled to leave this phone", """
             ## What it is
             With **Archive** selected, up to two lines:
-            • **N files archived · X in OneDrive.** How many files from your Archive albums the app has sent to OneDrive, and how much room they take there. This counts files that have been sent, whether or not they have left the phone yet.
-            • **N Scheduled to leave this phone.** Files still on the phone in Archive albums. Every one is due to be removed once OneDrive is confirmed to hold it. When there are none, the line says **Nothing left to archive**.
+            • **N files archived · X in the Cloud.** How many files from your Archive albums the app has sent to the Cloud, and how much room they take there. This counts files that have been sent, whether or not they have left the phone yet.
+            • **N Scheduled to leave this phone.** Files still on the phone in Archive albums. Every one is due to be removed once the Cloud is confirmed to hold it. When there are none, the line says **Nothing left to archive**.
 
             ## Where it comes from
             The first line comes from the app's own record of what it has sent. The second is a live count
@@ -120,7 +119,7 @@ CHAPTER = Chapter(
 
             **When nothing is running**
             • **Sync now** starts a backup, and then optimises anything you set to Manual in Settings. It is greyed out when there is nothing to send and nothing waiting to be optimised, meaning every file in your Backup, Sync and Archive albums is already sent.
-            • **Rescan** looks at the phone again and asks OneDrive again, so all the figures are fresh. While it works it says **Checking OneDrive...** and is disabled.
+            • **Rescan** looks at the phone again and asks the Cloud again, so all the figures are fresh. While it works it says **Checking the Cloud...** and is disabled.
 
             **When a backup is running**
             • The left side reports instead of acting: **Syncing 37%**. Before the figures are known it just says **Syncing...**.
@@ -151,12 +150,12 @@ CHAPTER = Chapter(
 
             **After a run**, a summary made of the parts that apply, separated by commas:
             • **N uploaded**: sent this time.
-            • **N already in OneDrive**: found there already, so not sent again.
+            • **N already in the Cloud**: found there already, so not sent again.
             • **N no longer on this phone**: files the app remembered but that have since gone from the phone. This is not a failure.
             • **N failed**: could not be sent after several attempts.
-            • **N waiting on OneDrive**: their album could not be listed this time. They are untouched and will be tried again.
+            • **N waiting on the Cloud**: their album could not be listed this time. They are untouched and will be tried again.
             • **N still to go**: left for the next run.
-            • **stopped: ...** with a reason: not signed in, OneDrive rejected the sign-in, OneDrive is full, lost connection, or no access to your photos.
+            • **stopped: ...** with a reason: not signed in, the Cloud rejected the sign-in, the Cloud is full, lost connection, or no access to your photos.
 
             ## Where it comes from
             The backup itself reports it as it works.
@@ -167,24 +166,24 @@ CHAPTER = Chapter(
 
             • **Album name**, for example Camera.
             • **12 files · 340 MB.** How many files the album holds on the phone right now, and their total size. From your phone's media library, inside the chosen folders.
-            • **3 optimised · 4 kept at full size · 2 pending.** A second line that appears only when it has something to say, and shows only the parts that are not zero. Optimised counts files replaced by a smaller copy. Kept at full size counts files Restore has put back and that are still ticked, which GallerySync leaves alone. Pending counts files not yet sent to OneDrive: the number of files on the phone minus the number the app has recorded as sent. **Failed** counts those of the pending files the app has given up on after several attempts; open the album to retry them.
-            • **The OneDrive line.** The only line that describes OneDrive itself. Its four forms are listed below.
+            • **3 optimised · 4 kept at full size · 2 pending.** A second line that appears only when it has something to say, and shows only the parts that are not zero. Optimised counts files replaced by a smaller copy. Kept at full size counts files Restore has put back and that are still ticked, which GallerySync leaves alone. Pending counts files not yet sent to the Cloud: the number of files on the phone minus the number the app has recorded as sent. **Failed** counts those of the pending files the app has given up on after several attempts; open the album to retry them.
+            • **The the Cloud line.** The only line that describes the Cloud itself. Its four forms are listed below.
             • **All files Archived**, in place of the three lines above, on an Archive album that has nothing left on the phone. This is uncommon now: when an Archive run empties an album, the album leaves this list and its mode is forgotten. See [[modes-in-depth]].
             • **The mode pill**, at the right, in the mode's colour, with a small arrow. Tap it and choose Off, Backup, Sync or Archive; the current mode is ringed. Choosing Archive first asks you to confirm. See [[dialog-archive-confirm]].
 
             Tap anywhere else on the card to see the album's files. See [[album-detail]].
 
-            ## The four forms of the OneDrive line
-            • **Not checked against OneDrive yet.** Nobody has asked yet. That is not the same as zero.
-            • **Could not reach OneDrive when this was last checked.** The answer is unknown, not bad news.
-            • **12 verified in OneDrive**, in green. OneDrive holds every file in the album at the right size.
-            • **10 of 12 verified in OneDrive.** Some files are missing there, or are there at a different size.
+            ## The four forms of the the Cloud line
+            • **Not checked against the Cloud yet.** Nobody has asked yet. That is not the same as zero.
+            • **Could not reach the Cloud when this was last checked.** The answer is unknown, not bad news.
+            • **12 verified in the Cloud**, in green. the Cloud holds every file in the album at the right size.
+            • **10 of 12 verified in the Cloud.** Some files are missing there, or are there at a different size.
 
-            ## Where the OneDrive line comes from
-            OneDrive is asked directly, each time you open the tab or press Rescan. A file counts as
-            **verified** only if OneDrive has a file with the same name in that album's folder **and**
+            ## Where the the Cloud line comes from
+            the Cloud is asked directly, each time you open the tab or press Rescan. A file counts as
+            **verified** only if the Cloud has a file with the same name in that album's folder **and**
             reports the same size. It is deliberately not taken from the app's memory of what it once
-            sent, because that memory cannot know if you have since deleted something in OneDrive.
+            sent, because that memory cannot know if you have since deleted something in the Cloud.
         """, ui=True),
 
         topic("album-detail", "An album's file list", """
@@ -215,17 +214,17 @@ CHAPTER = Chapter(
             **backed up**, **optimised**, **kept at full size**, **pending** and **failed**. Each file
             then carries its marks, after its size on the same line:
 
-            • **✓ backed up.** In OneDrive, and still full size on the phone.
-            • **✓ backed up · optimised.** In OneDrive, and the phone holds a smaller copy. Both are true: a smaller copy is only ever made from a file already confirmed in OneDrive.
+            • **✓ backed up.** In the Cloud, and still full size on the phone.
+            • **✓ backed up · optimised.** In the Cloud, and the phone holds a smaller copy. Both are true: a smaller copy is only ever made from a file already confirmed in the Cloud.
             • **✓ optimised.** Smaller on the phone.
             • **⟳ pending.** Waiting to be sent.
             • **✗ failed.** Could not be sent after several attempts. The app does not keep retrying a file forever.
 
             ## Retry failed
-            When an album that is being backed up has failed files, a hint and a **Retry** button appear under the counts, reading for example **Retry 3 failed**. Pressing it puts those files back in the queue and starts a backup. It only adds work: nothing is removed from your phone or from OneDrive. If a file fails again, it stays marked failed and the button is still there.
+            When an album that is being backed up has failed files, a hint and a **Retry** button appear under the counts, reading for example **Retry 3 failed**. Pressing it puts those files back in the queue and starts a backup. It only adds work: nothing is removed from your phone or from the Cloud. If a file fails again, it stays marked failed and the button is still there.
 
             ## Where it comes from
-            The app's own record of each file's progress. The OneDrive-checked answer is the last line of
+            The app's own record of each file's progress. The the Cloud-checked answer is the last line of
             the album card on the main list.
         """, ui=True),
 
@@ -291,13 +290,13 @@ CHAPTER = Chapter(
 
             ## Why Camera has no Sync
             The Camera album offers **Off**, **Backup** and **Archive**, and not **Sync**. Sync makes a
-            photo smaller as soon as OneDrive has it, which is right for an album you have set aside and
+            photo smaller as soon as the Cloud has it, which is right for an album you have set aside and
             wrong for the folder your camera writes to. This control is the alternative: you say how old a
             photo has to be, and only then is it touched. An album that was already set to Sync before this
             was added keeps that setting.
 
             ## Which files are listed
-            • Photos and videos that OneDrive has confirmed, at the same size. A file not yet backed up is never listed.
+            • Photos and videos that the Cloud has confirmed, at the same size. A file not yet backed up is never listed.
             • Only files at least as old as the age you chose, by the date your phone holds for each file (the date it was last changed).
             • Photos only if **Optimise photos** is on in Settings, and videos only if **Optimise video** is on. If one is off, the card says so.
             • Not files that have already been made smaller, or that could not be made smaller.
@@ -316,13 +315,13 @@ CHAPTER = Chapter(
 
             ## What the button does
             It replaces each listed file on your phone with a smaller copy that stays in your gallery
-            under its own name. The full-size original stays in OneDrive, and **Restore** brings it back.
+            under its own name. The full-size original stays in the Cloud, and **Restore** brings it back.
             Files inside the folders you gave GallerySync access to at setup are done in the background;
             any outside them need Android's own confirmation first. Nothing is removed and nothing is sent.
             While it runs the card shows how many are left and the list gets shorter as each one is done.
 
             ## Where it comes from
-            The app's own record of what OneDrive has confirmed for each file, and your Settings switches.
+            The app's own record of what the Cloud has confirmed for each file, and your Settings switches.
             Video is made smaller at the quality chosen in Settings.
         """, ui=True),
 
@@ -358,7 +357,7 @@ CHAPTER = Chapter(
 
             ## Why it asks once
             Setting an album to Archive is you saying "take this album off the phone once it is safely in
-            OneDrive". This is the moment that choice is confirmed. After that the mode stands until you
+            the Cloud". This is the moment that choice is confirmed. After that the mode stands until you
             change it or until Archive has taken every file off the phone: nobody asks again about the
             mode itself, and files added to the album while it still holds files are covered by the same
             choice. Android will still show its own confirmation each time files are actually removed.
@@ -366,7 +365,7 @@ CHAPTER = Chapter(
 
             ## What happens next
             After you confirm, the app takes you to the Archive tab, where you can watch the files being
-            checked. Nothing is removed until they are confirmed in OneDrive at the same size.
+            checked. Nothing is removed until they are confirmed in the Cloud at the same size.
 
             ## The bin is named differently on different phones
             Samsung Gallery calls it the Recycle Bin and the Files app calls it Trash. It is the same
