@@ -199,7 +199,7 @@ CHAPTER = Chapter(
             you will save on the phone**. Then it asks **Do you want to perform backup now?**
 
             • **Right now** starts straight away.
-            • **Start in 1 hour** (or the delay you pick) starts later. Seven delay buttons appear: **3m, 1h, 2h, 4h, 8h, 12h and 24h**.
+            • **Start in 1 hour** (or the delay you pick) starts later. Six delay buttons appear: **1h, 2h, 4h, 8h, 12h and 24h**.
 
             ## Two notes on the screen
             • A delayed backup may start a little after the set time. Android batches background work for apps that have not been opened recently.

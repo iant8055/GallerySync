@@ -170,15 +170,13 @@ private val DelayChipPadding = PaddingValues(horizontal = 0.dp, vertical = 8.dp)
 private const val MINUTES_PER_HOUR = 60
 
 /**
- * The delays the card offers, in minutes.
- *
- * Three minutes is short enough to sit and watch one start, which is the only way to see the
- * handover to WorkManager actually happen.
+ * The delays the card offers, in minutes. There was a three-minute chip while the handover to
+ * WorkManager was being watched; Ian took it out on 25 Sept 2026 because it was for testing only.
  */
-private val DelayChoiceMinutes = listOf(3, 60, 120, 240, 480, 720, 1440)
+private val DelayChoiceMinutes = listOf(60, 120, 240, 480, 720, 1440)
 
-/** Chips per row. Seven no longer fit one row, and four keep every chip the same width. */
-private const val DelayChipsPerRow = 4
+/** Chips per row. Six chips make two even rows of three, and every chip keeps the same width. */
+private const val DelayChipsPerRow = 3
 
 /**
  * How long the welcome picture stays up no matter what. Ian, 22 Sept 2026: *"sometimes when you
