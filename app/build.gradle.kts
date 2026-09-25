@@ -37,8 +37,10 @@ android {
         // only ever accepts a higher one, so it is bumped per upload and never reset. First real
         // upload was versionCode 1 (Internal Testing, 23 Sept 2026); this is the second, adding the
         // Billing Library so Play Console will allow the pro_unlock product to be created at all.
-        versionCode = 2
-        versionName = "0.3.0"
+        // The third (26 Sept 2026) carries the multi-cloud work: Dropbox, Google Drive, Backblaze B2,
+        // IDrive e2, the sign-out prompt and the rewritten How To Guide.
+        versionCode = 3
+        versionName = "0.3.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
