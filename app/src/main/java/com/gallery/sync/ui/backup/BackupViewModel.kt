@@ -10,6 +10,7 @@ import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.media.LocalCopyRemover
 import com.gallery.sync.data.local.media.ProxyApplier
 import com.gallery.sync.data.local.media.ProxyGenerator
+import com.gallery.sync.data.local.media.sharesByFolder
 import com.gallery.sync.data.local.media.ProxyOutcome
 import com.gallery.sync.data.local.media.VideoOptimiser
 import com.gallery.sync.data.local.media.VideoReadiness
@@ -830,14 +831,14 @@ class BackupViewModel @Inject constructor(
             }
 
             val folders = scannedAlbums
-                .filter { it.topLevelFolder != null }
-                .groupBy { it.topLevelFolder!! }
+                .flatMap { album -> album.sharesByFolder().map { (folder, share) -> Triple(folder, album, share) } }
+                .groupBy({ it.first }, { it.second to it.third })
                 .map { (name, inFolder) ->
                     FolderRow(
                         name = name,
                         albumCount = inFolder.size,
-                        fileCount = inFolder.sumOf { it.itemCount },
-                        totalBytes = inFolder.sumOf { it.totalBytes },
+                        fileCount = inFolder.sumOf { it.second.itemCount },
+                        totalBytes = inFolder.sumOf { it.second.totalBytes },
                         location = FolderDestination.resolve(name, folderLocations, prefs.backupLocation)
                     )
                 }

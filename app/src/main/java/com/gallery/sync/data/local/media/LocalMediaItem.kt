@@ -49,7 +49,15 @@ data class MediaAlbum(
      * the album reported a usable `RELATIVE_PATH` (API < 29, or an odd location). TASK-026: this is
      * the destination-choice granularity, one level up from the album itself.
      */
-    val topLevelFolder: String? = null
+    val topLevelFolder: String? = null,
+    /**
+     * What the album holds in each top-level folder. An album is a folder's leaf name, so two directories with
+     * the same leaf name (`DCIM/blaze-test` and `Movies/blaze-test`) are one album spread over two top-level
+     * folders. [topLevelFolder] is only the first of them; the folder list has to count all of them or the
+     * second folder never appears (Ian, 25 Sept 2026: Movies went missing from *Where each folder goes*).
+     * Empty means "not worked out": use [sharesByFolder].
+     */
+    val inFolders: Map<String, FolderShare> = emptyMap()
 )
 
 /** A top-level directory on the device containing media files, discovered by scanning MediaStore. */
@@ -84,3 +92,10 @@ enum class MediaAccess {
 
     NONE
 }
+
+/** One album's files in one top-level folder. */
+data class FolderShare(val itemCount: Int, val totalBytes: Long)
+
+/** The album's files per top-level folder; falls back to the single [MediaAlbum.topLevelFolder] when not worked out. */
+fun MediaAlbum.sharesByFolder(): Map<String, FolderShare> =
+    inFolders.ifEmpty { topLevelFolder?.let { mapOf(it to FolderShare(itemCount, totalBytes)) }.orEmpty() }

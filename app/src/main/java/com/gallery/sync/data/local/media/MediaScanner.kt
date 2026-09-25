@@ -193,7 +193,11 @@ class MediaScanner @Inject constructor(
                     // directory — so the first item that resolves one speaks for the whole group.
                     // Not assumed to be perfectly uniform: a stray item with no RELATIVE_PATH beside
                     // others that have one is exactly the API < 29 case this falls back for.
-                    topLevelFolder = items.firstNotNullOfOrNull { MediaScanRules.topLevelFolderOf(it.relativePath) }
+                    topLevelFolder = items.firstNotNullOfOrNull { MediaScanRules.topLevelFolderOf(it.relativePath) },
+                    inFolders = items
+                        .mapNotNull { item -> MediaScanRules.topLevelFolderOf(item.relativePath)?.let { it to item } }
+                        .groupBy({ it.first }, { it.second })
+                        .mapValues { (_, inFolder) -> FolderShare(inFolder.size, inFolder.sumOf { it.sizeBytes }) }
                 )
             }
             .sortedBy { it.name.lowercase() }

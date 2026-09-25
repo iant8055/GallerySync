@@ -4,6 +4,7 @@ import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.dao.FolderPreferenceDao
 import com.gallery.sync.data.local.entity.FolderPreferenceEntity
 import com.gallery.sync.data.local.media.MediaScanner
+import com.gallery.sync.data.local.media.sharesByFolder
 import javax.inject.Inject
 
 /**
@@ -30,9 +31,10 @@ class SetFolderDestination @Inject constructor(
         if (choices.isEmpty()) return
         folderDao.setPreferences(choices.map { (folder, location) -> FolderPreferenceEntity(folder, location) })
 
+        // By every folder the album has files in, not just the first: see MediaAlbum.inFolders.
         val albumsByFolder = scanner.scanAlbums()
-            .filter { it.topLevelFolder != null }
-            .groupBy({ it.topLevelFolder!! }, { it.name })
+            .flatMap { album -> album.sharesByFolder().keys.map { it to album.name } }
+            .groupBy({ it.first }, { it.second })
         choices.forEach { (folder, location) ->
             val albums = albumsByFolder[folder].orEmpty()
             if (albums.isNotEmpty()) entryDao.retargetUnsent(albums, location)
