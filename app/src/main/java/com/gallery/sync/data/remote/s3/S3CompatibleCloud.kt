@@ -75,7 +75,18 @@ abstract class S3CompatibleCloud(
                         save(config)
                         SignInResult.Success(accountLabel() ?: config.bucket)
                     }
-                    response.code == 403 || response.code == 401 -> SignInResult.Failed(MSG_KEYS_REJECTED)
+                    response.code == 403 || response.code == 401 -> {
+                        // The HEAD said no but not why. Ask again in a way that explains itself, so the
+                        // message can name the box that is wrong (Ian, 24 Sept 2026: a bare "rejected"
+                        // left him guessing between five fields).
+                        val code = try {
+                            s3.refusalCode(config)
+                        } catch (e: IOException) {
+                            null
+                        }
+                        Logger.w(TAG, "connect: refused, store code $code")
+                        SignInResult.Failed(rejectionMessage(code))
+                    }
                     response.code == 404 -> SignInResult.Failed(MSG_BUCKET_NOT_FOUND)
                     else -> SignInResult.Failed("The store answered with error ${response.code}")
                 }
@@ -158,6 +169,20 @@ abstract class S3CompatibleCloud(
         const val MSG_KEYS_REJECTED = "The store rejected those keys."
         const val MSG_BUCKET_NOT_FOUND = "That bucket was not found."
         const val MSG_UNREACHABLE = "Could not reach that endpoint."
+
+        /** What to tell the user for the error code the store gave, naming the box to check. */
+        fun rejectionMessage(code: String?): String = when (code) {
+            "InvalidAccessKeyId" ->
+                "The store does not recognise that access key ID. Use the full key ID."
+            "SignatureDoesNotMatch" ->
+                "The secret key or the region does not match. Check both."
+            "AuthorizationHeaderMalformed", "InvalidRegionName" ->
+                "The region does not match this endpoint. Copy it from the endpoint."
+            "AccessDenied" ->
+                "These keys are not allowed to use that bucket."
+            null -> MSG_KEYS_REJECTED
+            else -> "$MSG_KEYS_REJECTED ($code)"
+        }
 
         /** `GallerySync/<album>/<name>` — the same shape for every provider that keeps folders. */
         fun objectKey(album: String, displayName: String): String =

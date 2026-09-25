@@ -58,6 +58,34 @@ class S3Client @Inject constructor(
     }
 
     /**
+     * Asks why a request was refused. A HEAD comes back with no body, so a refused key check cannot say
+     * whether the key ID, the secret or the region was wrong; a one-item listing answers with S3's own
+     * error document. Returns its `Code` (for example `SignatureDoesNotMatch`), or null if it says none.
+     * Only ever called after `HEAD` was refused, and reads nothing but the error.
+     */
+    fun refusalCode(config: S3Config): String? {
+        val url = urlFor(config, key = null).newBuilder()
+            .addQueryParameter("list-type", "2")
+            .addQueryParameter("max-keys", "1")
+            .build()
+        val headers = SigV4.sign(
+            method = "GET",
+            host = hostOf(url),
+            path = "/${config.bucket}",
+            query = "list-type=2&max-keys=1",
+            payloadSha256Hex = EMPTY_SHA256,
+            region = config.region,
+            accessKey = config.accessKey,
+            secretKey = config.secretKey,
+            now = Date()
+        ).headers
+        val request = Request.Builder().url(url).get().apply { headers.forEach { (k, v) -> header(k, v) } }.build()
+        client.newCall(request).execute().use { response ->
+            return s3ErrorCode(response.body?.string().orEmpty())
+        }
+    }
+
+    /**
      * `PUT /bucket/key`. The payload's SHA-256 is computed first, by reading the file once, and signed
      * into the request: every S3-compatible store accepts a real hash, where "unsigned payload" is one
      * more thing a provider might not support. Local reads are cheap next to the upload.
@@ -128,3 +156,7 @@ class S3Client @Inject constructor(
         const val BUFFER_BYTES = 1024 * 1024
     }
 }
+
+/** The `Code` in an S3 error document, e.g. `InvalidAccessKeyId`, or null when there is none. */
+internal fun s3ErrorCode(body: String): String? =
+    Regex("<Code>([^<]+)</Code>").find(body)?.groupValues?.get(1)?.trim()?.takeIf { it.isNotEmpty() }
