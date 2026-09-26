@@ -1326,6 +1326,21 @@ interface BackupEntryDao {
         uploaded: BackupState = BackupState.UPLOADED
     ): Int
 
+    /**
+     * The ledger rows for one file on the phone, found by where it is rather than by its content key.
+     *
+     * A photo that Sync has shrunk keeps the **original's** size in `sizeBytes` (the shrunk size is in
+     * `localProxySizeBytes`), so the key computed from the file as it is now no longer matches the row's id.
+     * The file's MediaStore id, album and name still do. Read only.
+     */
+    @Query(
+        """
+        SELECT * FROM backup_entries
+        WHERE mediaStoreId = :mediaStoreId AND album = :album AND displayName = :displayName
+        """
+    )
+    suspend fun findByLocalFile(mediaStoreId: Long, album: String, displayName: String): List<BackupEntryEntity>
+
     /** Every file the user has kept at full size, for the paths that would otherwise remove one. */
     @Query("SELECT id, mediaStoreId FROM backup_entries WHERE modeOverride = :pin")
     suspend fun pinnedKeys(pin: AlbumMode = AlbumMode.BACKUP): List<PinnedKey>

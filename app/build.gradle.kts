@@ -43,8 +43,9 @@ android {
         // folder grant, and carries the wording changes made while testing the third on the Moto G.
         // The fifth (25 Sept 2026) gives the Archive tab a folder list, with the check covering one folder or all.
         // The sixth (25 Sept 2026): the Archive header names the opened folder, with a way back.
-        versionCode = 6
-        versionName = "0.3.5"
+        // The seventh (25 Sept 2026): a photo Sync has shrunk can be swiped out of Archive.
+        versionCode = 7
+        versionName = "0.3.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

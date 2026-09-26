@@ -1327,12 +1327,24 @@ class BackupEngine @Inject constructor(
             val key = backupKeyOf(item.album, item.displayName, item.sizeBytes, item.dateModifiedEpochSeconds)
 
             if (optedOut) {
-                if (entryDao.find(key) == null) refreshLedger()
-                if (entryDao.find(key) == null) {
+                // The row is found by its key, and failing that by where the file is. A photo Sync has shrunk
+                // is no longer the size its row was keyed on, so the key alone matched nothing and the swipe
+                // silently did nothing (Moto G, 25 Sept 2026: every file in Temp02, which Sync had shrunk).
+                suspend fun rowsFor(): List<String> =
+                    listOfNotNull(entryDao.find(key)?.id).ifEmpty {
+                        entryDao.findByLocalFile(item.mediaStoreId, item.album, item.displayName).map { it.id }
+                    }
+
+                var ids = rowsFor()
+                if (ids.isEmpty()) {
+                    refreshLedger()
+                    ids = rowsFor()
+                }
+                if (ids.isEmpty()) {
                     Logger.w(TAG, "setArchiveOptOut: no ledger row for ${item.displayName}, nothing saved")
                     return@withContext false
                 }
-                entryDao.setModeOverride(key, FilePin.overrideFor(true))
+                ids.forEach { entryDao.setModeOverride(it, FilePin.overrideFor(true)) }
             } else {
                 val pinned = entryDao.pinnedKeys()
                 val ids = pinned.filter { it.id == key || it.mediaStoreId == item.mediaStoreId }.map { it.id }

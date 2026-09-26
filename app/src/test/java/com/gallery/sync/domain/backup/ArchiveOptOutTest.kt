@@ -167,10 +167,26 @@ class ArchiveOptOutTest {
         // No row before or after the refresh: the answer must be false and nothing written.
         whenever(scanner.access()).thenReturn(MediaAccess.NONE)
         whenever(entryDao.find(any())).thenReturn(null)
+        whenever(entryDao.findByLocalFile(any(), any(), any())).thenReturn(emptyList())
 
         assertFalse(engine.setArchiveOptOut(item, optedOut = true))
 
         verify(entryDao, never()).setModeOverride(any(), any())
+    }
+
+    @Test
+    fun `a photo Sync has shrunk can still be opted out, found by where it is rather than by its old size`() = runTest {
+        // The row was keyed on the original (1,000 bytes); the file on the phone is now 200. Its content key
+        // no longer matches, but its MediaStore id, album and name do. Moto G, 25 Sept 2026: swiping any file
+        // in a Sync-shrunk album did nothing, because only the content key was tried.
+        val original = file("Temp 9", "a.jpg", 1L, size = 1_000L)
+        val shrunk = file("Temp 9", "a.jpg", 1L, size = 200L)
+        whenever(entryDao.find(any())).thenReturn(null)
+        whenever(entryDao.findByLocalFile(1L, "Temp 9", "a.jpg")).thenReturn(listOf(row(original)))
+
+        assertTrue(engine.setArchiveOptOut(shrunk, optedOut = true))
+
+        verify(entryDao).setModeOverride(eq(keyOf(original)), any())
     }
 
     @Test
