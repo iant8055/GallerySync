@@ -301,6 +301,10 @@ private fun AlbumList(
 
     // Hoisted to the screen, because the hero sets it and the list below obeys it.
     var modeFilter by rememberSaveable { mutableStateOf<AlbumMode?>(null) }
+    // Show new Albums is its own view, not the Off filter (Ian, 26 Sept 2026). It used to set the mode filter to
+    // Off, which re-sorted the whole tab, rewrote the summary at the top, and showed every Off album rather than
+    // the new ones. This leaves the mode filter and the summary alone.
+    var showNewOnly by rememberSaveable { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -321,6 +325,7 @@ private fun AlbumList(
                         // Tapping the active mode again clears it, so every button is its own way
                         // out; All Albums passes null and clears it outright.
                         modeFilter = if (tapped != null && modeFilter == tapped) null else tapped
+                        showNewOnly = false
                     }
                 )
             },
@@ -417,7 +422,13 @@ private fun AlbumList(
     // 27 Aug 2026 before Ian removed it: the four mode buttons above already answer the question
     // this screen is for, and a search box is the first thing that makes an app feel like it has
     // more in it than it does. CLAUDE.md's "no search" comes out intact rather than argued around.
-    val visibleAlbums = state.albums.filter { modeFilter == null || it.mode == modeFilter }
+    val waitingNames = state.waitingAlbums.map { it.name }.toSet()
+    val showingNew = showNewOnly && waitingNames.isNotEmpty()
+    val visibleAlbums = if (showingNew) {
+        state.albums.filter { it.name in waitingNames }
+    } else {
+        state.albums.filter { modeFilter == null || it.mode == modeFilter }
+    }
 
     Column(modifier = Modifier.fillMaxSize()) {
         if (visibleAlbums.isEmpty() && state.albums.isNotEmpty()) {
@@ -460,14 +471,17 @@ private fun AlbumList(
 
             // New albums start at Off, so a folder that has just appeared would otherwise go unbacked-up
             // without a word. Says how many are waiting for a choice, and offers to show them.
-            val waitingNames = state.waitingAlbums.map { it.name }.toSet()
             val waiting = waitingNames.size
             if (waiting > 0) {
                 item(key = "waiting-albums") {
                     WaitingAlbumsCard(
                         count = waiting,
-                        onShow = { modeFilter = AlbumMode.OFF },
-                        onDismiss = viewModel::dismissWaitingAlbums
+                        showingNew = showingNew,
+                        onToggleShow = { showNewOnly = !showingNew },
+                        onDismiss = {
+                            showNewOnly = false
+                            viewModel.dismissWaitingAlbums()
+                        }
                     )
                 }
             }
@@ -993,7 +1007,7 @@ private fun ArchiveConfirmDialog(
  * Theme tokens only: the error container, with text inheriting its content colour.
  */
 @Composable
-private fun WaitingAlbumsCard(count: Int, onShow: () -> Unit, onDismiss: () -> Unit) {
+private fun WaitingAlbumsCard(count: Int, showingNew: Boolean, onToggleShow: () -> Unit, onDismiss: () -> Unit) {
     Surface(
         color = MaterialTheme.colorScheme.secondaryContainer,
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -1009,7 +1023,9 @@ private fun WaitingAlbumsCard(count: Int, onShow: () -> Unit, onDismiss: () -> U
                 style = MaterialTheme.typography.bodyLarge
             )
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextButton(onClick = onShow) { Text(stringResource(R.string.albums_waiting_show)) }
+                TextButton(onClick = onToggleShow) {
+                    Text(stringResource(if (showingNew) R.string.albums_waiting_show_all else R.string.albums_waiting_show))
+                }
                 TextButton(onClick = onDismiss) { Text(stringResource(R.string.albums_waiting_dismiss)) }
             }
         }

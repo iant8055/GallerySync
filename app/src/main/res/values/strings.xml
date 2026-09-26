@@ -874,6 +874,7 @@ full size</string>
         <item quantity="other">%d new Albums are waiting for you to choose a mode</item>
     </plurals>
     <string name="albums_waiting_show">Show new Albums</string>
+    <string name="albums_waiting_show_all">Show all Albums</string>
     <string name="album_new_tag">New</string>
     <string name="albums_waiting_dismiss">Dismiss</string>
     <string name="feature_restore">RESTORE</string>
@@ -927,7 +928,7 @@ full size</string>
     <string name="video_quality_medium_name">Medium</string>
     <string name="video_quality_low_name">Low</string>
 
-    <string name="tour_delay_title">Ready to back up</string>
+    <string name="tour_delay_title">Ready to Back Up</string>
     <string name="tour_delay_backup_size">You have selected %1$s to back up</string>
     <string name="tour_delay_saving_size">You will save %1$s in local storage</string>
     <string name="tour_delay_scanning">Scanning your library…</string>

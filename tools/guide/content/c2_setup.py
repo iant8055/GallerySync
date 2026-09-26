@@ -194,7 +194,7 @@ CHAPTER = Chapter(
         """),
 
 
-        topic("setup-ready", "Ready to back up", """
+        topic("setup-ready", "Ready to Back Up", """
             Shows **how much you have selected to back up** and, if optimising is on, **how much space
             you will save on the phone**. Then it asks **Do you want to perform backup now?**
 
