@@ -42,8 +42,9 @@ android {
         // The fourth (25 Sept 2026) writes a restored file back into the folder it left, through the
         // folder grant, and carries the wording changes made while testing the third on the Moto G.
         // The fifth (25 Sept 2026) gives the Archive tab a folder list, with the check covering one folder or all.
-        versionCode = 5
-        versionName = "0.3.4"
+        // The sixth (25 Sept 2026): the Archive header names the opened folder, with a way back.
+        versionCode = 6
+        versionName = "0.3.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

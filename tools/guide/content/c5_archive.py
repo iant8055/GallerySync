@@ -53,7 +53,7 @@ CHAPTER = Chapter(
 
             ## Where it comes from
             The number is a live count of the files on the phone, in albums set to Archive, that will be
-            archived. Opened on a folder, it counts that folder's files and the name under it is that folder's. Files you have swiped out of Archive are not counted. When you arrive it is worked
+            archived. On the folder list it counts the files waiting in every Archive folder. Opened on a folder, it is that folder's files. Files you have swiped out of Archive are not counted. When you arrive it is worked
             out from the phone; it does not need the internet. The album names are the
             albums you set to Archive.
         """, ui=True),
@@ -62,7 +62,7 @@ CHAPTER = Chapter(
             ## What it is
             The first thing under the green card: one rounded card for each folder set to Archive, in the same style as the folder cards on the Restore tab. Each shows the folder's name, how many files are waiting in it and their size, and, when they apply, how many you have kept on the phone, how many the age filter is holding back, and, after a check, how many are confirmed in your Cloud or could not be confirmed.
 
-            Tap a folder to open it. Inside, you see its files, with a button **All folders** at the top to go back.
+            Tap a folder to open it. Inside, the green card changes as it does on Restore: a back arrow and the folder's name on the left, and on the right the number of files in that folder, labelled **Files in this folder**. Tap the arrow to go back to the list.
 
             ## What it changes
             Which files a check covers. On the folder list the button reads **Check all folders** (or **Check these files** when you have only one) and covers every Archive folder. Opened on a folder it reads **Check these files** and covers that folder only: the question that follows, and Android's confirmation, are about that folder alone.

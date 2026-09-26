@@ -24,6 +24,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -44,6 +45,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -152,7 +154,12 @@ fun ArchiveScreen(
             // The same header as the Restore list, and laid out like the drill-downs on Albums and
             // Restore (Ian, 19 Sept 2026): "Files to" with "Archive" under it on the left half, the
             // number waiting on this tab centred in the right half.
-            ArchiveHeader(state = state, onValidate = viewModel::validate, onSetAgeFilter = viewModel::setAgeFilter)
+            ArchiveHeader(
+                state = state,
+                onValidate = viewModel::validate,
+                onSetAgeFilter = viewModel::setAgeFilter,
+                onCloseAlbum = viewModel::closeAlbum
+            )
         }
 
         if (state.showPrompt()) {
@@ -225,18 +232,6 @@ fun ArchiveScreen(
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    item(key = "archive-back") {
-                        TextButton(onClick = viewModel::closeAlbum) {
-                            Text("\u2190 " + stringResource(R.string.archive_back_to_folders))
-                        }
-                    }
-                    item(key = "archive-folder-name") {
-                        Text(
-                            text = open,
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
                     item(key = "archive-heading") {
                         WithHelp(HelpTopic.ARCHIVE_FILE_LIST) {
                             Text(
@@ -323,8 +318,14 @@ private fun ArchiveListItem(
  * moved to this arrangement on 19 Sept 2026 and Archive follows.
  */
 @Composable
-private fun ArchiveHeader(state: ArchiveUiState, onValidate: () -> Unit, onSetAgeFilter: (ArchiveAge) -> Unit) {
+private fun ArchiveHeader(
+    state: ArchiveUiState,
+    onValidate: () -> Unit,
+    onSetAgeFilter: (ArchiveAge) -> Unit,
+    onCloseAlbum: () -> Unit
+) {
     val signal = LocalGallerySyncColors.current
+    val open = state.openAlbum
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -336,27 +337,71 @@ private fun ArchiveHeader(state: ArchiveUiState, onValidate: () -> Unit, onSetAg
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(modifier = Modifier.weight(1f).padding(start = 8.dp)) {
-                    Text(
-                        text = stringResource(R.string.archive_hero_label_top),
-                        style = MaterialTheme.typography.headlineMedium
-                    )
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+            if (open == null) {
+                // The folder list keeps the tab's own title and its count of files waiting. Opened on a folder
+                // the title becomes that folder's name with a way back, as on Restore (Ian, 25 Sept 2026).
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(modifier = Modifier.weight(1f).padding(start = 8.dp)) {
                         Text(
-                            text = stringResource(R.string.archive_hero_label_bottom),
+                            text = stringResource(R.string.archive_hero_label_top),
                             style = MaterialTheme.typography.headlineMedium
                         )
-                        HelpButton(HelpTopic.ARCHIVE_HERO)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = stringResource(R.string.archive_hero_label_bottom),
+                                style = MaterialTheme.typography.headlineMedium
+                            )
+                            HelpButton(HelpTopic.ARCHIVE_HERO)
+                        }
+                    }
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = state.scopedEntries.size.toString(),
+                            style = MaterialTheme.typography.displayMedium
+                        )
                     }
                 }
-                // The number of files waiting on this tab, which is what someone arriving here wants
-                // to know before anything else.
-                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = state.scopedEntries.size.toString(),
-                        style = MaterialTheme.typography.displayMedium
-                    )
+            } else {
+                // Inside a folder, as Restore's: the way back and the folder's name on the left, the
+                // number of files in this folder on the right with its label under it.
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        IconButton(onClick = onCloseAlbum) {
+                            Icon(
+                                imageVector = SignalIcons.Back,
+                                contentDescription = stringResource(R.string.retrieve_back),
+                                modifier = Modifier.size(32.dp),
+                                tint = LocalContentColor.current
+                            )
+                        }
+                        Text(
+                            text = open,
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false)
+                        )
+                    }
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = state.scopedEntries.size.toString(),
+                            style = MaterialTheme.typography.displayMedium
+                        )
+                    }
+                }
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Box(modifier = Modifier.weight(1f))
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = stringResource(R.string.archive_hero_label_files),
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
 
@@ -489,11 +534,13 @@ private fun ArchiveAge.label(): Int = when (this) {
 /** The album names and the one-line explanation of what this tab does before it does it. */
 @Composable
 private fun ArchiveHeroDetail(state: ArchiveUiState) {
-    Text(
-        text = state.openAlbum ?: state.plan.albums.joinToString(", "),
-        style = MaterialTheme.typography.titleSmall,
-        fontWeight = FontWeight.SemiBold
-    )
+    if (state.openAlbum == null) {
+        Text(
+            text = state.plan.albums.joinToString(", "),
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold
+        )
+    }
     Text(
         text = stringResource(R.string.archive_intro),
         style = MaterialTheme.typography.bodySmall
@@ -1032,7 +1079,7 @@ fun ArchiveTabPreview() {
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        ArchiveHeader(state = state, onValidate = {}, onSetAgeFilter = {})
+        ArchiveHeader(state = state, onValidate = {}, onSetAgeFilter = {}, onCloseAlbum = {})
         entries.forEach { ArchiveRow(it) }
     }
 }

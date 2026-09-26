@@ -207,7 +207,7 @@
     <string name="archive_list_heading">Files</string>
     <string name="archive_folders_heading">Folders</string>
     <string name="archive_folders_hint">Tap a folder to see its files. Inside a folder, Check and Archive cover that folder only.</string>
-    <string name="archive_back_to_folders">All folders</string>
+    <string name="archive_hero_label_files">Files in this folder</string>
     <string name="archive_folder_nothing">Nothing waiting</string>
     <string name="archive_folder_detail">%1$s · %2$s</string>
     <string name="archive_folder_kept">%1$d kept on this phone</string>
