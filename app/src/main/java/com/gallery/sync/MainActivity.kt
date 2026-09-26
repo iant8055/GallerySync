@@ -27,6 +27,7 @@ import com.gallery.sync.ui.common.ExitWarningDialog
 import com.gallery.sync.domain.backup.CloudFeature
 import com.gallery.sync.ui.common.FeatureUnavailableDialog
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableIntState
 import com.gallery.sync.ui.common.NavDestination
 import com.gallery.sync.ui.common.SignalIcons
 import com.gallery.sync.ui.common.SignalNavBar
@@ -136,6 +137,10 @@ private fun GallerySyncApp(modifier: Modifier = Modifier, initialTab: Int = 0) {
     val cloudState by cloudViewModel.state.collectAsStateWithLifecycle()
     val setupViewModel: ReconcileViewModel = hiltViewModel()
     val setupState by setupViewModel.state.collectAsStateWithLifecycle()
+    // Held here, above the branches below, because each branch is a different place in the composition and a
+    // tab remembered inside SignedInApp was lost whenever the branch changed: signing OneDrive out drops the
+    // DeletedFilesGate wrapper and the app came back on Albums (Ian, 25 Sept 2026).
+    val selectedTab = rememberSaveable { mutableIntStateOf(initialTab) }
 
     if (!setupState.setupDecisionReady || !cloudState.loaded) {
         Box(modifier.fillMaxSize())
@@ -147,6 +152,7 @@ private fun GallerySyncApp(modifier: Modifier = Modifier, initialTab: Int = 0) {
     when {
         needsSetup || !cloudState.anyConnected -> SignedInApp(
             accountName = cloudAccountName(cloudState),
+            selectedTabState = selectedTab,
             onSignOut = { cloudViewModel.disconnect(BackupLocation.ONEDRIVE) },
             showTour = true,
             setupViewModel = setupViewModel,
@@ -164,8 +170,8 @@ private fun GallerySyncApp(modifier: Modifier = Modifier, initialTab: Int = 0) {
             val app: @Composable () -> Unit = {
                 SignedInApp(
                     accountName = cloudAccountName(cloudState),
+                    selectedTabState = selectedTab,
                     onSignOut = { cloudViewModel.disconnect(BackupLocation.ONEDRIVE) },
-                    initialTab = initialTab,
                     modifier = modifier
                 )
             }
@@ -193,19 +199,18 @@ private fun cloudAccountName(state: CloudProvidersUiState): String =
 @Composable
 private fun SignedInApp(
     accountName: String,
+    /** The selected tab, held by the caller so it outlives a change of branch. See [GallerySyncApp]. */
+    selectedTabState: MutableIntState,
     onSignOut: () -> Unit,
     showTour: Boolean = false,
     setupViewModel: ReconcileViewModel? = null,
     signInViewModel: SignInViewModel? = null,
-    /** Which tab to open on, e.g. Archive after a "come of age" notification tap. See [MainActivity]. */
-    initialTab: Int = 0,
     modifier: Modifier = Modifier
 ) {
-    // Saved, so the tab survives Android recreating the screen (Ian, 25 Sept 2026). It was `remember`, and any
-    // recreation put the app back on Albums: coming back from the browser after a sign-in, from a folder picker or
-    // the purchase sheet, or after a theme change. A pop-up that leaves the app now returns to the tab it came from.
-    // `initialTab` still decides the first look, for a cold start or a notification tap.
-    var selectedTab by rememberSaveable { mutableIntStateOf(initialTab) }
+    // The tab is saved and held by GallerySyncApp (Ian, 25 Sept 2026), so it survives Android recreating the screen
+    // (the sign-in browser, a folder picker, the purchase sheet, a theme change) and a change of branch above this
+    // (signing OneDrive out). `initialTab` still decides the first look, for a cold start or a notification tap.
+    var selectedTab by selectedTabState
 
     // Order is the order of use. Albums is what people open the app for; Cloud check and Settings
     // are things done once. Restore moved second because it was the tab falling off the right edge

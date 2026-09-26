@@ -45,8 +45,9 @@ android {
         // The sixth (25 Sept 2026): the Archive header names the opened folder, with a way back.
         // The seventh (25 Sept 2026): a photo Sync has shrunk can be swiped out of Archive.
         // The eighth (25 Sept 2026): the selected tab survives a sign-in, a folder picker and a theme change.
-        versionCode = 8
-        versionName = "0.3.7"
+        // The ninth (25 Sept 2026): the selected tab also survives signing OneDrive out.
+        versionCode = 9
+        versionName = "0.3.8"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
