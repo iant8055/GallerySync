@@ -17,6 +17,8 @@ captures/
 *.jks
 *.keystore
 *.p12
+# Certificates downloaded from the Play Console (App signing → Download certificate). Public, but not part of the app.
+*.der
 google-services.json
 local.secrets.properties
 keystore.properties
