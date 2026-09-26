@@ -24,9 +24,11 @@ CHAPTER = Chapter(
 
         topic("albums-new", "New albums", """
             ## What it is
-            When an album appears on your phone that you have not chosen a mode for, a message at the top of the tab says **1 new Album is waiting for you to choose a mode** (or how many). It has two buttons:
-            • **Show new Albums** lists just the albums you have not decided about.
-            • **Dismiss** puts the message away.
+            When an album appears on your phone that you have not chosen a mode for, a pop-up called **New Albums** says **1 new Album is waiting for you to choose a mode** (or how many). It has two buttons:
+            • **Show new Albums** lists just the albums you have not decided about, with a line above them saying **Showing new Albums** and a **Show all Albums** button to bring the rest back. It does not change the mode buttons or the summary at the top.
+            • **Dismiss** puts the message away for good.
+
+            Touching outside the pop-up, or going back, closes it for now. It asks again only when another new album appears.
 
             Each such album carries a **New** tag and is highlighted in the list, until you choose a mode for it.
 

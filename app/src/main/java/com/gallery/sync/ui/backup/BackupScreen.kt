@@ -424,6 +424,25 @@ private fun AlbumList(
     // more in it than it does. CLAUDE.md's "no search" comes out intact rather than argued around.
     val waitingNames = state.waitingAlbums.map { it.name }.toSet()
     val showingNew = showNewOnly && waitingNames.isNotEmpty()
+
+    // New albums are announced in a pop-up, not a coloured block in the list (Ian, 26 Sept 2026). Asked once per
+    // set of new albums: closing it any way at all counts as seen, and a folder that appears later asks again.
+    var promptedNames by rememberSaveable { mutableStateOf("") }
+    val prompted = if (promptedNames.isEmpty()) emptySet() else promptedNames.split("|").toSet()
+    if (waitingNames.isNotEmpty() && !showingNew && !prompted.containsAll(waitingNames)) {
+        NewAlbumsDialog(
+            count = waitingNames.size,
+            onShow = {
+                promptedNames = waitingNames.sorted().joinToString("|")
+                showNewOnly = true
+            },
+            onDismiss = {
+                promptedNames = waitingNames.sorted().joinToString("|")
+                viewModel.dismissWaitingAlbums()
+            },
+            onClose = { promptedNames = waitingNames.sorted().joinToString("|") }
+        )
+    }
     val visibleAlbums = if (showingNew) {
         state.albums.filter { it.name in waitingNames }
     } else {
@@ -469,20 +488,10 @@ private fun AlbumList(
                 }
             }
 
-            // New albums start at Off, so a folder that has just appeared would otherwise go unbacked-up
-            // without a word. Says how many are waiting for a choice, and offers to show them.
-            val waiting = waitingNames.size
-            if (waiting > 0) {
-                item(key = "waiting-albums") {
-                    WaitingAlbumsCard(
-                        count = waiting,
-                        showingNew = showingNew,
-                        onToggleShow = { showNewOnly = !showingNew },
-                        onDismiss = {
-                            showNewOnly = false
-                            viewModel.dismissWaitingAlbums()
-                        }
-                    )
+            // Shown while the list is narrowed to the new albums, so there is always a way back to all of them.
+            if (showingNew) {
+                item(key = "showing-new-albums") {
+                    ShowingNewAlbumsRow(onShowAll = { showNewOnly = false })
                 }
             }
 
@@ -998,6 +1007,40 @@ private fun ArchiveConfirmDialog(
 }
 
 /**
+ * Tells the user that folders have appeared that nobody has chosen a mode for.
+ *
+ * New albums start at Off, so without a word a new folder would go unbacked-up. A pop-up rather than a block in the
+ * list (Ian, 26 Sept 2026). *Show new Albums* narrows the list to them; *Dismiss* is the standing answer (see
+ * `dismissWaitingAlbums`); leaving it any other way just closes it for now.
+ */
+@Composable
+private fun NewAlbumsDialog(count: Int, onShow: () -> Unit, onDismiss: () -> Unit, onClose: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onClose,
+        title = { Text(stringResource(R.string.albums_waiting_title)) },
+        text = { Text(pluralStringResource(R.plurals.albums_waiting, count, count)) },
+        confirmButton = { TextButton(onClick = onShow) { Text(stringResource(R.string.albums_waiting_show)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.albums_waiting_dismiss)) } }
+    )
+}
+
+/** One quiet line above the list while it is narrowed to the new albums. Theme colours only. */
+@Composable
+private fun ShowingNewAlbumsRow(onShowAll: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = stringResource(R.string.albums_showing_new),
+            style = MaterialTheme.typography.bodyLarge
+        )
+        TextButton(onClick = onShowAll) { Text(stringResource(R.string.albums_waiting_show_all)) }
+    }
+}
+
+/**
  * Lists the albums that were merged from duplicate names, and says each merged album is now Off.
  *
  * One card for all of them, as a table: Ian's layout, 16 Sept 2026. Every merge sets the album Off,
@@ -1006,32 +1049,6 @@ private fun ArchiveConfirmDialog(
  *
  * Theme tokens only: the error container, with text inheriting its content colour.
  */
-@Composable
-private fun WaitingAlbumsCard(count: Int, showingNew: Boolean, onToggleShow: () -> Unit, onDismiss: () -> Unit) {
-    Surface(
-        color = MaterialTheme.colorScheme.secondaryContainer,
-        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-        shape = RoundedCornerShape(12.dp),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Text(
-                text = pluralStringResource(R.plurals.albums_waiting, count, count),
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextButton(onClick = onToggleShow) {
-                    Text(stringResource(if (showingNew) R.string.albums_waiting_show_all else R.string.albums_waiting_show))
-                }
-                TextButton(onClick = onDismiss) { Text(stringResource(R.string.albums_waiting_dismiss)) }
-            }
-        }
-    }
-}
-
 @Composable
 private fun AlbumMergeWarningCard(warnings: List<AlbumMergeWarning>, onDismiss: () -> Unit) {
     Surface(

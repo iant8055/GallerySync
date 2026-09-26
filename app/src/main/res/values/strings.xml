@@ -875,6 +875,8 @@ full size</string>
     </plurals>
     <string name="albums_waiting_show">Show new Albums</string>
     <string name="albums_waiting_show_all">Show all Albums</string>
+    <string name="albums_waiting_title">New Albums</string>
+    <string name="albums_showing_new">Showing new Albums</string>
     <string name="album_new_tag">New</string>
     <string name="albums_waiting_dismiss">Dismiss</string>
     <string name="feature_restore">RESTORE</string>
