@@ -69,3 +69,7 @@ So a file can be matched to its ledger row by MediaStore id (parsed), or by name
 3. Refuse anything not verified in OneDrive at full size (`verifiedInCloud`), the same bar as every rewrite.
 4. Download the original, write it in place, clear `isProxied`, and pin the file (`FilePin`), exactly as Restore does.
 5. Test with Samsung Gallery on Ian's real device only if he chooses to; the Moto G has Google Photos only.
+
+## Correction, 26 Sept 2026 (measured on the Moto G)
+
+The sentence above, *Restore already refuses to write over a file whose size has changed*, is **wrong**. An in-place edit of an optimised photo was simulated (id kept, size 744,886 instead of 744,869): the app never uploaded it, and Restore then replaced it with the 3.85 MB OneDrive original with no refusal and no warning. `RestoreProxyInPlace.restore` checks only that the download is complete, not that the file on the phone is still the copy the app wrote. Both halves of the proposed fix are needed: Restore must refuse a changed file, and a changed optimised file must be treated as edited and uploaded as a new file. Ian has not decided. See `.claude/MILESTONES.md`, 26 Sept 2026.
