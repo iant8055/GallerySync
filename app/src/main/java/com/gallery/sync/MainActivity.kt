@@ -201,7 +201,11 @@ private fun SignedInApp(
     initialTab: Int = 0,
     modifier: Modifier = Modifier
 ) {
-    var selectedTab by remember { mutableIntStateOf(initialTab) }
+    // Saved, so the tab survives Android recreating the screen (Ian, 25 Sept 2026). It was `remember`, and any
+    // recreation put the app back on Albums: coming back from the browser after a sign-in, from a folder picker or
+    // the purchase sheet, or after a theme change. A pop-up that leaves the app now returns to the tab it came from.
+    // `initialTab` still decides the first look, for a cold start or a notification tap.
+    var selectedTab by rememberSaveable { mutableIntStateOf(initialTab) }
 
     // Order is the order of use. Albums is what people open the app for; Cloud check and Settings
     // are things done once. Restore moved second because it was the tab falling off the right edge
