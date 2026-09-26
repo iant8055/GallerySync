@@ -84,8 +84,6 @@ data class CloudProvidersUiState(
 
     val anyConnected: Boolean get() = connected.isNotEmpty()
 
-    val mainConnected: Boolean get() = connected.any { it.location == main }
-
     /** Connected clouds other than the main one — the ones that need Pro or the trial. */
     val extraConnected: List<ProviderState> get() = connected.filter { it.location != main }
 

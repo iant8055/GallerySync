@@ -104,13 +104,6 @@ data class ArchivePlan(
     /** Some green, some red. The prompt has to describe only the green half. */
     val isPartial: Boolean get() = confirmed.isNotEmpty() && failed.isNotEmpty()
 
-    fun withMark(id: Long, mark: ArchiveMark, failure: ArchiveFailure? = null): ArchivePlan =
-        copy(
-            entries = entries.map {
-                if (it.item.mediaStoreId == id) it.copy(mark = mark, failure = failure) else it
-            }
-        )
-
     fun withMarks(ids: Set<Long>, mark: ArchiveMark, failure: ArchiveFailure? = null): ArchivePlan =
         copy(
             entries = entries.map {

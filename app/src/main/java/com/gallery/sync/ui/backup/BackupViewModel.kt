@@ -37,7 +37,6 @@ import com.gallery.sync.domain.backup.BackupLocation
 import com.gallery.sync.domain.backup.CameraAlbum
 import com.gallery.sync.domain.backup.CameraOptimisePlan
 import com.gallery.sync.domain.backup.CameraOptimiseSettings
-import com.gallery.sync.domain.backup.CloudConfirmation
 import com.gallery.sync.domain.backup.FilePin
 import com.gallery.sync.domain.backup.FolderDestination
 import com.gallery.sync.domain.backup.GooglePhotosDestination
@@ -174,8 +173,6 @@ data class AlbumRow(
      */
     val showsOneDriveClause: Boolean get() = !(sentElsewhereCount > 0 && (backedUpCount - sentElsewhereCount) <= 0)
 
-    val backedUpOnly: Int get() = (backedUpCount - proxiedCount).coerceAtLeast(0)
-
     val status: AlbumStatus
         get() = when {
             itemCount > 0 && backedUpCount >= itemCount -> AlbumStatus.COMPLETE
@@ -291,8 +288,6 @@ data class BackupUiState(
      * What it does carry is the fact Android's dialog cannot state — that the cloud copy is verified.
      */
     val archiveAlbumsReady: List<String> = emptyList(),
-    /** What the last removal attempt refused to remove, and why. Null before any attempt. */
-    val removalHeldBack: CloudConfirmation? = null,
     /** Photos whose local copy could be replaced by a proxy, and what they occupy now. */
     val proxyCandidateCount: Int = 0,
     val canProxy: Boolean = false,
@@ -405,11 +400,6 @@ data class BackupUiState(
     /** Files that would be sent if a run started now. */
     val enabledItemCount: Int get() = albums.filter { it.isEnabled }.sumOf { it.itemCount }
 
-    val enabledBytes: Long get() = albums.filter { it.isEnabled }.sumOf { it.totalBytes }
-
-    /** Something selected, and all of it already in OneDrive. */
-    val isSelectionFullyBackedUp: Boolean get() = enabledItemCount > 0 && pendingCount == 0
-
     /**
      * How many albums are in each mode.
      *
@@ -423,9 +413,6 @@ data class BackupUiState(
     val syncAlbumCount: Int get() = albums.count { it.mode == AlbumMode.SYNC }
     val archiveAlbumCount: Int get() = albums.count { it.mode == AlbumMode.ARCHIVE }
     val offAlbumCount: Int get() = albums.count { it.mode == AlbumMode.OFF }
-
-    /** Albums doing something. */
-    val activeAlbumCount: Int get() = albums.count { it.mode != AlbumMode.OFF }
 
     /**
      * What the hero says about whatever the filter is showing.
@@ -453,15 +440,6 @@ data class BackupUiState(
             archivedBytes = rows.sumOf { it.everBackedUpBytes }
         )
     }
-
-    /**
-     * The button is worth pressing — either to start work, or to stop work already running.
-     *
-     * While a run is live this is always true, because the button is Stop then. It used to be
-     * `!isRunning && pendingCount > 0`, which disabled the one control that could end a run the
-     * user had started.
-     */
-    val canRunBackup: Boolean get() = isRunning || pendingCount > 0
 
     /** Whether the Sync now button does anything: files to send, or Manual optimising to run. */
     val canSyncNow: Boolean get() = pendingCount > 0 || manualOptimiseWaiting
@@ -1346,45 +1324,6 @@ class BackupViewModel @Inject constructor(
             pendingProxyCandidates = emptyList()
             refresh()
         }
-    }
-
-    /**
-     * Builds the system request to move redundant local copies into the gallery's trash.
-     *
-     * ### OneDrive is asked again, here, every time
-     *
-     * `redundantLocalCopies` reads the ledger, which records that a copy was confirmed *once*. That
-     * is not the same claim as "there is a copy now", and removal is the one place where only the
-     * second will do — a file deleted from OneDrive by hand leaves a row insisting it is safe
-     * forever, with nothing anywhere to notice.
-     *
-     * So the drive is re-listed before anything is offered for removal, and only files it confirms
-     * right now are included. Files it cannot vouch for are dropped from the request and reported;
-     * **being unable to ask is never treated as a yes.**
-     *
-     * Returns null when nothing survives the check. The caller launches the request, and Android —
-     * not this app — asks the user to confirm.
-     */
-    suspend fun buildMoveToBackupRequest(): IntentSender? {
-        val redundant = engine.redundantLocalCopies()
-        if (redundant.isEmpty()) return null
-
-        val confirmation = engine.confirmStillInCloud(redundant)
-        _state.value = _state.value.copy(removalHeldBack = confirmation)
-
-        if (confirmation.confirmed.isEmpty()) {
-            Logger.w("BackupViewModel", "not removing: OneDrive confirmed none of ${redundant.size}")
-            return null
-        }
-
-        return localCopyRemover.createMoveToBackupRequest(
-            confirmation.confirmed.map { it.contentUri }
-        )
-    }
-
-    /** Called after the system dialog closes, to reflect whatever the user allowed. */
-    fun onMoveToBackupFinished() {
-        viewModelScope.launch { refresh() }
     }
 
     /**

@@ -18,7 +18,6 @@ import com.gallery.sync.util.ChargingState
 import com.gallery.sync.util.RecentsCard
 import com.gallery.sync.domain.backup.FirstBackupHold
 import com.gallery.sync.domain.backup.LibraryChoice
-import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.domain.backup.CloudDeletionPolicy
 import com.gallery.sync.domain.backup.FirstBackupWindow
 import com.gallery.sync.domain.backup.OptimiseMode
@@ -184,8 +183,6 @@ data class ReconcileUiState(
     val optimiseRunning: Boolean = false,
     /** How many files were optimised in the one-time pass. */
     val optimisedCount: Int = 0,
-    /** Bytes reclaimed by the one-time pass. */
-    val optimisedBytes: Long = 0L,
     /** Whether the one-time pass finished. */
     val optimiseFinished: Boolean = false,
     /** Videos eligible for the wizard's one-time bulk optimise. */
@@ -194,8 +191,6 @@ data class ReconcileUiState(
     val videoOptimiseRunning: Boolean = false,
     /** How many videos were optimised. */
     val videoOptimisedCount: Int = 0,
-    /** Bytes reclaimed by video optimisation. */
-    val videoOptimisedBytes: Long = 0L,
     /** Whether video optimisation finished. */
     val videoOptimiseFinished: Boolean = false,
     /**

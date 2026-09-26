@@ -16,7 +16,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
-import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.coroutineContext
@@ -40,8 +39,6 @@ data class VideoOptimiseResult(
      */
     val failedIds: List<String> = emptyList()
 ) {
-    val didAnything: Boolean get() = optimised > 0 || skipped > 0 || failed > 0
-
     /** Clips this run took a real look at, which is what proves the chain is moving. */
     val attempted: Int get() = optimised + skipped + failed
 }

@@ -1,8 +1,6 @@
 package com.gallery.sync.ui.settings
 
-import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -30,7 +28,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,19 +47,13 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
 import com.gallery.sync.ui.common.labelRes
-import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.settings.ThemeMode
 import com.gallery.sync.domain.backup.ArchiveAge
 import com.gallery.sync.domain.backup.BackupLocation
-import com.gallery.sync.domain.backup.capabilities
-import com.gallery.sync.domain.backup.BackupLocations
 import com.gallery.sync.domain.backup.MediaAge
 import com.gallery.sync.domain.backup.OptimiseMode
 import com.gallery.sync.domain.backup.VideoQuality
-import com.gallery.sync.ui.backup.BackupUiState
 import com.gallery.sync.ui.backup.BackupViewModel
-import com.gallery.sync.ui.common.LabelWithAction
-import com.gallery.sync.ui.common.formatBytes
 import com.gallery.sync.ui.help.HelpButton
 import com.gallery.sync.ui.help.HelpTopic
 import com.gallery.sync.ui.help.WithHelp
@@ -537,24 +528,6 @@ private fun SettingDivider() {
     HorizontalDivider()
 }
 
-/** A backup location's name, with the box that switches it on or off at the left of it. */
-@Composable
-private fun LocationHeading(
-    title: String,
-    checked: Boolean,
-    enabled: Boolean,
-    onCheckedChange: (Boolean) -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        Checkbox(checked = checked, onCheckedChange = onCheckedChange, enabled = enabled)
-        Text(text = title, style = MaterialTheme.typography.titleMedium)
-    }
-}
-
 @Composable
 private fun SettingSwitch(
     label: String,
@@ -674,14 +647,6 @@ private fun ArchiveAge.label(): String = when (this) {
     ArchiveAge.OneMonth -> stringResource(R.string.archive_age_month)
     ArchiveAge.OneYear -> stringResource(R.string.archive_age_year)
     ArchiveAge.All -> stringResource(R.string.archive_age_all)
-}
-
-@Composable
-private fun AlbumMode.settingsLabel(): String = when (this) {
-    AlbumMode.OFF -> stringResource(R.string.mode_off)
-    AlbumMode.BACKUP -> stringResource(R.string.mode_backup)
-    AlbumMode.SYNC -> stringResource(R.string.mode_sync)
-    AlbumMode.ARCHIVE -> stringResource(R.string.mode_archive)
 }
 
 /**

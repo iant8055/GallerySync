@@ -29,7 +29,6 @@ import com.gallery.sync.domain.model.RemoteError
 import com.gallery.sync.domain.model.RemoteMediaNode
 import com.gallery.sync.domain.billing.MultiCloudEntitlement
 import com.gallery.sync.domain.repository.CloudUploaders
-import com.gallery.sync.domain.repository.RemoteCheck
 import com.gallery.sync.domain.repository.CloudVerifiers
 import com.gallery.sync.domain.repository.OneDriveRepository
 import com.gallery.sync.domain.repository.OneDriveUploadRepository
@@ -1644,46 +1643,6 @@ class BackupEngine @Inject constructor(
      */
     suspend fun destinationPath(): String = destinationRoot()
 
-    /**
-     * Everything OneDrive holds for one album, each marked with whether the phone still has it.
-     *
-     * Reuses [remoteIndexFor] rather than walking the pages again. That walk is the one this
-     * codebase has already paid for: reading a single page made 5,523 files look absent on a real
-     * library, and a second copy of the logic is a second chance to reintroduce it.
-     *
-     * Every file is returned, including ones already on the device — see [RestorableFile]. `null`
-     * means the folder could not be listed, which is not the same as it being empty.
-     */
-    suspend fun restorableFilesIn(album: String): List<RestorableFile>? = withContext(dispatcher) {
-        val index = remoteIndexFor(album) ?: return@withContext null
-
-        // Only a trustworthy scan may say a file is here. Without full access the honest answer is
-        // "we do not know", and the safe rendering of that is to mark nothing — an unmarked file is
-        // simply offered, which costs a duplicate at worst. Claiming a file is already on the phone
-        // when we cannot see it would talk the user out of a retrieval they need.
-        val onDevice = if (scanner.access() == MediaAccess.FULL) {
-            scanner.scanEverything().mapTo(HashSet()) {
-                RestoredAlbum.contentSignature(it.displayName, it.sizeBytes)
-            }
-        } else {
-            emptySet()
-        }
-
-        index.map { (name, ref) ->
-            // An unreported size shows as 0 in the list and never matches an on-device signature.
-            // Both are the safe direction here: the row still offers the download, and "already on
-            // this phone" stays a claim we can only make when we actually know the size.
-            RestorableFile(
-                remoteItemId = ref.id,
-                displayName = name,
-                mimeType = ref.mimeType,
-                sizeBytes = ref.sizeBytes ?: 0L,
-                alreadyOnDevice = ref.sizeBytes != null &&
-                    RestoredAlbum.contentSignature(name, ref.sizeBytes) in onDevice
-            )
-        }.sortedBy { it.displayName.lowercase() }
-    }
-
     private class CachedIndex(val index: Map<String, RemoteFileRef>, val atMillis: Long)
 
     private val indexCache = HashMap<String, CachedIndex>()
@@ -2048,16 +2007,6 @@ class BackupEngine @Inject constructor(
 
         /** Marks a description of a OneDrive file that has no ledger row. See [driveRestoreFiles]. */
         const val DRIVE_ID_PREFIX = "drive:"
-
-        /**
-         * Retired in favour of [RemoteRoots]. The destination is now a user setting and the search
-         * set is more than one folder, so a single constant can no longer describe either.
-         */
-        @Deprecated(
-            "The destination is a setting; use RemoteRoots",
-            ReplaceWith("RemoteRoots.SAMSUNG_GALLERY")
-        )
-        const val REMOTE_ROOT = RemoteRoots.SAMSUNG_GALLERY
 
         /**
          * Bound variables per statement.

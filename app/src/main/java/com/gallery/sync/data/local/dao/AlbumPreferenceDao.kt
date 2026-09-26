@@ -46,16 +46,6 @@ interface AlbumPreferenceDao {
     @Query("SELECT * FROM album_preferences")
     suspend fun all(): List<AlbumPreferenceEntity>
 
-    /**
-     * Albums the user switched off.
-     *
-     * Absence from this list does **not** mean the album is backed up — an album with no row has
-     * not been chosen either way, and is not eligible. See [BackupEntryDao.nextPending] for the gate
-     * that decides.
-     */
-    @Query("SELECT albumName FROM album_preferences WHERE mode = 'OFF'")
-    suspend fun disabledAlbums(): List<String>
-
     /** Albums in a given mode, for the space-management work that only applies to some of them. */
     @Query("SELECT albumName FROM album_preferences WHERE mode = :mode")
     suspend fun albumsInMode(mode: AlbumMode): List<String>

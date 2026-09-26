@@ -19,10 +19,6 @@ import com.gallery.sync.util.Logger
  */
 object OneDriveLauncher {
 
-    /** Requires the matching `<queries>` entry in the manifest, or this always returns null on API 30+. */
-    fun isInstalled(context: Context): Boolean =
-        context.packageManager.getLaunchIntentForPackage(ONEDRIVE_PACKAGE) != null
-
     fun open(context: Context) {
         val launch = context.packageManager.getLaunchIntentForPackage(ONEDRIVE_PACKAGE)
         if (launch != null) {

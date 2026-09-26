@@ -10,7 +10,6 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.domain.backup.ArchiveAge
 import com.gallery.sync.domain.backup.BackupLocation
 import com.gallery.sync.domain.backup.LibraryChoice
@@ -470,10 +469,6 @@ class BackupSettings @Inject constructor(
 
     suspend fun setWizardStep(step: Int) {
         context.dataStore.edit { it[KEY_WIZARD_STEP] = step }
-    }
-
-    suspend fun setWizardBackupTotal(total: Int) {
-        context.dataStore.edit { it[KEY_WIZARD_BACKUP_TOTAL] = total }
     }
 
     /** Records the wizard run's denominator and start together, so the two cannot disagree. */

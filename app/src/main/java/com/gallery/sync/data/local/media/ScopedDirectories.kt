@@ -86,9 +86,6 @@ class ScopedDirectories @Inject constructor(
 
     suspend fun current(): List<GrantedDirectory> = directories.first()
 
-    /** Whether anything has been granted or selected. The engine has nothing correct to do until it has. */
-    suspend fun hasAny(): Boolean = current().isNotEmpty() || selectedDirectories.first().isNotEmpty()
-
     /**
      * Stores the directory names the user checked in the wizard.
      *

@@ -595,9 +595,6 @@ interface BackupEntryDao {
     @Query("SELECT COUNT(*) FROM backup_entries WHERE state = :state")
     suspend fun countInState(state: BackupState): Int
 
-    @Query("SELECT COUNT(*) FROM backup_entries WHERE state != :state")
-    suspend fun countNotInState(state: BackupState): Int
-
     /**
      * Outstanding files in albums the user actually selected.
      *
@@ -619,12 +616,6 @@ interface BackupEntryDao {
         """
     )
     suspend fun countPendingInSelectedAlbums(maxAttempts: Int, uploaded: BackupState = BackupState.UPLOADED): Int
-
-    @Query("SELECT COUNT(*) FROM backup_entries")
-    fun observeTotal(): Flow<Int>
-
-    @Query("SELECT COALESCE(SUM(sizeBytes), 0) FROM backup_entries WHERE state != :uploaded")
-    fun observePendingBytes(uploaded: BackupState = BackupState.UPLOADED): Flow<Long>
 
     /**
      * Bytes already in OneDrive, and bytes still waiting in albums the user selected.
@@ -657,16 +648,6 @@ interface BackupEntryDao {
         """
     )
     suspend fun pendingBytesInSelectedAlbums(uploaded: BackupState = BackupState.UPLOADED): Long
-
-    /**
-     * Rows for files no longer on the device.
-     *
-     * Removing these keeps the ledger honest. It never touches the copy already in OneDrive —
-     * deleting a photo from the phone must not delete the backup, which is the whole point of
-     * having one.
-     */
-    @Query("DELETE FROM backup_entries WHERE id NOT IN (:presentIds)")
-    suspend fun deleteMissing(presentIds: List<String>)
 
     @Query("SELECT * FROM backup_entries WHERE id = :id")
     suspend fun find(id: String): BackupEntryEntity?

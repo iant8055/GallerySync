@@ -5,15 +5,6 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Text
-import androidx.compose.ui.semantics.Role
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -94,61 +85,4 @@ fun LabelWithAction(
 fun isCompactWidth(availableWidth: Dp, minRowWidth: Dp = CompactRowThreshold): Boolean {
     val fontScale = LocalDensity.current.fontScale.coerceAtLeast(1f)
     return availableWidth < minRowWidth * fontScale
-}
-
-/**
- * A single-choice control that stops being a segmented row when the options cannot fit.
- *
- * A segmented button divides the available width between its options, so each one gets a fraction
- * of an already-narrow screen. At 320dp with 1.7x text, "System" wrapped onto two lines and swelled
- * that segment out of the pill, deforming the whole control — a shape no amount of rearranging
- * fixes, because the control itself is the wrong one at that size.
- *
- * Below the threshold this becomes a vertical list of radio options, which reads correctly at any
- * width and any font size.
- */
-@Composable
-fun <T> SingleChoiceControl(
-    options: List<T>,
-    selected: T,
-    onSelected: (T) -> Unit,
-    label: @Composable (T) -> String,
-    modifier: Modifier = Modifier,
-    minRowWidth: Dp = CompactRowThreshold
-) {
-    BoxWithConstraints(modifier.fillMaxWidth()) {
-        if (isCompactWidth(maxWidth, minRowWidth)) {
-            Column(Modifier.selectableGroup()) {
-                options.forEach { option ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .selectable(
-                                selected = option == selected,
-                                onClick = { onSelected(option) },
-                                role = Role.RadioButton
-                            )
-                            .padding(vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        RadioButton(selected = option == selected, onClick = null)
-                        Text(label(option))
-                    }
-                }
-            }
-        } else {
-            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                options.forEachIndexed { index, option ->
-                    SegmentedButton(
-                        selected = option == selected,
-                        onClick = { onSelected(option) },
-                        shape = SegmentedButtonDefaults.itemShape(index, options.size)
-                    ) {
-                        Text(label(option))
-                    }
-                }
-            }
-        }
-    }
 }
