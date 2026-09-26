@@ -349,10 +349,9 @@ class ReconcileViewModel @Inject constructor(
                     hasCompletedSetup = prefs.hasCompletedSetup,
                     settingsLoaded = true,
                     allowMeteredNetwork = prefs.allowMeteredNetwork,
-                    isAutoOptimiseEnabled = prefs.isOptimiseEnabled &&
-                        prefs.photoOptimiseMode == OptimiseMode.Auto,
-                    optimiseVideo = prefs.optimiseVideo,
-                    videoQuality = prefs.videoQuality,
+                    isAutoOptimiseEnabled = prefs.wizardOptimisePhotos,
+                    optimiseVideo = prefs.wizardOptimiseVideo,
+                    videoQuality = prefs.wizardVideoQuality,
                     libraryChoice = prefs.libraryChoice,
                     cloudDeletionPolicy = prefs.cloudDeletionPolicy,
                     wizardStep = prefs.wizardStep,
@@ -375,26 +374,20 @@ class ReconcileViewModel @Inject constructor(
         viewModelScope.launch { settings.setAllowMeteredNetwork(allowed) }
     }
 
-    /**
-     * The old single photo switch, expressed through the two settings that replaced it.
-     *
-     * Kept so existing callers keep working while the new Settings section is built. It sets the
-     * master switch and puts photos in Auto, which is what this control used to mean - "optimise
-     * photos without asking me each time".
-     */
-    fun setAutoOptimiseEnabled(enabled: Boolean) {
-        viewModelScope.launch {
-            settings.setOptimiseEnabled(enabled)
-            if (enabled) settings.setPhotoOptimiseMode(OptimiseMode.Auto)
-        }
+    // The wizard's Optimisation Settings card. It writes its own three values and never the Settings tab's:
+    // Ian, 26 Sept 2026, "THE WIZARD SHOULD NEVER EVER SET A DEFAULT IN SETTINGS". These used to switch on the
+    // master optimise switch, put photos in Auto, and turn video on for good, so a phone set up in the wizard
+    // came out with Settings already changed and a Sync album optimising by itself.
+    fun setWizardOptimisePhotos(enabled: Boolean) {
+        viewModelScope.launch { settings.setWizardOptimisePhotos(enabled) }
     }
 
-    fun setOptimiseVideo(enabled: Boolean) {
-        viewModelScope.launch { settings.setOptimiseVideo(enabled) }
+    fun setWizardOptimiseVideo(enabled: Boolean) {
+        viewModelScope.launch { settings.setWizardOptimiseVideo(enabled) }
     }
 
-    fun setVideoQuality(quality: VideoQuality) {
-        viewModelScope.launch { settings.setVideoQuality(quality) }
+    fun setWizardVideoQuality(quality: VideoQuality) {
+        viewModelScope.launch { settings.setWizardVideoQuality(quality) }
     }
 
     fun setCloudDeletionPolicy(policy: CloudDeletionPolicy) {

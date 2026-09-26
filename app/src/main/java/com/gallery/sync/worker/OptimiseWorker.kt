@@ -268,7 +268,8 @@ class OptimiseWorker @AssistedInject constructor(
             return 0
         }
 
-        val quality = settings.current().videoQuality
+        // The wizard's own answer, not Settings': the two are independent, in both directions.
+        val quality = settings.current().wizardVideoQuality
         Logger.i(TAG, "video: optimising up to $VIDEO_BATCH of ${candidates.size} at $quality")
         videoOptimiser.runForWizard(quality, limit = VIDEO_BATCH)
         return (candidates.size - VIDEO_BATCH).coerceAtLeast(0)

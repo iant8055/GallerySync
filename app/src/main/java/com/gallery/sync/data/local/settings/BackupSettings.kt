@@ -216,6 +216,18 @@ data class BackupPreferences(
      */
     val videoQuality: VideoQuality = VideoQuality.DEFAULT,
     /**
+     * The install wizard's own answers to its Optimisation Settings card. **Not the Settings tab's.**
+     *
+     * Ian, 26 Sept 2026, in capitals: the wizard must never set a default in Settings, ever. These three
+     * used to be [optimisePhotos] (through the master switch and Auto mode), [optimiseVideo] and
+     * [videoQuality], so a stranger who turned video on in the wizard found Optimise video already on in
+     * Settings, and a Sync album then optimised old clips by itself. They are separate keys now: the wizard
+     * reads and writes only these, and Settings reads and writes only its own. Both start at their defaults.
+     */
+    val wizardOptimisePhotos: Boolean = false,
+    val wizardOptimiseVideo: Boolean = false,
+    val wizardVideoQuality: VideoQuality = VideoQuality.DEFAULT,
+    /**
      * The one-time install choice, kept so the wizard survives its own process ending.
      *
      * It used to live only in `ReconcileUiState`. Closing the wizard mid-backup — which is the
@@ -334,6 +346,9 @@ class BackupSettings @Inject constructor(
             uploadInterruptedAtEpochMillis = stored[KEY_INTERRUPTED_AT] ?: 0L,
             runBaselineBytes = stored[KEY_RUN_BASELINE] ?: 0L,
             videoQuality = VideoQuality.fromNameOrDefault(stored[KEY_VIDEO_QUALITY]),
+            wizardOptimisePhotos = stored[KEY_WIZARD_OPTIMISE_PHOTOS] ?: false,
+            wizardOptimiseVideo = stored[KEY_WIZARD_OPTIMISE_VIDEO] ?: false,
+            wizardVideoQuality = VideoQuality.fromNameOrDefault(stored[KEY_WIZARD_VIDEO_QUALITY]),
             libraryChoice = LibraryChoice.fromNameOrDefault(stored[KEY_LIBRARY_CHOICE]),
             optimiseCutoffEpochMillis = stored[KEY_OPTIMISE_CUTOFF] ?: OptimiseCutoff.EVERYTHING,
             videoOptimiseAge = MediaAge.fromNameOrDefault(stored[KEY_VIDEO_OPTIMISE_AGE]),
@@ -412,6 +427,19 @@ class BackupSettings @Inject constructor(
     /** How hard to optimise video. See [VideoQuality]. */
     suspend fun setVideoQuality(quality: VideoQuality) {
         context.dataStore.edit { it[KEY_VIDEO_QUALITY] = quality.name }
+    }
+
+    /** The wizard's answers. See [BackupPreferences.wizardOptimisePhotos]: never Settings' own keys. */
+    suspend fun setWizardOptimisePhotos(enabled: Boolean) {
+        context.dataStore.edit { it[KEY_WIZARD_OPTIMISE_PHOTOS] = enabled }
+    }
+
+    suspend fun setWizardOptimiseVideo(enabled: Boolean) {
+        context.dataStore.edit { it[KEY_WIZARD_OPTIMISE_VIDEO] = enabled }
+    }
+
+    suspend fun setWizardVideoQuality(quality: VideoQuality) {
+        context.dataStore.edit { it[KEY_WIZARD_VIDEO_QUALITY] = quality.name }
     }
 
     /** Records the install choice so it outlives the wizard's own process. */
@@ -663,6 +691,9 @@ class BackupSettings @Inject constructor(
         val KEY_INTERRUPTED_AT = longPreferencesKey("upload_interrupted_at")
         val KEY_RUN_BASELINE = longPreferencesKey("run_baseline_bytes")
         val KEY_VIDEO_QUALITY = stringPreferencesKey("video_quality")
+        val KEY_WIZARD_OPTIMISE_PHOTOS = booleanPreferencesKey("wizard_optimise_photos")
+        val KEY_WIZARD_OPTIMISE_VIDEO = booleanPreferencesKey("wizard_optimise_video")
+        val KEY_WIZARD_VIDEO_QUALITY = stringPreferencesKey("wizard_video_quality")
         val KEY_LIBRARY_CHOICE = stringPreferencesKey("library_choice")
         val KEY_OPTIMISE_CUTOFF = longPreferencesKey("optimise_cutoff")
         val KEY_VIDEO_OPTIMISE_AGE = stringPreferencesKey("video_optimise_age")

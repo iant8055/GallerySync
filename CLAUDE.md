@@ -259,6 +259,12 @@ table, the same table Settings lists. That is not the wizard writing Settings: t
 routing itself, not a Settings value, and the wizard still reads none of it. It writes no album modes
 and no optimise settings, and none of the rules above changed. See TASK-026.
 
+**Enforced in code, 26 Sept 2026.** The wizard's Optimisation Settings card stores its answers in its own `wizard_optimise_photos`, 
+`wizard_optimise_video` and `wizard_video_quality` values and never in the ones Settings shows. They were shared from 31 Aug to 26 Sept, 
+against this rule, and Ian found Video Optimisation already on in Settings on a phone that had only been through the wizard. 
+`WizardDoesNotWriteSettingsTest` fails the build if the tour, or any view-model function it calls, writes a Settings-owned setter. 
+**Never offer "keep it shared" as an option: this is not a choice.**
+
 **Settings → *Run setup again* is a testing affordance and will not ship** (Ian, 7 Sept 2026). It is
 there so the wizard can be re-entered without wiping app data while the wizard is still being
 iterated on, and *"once we finally get the Wizard set that setting will go away"*. Do not build on it,

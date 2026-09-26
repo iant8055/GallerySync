@@ -735,11 +735,11 @@ fun SetupTour(
                         )
                         7 -> OptimizationContent(
                             optimisePhotos = state.isAutoOptimiseEnabled,
-                            onOptimisePhotosChanged = viewModel::setAutoOptimiseEnabled,
+                            onOptimisePhotosChanged = viewModel::setWizardOptimisePhotos,
                             optimiseVideo = state.optimiseVideo,
-                            onOptimiseVideoChanged = viewModel::setOptimiseVideo,
+                            onOptimiseVideoChanged = viewModel::setWizardOptimiseVideo,
                             videoQuality = state.videoQuality,
-                            onVideoQualityChanged = viewModel::setVideoQuality,
+                            onVideoQualityChanged = viewModel::setWizardVideoQuality,
                             state = state
                         )
                         8 -> BackupDelayContent(
