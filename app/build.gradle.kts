@@ -41,8 +41,9 @@ android {
         // IDrive e2, the sign-out prompt and the rewritten How To Guide.
         // The fourth (25 Sept 2026) writes a restored file back into the folder it left, through the
         // folder grant, and carries the wording changes made while testing the third on the Moto G.
-        versionCode = 4
-        versionName = "0.3.3"
+        // The fifth (25 Sept 2026) gives the Archive tab a folder list, with the check covering one folder or all.
+        versionCode = 5
+        versionName = "0.3.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

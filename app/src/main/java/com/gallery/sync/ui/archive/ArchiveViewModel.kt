@@ -68,8 +68,20 @@ data class ArchiveUiState(
      * else happens on this screen. Unlike [optedOut] this is not a per-file choice — widening the
      * filter, or simply waiting, brings a file back into [plan] on its own.
      */
-    val hiddenByAge: List<LocalMediaItem> = emptyList()
+    val hiddenByAge: List<LocalMediaItem> = emptyList(),
+    /**
+     * The folder the user has opened, or null on the folder list. Ian, 25 Sept 2026.
+     *
+     * It is also the scope of *Check these files*: opened on a folder, the check and the question that
+     * follows it are about that folder only; on the folder list they are about every Archive folder, as
+     * the tab always did. It only ever narrows what a check acts on, so it adds no removal.
+     */
+    val openAlbum: String? = null
 ) {
+    /** The entries the check acts on: the opened folder's, or all of them from the folder list. */
+    val scopedEntries: List<ArchiveEntry>
+        get() = if (openAlbum == null) plan.entries else plan.entries.filter { it.album == openAlbum }
+
     /**
      * Whether *Check these files* is offered: files are waiting and nothing is running.
      *
@@ -79,7 +91,7 @@ data class ArchiveUiState(
      * cancel??"*. The rest of the screen always could; only the button was missing.
      */
     fun offersCheck(): Boolean =
-        isSupported && !plan.isEmpty && (phase == ArchivePhase.IDLE || phase == ArchivePhase.DONE)
+        isSupported && scopedEntries.isNotEmpty() && (phase == ArchivePhase.IDLE || phase == ArchivePhase.DONE)
 
     /** The Archive question: shown once the check is done. */
     fun showPrompt(): Boolean = phase == ArchivePhase.READY
@@ -130,6 +142,7 @@ class ArchiveViewModel @Inject constructor(
                 hiddenByAge = split.hiddenByAge,
                 optedOut = files.optedOut,
                 archiveAlbums = albums,
+                openAlbum = _state.value.openAlbum?.takeIf { it in albums },
                 phase = ArchivePhase.IDLE,
                 batchTotal = 0,
                 batchIndex = 0,
@@ -178,8 +191,10 @@ class ArchiveViewModel @Inject constructor(
      */
     fun validate() {
         val current = _state.value
-        val entries = current.plan.entries
+        // The opened folder's files, or every Archive folder's from the folder list.
+        val entries = current.scopedEntries
         if (entries.isEmpty()) return
+        val scopeIds = entries.mapTo(HashSet()) { it.item.mediaStoreId }
         // One run at a time: a second check or a check during a removal would act on a list that is
         // changing under it.
         if (current.phase == ArchivePhase.VALIDATING || current.phase == ArchivePhase.REMOVING) return
@@ -190,8 +205,17 @@ class ArchiveViewModel @Inject constructor(
                 removedCount = 0,
                 removedBytes = 0L,
                 phase = ArchivePhase.VALIDATING,
+                // Files outside this check go back to waiting. What the question that follows offers must be
+                // exactly what was checked just now, never a folder confirmed earlier and left standing
+                // while the user looked elsewhere: a confirmation is only as good as how recent it is.
                 plan = _state.value.plan.copy(
-                    entries = entries.map { it.copy(mark = ArchiveMark.CHECKING, failure = null) },
+                    entries = _state.value.plan.entries.map {
+                        if (it.item.mediaStoreId in scopeIds) {
+                            it.copy(mark = ArchiveMark.CHECKING, failure = null)
+                        } else {
+                            it.copy(mark = ArchiveMark.WAITING, failure = null)
+                        }
+                    },
                     validated = false
                 )
             )
@@ -332,7 +356,10 @@ class ArchiveViewModel @Inject constructor(
             // Re-read the phase after the suspension: a run may have begun while the phone was asked.
             val now = _state.value.phase
             if (now == ArchivePhase.VALIDATING || now == ArchivePhase.REMOVING) return@launch
-            _state.value = reconciled(_state.value, engine.archiveFiles()).copy(archiveAlbums = albums)
+            _state.value = reconciled(_state.value, engine.archiveFiles()).copy(
+                archiveAlbums = albums,
+                openAlbum = _state.value.openAlbum?.takeIf { it in albums }
+            )
         }
     }
 
@@ -473,6 +500,8 @@ class ArchiveViewModel @Inject constructor(
                 hiddenByAge = split.hiddenByAge,
                 optedOut = remainingFiles.optedOut,
                 archiveAlbums = albums,
+                // An emptied folder is forgotten, so there is nothing left to be opened on.
+                openAlbum = _state.value.openAlbum?.takeIf { it in albums },
                 batchIndex = 0,
                 batchTotal = 0,
                 phase = ArchivePhase.DONE,
@@ -481,6 +510,35 @@ class ArchiveViewModel @Inject constructor(
             )
             Logger.i(TAG, "archive: ${removed.size} files removed from this phone")
         }
+    }
+
+    /** Opens one folder's files. Check and Archive then act on that folder only. */
+    fun openAlbum(album: String) = setScope(album)
+
+    /** Back to the folder list, where the check covers every Archive folder again. */
+    fun closeAlbum() = setScope(null)
+
+    private fun setScope(album: String?) {
+        val current = _state.value
+        if (current.openAlbum == album) return
+        // A check or a removal is acting on a list already fixed.
+        if (current.phase == ArchivePhase.VALIDATING || current.phase == ArchivePhase.REMOVING) return
+        // The question describes one check. Moving to another folder drops it, and the marks with it, so
+        // nothing confirmed for one folder can be answered Yes to while another is on screen.
+        val dropQuestion = current.phase == ArchivePhase.READY
+        _state.value = current.copy(
+            openAlbum = album,
+            phase = if (dropQuestion) ArchivePhase.IDLE else current.phase,
+            batchTotal = if (dropQuestion) 0 else current.batchTotal,
+            plan = if (dropQuestion) {
+                current.plan.copy(
+                    entries = current.plan.entries.map { it.copy(mark = ArchiveMark.WAITING, failure = null) },
+                    validated = false
+                )
+            } else {
+                current.plan
+            }
+        )
     }
 
     /** The user said no. Nothing is remembered — the album is still Archive, so it will offer again. */

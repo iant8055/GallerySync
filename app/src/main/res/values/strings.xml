@@ -205,6 +205,15 @@
     <string name="archive_action_keep">Deselect (keep on this phone)</string>
     <string name="archive_action_archive">Select (archive this file)</string>
     <string name="archive_list_heading">Files</string>
+    <string name="archive_folders_heading">Folders</string>
+    <string name="archive_folders_hint">Tap a folder to see its files. Inside a folder, Check and Archive cover that folder only.</string>
+    <string name="archive_back_to_folders">All folders</string>
+    <string name="archive_folder_nothing">Nothing waiting</string>
+    <string name="archive_folder_detail">%1$s · %2$s</string>
+    <string name="archive_folder_kept">%1$d kept on this phone</string>
+    <string name="archive_folder_held">%1$d held back by the age filter</string>
+    <string name="archive_folder_confirmed">%1$d confirmed in your Cloud</string>
+    <string name="archive_folder_failed">%1$d could not be confirmed</string>
 
     <string name="settings_optimise_master">Optimise photos and video</string>
     <!--
@@ -522,6 +531,7 @@ full size</string>
     <string name="archive_empty_hint">Set an album to Archive on the Albums tab, and its files will be listed here for checking before anything leaves your phone.</string>
     <string name="archive_intro">Every file below is checked against your Cloud first. Anything that is not there yet is backed up before it is verified.</string>
     <string name="archive_validate">Check these files</string>
+    <string name="archive_validate_all">Check all folders</string>
     <string name="archive_validating">Checking with your Cloud…</string>
     <string name="archive_unsupported">This version of Android has no media trash, so removing local copies is not offered here.</string>
 

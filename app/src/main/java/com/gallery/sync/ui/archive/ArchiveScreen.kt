@@ -174,19 +174,37 @@ fun ArchiveScreen(
         // list in name order (Ian, 19 Sept 2026 for the opt-out rows; 22 Sept for the age ones). A
         // file that arrives in an Archive album later shows up here too, so there is always a chance
         // to opt it out first.
-        val rows = remember(state.plan.entries, state.optedOut, state.hiddenByAge) {
+        // The folder list is the first level, as on Restore (Ian, 25 Sept 2026): a card per Archive folder,
+        // and a tap opens its files. Only the opened folder's files are listed below.
+        val open = state.openAlbum
+        val rows = remember(state.plan.entries, state.optedOut, state.hiddenByAge, open) {
             (
                 state.plan.entries.map { ArchiveListRow(it.item, it) } +
                     state.optedOut.map { ArchiveListRow(it, null) } +
                     state.hiddenByAge.map { ArchiveListRow(it, null, hiddenByAge = true) }
                 )
+                .filter { open != null && it.item.album == open }
                 .sortedWith(compareBy({ it.item.album }, { it.item.displayName }))
         }
         // Not while a check or a removal is running: they act on the list as it was when they began.
         val canSwipe = state.isSupported &&
             state.phase != ArchivePhase.VALIDATING && state.phase != ArchivePhase.REMOVING
 
-        if (rows.isNotEmpty()) {
+        if (open == null) {
+            val folders = remember(state.plan.entries, state.optedOut, state.hiddenByAge, state.archiveAlbums) {
+                archiveFolders(state)
+            }
+            if (folders.isNotEmpty()) {
+                HorizontalDivider()
+                ArchiveFolderList(
+                    folders = folders,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    onOpen = viewModel::openAlbum
+                )
+            }
+        } else {
             HorizontalDivider()
             // weight(1f) rather than fillMaxWidth alone: the list takes whatever height is left once
             // the header and the question have theirs, so a long album scrolls inside its own space
@@ -207,6 +225,18 @@ fun ArchiveScreen(
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
+                    item(key = "archive-back") {
+                        TextButton(onClick = viewModel::closeAlbum) {
+                            Text("\u2190 " + stringResource(R.string.archive_back_to_folders))
+                        }
+                    }
+                    item(key = "archive-folder-name") {
+                        Text(
+                            text = open,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                     item(key = "archive-heading") {
                         WithHelp(HelpTopic.ARCHIVE_FILE_LIST) {
                             Text(
@@ -324,7 +354,7 @@ private fun ArchiveHeader(state: ArchiveUiState, onValidate: () -> Unit, onSetAg
                 // to know before anything else.
                 Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
                     Text(
-                        text = state.plan.entries.size.toString(),
+                        text = state.scopedEntries.size.toString(),
                         style = MaterialTheme.typography.displayMedium
                     )
                 }
@@ -390,7 +420,7 @@ private fun ArchiveHeader(state: ArchiveUiState, onValidate: () -> Unit, onSetAg
                     color = LocalContentColor.current.copy(alpha = 0.7f)
                 )
 
-                if (state.isSupported && !state.plan.isEmpty) {
+                if (state.isSupported && state.scopedEntries.isNotEmpty()) {
                     WithHelp(HelpTopic.ARCHIVE_CHECK_BUTTON) {
                         ArchiveHeroActions(state = state, onValidate = onValidate)
                     }
@@ -460,7 +490,7 @@ private fun ArchiveAge.label(): Int = when (this) {
 @Composable
 private fun ArchiveHeroDetail(state: ArchiveUiState) {
     Text(
-        text = state.plan.albums.joinToString(", "),
+        text = state.openAlbum ?: state.plan.albums.joinToString(", "),
         style = MaterialTheme.typography.titleSmall,
         fontWeight = FontWeight.SemiBold
     )
@@ -479,11 +509,16 @@ private fun ArchiveHeroDetail(state: ArchiveUiState) {
 @Composable
 private fun ArchiveHeroActions(state: ArchiveUiState, onValidate: () -> Unit) {
     val context = LocalContext.current
+    // From the folder list with more than one folder the check covers all of them, and says so; opened on
+    // a folder it covers that folder.
+    val validateLabel = stringResource(
+        if (state.openAlbum == null && state.archiveAlbums.size > 1) R.string.archive_validate_all else R.string.archive_validate
+    )
 
     when (state.phase) {
         ArchivePhase.IDLE -> HeroOutlinedButton(
             onClick = onValidate,
-            label = stringResource(R.string.archive_validate)
+            label = validateLabel
         )
 
         ArchivePhase.VALIDATING -> Row(
@@ -528,7 +563,7 @@ private fun ArchiveHeroActions(state: ArchiveUiState, onValidate: () -> Unit) {
             if (state.offersCheck()) {
                 HeroOutlinedButton(
                     onClick = onValidate,
-                    label = stringResource(R.string.archive_validate)
+                    label = validateLabel
                 )
             }
         }
@@ -807,6 +842,156 @@ private fun ArchivePrompt(
                     Text(stringResource(R.string.archive_prompt_no), maxLines = 1)
                 }
             }
+        }
+    }
+}
+
+/** One Archive folder as the folder list shows it. */
+private data class ArchiveFolder(
+    val name: String,
+    val entries: List<ArchiveEntry>,
+    val optedOut: Int,
+    val heldByAge: Int
+) {
+    val bytes: Long get() = entries.sumOf { it.sizeBytes }
+    val confirmed: Int get() = entries.count { it.mark == ArchiveMark.CONFIRMED }
+    val failed: Int get() = entries.count { it.mark == ArchiveMark.FAILED }
+}
+
+/** Every Archive folder, including ones with nothing left in them, in name order. */
+private fun archiveFolders(state: ArchiveUiState): List<ArchiveFolder> {
+    val names = (
+        state.archiveAlbums +
+            state.plan.entries.map { it.album } +
+            state.optedOut.map { it.album } +
+            state.hiddenByAge.map { it.album }
+        ).distinct().sortedBy { it.lowercase() }
+    return names.map { name ->
+        ArchiveFolder(
+            name = name,
+            entries = state.plan.entries.filter { it.album == name },
+            optedOut = state.optedOut.count { it.album == name },
+            heldByAge = state.hiddenByAge.count { it.album == name }
+        )
+    }
+}
+
+/** The first level of the tab: a card per Archive folder. Two columns from 600dp, as on Restore. */
+@Composable
+private fun ArchiveFolderList(
+    folders: List<ArchiveFolder>,
+    modifier: Modifier = Modifier,
+    onOpen: (String) -> Unit
+) {
+    BoxWithConstraints(modifier = modifier) {
+        val columns = if (maxWidth >= WideBreakpoint) 2 else 1
+        val half = (folders.size + columns - 1) / columns
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            item(key = "archive-folders-heading") {
+                WithHelp(HelpTopic.ARCHIVE_FOLDER_LIST) {
+                    Text(
+                        text = stringResource(R.string.archive_folders_heading),
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                }
+            }
+            item(key = "archive-folders-hint") {
+                Text(
+                    text = stringResource(R.string.archive_folders_hint),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            items(half) { index ->
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    for (column in 0 until columns) {
+                        Box(modifier = Modifier.weight(1f)) {
+                            folders.getOrNull(index + column * half)?.let { folder ->
+                                ArchiveFolderCard(folder = folder, onOpen = { onOpen(folder.name) })
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/** A folder card: the folder's name, what is waiting in it, and what the last check said. */
+@Composable
+private fun ArchiveFolderCard(folder: ArchiveFolder, onOpen: () -> Unit) {
+    val context = LocalContext.current
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        color = MaterialTheme.colorScheme.surface,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        onClick = onOpen
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = folder.name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = if (folder.entries.isEmpty()) {
+                        stringResource(R.string.archive_folder_nothing)
+                    } else {
+                        stringResource(
+                            R.string.archive_folder_detail,
+                            pluralStringResource(R.plurals.file_count, folder.entries.size, folder.entries.size),
+                            formatBytes(context, folder.bytes)
+                        )
+                    },
+                    style = MaterialTheme.typography.bodySmall
+                )
+                if (folder.optedOut > 0) {
+                    Text(
+                        text = stringResource(R.string.archive_folder_kept, folder.optedOut),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                if (folder.heldByAge > 0) {
+                    Text(
+                        text = stringResource(R.string.archive_folder_held, folder.heldByAge),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                if (folder.confirmed > 0) {
+                    Text(
+                        text = stringResource(R.string.archive_folder_confirmed, folder.confirmed),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                if (folder.failed > 0) {
+                    Text(
+                        text = stringResource(R.string.archive_folder_failed, folder.failed),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+            Icon(
+                imageVector = SignalIcons.ChevronRight,
+                contentDescription = null,
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

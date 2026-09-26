@@ -35,6 +35,7 @@ enum class HelpTopic(
     RESTORE_BUTTONS("restore-buttons", R.string.help_restore_buttons_title, R.string.help_restore_buttons_body),
     RESTORE_GREYED_FILES("restore-greyed-files", R.string.help_restore_greyed_files_title, R.string.help_restore_greyed_files_body),
     ARCHIVE_HERO("archive-hero", R.string.help_archive_hero_title, R.string.help_archive_hero_body),
+    ARCHIVE_FOLDER_LIST("archive-folder-list", R.string.help_archive_folder_list_title, R.string.help_archive_folder_list_body),
     ARCHIVE_CHECK_BUTTON("archive-check-button", R.string.help_archive_check_button_title, R.string.help_archive_check_button_body),
     ARCHIVE_AGE_FILTER("archive-age-filter", R.string.help_archive_age_filter_title, R.string.help_archive_age_filter_body),
     ARCHIVE_EMPTY("archive-empty", R.string.help_archive_empty_title, R.string.help_archive_empty_body),

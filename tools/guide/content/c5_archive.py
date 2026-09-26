@@ -8,7 +8,7 @@ CHAPTER = Chapter(
     topics=[
         topic("archive-overview", "How Archive works, step by step", """
             1. **You choose it, once, per album.** On the Albums tab, set an album's mode to **Archive** and confirm. This is your consent. See [[dialog-archive-confirm]].
-            2. **You come here and press Check these files.** Every file in your Archive albums, except any you have chosen to keep on your phone, is checked against the Cloud it was sent to. Anything not there yet is sent first and then checked.
+            2. **You come here and press Check these files.** The tab opens on a list of your Archive folders. Press the button there to check every folder, or tap a folder first to check just that one. Every file, except any you have chosen to keep on your phone, is checked against the Cloud it was sent to. Anything not there yet is sent first and then checked.
             3. **The app tells you the result.** Each file gets a check mark or a red cross, and a prompt says how many are confirmed and how much room will be freed.
             4. **You say Yes.** The app asks Android to move the confirmed files to your phone's Trash or Recycle Bin. Android shows its own confirmation. See [[dialog-android-trash]].
             5. **You empty the bin when you are ready.** Removed files keep taking their full space until you do, and the app never empties it for you.
@@ -53,15 +53,30 @@ CHAPTER = Chapter(
 
             ## Where it comes from
             The number is a live count of the files on the phone, in albums set to Archive, that will be
-            archived. Files you have swiped out of Archive are not counted. When you arrive it is worked
+            archived. Opened on a folder, it counts that folder's files and the name under it is that folder's. Files you have swiped out of Archive are not counted. When you arrive it is worked
             out from the phone; it does not need the internet. The album names are the
             albums you set to Archive.
+        """, ui=True),
+
+        topic("archive-folder-list", "The Archive folders", """
+            ## What it is
+            The first thing under the green card: one rounded card for each folder set to Archive, in the same style as the folder cards on the Restore tab. Each shows the folder's name, how many files are waiting in it and their size, and, when they apply, how many you have kept on the phone, how many the age filter is holding back, and, after a check, how many are confirmed in your Cloud or could not be confirmed.
+
+            Tap a folder to open it. Inside, you see its files, with a button **All folders** at the top to go back.
+
+            ## What it changes
+            Which files a check covers. On the folder list the button reads **Check all folders** (or **Check these files** when you have only one) and covers every Archive folder. Opened on a folder it reads **Check these files** and covers that folder only: the question that follows, and Android's confirmation, are about that folder alone.
+
+            Going to another folder, or back to the list, before you answer the question drops it, so nothing checked for one folder can be answered Yes to while you are looking at another.
+
+            ## Good to know
+            Choosing a folder changes only what is checked. It removes nothing, and it does not change any album's mode. A folder you did not check is left exactly as it was.
         """, ui=True),
 
         topic("archive-check-button", "Check these files, and what it reports", """
             ## What it is
             The button in the green card, and the messages that replace it as the process moves along:
-            • **Check these files** starts the check.
+            • **Check these files** starts the check. On the folder list, with more than one Archive folder, it reads **Check all folders** and covers every folder; opened on a folder it covers that folder only. See [[archive-folder-list]].
             • **Checking with your Cloud...** with a small spinner while the Cloud is asked.
             • **Batch 1 of 3** while files are being removed. See [[dialog-android-trash]] for why there may be several.
             • **12 files removed from this phone, freeing 340 MB.** or **Nothing was removed.** when it finishes.
