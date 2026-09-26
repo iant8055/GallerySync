@@ -249,7 +249,10 @@ class VideoTranscoder @Inject constructor(
     }
 
     private fun readSource(uri: Uri): SourceInfo? = runCatching {
-        MediaMetadataRetriever().use { retriever ->
+        // Released in a finally, not with `use`: MediaMetadataRetriever is only AutoCloseable from API 29 and the
+        // app runs on 26. On 26-28 `use` threw, runCatching swallowed it, and every video read as unreadable.
+        val retriever = MediaMetadataRetriever()
+        try {
             retriever.setDataSource(context, uri)
 
             fun value(key: Int) = retriever.extractMetadata(key)
@@ -271,6 +274,8 @@ class VideoTranscoder @Inject constructor(
                     ?.use { it.statSize } ?: 0L,
                 mimeType = codecMimeType(uri) ?: MimeTypes.VIDEO_H265
             )
+        } finally {
+            retriever.release()
         }
     }.getOrNull()
 
