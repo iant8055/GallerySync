@@ -91,6 +91,21 @@
     <string name="cloud_signout_incomplete_body">%1$d restored, %2$d could not be. You are still signed in to %3$s.</string>
     <string name="cloud_signout_anyway">Sign out anyway</string>
     <string name="cloud_signout_stay">Stay signed in</string>
+    <string name="cloud_signout_edited_title">Edited files</string>
+    <plurals name="cloud_signout_edited_body">
+        <item quantity="one">%d file has been edited since it was backed up. Overwrite it with the original, or keep your edit?</item>
+        <item quantity="other">%d files have been edited since they were backed up. Overwrite them with the originals, or keep your edits?</item>
+    </plurals>
+    <string name="cloud_signout_edited_overwrite">Overwrite</string>
+    <string name="restore_edited_one_photo">This photo has been edited since it was backed up. Overwrite it with the original?</string>
+    <string name="restore_edited_one_video">This video has been edited since it was backed up. Overwrite it with the original?</string>
+    <plurals name="restore_edited_many">
+        <item quantity="one">%d file has been edited since it was backed up. Overwrite it with the original?</item>
+        <item quantity="other">%d files have been edited since they were backed up. Overwrite them with the originals?</item>
+    </plurals>
+    <string name="restore_edited_overwrite">Overwrite</string>
+    <string name="restore_edited_keep">Keep my edits</string>
+    <string name="restore_edited_row">Edited since it was backed up, left alone</string>
     <string name="cloud_main_tag">main (free)</string>
     <string name="google_photos_not_connected">Not connected</string>
     <string name="google_photos_connected">Connected</string>

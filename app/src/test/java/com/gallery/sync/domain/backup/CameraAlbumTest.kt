@@ -125,7 +125,7 @@ class CameraAlbumTest {
         whenever(scanner.access()).thenReturn(MediaAccess.FULL)
         whenever(scanner.scanAll()).thenReturn(items)
         whenever(scanner.scanEverything()).thenReturn(items)
-        whenever(entryDao.proxiedMediaStoreIds()).thenReturn(emptyList())
+        whenever(entryDao.proxiedSizes()).thenReturn(emptyList())
         whenever(entryDao.uploadedKeys()).thenReturn(emptyList())
         whenever(entryDao.pendingKeys()).thenReturn(emptyList())
         whenever(unsentDao.all()).thenReturn(emptyList())

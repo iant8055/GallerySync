@@ -109,6 +109,40 @@ fun RestoreScreen(
     // list, and there is no other moment the screen would learn about it.
     LaunchedEffect(Unit) { viewModel.refresh() }
 
+    // Files the person edited after the app shrank them are never overwritten unasked. Ian, 26 Sept 2026: the
+    // person knows they are editing an optimised copy, so ask at the moment of restoring, once for the run.
+    if (state.editedIds.isNotEmpty() && !state.running) {
+        val edited = state.rows.filter { it.id in state.editedIds }
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = viewModel::keepEdits,
+            text = {
+                Text(
+                    if (edited.size == 1) {
+                        stringResource(
+                            if (edited.first().entry.isVideo) R.string.restore_edited_one_video
+                            else R.string.restore_edited_one_photo
+                        )
+                    } else {
+                        androidx.compose.ui.res.pluralStringResource(
+                            R.plurals.restore_edited_many, edited.size, edited.size
+                        )
+                    }
+                )
+            },
+            confirmButton = {
+                androidx.compose.material3.TextButton(onClick = viewModel::keepEdits) {
+                    Text(stringResource(R.string.restore_edited_keep))
+                }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = viewModel::overwriteEdited) {
+                    Text(stringResource(R.string.restore_edited_overwrite))
+                }
+            }
+        )
+    }
+
+
     Column(modifier = modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -796,6 +830,12 @@ private fun FileCard(
 
                     // Says the file is unchanged, because it is. Not softened into an apology: this
                     // is the sentence that tells the user a failure here costs them nothing.
+                    RowState.Edited -> Text(
+                        text = stringResource(R.string.restore_edited_row),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
+
                     is RowState.Failed -> Text(
                         text = stringResource(R.string.restore_failed_row, rowState.reason),
                         style = MaterialTheme.typography.bodySmall,

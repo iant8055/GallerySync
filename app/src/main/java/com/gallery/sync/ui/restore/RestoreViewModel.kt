@@ -54,6 +54,12 @@ sealed interface RowState {
      * than overwrites when a name is taken. Neither can cost the user a file.
      */
     data class Failed(val reason: String) : RowState
+
+    /**
+     * The file was edited after the app shrank it, so restoring would have replaced the edit. Left as it is;
+     * the person is asked whether to overwrite it (see [RestoreUiState.editedIds]).
+     */
+    data object Edited : RowState
 }
 
 /** One file, and what the screen knows about it. */
@@ -107,7 +113,12 @@ data class RestoreUiState(
     /** A folder could not be listed, so what is shown may be incomplete. */
     val cloudUnavailable: Boolean = false,
     /** Settings > Restore > Show empty folders: list folders with nothing to bring back too. */
-    val showEmptyFolders: Boolean = false
+    val showEmptyFolders: Boolean = false,
+    /**
+     * Files the last run left alone because they were edited since they were backed up. Non-empty means the
+     * person is being asked whether to overwrite them; each is a row id.
+     */
+    val editedIds: List<String> = emptyList()
 ) {
     val hasSelection: Boolean get() = selection.isNotEmpty()
 
@@ -128,10 +139,12 @@ data class RestoreUiState(
             val picked = selectedRows
             if (picked.isEmpty()) return null
             val weights = picked.map { (it.fullBytes - it.localBytes).coerceAtLeast(1L) }
-            val finished = picked.count { it.state is RowState.Done || it.state is RowState.Failed }
+            val finished = picked.count {
+                it.state is RowState.Done || it.state is RowState.Failed || it.state == RowState.Edited
+            }
             val got = picked.indices.sumOf { i ->
                 val share = when (val s = picked[i].state) {
-                    is RowState.Done, is RowState.Failed -> 1.0
+                    is RowState.Done, is RowState.Failed, RowState.Edited -> 1.0
                     is RowState.Working -> s.percent / 100.0
                     RowState.Waiting -> 0.0
                 }
@@ -382,16 +395,17 @@ class RestoreViewModel @Inject constructor(
     }
 
     /** Both kinds, one at a time, in one run. Parallel transfers compete for one connection. */
-    fun restoreSelected() {
+    fun restoreSelected(overwriteEdited: Boolean = false) {
         if (_state.value.running) return
         val chosen = _state.value.selectedRows
         if (chosen.isEmpty()) return
 
         job = viewModelScope.launch {
-            _state.value = _state.value.copy(running = true, summary = null)
+            _state.value = _state.value.copy(running = true, summary = null, editedIds = emptyList())
             var restored = 0
             var downloaded = 0
             var failed = 0
+            val edited = mutableListOf<String>()
 
             try {
                 chosen.forEach { row ->
@@ -402,7 +416,7 @@ class RestoreViewModel @Inject constructor(
                     }
 
                     val result = when (row.kind) {
-                        RowKind.Restore -> restorer.restore(row.entry, onProgress)
+                        RowKind.Restore -> restorer.restore(row.entry, onProgress, overwriteEdited)
                         RowKind.Download -> downloader.download(row.entry, onProgress)
                         // Never selected; here so the `when` is exhaustive.
                         RowKind.Here -> return@forEach
@@ -412,6 +426,11 @@ class RestoreViewModel @Inject constructor(
                         is RestoreInPlaceResult.Restored -> {
                             if (row.kind == RowKind.Restore) restored++ else downloaded++
                             setRow(row.id, RowState.Done(result.bytesWritten))
+                        }
+
+                        RestoreInPlaceResult.EditedSinceBackup -> {
+                            edited += row.id
+                            setRow(row.id, RowState.Edited)
                         }
 
                         RestoreInPlaceResult.GoneFromCloud -> {
@@ -436,11 +455,27 @@ class RestoreViewModel @Inject constructor(
                 _state.value = _state.value.copy(
                     running = false,
                     selection = emptySet(),
-                    summary = summaryOf(restored, downloaded, failed)
+                    summary = summaryOf(restored, downloaded, failed, edited.size),
+                    editedIds = edited
                 )
+                // Refreshed after the prompt is set, and the rows the person edited keep their state, so the
+                // list still says which files are waiting on the answer.
                 refresh()
             }
         }
+    }
+
+    /** "Overwrite": the person was asked about the files they edited and said yes. Runs just those. */
+    fun overwriteEdited() {
+        val ids = _state.value.editedIds
+        if (ids.isEmpty() || _state.value.running) return
+        _state.value = _state.value.copy(selection = ids.toSet(), editedIds = emptyList())
+        restoreSelected(overwriteEdited = true)
+    }
+
+    /** "Keep my edits": nothing is restored over them, and the question goes away. */
+    fun keepEdits() {
+        _state.value = _state.value.copy(editedIds = emptyList())
     }
 
     /** Stops the batch, including the file in flight. What is already back stays back. */
@@ -448,15 +483,17 @@ class RestoreViewModel @Inject constructor(
         job?.cancel()
     }
 
-    private fun summaryOf(restored: Int, downloaded: Int, failed: Int): String {
+    private fun summaryOf(restored: Int, downloaded: Int, failed: Int, edited: Int = 0): String {
         val did = buildList {
             if (restored > 0) add("$restored back to full quality")
             if (downloaded > 0) add("$downloaded back on this phone")
         }
+        val left = if (edited > 0) " $edited edited, left alone." else ""
         return when {
-            did.isEmpty() && failed > 0 -> "None recovered. $failed unchanged."
-            failed == 0 -> did.joinToString(" · ") + "."
-            else -> did.joinToString(" · ") + ". $failed unchanged."
+            did.isEmpty() && failed > 0 -> "None recovered. $failed unchanged.$left"
+            did.isEmpty() && edited > 0 -> "Nothing changed.$left"
+            failed == 0 -> did.joinToString(" · ") + ".$left"
+            else -> did.joinToString(" · ") + ". $failed unchanged.$left"
         }
     }
 

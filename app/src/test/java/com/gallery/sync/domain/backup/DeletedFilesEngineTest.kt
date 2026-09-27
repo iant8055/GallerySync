@@ -326,7 +326,7 @@ class DeletedFilesEngineTest {
         whenever(scanner.access()).thenReturn(MediaAccess.FULL)
         whenever(scanner.scanAll()).thenReturn(present)
         whenever(scanner.scanEverything()).thenReturn(present)
-        whenever(entryDao.proxiedMediaStoreIds()).thenReturn(emptyList())
+        whenever(entryDao.proxiedSizes()).thenReturn(emptyList())
         whenever(entryDao.uploadedKeys()).thenReturn(emptyList())
         whenever(entryDao.pendingKeys()).thenReturn(
             pending.map { UploadedKey(it.id, it.displayName, it.sizeBytes, it.mediaStoreId, false) }

@@ -178,5 +178,22 @@ CHAPTER = Chapter(
             Each file is downloaded from the Cloud it was sent to, checked, and only then put in place. It needs an
             internet connection and enough free space. Your Cloud is only read, never changed.
         """),
+        topic("restore-edited", "A photo or video you edited", """
+            ## What it is
+            If you edited a smaller copy and saved it over that same file, then restoring it would replace your edit with the
+            original from your Cloud. So GallerySync asks first: **This photo has been edited since it was backed up. Overwrite it with the original?**
+            (or **This video…**, or **N files have been edited…** when there are several).
+
+            • **Keep my edits** leaves the file exactly as it is. The row says **Edited since it was backed up, left alone**.
+            • **Overwrite** puts the original in its place. Your edit is replaced.
+
+            ## Good to know
+            Most editing apps save a new file with a new name, and those are never affected. This only matters when you save over the
+            smaller copy itself.
+
+            An edited file is also backed up as a **new file**, named with the word **edited** and the time you saved it, for example
+            **photo (edited 20260926-231537).jpg**. The full-size original in your Cloud is never replaced. Signing out and choosing
+            **Restore them to the phone first** asks the same question about edited files.
+        """),
     ],
 )

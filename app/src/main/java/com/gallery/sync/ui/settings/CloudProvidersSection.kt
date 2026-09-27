@@ -68,6 +68,7 @@ fun CloudProvidersSection(
             onContinue = viewModel::continueSignOut,
             onLeave = viewModel::signOutLeavingFiles,
             onRestore = viewModel::restoreThenSignOut,
+            onOverwriteEdited = viewModel::overwriteEditedThenSignOut,
             onCancel = viewModel::cancelSignOut
         )
     }
@@ -198,6 +199,7 @@ private fun SignOutDialog(
     onContinue: () -> Unit,
     onLeave: () -> Unit,
     onRestore: () -> Unit,
+    onOverwriteEdited: () -> Unit,
     onCancel: () -> Unit
 ) {
     val cloud = stringResource(question.location.labelRes())
@@ -253,6 +255,29 @@ private fun SignOutDialog(
             },
             confirmButton = {
                 TextButton(onClick = onCancel) { Text(stringResource(R.string.cloud_signout_stop)) }
+            }
+        )
+
+        // The person edited these after the app shrank them. Keeping the edits is the safe answer and is first;
+        // overwriting throws the edits away, so it is a separate, plainly named button.
+        is SignOutState.Edited -> AlertDialog(
+            onDismissRequest = onCancel,
+            title = { Text(stringResource(R.string.cloud_signout_edited_title)) },
+            text = {
+                Text(
+                    androidx.compose.ui.res.pluralStringResource(
+                        R.plurals.cloud_signout_edited_body,
+                        question.files.size,
+                        question.files.size
+                    )
+                )
+            },
+            confirmButton = {
+                Column(horizontalAlignment = androidx.compose.ui.Alignment.End) {
+                    TextButton(onClick = onLeave) { Text(stringResource(R.string.restore_edited_keep)) }
+                    TextButton(onClick = onOverwriteEdited) { Text(stringResource(R.string.cloud_signout_edited_overwrite)) }
+                    TextButton(onClick = onCancel) { Text(stringResource(R.string.cloud_signout_stay)) }
+                }
             }
         )
 

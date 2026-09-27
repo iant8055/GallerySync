@@ -40,6 +40,12 @@ sealed interface RestoreInPlaceResult {
      */
     data object NotCovered : RestoreInPlaceResult
 
+    /**
+     * The file on the phone is no longer the copy this app made: it has been edited since it was backed up.
+     * Nothing was touched. The user is asked whether to overwrite it with the original; see [EditCheck].
+     */
+    data object EditedSinceBackup : RestoreInPlaceResult
+
     data class Failed(val reason: String) : RestoreInPlaceResult
 }
 
@@ -81,9 +87,14 @@ class RestoreProxyInPlace @Inject constructor(
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
 ) {
 
+    /**
+     * [overwriteEdited] is true only when the person has just been asked about a file they edited and said
+     * overwrite. Without it a file that has changed since the app shrank it is left exactly as it is.
+     */
     suspend fun restore(
         entry: BackupEntryEntity,
-        onProgress: (bytesWritten: Long, total: Long) -> Unit = { _, _ -> }
+        onProgress: (bytesWritten: Long, total: Long) -> Unit = { _, _ -> },
+        overwriteEdited: Boolean = false
     ): RestoreInPlaceResult = withContext(dispatcher) {
         val remoteItemId = entry.remoteItemId?.takeIf { it.isNotBlank() }
             ?: return@withContext RestoreInPlaceResult.Failed(
@@ -100,6 +111,14 @@ class RestoreProxyInPlace @Inject constructor(
                 ?: return@withContext RestoreInPlaceResult.Failed("no Cloud size recorded")
         }
         val uri = Uri.parse(entry.contentUri)
+
+        // Before anything is downloaded, so an edit costs nothing to keep.
+        if (!overwriteEdited &&
+            EditCheck.isEdited(entry.isProxied, entry.localProxySizeBytes, currentSizeOf(uri))
+        ) {
+            Logger.i(TAG, "${entry.displayName}: edited since it was backed up, left alone")
+            return@withContext RestoreInPlaceResult.EditedSinceBackup
+        }
 
         // Asked before a byte moves. A file outside every granted tree cannot be rewritten without
         // the dialog, and finding that out after a 40 MB download would be a waste of the user's
@@ -252,6 +271,17 @@ class RestoreProxyInPlace @Inject constructor(
             modeOverride = AlbumMode.BACKUP
         )
     }
+
+    /**
+     * The file's real size on disk. MediaStore's cached size can lag a write by a moment, and a stale number
+     * here would call an untouched file edited, so the bytes are asked for first and the index is the fallback.
+     * Null when neither can be read, which [EditCheck] treats as not edited.
+     */
+    private fun currentSizeOf(uri: Uri): Long? =
+        runCatching { context.contentResolver.openFileDescriptor(uri, "r")?.use { it.statSize } }
+            .getOrNull()
+            ?.takeIf { it >= 0 }
+            ?: readIndexed(uri)?.sizeBytes
 
     private fun readIndexed(uri: Uri): Indexed? = runCatching {
         context.contentResolver.query(

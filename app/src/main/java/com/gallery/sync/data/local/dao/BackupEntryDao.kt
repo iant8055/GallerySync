@@ -46,6 +46,13 @@ data class UploadedKey(
     val contentSignature: String get() = RestoredAlbum.contentSignature(displayName, sizeBytes)
 }
 
+/** A proxied row's file identity and the two sizes it can legitimately have on the phone. */
+data class ProxiedSizes(
+    val mediaStoreId: Long,
+    val sizeBytes: Long,
+    val localProxySizeBytes: Long?
+)
+
 /** One proxied file's name and the size OneDrive should still be holding for it. */
 data class ProxiedOriginal(
     val displayName: String,
@@ -792,6 +799,20 @@ interface BackupEntryDao {
 
     @Query("SELECT mediaStoreId FROM backup_entries WHERE isProxied = 1")
     suspend fun proxiedMediaStoreIds(): List<Long>
+
+    /**
+     * Every proxied row's MediaStore id with its original size and the size of the copy the app wrote. The ledger scan
+     * skips a file only while it is still one of those sizes; anything else is an edit (see EditCheck).
+     */
+    @Query("SELECT mediaStoreId, sizeBytes, localProxySizeBytes FROM backup_entries WHERE isProxied = 1")
+    suspend fun proxiedSizes(): List<ProxiedSizes>
+
+    /**
+     * Whether another row for the same file (same MediaStore id) is a proxied original, which makes this row an edit
+     * of it. Decides the name an edit is uploaded under.
+     */
+    @Query("SELECT COUNT(*) FROM backup_entries WHERE mediaStoreId = :mediaStoreId AND id != :id AND isProxied = 1")
+    suspend fun countProxiedSiblings(mediaStoreId: Long, id: String): Int
 
     @Query(
         """

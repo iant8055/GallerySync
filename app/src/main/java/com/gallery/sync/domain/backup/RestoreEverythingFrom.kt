@@ -33,7 +33,16 @@ class RestoreEverythingFrom @Inject constructor(
         val bytes: Long get() = (proxies + missing).sumOf { it.sizeBytes }
     }
 
-    data class Outcome(val restored: Int, val downloaded: Int, val failed: Int)
+    /**
+     * [edited] are files the person changed after the app shrank them: left exactly as they are, and neither
+     * restored nor failed. The caller asks whether to overwrite them ([overwriteEdited]).
+     */
+    data class Outcome(
+        val restored: Int,
+        val downloaded: Int,
+        val failed: Int,
+        val edited: List<BackupEntryEntity> = emptyList()
+    )
 
     /** No network: both lists come from the ledger and the device scan, like the Restore tab's. */
     suspend fun plan(location: BackupLocation): Plan {
@@ -53,6 +62,7 @@ class RestoreEverythingFrom @Inject constructor(
         var downloaded = 0
         var failed = 0
         var finished = 0
+        val edited = mutableListOf<BackupEntryEntity>()
 
         val all = plan.proxies.map { it to true } + plan.missing.map { it to false }
         for ((entry, inPlace) in all) {
@@ -60,11 +70,35 @@ class RestoreEverythingFrom @Inject constructor(
             val result = if (inPlace) restorer.restore(entry) else downloader.download(entry)
             when (result) {
                 is RestoreInPlaceResult.Restored -> if (inPlace) restored++ else downloaded++
+                RestoreInPlaceResult.EditedSinceBackup -> edited += entry
                 else -> failed++
             }
             finished++
         }
         onProgress(finished, all.size, "")
-        return Outcome(restored, downloaded, failed)
+        return Outcome(restored, downloaded, failed, edited)
+    }
+
+    /**
+     * Puts the originals over files the person edited, after they were asked and said overwrite. The only
+     * caller of [RestoreProxyInPlace.restore] that passes `overwriteEdited = true` from this runner.
+     */
+    suspend fun overwriteEdited(
+        files: List<BackupEntryEntity>,
+        onProgress: (finished: Int, total: Int, current: String) -> Unit
+    ): Outcome {
+        var restored = 0
+        var failed = 0
+        var finished = 0
+        for (entry in files) {
+            onProgress(finished, files.size, entry.displayName)
+            when (restorer.restore(entry, overwriteEdited = true)) {
+                is RestoreInPlaceResult.Restored -> restored++
+                else -> failed++
+            }
+            finished++
+        }
+        onProgress(finished, files.size, "")
+        return Outcome(restored, 0, failed)
     }
 }

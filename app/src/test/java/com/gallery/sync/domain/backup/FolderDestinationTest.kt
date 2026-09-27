@@ -78,7 +78,7 @@ class FolderDestinationTest {
         whenever(scanner.access()).thenReturn(MediaAccess.FULL)
         whenever(scanner.scanAll()).thenReturn(items.toList())
         whenever(scanner.scanEverything()).thenReturn(items.toList())
-        whenever(entryDao.proxiedMediaStoreIds()).thenReturn(emptyList())
+        whenever(entryDao.proxiedSizes()).thenReturn(emptyList())
         whenever(entryDao.uploadedKeys()).thenReturn(emptyList())
         whenever(entryDao.pendingKeys()).thenReturn(emptyList())
         whenever(entryDao.countRetrievableOutsideDevice(any(), any())).thenReturn(0)

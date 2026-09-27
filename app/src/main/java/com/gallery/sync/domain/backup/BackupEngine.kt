@@ -200,6 +200,17 @@ class BackupEngine @Inject constructor(
     }
 
     /**
+     * The name a file is sent under. Its own, unless it is an edit of a shrunk file, in which case it gets a name of
+     * its own so it is a new file in every Cloud and never replaces the original (see [EditedName]).
+     */
+    private suspend fun uploadNameFor(entry: BackupEntryEntity): String =
+        if (entryDao.countProxiedSiblings(entry.mediaStoreId, entry.id) > 0) {
+            EditedName.of(entry.displayName, entry.dateModifiedEpochSeconds)
+        } else {
+            entry.displayName
+        }
+
+    /**
      * Records every readable file in the ledger. Existing rows are untouched, so already-uploaded
      * files stay uploaded.
      *
@@ -218,7 +229,27 @@ class BackupEngine @Inject constructor(
         // Proxied files are skipped by MediaStore id, because proxying changed their size and so
         // their content key. Without this every proxy is seen as a new file and uploaded beside
         // the original it replaced — the single most important line in this method.
-        val proxied = entryDao.proxiedMediaStoreIds().toSet()
+        //
+        // But only while the file is still one of the sizes this app knows for it. An editor that saves over
+        // the file in place keeps its MediaStore id, and skipping by id alone meant such an edit was never
+        // uploaded (measured on the Moto G, 26 Sept 2026). A file whose size is neither the copy this app wrote
+        // nor the original is an edit, and Ian's ruling is that it is a new file: it is scanned, ledgered and
+        // uploaded under its own name (see EditedName) and the original stays in the Cloud untouched.
+        val proxiedSizes = entryDao.proxiedSizes().groupBy { it.mediaStoreId }
+        val scanned = scanner.scanAll()
+        var editedIds = scanned.filter { item ->
+            val known = proxiedSizes[item.mediaStoreId] ?: return@filter false
+            known.none { !EditCheck.isEditedNow(item.sizeBytes, it.sizeBytes, it.localProxySizeBytes) }
+        }.mapTo(HashSet()) { it.mediaStoreId }
+        // A person edits a photo now and then. Dozens at once is a stale or wrong index, and treating it as
+        // edits would upload a copy of the library, so this scan stands down.
+        if (editedIds.size > EditCheck.MAX_EDITS_PER_SCAN &&
+            editedIds.size * EditCheck.MAX_EDIT_FRACTION_DENOMINATOR > proxiedSizes.size
+        ) {
+            Logger.w(TAG, "refreshLedger: ${editedIds.size} of ${proxiedSizes.size} shrunk files look edited at once; treating none as edited")
+            editedIds = HashSet()
+        }
+        if (editedIds.isNotEmpty()) Logger.i(TAG, "refreshLedger: ${editedIds.size} shrunk file(s) edited since they were backed up")
 
         // Where uploads go — per top-level folder (DCIM, Pictures, Movies...), not one app-wide
         // setting; see TASK-026, 24 Sept 2026. Read once here rather than per item: a row's
@@ -230,7 +261,7 @@ class BackupEngine @Inject constructor(
         // own: never explicitly chosen, or a `RELATIVE_PATH`-less item on API < 29.
         val defaultLocation = settings.current().backupLocation
 
-        val items = scanner.scanAll().filterNot { it.mediaStoreId in proxied }
+        val items = scanned.filterNot { it.mediaStoreId in proxiedSizes && it.mediaStoreId !in editedIds }
         val entries = items.map { item ->
             val folder = MediaScanRules.topLevelFolderOf(item.relativePath)
             BackupEntryEntity(
@@ -768,7 +799,7 @@ class BackupEngine @Inject constructor(
                 val source = ContentUriUploadSource(
                     resolver = context.contentResolver,
                     uri = android.net.Uri.parse(entry.contentUri),
-                    displayName = entry.displayName,
+                    displayName = uploadNameFor(entry),
                     sizeBytes = entry.sizeBytes
                 )
 
@@ -927,7 +958,7 @@ class BackupEngine @Inject constructor(
                     val source = ContentUriUploadSource(
                         resolver = context.contentResolver,
                         uri = android.net.Uri.parse(entry.contentUri),
-                        displayName = entry.displayName,
+                        displayName = uploadNameFor(entry),
                         sizeBytes = entry.sizeBytes
                     )
 

@@ -10,6 +10,7 @@ import com.gallery.sync.data.remote.auth.SignInResult
 import com.gallery.sync.data.remote.cloud.CloudConnections
 import com.gallery.sync.data.remote.cloud.ConnectionKind
 import com.gallery.sync.data.remote.cloud.KeyField
+import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.domain.backup.BackupLocation
 import com.gallery.sync.domain.backup.RestoreEverythingFrom
 import com.gallery.sync.domain.billing.BillingRepository
@@ -57,6 +58,16 @@ sealed interface SignOutState {
 
     /** Some files could not be restored, so the app has not signed out and lets the user decide. */
     data class Incomplete(override val location: BackupLocation, val restored: Int, val failed: Int) : SignOutState
+
+    /**
+     * Files the person edited after the app shrank them. Restoring would replace each edit with the original,
+     * so it asks first; nothing has been touched yet. [files] are what would be overwritten.
+     */
+    data class Edited(
+        override val location: BackupLocation,
+        val files: List<BackupEntryEntity>,
+        val restored: Int
+    ) : SignOutState
 }
 
 /**
@@ -265,12 +276,48 @@ class CloudProvidersViewModel @Inject constructor(
                 val outcome = restoreEverything.run(plan) { finished, total, current ->
                     _state.value = _state.value.copy(signOut = SignOutState.Restoring(location, finished, total, current))
                 }
+                when {
+                    outcome.failed == 0 && outcome.edited.isEmpty() -> {
+                        _state.value = _state.value.copy(signOut = null)
+                        disconnect(location)
+                    }
+                    // Something could not come back, so the app stays signed in; an edit that was left alone
+                    // is counted with it, because it did not come back either.
+                    outcome.failed > 0 -> _state.value = _state.value.copy(
+                        signOut = SignOutState.Incomplete(
+                            location,
+                            outcome.restored + outcome.downloaded,
+                            outcome.failed + outcome.edited.size
+                        )
+                    )
+                    else -> _state.value = _state.value.copy(
+                        signOut = SignOutState.Edited(location, outcome.edited, outcome.restored + outcome.downloaded)
+                    )
+                }
+            } catch (e: CancellationException) {
+                _state.value = _state.value.copy(signOut = null)
+                throw e
+            }
+        }
+    }
+
+    /** "Overwrite them": the person has just been asked about the files they edited, and said yes. */
+    fun overwriteEditedThenSignOut() {
+        val question = _state.value.signOut as? SignOutState.Edited ?: return
+        val location = question.location
+        if (restoreJob?.isActive == true) return
+        restoreJob = viewModelScope.launch {
+            try {
+                _state.value = _state.value.copy(signOut = SignOutState.Restoring(location, 0, question.files.size, ""))
+                val outcome = restoreEverything.overwriteEdited(question.files) { finished, total, current ->
+                    _state.value = _state.value.copy(signOut = SignOutState.Restoring(location, finished, total, current))
+                }
                 if (outcome.failed == 0) {
                     _state.value = _state.value.copy(signOut = null)
                     disconnect(location)
                 } else {
                     _state.value = _state.value.copy(
-                        signOut = SignOutState.Incomplete(location, outcome.restored + outcome.downloaded, outcome.failed)
+                        signOut = SignOutState.Incomplete(location, question.restored + outcome.restored, outcome.failed)
                     )
                 }
             } catch (e: CancellationException) {

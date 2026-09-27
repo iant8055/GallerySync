@@ -60,6 +60,32 @@ class RestoreEverythingFromTest {
     }
 
     @Test
+    fun `an edited file is left alone, reported, and not counted as a failure`() = runTest {
+        val shrunk = row("s", BackupLocation.DROPBOX)
+        val edited = row("e", BackupLocation.DROPBOX)
+        whenever(restorer.restore(eq(shrunk), any(), eq(false))).thenReturn(RestoreInPlaceResult.Restored(1_000))
+        whenever(restorer.restore(eq(edited), any(), eq(false))).thenReturn(RestoreInPlaceResult.EditedSinceBackup)
+
+        val outcome = subject.run(RestoreEverythingFrom.Plan(listOf(shrunk, edited), emptyList())) { _, _, _ -> }
+
+        assertEquals(1, outcome.restored)
+        assertEquals(0, outcome.failed)
+        assertEquals(listOf(edited), outcome.edited)
+    }
+
+    @Test
+    fun `overwriting the edited files asks the restorer to overwrite, and only those files`() = runTest {
+        val edited = row("e", BackupLocation.DROPBOX)
+        whenever(restorer.restore(eq(edited), any(), eq(true))).thenReturn(RestoreInPlaceResult.Restored(1_000))
+
+        val outcome = subject.overwriteEdited(listOf(edited)) { _, _, _ -> }
+
+        assertEquals(1, outcome.restored)
+        assertEquals(0, outcome.failed)
+        verify(restorer).restore(eq(edited), any(), eq(true))
+    }
+
+    @Test
     fun `nothing to bring back is an empty plan`() = runTest {
         whenever(entryDao.restorableProxies()).thenReturn(emptyList())
         whenever(engine.filesNotOnThePhone()).thenReturn(listOf(row("x", BackupLocation.ONEDRIVE)))
@@ -72,7 +98,7 @@ class RestoreEverythingFromTest {
         val shrunk = row("s", BackupLocation.DROPBOX)
         val gone = row("g", BackupLocation.DROPBOX)
         val broken = row("b", BackupLocation.DROPBOX)
-        whenever(restorer.restore(any(), any())).thenReturn(RestoreInPlaceResult.Restored(1_000))
+        whenever(restorer.restore(any(), any(), any())).thenReturn(RestoreInPlaceResult.Restored(1_000))
         whenever(downloader.download(eq(gone), any())).thenReturn(RestoreInPlaceResult.Restored(1_000))
         whenever(downloader.download(eq(broken), any())).thenReturn(RestoreInPlaceResult.GoneFromCloud)
 
@@ -90,7 +116,7 @@ class RestoreEverythingFromTest {
         val outcome = subject.run(RestoreEverythingFrom.Plan(emptyList(), emptyList())) { _, _, _ -> }
 
         assertTrue(outcome.failed == 0 && outcome.restored == 0 && outcome.downloaded == 0)
-        verify(restorer, never()).restore(any(), any())
+        verify(restorer, never()).restore(any(), any(), any())
         verify(downloader, never()).download(any(), any())
     }
 }

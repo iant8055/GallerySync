@@ -73,3 +73,7 @@ So a file can be matched to its ledger row by MediaStore id (parsed), or by name
 ## Correction, 26 Sept 2026 (measured on the Moto G)
 
 The sentence above, *Restore already refuses to write over a file whose size has changed*, is **wrong**. An in-place edit of an optimised photo was simulated (id kept, size 744,886 instead of 744,869): the app never uploaded it, and Restore then replaced it with the 3.85 MB OneDrive original with no refusal and no warning. `RestoreProxyInPlace.restore` checks only that the download is complete, not that the file on the phone is still the copy the app wrote. Both halves of the proposed fix are needed: Restore must refuse a changed file, and a changed optimised file must be treated as edited and uploaded as a new file. Ian has not decided. See `.claude/MILESTONES.md`, 26 Sept 2026.
+
+## Decided and built, 26 Sept 2026
+
+Ian ruled on both halves of the edit-over-proxy question above: Restore asks before overwriting an edited file (Keep my edits / Overwrite), and an edited optimised file is treated as a new file and uploaded under its own name. Built as described in MILESTONES, 26 Sept 2026 (EditCheck, EditedName, the scan change, the Restore and sign-out prompts). Not yet verified on a device. The DocumentsProvider route and the Share-menu route remain shelved.
