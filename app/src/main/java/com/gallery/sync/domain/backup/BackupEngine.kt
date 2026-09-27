@@ -583,7 +583,10 @@ class BackupEngine @Inject constructor(
                 } else {
                     entry.sizeBytes
                 }
-                val ref = remoteIndex[entry.displayName]
+                // The name it was actually sent under — an edit of a shrunk file lives in the Cloud under its own
+                // edited name, never the original's, so looking it up by `entry.displayName` alone would find the
+                // unrelated original and read a correctly-uploaded edit as missing.
+                val ref = remoteIndex[uploadNameFor(entry)]
                 if (ref == null || ref.sizeBytes != expected) {
                     toRequeue += entry.mediaStoreId
                 }
@@ -724,6 +727,15 @@ class BackupEngine @Inject constructor(
                     continue
                 }
 
+                // The name this file will actually be sent under — its own, unless it is an edit of a shrunk
+                // file, in which case it is a different name from the original still sitting in OneDrive.
+                // Read once and used for every lookup below: matching against `entry.displayName` here missed
+                // that difference, so an edit was matched to the original by its old name and swallowed as
+                // "already backed up" or "recovered as a proxy" without ever reaching the upload call that
+                // already sends it under its edited name. Moto G, 27 Sept 2026, version 11's first real test:
+                // the edit never left the phone, logged as `recovered proxy record`.
+                val remoteName = uploadNameFor(entry)
+
                 // Same name and same size means the file is already backed up — by Samsung's own
                 // sync while both run in parallel, or by this app before a reinstall lost the
                 // ledger. Uploading anyway produces a renamed duplicate, which is what the user
@@ -732,18 +744,18 @@ class BackupEngine @Inject constructor(
                 // mismatch and must not be read as one: falling through would upload a second copy
                 // beside a file that may well already be there, which is the renamed-duplicate
                 // failure this check exists to prevent. Defer instead and ask again next run.
-                val match = alreadyThere[entry.displayName]
+                val match = alreadyThere[remoteName]
                 if (match != null && match.sizeBytes == null) {
                     Logger.w(
                         TAG,
-                        "OneDrive reported no size for ${entry.displayName}; deferring rather " +
+                        "OneDrive reported no size for $remoteName; deferring rather " +
                             "than risking a duplicate"
                     )
                     deferred++
                     continue
                 }
                 if (match?.sizeBytes == entry.sizeBytes) {
-                    Logger.d(TAG, "already in OneDrive, not re-uploading: ${entry.displayName}")
+                    Logger.d(TAG, "already in OneDrive, not re-uploading: $remoteName")
                     entryDao.markUploaded(
                         id = entry.id,
                         // The listing's item id, not an empty string. Recording "" here said the
@@ -767,7 +779,7 @@ class BackupEngine @Inject constructor(
                 // see that it is already backed up. Ask the file instead: if it carries the proxy
                 // marker and OneDrive holds a larger file of the same name, that larger file is
                 // the original. Uploading would file a 2048px copy beside it.
-                val remoteMatch = alreadyThere[entry.displayName]
+                val remoteMatch = alreadyThere[remoteName]
                 val remoteSize = remoteMatch?.sizeBytes
                 if (
                     LedgerRecovery.isBackedUpProxy(
@@ -778,7 +790,7 @@ class BackupEngine @Inject constructor(
                         )
                     )
                 ) {
-                    Logger.i(TAG, "recovered proxy record for ${entry.displayName}")
+                    Logger.i(TAG, "recovered proxy record for $remoteName")
                     entryDao.markRecoveredAsProxied(
                         id = entry.id,
                         originalSizeBytes = remoteSize!!,
@@ -799,7 +811,7 @@ class BackupEngine @Inject constructor(
                 val source = ContentUriUploadSource(
                     resolver = context.contentResolver,
                     uri = android.net.Uri.parse(entry.contentUri),
-                    displayName = uploadNameFor(entry),
+                    displayName = remoteName,
                     sizeBytes = entry.sizeBytes
                 )
 
@@ -809,7 +821,7 @@ class BackupEngine @Inject constructor(
                     BackupProgress(
                         completed = uploaded + skipped + pruned,
                         total = pending.size,
-                        currentFile = entry.displayName,
+                        currentFile = remoteName,
                         currentBytesSent = 0,
                         currentBytesTotal = entry.sizeBytes
                     )
