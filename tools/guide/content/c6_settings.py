@@ -436,6 +436,28 @@ CHAPTER = Chapter(
             already on the phone. Off is right for most people. It only affects OneDrive: other Clouds list only what the app sent.
         """, ui=True),
 
+        topic("settings-section-camera", "Camera Sync (Settings)", """
+            ## What it is
+            **Special settings for Camera**, off out of the box. Off, no folder gets them, and every album
+            works the same way, Camera included.
+
+            Turn it on and more settings appear:
+            • **Camera folder**: the folder your camera saves to. Nothing is chosen for you; pick it from the list.
+            • **Select Photos/Videos older than**, **Photos** and **Videos**: your defaults for that folder's own optimise choices ([[album-camera-optimise]]). Out of the box they are **All**, with Photos and Videos both off, so nothing is selected until you choose.
+            • **Video quality**: how much a video is made smaller when you optimise it there.
+
+            ## What changes for the Camera folder
+            It has no **Sync** on its menu, and its file list gets the choices, **Sync now** and **Rescan** at
+            the top. Nothing is made smaller until you press **Sync now** there.
+
+            ## Good to know
+            These are only starting points. Changing the choices in the Camera folder lasts for that visit,
+            and when you leave with different ones the app asks whether to make them your defaults.
+
+            They are separate from the **Optimise** switches above, which are for Sync albums only and have no
+            effect on the Camera folder or on any album set to Backup.
+        """, ui=True),
+
         topic("settings-section-archive", "Archive (Settings)", """
             ## What it is
             Two settings, added 22 Sept 2026:

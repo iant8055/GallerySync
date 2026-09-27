@@ -206,8 +206,8 @@ CHAPTER = Chapter(
             Under the name is a line such as **Backup · 12 files**: its mode and how many files the app
             is tracking. Then the counts ([[album-file-status]]) and, on one line, a **Sort by** box
             ([[album-file-sort]]) and, when some file has one, the **Keep at full size** heading over the
-            checkboxes ([[album-file-pin]]). In the **Camera** album there is also a control to optimise
-            older photos and videos ([[album-camera-optimise]]).
+            checkboxes ([[album-file-pin]]). In your **Camera folder**, if you have chosen one in Settings,
+            there are also controls to optimise older photos and videos ([[album-camera-optimise]]).
 
             Below the card is one rounded card for each file, in the same style as the Restore tab's
             files. Each shows the file's name and, under it, one line with its size (and **video** if it is
@@ -284,58 +284,61 @@ CHAPTER = Chapter(
             file itself.
         """, ui=True),
 
-        topic("album-camera-optimise", "Optimise older photos and videos in Camera", """
+        topic("album-camera-optimise", "Optimise older photos and videos in your Camera folder", """
             ## What it is
-            Only the **Camera** album has this. At the top of its file list, under the counts, is
-            **Only list Photos/Videos older than**, with a box to choose **1 day**, **1 week**,
-            **1 month**, **6 months**, **1 year** or **All**. Choose one and the list below shows just the files that
-            are that old or older and could be made smaller. A **Cancel** button appears beside the box; it
-            drops the age and brings back the whole album. The card says how many files there are and
-            roughly how much space they would give back, marked **(estimate)**, and a button at the bottom
-            of the screen, like Restore's, reads **Optimise 12 files** (with the real number).
+            Only your **Camera folder** has this: the folder you chose in Settings under **Camera Sync**
+            ([[settings-section-camera]]). Until you turn that on and choose a folder, no album has it, and
+            every album, including one named Camera, works like any other.
 
-            Nothing happens until you press that button. It is a one-off tidy of one folder. It is not a
-            mode, it is not remembered, and it does not change how new photos are handled: a picture you
-            take stays exactly as it is until you ask. **All** lists every backed-up photo and video, including
-            ones you took a moment ago, so look down the list and swipe out anything you want left alone before
-            you press the button. The control is not shown while Camera is set to
-            **Archive**, because those files are on their way off the phone.
+            The list shows **every** file in the folder, as any album does. At the top, under the counts, are
+            three choices that **select** files for optimising:
 
-            ## Why Camera has no Sync
-            The Camera album offers **Off**, **Backup** and **Archive**, and not **Sync**. Sync makes a
-            photo smaller as soon as the Cloud has it, which is right for an album you have set aside and
-            wrong for the folder your camera writes to. This control is the alternative: you say how old a
-            photo has to be, and only then is it touched. An album that was already set to Sync before this
-            was added keeps that setting.
+            • **Select Photos/Videos older than**: **1 day**, **1 week**, **1 month**, **6 months**, **1 year** or **All**.
+            • **Photos** and **Videos**: which kinds to select. A check mark means on.
 
-            ## Which files are listed
-            • Photos and videos that the Cloud has confirmed, at the same size. A file not yet backed up is never listed. For now this covers files sent to OneDrive: files sent to another Cloud are not listed here.
-            • Only files at least as old as the age you chose, by the date your phone holds for each file (the date it was last changed).
-            • Photos only if **Optimise photos** is on in Settings, and videos only if **Optimise video** is on. If one is off, the card says so.
+            They start at your defaults from Settings. Selected files are highlighted, as on the Restore tab;
+            the rest are greyed. Changing a choice selects afresh. Then swipe a file right to select it, or
+            left to deselect it. The card says how many files are selected and roughly how much space they
+            would give back, marked **(estimate)**.
+
+            Under them are **Sync now** and **Rescan**, as on the Albums tab. **Sync now** sends anything in
+            the folder that is waiting to be backed up, and makes the selected files smaller. **Rescan** checks
+            the Cloud again.
+
+            Nothing is made smaller until you press **Sync now**. It is a one-off tidy of one folder. It is not a
+            mode and it does not change how new photos are handled: a picture you take stays exactly as it is
+            until you ask. The choices are not shown while the folder is set to **Archive**, because those
+            files are on their way off the phone.
+
+            ## Which files can be selected
+            • Photos and videos that the Cloud has confirmed, at the same size. A file not yet backed up is listed but greyed, and cannot be selected until the Cloud has confirmed it. For now this covers files sent to OneDrive.
             • Not files that have already been made smaller, or that could not be made smaller.
+            • A file Restore has put back (**Keep at full size**, [[album-file-pin]]) is not selected by the choices, but you can swipe it right to select it. Pressing **Sync now** then makes it smaller again.
 
-            ## Before you choose
-            The Camera file list shows nothing until you choose an age, and says so. Once you have, it lists
-            only the files that age would optimise, so there is nothing on screen that cannot be swiped.
-            **Cancel** empties it again. A file Restore has put back appears greyed in the list, if it is old enough, marked
-            **Kept at full size**; swipe it right to let it be optimised again.
+            ## Keeping your choices
+            Your choices and swipes last for this visit. When you leave with choices that differ from your
+            defaults, the app asks **Do you want to make these your default settings?** **Yes** saves them in
+            Settings; **No** leaves the defaults as they were.
 
-            ## Leaving files out
-            Swipe right to select and left to deselect, as everywhere in the app. Swipe a file to the left to
-            deselect it and keep it at full size: it goes grey and is left out of the count and of the
-            estimate. Swipe it to the right to select it again and put it back on the list. This is the same choice as
-            **Keep at full size** ([[album-file-pin]]), so it can only make the app do less.
+            ## Why the Camera folder has no Sync
+            The Camera folder offers **Off**, **Backup** and **Archive**, and not **Sync**. Sync makes a
+            photo smaller as soon as the Cloud has it, which is right for an album you have set aside and
+            wrong for the folder your camera writes to. This is the alternative: you choose what to make
+            smaller, and only then is it touched. An album that was already set to Sync keeps that setting.
 
-            ## What the button does
-            It replaces each listed file on your phone with a smaller copy that stays in your gallery
+            The **Optimise** switches in Settings are for Sync albums only. They have no effect here, or on any
+            album set to Backup.
+
+            ## What Sync now does to the selected files
+            It replaces each selected file on your phone with a smaller copy that stays in your gallery
             under its own name. The full-size original stays in the Cloud, and **Restore** brings it back.
             Files inside the folders you gave GallerySync access to at setup are done in the background;
-            any outside them need Android's own confirmation first. Nothing is removed and nothing is sent.
-            While it runs the card shows how many are left and the list gets shorter as each one is done.
+            any outside them need Android's own confirmation first. Nothing is removed. While it runs the
+            button shows how many are left.
 
             ## Where it comes from
-            The app's own record of what the Cloud has confirmed for each file, and your Settings switches.
-            Video is made smaller at the quality chosen in Settings.
+            The app's own record of what the Cloud has confirmed for each file, and the choices on this
+            screen. Video is made smaller at the Camera video quality chosen in Settings.
         """, ui=True),
 
         topic("album-merge-warning", "Duplicate album names detected", """

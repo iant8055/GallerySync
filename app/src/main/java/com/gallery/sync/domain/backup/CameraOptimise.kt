@@ -6,11 +6,11 @@ import java.time.Duration
 import java.time.Instant
 
 /**
- * How old a Camera file must be before the album's *Optimise* control will offer it.
+ * How old a Camera file must be for the header's age to select it.
  *
  * Ian's list, 20 Sept 2026: 1 day, 1 week, 1 month, 6 months, 1 year. It is a separate scale from
  * [MediaAge] on purpose. That one gates the ongoing video setting and is measured in hours to a week;
- * this one is picked once, by hand, for a folder full of recent shots, and wants to reach months.
+ * this one is picked by hand for a folder full of recent shots, and wants to reach months.
  *
  * Months are fixed lengths (30, 182 and 365 days) rather than calendar arithmetic: nothing here is
  * worth a time-zone question, and a file a day either side of the line is the user's own boundary
@@ -33,99 +33,100 @@ enum class CameraOptimiseAge(val duration: Duration) {
 
     /** The newest modification time, in seconds, a file may have and still be old enough. */
     fun thresholdEpochSeconds(now: Instant): Long = now.minus(duration).epochSecond
-}
 
-/** The Settings the Camera control obeys. Ian, 20 Sept 2026: it respects the same switches as Sync does. */
-data class CameraOptimiseSettings(
-    /** The master switch: *Optimise photos and videos*. */
-    val enabled: Boolean,
-    val photos: Boolean,
-    val videos: Boolean,
-    /** What a photo or a clip is expected to lose, in whole percent. Only an estimate. */
-    val photoSavingPercent: Int,
-    val videoSavingPercent: Int
-) {
-    fun allows(entry: BackupEntryEntity): Boolean =
-        enabled && if (entry.isVideo) videos else photos
+    companion object {
+        /** All, out of the box (Ian, 27 Sept 2026). With Photos and Videos both off it still selects nothing. */
+        val DEFAULT = All
 
-    /** True when Settings would optimise nothing at all, which is worth saying instead of "no files". */
-    val everythingOff: Boolean get() = !enabled || (!photos && !videos)
+        fun fromNameOrDefault(name: String?): CameraOptimiseAge =
+            entries.firstOrNull { it.name == name } ?: DEFAULT
+    }
 }
 
 /**
- * What the Camera album's *Only list Photos/Videos older than…* control will do, worked out from
- * the ledger alone.
+ * The three choices on the Camera screen's header: how old, and which kinds.
  *
- * ### This is a manual optimise of one folder, not a mode
- *
- * Ian, 20 Sept 2026: *"this isn't a Backup - this is basically a Manual Optimization for a single
- * folder."* Nothing here is remembered as a rule, nothing sets the album's mode, and nothing runs
- * until the person taps the button beside the count. The plan is only ever the answer to "if I tapped
- * now, which files would it touch?", which is why the list can show it before anything happens.
- *
- * ### One test, used by the screen and by the worker
- *
- * The screen draws the list from [of], and the worker that does the work calls [of] again with the
- * same cutoff, so what was shown is what is done. A file can only leave the plan between the two
- * (swiped out, already done, gone from the phone), never join it, because the cutoff is fixed when
- * the person taps and is handed to the worker rather than recomputed.
- *
- * ### Who is in it
- *
- * The same bar as every rewrite in this app: the file is uploaded **and** OneDrive reported the
- * size it has here, so the full-quality original is safe before the local copy shrinks. Then the
- * usual "not already smaller, not already declined", the age against the file's own modification
- * time, and the Settings switch for its kind.
- *
- * A file the user has swiped out is pinned (`FilePin`). It is kept in [optedOut] and never in
- * [eligible], which is the property everything downstream depends on: the worker acts on
- * [eligible] and on nothing else.
+ * They start at the Camera defaults in Settings and can be changed on the screen for that visit. Leaving with a
+ * choice that differs from the defaults asks whether to make it the default (Ian, 27 Sept 2026); nothing
+ * else writes them back.
  */
-data class CameraOptimisePlan(
-    /** What will be optimised, largest first. */
-    val eligible: List<BackupEntryEntity>,
-    /** Files that qualify but that the user swiped out. Shown greyed, never touched. */
-    val optedOut: List<BackupEntryEntity>,
-    val settings: CameraOptimiseSettings
+data class CameraOptimiseChoice(
+    val age: CameraOptimiseAge,
+    val photos: Boolean,
+    val videos: Boolean
 ) {
-    val photoCount: Int get() = eligible.count { !it.isVideo }
-    val videoCount: Int get() = eligible.count { it.isVideo }
-
-    /**
-     * What it is expected to give back, in bytes.
-     *
-     * An estimate and labelled as one wherever it is drawn. It is the size times the measured saving
-     * for that kind, so it over-promises for a photo that is already small (skipped, no saving) and
-     * for a clip that will not shrink. Both are examined only when the work runs.
-     */
-    val estimatedSavedBytes: Long
-        get() = eligible.sumOf { it.sizeBytes * percentFor(it) / 100 }
-
-    private fun percentFor(entry: BackupEntryEntity): Int =
-        if (entry.isVideo) settings.videoSavingPercent else settings.photoSavingPercent
+    /** Neither kind is chosen, so the header selects nothing. The list still shows every file. */
+    val nothingChosen: Boolean get() = !photos && !videos
 
     companion object {
-
-        fun of(
-            entries: List<BackupEntryEntity>,
-            modifiedBeforeEpochSeconds: Long,
-            settings: CameraOptimiseSettings
-        ): CameraOptimisePlan {
-            val qualifying = entries
-                .filter { isReady(it, modifiedBeforeEpochSeconds) && settings.allows(it) }
-                .sortedByDescending { it.sizeBytes }
-            val (pinned, free) = qualifying.partition { FilePin.isPinned(it.modeOverride) }
-            return CameraOptimisePlan(eligible = free, optedOut = pinned, settings = settings)
-        }
-
-        /** The ledger's half of the test; the phone's half (still there? writable?) is asked at run time. */
-        internal fun isReady(entry: BackupEntryEntity, modifiedBeforeEpochSeconds: Long): Boolean =
-            entry.state == BackupState.UPLOADED &&
-                entry.remoteSizeBytes != null &&
-                entry.remoteSizeBytes == entry.sizeBytes &&
-                !entry.isProxied &&
-                !entry.isProxySkipped &&
-                entry.localMissingSinceEpochMillis == null &&
-                entry.dateModifiedEpochSeconds <= modifiedBeforeEpochSeconds
+        /** Settings' defaults out of the box: both kinds off, age All. Ian, 27 Sept 2026. */
+        val DEFAULT = CameraOptimiseChoice(CameraOptimiseAge.DEFAULT, photos = false, videos = false)
     }
+}
+
+/**
+ * Which files in the camera folder *Sync now* will optimise.
+ *
+ * ### What is listed and what is selected are separate (Ian, 27 Sept 2026)
+ *
+ * The screen lists **every** file in the folder, always; nothing on the header or in Settings hides one.
+ * The header's age, Photos and Videos *select* files, highlighted as on the Restore tab, and the person
+ * can then swipe any file right to select it or left to deselect it. Changing a header choice re-selects
+ * by the new choice. The selection lasts for the visit and is not stored; it is what *Sync now* acts on.
+ *
+ * ### Which files can be selected
+ *
+ * The same bar as every rewrite in this app: uploaded **and** OneDrive reported the size it has here, so the
+ * full-quality original is safe before the local copy shrinks; not already smaller, not already declined,
+ * still on the phone. Anything else is listed, greyed, with its usual marks, and cannot be selected.
+ *
+ * ### What the header selects
+ *
+ * Every selectable file old enough for the age whose kind is chosen, **except** a file kept at full size
+ * ([FilePin], set by Restore): that one starts deselected. Swiping it in selects it for this run, and
+ * *Sync now* then clears its pin, so the pin never disagrees with what was done.
+ */
+object CameraSelection {
+
+    /** Whether [entry] can be optimised at all. Not selectable means listed, greyed, and never acted on. */
+    fun isSelectable(entry: BackupEntryEntity): Boolean =
+        entry.state == BackupState.UPLOADED &&
+            entry.remoteSizeBytes != null &&
+            entry.remoteSizeBytes == entry.sizeBytes &&
+            !entry.isProxied &&
+            !entry.isProxySkipped &&
+            entry.localMissingSinceEpochMillis == null
+
+    /** Whether the header's [choice], with its age turned into [modifiedBeforeEpochSeconds], selects [entry]. */
+    fun matches(entry: BackupEntryEntity, choice: CameraOptimiseChoice, modifiedBeforeEpochSeconds: Long): Boolean =
+        isSelectable(entry) &&
+            !FilePin.isPinned(entry.modeOverride) &&
+            (if (entry.isVideo) choice.videos else choice.photos) &&
+            entry.dateModifiedEpochSeconds <= modifiedBeforeEpochSeconds
+
+    /** What the header selects: the starting selection, and the one a changed choice replaces it with. */
+    fun byChoice(
+        entries: List<BackupEntryEntity>,
+        choice: CameraOptimiseChoice,
+        modifiedBeforeEpochSeconds: Long
+    ): Set<String> =
+        entries.filter { matches(it, choice, modifiedBeforeEpochSeconds) }.mapTo(LinkedHashSet()) { it.id }
+
+    /**
+     * The files a run will optimise: those in [selectedIds] that can still be optimised, largest first. The only
+     * list the worker acts on. A file that stopped being selectable since it was selected (done, gone, declined)
+     * drops out here; nothing outside [selectedIds] can get in.
+     */
+    fun toOptimise(entries: List<BackupEntryEntity>, selectedIds: Set<String>): List<BackupEntryEntity> =
+        entries.filter { it.id in selectedIds && isSelectable(it) }.sortedByDescending { it.sizeBytes }
+
+    /**
+     * What optimising [files] is expected to give back, in bytes.
+     *
+     * An estimate and labelled as one wherever it is drawn. It is the size times the measured saving for that
+     * kind, so it over-promises for a photo that is already small (skipped, no saving) and for a clip that will
+     * not shrink. Both are examined only when the work runs.
+     */
+    fun estimatedSavedBytes(files: List<BackupEntryEntity>, photoSavingPercent: Int, videoSavingPercent: Int): Long =
+        files.sumOf { it.sizeBytes * (if (it.isVideo) videoSavingPercent else photoSavingPercent) / 100 }
 }

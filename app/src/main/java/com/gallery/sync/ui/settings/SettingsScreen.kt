@@ -50,6 +50,7 @@ import com.gallery.sync.ui.common.labelRes
 import com.gallery.sync.data.local.settings.ThemeMode
 import com.gallery.sync.domain.backup.ArchiveAge
 import com.gallery.sync.domain.backup.BackupLocation
+import com.gallery.sync.domain.backup.CameraOptimiseAge
 import com.gallery.sync.domain.backup.MediaAge
 import com.gallery.sync.domain.backup.OptimiseMode
 import com.gallery.sync.domain.backup.VideoQuality
@@ -345,6 +346,83 @@ fun SettingsScreen(
             )
         }
 
+        // ── Camera Sync ──────────────────────────────────────────────────────
+        // The camera folder's own optimise. Off out of the box, and no folder is assumed (Ian, 27 Sept 2026):
+        // until it is on and a folder is picked, every album is ordinary. Its own values, never the Optimise
+        // switches above, which are for Sync albums only. Not in the wizard, which never writes Settings.
+        SectionHeader(
+            stringResource(R.string.settings_camera),
+            help = HelpTopic.SETTINGS_SECTION_CAMERA
+        )
+
+        SettingSwitch(
+            label = stringResource(R.string.settings_camera_special),
+            checked = state.cameraSpecialEnabled,
+            onCheckedChange = viewModel::setCameraSpecialEnabled
+        )
+
+        if (state.cameraSpecialEnabled) {
+            Column(
+                modifier = Modifier.padding(start = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Every album the phone has, plus the picked one if it is not among them right now (emptied, or
+                // not yet scanned), so the button never shows a folder the menu cannot offer back. Blank reads
+                // Choose: nothing is picked for the person.
+                val cameraFolderOptions = remember(state.albums, state.cameraFolderPicked) {
+                    (state.albums.map { it.name } + state.cameraFolderPicked)
+                        .filter { it.isNotBlank() }
+                        .distinctBy { it.lowercase() }
+                        .sortedBy { it.lowercase() }
+                }
+                val chooseLabel = stringResource(R.string.settings_camera_folder_choose)
+                SettingDropdown(
+                    label = stringResource(R.string.settings_camera_folder),
+                    options = cameraFolderOptions,
+                    selected = state.cameraFolderPicked,
+                    onSelected = viewModel::setCameraFolder,
+                    optionLabel = { it.ifBlank { chooseLabel } },
+                    note = if (state.cameraFolderPicked.isBlank()) {
+                        stringResource(R.string.settings_camera_folder_hint)
+                    } else null
+                )
+
+                SettingDropdown(
+                    label = stringResource(R.string.camera_optimise_heading),
+                    options = CameraOptimiseAge.entries,
+                    selected = state.cameraDefaults.age,
+                    onSelected = viewModel::setCameraDefaultAge,
+                    optionLabel = { age -> age.label() }
+                )
+
+                SettingSwitch(
+                    label = stringResource(R.string.camera_kind_photos),
+                    checked = state.cameraDefaults.photos,
+                    onCheckedChange = viewModel::setCameraOptimisePhotos
+                )
+
+                SettingSwitch(
+                    label = stringResource(R.string.camera_kind_videos),
+                    checked = state.cameraDefaults.videos,
+                    onCheckedChange = viewModel::setCameraOptimiseVideo
+                )
+
+                SettingDropdown(
+                    label = stringResource(R.string.settings_camera_video_quality),
+                    options = VideoQuality.entries,
+                    selected = state.cameraVideoQuality,
+                    onSelected = viewModel::setCameraVideoQuality,
+                    optionLabel = { quality ->
+                        when (quality) {
+                            VideoQuality.High -> stringResource(R.string.video_quality_high)
+                            VideoQuality.Medium -> stringResource(R.string.video_quality_medium)
+                            VideoQuality.Low -> stringResource(R.string.video_quality_low)
+                        }
+                    }
+                )
+            }
+        }
+
         // ── Restore ──────────────────────────────────────────────────────────
         SectionHeader(
             stringResource(R.string.settings_restore),
@@ -636,6 +714,17 @@ private fun MediaAge.label(): String = when (this) {
     MediaAge.TwelveHours -> stringResource(R.string.media_age_twelve_hours)
     MediaAge.OneDay -> stringResource(R.string.media_age_one_day)
     MediaAge.OneWeek -> stringResource(R.string.media_age_one_week)
+}
+
+/** The same wording as the Camera folder's own age button. */
+@Composable
+private fun CameraOptimiseAge.label(): String = when (this) {
+    CameraOptimiseAge.OneDay -> stringResource(R.string.camera_age_day)
+    CameraOptimiseAge.OneWeek -> stringResource(R.string.camera_age_week)
+    CameraOptimiseAge.OneMonth -> stringResource(R.string.camera_age_month)
+    CameraOptimiseAge.SixMonths -> stringResource(R.string.camera_age_six_months)
+    CameraOptimiseAge.OneYear -> stringResource(R.string.camera_age_year)
+    CameraOptimiseAge.All -> stringResource(R.string.camera_age_all)
 }
 
 /** The same wording as the Archive tab's own filter — one vocabulary, one setting. */

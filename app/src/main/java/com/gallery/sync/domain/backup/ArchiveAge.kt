@@ -60,7 +60,7 @@ data class ArchiveAgeSplit(
  * Splits files in Archive albums by [age], measured against each file's own modification time —
  * the same field [CameraOptimiseAge] reads, needing no schema change.
  *
- * A file exactly on the line is old enough; the test is `<=`, matching `CameraOptimisePlan.isReady`.
+ * A file exactly on the line is old enough; the test is `<=`, matching `CameraSelection.matches`.
  */
 fun ArchiveAge.split(items: List<LocalMediaItem>, now: Instant = Instant.now()): ArchiveAgeSplit {
     val threshold = thresholdEpochSeconds(now)

@@ -12,6 +12,7 @@ import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.gallery.sync.domain.backup.ArchiveAge
 import com.gallery.sync.domain.backup.BackupLocation
+import com.gallery.sync.domain.backup.CameraOptimiseAge
 import com.gallery.sync.domain.backup.LibraryChoice
 import com.gallery.sync.domain.backup.MediaAge
 import com.gallery.sync.domain.backup.OptimiseCutoff
@@ -289,7 +290,37 @@ data class BackupPreferences(
      * the count has **grown** past it, never merely because it is still above zero. Bookkeeping, not
      * a user-facing setting — there is no screen that shows this number.
      */
-    val archiveReadyLastSeenCount: Int = 0
+    val archiveReadyLastSeenCount: Int = 0,
+    /**
+     * *Special settings for Camera*. **Off out of the box** (Ian, 27 Sept 2026): *"otherwise we are assuming what
+     * folder the system is saving camera to"*. Off, there is no camera folder and every album is ordinary.
+     * See `CameraAlbum`.
+     */
+    val cameraSpecialEnabled: Boolean = false,
+    /**
+     * Which album is the camera folder while [cameraSpecialEnabled] is on: no Sync on its menu, and its own
+     * manual optimise in its file list. Blank until the person picks one, and nothing is assumed.
+     */
+    val cameraFolder: String = "",
+    /**
+     * The camera folder's manual optimise: what its header starts at. Ian, 27 Sept 2026: it is a manual
+     * operation, *"sort of like the wizard"*, with its own age and optimise choices and **its defaults here**:
+     * Photos and Videos off, age All, so nothing is selected until someone chooses to.
+     *
+     * Its own values, not the Optimise switches above: those govern Sync albums only and have no effect on any
+     * album set to Backup (Ian, 27 Sept 2026). Changing the choices on the Camera screen is for that visit; they
+     * are written here only when the person answers Yes to *make these your default settings*.
+     */
+    val cameraDefaultAge: CameraOptimiseAge = CameraOptimiseAge.DEFAULT,
+    val cameraOptimisePhotos: Boolean = false,
+    val cameraOptimiseVideo: Boolean = false,
+    val cameraVideoQuality: VideoQuality = VideoQuality.DEFAULT,
+    /**
+     * The files the last *Sync now* on the camera folder selected, for the optimise worker to read. Bookkeeping,
+     * not a setting: no screen shows it. Stored rather than passed with the work because a large folder's ids
+     * would not fit in WorkManager's 10 KB of input.
+     */
+    val cameraRunSelection: Set<String> = emptySet()
 )
 
 /**
@@ -357,7 +388,14 @@ class BackupSettings @Inject constructor(
             wizardRunStartedAt = stored[KEY_WIZARD_RUN_STARTED_AT] ?: 0L,
             archiveDefaultAge = ArchiveAge.fromNameOrDefault(stored[KEY_ARCHIVE_DEFAULT_AGE]),
             archiveNotifyEnabled = stored[KEY_ARCHIVE_NOTIFY_ENABLED] ?: false,
-            archiveReadyLastSeenCount = stored[KEY_ARCHIVE_READY_LAST_SEEN] ?: 0
+            archiveReadyLastSeenCount = stored[KEY_ARCHIVE_READY_LAST_SEEN] ?: 0,
+            cameraSpecialEnabled = stored[KEY_CAMERA_SPECIAL] ?: false,
+            cameraFolder = stored[KEY_CAMERA_FOLDER] ?: "",
+            cameraDefaultAge = CameraOptimiseAge.fromNameOrDefault(stored[KEY_CAMERA_DEFAULT_AGE]),
+            cameraOptimisePhotos = stored[KEY_CAMERA_OPTIMISE_PHOTOS] ?: false,
+            cameraOptimiseVideo = stored[KEY_CAMERA_OPTIMISE_VIDEO] ?: false,
+            cameraVideoQuality = VideoQuality.fromNameOrDefault(stored[KEY_CAMERA_VIDEO_QUALITY]),
+            cameraRunSelection = stored[KEY_CAMERA_RUN_SELECTION] ?: emptySet()
         )
     }
 
@@ -564,6 +602,47 @@ class BackupSettings @Inject constructor(
         context.dataStore.edit { it[KEY_ARCHIVE_DEFAULT_AGE] = age.name }
     }
 
+    /** *Special settings for Camera*. See [BackupPreferences.cameraSpecialEnabled]. */
+    suspend fun setCameraSpecialEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[KEY_CAMERA_SPECIAL] = enabled }
+    }
+
+    /** What the next Camera optimise pass works on. See [BackupPreferences.cameraRunSelection]. */
+    suspend fun setCameraRunSelection(ids: Set<String>) {
+        context.dataStore.edit { it[KEY_CAMERA_RUN_SELECTION] = ids }
+    }
+
+    /** Which album is the camera folder. See [BackupPreferences.cameraFolder]. */
+    suspend fun setCameraFolder(album: String) {
+        context.dataStore.edit { it[KEY_CAMERA_FOLDER] = album }
+    }
+
+    /** The Camera screen's starting choices. See [BackupPreferences.cameraDefaultAge]. */
+    suspend fun setCameraDefaultAge(age: CameraOptimiseAge) {
+        context.dataStore.edit { it[KEY_CAMERA_DEFAULT_AGE] = age.name }
+    }
+
+    suspend fun setCameraOptimisePhotos(enabled: Boolean) {
+        context.dataStore.edit { it[KEY_CAMERA_OPTIMISE_PHOTOS] = enabled }
+    }
+
+    suspend fun setCameraOptimiseVideo(enabled: Boolean) {
+        context.dataStore.edit { it[KEY_CAMERA_OPTIMISE_VIDEO] = enabled }
+    }
+
+    suspend fun setCameraVideoQuality(quality: VideoQuality) {
+        context.dataStore.edit { it[KEY_CAMERA_VIDEO_QUALITY] = quality.name }
+    }
+
+    /** The answer Yes to *make these your default settings* on the Camera screen: all three in one write. */
+    suspend fun setCameraDefaults(age: CameraOptimiseAge, photos: Boolean, videos: Boolean) {
+        context.dataStore.edit {
+            it[KEY_CAMERA_DEFAULT_AGE] = age.name
+            it[KEY_CAMERA_OPTIMISE_PHOTOS] = photos
+            it[KEY_CAMERA_OPTIMISE_VIDEO] = videos
+        }
+    }
+
     /** Whether a notification is sent when files in an Archive album have come of age. */
     suspend fun setArchiveNotifyEnabled(enabled: Boolean) {
         context.dataStore.edit { it[KEY_ARCHIVE_NOTIFY_ENABLED] = enabled }
@@ -704,5 +783,12 @@ class BackupSettings @Inject constructor(
         val KEY_ARCHIVE_DEFAULT_AGE = stringPreferencesKey("archive_default_age")
         val KEY_ARCHIVE_NOTIFY_ENABLED = booleanPreferencesKey("archive_notify_enabled")
         val KEY_ARCHIVE_READY_LAST_SEEN = intPreferencesKey("archive_ready_last_seen_count")
+        val KEY_CAMERA_SPECIAL = booleanPreferencesKey("camera_special_enabled")
+        val KEY_CAMERA_FOLDER = stringPreferencesKey("camera_folder")
+        val KEY_CAMERA_RUN_SELECTION = stringSetPreferencesKey("camera_run_selection")
+        val KEY_CAMERA_DEFAULT_AGE = stringPreferencesKey("camera_default_age")
+        val KEY_CAMERA_OPTIMISE_PHOTOS = booleanPreferencesKey("camera_optimise_photos")
+        val KEY_CAMERA_OPTIMISE_VIDEO = booleanPreferencesKey("camera_optimise_video")
+        val KEY_CAMERA_VIDEO_QUALITY = stringPreferencesKey("camera_video_quality")
     }
 }

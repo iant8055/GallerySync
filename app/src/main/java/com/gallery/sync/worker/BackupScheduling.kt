@@ -76,20 +76,15 @@ object BackupScheduling {
     const val PHASE_SYNC_PHOTOS = "sync-photos"
 
     /**
-     * The Camera album's manual optimise (Ian, 20 Sept 2026): photos and clips older than the age the
-     * person picked, minus the ones they swiped out. One folder, one tap, no mode. Carries
-     * [KEY_OPTIMISE_ALBUM], [KEY_OPTIMISE_BEFORE] and, as it goes, [KEY_OPTIMISE_EXCLUDED].
+     * The camera folder's manual optimise (Ian, 20 Sept 2026; a selection since 27 Sept 2026): exactly the files
+     * selected on its screen when Sync now was pressed, which are stored as `cameraRunSelection` because a large
+     * folder's ids would not fit in the work's input. One folder, one tap, no mode. Carries [KEY_OPTIMISE_ALBUM]
+     * and, as it goes, [KEY_OPTIMISE_EXCLUDED].
      */
     const val PHASE_CAMERA = "camera"
 
     /** The album a [PHASE_CAMERA] pass works on. */
     const val KEY_OPTIMISE_ALBUM = "optimise_album"
-
-    /**
-     * Newest modification time, in epoch seconds, a file may have. Fixed when the person taps, so the
-     * set they were shown is the set that is done and a file cannot become old enough mid-run.
-     */
-    const val KEY_OPTIMISE_BEFORE = "optimise_before"
 
     /** Ids the pass already failed on this time round, so its continuations step over them. */
     const val KEY_OPTIMISE_EXCLUDED = "optimise_excluded"
@@ -366,8 +361,7 @@ object BackupScheduling {
      */
     suspend fun enqueueCameraOptimise(
         workManager: WorkManager,
-        album: String,
-        modifiedBeforeEpochSeconds: Long
+        album: String
     ): Boolean {
         if (cameraOptimiseLive(workManager)) return false
         enqueueOptimise(
@@ -375,7 +369,6 @@ object BackupScheduling {
             PHASE_CAMERA,
             Data.Builder()
                 .putString(KEY_OPTIMISE_ALBUM, album)
-                .putLong(KEY_OPTIMISE_BEFORE, modifiedBeforeEpochSeconds)
                 .build()
         )
         return true

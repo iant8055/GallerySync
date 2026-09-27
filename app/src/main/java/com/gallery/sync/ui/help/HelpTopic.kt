@@ -65,6 +65,7 @@ enum class HelpTopic(
     SETTINGS_VIDEO_QUALITY("settings-video-quality", R.string.help_settings_video_quality_title, R.string.help_settings_video_quality_body),
     SETTINGS_SECTION_RESTORE("settings-section-restore", R.string.help_settings_section_restore_title, R.string.help_settings_section_restore_body),
     SETTINGS_SHOW_EMPTY_FOLDERS("settings-show-empty-folders", R.string.help_settings_show_empty_folders_title, R.string.help_settings_show_empty_folders_body),
+    SETTINGS_SECTION_CAMERA("settings-section-camera", R.string.help_settings_section_camera_title, R.string.help_settings_section_camera_body),
     SETTINGS_SECTION_ARCHIVE("settings-section-archive", R.string.help_settings_section_archive_title, R.string.help_settings_section_archive_body),
     SETTINGS_ARCHIVE_DEFAULT_AGE("settings-archive-default-age", R.string.help_settings_archive_default_age_title, R.string.help_settings_archive_default_age_body),
     SETTINGS_ARCHIVE_NOTIFY("settings-archive-notify", R.string.help_settings_archive_notify_title, R.string.help_settings_archive_notify_body);

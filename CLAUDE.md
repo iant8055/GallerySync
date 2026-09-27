@@ -286,18 +286,38 @@ Three areas, fully independent:
    with nothing to send. There is no optimise button or status line in Settings.
 3. **Album modes** (Off / Backup / Sync / Archive). Set **only** by the user, per album.
 
-**The Camera album has no Sync, and has its own manual optimise. Ian, 20 Sept 2026.** *"I don't want a user
-to take a picture/video and then BAM it's optimized already."* The Camera album (`CameraAlbum`, by name) offers
-Off, Backup and Archive; Sync is not on its menu, `setAlbumMode` refuses it, and seeding a new Camera album
+**The camera folder has no Sync, and has its own manual optimise. Ian, 20 Sept 2026, reworked 27 Sept 2026.**
+*"I don't want a user to take a picture/video and then BAM it's optimized already."* The camera folder
+(`CameraAlbum`) offers Off, Backup and Archive; Sync is not on its menu, `setAlbumMode` refuses it, and seeding
 or Select all writes Backup where every other album would get Sync. **An album already at Sync is left alone**,
-because rewriting that would be the app setting a mode. In its place, the album's file list has *Only list Photos/Videos
-older than* 1 day / 1 week / 1 month / 6 months / 1 year / All (`CameraOptimisePlan`): a **one-shot, manual
-optimise of one folder, not a mode and not a standing rule**. Nothing is remembered but the files the user swiped
-out (`FilePin`, so no new column), nothing runs until the button is pressed, and it writes no album mode, so it is
-none of the three areas above and touches none of them. It obeys the Settings switches, measures age from the
-file's modified time, and only ever takes a file OneDrive has confirmed at its full size. **The invariant to
-protect: a swiped-out (pinned) file is never in `CameraOptimisePlan.eligible`**, which is the only list the worker
-acts on; the cutoff is fixed when the button is pressed so the files done are the files shown.
+because rewriting that would be the app setting a mode.
+
+**There is no camera folder until the user chooses one.** Settings → *Camera Sync* → *Special settings for
+Camera* is **off out of the box** (Ian: *"otherwise we are assuming what folder the system is saving camera
+to"*), and the folder picker under it starts blank. Until both are set, **every album is ordinary, including
+one named Camera, and Sync is on its menu.** This replaced the 20 Sept rule that the album named Camera always
+was the camera folder. **It is not asked in the wizard** (Ian, 27 Sept 2026): it is a Settings value, and the
+wizard never writes Settings.
+
+**The camera folder's file list is a selection, like Restore's (Ian, 27 Sept 2026).** It lists **every** file;
+nothing hides one. The header's age, **Photos** and **Videos** *select* files (highlighted as on Restore; the
+rest greyed), a swipe right selects and left deselects, and changing a header choice selects afresh. Only a file
+OneDrive has confirmed at full size, not already optimised or declined, can be selected (`CameraSelection`); a
+file kept at full size (`FilePin`) is not selected by the header but can be swiped in, and *Sync now* clears its
+pin. The selection is **for the visit only** and is not stored as a preference. The header has **Sync now**
+(uploads what is waiting in the folder **and** optimises exactly the selected files) and **Rescan**. It is a
+**one-shot, manual optimise of one folder, not a mode and not a standing rule**, it writes no album mode, so it
+is none of the three areas above and touches none of them. **The invariant to protect: nothing outside the
+selection is ever optimised** — `CameraSelection.toOptimise` is the only list the worker acts on, read from
+`cameraRunSelection`, which Sync now writes.
+
+**Its own settings; the Optimise switches never reach it.** Ian: *"The Optimize switch in settings should have NO
+impact on ANY folder that is set to BACKUP."* The header's choices start at the Camera defaults in Settings
+(`cameraDefaultAge` **All**, `cameraOptimisePhotos` and `cameraOptimiseVideo` **off**), and clips use
+`cameraVideoQuality`. The 20 Sept line that the control "respects the same switches as Sync does" is withdrawn
+and must not come back: its only record was a paraphrase in a code comment. Changing the choices on the screen
+is for that visit; leaving with choices that differ from the defaults asks *"Do you want to make these your
+default settings?"* Yes / No, and only Yes writes Settings.
 
 **One exception, made by Ian, 16 Sept 2026 — a folder/album conflict sets the mode to `Off`.** When the
 app finds one folder under two album identities (TASK-023: MediaStore keeps each writer's spelling, so

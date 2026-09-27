@@ -49,8 +49,9 @@ android {
         // The tenth (26 Sept 2026): dead code removed, and video metadata readable on Android 8 and 9.
         // The eleventh (27 Sept 2026): the wizard never writes Settings, New Albums pop-up, edited files asked about and uploaded as new files.
         // The twelfth (27 Sept 2026): an edited file is no longer swallowed as already-backed-up before it can upload under its new name.
-        versionCode = 12
-        versionName = "0.3.11"
+        // The thirteenth (27 Sept 2026): Camera Sync in Settings (off by default, folder chosen by the user), and the camera folder's list as a selection with Sync now and Rescan.
+        versionCode = 13
+        versionName = "0.3.12"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

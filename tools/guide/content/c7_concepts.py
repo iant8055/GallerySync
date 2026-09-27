@@ -19,10 +19,12 @@ CHAPTER = Chapter(
             ## What each Cloud can do
             Backup works with every Cloud. **Sync** and **Archive** need a Cloud that GallerySync can ask, at the moment it matters, whether a file is safe: OneDrive, Google Drive, Dropbox, IDrive e2 and Backblaze B2. Google Photos and pCloud are backup only for now. If an album goes to one of those, choosing Sync or Archive shows a message and nothing happens for that album.
 
-            ## The Camera album has no Sync
-            Camera offers **Off**, **Backup** and **Archive**. Sync would make a new photo smaller the
-            moment it is backed up, so Camera has a separate control instead: choose an age and optimise
-            only what is already old. See [[album-camera-optimise]].
+            ## Your Camera folder can have no Sync
+            If you turn on **Camera Sync** in Settings and choose the folder your camera saves to, that folder
+            offers **Off**, **Backup** and **Archive**. Sync would make a new photo smaller the moment it is
+            backed up, so the Camera folder has its own choices instead: you select what to make smaller, and
+            only then is it touched. See [[album-camera-optimise]]. Until you turn it on, every album,
+            Camera included, offers all four modes.
 
             ## Only you set a mode
             Nothing sets an album's mode for you: not first-time setup, not the optimise settings, and not
@@ -31,7 +33,7 @@ CHAPTER = Chapter(
 
             ## Which one should I pick?
             • Camera, and albums you want protected but kept as they are: **Backup**.
-            • Albums that fill the phone, where you want space back but still want to see the photos: **Sync**. For Camera, use **Backup** and optimise the old photos from its file list ([[album-camera-optimise]]).
+            • Albums that fill the phone, where you want space back but still want to see the photos: **Sync**. For the folder your camera saves to, you can instead use **Backup** and optimise old photos by hand from its file list ([[album-camera-optimise]]).
             • Old albums you rarely open and want off the phone: **Archive**.
             • Not sure yet: leave it **Off**, or use **Backup**. You can change a mode at any time.
 

@@ -11,8 +11,8 @@ import com.gallery.sync.data.local.media.ProxyApplier
 import com.gallery.sync.data.local.media.ProxyOutcome
 import com.gallery.sync.data.local.media.VideoOptimiser
 import com.gallery.sync.data.local.settings.BackupSettings
-import com.gallery.sync.domain.backup.CameraOptimisePlan
-import com.gallery.sync.domain.backup.CameraOptimiseSettings
+import com.gallery.sync.domain.backup.CameraSelection
+import com.gallery.sync.domain.backup.FilePin
 import com.gallery.sync.domain.backup.PhotoOptimisePolicy
 import com.gallery.sync.domain.backup.WizardBulkOptimise
 import com.gallery.sync.util.Logger
@@ -95,11 +95,14 @@ class OptimiseWorker @AssistedInject constructor(
     }
 
     /**
-     * One batch of the Camera album's manual optimise, and a continuation while more is left.
+     * One batch of the camera folder's manual optimise, and a continuation while more is left.
      *
-     * The list is worked out again here with [CameraOptimisePlan], from the cutoff the person tapped
-     * with, so it is the list they were shown minus anything swiped out, finished or gone since. It
-     * reads the Settings switches again too: switching photos off mid-run stops photos at the next file.
+     * Acts on exactly the files that were selected on the screen when Sync now was pressed
+     * (`cameraRunSelection`), through [CameraSelection.toOptimise], so nothing outside the selection can get in
+     * and anything done, gone or declined since drops out. A file kept at full size is stepped over as well:
+     * Sync now clears the pin of any pinned file the person selected before this is queued, so a pin still set
+     * here was set afterwards and wins. The Settings Optimise switches play no part (they govern Sync albums
+     * only, Ian, 27 Sept 2026). Clips use the Camera video quality from Settings.
      *
      * A file that fails is not retried by the next batch. Its id travels in the continuation and is
      * stepped over, which is what keeps one unwritable file from being the first candidate of every
@@ -111,24 +114,13 @@ class OptimiseWorker @AssistedInject constructor(
      */
     private suspend fun runCamera(): Result {
         val album = inputData.getString(BackupScheduling.KEY_OPTIMISE_ALBUM) ?: return Result.success()
-        val before = inputData.getLong(BackupScheduling.KEY_OPTIMISE_BEFORE, Long.MIN_VALUE)
-        if (before == Long.MIN_VALUE) return Result.success()
         val excluded = inputData.getStringArray(BackupScheduling.KEY_OPTIMISE_EXCLUDED)?.toMutableSet()
             ?: mutableSetOf()
 
         val prefs = settings.current()
-        val plan = CameraOptimisePlan.of(
-            entries = entryDao.entriesForAlbum(album),
-            modifiedBeforeEpochSeconds = before,
-            settings = CameraOptimiseSettings(
-                enabled = prefs.isOptimiseEnabled,
-                photos = prefs.optimisePhotos,
-                videos = prefs.optimiseVideo,
-                photoSavingPercent = 0,
-                videoSavingPercent = 0
-            )
-        )
-        val ready = proxyApplier.onDevice(plan.eligible.filter { it.id !in excluded })
+        val selected = CameraSelection.toOptimise(entryDao.entriesForAlbum(album), prefs.cameraRunSelection)
+            .filterNot { FilePin.isPinned(it.modeOverride) }
+        val ready = proxyApplier.onDevice(selected.filter { it.id !in excluded })
         if (ready.isEmpty()) {
             Logger.d(TAG, "camera: nothing left to optimise")
             return Result.success()
@@ -151,7 +143,7 @@ class OptimiseWorker @AssistedInject constructor(
             }
         }
         if (videos.isNotEmpty()) {
-            val result = videoOptimiser.optimiseEntries(videos, prefs.videoQuality)
+            val result = videoOptimiser.optimiseEntries(videos, prefs.cameraVideoQuality)
             progressed += result.optimised + result.skipped
             excluded += result.failedIds
         }
@@ -164,7 +156,6 @@ class OptimiseWorker @AssistedInject constructor(
                 BackupScheduling.PHASE_CAMERA,
                 Data.Builder()
                     .putString(BackupScheduling.KEY_OPTIMISE_ALBUM, album)
-                    .putLong(BackupScheduling.KEY_OPTIMISE_BEFORE, before)
                     .putStringArray(BackupScheduling.KEY_OPTIMISE_EXCLUDED, excluded.toTypedArray())
                     .build()
             )

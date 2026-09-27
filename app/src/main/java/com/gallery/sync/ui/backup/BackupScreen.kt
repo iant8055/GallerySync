@@ -156,7 +156,7 @@ fun BackupScreen(
         // Not offered while Camera is set to Archive: those files are on their way off the phone, so
         // shrinking them is moot, and swiping one out of the list would also opt it out of Archive
         // (the same pin), which nothing on this screen would say.
-        val isCamera = CameraAlbum.isCamera(album.name) && album.mode != AlbumMode.ARCHIVE
+        val isCamera = CameraAlbum.isCamera(album.name, state.cameraFolder) && album.mode != AlbumMode.ARCHIVE
         AlbumDetailScreen(
             albumName = album.name,
             mode = album.mode,
@@ -177,11 +177,16 @@ fun BackupScreen(
             modifier = modifier,
             camera = if (isCamera) {
                 CameraOptimiseControls(
-                    settings = viewModel.cameraSettings(state),
+                    defaults = state.cameraDefaults,
+                    estimate = { files -> viewModel.cameraEstimate(files, state) },
                     running = state.cameraOptimising,
-                    onOptimise = { before ->
+                    uploading = state.isRunning,
+                    checkingCloud = state.isCheckingCloud,
+                    onRescan = viewModel::rescan,
+                    onSaveDefaults = viewModel::saveCameraDefaults,
+                    onSyncNow = { selectedIds ->
                         scope.launch {
-                            when (val start = viewModel.prepareCameraOptimise(album.name, before)) {
+                            when (val start = viewModel.cameraSyncNow(album.name, selectedIds)) {
                                 is BackupViewModel.CameraStart.NeedsConsent ->
                                     cameraConsentLauncher.launch(IntentSenderRequest.Builder(start.sender).build())
 
@@ -511,6 +516,7 @@ private fun AlbumList(
                             Box(modifier = Modifier.weight(1f)) {
                                 AlbumModeRow(
                                     album = album,
+                                    cameraFolder = state.cameraFolder,
                                     isNew = album.name in waitingNames,
                                     context = context,
                                     onTapped = { onAlbumTapped(album) },
@@ -682,6 +688,8 @@ private fun ModeFilterChip(
 private fun AlbumModeRow(
     album: AlbumRow,
     context: android.content.Context,
+    /** The camera folder chosen in Settings, which never offers Sync, or null when there is none. */
+    cameraFolder: String? = null,
     /** Nobody has chosen a mode for it yet. Ringed and tagged so it cannot be missed in the list. */
     isNew: Boolean = false,
     onTapped: () -> Unit,
@@ -802,11 +810,11 @@ private fun AlbumModeRow(
             // Camera never offers Sync; Google Photos (as this album's folder destination) never
             // offers Sync or Archive. Intersected, not one overriding the other, since Camera itself
             // could be routed to Google Photos.
-            modes = CameraAlbum.modesFor(album.name)
+            modes = CameraAlbum.modesFor(album.name, cameraFolder)
                 .filter { GooglePhotosDestination.canChoose(album.backupLocation, it) },
             // What this album's cloud cannot do stays on the menu, greyed; choosing it says why
             // (Ian, 24 Sept 2026). Camera's missing Sync is its own rule and is not shown here.
-            unsupported = CameraAlbum.modesFor(album.name)
+            unsupported = CameraAlbum.modesFor(album.name, cameraFolder)
                 .filterNot { GooglePhotosDestination.canChoose(album.backupLocation, it) },
             onUnsupported = { blockedMode = it },
             onModeSelected = onModeSelected

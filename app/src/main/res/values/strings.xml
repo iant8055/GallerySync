@@ -159,6 +159,12 @@
     <string name="settings_sync">Sync</string>
     <string name="settings_restore">Restore</string>
     <string name="settings_archive">Archive</string>
+    <string name="settings_camera">Camera Sync</string>
+    <string name="settings_camera_special">Special settings for Camera</string>
+    <string name="settings_camera_folder">Camera folder</string>
+    <string name="settings_camera_folder_choose">Choose</string>
+    <string name="settings_camera_folder_hint">Choose the folder your camera saves to. Until you do, no folder has these settings.</string>
+    <string name="settings_camera_video_quality">Video quality</string>
 
     <!-- The three link cards at the bottom of Settings. -->
     <string name="settings_how_to_guide">How To Guide</string>
@@ -1043,10 +1049,16 @@ full size</string>
     <string name="abort_backup_confirm">Stop and go back</string>
     <string name="abort_backup_keep">Keep backing up</string>
 
-    <!-- Camera album: optimise what is already old (Ian, 20 Sept 2026). A one-shot, manual optimise, not a mode. -->
-    <string name="camera_optimise_heading">Only list Photos/Videos older than</string>
-    <string name="camera_optimise_choose">Choose</string>
-    <string name="camera_optimise_cancel">Cancel</string>
+    <!-- Camera album: optimise what is already old (Ian, 20 Sept 2026). A one-shot, manual optimise, not a mode.
+         Its own age and kinds, with defaults in Settings, and Sync now and Rescan on its header (Ian, 27 Sept 2026). -->
+    <string name="camera_optimise_heading">Select Photos/Videos older than</string>
+    <string name="camera_kind_photos">Photos</string>
+    <string name="camera_kind_videos">Videos</string>
+    <string name="camera_kind_on">%1$s: selected. Tap to leave them out.</string>
+    <string name="camera_kind_off">%1$s: not selected. Tap to include them.</string>
+    <string name="camera_defaults_question">Do you want to make these your default settings?</string>
+    <string name="camera_defaults_yes">Yes</string>
+    <string name="camera_defaults_no">No</string>
     <string name="camera_age_day">1 day</string>
     <string name="camera_age_week">1 week</string>
     <string name="camera_age_month">1 month</string>
@@ -1057,24 +1069,14 @@ full size</string>
         <item quantity="one">%1$d file · about %2$s saved (estimate)</item>
         <item quantity="other">%1$d files · about %2$s saved (estimate)</item>
     </plurals>
-    <plurals name="camera_optimise_button">
-        <item quantity="one">Optimise %d file</item>
-        <item quantity="other">Optimise %d files</item>
-    </plurals>
     <!-- The one wording for choosing files by swiping, wherever a list does it. Ian, 20 Sept 2026. -->
     <string name="select_swipe_hint">Swipe right to select / left to deselect</string>
     <string name="select_action_select">Select</string>
     <string name="select_action_deselect">Deselect</string>
-    <string name="camera_choose_hint">Choose an age above to list the photos and videos it would optimise. Nothing is listed until you do.</string>
     <string name="camera_optimise_working">Optimising… %1$d left</string>
-    <string name="camera_optimise_none">Nothing this old is ready to optimise. Only files already in OneDrive are offered.</string>
-    <string name="camera_optimise_all_kept">Every file this old is deselected and stays at full size. Swipe a file right to select it.</string>
-    <string name="camera_optimise_all_off">Optimising is switched off in Settings.</string>
-    <string name="camera_optimise_photos_off">Photos are switched off in Settings, so none are listed.</string>
-    <string name="camera_optimise_videos_off">Video is switched off in Settings, so none is listed.</string>
-    <string name="camera_optimise_swipe_hint">Swipe right to select / left to deselect. A deselected file stays at full size.</string>
+    <string name="camera_optimise_none_selected">Nothing selected to optimise. Turn on Photos or Videos, or swipe a file right to select it. Only files already in OneDrive can be selected.</string>
+    <string name="camera_optimise_swipe_hint">Swipe right to select / left to deselect. Sync now optimises the selected files.</string>
     <string name="camera_action_keep">Deselect (keep at full size)</string>
     <string name="camera_action_optimise">Select (optimise this file)</string>
-    <string name="camera_opted_out_detail">%1$s · Kept at full size</string>
 
 </resources>

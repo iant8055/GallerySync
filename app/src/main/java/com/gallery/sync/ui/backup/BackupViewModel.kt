@@ -35,8 +35,9 @@ import com.gallery.sync.domain.backup.ArchiveAge
 import com.gallery.sync.domain.backup.BackupEngine
 import com.gallery.sync.domain.backup.BackupLocation
 import com.gallery.sync.domain.backup.CameraAlbum
-import com.gallery.sync.domain.backup.CameraOptimisePlan
-import com.gallery.sync.domain.backup.CameraOptimiseSettings
+import com.gallery.sync.domain.backup.CameraOptimiseAge
+import com.gallery.sync.domain.backup.CameraOptimiseChoice
+import com.gallery.sync.domain.backup.CameraSelection
 import com.gallery.sync.domain.backup.FilePin
 import com.gallery.sync.domain.backup.FolderDestination
 import com.gallery.sync.domain.backup.GooglePhotosDestination
@@ -317,6 +318,16 @@ data class BackupUiState(
     val folders: List<FolderRow> = emptyList(),
     /** The Camera album's manual optimise is queued or running. Drives its button and its list. */
     val cameraOptimising: Boolean = false,
+    /** *Special settings for Camera*, off out of the box. See `BackupPreferences.cameraSpecialEnabled`. */
+    val cameraSpecialEnabled: Boolean = false,
+    /** The folder picked in Settings, shown there whether or not the switch is on. Blank until one is picked. */
+    val cameraFolderPicked: String = "",
+    /** The camera folder in force: the picked one while the switch is on, otherwise none. See `CameraAlbum`. */
+    val cameraFolder: String? = null,
+    /** What the Camera screen's header starts at: the defaults in Settings. */
+    val cameraDefaults: CameraOptimiseChoice = CameraOptimiseChoice.DEFAULT,
+    /** How hard the Camera optimise shrinks a clip. Its own value, not the Sync one. */
+    val cameraVideoQuality: VideoQuality = VideoQuality.DEFAULT,
     /** Whether the restore screen lists cloud folders that hold nothing. */
     val showEmptyCloudFolders: Boolean = false,
     /** What the Archive tab's age filter starts at. See `ArchiveAge`. */
@@ -505,6 +516,15 @@ class BackupViewModel @Inject constructor(
                     showEmptyCloudFolders = prefs.showEmptyCloudFolders,
                     archiveDefaultAge = prefs.archiveDefaultAge,
                     archiveNotifyEnabled = prefs.archiveNotifyEnabled,
+                    cameraSpecialEnabled = prefs.cameraSpecialEnabled,
+                    cameraFolderPicked = prefs.cameraFolder,
+                    cameraFolder = CameraAlbum.chosen(prefs.cameraSpecialEnabled, prefs.cameraFolder),
+                    cameraDefaults = CameraOptimiseChoice(
+                        age = prefs.cameraDefaultAge,
+                        photos = prefs.cameraOptimisePhotos,
+                        videos = prefs.cameraOptimiseVideo
+                    ),
+                    cameraVideoQuality = prefs.cameraVideoQuality,
                     isPaused = prefs.isPaused,
                     runBaselineBytes = prefs.runBaselineBytes,
                     backupLocation = prefs.backupLocation,
@@ -907,21 +927,56 @@ class BackupViewModel @Inject constructor(
         refresh()
     }
 
-    /** What the Camera control would do at [modifiedBeforeEpochSeconds], under Settings as they are now. */
-    fun cameraSettings(state: BackupUiState = _state.value) = CameraOptimiseSettings(
-        enabled = state.isOptimiseEnabled,
-        photos = state.optimisePhotos,
-        videos = state.optimiseVideo,
-        photoSavingPercent = ProxyGenerator.APPROXIMATE_SAVING_PERCENT,
-        videoSavingPercent = state.videoQuality.approximateSavingPercent
-    )
+    /** What a Camera selection is expected to give back, in bytes. An estimate, labelled as one where it is shown. */
+    fun cameraEstimate(files: List<BackupEntryEntity>, state: BackupUiState = _state.value): Long =
+        CameraSelection.estimatedSavedBytes(
+            files,
+            photoSavingPercent = ProxyGenerator.APPROXIMATE_SAVING_PERCENT,
+            videoSavingPercent = state.cameraVideoQuality.approximateSavingPercent
+        )
 
-    /** The files [prepareCameraOptimise] asked Android about, held until the person answers. */
-    private var pendingCamera: PendingCameraRun? = null
+    /** The run [cameraSyncNow] asked Android about, held until the person answers. */
+    private var pendingCamera: String? = null
 
-    private data class PendingCameraRun(val album: String, val before: Long)
+    /**
+     * *Sync now* on the camera folder's header. Ian, 27 Sept 2026: it uploads **and** optimises. Anything waiting
+     * to upload is sent by the same run the Albums tab's Sync now starts; the files selected on the screen are
+     * optimised, and nothing else.
+     *
+     * The selection is stored for the worker (`cameraRunSelection`), and a selected file kept at full size has its
+     * pin cleared first: selecting it was the person undoing the pin, and leaving the pin set would have the file
+     * both kept and optimised. Files inside a folder the app was granted at setup are rewritten with no dialog; any
+     * outside one need Android's confirmation first, raised by the screen from [CameraStart.NeedsConsent]. Nothing
+     * is removed by either route.
+     */
+    suspend fun cameraSyncNow(album: String, selectedIds: Set<String>): CameraStart {
+        val entries = entryDao.entriesForAlbum(album)
+        if (entries.any { it.state == BackupState.PENDING }) runBackupNow()
+        if (!CameraAlbum.isCamera(album, _state.value.cameraFolder)) return CameraStart.NothingToDo
 
-    /** What tapping *Optimise* on the Camera album led to. */
+        val chosen = CameraSelection.toOptimise(entries, selectedIds)
+        val ready = proxyApplier.onDevice(chosen)
+        if (ready.isEmpty()) {
+            refreshCounts()
+            return CameraStart.NothingToDo
+        }
+        ready.filter { FilePin.isPinned(it.modeOverride) }
+            .forEach { entryDao.setModeOverride(it.id, FilePin.overrideFor(false)) }
+        settings.setCameraRunSelection(ready.mapTo(HashSet()) { it.id })
+
+        val outside = proxyApplier.splitByConsent(ready).outside
+        if (outside.isNotEmpty()) {
+            val sender = proxyApplier.createWriteRequest(outside.take(CAMERA_WRITE_REQUEST_LIMIT))
+            if (sender != null) {
+                pendingCamera = album
+                return CameraStart.NeedsConsent(sender)
+            }
+            // No dialog could be built. The files inside a granted folder can still be done, so go on.
+        }
+        return startCameraOptimise(album)
+    }
+
+    /** What pressing *Sync now* on the camera folder led to. */
     sealed interface CameraStart {
         /** Queued. Nothing more to ask. */
         data object Started : CameraStart
@@ -929,44 +984,15 @@ class BackupViewModel @Inject constructor(
         /** Some files sit outside a granted folder: Android's own dialog comes first, then [onCameraConsentGranted]. */
         data class NeedsConsent(val sender: IntentSender) : CameraStart
 
-        /** Nothing on the list is still there to optimise. */
+        /** Nothing selected is still there to optimise. */
         data object NothingToDo : CameraStart
-    }
-
-    /**
-     * The tap on *Optimise* in the Camera album.
-     *
-     * [modifiedBeforeEpochSeconds] is the cutoff the list on screen was drawn with, so the files
-     * worked on are the ones the person was looking at. Files inside a folder the app was granted at
-     * setup are rewritten with no dialog; any outside one need Android's confirmation first, raised
-     * by the screen from [CameraStart.NeedsConsent]. Nothing is removed by either route.
-     */
-    suspend fun prepareCameraOptimise(album: String, modifiedBeforeEpochSeconds: Long): CameraStart {
-        if (!CameraAlbum.isCamera(album)) return CameraStart.NothingToDo
-        val plan = CameraOptimisePlan.of(entryDao.entriesForAlbum(album), modifiedBeforeEpochSeconds, cameraSettings())
-        val ready = proxyApplier.onDevice(plan.eligible)
-        if (ready.isEmpty()) {
-            refreshCounts()
-            return CameraStart.NothingToDo
-        }
-
-        val outside = proxyApplier.splitByConsent(ready).outside
-        if (outside.isNotEmpty()) {
-            val sender = proxyApplier.createWriteRequest(outside.take(CAMERA_WRITE_REQUEST_LIMIT))
-            if (sender != null) {
-                pendingCamera = PendingCameraRun(album, modifiedBeforeEpochSeconds)
-                return CameraStart.NeedsConsent(sender)
-            }
-            // No dialog could be built. The files inside a granted folder can still be done, so go on.
-        }
-        return startCameraOptimise(album, modifiedBeforeEpochSeconds)
     }
 
     /** Android's dialog was confirmed. */
     fun onCameraConsentGranted() {
-        val pending = pendingCamera ?: return
+        val album = pendingCamera ?: return
         pendingCamera = null
-        viewModelScope.launch { startCameraOptimise(pending.album, pending.before) }
+        viewModelScope.launch { startCameraOptimise(album) }
     }
 
     /** The dialog was dismissed. Nothing was consented to, so nothing is done. */
@@ -974,15 +1000,47 @@ class BackupViewModel @Inject constructor(
         pendingCamera = null
     }
 
-    private suspend fun startCameraOptimise(album: String, before: Long): CameraStart {
-        BackupScheduling.enqueueCameraOptimise(WorkManager.getInstance(context), album, before)
+    private suspend fun startCameraOptimise(album: String): CameraStart {
+        BackupScheduling.enqueueCameraOptimise(WorkManager.getInstance(context), album)
         return CameraStart.Started
+    }
+
+    /** *Special settings for Camera*. Settings only. */
+    fun setCameraSpecialEnabled(enabled: Boolean) {
+        viewModelScope.launch { settings.setCameraSpecialEnabled(enabled) }
+    }
+
+    /** Which album is the camera folder. Settings only. */
+    fun setCameraFolder(album: String) {
+        viewModelScope.launch { settings.setCameraFolder(album) }
+    }
+
+    /** The Camera screen's starting choices, set in Settings. */
+    fun setCameraDefaultAge(age: CameraOptimiseAge) {
+        viewModelScope.launch { settings.setCameraDefaultAge(age) }
+    }
+
+    fun setCameraOptimisePhotos(enabled: Boolean) {
+        viewModelScope.launch { settings.setCameraOptimisePhotos(enabled) }
+    }
+
+    fun setCameraOptimiseVideo(enabled: Boolean) {
+        viewModelScope.launch { settings.setCameraOptimiseVideo(enabled) }
+    }
+
+    fun setCameraVideoQuality(quality: VideoQuality) {
+        viewModelScope.launch { settings.setCameraVideoQuality(quality) }
+    }
+
+    /** Yes to *make these your default settings* on leaving the Camera screen. The only way the screen writes back. */
+    fun saveCameraDefaults(choice: CameraOptimiseChoice) {
+        viewModelScope.launch { settings.setCameraDefaults(choice.age, choice.photos, choice.videos) }
     }
 
     fun setAlbumMode(album: String, mode: AlbumMode) {
         // The Camera album has no Sync (Ian, 20 Sept 2026). The menu does not offer it; this is the
         // second lock, for anything that reaches here by another route.
-        if (!CameraAlbum.canChoose(album, mode)) return
+        if (!CameraAlbum.canChoose(album, mode, _state.value.cameraFolder)) return
         // Same second-lock shape for Google Photos: Sync and Archive are never offered for an album
         // whose folder is routed there. See GooglePhotosDestination.
         val albumLocation = _state.value.albums.firstOrNull { it.name == album }?.backupLocation
@@ -1193,7 +1251,7 @@ class BackupViewModel @Inject constructor(
             val modeFor = { name: String ->
                 GooglePhotosDestination.seeded(
                     locationOf[name] ?: _state.value.backupLocation,
-                    CameraAlbum.seeded(name, mode)
+                    CameraAlbum.seeded(name, mode, _state.value.cameraFolder)
                 )
             }
             albumDao.setPreferences(albums.map { AlbumPreferenceEntity(it.name, modeFor(it.name)) })

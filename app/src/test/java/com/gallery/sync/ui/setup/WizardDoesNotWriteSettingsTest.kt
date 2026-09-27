@@ -21,7 +21,9 @@ class WizardDoesNotWriteSettingsTest {
     private val settingsOwned = listOf(
         "setOptimiseEnabled", "setOptimisePhotos", "setOptimiseVideo", "setPhotoOptimiseMode",
         "setVideoOptimiseMode", "setVideoQuality", "setVideoOptimiseAge", "setAllowMeteredNetwork",
-        "setCloudDeletionPolicy", "setAutomaticEnabled", "setBackupLocation", "setPaused"
+        "setCloudDeletionPolicy", "setAutomaticEnabled", "setBackupLocation", "setPaused",
+        "setCameraFolder", "setCameraDefaultAge", "setCameraOptimisePhotos", "setCameraOptimiseVideo",
+        "setCameraVideoQuality", "setCameraDefaults", "setCameraSpecialEnabled"
     )
 
     private fun source(relative: String): String {
