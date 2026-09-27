@@ -27,6 +27,7 @@ enum class HelpTopic(
     ALBUM_FILE_STATUS("album-file-status", R.string.help_album_file_status_title, R.string.help_album_file_status_body),
     ALBUM_FILE_PIN("album-file-pin", R.string.help_album_file_pin_title, R.string.help_album_file_pin_body),
     ALBUM_CAMERA_OPTIMISE("album-camera-optimise", R.string.help_album_camera_optimise_title, R.string.help_album_camera_optimise_body),
+    ALBUM_CAMERA_SELECT("album-camera-select", R.string.help_album_camera_select_title, R.string.help_album_camera_select_body),
     ALBUM_MERGE_WARNING("album-merge-warning", R.string.help_album_merge_warning_title, R.string.help_album_merge_warning_body),
     DIALOG_ARCHIVE_CONFIRM("dialog-archive-confirm", R.string.help_dialog_archive_confirm_title, R.string.help_dialog_archive_confirm_body),
     RESTORE_HERO("restore-hero", R.string.help_restore_hero_title, R.string.help_restore_hero_body),

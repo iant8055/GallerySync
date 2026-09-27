@@ -1,5 +1,6 @@
 package com.gallery.sync.ui.settings
 
+import android.provider.DocumentsContract
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -50,6 +51,7 @@ import com.gallery.sync.ui.common.labelRes
 import com.gallery.sync.data.local.settings.ThemeMode
 import com.gallery.sync.domain.backup.ArchiveAge
 import com.gallery.sync.domain.backup.BackupLocation
+import com.gallery.sync.domain.backup.CameraAlbum
 import com.gallery.sync.domain.backup.CameraOptimiseAge
 import com.gallery.sync.domain.backup.MediaAge
 import com.gallery.sync.domain.backup.OptimiseMode
@@ -375,13 +377,30 @@ fun SettingsScreen(
                         .distinctBy { it.lowercase() }
                         .sortedBy { it.lowercase() }
                 }
+                // Other… opens Android's folder picker for a folder not on the Albums tab yet, usually one the camera
+                // has not saved anything to. Only the folder's name is kept: the grant is not persisted and nothing is
+                // written there (Ian, 27 Sept 2026: the picker, not a typed name, which could silently match nothing).
+                val pickFolder = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocumentTree()) { uri ->
+                    val name = uri?.let { runCatching { DocumentsContract.getTreeDocumentId(it) }.getOrNull() }
+                        ?.let(CameraAlbum::folderNameFromTreeDocumentId)
+                    if (name != null) viewModel.setCameraFolder(name)
+                }
                 val chooseLabel = stringResource(R.string.settings_camera_folder_choose)
+                val otherLabel = stringResource(R.string.settings_camera_folder_other)
                 SettingDropdown(
                     label = stringResource(R.string.settings_camera_folder),
-                    options = cameraFolderOptions,
+                    options = cameraFolderOptions + CameraFolderOther,
                     selected = state.cameraFolderPicked,
-                    onSelected = viewModel::setCameraFolder,
-                    optionLabel = { it.ifBlank { chooseLabel } },
+                    onSelected = { picked ->
+                        if (picked == CameraFolderOther) pickFolder.launch(null) else viewModel.setCameraFolder(picked)
+                    },
+                    optionLabel = { option ->
+                        when {
+                            option == CameraFolderOther -> otherLabel
+                            option.isBlank() -> chooseLabel
+                            else -> option
+                        }
+                    },
                     note = if (state.cameraFolderPicked.isBlank()) {
                         stringResource(R.string.settings_camera_folder_hint)
                     } else null
@@ -407,19 +426,22 @@ fun SettingsScreen(
                     onCheckedChange = viewModel::setCameraOptimiseVideo
                 )
 
-                SettingDropdown(
-                    label = stringResource(R.string.settings_camera_video_quality),
-                    options = VideoQuality.entries,
-                    selected = state.cameraVideoQuality,
-                    onSelected = viewModel::setCameraVideoQuality,
-                    optionLabel = { quality ->
-                        when (quality) {
-                            VideoQuality.High -> stringResource(R.string.video_quality_high)
-                            VideoQuality.Medium -> stringResource(R.string.video_quality_medium)
-                            VideoQuality.Low -> stringResource(R.string.video_quality_low)
+                // Only once Videos is on: with it off there is no clip for it to act on (Ian, 27 Sept 2026).
+                if (state.cameraDefaults.videos) {
+                    SettingDropdown(
+                        label = stringResource(R.string.settings_camera_video_quality),
+                        options = VideoQuality.entries,
+                        selected = state.cameraVideoQuality,
+                        onSelected = viewModel::setCameraVideoQuality,
+                        optionLabel = { quality ->
+                            when (quality) {
+                                VideoQuality.High -> stringResource(R.string.video_quality_high)
+                                VideoQuality.Medium -> stringResource(R.string.video_quality_medium)
+                                VideoQuality.Low -> stringResource(R.string.video_quality_low)
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
         }
 
@@ -715,6 +737,12 @@ private fun MediaAge.label(): String = when (this) {
     MediaAge.OneDay -> stringResource(R.string.media_age_one_day)
     MediaAge.OneWeek -> stringResource(R.string.media_age_one_week)
 }
+
+/**
+ * The Camera folder list's last entry, which opens the folder picker. A value no album name can be, so it can never
+ * be mistaken for one or stored.
+ */
+private const val CameraFolderOther = "\u0000other"
 
 /** The same wording as the Camera folder's own age button. */
 @Composable

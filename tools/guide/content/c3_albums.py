@@ -211,7 +211,8 @@ CHAPTER = Chapter(
 
             Below the card is one rounded card for each file, in the same style as the Restore tab's
             files. Each shows the file's name and, under it, one line with its size (and **video** if it is
-            a video) followed by its marks. A file that Restore has put back also has a checkbox at its
+            a video), its date, then its marks, for example **4.2 MB · 12 Sep 2026 · ✓ backed up**. The date
+            is the one your phone holds for the file, the one **Sort by Date** uses. A file that Restore has put back also has a checkbox at its
             right.
 
             If the app has not handled any files in the album yet, it says **No files tracked yet**.
@@ -296,7 +297,7 @@ CHAPTER = Chapter(
             • **Select Photos/Videos older than**: **1 day**, **1 week**, **1 month**, **6 months**, **1 year** or **All**.
             • **Photos** and **Videos**: which kinds to select. A check mark means on.
 
-            They start at your defaults from Settings. Selected files are highlighted, as on the Restore tab;
+            The three sit on one line, and start at your defaults from Settings. Selected files are highlighted, as on the Restore tab;
             the rest are greyed. Changing a choice selects afresh. Then swipe a file right to select it, or
             left to deselect it. The card says how many files are selected and roughly how much space they
             would give back, marked **(estimate)**.
@@ -339,6 +340,25 @@ CHAPTER = Chapter(
             ## Where it comes from
             The app's own record of what the Cloud has confirmed for each file, and the choices on this
             screen. Video is made smaller at the Camera video quality chosen in Settings.
+        """, ui=True),
+
+        topic("album-camera-select", "Selecting files in your Camera folder", """
+            ## What it is
+            The line under the choices in your Camera folder: how many files are selected and roughly how
+            much space optimising them would give back, marked **(estimate)**, or **Nothing selected**.
+
+            ## How to select
+            • **Photos**, **Videos** and the age select every file that matches. Changing one selects afresh.
+            • Swipe a file right to select it, or left to deselect it. Selected files are highlighted; the rest are greyed.
+            • **Sync now** optimises the selected files, and nothing else.
+
+            ## Why a file cannot be selected
+            Only a file the Cloud has confirmed at its full size can be selected, so the original is safe
+            before the phone's copy is made smaller. A file still waiting to be backed up, or one already
+            made smaller, stays greyed and a swipe does nothing. For now this covers files sent to OneDrive.
+
+            ## Where it comes from
+            Your choices and swipes on this screen, for this visit. See [[album-camera-optimise]].
         """, ui=True),
 
         topic("album-merge-warning", "Duplicate album names detected", """

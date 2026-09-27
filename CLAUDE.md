@@ -294,7 +294,9 @@ because rewriting that would be the app setting a mode.
 
 **There is no camera folder until the user chooses one.** Settings → *Camera Sync* → *Special settings for
 Camera* is **off out of the box** (Ian: *"otherwise we are assuming what folder the system is saving camera
-to"*), and the folder picker under it starts blank. Until both are set, **every album is ordinary, including
+to"*), and the folder picker under it starts blank. It lists the albums on the Albums tab plus **Other…**,
+which opens Android's folder picker; only the picked folder's name is kept (the grant is not persisted, nothing
+is written there). Until both are set, **every album is ordinary, including
 one named Camera, and Sync is on its menu.** This replaced the 20 Sept rule that the album named Camera always
 was the camera folder. **It is not asked in the wizard** (Ian, 27 Sept 2026): it is a Settings value, and the
 wizard never writes Settings.

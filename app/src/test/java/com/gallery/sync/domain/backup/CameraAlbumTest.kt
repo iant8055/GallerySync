@@ -54,6 +54,16 @@ class CameraAlbumTest {
         assertEquals(AlbumMode.SYNC, CameraAlbum.seeded("Camera", AlbumMode.SYNC, null))
     }
 
+    /** Other… in Settings: the album name comes from the picked folder's tree document id. Ian, 27 Sept 2026. */
+    @Test
+    fun `a folder picked with the picker is named by its last folder, and a storage root is not a folder`() {
+        assertEquals("OpenCamera", CameraAlbum.folderNameFromTreeDocumentId("primary:DCIM/OpenCamera"))
+        assertEquals("Camera", CameraAlbum.folderNameFromTreeDocumentId("primary:DCIM/Camera/"))
+        assertEquals("DCIM", CameraAlbum.folderNameFromTreeDocumentId("1A2B-3C4D:DCIM"))
+        assertEquals(null, CameraAlbum.folderNameFromTreeDocumentId("primary:"))
+        assertEquals(null, CameraAlbum.folderNameFromTreeDocumentId("primary:/"))
+    }
+
     @Test
     fun `with the switch on the picked folder is the camera folder`() {
         assertEquals("OpenCamera", CameraAlbum.chosen(enabled = true, folder = "OpenCamera"))

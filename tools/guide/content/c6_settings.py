@@ -442,9 +442,9 @@ CHAPTER = Chapter(
             works the same way, Camera included.
 
             Turn it on and more settings appear:
-            • **Camera folder**: the folder your camera saves to. Nothing is chosen for you; pick it from the list.
+            • **Camera folder**: the folder your camera saves to. Nothing is chosen for you; pick it from the list, which shows the folders on the Albums tab. If yours is not there yet, usually because nothing has been saved to it, choose **Other…** and pick it in Android's folder picker. GallerySync keeps only the folder's name and writes nothing there.
             • **Select Photos/Videos older than**, **Photos** and **Videos**: your defaults for that folder's own optimise choices ([[album-camera-optimise]]). Out of the box they are **All**, with Photos and Videos both off, so nothing is selected until you choose.
-            • **Video quality**: how much a video is made smaller when you optimise it there.
+            • **Video quality**: how much a video is made smaller when you optimise it there. Shown once **Videos** is on.
 
             ## What changes for the Camera folder
             It has no **Sync** on its menu, and its file list gets the choices, **Sync now** and **Rescan** at

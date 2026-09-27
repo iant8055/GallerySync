@@ -372,7 +372,7 @@
   <div class="topic-body" id="album-detail">
 <h4>What it is</h4>
 <p>Opens when you tap an album card. It has the same green card at the top as the other tabs. In it, a <strong>return arrow</strong> at the left goes back, and beside it is the folder's name in bold. Under the name is a line such as <strong>Backup · 12 files</strong>: its mode and how many files the app is tracking. Then the counts (<a class="xref" href="#album-file-status">“File marks and counts in an album”</a>) and, on one line, a <strong>Sort by</strong> box (<a class="xref" href="#album-file-sort">“Sorting an album's files”</a>) and, when some file has one, the <strong>Keep at full size</strong> heading over the checkboxes (<a class="xref" href="#album-file-pin">“Keep at full size”</a>). In your <strong>Camera folder</strong>, if you have chosen one in Settings, there are also controls to optimise older photos and videos (<a class="xref" href="#album-camera-optimise">“Optimise older photos and videos in your Camera folder”</a>).</p>
-<p>Below the card is one rounded card for each file, in the same style as the Restore tab's files. Each shows the file's name and, under it, one line with its size (and <strong>video</strong> if it is a video) followed by its marks. A file that Restore has put back also has a checkbox at its right.</p>
+<p>Below the card is one rounded card for each file, in the same style as the Restore tab's files. Each shows the file's name and, under it, one line with its size (and <strong>video</strong> if it is a video), its date, then its marks, for example <strong>4.2 MB · 12 Sep 2026 · ✓ backed up</strong>. The date is the one your phone holds for the file, the one <strong>Sort by Date</strong> uses. A file that Restore has put back also has a checkbox at its right.</p>
 <p>If the app has not handled any files in the album yet, it says <strong>No files tracked yet</strong>.</p>
 <h4>Where it comes from</h4>
 <p>The app's own record of the files it has handled in that album. It is a plain list of names and marks: no thumbnails, no preview. Looking at photos is the job of your gallery app.</p>
@@ -414,7 +414,7 @@
 <p>Only your <strong>Camera folder</strong> has this: the folder you chose in Settings under <strong>Camera Sync</strong> (<a class="xref" href="#settings-section-camera">“Camera Sync (Settings)”</a>). Until you turn that on and choose a folder, no album has it, and every album, including one named Camera, works like any other.</p>
 <p>The list shows <strong>every</strong> file in the folder, as any album does. At the top, under the counts, are three choices that <strong>select</strong> files for optimising:</p>
 <ul><li><strong>Select Photos/Videos older than</strong>: <strong>1 day</strong>, <strong>1 week</strong>, <strong>1 month</strong>, <strong>6 months</strong>, <strong>1 year</strong> or <strong>All</strong>.</li><li><strong>Photos</strong> and <strong>Videos</strong>: which kinds to select. A check mark means on.</li></ul>
-<p>They start at your defaults from Settings. Selected files are highlighted, as on the Restore tab; the rest are greyed. Changing a choice selects afresh. Then swipe a file right to select it, or left to deselect it. The card says how many files are selected and roughly how much space they would give back, marked <strong>(estimate)</strong>.</p>
+<p>The three sit on one line, and start at your defaults from Settings. Selected files are highlighted, as on the Restore tab; the rest are greyed. Changing a choice selects afresh. Then swipe a file right to select it, or left to deselect it. The card says how many files are selected and roughly how much space they would give back, marked <strong>(estimate)</strong>.</p>
 <p>Under them are <strong>Sync now</strong> and <strong>Rescan</strong>, as on the Albums tab. <strong>Sync now</strong> sends anything in the folder that is waiting to be backed up, and makes the selected files smaller. <strong>Rescan</strong> checks the Cloud again.</p>
 <p>Nothing is made smaller until you press <strong>Sync now</strong>. It is a one-off tidy of one folder. It is not a mode and it does not change how new photos are handled: a picture you take stays exactly as it is until you ask. The choices are not shown while the folder is set to <strong>Archive</strong>, because those files are on their way off the phone.</p>
 <h4>Which files can be selected</h4>
@@ -428,6 +428,17 @@
 <p>It replaces each selected file on your phone with a smaller copy that stays in your gallery under its own name. The full-size original stays in the Cloud, and <strong>Restore</strong> brings it back. Files inside the folders you gave GallerySync access to at setup are done in the background; any outside them need Android's own confirmation first. Nothing is removed. While it runs the button shows how many are left.</p>
 <h4>Where it comes from</h4>
 <p>The app's own record of what the Cloud has confirmed for each file, and the choices on this screen. Video is made smaller at the Camera video quality chosen in Settings.</p>
+  </div></details>
+  <details class="topic"><summary>Selecting files in your Camera folder</summary>
+  <div class="topic-body" id="album-camera-select">
+<h4>What it is</h4>
+<p>The line under the choices in your Camera folder: how many files are selected and roughly how much space optimising them would give back, marked <strong>(estimate)</strong>, or <strong>Nothing selected</strong>.</p>
+<h4>How to select</h4>
+<ul><li><strong>Photos</strong>, <strong>Videos</strong> and the age select every file that matches. Changing one selects afresh.</li><li>Swipe a file right to select it, or left to deselect it. Selected files are highlighted; the rest are greyed.</li><li><strong>Sync now</strong> optimises the selected files, and nothing else.</li></ul>
+<h4>Why a file cannot be selected</h4>
+<p>Only a file the Cloud has confirmed at its full size can be selected, so the original is safe before the phone's copy is made smaller. A file still waiting to be backed up, or one already made smaller, stays greyed and a swipe does nothing. For now this covers files sent to OneDrive.</p>
+<h4>Where it comes from</h4>
+<p>Your choices and swipes on this screen, for this visit. See <a class="xref" href="#album-camera-optimise">“Optimise older photos and videos in your Camera folder”</a>.</p>
   </div></details>
   <details class="topic"><summary>Duplicate album names detected</summary>
   <div class="topic-body" id="album-merge-warning">
@@ -917,7 +928,7 @@
 <h4>What it is</h4>
 <p><strong>Special settings for Camera</strong>, off out of the box. Off, no folder gets them, and every album works the same way, Camera included.</p>
 <p>Turn it on and more settings appear:</p>
-<ul><li><strong>Camera folder</strong>: the folder your camera saves to. Nothing is chosen for you; pick it from the list.</li><li><strong>Select Photos/Videos older than</strong>, <strong>Photos</strong> and <strong>Videos</strong>: your defaults for that folder's own optimise choices (<a class="xref" href="#album-camera-optimise">“Optimise older photos and videos in your Camera folder”</a>). Out of the box they are <strong>All</strong>, with Photos and Videos both off, so nothing is selected until you choose.</li><li><strong>Video quality</strong>: how much a video is made smaller when you optimise it there.</li></ul>
+<ul><li><strong>Camera folder</strong>: the folder your camera saves to. Nothing is chosen for you; pick it from the list, which shows the folders on the Albums tab. If yours is not there yet, usually because nothing has been saved to it, choose <strong>Other…</strong> and pick it in Android's folder picker. GallerySync keeps only the folder's name and writes nothing there.</li><li><strong>Select Photos/Videos older than</strong>, <strong>Photos</strong> and <strong>Videos</strong>: your defaults for that folder's own optimise choices (<a class="xref" href="#album-camera-optimise">“Optimise older photos and videos in your Camera folder”</a>). Out of the box they are <strong>All</strong>, with Photos and Videos both off, so nothing is selected until you choose.</li><li><strong>Video quality</strong>: how much a video is made smaller when you optimise it there. Shown once <strong>Videos</strong> is on.</li></ul>
 <h4>What changes for the Camera folder</h4>
 <p>It has no <strong>Sync</strong> on its menu, and its file list gets the choices, <strong>Sync now</strong> and <strong>Rescan</strong> at the top. Nothing is made smaller until you press <strong>Sync now</strong> there.</p>
 <h4>Good to know</h4>

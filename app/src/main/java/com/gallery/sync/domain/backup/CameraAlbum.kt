@@ -40,6 +40,14 @@ object CameraAlbum {
     /** The camera folder Settings describes: the picked folder while the switch is on, otherwise none. */
     fun chosen(enabled: Boolean, folder: String): String? = folder.takeIf { enabled && it.isNotBlank() }
 
+    /**
+     * The album name for a folder picked with Android's folder picker (*Other…* in Settings), from the picked tree's
+     * document id, such as `primary:DCIM/OpenCamera`: its last folder, which is how the scanner names albums. Null
+     * for a storage root, which is not an album.
+     */
+    fun folderNameFromTreeDocumentId(documentId: String): String? =
+        documentId.substringAfter(':').trimEnd('/').substringAfterLast('/').takeIf { it.isNotBlank() }
+
     fun isCamera(album: String, cameraFolder: String?): Boolean =
         cameraFolder != null && album.equals(cameraFolder, ignoreCase = true)
 

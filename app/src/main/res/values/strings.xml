@@ -163,6 +163,7 @@
     <string name="settings_camera_special">Special settings for Camera</string>
     <string name="settings_camera_folder">Camera folder</string>
     <string name="settings_camera_folder_choose">Choose</string>
+    <string name="settings_camera_folder_other">Other…</string>
     <string name="settings_camera_folder_hint">Choose the folder your camera saves to. Until you do, no folder has these settings.</string>
     <string name="settings_camera_video_quality">Video quality</string>
 
@@ -1066,16 +1067,15 @@ full size</string>
     <string name="camera_age_year">1 year</string>
     <string name="camera_age_all">All</string>
     <plurals name="camera_optimise_summary">
-        <item quantity="one">%1$d file · about %2$s saved (estimate)</item>
-        <item quantity="other">%1$d files · about %2$s saved (estimate)</item>
+        <item quantity="one">%1$d selected · about %2$s saved (estimate)</item>
+        <item quantity="other">%1$d selected · about %2$s saved (estimate)</item>
     </plurals>
     <!-- The one wording for choosing files by swiping, wherever a list does it. Ian, 20 Sept 2026. -->
     <string name="select_swipe_hint">Swipe right to select / left to deselect</string>
     <string name="select_action_select">Select</string>
     <string name="select_action_deselect">Deselect</string>
     <string name="camera_optimise_working">Optimising… %1$d left</string>
-    <string name="camera_optimise_none_selected">Nothing selected to optimise. Turn on Photos or Videos, or swipe a file right to select it. Only files already in OneDrive can be selected.</string>
-    <string name="camera_optimise_swipe_hint">Swipe right to select / left to deselect. Sync now optimises the selected files.</string>
+    <string name="camera_optimise_none_selected">Nothing selected</string>
     <string name="camera_action_keep">Deselect (keep at full size)</string>
     <string name="camera_action_optimise">Select (optimise this file)</string>
 

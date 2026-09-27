@@ -79,9 +79,11 @@ import com.gallery.sync.ui.help.HelpTopic
 import com.gallery.sync.ui.help.WithHelp
 import com.gallery.sync.ui.theme.LocalGallerySyncColors
 import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
-/** The age button is wider than its word, as the buttons beside it are. Ian, 20 Sept 2026. */
-private val CameraButtonMinWidth = 140.dp
+/** A file's date on its line: day, short month, year. Read in the phone's language. */
+private val FileDateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM yyyy")
 
 /** Two columns of file cards from here up, as on the Restore tab: unfolded, more rows rather than wider ones. */
 private val WideBreakpoint = 600.dp
@@ -516,9 +518,13 @@ private fun FileCard(
                 )
                 // Size and marks on one line, each mark in its own colour. They were stacked while
                 // the header was being moved around; Ian, 19 Sept 2026: now they can share a line.
+                // The date too, beside the status and not instead of it (Ian, 27 Sept 2026): Sort by Date and the
+                // Camera age both go by it, so it has to be on screen. The phone's modified date.
                 val size = buildString {
                     append(formatBytes(context, entry.sizeBytes))
                     if (entry.isVideo) append(" · video")
+                    append(" · ")
+                    append(FileDateFormat.format(Instant.ofEpochSecond(entry.dateModifiedEpochSeconds).atZone(ZoneId.systemDefault())))
                 }
                 val marks = entry.statusLines()
                 Text(
@@ -594,28 +600,28 @@ private fun CameraOptimiseSection(camera: CameraHeader) {
             )
             HelpButton(HelpTopic.ALBUM_CAMERA_OPTIMISE)
         }
-        Box {
-            HeroOutlinedButton(
-                onClick = { menuOpen = true },
-                label = stringResource(camera.choice.age.label()),
-                modifier = Modifier.widthIn(min = CameraButtonMinWidth),
-                enabled = !busy
-            )
-            DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                CameraOptimiseAge.entries.forEach { option ->
-                    DropdownMenuItem(
-                        text = { Text(stringResource(option.label())) },
-                        onClick = {
-                            camera.onAge(option)
-                            menuOpen = false
-                        }
-                    )
+        // The age and the two kinds on one line (Ian, 27 Sept 2026). The kinds are toggles: a check mark and full
+        // ink when on, the word alone and faded when off.
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Box(modifier = Modifier.weight(1f)) {
+                HeroOutlinedButton(
+                    onClick = { menuOpen = true },
+                    label = stringResource(camera.choice.age.label()),
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = !busy
+                )
+                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                    CameraOptimiseAge.entries.forEach { option ->
+                        DropdownMenuItem(
+                            text = { Text(stringResource(option.label())) },
+                            onClick = {
+                                camera.onAge(option)
+                                menuOpen = false
+                            }
+                        )
+                    }
                 }
             }
-        }
-
-        // Which kinds, as two toggles: a check mark and full ink when on, the word alone and faded when off.
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             KindToggle(
                 label = stringResource(R.string.camera_kind_photos),
                 on = camera.choice.photos,
@@ -632,24 +638,25 @@ private fun CameraOptimiseSection(camera: CameraHeader) {
             )
         }
 
+        // One short status line. How selecting works is in the (?) beside it, not spelled out here (Ian, 27 Sept 2026).
         val count = camera.toOptimise.size
-        Text(
-            text = when {
-                busy -> stringResource(R.string.camera_optimise_working, count)
-                count == 0 -> stringResource(R.string.camera_optimise_none_selected)
-                else -> pluralStringResource(
-                    R.plurals.camera_optimise_summary,
-                    count,
-                    count,
-                    formatBytes(context, controls.estimate(camera.toOptimise))
-                )
-            },
-            style = MaterialTheme.typography.bodyMedium
-        )
-        Text(
-            text = stringResource(R.string.camera_optimise_swipe_hint),
-            style = MaterialTheme.typography.bodySmall
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = when {
+                    busy -> stringResource(R.string.camera_optimise_working, count)
+                    count == 0 -> stringResource(R.string.camera_optimise_none_selected)
+                    else -> pluralStringResource(
+                        R.plurals.camera_optimise_summary,
+                        count,
+                        count,
+                        formatBytes(context, controls.estimate(camera.toOptimise))
+                    )
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f, fill = false)
+            )
+            HelpButton(HelpTopic.ALBUM_CAMERA_SELECT)
+        }
 
         // Sync now and Rescan, as the Albums tab has them. Sync now sends what is waiting and optimises what is
         // listed, so it is pressable when either is there to do.
