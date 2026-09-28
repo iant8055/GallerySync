@@ -328,6 +328,12 @@ data class BackupUiState(
     val cameraDefaults: CameraOptimiseChoice = CameraOptimiseChoice.DEFAULT,
     /** How hard the Camera optimise shrinks a clip. Its own value, not the Sync one. */
     val cameraVideoQuality: VideoQuality = VideoQuality.DEFAULT,
+    /**
+     * The camera folder's header choices while they differ from the defaults and nobody has answered *make these
+     * your default settings?* yet. Set by the open Camera screen, so the bottom bar can ask before it leaves
+     * (Ian, 27 Sept 2026: leaving by the bottom bar skipped the question and threw the changes away).
+     */
+    val cameraUnsaved: CameraOptimiseChoice? = null,
     /** Whether the restore screen lists cloud folders that hold nothing. */
     val showEmptyCloudFolders: Boolean = false,
     /** What the Archive tab's age filter starts at. See `ArchiveAge`. */
@@ -1034,7 +1040,13 @@ class BackupViewModel @Inject constructor(
 
     /** Yes to *make these your default settings* on leaving the Camera screen. The only way the screen writes back. */
     fun saveCameraDefaults(choice: CameraOptimiseChoice) {
+        _state.update { it.copy(cameraUnsaved = null) }
         viewModelScope.launch { settings.setCameraDefaults(choice.age, choice.photos, choice.videos) }
+    }
+
+    /** What the open Camera screen's header holds that is not yet the default, or null. See [BackupUiState.cameraUnsaved]. */
+    fun setCameraUnsaved(choice: CameraOptimiseChoice?) {
+        _state.update { it.copy(cameraUnsaved = choice) }
     }
 
     fun setAlbumMode(album: String, mode: AlbumMode) {

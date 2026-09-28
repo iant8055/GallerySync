@@ -318,8 +318,9 @@ CHAPTER = Chapter(
 
             ## Keeping your choices
             Your choices and swipes last for this visit. When you leave with choices that differ from your
-            defaults, the app asks **Do you want to make these your default settings?** **Yes** saves them in
-            Settings; **No** leaves the defaults as they were.
+            defaults, by the return arrow, the phone's Back or another tab in the bar at the bottom, the app asks
+            **Do you want to make these your default settings?** **Yes** saves them in Settings; **No** leaves the
+            defaults as they were. Tapping outside the question keeps you in the Camera folder.
 
             ## Why the Camera folder has no Sync
             The Camera folder offers **Off**, **Backup** and **Archive**, and not **Sync**. Sync makes a
@@ -345,7 +346,9 @@ CHAPTER = Chapter(
         topic("album-camera-select", "Selecting files in your Camera folder", """
             ## What it is
             The line under the choices in your Camera folder: how many files are selected and roughly how
-            much space optimising them would give back, marked **(estimate)**, or **Nothing selected**.
+            much space optimising them would give back, marked **(estimate)**. If nothing is selected it says
+            **Nothing selected**, or **Nothing older than 1 year** (with your age) when Photos or Videos is on but
+            no file is that old yet.
 
             ## How to select
             • **Photos**, **Videos** and the age select every file that matches. Changing one selects afresh.

@@ -1076,6 +1076,7 @@ full size</string>
     <string name="select_action_deselect">Deselect</string>
     <string name="camera_optimise_working">Optimising… %1$d left</string>
     <string name="camera_optimise_none_selected">Nothing selected</string>
+    <string name="camera_optimise_none_old_enough">Nothing older than %1$s</string>
     <string name="camera_action_keep">Deselect (keep at full size)</string>
     <string name="camera_action_optimise">Select (optimise this file)</string>
 

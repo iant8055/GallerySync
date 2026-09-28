@@ -36,11 +36,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -110,6 +112,8 @@ data class CameraOptimiseControls(
     val onRescan: () -> Unit,
     /** Yes to *make these your default settings*, on leaving with choices that differ from [defaults]. */
     val onSaveDefaults: (CameraOptimiseChoice) -> Unit,
+    /** The header's choices while they differ from [defaults], or null: lets the bottom bar ask before leaving. */
+    val onUnsavedChanged: (CameraOptimiseChoice?) -> Unit,
     /** *Sync now*: upload what is waiting, then optimise exactly the selected files. */
     val onSyncNow: (selectedIds: Set<String>) -> Unit
 )
@@ -173,6 +177,15 @@ fun AlbumDetailScreen(
     // Leaving the camera folder with choices that are not the defaults asks once whether to keep them
     // (Ian, 27 Sept 2026). Yes writes them to Settings; No leaves Settings alone; either way the screen closes.
     var askDefaults by remember { mutableStateOf(false) }
+    // Told to the view model as it changes, so that leaving by the bottom bar asks too, not only the return
+    // arrow and Back (Ian, 27 Sept 2026). The question itself is then asked by the bar's owner.
+    LaunchedEffect(choice, camera?.defaults) {
+        camera?.onUnsavedChanged(choice.takeIf { it != camera.defaults })
+    }
+    // However the screen closes, nothing is left marked unsaved for the bar to ask about later. The bar's own
+    // question is answered before its tab changes, so this runs after the answer, never instead of it.
+    val latestCamera by rememberUpdatedState(camera)
+    DisposableEffect(Unit) { onDispose { latestCamera?.onUnsavedChanged(null) } }
     val leave = {
         if (camera != null && choice != camera.defaults) askDefaults = true else onBack()
     }
@@ -192,6 +205,7 @@ fun AlbumDetailScreen(
             dismissButton = {
                 TextButton(onClick = {
                     askDefaults = false
+                    camera.onUnsavedChanged(null)
                     onBack()
                 }) { Text(stringResource(R.string.camera_defaults_no)) }
             }
@@ -223,6 +237,11 @@ fun AlbumDetailScreen(
                         controls = it,
                         choice = choice,
                         toOptimise = toOptimise,
+                        // Why nothing is selected, when the choices are on but the age leaves every file out: said
+                        // plainly, or a ticked Photos over a grey list reads as a toggle that did nothing.
+                        tooYoung = !choice.nothingChosen && choice.age != CameraOptimiseAge.All &&
+                            CameraSelection.byChoice(entries, choice, Long.MAX_VALUE).isNotEmpty() &&
+                            CameraSelection.byChoice(entries, choice, choice.age.thresholdEpochSeconds(Instant.now())).isEmpty(),
                         hasPending = entries.any { entry -> entry.state == BackupState.PENDING },
                         onAge = { picked ->
                             ageName = picked.name
@@ -570,6 +589,8 @@ private data class CameraHeader(
     val toOptimise: List<BackupEntryEntity>,
     /** Files in this folder waiting to upload, which Sync now sends too. */
     val hasPending: Boolean,
+    /** The chosen kinds have files ready, but none is as old as the chosen age. */
+    val tooYoung: Boolean,
     val onAge: (CameraOptimiseAge) -> Unit,
     val onPhotos: (Boolean) -> Unit,
     val onVideos: (Boolean) -> Unit,
@@ -644,6 +665,9 @@ private fun CameraOptimiseSection(camera: CameraHeader) {
             Text(
                 text = when {
                     busy -> stringResource(R.string.camera_optimise_working, count)
+                    count == 0 && camera.tooYoung -> stringResource(
+                        R.string.camera_optimise_none_old_enough, stringResource(camera.choice.age.label())
+                    )
                     count == 0 -> stringResource(R.string.camera_optimise_none_selected)
                     else -> pluralStringResource(
                         R.plurals.camera_optimise_summary,

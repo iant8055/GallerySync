@@ -184,6 +184,7 @@ fun BackupScreen(
                     checkingCloud = state.isCheckingCloud,
                     onRescan = viewModel::rescan,
                     onSaveDefaults = viewModel::saveCameraDefaults,
+                    onUnsavedChanged = viewModel::setCameraUnsaved,
                     onSyncNow = { selectedIds ->
                         scope.launch {
                             when (val start = viewModel.cameraSyncNow(album.name, selectedIds)) {

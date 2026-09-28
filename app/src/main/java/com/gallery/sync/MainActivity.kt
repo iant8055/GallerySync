@@ -280,6 +280,32 @@ private fun SignedInApp(
         )
     }
 
+    // The tab the bottom bar was asked for while the Camera screen held unsaved choices; the question comes first.
+    var cameraLeaveTo by remember { mutableStateOf<Int?>(null) }
+    val unsavedCamera = backupState.cameraUnsaved
+    if (cameraLeaveTo != null && unsavedCamera != null) {
+        val target = cameraLeaveTo!!
+        AlertDialog(
+            // Tapping outside decides nothing and stays on the Camera screen.
+            onDismissRequest = { cameraLeaveTo = null },
+            text = { Text(stringResource(R.string.camera_defaults_question)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    cameraLeaveTo = null
+                    backupViewModel.saveCameraDefaults(unsavedCamera)
+                    selectedTab = target
+                }) { Text(stringResource(R.string.camera_defaults_yes)) }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    cameraLeaveTo = null
+                    backupViewModel.setCameraUnsaved(null)
+                    selectedTab = target
+                }) { Text(stringResource(R.string.camera_defaults_no)) }
+            }
+        )
+    }
+
     var tourStep by remember { mutableIntStateOf(1) }
 
     // Close on the last step puts the wizard away for this session without claiming setup finished.
@@ -334,7 +360,13 @@ private fun SignedInApp(
                 onSelect = { tab ->
                     if (!tourVisible) {
                         val locked = featureOfTab(tab)?.takeIf { featureLocked(it) }
-                        if (locked != null) blockedFeature = locked else selectedTab = tab
+                        when {
+                            locked != null -> blockedFeature = locked
+                            // Leaving the Camera screen by the bar asks the same question as its return arrow
+                            // (Ian, 27 Sept 2026): it used to leave without asking and lose the changes.
+                            selectedTab == 0 && tab != 0 && backupState.cameraUnsaved != null -> cameraLeaveTo = tab
+                            else -> selectedTab = tab
+                        }
                     }
                 },
                 modifier = Modifier.align(Alignment.CenterHorizontally)
