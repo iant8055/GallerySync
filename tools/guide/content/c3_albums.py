@@ -212,7 +212,8 @@ CHAPTER = Chapter(
             Below the card is one rounded card for each file, in the same style as the Restore tab's
             files. Each shows the file's name and, under it, one line with its size (and **video** if it is
             a video), its date, then its marks, for example **4.2 MB · 12 Sep 2026 · ✓ backed up**. The date
-            is the one your phone holds for the file, the one **Sort by Date** uses. A file that Restore has put back also has a checkbox at its
+            is the one your phone holds for the file, the one **Sort by Date** uses. For a file that has been
+            optimised, the size is the smaller copy on your phone; the full-size original is in the Cloud. A file that Restore has put back also has a checkbox at its
             right.
 
             If the app has not handled any files in the album yet, it says **No files tracked yet**.
@@ -297,7 +298,8 @@ CHAPTER = Chapter(
             • **Select Photos/Videos older than**: **1 day**, **1 week**, **1 month**, **6 months**, **1 year** or **All**.
             • **Photos** and **Videos**: which kinds to select. A check mark means on.
 
-            The three sit on one line, and start at your defaults from Settings. Selected files are highlighted, as on the Restore tab;
+            The three sit on one line, and start at your defaults from Settings. The large number at the top
+            right of the card is how many files are selected. Selected files are highlighted, as on the Restore tab;
             the rest are greyed. Changing a choice selects afresh. Then swipe a file right to select it, or
             left to deselect it. The card says how many files are selected and roughly how much space they
             would give back, marked **(estimate)**.

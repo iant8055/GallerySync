@@ -387,6 +387,16 @@ private fun DetailHeader(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
                 )
+                // In the camera folder, how many files Sync now will optimise, large, as Restore and Archive show
+                // their number (Ian, 27 Sept 2026). It moves as the choices change and files are swiped.
+                if (camera != null) {
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = camera.toOptimise.size.toString(),
+                            style = MaterialTheme.typography.displayMedium
+                        )
+                    }
+                }
                 HelpButton(HelpTopic.ALBUM_DETAIL)
             }
 
@@ -539,8 +549,11 @@ private fun FileCard(
                 // the header was being moved around; Ian, 19 Sept 2026: now they can share a line.
                 // The date too, beside the status and not instead of it (Ian, 27 Sept 2026): Sort by Date and the
                 // Camera age both go by it, so it has to be on screen. The phone's modified date.
+                // An optimised file's size is what is on the phone now, not the original's (Ian, 27 Sept 2026): the
+                // original size made a file just optimised look as if nothing had shrunk. The optimised mark says
+                // the full-size original is in the Cloud.
                 val size = buildString {
-                    append(formatBytes(context, entry.sizeBytes))
+                    append(formatBytes(context, entry.sizeOnPhone()))
                     if (entry.isVideo) append(" · video")
                     append(" · ")
                     append(FileDateFormat.format(Instant.ofEpochSecond(entry.dateModifiedEpochSeconds).atZone(ZoneId.systemDefault())))
@@ -756,6 +769,10 @@ private fun FileSort.label(): Int = when (this) {
     FileSort.DATE -> R.string.album_sort_date
     FileSort.STATUS -> R.string.album_sort_status
 }
+
+/** What the file takes on the phone: the smaller copy once optimised, otherwise the file itself. */
+private fun BackupEntryEntity.sizeOnPhone(): Long =
+    localProxySizeBytes?.takeIf { isProxied } ?: sizeBytes
 
 /**
  * The file's marks, in order: backed up, then optimised.

@@ -52,8 +52,9 @@ android {
         // The thirteenth (27 Sept 2026): Camera Sync in Settings (off by default, folder chosen by the user), and the camera folder's list as a selection with Sync now and Rescan.
         // The fourteenth (27 Sept 2026): Camera header on one line with (?) pop-ups, Other… folder picker, Video quality shown with Videos, dates on file lines.
         // The fifteenth (27 Sept 2026): leaving the Camera screen by the bottom bar asks before discarding changed choices; "Nothing older than" status.
-        versionCode = 15
-        versionName = "0.3.14"
+        // The sixteenth (27 Sept 2026): the selected-count number on the Camera header; optimised files show their size on the phone.
+        versionCode = 16
+        versionName = "0.3.15"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
