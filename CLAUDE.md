@@ -222,6 +222,24 @@ text at all. That is a shipped-to-users bug, not a cosmetic one.
   `adb shell "cmd uimode night yes"` and `… night no`. Compiling proves nothing here.
 - The same applies to anything drawn rather than composed — icons, custom canvas, overlays.
 
+### ONCE THE INITIAL BACKUP HAS COMPLETED, NOTHING EVER SHOWS THE WIZARD AGAIN
+
+## **NOTHING SHOULD CALL THE WIZARD ONCE IT SUCCESSFULLY COMPLETES THE INITIAL BACKUP**
+
+Stated by Ian, 28 Sept 2026, in capitals, after signing out of every cloud on the Moto G (to see which accounts
+each used) sent the app back into the wizard. It had done so since 24 Sept (`9a7348d`), when the old gate "not
+signed in to OneDrive" (from when signing in was setup's first step) became "no cloud connected" and kept pointing
+at the wizard; removing every folder to back up in Settings did the same. **Nobody ever decided either.** It was
+carried over mechanically, and then described to Ian as "by design", which it was not.
+
+- The decision lives in `WizardGate` and nowhere else. Once `hasCompletedFirstBackup` or `hasCompletedSetup` is
+  true, `WizardGate.shows` is false whatever the clouds, folders or anything else say.
+- After that, a missing cloud or folder is said **in the app** (the *No Cloud connected* bar, Settings), never by
+  sending the user through setup.
+- `WizardGateTest` fails the build if `MainActivity` decides it any other way or switches the tour on anywhere else.
+- **Never offer a change that re-enters the wizard after the first backup, and never call a wizard re-entry
+  "by design" without a recorded decision from Ian.**
+
 ### The wizard and the Settings tab are independent — in both directions
 
 ## **SETTINGS HAS NO EFFECT ON THE WIZARD**

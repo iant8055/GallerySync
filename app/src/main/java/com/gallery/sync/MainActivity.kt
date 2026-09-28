@@ -36,6 +36,9 @@ import com.gallery.sync.ui.help.LocalSetupOnlyGuide
 import com.gallery.sync.ui.archive.ArchiveScreen
 import com.gallery.sync.ui.restore.RestoreScreen
 import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -58,6 +61,7 @@ import com.gallery.sync.ui.signin.SignInScreen
 import com.gallery.sync.ui.signin.SignInUiState
 import com.gallery.sync.ui.signin.SignInViewModel
 import com.gallery.sync.domain.backup.BackupLocation
+import com.gallery.sync.domain.backup.WizardGate
 import com.gallery.sync.domain.backup.capabilities
 import com.gallery.sync.ui.settings.CloudProvidersUiState
 import com.gallery.sync.ui.settings.CloudProvidersViewModel
@@ -121,6 +125,7 @@ class MainActivity : ComponentActivity() {
  * above, so the two cannot drift apart.
  */
 private const val ArchiveTab = 2
+private const val SettingsTab = 3
 
 /**
  * Chooses between signing in and the signed-in app.
@@ -147,10 +152,18 @@ private fun GallerySyncApp(modifier: Modifier = Modifier, initialTab: Int = 0) {
         return
     }
 
-    val needsSetup = !setupState.hasCompletedSetup || !setupState.hasSources || setupState.firstBackupPending
+    // ONCE THE INITIAL BACKUP HAS COMPLETED, NOTHING EVER SHOWS THE WIZARD AGAIN (Ian, 28 Sept 2026). Decided by
+    // WizardGate and nothing else; WizardGateTest fails the build if this line stops asking it.
+    val needsSetup = WizardGate.shows(
+        firstBackupDone = setupState.hasCompletedFirstBackup,
+        setupCompleted = setupState.hasCompletedSetup,
+        hasSources = setupState.hasSources,
+        firstBackupPending = setupState.firstBackupPending,
+        anyCloudConnected = cloudState.anyConnected
+    )
 
     when {
-        needsSetup || !cloudState.anyConnected -> SignedInApp(
+        needsSetup -> SignedInApp(
             accountName = cloudAccountName(cloudState),
             selectedTabState = selectedTab,
             onSignOut = { cloudViewModel.disconnect(BackupLocation.ONEDRIVE) },
@@ -172,6 +185,7 @@ private fun GallerySyncApp(modifier: Modifier = Modifier, initialTab: Int = 0) {
                     accountName = cloudAccountName(cloudState),
                     selectedTabState = selectedTab,
                     onSignOut = { cloudViewModel.disconnect(BackupLocation.ONEDRIVE) },
+                    noCloudConnected = !cloudState.anyConnected,
                     modifier = modifier
                 )
             }
@@ -205,6 +219,8 @@ private fun SignedInApp(
     showTour: Boolean = false,
     setupViewModel: ReconcileViewModel? = null,
     signInViewModel: SignInViewModel? = null,
+    /** Setup is over and every cloud is signed out: the app stays open and says so. Never the wizard again. */
+    noCloudConnected: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     // The tab is saved and held by GallerySyncApp (Ian, 25 Sept 2026), so it survives Android recreating the screen
@@ -321,6 +337,31 @@ private fun SignedInApp(
     val hideNavBar = tourVisible
 
     Column(modifier = modifier.fillMaxSize()) {
+        // Every cloud signed out after setup: say so and point at where it is fixed. This replaced being sent back
+        // through the wizard (Ian, 28 Sept 2026). Nothing uploads meanwhile, because there is nowhere to send it.
+        if (noCloudConnected && !tourVisible) {
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.errorContainer,
+                contentColor = MaterialTheme.colorScheme.onErrorContainer
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.no_cloud_connected),
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.weight(1f)
+                    )
+                    if (selectedTab != SettingsTab) {
+                        TextButton(onClick = { selectedTab = SettingsTab }) {
+                            Text(stringResource(R.string.no_cloud_open_settings))
+                        }
+                    }
+                }
+            }
+        }
         Box(modifier = Modifier.weight(1f)) {
             // A locked tab is never drawn — not even when something else lands on it, such as the
             // "come of age" notification opening Archive: the same message stands in its place.

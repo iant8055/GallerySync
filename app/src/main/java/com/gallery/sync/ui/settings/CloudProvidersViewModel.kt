@@ -12,6 +12,7 @@ import com.gallery.sync.data.remote.cloud.ConnectionKind
 import com.gallery.sync.data.remote.cloud.KeyField
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.domain.backup.BackupLocation
+import com.gallery.sync.domain.backup.WizardGate
 import com.gallery.sync.domain.backup.RestoreEverythingFrom
 import com.gallery.sync.domain.billing.BillingRepository
 import com.gallery.sync.domain.billing.MultiCloudEntitlement
@@ -170,9 +171,13 @@ class CloudProvidersViewModel @Inject constructor(
 
     fun connect(location: BackupLocation, activity: Activity) {
         val connection = connections.of(location) ?: return
+        val wasNoneConnected = _state.value.connected.isEmpty()
         runBusy {
             when (val result = connection.signIn(activity)) {
-                is SignInResult.Success -> Logger.i(TAG, "connected $location")
+                is SignInResult.Success -> {
+                    Logger.i(TAG, "connected $location")
+                    if (wasNoneConnected) becomeFreeCloud(location)
+                }
                 SignInResult.Cancelled -> Unit
                 is SignInResult.Failed -> {
                     Logger.w(TAG, "$location sign-in failed: ${result.errorCode}")
@@ -184,9 +189,13 @@ class CloudProvidersViewModel @Inject constructor(
 
     fun connectWithKeys(location: BackupLocation, values: Map<String, String>) {
         val connection = connections.of(location) ?: return
+        val wasNoneConnected = _state.value.connected.isEmpty()
         runBusy {
             when (val result = connection.connectWithKeys(values)) {
-                is SignInResult.Success -> Logger.i(TAG, "connected $location")
+                is SignInResult.Success -> {
+                    Logger.i(TAG, "connected $location")
+                    if (wasNoneConnected) becomeFreeCloud(location)
+                }
                 SignInResult.Cancelled -> Unit
                 is SignInResult.Failed -> _state.value = _state.value.copy(lastError = result.errorCode)
             }
@@ -207,6 +216,21 @@ class CloudProvidersViewModel @Inject constructor(
             entryDao.retargetAllUnsent(old, location)
             refresh()
         }
+    }
+
+    /**
+     * The first cloud connected when none is, after setup (every cloud was signed out, Ian, 28 Sept 2026), is the
+     * free one: the free tier is one cloud, whichever the user has. Only which cloud is free changes; every folder
+     * pairing stays as the user set it, as [keepFree] leaves them.
+     */
+    private suspend fun becomeFreeCloud(location: BackupLocation) {
+        val prefs = settings.current()
+        // The wizard chooses the free cloud itself, with setMain, which also pairs the folders; this is only for after.
+        if (!WizardGate.finished(prefs.hasCompletedFirstBackup, prefs.hasCompletedSetup)) return
+        if (prefs.backupLocation == location) return
+        Logger.i(TAG, "$location is now the free cloud (none was connected)")
+        settings.setBackupLocation(location)
+        refresh()
     }
 
     /**

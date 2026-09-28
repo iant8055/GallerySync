@@ -160,6 +160,8 @@
     <string name="settings_restore">Restore</string>
     <string name="settings_archive">Archive</string>
     <string name="settings_camera">Camera Sync</string>
+    <string name="no_cloud_connected">No Cloud connected. Connect one in Settings to keep backing up.</string>
+    <string name="no_cloud_open_settings">Open Settings</string>
     <string name="settings_camera_special">Special settings for Camera</string>
     <string name="settings_camera_folder">Camera folder</string>
     <string name="settings_camera_folder_choose">Choose</string>
