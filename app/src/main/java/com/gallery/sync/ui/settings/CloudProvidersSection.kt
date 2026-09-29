@@ -88,17 +88,25 @@ fun CloudProvidersSection(
         state.providers.filter { only == null || it.location in only }.forEach { provider ->
             LabelWithAction(
                 action = {
+                    // The spinner goes on the one cloud being connected; every other button stays in place,
+                    // greyed, so one sign-in at a time is still enforced without six rows looking busy.
                     when {
-                        state.isBusy -> BusyIndicator()
-                        provider.isConnected -> OutlinedButton(onClick = { viewModel.requestSignOut(provider.location) }) {
+                        state.busyWith == provider.location -> BusyIndicator()
+                        provider.isConnected -> OutlinedButton(
+                            onClick = { viewModel.requestSignOut(provider.location) },
+                            enabled = !state.isBusy
+                        ) {
                             Text(stringResource(R.string.sign_out_action))
                         }
-                        provider.kind == ConnectionKind.ACCESS_KEYS -> Button(onClick = { keysFor = provider }) {
+                        provider.kind == ConnectionKind.ACCESS_KEYS -> Button(
+                            onClick = { keysFor = provider },
+                            enabled = !state.isBusy
+                        ) {
                             Text(stringResource(R.string.cloud_enter_keys_action))
                         }
                         else -> Button(
                             onClick = { activity?.let { viewModel.connect(provider.location, it) } },
-                            enabled = activity != null
+                            enabled = activity != null && !state.isBusy
                         ) {
                             Text(stringResource(R.string.google_photos_connect_action))
                         }
@@ -144,23 +152,25 @@ fun CloudProvidersSection(
                 },
                 style = MaterialTheme.typography.bodyMedium
             )
-            if (state.isBusy) {
+            // A purchase belongs to no cloud row, so its spinner is here; a cloud's sign-in keeps its spinner
+            // on that row and only greys these buttons.
+            if (state.isBusy && state.busyWith == null) {
                 BusyIndicator()
             } else {
                 // Stacked, full width: side by side they squeezed "Unlock Pro" down to "Un" on a 360dp card.
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     if (trial == MultiCloudTrial.State.NotStarted) {
-                        Button(onClick = viewModel::startTrial, modifier = Modifier.fillMaxWidth()) {
+                        Button(onClick = viewModel::startTrial, enabled = !state.isBusy, modifier = Modifier.fillMaxWidth()) {
                             Text(stringResource(R.string.google_photos_trial_start_action))
                         }
                     }
                     val unlock = { activity?.let(viewModel::unlockPro); Unit }
                     if (trial == MultiCloudTrial.State.NotStarted) {
-                        OutlinedButton(onClick = unlock, enabled = activity != null, modifier = Modifier.fillMaxWidth()) {
+                        OutlinedButton(onClick = unlock, enabled = activity != null && !state.isBusy, modifier = Modifier.fillMaxWidth()) {
                             Text(stringResource(R.string.google_photos_unlock_pro_action), maxLines = 1)
                         }
                     } else {
-                        Button(onClick = unlock, enabled = activity != null, modifier = Modifier.fillMaxWidth()) {
+                        Button(onClick = unlock, enabled = activity != null && !state.isBusy, modifier = Modifier.fillMaxWidth()) {
                             Text(stringResource(R.string.google_photos_unlock_pro_action), maxLines = 1)
                         }
                     }

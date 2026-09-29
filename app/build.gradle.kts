@@ -54,8 +54,9 @@ android {
         // The fifteenth (27 Sept 2026): leaving the Camera screen by the bottom bar asks before discarding changed choices; "Nothing older than" status.
         // The sixteenth (27 Sept 2026): the selected-count number on the Camera header; optimised files show their size on the phone.
         // The seventeenth (28 Sept 2026): once the first backup has completed, nothing ever shows the wizard again.
-        versionCode = 17
-        versionName = "0.3.16"
+        // The eighteenth (29 Sept 2026): Connect shows its spinner on that Cloud only; a folder paired with a signed-out Cloud reads "No Cloud" in red.
+        versionCode = 18
+        versionName = "0.3.17"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

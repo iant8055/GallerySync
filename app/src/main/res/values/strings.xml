@@ -147,6 +147,11 @@
     <string name="pairing_path">Goes to %1$s / %2$s</string>
     <string name="pairing_path_library">Goes to your Google Photos library</string>
     <string name="pairing_needs_pro">Needs Pro: nothing is being sent to %1$s until you unlock it, or pair this folder with your free Cloud.</string>
+    <!-- The folder's pill on Where each folder goes, in red, when the Cloud it is paired with is signed out. -->
+    <string name="pairing_no_cloud">No Cloud</string>
+    <string name="pairing_not_connected">%1$s is not connected. Nothing in this folder is being backed up. Connect it above, or pick another Cloud.</string>
+    <!-- The paired Cloud's entry in the folder's menu while it is signed out. -->
+    <string name="pairing_option_not_connected">%1$s (not connected)</string>
     <string name="keep_free_title">Your free trial has ended</string>
     <string name="keep_free_body">Free covers one Cloud. Which one do you want to keep free? Uploads to the others pause until you unlock Pro. Nothing you have already sent is touched.</string>
     <string name="keep_free_keep">Keep %1$s free</string>

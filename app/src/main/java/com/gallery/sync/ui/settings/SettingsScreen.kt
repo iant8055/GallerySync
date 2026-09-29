@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -174,6 +176,10 @@ fun SettingsScreen(
                     addAll(cloudState.destinations)
                     if (folder.location !in this) add(folder.location)
                 }
+                // Paired with a Cloud that is signed out: the pill turns red and says so (Ian, 29 Sept 2026).
+                // The pairing itself is kept, since moving the folder elsewhere would be the app choosing where
+                // files go; it backs up again as soon as that Cloud is reconnected.
+                val cloudMissing = cloudState.connected.none { it.location == folder.location }
                 SettingDropdown(
                     label = pluralStringResource(
                         R.plurals.backup_folder_label, folder.fileCount, folder.name, folder.fileCount
@@ -181,12 +187,22 @@ fun SettingsScreen(
                     options = options,
                     selected = folder.location,
                     onSelected = { viewModel.setFolderLocation(folder.name, it) },
-                    optionLabel = { location -> stringResource(location.labelRes()) },
-                    enabled = options.size > 1,
+                    optionLabel = { location ->
+                        if (cloudState.connected.none { it.location == location }) {
+                            stringResource(R.string.pairing_option_not_connected, stringResource(location.labelRes()))
+                        } else {
+                            stringResource(location.labelRes())
+                        }
+                    },
+                    // A red pill must open, so the folder can be moved to a Cloud that is connected.
+                    enabled = options.size > 1 || cloudMissing,
+                    alarmLabel = if (cloudMissing) stringResource(R.string.pairing_no_cloud) else null,
                     // Where in that cloud the folder's files go, so a row reads as one pairing:
                     // local folder, cloud, place in the cloud.
-                    noteIsWarning = folder.location != cloudState.main && !cloudState.isEntitled,
-                    note = if (folder.location != cloudState.main && !cloudState.isEntitled) {
+                    noteIsWarning = cloudMissing || (folder.location != cloudState.main && !cloudState.isEntitled),
+                    note = if (cloudMissing) {
+                        stringResource(R.string.pairing_not_connected, stringResource(folder.location.labelRes()))
+                    } else if (folder.location != cloudState.main && !cloudState.isEntitled) {
                         // Paired with a cloud that is not the free one, with no Pro and no trial: nothing is
                         // sent there. Say so on the row rather than let it sit silent.
                         stringResource(R.string.pairing_needs_pro, stringResource(folder.location.labelRes()))
@@ -688,7 +704,12 @@ private fun <T> SettingDropdown(
     /** A line under the row saying why it is locked, or anything else worth a sentence. */
     note: String? = null,
     /** Draws [note] as a warning: something here is not working. */
-    noteIsWarning: Boolean = false
+    noteIsWarning: Boolean = false,
+    /**
+     * Replaces the button's text and draws it in the error colours: the selected value cannot work right
+     * now (a folder paired with a signed-out Cloud). The menu still opens, so it can be changed.
+     */
+    alarmLabel: String? = null
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -700,8 +721,21 @@ private fun <T> SettingDropdown(
     ) {
         LabelWithHelp(label, help, modifier = Modifier.weight(1f))
         Box {
-            OutlinedButton(onClick = { expanded = true }, enabled = enabled) {
-                Text(optionLabel(selected), maxLines = 1)
+            if (alarmLabel != null) {
+                Button(
+                    onClick = { expanded = true },
+                    enabled = enabled,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError
+                    )
+                ) {
+                    Text(alarmLabel, maxLines = 1)
+                }
+            } else {
+                OutlinedButton(onClick = { expanded = true }, enabled = enabled) {
+                    Text(optionLabel(selected), maxLines = 1)
+                }
             }
             DropdownMenu(
                 expanded = expanded,

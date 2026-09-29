@@ -82,6 +82,12 @@ data class CloudProvidersUiState(
     val isProUnlocked: Boolean = false,
     /** A sign-in, key check or purchase is in progress; the buttons disable themselves while true. */
     val isBusy: Boolean = false,
+    /**
+     * The cloud whose sign-in or key check is running: only its row shows the spinner, the others grey
+     * out. A spinner on every row read as six things loading at once (Ian, 29 Sept 2026). Null during a
+     * purchase, which belongs to no row.
+     */
+    val busyWith: BackupLocation? = null,
     /** The last thing that went wrong, for a one-line explanation. Cleared on the next attempt. */
     val lastError: String? = null,
     val trial: MultiCloudTrial.State = MultiCloudTrial.State.NotStarted,
@@ -172,7 +178,7 @@ class CloudProvidersViewModel @Inject constructor(
     fun connect(location: BackupLocation, activity: Activity) {
         val connection = connections.of(location) ?: return
         val wasNoneConnected = _state.value.connected.isEmpty()
-        runBusy {
+        runBusy(location) {
             when (val result = connection.signIn(activity)) {
                 is SignInResult.Success -> {
                     Logger.i(TAG, "connected $location")
@@ -190,7 +196,7 @@ class CloudProvidersViewModel @Inject constructor(
     fun connectWithKeys(location: BackupLocation, values: Map<String, String>) {
         val connection = connections.of(location) ?: return
         val wasNoneConnected = _state.value.connected.isEmpty()
-        runBusy {
+        runBusy(location) {
             when (val result = connection.connectWithKeys(values)) {
                 is SignInResult.Success -> {
                     Logger.i(TAG, "connected $location")
@@ -379,13 +385,13 @@ class CloudProvidersViewModel @Inject constructor(
         }
     }
 
-    private fun runBusy(block: suspend () -> Unit) {
+    private fun runBusy(location: BackupLocation? = null, block: suspend () -> Unit) {
         viewModelScope.launch {
-            _state.value = _state.value.copy(isBusy = true, lastError = null)
+            _state.value = _state.value.copy(isBusy = true, busyWith = location, lastError = null)
             try {
                 block()
             } finally {
-                _state.value = _state.value.copy(isBusy = false)
+                _state.value = _state.value.copy(isBusy = false, busyWith = null)
                 refresh()
             }
         }
