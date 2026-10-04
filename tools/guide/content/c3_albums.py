@@ -196,7 +196,7 @@ CHAPTER = Chapter(
             OneDrive is asked directly, each time you open the tab or press Rescan. A file counts as **verified** only if OneDrive has a file with the same name in that album's folder **and** reports the same size. It is deliberately not taken from the app's memory of what it once sent, because that memory cannot know if you have since deleted something in your Cloud.
 
             ## The Cloud line for any other Cloud
-            **15 sent to Backblaze B2**, or Dropbox, Google Drive, IDrive e2, Google Photos or pCloud. If an album's files went to more than one Cloud there is one such line for each. It says **sent**, not **verified**, because it is the app's own record: those Clouds are not asked when you open the tab. Dropbox, Google Drive, Backblaze B2 and IDrive e2 are asked, one file at a time and right then, before that file is shrunk or removed. See [[how-verification-works]].
+            **15 sent to Backblaze B2**, or Dropbox, Google Drive, IDrive e2, pCloud or Google Photos. If an album's files went to more than one Cloud there is one such line for each. It says **sent**, not **verified**, because it is the app's own record: those Clouds are not asked when you open the tab. Dropbox, Google Drive, Backblaze B2, IDrive e2 and pCloud are asked, one file at a time and right then, before that file is shrunk or removed. See [[how-verification-works]].
         """, ui=True),
 
         topic("album-detail", "An album's file list", """

@@ -20,7 +20,7 @@ CHAPTER = Chapter(
             If Sync has already made a photo smaller, the Cloud is checked against the size of the **original**, not the smaller copy, so the copy on your phone is never mistaken for the whole file.
 
             ## Which Clouds can Archive
-            OneDrive, Google Drive, Dropbox, IDrive e2 and Backblaze B2. An album whose files go to Google Photos or pCloud cannot be archived, and says so.
+            OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 and Backblaze B2. An album whose files go to Google Photos cannot be archived, and says so.
 
             ## What Archive cannot do by itself
             It cannot run while you are away. Android requires you to be present to approve removing

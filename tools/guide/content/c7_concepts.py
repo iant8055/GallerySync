@@ -17,7 +17,7 @@ CHAPTER = Chapter(
             • **Archive.** Backs up, verifies, and then takes the files off the phone into its Trash/Recycle Bin, after your tap. The album leaves your gallery. The only mode that removes files. It is a standing instruction while the album holds files: files added to it later are covered too. Once Archive has emptied the album, the album leaves the list and its mode is forgotten.
 
             ## What each Cloud can do
-            Backup works with every Cloud. **Sync** and **Archive** need a Cloud that GallerySync can ask, at the moment it matters, whether a file is safe: OneDrive, Google Drive, Dropbox, IDrive e2 and Backblaze B2. Google Photos and pCloud are backup only for now. If an album goes to one of those, choosing Sync or Archive shows a message and nothing happens for that album.
+            Backup works with every Cloud. **Sync** and **Archive** need a Cloud that GallerySync can ask, at the moment it matters, whether a file is safe: OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 and Backblaze B2. Google Photos is backup only. If an album goes there, choosing Sync or Archive shows a message and nothing happens for that album.
 
             ## Your Camera folder can have no Sync
             If you turn on **Camera Sync** in Settings and choose the folder your camera saves to, that folder

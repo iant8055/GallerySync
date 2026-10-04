@@ -21,7 +21,7 @@ import org.junit.runner.RunWith
  * TASK-027 stage 2: which uploaded rows Sync (optimise) may consider, and which proxies Restore may put back.
  *
  * The clouds that can Sync carry no remembered size by design, so they are matched on having uploaded with an id.
- * Google Photos and pCloud must never appear. The live per-file check still stands in front of every overwrite.
+ * Google Photos must never appear. The live per-file check still stands in front of every overwrite.
  */
 @RunWith(AndroidJUnit4::class)
 class SyncCandidatesTest {
@@ -75,7 +75,7 @@ class SyncCandidatesTest {
     )
 
     @Test
-    fun photoCandidatesIncludeTheFourCloudsAndVerifiedOneDriveOnly() = runTest {
+    fun photoCandidatesIncludeTheOtherCloudsAndVerifiedOneDriveOnly() = runTest {
         entryDao.insertIfNew(
             listOf(
                 row("onedrive-verified.jpg", BackupLocation.ONEDRIVE, remoteSize = 1_024L),
@@ -95,7 +95,7 @@ class SyncCandidatesTest {
         val names = entryDao.proxyCandidates().map { it.displayName }.toSet()
 
         assertEquals(
-            setOf("onedrive-verified.jpg", "dropbox.jpg", "drive.jpg", "b2.jpg", "idrive.jpg"),
+            setOf("onedrive-verified.jpg", "dropbox.jpg", "drive.jpg", "b2.jpg", "idrive.jpg", "pcloud.jpg"),
             names
         )
     }

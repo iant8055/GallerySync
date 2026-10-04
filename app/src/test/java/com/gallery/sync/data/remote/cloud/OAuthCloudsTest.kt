@@ -3,6 +3,7 @@ package com.gallery.sync.data.remote.cloud
 import com.gallery.sync.domain.backup.BackupLocation
 import com.gallery.sync.domain.model.DataResult
 import com.gallery.sync.domain.model.RemoteError
+import com.gallery.sync.domain.repository.RemoteCheck
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -182,6 +183,56 @@ class OAuthCloudsTest {
         whenever(secrets.read(PCloudCloud.KEY_TOKEN)).thenReturn("PTOKEN")
         server.enqueue(MockResponse().setBody("""{"result":2000,"error":"Log in required."}"""))
         assertEquals(DataResult.Failure(RemoteError.Unauthorized), pcloud().upload(source, "A"))
+    }
+
+    @Test
+    fun `pcloud restores through the link getfilelink hands out`() = runTest {
+        whenever(secrets.read(PCloudCloud.KEY_TOKEN)).thenReturn("PTOKEN")
+        server.enqueue(MockResponse().setBody("""{"result":0,"path":"/dl/abc/Car.jpg","hosts":["c1.pcloud.com"]}"""))
+        server.enqueue(MockResponse().setBody(okio.Buffer().write(bytes)))
+        val cloud = pcloud().also { it.linkBaseOverride = base() }
+
+        val result = cloud.openStream("42")
+
+        assertTrue(result.toString(), result is DataResult.Success)
+        assertTrue(bytes.contentEquals((result as DataResult.Success).value.use { it.readBytes() }))
+        assertTrue(server.takeRequest().path!!.startsWith("/getfilelink?fileid=42&forcedownload=1&access_token=PTOKEN"))
+        assertEquals("/dl/abc/Car.jpg", server.takeRequest().path)
+    }
+
+    @Test
+    fun `pcloud reports a file it cannot find as gone from the cloud`() = runTest {
+        whenever(secrets.read(PCloudCloud.KEY_TOKEN)).thenReturn("PTOKEN")
+        server.enqueue(MockResponse().setBody("""{"result":2009,"error":"File not found."}"""))
+        val result = pcloud().openStream("42")
+        assertTrue(result.toString(), result is DataResult.Failure && result.error is RemoteError.Http &&
+            (result.error as RemoteError.Http).code == 404)
+    }
+
+    @Test
+    fun `pcloud asks stat for the size, and only a definite answer counts`() = runTest {
+        whenever(secrets.read(PCloudCloud.KEY_TOKEN)).thenReturn("PTOKEN")
+        server.enqueue(MockResponse().setBody("""{"result":0,"metadata":{"fileid":42,"size":3000,"isfolder":false}}"""))
+        server.enqueue(MockResponse().setBody("""{"result":2009,"error":"File not found."}"""))
+        server.enqueue(MockResponse().setBody("""{"result":0,"metadata":{"fileid":42,"size":3000,"isdeleted":true}}"""))
+        server.enqueue(MockResponse().setBody("""{"result":2000,"error":"Log in required."}"""))
+        server.enqueue(MockResponse().setResponseCode(500))
+        val cloud = pcloud()
+
+        assertEquals(RemoteCheck.Present(3_000L), cloud.sizeOf("42"))
+        assertTrue(server.takeRequest().path!!.startsWith("/stat?fileid=42&access_token=PTOKEN"))
+        assertEquals(RemoteCheck.Gone, cloud.sizeOf("42"))
+        assertEquals(RemoteCheck.Gone, cloud.sizeOf("42"))
+        assertEquals(RemoteCheck.Unknown, cloud.sizeOf("42"))
+        assertEquals(RemoteCheck.Unknown, cloud.sizeOf("42"))
+    }
+
+    @Test
+    fun `pcloud cannot look up a row recorded by name, and does not try`() = runTest {
+        whenever(secrets.read(PCloudCloud.KEY_TOKEN)).thenReturn("PTOKEN")
+        assertEquals(RemoteCheck.Unknown, pcloud().sizeOf("Car.jpg"))
+        assertTrue(pcloud().openStream("Car.jpg") is DataResult.Failure)
+        assertEquals(0, server.requestCount)
     }
 
     @Test

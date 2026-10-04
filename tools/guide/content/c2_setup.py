@@ -59,7 +59,7 @@ CHAPTER = Chapter(
             ## What each Cloud can do
             Selecting a Cloud can show an **About this Cloud** note listing what it cannot do.
             • **OneDrive, Google Drive, Dropbox, IDrive e2 and Backblaze B2** can Backup, Sync, Archive and Restore.
-            • **Google Photos and pCloud** are **backup only** for now. Files sent there are not optimised, archived or restored by GallerySync, because the app cannot ask them, right then, whether a copy is safe.
+            • **Google Photos** is **backup only**. Files sent there are not optimised, archived or restored by GallerySync, because the app cannot ask it, right then, whether a copy is safe.
             • **Outside OneDrive, the app cannot see what a Cloud already holds**, so a photo that is already there may be added a second time.
 
             ## Signing in, one Cloud at a time

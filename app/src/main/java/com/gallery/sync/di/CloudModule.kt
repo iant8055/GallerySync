@@ -75,6 +75,12 @@ abstract class CloudModule {
     abstract fun bindPCloudConnection(impl: PCloudCloud): CloudConnection
 
     @Binds @IntoSet
+    abstract fun bindPCloudDownloader(impl: PCloudCloud): CloudDownloader
+
+    @Binds @IntoSet
+    abstract fun bindPCloudVerifier(impl: PCloudCloud): CloudVerifier
+
+    @Binds @IntoSet
     abstract fun bindIDriveUploader(impl: IDriveE2Cloud): CloudUploader
 
     @Binds @IntoSet

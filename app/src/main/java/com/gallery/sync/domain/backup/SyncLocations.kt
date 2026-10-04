@@ -9,5 +9,5 @@ package com.gallery.sync.domain.backup
  */
 object SyncLocations {
 
-    const val SQL_LIST = "'DROPBOX','GOOGLE_DRIVE','BACKBLAZE_B2','IDRIVE_E2'"
+    const val SQL_LIST = "'DROPBOX','GOOGLE_DRIVE','BACKBLAZE_B2','IDRIVE_E2','PCLOUD'"
 }

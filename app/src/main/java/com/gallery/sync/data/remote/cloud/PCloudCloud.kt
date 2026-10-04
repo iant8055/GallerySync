@@ -12,7 +12,10 @@ import com.gallery.sync.domain.backup.BackupLocation
 import com.gallery.sync.domain.model.DataResult
 import com.gallery.sync.domain.model.RemoteError
 import com.gallery.sync.domain.model.UploadedItem
+import com.gallery.sync.domain.repository.CloudDownloader
 import com.gallery.sync.domain.repository.CloudUploader
+import com.gallery.sync.domain.repository.CloudVerifier
+import com.gallery.sync.domain.repository.RemoteCheck
 import com.gallery.sync.util.Logger
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
@@ -24,6 +27,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.io.InputStream
 import java.net.URLDecoder
 import java.security.SecureRandom
 import java.util.concurrent.ConcurrentHashMap
@@ -37,7 +41,9 @@ import javax.inject.Singleton
  * *token* flow (`response_type=token`) returns the access token in the redirect and needs none, so that
  * is what is used — a plain browser round trip caught by [PCloudRedirectActivity]. The token is
  * long-lived, so there is no refresh. Not offered until an app id is filled in `cloud_oauth_config.json`
- * and the redirect (`com.gallery.sync.pcloud:/callback`) is registered with pCloud. Backup-only.
+ * and the redirect (`com.gallery.sync.pcloud:/callback`) is registered with pCloud. Restore fetches a file back by
+ * the id pCloud gave at upload ([openStream]), and Archive and Sync ask pCloud live for that file's size first
+ * ([sizeOf]), the same as Dropbox (Ian, 4 Oct 2026, the day pCloud approved the app).
  *
  * pCloud keeps users in a US or a European data centre and expects API calls at the right host; the
  * host the sign-in reports is stored and used.
@@ -49,7 +55,7 @@ class PCloudCloud @Inject constructor(
     private val bridge: GoogleSignInResultBridge,
     @param:CloudUploadClient private val client: OkHttpClient,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
-) : CloudConnection, CloudUploader {
+) : CloudConnection, CloudUploader, CloudDownloader, CloudVerifier {
 
     override val location = BackupLocation.PCLOUD
 
@@ -59,6 +65,9 @@ class PCloudCloud @Inject constructor(
 
     /** Overridden in tests: a full base URL, scheme included, in place of `https://<host>`. */
     internal var baseOverride: String? = null
+
+    /** Overridden in tests: replaces `https://<content host>` in the download link pCloud hands out. */
+    internal var linkBaseOverride: String? = null
 
     private val ensured = ConcurrentHashMap.newKeySet<String>()
 
@@ -146,6 +155,99 @@ class PCloudCloud @Inject constructor(
         }
     }
 
+    /**
+     * Opens a file for Restore. pCloud does not stream from the API host: `getfilelink` returns a short-lived link
+     * on one of its content hosts, which is then fetched with no token. A file that is gone (deleted, or in pCloud's
+     * trash) answers result 2009, reported as a 404 so Restore says it is gone.
+     */
+    override suspend fun openStream(remoteItemId: String): DataResult<InputStream> = withContext(dispatcher) {
+        val token = secrets.read(KEY_TOKEN) ?: return@withContext DataResult.Failure(RemoteError.NoToken)
+        // Rows from an upload whose reply carried no file id were recorded by name, which pCloud cannot look up.
+        if (remoteItemId.toLongOrNull() == null) {
+            return@withContext DataResult.Failure(RemoteError.Unknown(IOException("no pCloud file id recorded")))
+        }
+        val base = baseOverride ?: "https://${secrets.read(KEY_HOST) ?: DEFAULT_HOST}"
+        try {
+            val linkUrl = "$base/getfilelink".toHttpUrl().newBuilder()
+                .addQueryParameter("fileid", remoteItemId)
+                .addQueryParameter("forcedownload", "1")
+                .addQueryParameter("access_token", token)
+                .build()
+            val link = client.newCall(Request.Builder().url(linkUrl).build()).execute().use { response ->
+                val body = response.body?.string()
+                if (!response.isSuccessful) return@withContext CloudHttp.failureFor(response, body)
+                val json = CloudHttp.objectOf(body)
+                val code = json?.get("result")?.toString()?.toIntOrNull()
+                if (code in GONE_CODES) return@withContext DataResult.Failure(RemoteError.Http(404, body))
+                if (code != 0) return@withContext failureForResult(code, body)
+                val path = json?.stringOrNull("path")
+                val host = (json?.get("hosts") as? kotlinx.serialization.json.JsonArray)?.firstOrNull()
+                    ?.toString()?.trim('"')
+                if (path == null || host == null) {
+                    return@withContext DataResult.Failure(RemoteError.Unknown(IOException("pCloud gave no download link")))
+                }
+                (linkBaseOverride ?: "https://$host") + path
+            }
+            val response = client.newCall(Request.Builder().url(link).build()).execute()
+            if (!response.isSuccessful) {
+                val body = response.body?.string()
+                response.close()
+                return@withContext CloudHttp.failureFor(response, body)
+            }
+            val stream = response.body?.byteStream()
+                ?: run {
+                    response.close()
+                    return@withContext DataResult.Failure(RemoteError.Unknown(IOException("pCloud sent no file")))
+                }
+            DataResult.Success(stream)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: IOException) {
+            Logger.w(TAG, "download: network failure: ${e.message}")
+            DataResult.Failure(RemoteError.Network)
+        }
+    }
+
+    /**
+     * Asks pCloud how big a stored file is, for Archive and Sync: `stat` on the file id recorded at upload. A file
+     * that is gone answers result 2009; one pCloud reports as deleted counts as gone too. Anything that is not a
+     * definite answer is [RemoteCheck.Unknown], which the removal paths read as "do not remove".
+     */
+    override suspend fun sizeOf(remoteItemId: String): RemoteCheck = withContext(dispatcher) {
+        val token = secrets.read(KEY_TOKEN) ?: return@withContext RemoteCheck.Unknown
+        if (remoteItemId.toLongOrNull() == null) return@withContext RemoteCheck.Unknown
+        val base = baseOverride ?: "https://${secrets.read(KEY_HOST) ?: DEFAULT_HOST}"
+        val url = "$base/stat".toHttpUrl().newBuilder()
+            .addQueryParameter("fileid", remoteItemId)
+            .addQueryParameter("access_token", token)
+            .build()
+        try {
+            client.newCall(Request.Builder().url(url).build()).execute().use { response ->
+                if (!response.isSuccessful) return@use RemoteCheck.Unknown
+                val json = CloudHttp.objectOf(response.body?.string())
+                when (json?.get("result")?.toString()?.toIntOrNull()) {
+                    0 -> {
+                        val meta = json?.get("metadata") as? kotlinx.serialization.json.JsonObject
+                        val deleted = meta?.get("isdeleted")?.toString() == "true"
+                        val size = meta?.longOrNull("size")
+                        when {
+                            deleted -> RemoteCheck.Gone
+                            size == null -> RemoteCheck.Unknown
+                            else -> RemoteCheck.Present(size)
+                        }
+                    }
+                    in GONE_CODES -> RemoteCheck.Gone
+                    else -> RemoteCheck.Unknown
+                }
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: IOException) {
+            Logger.w(TAG, "check: network failure: ${e.message}")
+            RemoteCheck.Unknown
+        }
+    }
+
     /** One simple GET. Null means it worked; otherwise the failure to return. */
     private fun call(base: String, method: String, token: String, vararg params: Pair<String, String>): DataResult.Failure? {
         val url = "$base/$method".toHttpUrl().newBuilder().apply {
@@ -180,6 +282,9 @@ class PCloudCloud @Inject constructor(
         const val KEY_TOKEN = "PCLOUD.access_token"
         const val KEY_HOST = "PCLOUD.hostname"
         const val KEY_PENDING_STATE = "PCLOUD.pending_state"
+
+        /** 2009: "File not found." The only answer that means the file is not there. */
+        val GONE_CODES = setOf(2009)
 
         /** Parses `a=b&c=d` (a redirect's fragment or query) into a map, percent-decoded. */
         fun parseParams(raw: String?): Map<String, String> =

@@ -55,8 +55,9 @@ android {
         // The sixteenth (27 Sept 2026): the selected-count number on the Camera header; optimised files show their size on the phone.
         // The seventeenth (28 Sept 2026): once the first backup has completed, nothing ever shows the wizard again.
         // The eighteenth (29 Sept 2026): Connect shows its spinner on that Cloud only; a folder paired with a signed-out Cloud reads "No Cloud" in red.
-        versionCode = 18
-        versionName = "0.3.17"
+        // The nineteenth (4 Oct 2026): pCloud switched on (approved by pCloud) with Restore, Sync and Archive; the Camera number moved lower and right.
+        versionCode = 19
+        versionName = "0.3.18"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

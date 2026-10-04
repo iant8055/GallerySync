@@ -389,11 +389,13 @@ private fun DetailHeader(
                 )
                 // In the camera folder, how many files Sync now will optimise, large, as Restore and Archive show
                 // their number (Ian, 27 Sept 2026). It moves as the choices change and files are swiped.
+                // Set a little lower and to the right of centre (Ian, 28 Sept 2026).
                 if (camera != null) {
                     Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
                         Text(
                             text = camera.toOptimise.size.toString(),
-                            style = MaterialTheme.typography.displayMedium
+                            style = MaterialTheme.typography.displayMedium,
+                            modifier = Modifier.padding(start = 24.dp, top = 8.dp)
                         )
                     }
                 }

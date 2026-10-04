@@ -19,7 +19,7 @@ CHAPTER = Chapter(
             ## What your Cloud holds
             • **OneDrive.** Restore lists the photos and videos in your OneDrive backup folders, whoever put them there. It is not limited to what GallerySync uploaded, so an album you archived, a folder from another phone or one added from a computer can all be brought back. Each file goes back into the album with the same name as its OneDrive folder. It is still not a general file browser: only photos and videos, and only in your backup folders.
             • **Dropbox, Google Drive, Backblaze B2 and IDrive e2.** Restore lists what GallerySync sent there from this phone, and fetches each file by the exact address the app recorded when it sent it.
-            • **Google Photos and pCloud** cannot be restored from yet.
+            • **Google Photos** cannot be restored from.
 
             A file the phone already has at full size is shown greyed out, so you can see why it is not
             on offer. See [[restore-greyed-files]].
