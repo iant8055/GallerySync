@@ -636,10 +636,42 @@ class BackupEngine @Inject constructor(
         limit: Int = DEFAULT_BATCH,
         maxBytes: Long = DEFAULT_BATCH_BYTES,
         allAlbums: Boolean = false,
+        verifyOnly: Boolean = false,
         onProgress: (BackupProgress) -> Unit = {}
     ): BackupRunResult = uploadMutex.withLock {
-        uploadPendingWhileHolding(limit, maxBytes, allAlbums, onProgress)
+        uploadPendingWhileHolding(limit, maxBytes, allAlbums, verifyOnly, onProgress)
     }
+
+    /**
+     * **Step one of three: verification.** Ian, 5 Oct 2026 — *verification, then backup, then optimise*, which
+     * the Backup Plans have promised in their own wording since they were written: *"Check Cloud Storage and
+     * back up everything that isn't already backed up"*.
+     *
+     * Asks the Cloud what it already holds and **writes the answer to the ledger**, marking every file it
+     * finds as uploaded and leaving only what is genuinely missing pending. Nothing is sent.
+     *
+     * **It is the upload pass with the sending switched off**, deliberately, rather than a second matcher.
+     * The test for "already there" is subtle — the name a file would be sent under, a size that may be a
+     * proxy's original, a listing that failed, a listing that reported no size — and a copy of it would drift
+     * from the real one. Here there is no copy: the same loop, the same comparisons, the same
+     * `markUploaded`, stopping at the line that would have uploaded.
+     *
+     * The whole queue, not a batch: the point is to leave the ledger honest in one pass, so the card can say
+     * *0 of 22* instead of *1 of 8642* and the backup that follows has only the 22 to do.
+     *
+     * **Clouds other than OneDrive are not verified**, because nothing lists them here; their rows stay
+     * pending and are uploaded as before.
+     */
+    suspend fun verifyAgainstCloud(
+        allAlbums: Boolean = false,
+        onProgress: (BackupProgress) -> Unit = {}
+    ): BackupRunResult = uploadPending(
+        limit = Int.MAX_VALUE,
+        maxBytes = Long.MAX_VALUE,
+        allAlbums = allAlbums,
+        verifyOnly = true,
+        onProgress = onProgress
+    )
 
     /**
      * One upload run at a time, however many workers ask.
@@ -660,6 +692,7 @@ class BackupEngine @Inject constructor(
         limit: Int,
         maxBytes: Long,
         allAlbums: Boolean,
+        verifyOnly: Boolean,
         onProgress: (BackupProgress) -> Unit
     ): BackupRunResult =
         withContext(dispatcher) {
@@ -826,6 +859,11 @@ class BackupEngine @Inject constructor(
                     continue
                 }
 
+                // Verification stops here. Everything above answers "is this already in the Cloud" and
+                // records the answer; everything below is the sending, which verification does not do. The row
+                // stays PENDING, which is the truth — it really is outstanding.
+                if (verifyOnly) continue
+
                 val source = ContentUriUploadSource(
                     resolver = context.contentResolver,
                     uri = android.net.Uri.parse(entry.contentUri),
@@ -974,7 +1012,9 @@ class BackupEngine @Inject constructor(
                     continue
                 }
 
-                for (entry in rows) {
+                // Not verified, so not touched: nothing lists these Clouds here, and a verification pass
+                // must never send anything.
+                for (entry in if (verifyOnly) emptyList() else rows) {
                     onProgress(
                         BackupProgress(
                             completed = uploaded + skipped + pruned,

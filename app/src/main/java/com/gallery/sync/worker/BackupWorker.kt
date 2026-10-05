@@ -159,6 +159,24 @@ class BackupWorker @AssistedInject constructor(
         }
 
         val allAlbums = inputData.getBoolean(BackupScheduling.KEY_ALL_ALBUMS, false)
+
+        // **Step one: verification.** Ian, 5 Oct 2026 — the backup is three steps, and the Backup Plans have
+        // said so in their own words since they were written: *"Check Cloud Storage and back up everything that
+        // isn't already backed up"*. Until now the check ran, told the wizard the truth (*8,620 already in
+        // OneDrive, 22 outstanding*) and threw it away; the ledger kept all 8,642 rows pending and the upload
+        // path re-derived the same answer file by file, batch after batch. That is why the card read
+        // *1 of 8642* when 22 files needed sending, and why a first run was hundreds of batches.
+        //
+        // Only on the job that starts a chain: a continuation inherits a ledger this has already reconciled.
+        if (inputData.getBoolean(BackupScheduling.KEY_VERIFY_FIRST, false)) {
+            val verified = engine.verifyAgainstCloud(allAlbums = allAlbums)
+            Logger.i(
+                TAG,
+                "verification: ${verified.skipped} already in the Cloud, ${verified.remaining} to send, " +
+                    "${verified.deferred} could not be checked"
+            )
+        }
+
         val result = engine.uploadPending(allAlbums = allAlbums) { progress ->
             setProgressAsync(
                 Data.Builder()

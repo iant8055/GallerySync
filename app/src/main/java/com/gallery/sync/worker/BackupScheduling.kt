@@ -92,6 +92,14 @@ object BackupScheduling {
     /** Upload all albums regardless of album modes. Used by the wizard on fresh installs. */
     const val KEY_ALL_ALBUMS = "all_albums"
 
+    /**
+     * Run verification before uploading — step one of the three the backup has (Ian, 5 Oct 2026).
+     *
+     * True only on the job that *starts* a chain. A continuation inherits a ledger the first job has already
+     * reconciled, so verifying again would re-walk every album for nothing.
+     */
+    const val KEY_VERIFY_FIRST = "verify_first"
+
     /** Turns automatic backup on. Safe to call repeatedly. */
     fun enable(workManager: WorkManager, allowMeteredNetwork: Boolean) {
         enqueueContentTriggered(workManager, allowMeteredNetwork)
@@ -165,7 +173,8 @@ object BackupScheduling {
         manual: Boolean = false,
         allAlbums: Boolean = false,
         initialDelayMillis: Long = 0L,
-        requiresCharging: Boolean = false
+        requiresCharging: Boolean = false,
+        verifyFirst: Boolean = false
     ) {
         val request = OneTimeWorkRequestBuilder<BackupWorker>()
             .setConstraints(constraints(allowMeteredNetwork, requiresCharging))
@@ -174,6 +183,7 @@ object BackupScheduling {
                 Data.Builder()
                     .putBoolean(KEY_MANUAL, manual)
                     .putBoolean(KEY_ALL_ALBUMS, allAlbums)
+                    .putBoolean(KEY_VERIFY_FIRST, verifyFirst)
                     .build()
             )
             .build()
@@ -206,7 +216,9 @@ object BackupScheduling {
             allowMeteredNetwork,
             manual = true,
             allAlbums = allAlbums,
-            requiresCharging = requiresCharging
+            requiresCharging = requiresCharging,
+            // This job starts the chain, so it does the verification the chain is built on.
+            verifyFirst = true
         )
     }
 

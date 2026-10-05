@@ -7693,3 +7693,28 @@ published but never installed from Play on either phone** — both went to the s
 **Both phones are on the debug build and are off the Play track** until they are uninstalled and reinstalled from
 Play, which costs the OneDrive sign-in on each. The debug build is the same code plus the stack-trace
 instrumentation, so there is no hurry.
+
+**Step one of three built: verification writes its answer to the ledger (5 Oct 2026). NOT YET VERIFIED ON A
+DEVICE.** Ian: *"get this fixed"*, of the card reading *1 of 8642* on a library that is already backed up.
+
+`BackupEngine.verifyAgainstCloud()` asks the Cloud what it holds and marks every file it finds as uploaded,
+leaving only what is genuinely missing pending. **It is the upload pass with the sending switched off**
+(`uploadPending(verifyOnly = true)` over the whole queue), deliberately rather than a second matcher: the test
+for "already there" is subtle — the name a file would be sent under, a size that may be a proxy's original, a
+listing that failed, a listing that reported no size — and a copy of it would drift from the real one. There is
+no copy; the same loop stops at the line that would have uploaded. Clouds other than OneDrive are not verified
+(nothing lists them here) and their rows are untouched.
+
+`BackupScheduling` carries `KEY_VERIFY_FIRST`, true only on the job that *starts* a chain, so a continuation does
+not re-walk every album. `BackupWorker` runs it before `uploadPending` and logs
+`verification: N already in the Cloud, M to send, D could not be checked`.
+
+**Tests:** `VerifyAgainstCloudTest` — a file the Cloud already has is marked uploaded **and not sent**, and a
+Cloud that could not be listed marks nothing and sends nothing. 776 pass. **Two cases are deferred and written
+down in the test file:** a file the Cloud does not have, and one there at a different size. Both fall through to
+the proxy-recovery branch, which calls `Uri.parse` — null under plain JUnit — so they need Robolectric, which
+this project does not use. **Still to prove: that a file the Cloud lacks is left pending and unsent.**
+
+**What has not happened:** no device has run this. The expected result is the card reading *0 of 22* rather than
+*1 of 8642*, and a first backup of a few batches rather than hundreds. Both need a build on a phone to confirm,
+and the Fold was taken offline before it could be tried.
