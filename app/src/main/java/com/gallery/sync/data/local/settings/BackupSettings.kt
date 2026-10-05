@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.gallery.sync.util.Logger
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "backup_settings")
 
@@ -139,6 +140,21 @@ data class BackupPreferences(
      * would mean a photo taken at noon waits until 1am for no reason.
      */
     val hasCompletedFirstBackup: Boolean = false,
+    /**
+     * The overnight first-backup window has done its job and no longer applies.
+     *
+     * **Separate from [hasCompletedFirstBackup] on purpose, since 5 Oct 2026.** They were one flag from
+     * 28 Sept, when `WizardGate.finished()` began reading `hasCompletedFirstBackup` to mean "the wizard is
+     * over". The worker had been writing that flag since 25 Aug to mean something else entirely — that the
+     * backlog was clear, so a photo taken at noon need not wait until 1am — and the two meanings collided:
+     * the moment a first backup drained, the worker lifted the window and **destroyed the wizard forty
+     * milliseconds before it could offer the Finish button**. Seen on the Fold 8, traced to
+     * `BackupWorker.kt:187` by a stack trace. The Finish card had worked on 5 and 15 Sept, before the gate
+     * existed.
+     *
+     * This one is the scheduling fact and is the worker's to write. `WizardGate` must never read it.
+     */
+    val firstBackupWindowLifted: Boolean = false,
     /**
      * What happens to the OneDrive copy when a file leaves the phone.
      *
@@ -365,6 +381,10 @@ class BackupSettings @Inject constructor(
             firstBackupStartAtEpochMillis = stored[KEY_FIRST_BACKUP_START_AT],
             firstBackupDelayMillis = stored[KEY_FIRST_BACKUP_DELAY],
             hasCompletedFirstBackup = stored[KEY_FIRST_BACKUP_DONE] ?: false,
+            // Falls back to the old flag, so an install that already lifted its window keeps it lifted and
+            // no migration is needed. Only new installs ever see the two apart.
+            firstBackupWindowLifted = stored[KEY_FIRST_BACKUP_WINDOW_LIFTED]
+                ?: stored[KEY_FIRST_BACKUP_DONE] ?: false,
             // An unreadable value falls back to LEAVE, never to ASK. A corrupt preference must not
             // be able to arm the one feature that removes a user's last copy.
             cloudDeletionPolicy = stored[KEY_CLOUD_DELETION_POLICY]
@@ -523,6 +543,14 @@ class BackupSettings @Inject constructor(
 
     /** Marks guided setup finished. Skipping counts — the tour is optional, the gates are not. */
     suspend fun setSetupCompleted(completed: Boolean) {
+        // Who ended the wizard, named at the moment it happens.
+        //
+        // Twice on 5 Oct 2026 the wizard disappeared mid-backup on Ian's Fold 8 and neither time could the
+        // cause be read off the device: the first was found only because the worker happened to log something
+        // else, and the second could not be found at all — every caller was eliminated by reading the source
+        // and the flag was still set. This is the only write of KEY_SETUP_COMPLETE in the app, so a trace here
+        // names the caller whatever route it took.
+        Logger.w(TAG, "setSetupCompleted($completed)", Throwable("call site"))
         context.dataStore.edit {
             it[KEY_SETUP_COMPLETE] = completed
             if (completed) {
@@ -690,7 +718,16 @@ class BackupSettings @Inject constructor(
      * One-way on purpose. Flipping this back would re-impose an overnight wait on someone whose
      * library is already safe, which is the opposite of what the window is for.
      */
+    /**
+     * The backlog has drained, so the overnight window lifts. Scheduling only — this never ends the wizard.
+     */
+    suspend fun markFirstBackupWindowLifted() {
+        context.dataStore.edit { it[KEY_FIRST_BACKUP_WINDOW_LIFTED] = true }
+    }
+
     suspend fun markFirstBackupComplete() {
+        // The other half of what WizardGate reads — see setSetupCompleted above for why this is traced.
+        Logger.w(TAG, "markFirstBackupComplete()", Throwable("call site"))
         context.dataStore.edit { it[KEY_FIRST_BACKUP_DONE] = true }
     }
 
@@ -741,6 +778,7 @@ class BackupSettings @Inject constructor(
     }
 
     private companion object {
+        const val TAG = "BackupSettings"
         val KEY_AUTOMATIC = booleanPreferencesKey("automatic_backup_enabled")
         val KEY_ALLOW_METERED = booleanPreferencesKey("allow_metered_network")
         // New key rather than reusing auto_optimise_enabled. That one meant "optimise photos
@@ -761,6 +799,7 @@ class BackupSettings @Inject constructor(
         val KEY_FIRST_BACKUP_START_AT = longPreferencesKey("first_backup_start_at")
         val KEY_FIRST_BACKUP_DELAY = longPreferencesKey("first_backup_delay_millis")
         val KEY_FIRST_BACKUP_DONE = booleanPreferencesKey("first_backup_completed")
+        val KEY_FIRST_BACKUP_WINDOW_LIFTED = booleanPreferencesKey("first_backup_window_lifted")
         val KEY_CLOUD_DELETION_POLICY = stringPreferencesKey("cloud_deletion_policy")
         val KEY_DELETION_PROMPT_SEEN = longPreferencesKey("deletion_prompt_seen_up_to")
         val KEY_SHOW_EMPTY_FOLDERS = booleanPreferencesKey("show_empty_cloud_folders")

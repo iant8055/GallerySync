@@ -71,6 +71,7 @@ import com.gallery.sync.ui.theme.ThemeViewModel
 import com.gallery.sync.util.RecentsCard
 import javax.inject.Inject
 import dagger.hilt.android.AndroidEntryPoint
+import com.gallery.sync.util.Logger
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -161,6 +162,25 @@ private fun GallerySyncApp(modifier: Modifier = Modifier, initialTab: Int = 0) {
         firstBackupPending = setupState.firstBackupPending,
         anyCloudConnected = cloudState.anyConnected
     )
+
+    // Every input the gate saw, logged when it changes. On 5 Oct 2026 the wizard vanished mid-backup on the
+    // Fold 8 and the cause could not be read off the device: every writer of the two records was eliminated by
+    // reading the source, and the gate still said the wizard was over. This says which input closed it.
+    LaunchedEffect(
+        needsSetup,
+        setupState.hasCompletedFirstBackup,
+        setupState.hasCompletedSetup,
+        setupState.hasSources,
+        setupState.firstBackupPending,
+        cloudState.anyConnected
+    ) {
+        Logger.w(
+            "WizardGate",
+            "shows=$needsSetup firstBackupDone=${setupState.hasCompletedFirstBackup} " +
+                "setupCompleted=${setupState.hasCompletedSetup} hasSources=${setupState.hasSources} " +
+                "firstBackupPending=${setupState.firstBackupPending} cloud=${cloudState.anyConnected}"
+        )
+    }
 
     when {
         needsSetup -> SignedInApp(

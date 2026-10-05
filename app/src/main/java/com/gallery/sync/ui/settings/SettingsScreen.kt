@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -154,6 +155,15 @@ fun SettingsScreen(
         // where in its cloud the folder goes. `DestinationSection` is kept, unused, for the OneDrive folder
         // chooser if it is wanted back.
         CloudProvidersSection(viewModel = cloudViewModel)
+
+        // A clear boundary between connecting Clouds and routing folders to them (Ian, 5 Oct 2026). They ran
+        // together on the Fold 8, where the extra width lets both breathe and the join is harder to read: the
+        // last Cloud row and the "Where each folder goes" heading looked like one list. A rule with space either
+        // side, not a band — the green section headings mark the sections of Settings, and these two are halves
+        // of Backup rather than sections of their own.
+        Spacer(modifier = Modifier.size(8.dp))
+        SettingDivider()
+        Spacer(modifier = Modifier.size(8.dp))
 
         // Which local folder goes to which cloud — one row each, always shown (Ian, 24 Sept 2026: clean
         // pairing between a local folder and a cloud). Top-level folders only (DCIM, Pictures...), never

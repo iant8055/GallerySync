@@ -7605,3 +7605,60 @@ which track release 20 went to and whether both devices' account is a tester on 
 10:32, with it. Play accepts only one build per version code, so uploading the earlier one would have shipped 21
 without the morning's work and cost a version 22 to recover. Ian had not uploaded it. **Rebuild and re-send the
 bundle whenever a fix lands after one has been handed over**, and say plainly which file supersedes which.
+
+**The wizard ends only when Finish is pressed — found by instrumentation, fixed, and proven on both phones
+(5 Oct 2026, afternoon).**
+
+**The cause, named by a stack trace rather than by reading.** After the morning's mode-aware-count fix the wizard
+still vanished mid-backup on the Fold 8, and every writer of the two records `WizardGate` reads had been
+eliminated by reading the source. So both writers in `BackupSettings` were given a `Logger.w` with a `Throwable`,
+and `MainActivity` was made to log the gate's five inputs whenever they change. The next reproduction answered it
+in one line:
+
+```
+15:33:59.593  markFirstBackupComplete()
+    at BackupSettings.markFirstBackupComplete(BackupSettings.kt:704)
+    at BackupWorker.doWork(BackupWorker.kt:187)
+15:33:59.634  WizardGate shows=false firstBackupDone=true setupCompleted=false
+```
+
+**`BackupWorker:187`, firing correctly.** `result.isComplete` means the queue genuinely drained — and the worker
+then lifted the overnight first-backup window, which is its job. The flag it writes to say so is the one
+`WizardGate.finished()` reads to mean *the wizard is over*, so the wizard was destroyed **forty milliseconds**
+after the backup finished, which is precisely when it would have offered **Finish**.
+
+**One flag, two meanings, and the collision has a date.** The worker has written `markFirstBackupComplete()` since
+25 Aug 2026 (`268a606`) as a scheduling fact. `WizardGate` was created on **28 Sept 2026** (`6060879`, version 17)
+to implement Ian's rule that nothing shows the wizard after the first backup, and it reused that flag. Ian was
+right on both counts when he said it used to work and that we broke it: MILESTONES records the Finish card working
+on **5 Sept** and **15 Sept**, both before the gate existed. The morning's `outstandingCount()` fix was a second,
+older route to the same place and is still right.
+
+**The fix: the two records are now separate.** `firstBackupWindowLifted` is the scheduling fact, written by the
+worker, and `WizardGate` never reads it. `hasCompletedFirstBackup` is the wizard's, written only by
+`completeSetupAfterBackup()`. Reading falls back to the old key, so an install that already lifted its window
+keeps it lifted and **no migration is needed**. `OnlyFinishEndsTheWizardTest` fails the build if any worker writes
+either wizard record, if anything but `completeSetupAfterBackup` calls `markFirstBackupComplete`, or if
+`WizardGate` reads the scheduling record — verified by reintroducing the bug and watching two of its tests fail.
+
+**Proven on hardware, both phones, both themes.**
+- **Moto G**, fresh install, 51 files outstanding: queue drained at 15:50:51 with **no write by the worker**, and
+  the card reached **100% · Finish** in dark mode.
+- **Galaxy Z Fold 8**, fresh install, the real 8,642-file library: drained at 16:10:30, again no write, card
+  reached **100% · Finish** in light mode. Pressing it logged both writes from
+  `ReconcileViewModel.completeSetupAfterBackup` and only then `shows=false`. **That is the whole chain verified:
+  survive the drain → offer Finish → Finish writes both → the wizard ends for good.**
+- The same Fold run took **about sixteen minutes** for 8,642 files with `DCIM/Camera` listed **twice**, against
+  this morning's sixteen-hour projection with it listed once per batch. The index cache works at scale.
+
+**Also fixed this afternoon:** the *New Albums* pop-up came up over the wizard's progress card asking Ian to
+choose a mode for 86 albums mid-setup; `NewAlbumsPrompt` now asks `WizardGate.finished`, the same predicate the
+wizard itself is decided by, so it cannot appear until setup is over. And Settings gained a rule with space either
+side between the Cloud connections and *Where each folder goes* (Ian, 5 Oct), which ran together at the Fold's
+width.
+
+**The instrumentation is kept deliberately.** Two `Logger.w` calls with a stack trace, on records written once per
+install, plus the gate's inputs. Twice in one day the cause of a vanished wizard could not be read off a device;
+this is what ended that, and it costs nothing.
+
+774 unit tests pass.

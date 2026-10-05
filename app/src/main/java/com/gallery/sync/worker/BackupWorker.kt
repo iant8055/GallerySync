@@ -101,7 +101,8 @@ class BackupWorker @AssistedInject constructor(
         //
         // Refreshing the ledger still happens below either way. Knowing what is outstanding costs
         // nothing and is what lets the screen say how much is waiting.
-        val hold = if (preferences.hasCompletedFirstBackup || manual) {
+        // The scheduling record, never the wizard's. See BackupSettings.firstBackupWindowLifted.
+        val hold = if (preferences.firstBackupWindowLifted || manual) {
             null
         } else {
             FirstBackupWindow.heldBecause(
@@ -140,7 +141,7 @@ class BackupWorker @AssistedInject constructor(
             // this line regresses.
             if (engine.outstandingCountAll() == 0) {
                 Logger.i(TAG, "backlog already clear; first-backup window no longer applies")
-                settings.markFirstBackupComplete()
+                settings.markFirstBackupWindowLifted()
                 // Closes the run's denominator when the queue is drained. Doing this only at the start of
         // the next run was not enough: by then new files may exist, so nothing cleared the old
         // baseline and the next run opened part-finished against it.
@@ -182,9 +183,14 @@ class BackupWorker @AssistedInject constructor(
 
         // The backlog is clear, so the overnight window has done its job and lifts for good. Every
         // later run is incremental; keeping the gate would make a photo taken at noon wait until 1am.
-        if (result.isComplete && !preferences.hasCompletedFirstBackup) {
+        // Lifts the overnight window and nothing else. Until 5 Oct 2026 this called
+        // markFirstBackupComplete(), which `WizardGate.finished()` reads as "the wizard is over" — so a first
+        // backup that drained while the wizard was on screen destroyed it instants before it could show the
+        // **Finish** button. Traced on the Fold 8 by a stack trace from this line. Only
+        // `completeSetupAfterBackup()`, the Finish handler, may end the wizard.
+        if (result.isComplete && !preferences.firstBackupWindowLifted) {
             Logger.i(TAG, "backlog cleared; first-backup window no longer applies")
-            settings.markFirstBackupComplete()
+            settings.markFirstBackupWindowLifted()
         }
 
         // More files waiting and nothing wrong — schedule the next batch immediately rather than

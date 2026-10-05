@@ -435,7 +435,18 @@ private fun AlbumList(
     // set of new albums: closing it any way at all counts as seen, and a folder that appears later asks again.
     var promptedNames by rememberSaveable { mutableStateOf("") }
     val prompted = if (promptedNames.isEmpty()) emptySet() else promptedNames.split("|").toSet()
-    if (waitingNames.isNotEmpty() && !showingNew && !prompted.containsAll(waitingNames)) {
+    // Never while the wizard is running — Ian, 5 Oct 2026, after it appeared over the Backup Progress card
+    // on a fresh install and asked him to choose a mode for 86 albums mid-setup. The condition lives in
+    // NewAlbumsPrompt so it asks WizardGate the same question the wizard itself is decided by.
+    if (
+        NewAlbumsPrompt.shows(
+            firstBackupDone = state.hasCompletedFirstBackup,
+            setupCompleted = state.hasCompletedSetup,
+            waitingAlbums = waitingNames.size,
+            showingNewOnly = showingNew,
+            alreadyAsked = prompted.containsAll(waitingNames)
+        )
+    ) {
         NewAlbumsDialog(
             count = waitingNames.size,
             onShow = {

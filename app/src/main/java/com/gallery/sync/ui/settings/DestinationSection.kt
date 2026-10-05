@@ -113,7 +113,8 @@ fun FirstBackupSettings(
         FirstBackupSection(
             startHour = state.firstBackupStartHour,
             requiresCharging = state.firstBackupRequiresCharging,
-            done = state.hasCompletedFirstBackup,
+            // The window, not the wizard: this card is about when the first upload is allowed to run.
+            done = state.firstBackupWindowLifted,
             hold = state.firstBackupHold,
             onHourSelected = viewModel::setFirstBackupStartHour,
             onChargingChanged = viewModel::setFirstBackupRequiresCharging

@@ -240,6 +240,38 @@ carried over mechanically, and then described to Ian as "by design", which it wa
 - **Never offer a change that re-enters the wizard after the first backup, and never call a wizard re-entry
   "by design" without a recorded decision from Ian.**
 
+### The backup is three distinct steps
+
+## **VERIFICATION, then BACKUP, then OPTIMISE**
+
+Stated by Ian, 5 Oct 2026, after a day in which every defect found on his 8,642-file library traced back to the
+first two being tangled together.
+
+1. **Verification** — compare every file on the phone to what the Cloud holds, and **write the answer to the
+   ledger**: a file the Cloud already has is `UPLOADED`, and only what is genuinely missing stays `PENDING`.
+2. **Backup** — upload exactly what verification left pending. The question has already been answered, so this
+   step does not ask it again.
+3. **Optimise** — only if the wizard's library choice asked for it.
+
+**What was wrong.** `ReconcileWithCloud` computed the true answer — *8,620 already in OneDrive, 22 outstanding* —
+and wrote it only to `album_cloud_status`, for the Albums tab. The ledger kept all 8,642 rows `PENDING`, so the
+upload path re-derived the same comparison file by file, listing each album from the Cloud again for every batch.
+Measured on the Fold 8: **29 seconds per batch re-listing `DCIM/Camera`** (3,378 unchanged files) while resolving
+four files, a run on course for sixteen hours, and a progress card reading *1 of 8642* when the real figure was
+22. All of it is one cause.
+
+**The plans already promise this, in Ian's own wording.** Backup Plan #1 is *"Check Cloud Storage and back up
+everything that isn't already backed up"*; #4 is *"Check Cloud Storage but do not back up any new files"*; #3 adds
+*"only Optimise newly backed up files"*. Check, then back up what is not already there, then optimise. The user has
+been agreeing to that contract at install since the plans were written — this is not a new design, it is making the
+code do what the screen says.
+
+**The invariant, and the reason this was not done sooner.** Verification now writes the state that decides whether
+a file is ever sent. Its test must be **exactly** the upload path's: same name, same size, against that album's
+own listing. It must never mark a row backed up from a listing that failed or returned partial — *failing to ask
+is not evidence of absence* governs the write as strictly as it governs the skip. A wrong write here marks a file
+safe without sending it, which is the only failure in this app that loses data rather than time.
+
 ### THE WIZARD DOES NOT KNOW ALBUM MODES EXIST
 
 ## **THE WIZARD MUST NEVER READ AN ALBUM MODE, AND ONLY THE FINISH BUTTON MAY END IT**

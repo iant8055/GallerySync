@@ -278,6 +278,8 @@ data class BackupUiState(
     val videoOptimiseAge: MediaAge = MediaAge.DEFAULT,
     val videoQuality: VideoQuality = VideoQuality.DEFAULT,
     val hasCompletedFirstBackup: Boolean = false,
+    /** Paired with [hasCompletedFirstBackup] to ask `WizardGate.finished` whether the wizard is over. */
+    val hasCompletedSetup: Boolean = false,
     /**
      * Albums set to Archive that have files confirmed in OneDrive and still on the phone.
      *
@@ -543,7 +545,8 @@ class BackupViewModel @Inject constructor(
                     videoOptimiseMode = prefs.videoOptimiseMode,
                     videoOptimiseAge = prefs.videoOptimiseAge,
                     videoQuality = prefs.videoQuality,
-                    hasCompletedFirstBackup = prefs.hasCompletedFirstBackup
+                    hasCompletedFirstBackup = prefs.hasCompletedFirstBackup,
+                    hasCompletedSetup = prefs.hasCompletedSetup
                 )
             }
         }

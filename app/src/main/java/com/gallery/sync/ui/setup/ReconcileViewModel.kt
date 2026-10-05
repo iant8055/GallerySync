@@ -108,6 +108,8 @@ data class ReconcileUiState(
     val firstBackupDelayMillis: Long? = null,
     /** Once true the window no longer applies and the section explains why it is gone. */
     val hasCompletedFirstBackup: Boolean = false,
+    /** The overnight first-backup window no longer applies. Scheduling only — see BackupSettings. */
+    val firstBackupWindowLifted: Boolean = false,
     /** What is currently holding the first run, or null if nothing is. */
     val firstBackupHold: FirstBackupHold? = null,
     /** Gate 1. Until this has something in it, the engine has nothing correct to do. */
@@ -346,6 +348,7 @@ class ReconcileViewModel @Inject constructor(
                     firstBackupStartAtEpochMillis = prefs.firstBackupStartAtEpochMillis,
                     firstBackupDelayMillis = prefs.firstBackupDelayMillis,
                     hasCompletedFirstBackup = prefs.hasCompletedFirstBackup,
+                    firstBackupWindowLifted = prefs.firstBackupWindowLifted,
                     hasCompletedSetup = prefs.hasCompletedSetup,
                     settingsLoaded = true,
                     allowMeteredNetwork = prefs.allowMeteredNetwork,
@@ -355,7 +358,8 @@ class ReconcileViewModel @Inject constructor(
                     libraryChoice = prefs.libraryChoice,
                     cloudDeletionPolicy = prefs.cloudDeletionPolicy,
                     wizardStep = prefs.wizardStep,
-                    firstBackupHold = if (prefs.hasCompletedFirstBackup) {
+                    // Scheduling, not the wizard: this is whether the overnight window still applies.
+                    firstBackupHold = if (prefs.firstBackupWindowLifted) {
                         null
                     } else {
                         FirstBackupWindow.heldBecause(
