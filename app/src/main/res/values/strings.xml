@@ -187,6 +187,19 @@
     <string name="contact_page_copy">Copy address</string>
     <string name="contact_page_copied">Copied</string>
     <string name="contact_page_clip_label">GallerySync contact</string>
+    <!-- Help &amp; Feedback: the two cards that sit above the legal links. -->
+    <string name="settings_help_feedback">Help &amp; Feedback</string>
+    <string name="settings_rate">Rate us on Play Store</string>
+    <string name="settings_rate_detail">Opens the GallerySync listing on Google Play.</string>
+    <string name="settings_bug_report">Bug Report</string>
+    <string name="settings_bug_report_detail">Something not working? Send us what happened.</string>
+    <string name="bug_report_intro">Tell us what went wrong, what you expected to happen, and which screen you were on. Write to:</string>
+    <string name="bug_report_details_heading">Please include these details</string>
+    <string name="bug_report_details_hint">They tell us which build and which phone, which is usually the difference between a fix and a guess.</string>
+    <string name="bug_report_copy_details">Copy details</string>
+    <string name="bug_report_copied">Copied</string>
+    <string name="bug_report_clip_label">GallerySync bug report</string>
+
     <string name="settings_page_close">Close</string>
     <string name="settings_page_load_failed">This page could not be loaded. Check your connection and try again.</string>
     <string name="settings_page_open_browser">Open in browser</string>
@@ -640,6 +653,14 @@ full size</string>
     <string name="restore_hero_label_top">Folders to</string>
     <string name="restore_hero_label_bottom">Restore</string>
     <string name="restore_hero_label_files">Files in this folder</string>
+    <!-- Search and sort inside one folder on the Restore tab (Ian, 4 Oct 2026). -->
+    <string name="restore_search">Search this folder</string>
+    <string name="restore_search_hint">File name</string>
+    <string name="restore_search_close">Close search</string>
+    <string name="restore_sort_by">Sort by</string>
+    <string name="restore_sort_name">Name</string>
+    <string name="restore_sort_newest">Newest first</string>
+    <string name="restore_sort_largest">Largest first</string>
     <string name="restore_intro_folders">Swipe right to select / left to deselect\nTap to open</string>
     <string name="restore_intro_files">Swipe right to select / left to deselect  →  Then press Restore</string>
     <!-- Once something is selected the first half changes to say how to undo it. Ian, 19 Sept 2026. -->

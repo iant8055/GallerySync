@@ -56,8 +56,9 @@ android {
         // The seventeenth (28 Sept 2026): once the first backup has completed, nothing ever shows the wizard again.
         // The eighteenth (29 Sept 2026): Connect shows its spinner on that Cloud only; a folder paired with a signed-out Cloud reads "No Cloud" in red.
         // The nineteenth (4 Oct 2026): pCloud switched on (approved by pCloud) with Restore, Sync and Archive; the Camera number moved lower and right.
-        versionCode = 19
-        versionName = "0.3.18"
+        // The twentieth (5 Oct 2026): Restore's folder view gets Sort by and a search box; the Album drill-down names the Cloud a file went to; Settings gets Help & Feedback.
+        versionCode = 20
+        versionName = "0.3.19"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

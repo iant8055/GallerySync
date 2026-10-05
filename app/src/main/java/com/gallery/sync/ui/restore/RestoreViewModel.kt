@@ -101,9 +101,23 @@ data class RestoreFolder(
 /** Files finished out of files picked, and the byte-weighted fraction of the run, 0..1. */
 data class RestoreProgress(val finished: Int, val total: Int, val fraction: Float)
 
+/**
+ * How the files inside one folder are ordered. Ian, 4 Oct 2026.
+ *
+ * Name first because it matches what the list shows and is stable between visits; the other two
+ * answer the questions a person actually opens a folder with — what did I shoot last, and what is
+ * taking the room.
+ */
+enum class RestoreSort { NAME, NEWEST, LARGEST }
+
 data class RestoreUiState(
     val rows: List<RestoreRow> = emptyList(),
     val openFolder: String? = null,
+    /** The search box is showing. Separate from [query] so closing it can clear the text. */
+    val searchOpen: Boolean = false,
+    /** What the search box holds. Matched against the file name, case-insensitively. */
+    val query: String = "",
+    val sort: RestoreSort = RestoreSort.NAME,
     val selection: Set<String> = emptySet(),
     val loading: Boolean = false,
     val running: Boolean = false,
@@ -160,7 +174,24 @@ data class RestoreUiState(
     /** The rows on screen: one folder's worth, or none while the folder list is showing. */
     val visibleRows: List<RestoreRow>
         get() = openFolder
-            ?.let { name -> rows.filter { it.album == name }.sortedBy { !it.isActionable } }
+            ?.let { name ->
+                rows.asSequence()
+                    .filter { it.album == name }
+                    .filter { query.isBlank() || it.displayName.contains(query, ignoreCase = true) }
+                    // Actionable first, always: a greyed-out file cannot be selected, so sinking it
+                    // keeps what the person can act on at the top whatever they sort by. The chosen
+                    // order applies within each of those two groups rather than across them.
+                    .sortedWith(
+                        compareBy<RestoreRow> { !it.isActionable }.then(
+                            when (sort) {
+                                RestoreSort.NAME -> compareBy(String.CASE_INSENSITIVE_ORDER) { it.displayName }
+                                RestoreSort.NEWEST -> compareByDescending { it.entry.dateModifiedEpochSeconds }
+                                RestoreSort.LARGEST -> compareByDescending { it.fullBytes }
+                            }
+                        )
+                    )
+                    .toList()
+            }
             .orEmpty()
 
     val folders: List<RestoreFolder>
@@ -351,7 +382,23 @@ class RestoreViewModel @Inject constructor(
     }
 
     fun closeFolder() {
-        _state.value = _state.value.copy(openFolder = null)
+        // Leaving the folder drops the search with it: a query left behind would silently hide files
+        // in the next folder opened, and the box that explained it would not be on screen.
+        _state.value = _state.value.copy(openFolder = null, searchOpen = false, query = "")
+    }
+
+    /** Shows or hides the search box; hiding clears what was typed, so the list is whole again. */
+    fun toggleSearch() {
+        val open = !_state.value.searchOpen
+        _state.value = _state.value.copy(searchOpen = open, query = if (open) _state.value.query else "")
+    }
+
+    fun setQuery(query: String) {
+        _state.value = _state.value.copy(query = query)
+    }
+
+    fun setSort(sort: RestoreSort) {
+        _state.value = _state.value.copy(sort = sort)
     }
 
     fun toggle(row: RestoreRow) {

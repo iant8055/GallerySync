@@ -52,6 +52,18 @@ object SupportLinks {
     const val CONTACT_EMAIL = "IanDev@Currently.com"
 
     /**
+     * The app's own Play listing, for the *Rate us on Play Store* card.
+     *
+     * The package name is written out rather than read from `BuildConfig.APPLICATION_ID`, for the same
+     * reason [com.gallery.sync.provider.MediaContract] writes it out: a build variant that ever carried a
+     * suffix would otherwise send the user to a listing that does not exist. [PLAY_APP] is the Play
+     * Store's own scheme and opens the app directly; [PLAY_WEB] is the fallback for a phone without the
+     * Play Store, and is the same page in a browser.
+     */
+    const val PLAY_APP = "market://details?id=com.gallery.sync"
+    const val PLAY_WEB = "https://play.google.com/store/apps/details?id=com.gallery.sync"
+
+    /**
      * Whether [url] may load inside the in-app viewer.
      *
      * Only our own pages, over HTTPS. Everything else — the Microsoft consent page, the privacy

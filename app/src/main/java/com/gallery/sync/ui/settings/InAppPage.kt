@@ -5,6 +5,7 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.os.Build
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
@@ -44,6 +45,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
+import com.gallery.sync.BuildConfig
 import com.gallery.sync.R
 import com.gallery.sync.util.Logger
 
@@ -268,4 +270,108 @@ fun ContactDialog(onDismiss: () -> Unit) {
 internal fun openLink(context: Context, intent: Intent) {
     runCatching { context.startActivity(intent) }
         .onFailure { Logger.w("InAppPage", "no app could open ${intent.action}") }
+}
+/**
+ * The *Bug Report* page: what to say, where to send it, and the details that make a report usable.
+ *
+ * Like [ContactDialog] it launches no mail app — the same ruling — so the address is shown to be copied
+ * rather than written to. The details block is built for the user instead of asked for in prose: the
+ * build and the Android release are what a report most often arrives without, and a person reading a
+ * bug on their phone cannot look either of them up without leaving the thing they are reporting.
+ */
+@Composable
+fun BugReportDialog(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    var addressCopied by remember { mutableStateOf(false) }
+    var detailsCopied by remember { mutableStateOf(false) }
+    val details = remember { bugReportDetails() }
+    val clipLabel = stringResource(R.string.bug_report_clip_label)
+
+    FullScreenPageDialog(
+        title = stringResource(R.string.settings_bug_report),
+        onDismissRequest = onDismiss,
+        onClose = onDismiss
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.bug_report_intro),
+                style = MaterialTheme.typography.bodyLarge
+            )
+            SelectionContainer {
+                Text(
+                    text = SupportLinks.CONTACT_EMAIL,
+                    style = MaterialTheme.typography.headlineSmall
+                )
+            }
+            OutlinedButton(
+                onClick = {
+                    context.copyToClipboard(clipLabel, SupportLinks.CONTACT_EMAIL)
+                    addressCopied = true
+                }
+            ) {
+                Text(
+                    stringResource(
+                        if (addressCopied) R.string.contact_page_copied else R.string.contact_page_copy
+                    )
+                )
+            }
+
+            Text(
+                text = stringResource(R.string.bug_report_details_heading),
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                text = stringResource(R.string.bug_report_details_hint),
+                style = MaterialTheme.typography.bodySmall
+            )
+            SelectionContainer {
+                Text(text = details, style = MaterialTheme.typography.bodyMedium)
+            }
+            OutlinedButton(
+                onClick = {
+                    context.copyToClipboard(clipLabel, details)
+                    detailsCopied = true
+                }
+            ) {
+                Text(
+                    stringResource(
+                        if (detailsCopied) R.string.bug_report_copied
+                        else R.string.bug_report_copy_details
+                    )
+                )
+            }
+        }
+    }
+}
+
+/**
+ * The build and the phone a report should carry, on three lines.
+ *
+ * Nothing here identifies the person or their library: the app's own version, the handset's make and
+ * model, and the Android release. It is read at the moment the page opens, so it describes the build
+ * the user is actually reporting on.
+ */
+internal fun bugReportDetails(): String = buildString {
+    appendLine("GallerySync ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})")
+    appendLine("${Build.MANUFACTURER} ${Build.MODEL}")
+    append("Android ${Build.VERSION.RELEASE} (SDK ${Build.VERSION.SDK_INT})")
+}
+
+private fun Context.copyToClipboard(label: String, text: String) {
+    getSystemService<ClipboardManager>()?.setPrimaryClip(ClipData.newPlainText(label, text))
+}
+
+/**
+ * Opens the app's own listing on Google Play — the Play Store app when it is installed, the same page in
+ * the phone's browser when it is not. Nothing is rated here; the user rates it there.
+ */
+internal fun openPlayListing(context: Context) {
+    val store = Intent(Intent.ACTION_VIEW, SupportLinks.PLAY_APP.toUri())
+    runCatching { context.startActivity(store) }
+        .onFailure { openLink(context, Intent(Intent.ACTION_VIEW, SupportLinks.PLAY_WEB.toUri())) }
 }

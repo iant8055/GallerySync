@@ -36,6 +36,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -48,6 +52,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -520,12 +526,58 @@ private fun FolderHeader(
                     }
                 }
                 Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = stringResource(R.string.restore_hero_label_files),
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center
-                    )
+                    // The label gives way to the controls that act on this list (Ian, 4 Oct 2026):
+                    // sort, and a magnifier that opens the search box in this same place.
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(2.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.restore_hero_label_files),
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center,
+                            maxLines = 2,
+                            modifier = Modifier.weight(1f, fill = false)
+                        )
+                        SortControl(current = state.sort, onPick = viewModel::setSort)
+                        IconButton(onClick = viewModel::toggleSearch) {
+                            Icon(
+                                imageVector = SignalIcons.Search,
+                                contentDescription = stringResource(R.string.restore_search),
+                                tint = LocalContentColor.current
+                            )
+                        }
+                    }
                 }
+            }
+
+            // The search box takes the whole width when it is open, under the name and the number and
+            // above the swipe instruction — the place the label was in, which is where the person was
+            // already looking. Closing it clears the query, so the list cannot stay filtered invisibly.
+            if (state.searchOpen) {
+                OutlinedTextField(
+                    value = state.query,
+                    onValueChange = viewModel::setQuery,
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                    placeholder = { Text(stringResource(R.string.restore_search_hint)) },
+                    leadingIcon = {
+                        Icon(imageVector = SignalIcons.Search, contentDescription = null)
+                    },
+                    trailingIcon = {
+                        IconButton(onClick = viewModel::toggleSearch) {
+                            Icon(
+                                imageVector = SignalIcons.Cross,
+                                contentDescription = stringResource(R.string.restore_search_close)
+                            )
+                        }
+                    },
+                    // Deliberately no colour overrides. The field sits inside a hero card that sets
+                    // its own ink, and naming colours here to match would mean hardcoding them in UI
+                    // code — the one thing CLAUDE.md forbids, and the fault that shipped unreadable
+                    // dark mode on the Teleprompter app. The theme's own field colours are legible in
+                    // both themes by construction; check on the device rather than trusting this.
+                )
             }
 
             HeaderLower(
@@ -539,6 +591,55 @@ private fun FolderHeader(
                 onClear = viewModel::clearSelection,
                 compact = true
             )
+        }
+    }
+}
+
+/**
+ * Sort by, as a menu on the folder's own card.
+ *
+ * A text button rather than an icon: three orders with no obvious glyphs between them, and the
+ * current one has to be readable without opening anything. The list it orders keeps greyed-out files
+ * last whatever is chosen — see `RestoreUiState.visibleRows`.
+ */
+@Composable
+private fun SortControl(current: RestoreSort, onPick: (RestoreSort) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    val label = when (current) {
+        RestoreSort.NAME -> R.string.restore_sort_name
+        RestoreSort.NEWEST -> R.string.restore_sort_newest
+        RestoreSort.LARGEST -> R.string.restore_sort_largest
+    }
+
+    Box {
+        TextButton(onClick = { open = true }, contentPadding = PaddingValues(horizontal = 6.dp)) {
+            Text(
+                text = stringResource(label),
+                style = MaterialTheme.typography.labelMedium,
+                color = LocalContentColor.current,
+                maxLines = 1
+            )
+            Icon(
+                imageVector = SignalIcons.ChevronDown,
+                contentDescription = stringResource(R.string.restore_sort_by),
+                tint = LocalContentColor.current,
+                modifier = Modifier.size(18.dp)
+            )
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            listOf(
+                RestoreSort.NAME to R.string.restore_sort_name,
+                RestoreSort.NEWEST to R.string.restore_sort_newest,
+                RestoreSort.LARGEST to R.string.restore_sort_largest
+            ).forEach { (sort, text) ->
+                DropdownMenuItem(
+                    text = { Text(stringResource(text)) },
+                    onClick = {
+                        onPick(sort)
+                        open = false
+                    }
+                )
+            }
         }
     }
 }

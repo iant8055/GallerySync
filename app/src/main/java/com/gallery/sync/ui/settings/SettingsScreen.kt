@@ -83,6 +83,7 @@ fun SettingsScreen(
     val scope = rememberCoroutineScope()
     var page by remember { mutableStateOf<SupportPage?>(null) }
     var showContact by remember { mutableStateOf(false) }
+    var showBugReport by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -522,6 +523,23 @@ fun SettingsScreen(
             )
         }
 
+        // ── Help & Feedback ──────────────────────────────────────────────────
+        SectionHeader(stringResource(R.string.settings_help_feedback))
+
+        // Leaves the app for Google Play. That is the whole point of the card, and the only way to
+        // reach a rating: Play takes them on its own listing and nowhere else.
+        LinkCard(
+            title = stringResource(R.string.settings_rate),
+            detail = stringResource(R.string.settings_rate_detail),
+            onClick = { openPlayListing(context) }
+        )
+
+        LinkCard(
+            title = stringResource(R.string.settings_bug_report),
+            detail = stringResource(R.string.settings_bug_report_detail),
+            onClick = { showBugReport = true }
+        )
+
         // The end of the sections proper. Everything below is the foot of the page, not a setting.
         HorizontalDivider()
 
@@ -564,6 +582,7 @@ fun SettingsScreen(
 
     page?.let { InAppPageDialog(page = it, onDismiss = { page = null }) }
     if (showContact) ContactDialog(onDismiss = { showContact = false })
+    if (showBugReport) BugReportDialog(onDismiss = { showBugReport = false })
 }
 
 /**
@@ -944,6 +963,18 @@ fun SettingsTabPreview(onGuideCardPositioned: ((androidx.compose.ui.geometry.Rec
             help = HelpTopic.SETTINGS_ARCHIVE_NOTIFY,
             checked = false,
             onCheckedChange = {}
+        )
+
+        SectionHeader(stringResource(R.string.settings_help_feedback))
+        LinkCard(
+            title = stringResource(R.string.settings_rate),
+            detail = stringResource(R.string.settings_rate_detail),
+            onClick = {}
+        )
+        LinkCard(
+            title = stringResource(R.string.settings_bug_report),
+            detail = stringResource(R.string.settings_bug_report_detail),
+            onClick = {}
         )
 
         SettingDivider()

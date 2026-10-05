@@ -76,6 +76,7 @@ import com.gallery.sync.ui.common.HeroOutlinedButton
 import com.gallery.sync.ui.common.SignalIcons
 import com.gallery.sync.ui.common.SwipeChoiceBox
 import com.gallery.sync.ui.common.formatBytes
+import com.gallery.sync.ui.common.labelRes
 import com.gallery.sync.ui.help.HelpButton
 import com.gallery.sync.ui.help.HelpTopic
 import com.gallery.sync.ui.help.WithHelp
@@ -541,32 +542,54 @@ private fun FileCard(
             // The same type as the Restore tab's file cards, which is the Albums card's (Ian,
             // 19 Sept 2026): bodyLarge for the name, bodySmall for the line under it.
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = entry.displayName,
-                    style = MaterialTheme.typography.bodyLarge,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                // Size and marks on one line, each mark in its own colour. They were stacked while
-                // the header was being moved around; Ian, 19 Sept 2026: now they can share a line.
-                // The date too, beside the status and not instead of it (Ian, 27 Sept 2026): Sort by Date and the
+                // Name and size share the top line, status and place the one below (Ian, 4 Oct 2026).
+                // The size moved up so the lower line is about what happened to the file rather than
+                // what it is, which is what leaves room to name the Cloud it went to.
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = entry.displayName,
+                        style = MaterialTheme.typography.bodyLarge,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false)
+                    )
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Text(
+                        text = buildString {
+                            append(formatBytes(context, entry.sizeOnPhone()))
+                            if (entry.isVideo) append(" · video")
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 1
+                    )
+                }
+                // Date, marks and Cloud on the lower line, each mark in its own colour. The date is
+                // beside the status and not instead of it (Ian, 27 Sept 2026): Sort by Date and the
                 // Camera age both go by it, so it has to be on screen. The phone's modified date.
                 // An optimised file's size is what is on the phone now, not the original's (Ian, 27 Sept 2026): the
-                // original size made a file just optimised look as if nothing had shrunk. The optimised mark says
-                // the full-size original is in the Cloud.
-                val size = buildString {
-                    append(formatBytes(context, entry.sizeOnPhone()))
-                    if (entry.isVideo) append(" · video")
-                    append(" · ")
-                    append(FileDateFormat.format(Instant.ofEpochSecond(entry.dateModifiedEpochSeconds).atZone(ZoneId.systemDefault())))
-                }
+                // original size made a file just optimised look as if nothing had shrunk — the size now sits on the
+                // line above, and the optimised mark here says the full-size original is in the Cloud.
+                val date = FileDateFormat.format(
+                    Instant.ofEpochSecond(entry.dateModifiedEpochSeconds).atZone(ZoneId.systemDefault())
+                )
                 val marks = entry.statusLines()
+                // Which Cloud it went to, named only once it is actually there (Ian, 4 Oct 2026: "or
+                // where it was backed up to" — past tense). A pending or failed row has a *destination*
+                // rather than a place, and naming one would read as a claim the app has not earned.
+                // Rows written before the column existed carry the default, OneDrive, which is what
+                // every file went to then.
+                val placed = entry.state == BackupState.UPLOADED
+                val cloud = if (placed) stringResource(entry.location.labelRes()) else null
                 Text(
                     text = buildAnnotatedString {
-                        append(size)
+                        append(date)
                         marks.forEach { (text, color) ->
                             append(" · ")
                             withStyle(SpanStyle(color = color)) { append(text) }
+                        }
+                        if (cloud != null) {
+                            append(" · ")
+                            append(cloud)
                         }
                     },
                     style = MaterialTheme.typography.bodySmall

@@ -121,6 +121,14 @@ object SignalIcons {
         )
     }
 
+    /** Find a file inside an open folder. Circle and handle, same 24-unit grid as the rest. */
+    val Search: ImageVector = stroked("search") {
+        listOf(
+            "M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z",
+            "m20 20-3.9-3.9"
+        )
+    }
+
     /** A folder row leads somewhere. */
     val ChevronRight: ImageVector = stroked("chevronRight") {
         listOf("m9 18 6-6-6-6")

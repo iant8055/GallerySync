@@ -7293,3 +7293,95 @@ Noted while checking, not changed: the boxes under **Folders to back up** start 
 **pCloud switched on, with Restore, Sync and Archive; version 19 (0.3.18) built (Ian, 4 Oct 2026; not yet on a device).** pCloud approved the app. Ian pasted the client id (`EUrNgiBkzYf`, public; the client secret is never used), now in `res/raw/cloud_oauth_config.json`, and confirmed the pCloud app page has the redirect `com.gallery.sync.pcloud:/callback` and *Allow implicit grant* on (the token flow needs it). `PCloudCloud` is now a `CloudDownloader` (`getfilelink` by the file id recorded at upload, then a plain GET on the content host it names; result 2009 is reported as a 404, gone) and a `CloudVerifier` (`stat` by file id: `Present(size)` only on result 0 with a size, `Gone` on 2009 or `isdeleted`, `Unknown` for anything else, including a refused token). A row recorded by name because the upload reply carried no file id is never looked up (`Unknown`, no request). pCloud joins `CloudCapabilities.FULL` and `SyncLocations.SQL_LIST`; `SyncCandidatesTest` (instrumented, compiled, not run) now expects pCloud rows as candidates. Guide (c2, c3, c4, c5, c7) and the privacy policy no longer call pCloud backup only; Google Photos is the only backup-only Cloud. 759 unit tests pass. Same build: the Camera header's number sits lower and to the right (`padding(start = 24.dp, top = 8.dp)`), from the version 16 check. **Not verified:** no pCloud account has signed in or round-tripped a file. Whether `stat` on a file in pCloud's trash answers 2009 or `isdeleted` is from pCloud's documentation, not observed; the check reads both as gone.
 
 **To check on the Moto once 19 is installed from Play:** Connect pCloud opens pCloud's page and returns signed in (the EU host if the account is European); a folder paired with pCloud uploads into `/GallerySync/<album>`; Restore brings a moved-out file back at its size; Archive removes only after the live check; the Camera number position.
+
+**Per-subfolder routing — scoped 4 Oct 2026, then shelved by Ian.** He had selected
+`Pictures/Screenshots` under *Folders to back up* and asked whether it could appear as its own row in
+*Where each folder goes*. It can, and the survey is kept so it does not have to be done again.
+
+- **Why it does not today:** routing is keyed on `MediaScanRules.topLevelFolderOf`, which is
+  `relativePath.substringBefore('/')`, so `Pictures/Screenshots/` collapses to `Pictures`. That is the
+  only reason, and it is deliberate (TASK-026, 24 Sept: a folder is the right granularity, never an
+  album).
+- **Why it is cheap:** the selection is already stored at full depth — `GrantedDirectory.relativePath`
+  is `Pictures/Screenshots`, which is what *Folders to back up* lists — and
+  `folder_preferences.folderName` is a plain `String` primary key, so a path fits the existing column.
+  **No schema change and no Room migration**, so it is not an escalation.
+- **What would change:** `BackupViewModel` builds the rows by grouping albums on their top-level folder
+  (`sharesByFolder()`); it would group on the deepest *granted* folder containing the file, which also
+  makes the two Settings lists agree on their units. `FolderDestination.resolve` becomes a
+  longest-prefix match — most specific granted folder, then the top-level row, then the app-wide
+  default — and existing rows keep working, `DCIM` being the shortest prefix of `DCIM/Camera`. The
+  Albums tab's per-album *Goes to…* reads the same resolver and follows for free. The remote path is
+  untouched: routing picks the Cloud, not the place within it.
+- **Two decisions left open**, and they are why it was not built on the spot: whether a subfolder row
+  takes its own Cloud while the rest of its parent stays put (longest-prefix says yes, which means one
+  folder's files split across two Clouds — the point of the feature, but worth choosing deliberately);
+  and whether the wizard's step 5 asks about subfolders too, since it writes `folder_preferences` and a
+  subfolder granted during setup would otherwise inherit its parent's Cloud with no question asked.
+- **One caveat carried from 25 Sept:** an album can already span two top-level folders, so under
+  subfolder routing the same album name could straddle two Clouds. `inFolders` can represent it; the
+  per-album row would need to say which.
+
+**Restore's folder view gets Sort by and a search box (Ian, 4 Oct 2026).** Both sit in the header row that
+held *Files in this folder*, under the folder name and its count and above the swipe line, where Ian asked for
+them. A magnifying glass (a new stroked `SignalIcons.Search`) opens a full-width field in that row; closing it
+clears what was typed, and so does leaving the folder — a query left behind would silently hide files in the
+next folder opened, with the box that explained it no longer on screen. The match is on the file name,
+case-insensitive. **Sort by** is a drop-down: *Name* (the default, stable between visits), *Newest* by the
+modified date, *Largest* by the full size. **Actionable files stay first whatever the sort** — the chosen
+order applies within the actionable and non-actionable groups rather than across them, so a greyed-out file
+that cannot be selected never floats to the top. No colour is set anywhere in it; the field takes the theme's,
+per the dark-mode rule.
+
+**The Album drill-down names the Cloud each file went to (Ian, 4 Oct 2026).** The card was one line of name
+and one of `size · video · date · marks`; it is now `name  2 MB · video` on top and
+`28 Sep 2026 · ✓ backed up · optimised · OneDrive` below. The size moved up so the lower line is about what
+happened to the file rather than what it is, which is what made room for the Cloud. **The Cloud is named only
+once the file is there** (`BackupState.UPLOADED`, from `BackupEntryEntity.location`): Ian's words were *"or
+where it was backed up to"*, past tense, and a pending or failed row has a destination rather than a place, so
+naming one would read as a claim the app has not earned. Rows written before the column existed carry its
+default, OneDrive, which is where everything went then.
+
+**Settings gets a Help & Feedback section (4 Oct 2026; version 20, 0.3.19).** Ian showed the equivalent in the *Testers Area*
+app on the Moto and asked for the same two rows: **Rate us on Play Store** and **Bug Report**. The section
+is a green band like every other, sitting between Archive and the legal cards at the foot — the position it
+occupies in the app he was looking at.
+
+- **Rate us on Play Store** opens `market://details?id=com.gallery.sync` (`SupportLinks.PLAY_APP`), falling
+  back to the same listing on the web (`PLAY_WEB`) when the Play Store app is not installed, via
+  `openPlayListing`. The package name is written out rather than read from `BuildConfig.APPLICATION_ID`,
+  for the reason `MediaContract` writes it out: a variant carrying a suffix would send the user to a
+  listing that does not exist. Google's in-app review API was not used — it is rate limited and shows
+  nothing in testing, so there would be no way to see whether the card worked.
+- **Bug Report** opens a native full-screen page (`BugReportDialog`), built like the Contact page: what to
+  say, the address with **Copy address**, and a details block with **Copy details** reading
+  `GallerySync <version> (<code>)` / make and model / `Android <release> (SDK <n>)`, from
+  `bugReportDetails()`. It identifies the build and the handset and nothing about the person or their
+  library. It is built for the user rather than asked for in prose because the version and the Android
+  release are what a report arrives without, and somebody reporting a bug on their phone cannot look
+  either up without leaving the thing they are reporting.
+- **No mail app is launched**, holding to the ruling made for the Contact page on 19 Sept. Ian asked what
+  it would take (`ACTION_SENDTO` with a `mailto:` data URI, the address in `EXTRA_EMAIL`, a narrow
+  `<queries>` entry beside the OneDrive one, with the copy page kept as the fallback — about half an hour);
+  it was costed and not built. Gmail does handle `mailto:` on the Moto, checked with
+  `cmd package query-activities`, so the route is open if it is ever wanted.
+
+**The feedback channel until launch is Google Play's own tester feedback (Ian, 4 Oct 2026).** Closed-testing
+testers send it from the Play listing and it reaches the Play Console, so it costs no code, no backend and no
+third party, and it buys the room to do **Crashlytics** properly afterwards — which is the half that matters,
+since every other route depends on somebody deciding to write in, and Crashlytics reports the crash the user
+closed the app over and never mentioned. Surveyed and not taken for now: a Google Form opened in the browser
+with the version and device pre-filled through `usp=pp_url` (the strongest no-backend option, and the one that
+can take a screenshot, though its upload question needs a Google sign-in); a form endpoint such as Formspree;
+Firestore; a pre-filled GitHub issue (the repo is public, so reports would be too). **Ruled out outright:** an
+SMTP relay API, which would ship a key inside the APK — the same class of mistake as the IDrive key that
+reached GitHub on 25 Sept. Nothing in the app's copy mentions tester feedback, deliberately: it is reached
+from the Play listing rather than from here, and it stops existing the day the app goes public.
+
+**Not verified.** 759 unit tests pass and it compiles, but the section has not been seen on a screen in either
+theme: the Moto runs the Play build and a local install is refused with `INSTALL_FAILED_UPDATE_INCOMPATIBLE`.
+It joins the Restore search and sort and the Album drill-down rows in waiting for the next Play upload.
+
+**To check on the Moto once version 20 is installed from Play:** the band and the two cards in light and dark; *Rate
+us* opens the Play listing; *Bug Report* shows the address and a details block naming the installed version and
+`moto g (2026)` / Android 16; both Copy buttons change to *Copied* and paste what they say; crash buffer empty.
