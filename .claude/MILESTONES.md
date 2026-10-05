@@ -7385,3 +7385,122 @@ It joins the Restore search and sort and the Album drill-down rows in waiting fo
 **To check on the Moto once version 20 is installed from Play:** the band and the two cards in light and dark; *Rate
 us* opens the Play listing; *Bug Report* shows the address and a details block naming the installed version and
 `moto g (2026)` / Android 16; both Copy buttons change to *Copied* and paste what they say; crash buffer empty.
+
+**Version 20 (0.3.19) saved and published to Closed testing (Ian, 5 Oct 2026).** Carries Restore's sort and
+search, the Cloud on album file lines, and Settings -> Help & Feedback. Release notes for the Play "What's new"
+box and a longer note for testers are in `design/play/release-notes-v20.md`; the short text is 455 characters
+against Play's 500 limit, and it ends by asking testers to report anything wrong in dark mode, since the Restore
+search box is the app's only text input and carries no colours of its own.
+
+**The `minSdk=32` discrepancy is explained, and is not a defect.** `dumpsys package` on the Moto has reported
+`minSdk=32` for every Play-installed build while the build file says 26. The bundle is not wrong: the merged
+release manifest inside `app-release.aab` declares `android:minSdkVersion="26"`. Play builds several APK
+variants from one bundle, split by SDK level so newer devices can take newer dex and resource optimisations,
+and the variant served to a phone on Android 16 carries the higher floor in its own manifest. So the number
+describes the variant this handset was given, not the app. **Not measured:** that a device below Android 16 is
+served a variant it can install, because there is no such device left to try it on — the inference rests on how
+bundles are built, and it is the one part of this worth checking if a tester on an older phone ever appears.
+
+## 5 Oct 2026 — the first real library: version 19 on the Galaxy Z Fold 8
+
+Ian installed GallerySync **from Play** on his own phone (`RFGL710JXAR`, `SM-F976U1`, **Android 17**) and ran a
+first backup against his real OneDrive: **6,468 images and 2,292 videos, 8,760 files in all**. Play served
+version **19 (0.3.18)**, not 20, so none of the version 20 work was on screen. Nothing was installed from a local
+APK, deliberately: Play App Signing means a sideload would block every later Play update on that handset.
+
+**This is the first time the app has run on the OS it targets** (SDK 37 is Android 17; everything else is checked
+on Android 16), and the first time it has met a library of that size. Four things fell out of it that no test
+library could have shown, and **three of the four are defects in shipped code, not in anything built this week**.
+
+**1. The progress card counts the whole library, not the work.** The card read *58 of 8642* when the reconcile
+had just answered the question correctly:
+
+```
+reconcile: 8281 already in OneDrive, 361 outstanding, 0 in 0 albums that could not be checked
+```
+
+361 files genuinely needed sending. The card said 8,642. The cause: `ReconcileWithCloud` writes its answer to
+`album_cloud_status` — the per-album counts the Albums tab shows — and **never to `backup_entries`**. The ledger
+still holds every file as `PENDING` from `refreshLedger`, and `CloudProgress.total` is `done + pendingByCloud()`,
+so the card counts the library. The upload path does recognise a file already in the Cloud (name and size against
+a per-album index, then `markUploaded` without sending — the comment there names this exact case, *"by this app
+before a reinstall lost the ledger"*), so **this is a wrong number rather than wasted uploading**. It is also the
+"reinstall re-upload" item open since 4 Sept, finally seen.
+
+**2. The ring and the count have different denominators.** The ring is `completed * 100 / total` from the
+worker's `WorkProgress`, where `total` is the **batch** — 25 files. The line beneath is `activeProgress.done` of
+`activeProgress.total`, which is the **Cloud's whole queue**. So the card showed *19%* beside *10 of 8642*, and
+later *0%* beside *58 of 8642*. On the Moto a batch is most of the run and the two tracked each other; at 8,642
+files the ring fills and resets hundreds of times while the count crawls, which reads as a bar that keeps
+restarting — or, at 0%, as a dead app.
+
+**3. Every batch starts from nothing.** At each batch boundary: `refreshLedger: 8642 files seen` — a full
+MediaStore scan — and then the albums are listed from OneDrive again. `Kaitlynn` was listed at 03:48:34 and again
+at 03:48:38, in the next batch, because `remoteByAlbum` lives for one `uploadPending` call. At 25 files a batch
+that is about **346 batches**, each re-scanning 8,642 files and re-listing albums over the network. Wasteful
+rather than harmful, and invisible on a library that finishes in three batches.
+
+**4. Close keeps it running — now proven on Samsung, on Android 17, at scale.** Ian closed the app; the window
+went (`mCurrentFocus=null`), **the process stayed** (same pid, 20 minutes up) and the chain carried on listing and
+uploading. The existing evidence for `finish()` over a foreground service was 151 files in five minutes on the
+Moto. This is a second vendor, the target OS, and an 8,600-file queue.
+
+**Also seen:** `listFolderByPath: Graph returned HTTP 404` for an album with no OneDrive folder, read correctly as
+*0 files*; an 86.7 MB video uploaded in one piece in about 30 seconds; Camera reading 2,847 files, all 2,847
+verified. **Not a defect:** the wizard's library choice was the default, which uploads without optimising, so
+nothing on that phone was shrunk.
+
+**Unfolded the inner screen is about 708dp**, so it is the only device here that engages the 600dp two-column
+layouts — not yet looked at, since the run held the screen.
+
+**Version 21 (0.3.20) — the album index is kept between batches, and the progress card stops contradicting
+itself (5 Oct 2026, overnight, from the Fold 8 run above).**
+
+**1. `BackupEngine` remembers album listings for ten minutes.** The per-run memo (`remoteByAlbum`) already
+existed; it just died with each `uploadPending` call, so a run of hundreds of batches paid for the same listing
+hundreds of times. `remoteIndexCached` now consults a `ConcurrentHashMap` on the engine — a `@Singleton`, so it
+lives as long as the process and is lost with it, which is the right lifetime: a fresh process does not know how
+old its knowledge is. Measured cost of not having it, on the Fold: **29 seconds re-listing `DCIM/Camera` (3,378
+files) for every batch of four**, about sixteen hours for the run.
+
+**What is deliberately not cached**, because each would turn a slow run into a wrong one:
+- **A failed listing.** `null` is never stored, so the next batch asks again. "Failing to ask is not evidence of
+  absence" is why the per-album `null` exists, and remembering a failure would extend one network blip across a
+  whole album for ten minutes.
+- **A partial listing.** `remoteIndexFor` returns what it gathered when a walk breaks off, which is right once —
+  a partial index can only cause a re-upload, never a wrongly-skipped file — but storing it would make that
+  re-upload the answer for every batch after. `onPartial` is how it says so; a partial answer is used and dropped.
+- **An index from another destination root.** The root is stored beside the entry and compared.
+
+**The freshness rule is its own object, `RemoteIndexFreshness`,** so it can be tested without a drive, a ledger or
+a dispatcher — the house pattern. Seven tests: fresh, same instant, past the window, exactly at the window
+(exclusive, so it expires rather than lingering), another root, a **clock that has gone backwards** (a negative
+age is not evidence of freshness, so it lists again — listing costs a request, trusting a bad clock costs a
+backup), and a zero window turning the cache off.
+
+**The ten minutes is the window in which the app can be wrong about the drive**, and the direction that matters is
+a file *removed* in OneDrive mid-run: until the entry expires the app still believes it is there, and the local
+copy would be marked backed up without being sent. Nothing is ever removed from the phone on the strength of it —
+Archive asks the cloud again, live, at the moment of archiving.
+
+**2. The ring and the count line now use the same pair of numbers.** The ring is drawn from `backupTotal`, which
+`sendTotal` has already discounted by the cloud check; the line beneath used `activeProgress.total`, which is
+`done + pendingByCloud()` — on a first run, the whole library. Two true statements about different things, shown
+one above the other: **19% over "10 of 8642"**, and later **0% over "58 of 8642"**, which reads as a broken app.
+The active cloud is still named in the label; what it may no longer do is bring its own denominator. Display
+only; nothing about what gets uploaded changed.
+
+**Not fixed, and left for Ian to decide.** The ledger still holds every file as `PENDING` after a fresh install,
+because `ReconcileWithCloud` writes its answer to `album_cloud_status` and never to `backup_entries`. Making the
+reconcile mark matched rows uploaded would shrink the queue from 8,642 to 361 and remove most of the remaining
+per-batch cost, but it writes the state that decides whether a file is ever sent, on a match computed somewhere
+other than the upload path. That is an architectural choice with a data-loss shape to it, so it is being put to
+Ian rather than taken overnight.
+
+**Also in this version:** the light-mode fix for Restore's folder header — the sort control is now
+`HeroOutlinedButton` (a `TextButton` sets its content colour to the theme's `primary`, a dark green that all but
+vanished on the dark green band), the search field's colours derive from `LocalContentColor`, and sort and search
+moved to a line of their own so *Files in this folder* stops wrapping. Seen wrong on the Moto on version 20, in
+light mode only — dark mode had been legible, which is how it shipped.
+
+766 unit tests pass (759 + 7). **Nothing in this version has been seen on a device.**

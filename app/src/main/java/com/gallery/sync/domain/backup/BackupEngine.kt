@@ -40,6 +40,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
+import java.util.concurrent.ConcurrentHashMap
 
 /** Why a backup run stopped before finishing its batch. */
 enum class StopReason {
@@ -122,6 +123,22 @@ class BackupEngine @Inject constructor(
     /** Live proof for the clouds other than OneDrive. Defaults to none, which reads as "could not ask". */
     private val verifiers: CloudVerifiers = CloudVerifiers(emptySet())
 ) {
+
+    /** One album's listing, with the root it came from and when it was taken. */
+    private data class CachedAlbumIndex(
+        val root: String,
+        val index: Map<String, RemoteFileRef>,
+        val atMillis: Long
+    )
+
+    /**
+     * Album listings kept between batches — see [remoteIndexCached] for what is and is not stored.
+     *
+     * Concurrent because the upload loop runs files in parallel. The engine is a `@Singleton`, so
+     * this lives as long as the process and is lost when the process is, which is the right lifetime:
+     * a fresh process has no idea how old its knowledge is.
+     */
+    private val albumIndexCache = ConcurrentHashMap<String, CachedAlbumIndex>()
 
     /**
      * Releases any upload session left in flight, so a paused file starts clean.
@@ -689,6 +706,7 @@ class BackupEngine @Inject constructor(
             // duplicates. Observed: 81 of 87 albums failed to list in a single run when
             // connectivity dropped. Failing to ask is not evidence of absence.
             val remoteByAlbum = mutableMapOf<String, Map<String, RemoteFileRef>?>()
+            val listedAt = System.currentTimeMillis()
 
             // Only OneDrive's own stop reason may ever fail the whole worker run (see below and
             // BackupWorker). Kept local to this loop rather than returned early, so a OneDrive stop
@@ -716,7 +734,7 @@ class BackupEngine @Inject constructor(
                 val alreadyThere = if (remoteByAlbum.containsKey(entry.album)) {
                     remoteByAlbum[entry.album]
                 } else {
-                    remoteIndexFor(entry.album).also { remoteByAlbum[entry.album] = it }
+                    remoteIndexCached(entry.album, listedAt).also { remoteByAlbum[entry.album] = it }
                 }
 
                 if (alreadyThere == null) {
@@ -1950,6 +1968,59 @@ class BackupEngine @Inject constructor(
      * A failure mid-walk returns what was gathered so far rather than nothing. A partial index can
      * only cause a re-upload, while an empty one guarantees a whole album of them.
      */
+    /**
+     * [remoteIndexFor], remembered between batches.
+     *
+     * A first backup is hundreds of batches, and every one of them was paying for the same listings
+     * again. Measured on the Galaxy Z Fold 8, 5 Oct 2026, against a real 8,642-file library: each
+     * batch resolved **four** files (the byte budget caps it, and the files were video) and spent
+     * **29 seconds** re-listing `DCIM/Camera`, whose 3,378 files had not changed since the batch
+     * before. The run was on course for about sixteen hours, nearly all of it spent asking OneDrive
+     * the same question. The per-run memo above already existed; this only gives it a life longer
+     * than one `uploadPending` call.
+     *
+     * Three things are deliberately not cached, because each would turn a slow run into a wrong one:
+     *
+     * - **A failed listing.** `null` is never stored, so the next batch asks again. Remembering a
+     *   failure for ten minutes would mean a network blip stopped a whole album being checked, and
+     *   "failing to ask is not evidence of absence" is the rule the per-album `null` exists for.
+     * - **A partial listing.** [remoteIndexFor] returns what it gathered when a walk breaks off
+     *   mid-way, which is right for one pass — a partial index can only cause a re-upload, never a
+     *   wrongly-skipped file — but storing it would make that re-upload the answer for every batch
+     *   that followed. `onPartial` is how it says so, and a partial answer is used once and dropped.
+     * - **An index from another destination root.** The root is stored beside the entry and compared,
+     *   so changing where backups go invalidates what was remembered about where they were.
+     *
+     * [ALBUM_INDEX_TTL_MILLIS] is the window in which this app can be wrong about the drive. The
+     * direction that matters is a file **removed** in OneDrive while the run is going: until the
+     * entry expires the app still believes it is there, and the local copy would be marked backed up
+     * without being sent. Ten minutes bounds that to something smaller than the gap between a person
+     * deleting a file and this run reaching it, while still turning one listing per batch into one
+     * listing per ten minutes. Nothing is ever removed from the phone on the strength of this cache:
+     * Archive asks the cloud again, live, at the moment of archiving.
+     */
+    private suspend fun remoteIndexCached(
+        album: String,
+        nowMillis: Long
+    ): Map<String, RemoteFileRef>? {
+        val root = destinationRoot()
+        albumIndexCache[album]?.let { remembered ->
+            val usable = RemoteIndexFreshness.isUsable(
+                rememberedRoot = remembered.root,
+                currentRoot = root,
+                rememberedAtMillis = remembered.atMillis,
+                nowMillis = nowMillis,
+                ttlMillis = ALBUM_INDEX_TTL_MILLIS
+            )
+            if (usable) return remembered.index
+        }
+
+        var partial = false
+        val fresh = remoteIndexFor(album) { partial = true } ?: return null
+        if (!partial) albumIndexCache[album] = CachedAlbumIndex(root, fresh, nowMillis)
+        return fresh
+    }
+
     internal suspend fun remoteIndexFor(
         album: String,
         onPartial: () -> Unit = {}
@@ -2047,6 +2118,15 @@ class BackupEngine @Inject constructor(
 
     companion object {
         private const val TAG = "BackupEngine"
+
+        /**
+         * How long an album listing may be reused — see [remoteIndexCached].
+         *
+         * Ten minutes: long enough that a run of hundreds of batches lists each album a handful of
+         * times rather than once per batch, short enough that the app is never long out of date about
+         * a drive somebody else may be changing.
+         */
+        private const val ALBUM_INDEX_TTL_MILLIS = 10L * 60L * 1000L
 
         /** Marks a description of a OneDrive file that has no ledger row. See [driveRestoreFiles]. */
         const val DRIVE_ID_PREFIX = "drive:"

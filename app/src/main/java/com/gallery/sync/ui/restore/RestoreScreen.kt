@@ -39,7 +39,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -526,28 +526,38 @@ private fun FolderHeader(
                     }
                 }
                 Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                    // The label gives way to the controls that act on this list (Ian, 4 Oct 2026):
-                    // sort, and a magnifier that opens the search box in this same place.
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(2.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.restore_hero_label_files),
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Center,
-                            maxLines = 2,
-                            modifier = Modifier.weight(1f, fill = false)
-                        )
-                        SortControl(current = state.sort, onPick = viewModel::setSort)
-                        IconButton(onClick = viewModel::toggleSearch) {
-                            Icon(
-                                imageVector = SignalIcons.Search,
-                                contentDescription = stringResource(R.string.restore_search),
-                                tint = LocalContentColor.current
-                            )
-                        }
-                    }
+                    Text(
+                        text = stringResource(R.string.restore_hero_label_files),
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center,
+                        maxLines = 2
+                    )
+                }
+            }
+
+            // Sort and search get a line of their own. They shared the label's line on the first
+            // build and the three would not fit at 360dp: *Files in this folder* wrapped to two lines
+            // and the controls were squeezed against it (seen on the Moto, version 20). The search
+            // box still opens directly under this, where Ian asked for it.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.restore_sort_by),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                SortControl(current = state.sort, onPick = viewModel::setSort)
+                Spacer(modifier = Modifier.weight(1f))
+                IconButton(onClick = viewModel::toggleSearch) {
+                    Icon(
+                        imageVector = SignalIcons.Search,
+                        contentDescription = stringResource(R.string.restore_search),
+                        tint = LocalContentColor.current
+                    )
                 }
             }
 
@@ -555,6 +565,7 @@ private fun FolderHeader(
             // above the swipe instruction — the place the label was in, which is where the person was
             // already looking. Closing it clears the query, so the list cannot stay filtered invisibly.
             if (state.searchOpen) {
+                val ink = LocalContentColor.current
                 OutlinedTextField(
                     value = state.query,
                     onValueChange = viewModel::setQuery,
@@ -572,11 +583,24 @@ private fun FolderHeader(
                             )
                         }
                     },
-                    // Deliberately no colour overrides. The field sits inside a hero card that sets
-                    // its own ink, and naming colours here to match would mean hardcoding them in UI
-                    // code — the one thing CLAUDE.md forbids, and the fault that shipped unreadable
-                    // dark mode on the Teleprompter app. The theme's own field colours are legible in
-                    // both themes by construction; check on the device rather than trusting this.
+                    // Every colour is taken from the hero band's own ink (LocalContentColor), not
+                    // named here: the field sits on heroContainer, not on surface, so the defaults —
+                    // which are built from onSurface — put near-black text on dark green in the light
+                    // theme. That shipped in version 20 and was unreadable on the Moto. Deriving from
+                    // the theme token is not the hardcoding CLAUDE.md forbids; Color(0xFF…) is.
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = ink,
+                        unfocusedTextColor = ink,
+                        cursorColor = ink,
+                        focusedBorderColor = ink.copy(alpha = 0.65f),
+                        unfocusedBorderColor = ink.copy(alpha = 0.35f),
+                        focusedPlaceholderColor = ink.copy(alpha = 0.7f),
+                        unfocusedPlaceholderColor = ink.copy(alpha = 0.7f),
+                        focusedLeadingIconColor = ink.copy(alpha = 0.7f),
+                        unfocusedLeadingIconColor = ink.copy(alpha = 0.7f),
+                        focusedTrailingIconColor = ink,
+                        unfocusedTrailingIconColor = ink
+                    )
                 )
             }
 
@@ -598,7 +622,7 @@ private fun FolderHeader(
 /**
  * Sort by, as a menu on the folder's own card.
  *
- * A text button rather than an icon: three orders with no obvious glyphs between them, and the
+ * A labelled button rather than an icon: three orders with no obvious glyphs between them, and the
  * current one has to be readable without opening anything. The list it orders keeps greyed-out files
  * last whatever is chosen — see `RestoreUiState.visibleRows`.
  */
@@ -612,20 +636,12 @@ private fun SortControl(current: RestoreSort, onPick: (RestoreSort) -> Unit) {
     }
 
     Box {
-        TextButton(onClick = { open = true }, contentPadding = PaddingValues(horizontal = 6.dp)) {
-            Text(
-                text = stringResource(label),
-                style = MaterialTheme.typography.labelMedium,
-                color = LocalContentColor.current,
-                maxLines = 1
-            )
-            Icon(
-                imageVector = SignalIcons.ChevronDown,
-                contentDescription = stringResource(R.string.restore_sort_by),
-                tint = LocalContentColor.current,
-                modifier = Modifier.size(18.dp)
-            )
-        }
+        // HeroOutlinedButton, the same control the Albums drill-down uses for its own Sort by, and
+        // for the same reason: it takes LocalContentColor, which inside a hero card is the band's own
+        // ink. A TextButton does not — it sets its content colour to the theme's primary, which in the
+        // light theme is a dark green that all but disappears on the dark green band. That was the
+        // first build's fault, seen on the Moto.
+        HeroOutlinedButton(onClick = { open = true }, label = stringResource(label))
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             listOf(
                 RestoreSort.NAME to R.string.restore_sort_name,

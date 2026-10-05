@@ -2365,6 +2365,18 @@ private fun BackupProgressContent(
                 // No total yet means the phase has started but the batch has not been counted.
                 // "0 of 0" would be worse than saying nothing, so the line is simply absent.
                 val ringCount = when {
+                    // The same pair the ring is drawn from, not this cloud's raw ledger count.
+                    //
+                    // `activeProgress.total` is `done + pendingByCloud()`, which on a first run is the
+                    // whole library: every file is PENDING until the run reaches it. `total` here has
+                    // already been discounted by the cloud check (`sendTotal`), so it is what will
+                    // actually be sent. Showing one beneath the other put "19%" above "10 of 8642" on
+                    // the Fold 8, 5 Oct 2026 — two true statements about different things, which reads
+                    // as a broken app. The cloud is still named, in the label above; what it is not
+                    // allowed to do is bring its own denominator.
+                    showCloud && total > 0 -> stringResource(
+                        R.string.tour_progress_count, completed, total
+                    )
                     showCloud -> stringResource(
                         R.string.tour_progress_count, activeProgress!!.done, activeProgress.total
                     )

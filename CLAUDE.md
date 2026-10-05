@@ -411,7 +411,7 @@ confident, wrong report that Ian's library was at risk and cost about an hour.
 |---|---|---|
 | ~~Galaxy Z Fold 4~~ | ~~`RFCT71H7RSW`~~ | **GONE — shipped out 30 Aug 2026, never available again.** Do not propose testing on it. Left in the table because its serial appears throughout MILESTONES and those observations are still valid; what is no longer valid is treating it as a rig. See below for what went with it. |
 | Moto G 2026 | `ZT422CTZQV` | Stock Android, **Google Photos rather than Samsung Gallery** — so it is where non-Samsung behaviour gets checked. Destination root `MotoG/Gallery`. |
-| Galaxy Z Fold 8 | — | **Ian's real phone.** Never experiment on it. |
+| Galaxy Z Fold 8 | `RFGL710JXAR` | **Ian's real phone.** Never experiment on it. `SM-F976U1`, and the only **Android 17** device here — the OS this app targets (SDK 37); everything else is checked on Android 16. Unfolded it is about **708dp** wide (2256px at density 510), so the 600dp two-column layouts engage on it and nowhere else; folded, its cover screen is the narrow case lost with the Fold 4. Connected over USB 5 Oct 2026 to look at the UI — looking is not experimenting, and nothing is installed from a local APK: Play App Signing means a sideload would block every later Play update on it. |
 
 **The Moto G's OneDrive account is a test account. So is everything on the phone.**
 
