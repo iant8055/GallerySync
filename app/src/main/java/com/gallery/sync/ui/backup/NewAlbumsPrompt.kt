@@ -23,18 +23,21 @@ object NewAlbumsPrompt {
     /**
      * @param firstBackupDone the record `WizardGate` reads
      * @param setupCompleted the other record it reads — only the Finish button writes it
-     * @param waitingAlbums albums with no mode chosen
+     * @param waitingAlbums albums with no mode chosen that have not been seen yet
      * @param showingNewOnly the list is already narrowed to the new albums, so the pop-up would be redundant
-     * @param alreadyAsked every waiting album has been through this pop-up once
+     *
+     * There is no "already asked" parameter. Being asked is recorded by acknowledging the albums, which takes
+     * them out of the waiting set for good — so a question that has been answered cannot come back. It used to
+     * be held in a `rememberSaveable` beside the dialog, which died with the composition and asked again on
+     * every visit to the Albums tab.
      */
     fun shows(
         firstBackupDone: Boolean,
         setupCompleted: Boolean,
         waitingAlbums: Int,
-        showingNewOnly: Boolean,
-        alreadyAsked: Boolean
+        showingNewOnly: Boolean
     ): Boolean {
         if (!WizardGate.finished(firstBackupDone, setupCompleted)) return false
-        return waitingAlbums > 0 && !showingNewOnly && !alreadyAsked
+        return waitingAlbums > 0 && !showingNewOnly
     }
 }

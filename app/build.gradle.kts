@@ -58,8 +58,9 @@ android {
         // The nineteenth (4 Oct 2026): pCloud switched on (approved by pCloud) with Restore, Sync and Archive; the Camera number moved lower and right.
         // The twentieth (5 Oct 2026): Restore's folder view gets Sort by and a search box; the Album drill-down names the Cloud a file went to; Settings gets Help & Feedback.
         // The twenty-first (5 Oct 2026): album listings kept between batches (a real 8,642-file library spent 29s per batch re-listing one folder); the progress ring and its count line use the same numbers; Restore's folder header readable in light mode.
-        versionCode = 21
-        versionName = "0.3.20"
+        // The twenty-second (5 Oct 2026): only the Finish button ends the wizard (the worker's scheduling record is now its own); New Albums waits for setup and stops asking twice; a boundary in Settings between Clouds and folder routing.
+        versionCode = 22
+        versionName = "0.3.21"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

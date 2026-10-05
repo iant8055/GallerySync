@@ -7662,3 +7662,24 @@ install, plus the gate's inputs. Twice in one day the cause of a vanished wizard
 this is what ended that, and it costs nothing.
 
 774 unit tests pass.
+
+**The New Albums pop-up stopped asking again on every visit (Ian, 5 Oct 2026).** *"every time I go back to the
+Album Tab - the New ALBUMS card pops up."* Only **Dismiss** recorded anything: *Show new Albums* and tapping
+outside set a `rememberSaveable` beside the dialog, which dies when `BackupScreen` leaves composition — which is
+what a tab switch does. The comment above it had always said *"closing it any way at all counts as seen"*; only
+the implementation disagreed. All three exits now call `acknowledgeAlbums`, which records **seen**, writes no
+album mode, and is per name, so a folder that appears later still asks. `NewAlbumsPrompt.shows` lost its
+`alreadyAsked` parameter with it: being asked is now recorded in the waiting set itself, so an answered question
+cannot come back. *Show new Albums* narrows the list from a snapshot taken at that moment, because acknowledging
+empties the live waiting set and the list would otherwise collapse as it opened.
+
+**Not a defect, checked:** the count fell from 86 to 85 because Ian set a mode on two albums himself. Nothing but
+the user wrote one.
+
+**Version 22 (0.3.21) built.** Carries, since 21: the wizard ends only when Finish is pressed (the worker's
+scheduling record split from the wizard's, `OnlyFinishEndsTheWizardTest`), the stack-trace instrumentation on both
+records and on the gate's inputs, the New Albums pop-up held back until setup is over and no longer repeating, and
+a clear boundary in Settings between the Cloud connections and *Where each folder goes*. 774 unit tests pass.
+Verified on hardware: **100% · Finish** reached on the Moto G (dark) and on the Fold 8 against the real
+8,642-file library (light), with no write by the worker in either, and the Fold run taking about sixteen minutes
+where the morning's projection was sixteen hours.

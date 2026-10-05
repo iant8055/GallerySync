@@ -429,12 +429,16 @@ private fun AlbumList(
     // this screen is for, and a search box is the first thing that makes an app feel like it has
     // more in it than it does. CLAUDE.md's "no search" comes out intact rather than argued around.
     val waitingNames = state.waitingAlbums.map { it.name }.toSet()
-    val showingNew = showNewOnly && waitingNames.isNotEmpty()
+    // The narrowed list works from a snapshot taken when *Show new Albums* was pressed, not from the live
+    // waiting set. Showing them counts as having seen them, which empties the live set — without the snapshot
+    // the list would collapse the instant it opened.
+    var shownNames by rememberSaveable { mutableStateOf("") }
+    val shownSet = if (shownNames.isEmpty()) emptySet() else shownNames.split("|").toSet()
+    val showingNew = showNewOnly && shownSet.isNotEmpty()
 
     // New albums are announced in a pop-up, not a coloured block in the list (Ian, 26 Sept 2026). Asked once per
     // set of new albums: closing it any way at all counts as seen, and a folder that appears later asks again.
-    var promptedNames by rememberSaveable { mutableStateOf("") }
-    val prompted = if (promptedNames.isEmpty()) emptySet() else promptedNames.split("|").toSet()
+
     // Never while the wizard is running — Ian, 5 Oct 2026, after it appeared over the Backup Progress card
     // on a fresh install and asked him to choose a mode for 86 albums mid-setup. The condition lives in
     // NewAlbumsPrompt so it asks WizardGate the same question the wizard itself is decided by.
@@ -443,25 +447,28 @@ private fun AlbumList(
             firstBackupDone = state.hasCompletedFirstBackup,
             setupCompleted = state.hasCompletedSetup,
             waitingAlbums = waitingNames.size,
-            showingNewOnly = showingNew,
-            alreadyAsked = prompted.containsAll(waitingNames)
+            showingNewOnly = showingNew
         )
     ) {
         NewAlbumsDialog(
             count = waitingNames.size,
+            // All three exits record that these albums have been seen (Ian, 5 Oct 2026: the pop-up returned
+            // on every visit to the Albums tab). Only Dismiss used to persist it; Show and tapping outside set
+            // a `rememberSaveable` that dies when this screen leaves composition, which is what a tab switch
+            // does — so the question came back. The comment here already said "closing it any way at all counts
+            // as seen"; only the implementation disagreed. Acknowledging records *seen* and writes no album
+            // mode, and it is per name, so a folder that appears later still asks.
             onShow = {
-                promptedNames = waitingNames.sorted().joinToString("|")
+                shownNames = waitingNames.sorted().joinToString("|")
                 showNewOnly = true
-            },
-            onDismiss = {
-                promptedNames = waitingNames.sorted().joinToString("|")
                 viewModel.dismissWaitingAlbums()
             },
-            onClose = { promptedNames = waitingNames.sorted().joinToString("|") }
+            onDismiss = { viewModel.dismissWaitingAlbums() },
+            onClose = { viewModel.dismissWaitingAlbums() }
         )
     }
     val visibleAlbums = if (showingNew) {
-        state.albums.filter { it.name in waitingNames }
+        state.albums.filter { it.name in shownSet }
     } else {
         state.albums.filter { modeFilter == null || it.mode == modeFilter }
     }
