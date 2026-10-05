@@ -7683,3 +7683,13 @@ a clear boundary in Settings between the Cloud connections and *Where each folde
 Verified on hardware: **100% · Finish** reached on the Moto G (dark) and on the Fold 8 against the real
 8,642-file library (light), with no write by the worker in either, and the Fold run taking about sixteen minutes
 where the morning's projection was sixteen hours.
+
+**Version 22 (0.3.21) submitted to Play (Ian, 5 Oct 2026, ~16:35).** Release notes in
+`design/play/release-notes-v22.md`; the "What's new" text is 451 of 500 characters and leads with the wizard
+staying until Finish is pressed, since that is the change a tester would actually notice. **Version 21 was
+published but never installed from Play on either phone** — both went to the sideloaded debug build instead — so
+22 is effectively the first of the day's work testers will see, and the notes are written that way.
+
+**Both phones are on the debug build and are off the Play track** until they are uninstalled and reinstalled from
+Play, which costs the OneDrive sign-in on each. The debug build is the same code plus the stack-trace
+instrumentation, so there is no hurry.
