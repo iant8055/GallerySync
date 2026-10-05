@@ -7504,3 +7504,83 @@ moved to a line of their own so *Files in this folder* stops wrapping. Seen wron
 light mode only — dark mode had been legible, which is how it shipped.
 
 766 unit tests pass (759 + 7). **Nothing in this version has been seen on a device.**
+
+**Verified in OneDrive, from the drive rather than the log (Ian, 5 Oct 2026, ~09:20).** With the Fold 8 run
+still going, Ian looked at the account itself: the new photos and videos are there, and **no apparent
+duplicates**. That is the check the logs cannot make, and it closes the question raised overnight. Three
+independent lines agree: the batch summaries (27 real uploads in two hours, everything else `already there`),
+the reconcile's own outstanding count falling 361 → 254 as genuine files went up, and now the drive.
+
+**It is the largest test the name-and-size skip has ever had.** That guard exists because a lost ledger used to
+re-upload whole albums as renamed duplicates — `file (1).jpg` — and it has only ever been exercised against test
+libraries of a few hundred files. Here it ran against 8,642 files in a real account and produced none.
+
+**Rate, measured the same morning:** 3,766 remaining at 09:00:36 and 3,316 at 09:18:05 — 450 files in 17½
+minutes, about **26 a minute**, against 8 a minute overnight. The difference is which albums a batch touches:
+the overnight batches were paying 29 seconds to re-list Camera's 3,378 files, and the run has since moved past
+it. Batches at this point read `0 uploaded, 25 already there`, so the data transfer was essentially done and
+what remained was the app confirming what it already had — the cost version 21 removes.
+
+**The Albums tab on the Fold 8, mid-run (5 Oct 2026, 09:36) — two findings, one good and one not.**
+
+**The two-column layout works, and this is the first time it has been seen on hardware.** At ~708dp the album
+cards lay out two across, correctly. Nothing else here is wide enough to engage it; it has been in the code since
+25 Sept and verifiable only in a preview.
+
+**Pill labels are clipped, mid-word and without an ellipsis.** The mode filter reads **Backu** · Sync · **Archi**
+· Off, and the run control reads Syncing **Paus** Stop. The short labels fit; the long ones are cut. Confirmed at
+full resolution, not a downscaling artifact, on a screen with room to spare — so the pills are not sizing to their
+content.
+
+**The likely trigger is the system font, and that is the part worth keeping.** Ian's Fold renders the whole UI in
+a wide rounded typeface rather than the platform default, so text laid out for Roboto's metrics overflows. **No
+device here could have caught it**: the Moto runs stock fonts, and every width check this project has made assumed
+them. Any fixed or weighted width holding text is suspect under a user-chosen font or a larger font scale.
+
+**Also confirmed by the same screen:** `86 Off` after a first backup is correct (the run uses `allAlbums = true`
+and ignores modes — the case CLAUDE.md says not to "fix"); progress moves to the Albums tab header once the
+wizard's card is closed, reading **Syncing** with **Pause** and **Stop**, and album cards carry both numbers
+(`181 pending`, `208 of 210 verified in OneDrive`).
+
+**One consequence of the wizard rule, observed rather than decided.** Ian pressed Close on the progress card
+early in the run; setup was marked complete, so the wizard never returns and **the Finish card is unreachable for
+the rest of that backup**. That is `WizardGate` working as specified. Whether a first backup that is still
+running should be able to show its own completion is a question for Ian, not a defect to fix.
+
+**The wizard ended itself mid-backup, because an album mode was allowed to answer for it (5 Oct 2026, Fold 8).**
+Ian reopened the app with 3,200 files still queued and landed on the Albums tab: no wizard, no Finish card. The
+cause, from the device log and the source rather than inference:
+
+```
+09:33:21  GallerySync/BackupWorke: backlog already clear; first-backup window no longer applies
+```
+
+`BackupWorker` asked `engine.outstandingCount()` — `countPendingInSelectedAlbums`, mode-aware — whether the
+backlog was clear. The first backup runs `allAlbums = true` and ignores modes on purpose, and every album was
+`Off` (correct after a first backup, and a case CLAUDE.md says not to "fix"), so the count read 0 with 3,200 rows
+pending. It wrote `markFirstBackupComplete()`, and `WizardGate.finished()` being `firstBackupDone ||
+setupCompleted` retired the wizard permanently.
+
+**One cause, not two.** Closing the app was survivable by design — `SetupTour` resumes the watch at
+`resumeStep == TOTAL_STEPS -> viewModel.observeBackupWorker()`, and `backupFinished` is written when that observer
+sees `remaining == 0`, which is the only thing that turns the step-9 button from **Close** into **Finish**. The
+premature flag did not merely skip the Finish card: it removed the only surface that could ever show it, and with
+it the observer that would have noticed the run draining.
+
+**The line dated to 26 Aug 2026 (`5c124ac`), a commit about stopping manual runs**, where the mode-aware count
+was the right question for a different job. It was the only use of `outstandingCount()` in the app outside its own
+definition; `ReconcileViewModel` already used `outstandingCountAll()` everywhere.
+
+**Fixed, and made structural.** `BackupWorker` now counts with `outstandingCountAll()`.
+`WizardNeverReadsAlbumModesTest` fails the build if a mode-aware count reaches the first-backup decision, or if the
+tour or `ReconcileViewModel` reads one at all, and fails too if the names it watches are renamed away so it cannot
+end up guarding nothing. **Proven by reintroducing the bug**: the test fails on exactly that line and passes once
+reverted. CLAUDE.md carries the rule beside `WizardGate` and the Settings boundary. 770 unit tests pass.
+
+**Ian's standing instruction, recorded in his words:** *"the Wizard should NEVER EVER EVER EVER call Album modes.
+the Wizard does not need to know Album modes even exist"*, and *"ONLY PRESSING THE FINISH button"* may end it. He
+had said it more than once before this; **nothing failed the build when it was broken**, which is why it recurred.
+
+**Left for Ian.** `markFirstBackupComplete()` means two things — the overnight first-backup window no longer
+applies (a scheduling concern a worker may own) and the wizard is over (which only Finish may say). Splitting them
+is an architectural decision and was not taken by an agent.

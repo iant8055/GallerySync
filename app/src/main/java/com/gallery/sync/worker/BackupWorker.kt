@@ -125,7 +125,20 @@ class BackupWorker @AssistedInject constructor(
             // downstream of this return, so while the window was closed nothing was capable of
             // noticing the window was no longer needed — the backlog could be empty for a day and
             // the app would still announce it was waiting. See FIX-001.
-            if (engine.outstandingCount() == 0) {
+            // `outstandingCountAll`, never `outstandingCount`. The mode-aware count asks "how much is
+            // left in the albums the user selected", and the first backup does not run on selected
+            // albums: it runs with `allAlbums = true`, which bypasses mode filtering on purpose. The
+            // two disagree the moment any album is Off — and after a first backup every album is Off,
+            // which CLAUDE.md says is correct and not to be "fixed".
+            //
+            // Measured on the Fold 8, 5 Oct 2026: 3,200 files still queued, every album Off, this check
+            // read 0 and wrote `markFirstBackupComplete()`. `WizardGate.finished()` is
+            // `firstBackupDone || setupCompleted`, so the wizard ended there — no Finish button, no
+            // progress card, and the observer that would have noticed the run draining had nowhere to
+            // resume. **Only the Finish button may end the wizard** (Ian, 5 Oct 2026), and an album mode
+            // may never be any part of deciding it. `WizardNeverReadsAlbumModesTest` fails the build if
+            // this line regresses.
+            if (engine.outstandingCountAll() == 0) {
                 Logger.i(TAG, "backlog already clear; first-backup window no longer applies")
                 settings.markFirstBackupComplete()
                 // Closes the run's denominator when the queue is drained. Doing this only at the start of

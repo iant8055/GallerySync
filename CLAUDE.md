@@ -240,6 +240,36 @@ carried over mechanically, and then described to Ian as "by design", which it wa
 - **Never offer a change that re-enters the wizard after the first backup, and never call a wizard re-entry
   "by design" without a recorded decision from Ian.**
 
+### THE WIZARD DOES NOT KNOW ALBUM MODES EXIST
+
+## **THE WIZARD MUST NEVER READ AN ALBUM MODE, AND ONLY THE FINISH BUTTON MAY END IT**
+
+Stated by Ian, 5 Oct 2026 — *"the Wizard should NEVER EVER EVER EVER call Album modes. the Wizard does not need
+to know Album modes even exist"* and *"ONLY PRESSING THE FINISH button should"* end it — after the wizard
+vanished mid-backup on his Galaxy Z Fold 8 with 3,200 files still queued. He has said it more than once. **The
+reason it kept coming back is that nothing failed the build when it did**, which is now fixed.
+
+**What happened.** `BackupWorker` decided whether the first backup was over by asking
+`engine.outstandingCount()` — `countPendingInSelectedAlbums`, which filters by album mode. The first backup runs
+with `allAlbums = true` and ignores modes **on purpose**, so the two disagree the moment an album is `Off` — and
+after a first backup every album is `Off`, which this file already says is correct and must not be "fixed". The
+check read 0, wrote `markFirstBackupComplete()`, and since `WizardGate.finished()` is
+`firstBackupDone || setupCompleted` the wizard was over for good: no Finish button, no progress card, and the
+observer that would have seen the run drain had no surface to resume on. The line had been there since 26 Aug 2026
+(`5c124ac`), in a commit about stopping manual runs, where the mode-aware count was the right question for a
+different job.
+
+- **Anything deciding whether the first backup is finished counts with `outstandingCountAll()`**, never
+  `outstandingCount()`. The run is mode-blind, so the question about it must be too.
+- **Only the Finish button ends the wizard.** `completeSetupAfterBackup()` is its handler and is the only place
+  that may write both records. Close writes nothing — it calls `activity?.finish()` and the chain carries on.
+- A worker may still mark the **first-backup scheduling window** as no longer applying. That it currently shares
+  one flag with "the wizard is over" is the root of this defect, and splitting them is Ian's decision, not an
+  agent's.
+- `WizardNeverReadsAlbumModesTest` fails the build if a mode-aware count reaches the first-backup decision, or if
+  the tour or `ReconcileViewModel` reads one at all. It also fails if the names it watches are renamed away, so it
+  cannot quietly end up guarding nothing.
+
 ### The wizard and the Settings tab are independent — in both directions
 
 ## **SETTINGS HAS NO EFFECT ON THE WIZARD**
