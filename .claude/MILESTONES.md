@@ -7584,3 +7584,24 @@ had said it more than once before this; **nothing failed the build when it was b
 **Left for Ian.** `markFirstBackupComplete()` means two things — the overnight first-backup window no longer
 applies (a scheduling concern a worker may own) and the wizard is over (which only Finish may say). Splitting them
 is an architectural decision and was not taken by an agent.
+
+**Version 21 (0.3.20) submitted to Closed testing — Alpha, full rollout (Ian, 5 Oct 2026, ~10:35).** Carries the
+album-index cache, the progress card's single denominator, the light-mode Restore header, and the wizard fix
+(`BackupWorker` no longer decides the first backup is over from a mode-aware count, with
+`WizardNeverReadsAlbumModesTest` failing the build if it regresses). Release notes in
+`design/play/release-notes-v21.md`; the "What's new" text is 439 of 500 characters and leads with setup no longer
+ending itself. A store listing change (*Change Video*, en-US) went in the same submission, so both are in the one
+review.
+
+**Two things learned about the Play tracks, from the Console's own screen.** Closed testing **goes through
+review** — *"Changes will be sent for review as soon as checks complete successfully"* — so a release can sit
+pending while the previous one stays live. That is a candidate explanation for the Fold 8 installing **19
+(0.3.18)** from Play at 03:31 when the Moto had taken **20 (0.3.19)** at 01:26: the devices may be on different
+tracks, or 20 may not have cleared review for the Fold's. The 28 Sept record shows the same split before — *"the
+Moto (still version 16, since 17 is on the Closed track)"*. **Not settled**, and the two things that settle it are
+which track release 20 went to and whether both devices' account is a tester on it.
+
+**A near miss worth recording.** Two bundles were built at versionCode 21 — 06:14, before the wizard fix, and
+10:32, with it. Play accepts only one build per version code, so uploading the earlier one would have shipped 21
+without the morning's work and cost a version 22 to recover. Ian had not uploaded it. **Rebuild and re-send the
+bundle whenever a fix lands after one has been handed over**, and say plainly which file supersedes which.
