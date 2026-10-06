@@ -175,6 +175,8 @@ class BackupWorker @AssistedInject constructor(
                 "verification: ${verified.skipped} already in the Cloud, ${verified.remaining} to send, " +
                     "${verified.deferred} could not be checked"
             )
+            // Tells the wizard's card the ledger now means what it says. See BackupPreferences.lastVerifiedAt.
+            settings.setLastVerifiedAt(System.currentTimeMillis())
         }
 
         val result = engine.uploadPending(allAlbums = allAlbums) { progress ->

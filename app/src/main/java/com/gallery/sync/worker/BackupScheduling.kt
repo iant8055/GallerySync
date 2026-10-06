@@ -255,7 +255,9 @@ object BackupScheduling {
             manual = true,
             allAlbums = allAlbums,
             initialDelayMillis = delayMillis,
-            requiresCharging = true
+            requiresCharging = true,
+            // It starts the wizard's chain just as an immediate start does, so it verifies first too.
+            verifyFirst = true
         )
     }
 

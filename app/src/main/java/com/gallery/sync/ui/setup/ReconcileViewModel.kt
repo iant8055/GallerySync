@@ -851,11 +851,18 @@ class ReconcileViewModel @Inject constructor(
 
                 if (completed > highWater) highWater = completed
 
+                // Step one, verification, has not finished for this run: the ledger still holds every file the Cloud
+                // already has as pending, so `remaining` is the library rather than the work. Nothing below may take
+                // a number from it until then. Growing the total on it is what made the card read *1 of 8642*
+                // on a library already backed up (Fold 8, 5 Oct 2026): the total was 0 or 22, `remaining` was
+                // 8,642, and the rule below grew the total to the library and saved it.
+                val verified = runStartedAt <= 0L || settings.current().lastVerifiedAt >= runStartedAt
+
                 // The ring must never read 100% while files are still queued. The total is an estimate made
                 // before the run (what the cloud check says is missing), and it can be short — it was for
                 // files bound for a cloud the check knows nothing about, the Moto G showing "84 of 84"
                 // with 2,168 to go. When it is exceeded, grow it to what is actually known.
-                if (completed >= total && remaining > 0) {
+                if (verified && completed >= total && remaining > 0) {
                     total = completed + remaining
                     if (runStartedAt > 0L) settings.setWizardRun(total, runStartedAt)
                 }
@@ -863,7 +870,8 @@ class ReconcileViewModel @Inject constructor(
                 // Per cloud, for the card: done since the run began, and what is still waiting.
                 val doneByCloud = backupEngine.uploadedSinceByCloud(runStartedAt)
                 val waitingByCloud = backupEngine.pendingByCloud()
-                val clouds = (doneByCloud.keys + waitingByCloud.keys).sortedBy { it.ordinal }.map {
+                // Not before verification, for the same reason: the waiting count would be the library.
+                val clouds = if (!verified) emptyList() else (doneByCloud.keys + waitingByCloud.keys).sortedBy { it.ordinal }.map {
                     val done = doneByCloud[it] ?: 0
                     CloudProgress(it, done, done + (waitingByCloud[it] ?: 0))
                 }.filter { it.total > 0 }

@@ -288,6 +288,13 @@ data class BackupPreferences(
      */
     val wizardRunStartedAt: Long = 0L,
     /**
+     * When a backup chain last finished step one, verification, or 0. Written by `BackupWorker` once
+     * `verifyAgainstCloud` has put its answer in the ledger. Until it is later than [wizardRunStartedAt] the
+     * ledger still counts files the Cloud already has as pending, so the wizard's card must not take its
+     * numbers from the ledger: it read *1 of 8642* on a library that was already backed up (Fold 8, 5 Oct 2026).
+     */
+    val lastVerifiedAt: Long = 0L,
+    /**
      * What the Archive tab's age filter starts at when the tab is opened. Ian, 22 Sept 2026.
      *
      * A Settings default, not a standing rule the tab enforces on its own — changing the filter on
@@ -406,6 +413,7 @@ class BackupSettings @Inject constructor(
             wizardStep = stored[KEY_WIZARD_STEP] ?: 0,
             wizardBackupTotal = stored[KEY_WIZARD_BACKUP_TOTAL] ?: 0,
             wizardRunStartedAt = stored[KEY_WIZARD_RUN_STARTED_AT] ?: 0L,
+            lastVerifiedAt = stored[KEY_LAST_VERIFIED_AT] ?: 0L,
             archiveDefaultAge = ArchiveAge.fromNameOrDefault(stored[KEY_ARCHIVE_DEFAULT_AGE]),
             archiveNotifyEnabled = stored[KEY_ARCHIVE_NOTIFY_ENABLED] ?: false,
             archiveReadyLastSeenCount = stored[KEY_ARCHIVE_READY_LAST_SEEN] ?: 0,
@@ -563,6 +571,11 @@ class BackupSettings @Inject constructor(
 
     suspend fun setWizardStep(step: Int) {
         context.dataStore.edit { it[KEY_WIZARD_STEP] = step }
+    }
+
+    /** See [BackupPreferences.lastVerifiedAt]. */
+    suspend fun setLastVerifiedAt(epochMillis: Long) {
+        context.dataStore.edit { it[KEY_LAST_VERIFIED_AT] = epochMillis }
     }
 
     /** Records the wizard run's denominator and start together, so the two cannot disagree. */
@@ -818,6 +831,7 @@ class BackupSettings @Inject constructor(
         val KEY_WIZARD_STEP = intPreferencesKey("wizard_step")
         val KEY_WIZARD_BACKUP_TOTAL = intPreferencesKey("wizard_backup_total")
         val KEY_WIZARD_RUN_STARTED_AT = longPreferencesKey("wizard_run_started_at")
+        val KEY_LAST_VERIFIED_AT = longPreferencesKey("last_verified_at")
         val KEY_ALBUM_MERGE_WARNINGS = stringSetPreferencesKey("album_merge_warnings")
         val KEY_ARCHIVE_DEFAULT_AGE = stringPreferencesKey("archive_default_age")
         val KEY_ARCHIVE_NOTIFY_ENABLED = booleanPreferencesKey("archive_notify_enabled")

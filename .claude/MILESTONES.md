@@ -7718,3 +7718,18 @@ this project does not use. **Still to prove: that a file the Cloud lacks is left
 **What has not happened:** no device has run this. The expected result is the card reading *0 of 22* rather than
 *1 of 8642*, and a first backup of a few batches rather than hundreds. Both need a build on a phone to confirm,
 and the Fold was taken offline before it could be tried.
+
+**Why verification alone would not have fixed the card, and the fix (6 Oct 2026). NOT YET VERIFIED ON A DEVICE.**
+Reading `ReconcileViewModel.observeBackupWorker` for the version 23 build: the card's total starts at `sendTotal`
+(the cloud check's figure, 0 or 22 on a library already backed up), and the rule that stops the ring reading 100%
+while files are queued (`completed >= total && remaining > 0` grows the total to `completed + remaining`) fires on
+the **first poll**, while verification is still walking the albums and `remaining` is the whole library. It grew
+the total to 8,642 and saved it with `setWizardRun`, so *1 of 8642* would have survived verification. Now the
+worker records `lastVerifiedAt` when verification finishes, and until it is later than `wizardRunStartedAt` the
+observer neither grows the total nor builds the per-Cloud lines from the ledger (the card shows *Starting backup*
+at 0%, as it already did before the first file lands). Also: the wizard's **delayed** first backup
+(`enqueueDelayedManualRun`) did not set `verifyFirst`, so a run started by the countdown would have skipped
+verification entirely; it now sets it. 776 unit tests pass.
+
+**To check on the Moto:** a fresh wizard run over a library already backed up reads a small count (or finishes at
+once), the log shows `verification: N already in the Cloud, M to send`, and the card never shows the library size.
