@@ -7733,3 +7733,15 @@ verification entirely; it now sets it. 776 unit tests pass.
 
 **To check on the Moto:** a fresh wizard run over a library already backed up reads a small count (or finishes at
 once), the log shows `verification: N already in the Cloud, M to send`, and the card never shows the library size.
+
+**Verification proven on the Moto G (6 Oct 2026, 16:07, debug build of `e4605f1`, fresh install).** Wizard over a
+library already backed up (DCIM granted, OneDrive): the cloud check logged `69 already in OneDrive, 82
+outstanding`; the worker's first job logged `verification: 151 already in the Cloud, 0 to send, 0 could not be
+checked`, and the wizard went straight to **Finish**, no upload. The ledger (read with its WAL) holds 151 rows,
+all `UPLOADED` to OneDrive, 0 pending. **The 82 are exactly the 82 rows now `isProxied`** (Camera 27, iDrive 25,
+Temp02 16, test01 10, Car Show, PauseTest, Temp01 and test02 one each): shrunk copies on the phone, carrying the
+proxy marker, with the larger original in OneDrive, which the upload path's `LedgerRecovery.isBackedUpProxy`
+recognises and `ReconcileWithCloud` does not, since it compares sizes only. So verification was right and the
+cloud check over-counted. **Left open:** the cloud check still counts a shrunk file as outstanding, so the card's
+starting figure can be too high on a phone that was optimised before a reinstall; it corrects itself once
+verification runs. Version 23 (0.3.22) built from this.
