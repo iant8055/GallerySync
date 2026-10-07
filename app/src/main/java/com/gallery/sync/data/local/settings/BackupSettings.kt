@@ -295,6 +295,15 @@ data class BackupPreferences(
      */
     val lastVerifiedAt: Long = 0L,
     /**
+     * Verification's own count, for the wizard's card (Ian, 6 Oct 2026: a check that "went by in an instant —
+     * that doesn't instill confidence that anything was actually verified"). While it runs, how many files it has
+     * checked of how many; once [lastVerifiedAt] is written, the final figures, with [verifyAlreadyThere] the
+     * number it found already in the Cloud.
+     */
+    val verifyChecked: Int = 0,
+    val verifyTotal: Int = 0,
+    val verifyAlreadyThere: Int = 0,
+    /**
      * What the Archive tab's age filter starts at when the tab is opened. Ian, 22 Sept 2026.
      *
      * A Settings default, not a standing rule the tab enforces on its own — changing the filter on
@@ -414,6 +423,9 @@ class BackupSettings @Inject constructor(
             wizardBackupTotal = stored[KEY_WIZARD_BACKUP_TOTAL] ?: 0,
             wizardRunStartedAt = stored[KEY_WIZARD_RUN_STARTED_AT] ?: 0L,
             lastVerifiedAt = stored[KEY_LAST_VERIFIED_AT] ?: 0L,
+            verifyChecked = stored[KEY_VERIFY_CHECKED] ?: 0,
+            verifyTotal = stored[KEY_VERIFY_TOTAL] ?: 0,
+            verifyAlreadyThere = stored[KEY_VERIFY_ALREADY_THERE] ?: 0,
             archiveDefaultAge = ArchiveAge.fromNameOrDefault(stored[KEY_ARCHIVE_DEFAULT_AGE]),
             archiveNotifyEnabled = stored[KEY_ARCHIVE_NOTIFY_ENABLED] ?: false,
             archiveReadyLastSeenCount = stored[KEY_ARCHIVE_READY_LAST_SEEN] ?: 0,
@@ -573,9 +585,22 @@ class BackupSettings @Inject constructor(
         context.dataStore.edit { it[KEY_WIZARD_STEP] = step }
     }
 
-    /** See [BackupPreferences.lastVerifiedAt]. */
-    suspend fun setLastVerifiedAt(epochMillis: Long) {
-        context.dataStore.edit { it[KEY_LAST_VERIFIED_AT] = epochMillis }
+    /** Verification's running count. See [BackupPreferences.verifyChecked]. */
+    suspend fun setVerifyProgress(checked: Int, total: Int) {
+        context.dataStore.edit {
+            it[KEY_VERIFY_CHECKED] = checked
+            it[KEY_VERIFY_TOTAL] = total
+        }
+    }
+
+    /** Verification has finished: its figures and the moment, written together. See [BackupPreferences.lastVerifiedAt]. */
+    suspend fun setVerificationFinished(checked: Int, alreadyThere: Int, epochMillis: Long) {
+        context.dataStore.edit {
+            it[KEY_VERIFY_CHECKED] = checked
+            it[KEY_VERIFY_TOTAL] = checked
+            it[KEY_VERIFY_ALREADY_THERE] = alreadyThere
+            it[KEY_LAST_VERIFIED_AT] = epochMillis
+        }
     }
 
     /** Records the wizard run's denominator and start together, so the two cannot disagree. */
@@ -832,6 +857,9 @@ class BackupSettings @Inject constructor(
         val KEY_WIZARD_BACKUP_TOTAL = intPreferencesKey("wizard_backup_total")
         val KEY_WIZARD_RUN_STARTED_AT = longPreferencesKey("wizard_run_started_at")
         val KEY_LAST_VERIFIED_AT = longPreferencesKey("last_verified_at")
+        val KEY_VERIFY_CHECKED = intPreferencesKey("verify_checked")
+        val KEY_VERIFY_TOTAL = intPreferencesKey("verify_total")
+        val KEY_VERIFY_ALREADY_THERE = intPreferencesKey("verify_already_there")
         val KEY_ALBUM_MERGE_WARNINGS = stringSetPreferencesKey("album_merge_warnings")
         val KEY_ARCHIVE_DEFAULT_AGE = stringPreferencesKey("archive_default_age")
         val KEY_ARCHIVE_NOTIFY_ENABLED = booleanPreferencesKey("archive_notify_enabled")

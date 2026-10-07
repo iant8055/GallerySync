@@ -408,6 +408,7 @@ fun SetupTour(
 
     val backupPhase = when {
         waitingForDelay -> WizardBackupPhase.WAITING
+        state.verifying -> WizardBackupPhase.VERIFYING
         !state.backupFinished -> WizardBackupPhase.UPLOADING
         !photosOptimised -> WizardBackupPhase.OPTIMISING_PHOTOS
         !videoOptimised -> WizardBackupPhase.OPTIMISING_VIDEO
@@ -764,6 +765,11 @@ fun SetupTour(
                             delayTotalMillis = state.firstBackupDelayMillis ?: 0L,
                             clouds = state.cloudProgress,
                             activeCloud = state.activeCloud,
+                            verifyChecked = state.verifyChecked,
+                            verifyTotal = state.verifyTotal,
+                            verifiedChecked = state.verifiedChecked,
+                            verifiedAlreadyThere = state.verifiedAlreadyThere,
+                            sent = state.backupSent,
                             onSyncNow = viewModel::startBackupNow
                         )
                     }
@@ -2223,8 +2229,16 @@ private fun BackupProgressContent(
     delayTotalMillis: Long,
     clouds: List<CloudProgress>,
     activeCloud: BackupLocation?,
+    verifyChecked: Int,
+    verifyTotal: Int,
+    verifiedChecked: Int?,
+    verifiedAlreadyThere: Int,
+    sent: Int,
     onSyncNow: () -> Unit
 ) {
+    // Verification shows its own count, and the finish says what it found. Ian, 6 Oct 2026, of a check that went
+    // straight to Finish: "that doesn't instill confidence that anything was actually verified".
+    val verifying = phase == WizardBackupPhase.VERIFYING
     val uploading = phase == WizardBackupPhase.UPLOADING
     // The cloud the ring names while uploading, and the others waiting their turn (Ian, 24 Sept 2026: the
     // ring still measures the whole backup, but says which cloud is being sent to and how far it is).
@@ -2249,6 +2263,7 @@ private fun BackupProgressContent(
     // the video pass starts from empty rather than inheriting where the photos finished.
     val percent = when {
         phase == WizardBackupPhase.DONE -> 100
+        verifying -> if (verifyTotal > 0) ((verifyChecked * 100) / verifyTotal).coerceIn(0, 100) else 0
         uploading && total > 0 -> ((completed * 100) / total).coerceIn(0, 100)
         uploading -> 0
         optimiseTotal > 0 -> ((optimiseDone * 100) / optimiseTotal).coerceIn(0, 100)
@@ -2279,6 +2294,7 @@ private fun BackupProgressContent(
             text = stringResource(
                 when (phase) {
                     WizardBackupPhase.WAITING -> R.string.tour_progress_waiting_body
+                    WizardBackupPhase.VERIFYING -> R.string.tour_progress_verifying_body
                     WizardBackupPhase.UPLOADING -> R.string.tour_progress_body
                     WizardBackupPhase.OPTIMISING_PHOTOS -> R.string.tour_progress_optimising_photos
                     WizardBackupPhase.OPTIMISING_VIDEO -> R.string.tour_progress_optimising_video
@@ -2288,6 +2304,20 @@ private fun BackupProgressContent(
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.fillMaxWidth()
         )
+
+        // What verification found, once the backup is over: the evidence that the check happened at all.
+        if (phase == WizardBackupPhase.DONE && verifiedChecked != null && verifiedChecked > 0) {
+            Text(
+                text = if (sent == 0 && verifiedAlreadyThere >= verifiedChecked) {
+                    stringResource(R.string.tour_progress_verified_all, verifiedChecked)
+                } else {
+                    stringResource(R.string.tour_progress_verified_some, verifiedChecked, verifiedAlreadyThere, sent)
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
 
         // The delayed start waits for the charger (Ian, 15 Sept 2026), so the card has to say so -
         // a countdown reaching zero on an unplugged phone otherwise looks like the app failing.
@@ -2319,6 +2349,7 @@ private fun BackupProgressContent(
                 // to the truth. Ian, 4 Sept 2026. Same rule the count line below already follows:
                 // say nothing rather than say zero.
                 val countPending = !waiting &&
+                    !(verifying && verifyTotal > 0) &&
                     phase != WizardBackupPhase.UPLOADING &&
                     phase != WizardBackupPhase.DONE &&
                     optimiseTotal == 0
@@ -2342,6 +2373,7 @@ private fun BackupProgressContent(
                     waiting -> stringResource(R.string.tour_progress_until_start)
                     phase == WizardBackupPhase.DONE ->
                         stringResource(R.string.wizard_finish_label)
+                    verifying -> stringResource(R.string.tour_progress_verifying)
                     phase == WizardBackupPhase.OPTIMISING_PHOTOS ->
                         stringResource(R.string.tour_progress_optimising_photos_label)
                     phase == WizardBackupPhase.OPTIMISING_VIDEO ->
@@ -2365,6 +2397,10 @@ private fun BackupProgressContent(
                 // No total yet means the phase has started but the batch has not been counted.
                 // "0 of 0" would be worse than saying nothing, so the line is simply absent.
                 val ringCount = when {
+                    verifying && verifyTotal > 0 -> stringResource(
+                        R.string.tour_progress_checked, verifyChecked, verifyTotal
+                    )
+                    verifying -> null
                     // The same pair the ring is drawn from, not this cloud's raw ledger count.
                     //
                     // `activeProgress.total` is `done + pendingByCloud()`, which on a first run is the
@@ -2630,6 +2666,8 @@ private fun formatCountdown(millis: Long): String {
 private enum class WizardBackupPhase {
     /** A delay was chosen and has not elapsed. Nothing is enqueued yet. */
     WAITING,
+    /** Step one: the Cloud is asked what it already has. Nothing is sent. */
+    VERIFYING,
     UPLOADING,
     OPTIMISING_PHOTOS,
     OPTIMISING_VIDEO,

@@ -13,6 +13,11 @@ import com.gallery.sync.domain.backup.FirstBackupWindow
 import com.gallery.sync.domain.backup.StopReason
 import com.gallery.sync.domain.backup.WizardBulkOptimise
 import java.time.LocalTime
+import java.util.concurrent.atomic.AtomicInteger
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import com.gallery.sync.util.ChargingState
 import com.gallery.sync.util.Logger
 import dagger.assisted.Assisted
@@ -169,14 +174,39 @@ class BackupWorker @AssistedInject constructor(
         //
         // Only on the job that starts a chain: a continuation inherits a ledger this has already reconciled.
         if (inputData.getBoolean(BackupScheduling.KEY_VERIFY_FIRST, false)) {
-            val verified = engine.verifyAgainstCloud(allAlbums = allAlbums)
+            // The count goes to the card once a second, not per file: thousands of DataStore writes in a minute
+            // would cost more than the check. Zeroed first, so a card never shows the last run's figures.
+            settings.setVerifyProgress(0, 0)
+            val checked = AtomicInteger(0)
+            val ofTotal = AtomicInteger(0)
+            val verified = coroutineScope {
+                val reporter = launch {
+                    while (isActive) {
+                        delay(1_000)
+                        settings.setVerifyProgress(checked.get(), ofTotal.get())
+                    }
+                }
+                try {
+                    engine.verifyAgainstCloud(allAlbums = allAlbums) { progress ->
+                        checked.set(progress.completed)
+                        ofTotal.set(progress.total)
+                    }
+                } finally {
+                    reporter.cancel()
+                }
+            }
             Logger.i(
                 TAG,
                 "verification: ${verified.skipped} already in the Cloud, ${verified.remaining} to send, " +
                     "${verified.deferred} could not be checked"
             )
-            // Tells the wizard's card the ledger now means what it says. See BackupPreferences.lastVerifiedAt.
-            settings.setLastVerifiedAt(System.currentTimeMillis())
+            // Tells the wizard's card the ledger now means what it says, and what was found. See
+            // BackupPreferences.lastVerifiedAt.
+            settings.setVerificationFinished(
+                checked = ofTotal.get(),
+                alreadyThere = verified.skipped,
+                epochMillis = System.currentTimeMillis()
+            )
         }
 
         val result = engine.uploadPending(allAlbums = allAlbums) { progress ->

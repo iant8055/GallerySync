@@ -7763,3 +7763,21 @@ phone's albums. The Albums tab's *221 of 2001 verified* after the upload was an 
 check taken mid-run; the tab's own recheck replaced it with *2001 verified*. **Auto-rotate** was back on on the
 morning of 7 Oct before any install (it read 1 before the uninstall and stayed 1 through uninstall, install and
 launch), so the Moto turns it on by itself; not GallerySync, which has no permission to change it.
+
+**Verification made visible on the wizard's card (Ian, 7 Oct 2026: the check "went by in an instant — that doesn't
+instill confidence that anything was actually verified").** A new card phase, `WizardBackupPhase.VERIFYING`, between
+waiting and uploading: body *Step one: checking your Cloud for the files it already has, by name and size. Nothing is
+sent during this step.*, ring label *Checking your Cloud*, count *N of M checked*. The engine reports every file
+verification checks (`BackupProgress` in the OneDrive loop when `verifyOnly`); the worker writes the count to
+DataStore once a second (`setVerifyProgress`) and the final figures with the timestamp in one edit
+(`setVerificationFinished`); the observer reads them on its 3-second poll. At the finish a bold line says what was
+found: *2,306 files checked: 2,214 already in OneDrive, 91 sent.*, or *… all already in OneDrive. Nothing needed
+sending.* The card does not finish before verification's record is written, unless no run is executing (a run
+started by an older version). **Seen on the Moto G, 16:13–16:18:** the count went 109 → 217 → 795 → 1,626 of 2,306
+with the ring filling, then the upload, then the summary above.
+
+**Found by the same recording, and fixed:** the upload count used a **stale total**. The wizard's cloud check had
+counted 28 before Ian added two folders; the card read *24 of 28* at 85%, then *33 of 91* at 36% once the
+never-100%-while-queued rule caught up, and finished capped at 91 though 92 were sent. Now, the first time the
+observer sees verification finished, it sets the total to *sent since the run began + still pending* (the ledger is
+the truth by then) and saves it. Built, unit tests pass; **the rebase itself is not yet seen on a device.**

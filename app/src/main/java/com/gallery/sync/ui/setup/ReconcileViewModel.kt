@@ -155,6 +155,15 @@ data class ReconcileUiState(
     val cloudProgress: List<CloudProgress> = emptyList(),
     /** The cloud a file was most recently sent to, or the next one waiting: the one "Uploading" names. */
     val activeCloud: BackupLocation? = null,
+    /** Step one, verification, is running: the card shows "Checking your Cloud" and these two numbers. */
+    val verifying: Boolean = false,
+    val verifyChecked: Int = 0,
+    val verifyTotal: Int = 0,
+    /** What verification found, once it has finished: files checked, and how many were already in the Cloud. */
+    val verifiedChecked: Int? = null,
+    val verifiedAlreadyThere: Int = 0,
+    /** Files this run actually sent, kept when it finishes (the ring's count is set to the total then). */
+    val backupSent: Int = 0,
     /** Directories found by scanning MediaStore, before any grants. */
     val discoveredDirectories: List<DiscoveredDirectory> = emptyList(),
     /** Whether directory discovery is running. */
@@ -833,6 +842,8 @@ class ReconcileViewModel @Inject constructor(
             _state.value = _state.value.copy(backupRunning = true, backupTotal = total)
 
             var highWater = _state.value.backupCompleted
+            // Whether this observer has taken the total from the ledger since verification finished. See below.
+            var rebasedOnVerification = false
             var lastDoneByCloud = emptyMap<BackupLocation, Int>()
             var activeCloud: BackupLocation? = null
             val pendingAtStart = backupEngine.outstandingCountAll()
@@ -856,7 +867,30 @@ class ReconcileViewModel @Inject constructor(
                 // a number from it until then. Growing the total on it is what made the card read *1 of 8642*
                 // on a library already backed up (Fold 8, 5 Oct 2026): the total was 0 or 22, `remaining` was
                 // 8,642, and the rule below grew the total to the library and saved it.
-                val verified = runStartedAt <= 0L || settings.current().lastVerifiedAt >= runStartedAt
+                val prefsNow = settings.current()
+                val verified = runStartedAt <= 0L || prefsNow.lastVerifiedAt >= runStartedAt
+                _state.value = _state.value.copy(
+                    verifying = !verified && remaining > 0,
+                    verifyChecked = prefsNow.verifyChecked,
+                    verifyTotal = prefsNow.verifyTotal,
+                    verifiedChecked = if (verified && runStartedAt > 0L) prefsNow.verifyChecked else null,
+                    verifiedAlreadyThere = prefsNow.verifyAlreadyThere
+                )
+
+                // Once verification has finished, the ledger is the truth: sent since the run began, plus what is
+                // still pending, is exactly the run's size. The total until then was the cloud check's estimate, made
+                // before the run, and it can be stale. Moto G, 7 Oct 2026: the check had counted 28 before two folders
+                // were added, the card read "24 of 28" at 85%, then "33 of 91" at 36% once the rule below caught up.
+                // Taken once per observer, the first time verification is seen finished.
+                if (verified && runStartedAt > 0L && !rebasedOnVerification) {
+                    rebasedOnVerification = true
+                    val actual = completed + remaining
+                    if (actual != total) {
+                        Logger.i(TAG, "card total from verification: $actual (was $total)")
+                        total = actual
+                        settings.setWizardRun(total, runStartedAt)
+                    }
+                }
 
                 // The ring must never read 100% while files are still queued. The total is an estimate made
                 // before the run (what the cloud check says is missing), and it can be short — it was for
@@ -898,7 +932,9 @@ class ReconcileViewModel @Inject constructor(
                     settings.setFirstBackupStartAt(null)
                 }
 
-                if (remaining == 0) {
+                // Not before verification has recorded what it found, or the card would finish without saying it.
+                // A run with no verification in flight (one started by an older version) finishes as before.
+                if (remaining == 0 && (verified || !BackupScheduling.manualRunExecuting(workManager))) {
                     val shouldOptimise = _state.value.libraryChoice.optimisesAtInstall
                     val photoCandidates = if (shouldOptimise) {
                         proxyApplier.candidatesAll()
@@ -912,6 +948,7 @@ class ReconcileViewModel @Inject constructor(
                         backupFinished = true,
                         backupTotal = total,
                         backupCompleted = total,
+                        backupSent = highWater,
                         optimiseCandidateCount = photoCandidates.size,
                         videoCandidateCount = videoCount
                     )

@@ -1047,6 +1047,11 @@ full size</string>
         catches up. "Starting upload" is the one description true of all three.
     -->
     <string name="tour_progress_starting">Starting upload…</string>
+    <string name="tour_progress_verifying">Checking your Cloud</string>
+    <string name="tour_progress_verifying_body">Step one: checking your Cloud for the files it already has, by name and size. Nothing is sent during this step.</string>
+    <string name="tour_progress_checked">%1$,d of %2$,d checked</string>
+    <string name="tour_progress_verified_all">%1$,d files checked: all already in OneDrive. Nothing needed sending.</string>
+    <string name="tour_progress_verified_some">%1$,d files checked: %2$,d already in OneDrive, %3$,d sent.</string>
     <!--
         The ring's own label, which says which half of the run is on screen. Ian, 4 Sept 2026: the
         two optimise phases both read a bare "Optimising", so the ring gave no way to tell the photo

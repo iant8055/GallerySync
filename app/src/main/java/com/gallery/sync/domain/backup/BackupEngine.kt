@@ -759,7 +759,12 @@ class BackupEngine @Inject constructor(
                 Logger.w(TAG, "uploadPending: ${oneDrivePending.size} row(s) for OneDrive, which is not the main cloud, and Pro is not unlocked — skipping this pass")
             }
 
-            for (entry in if (allowed(BackupLocation.ONEDRIVE)) oneDrivePending else emptyList()) {
+            // Verification reports every file it checks, so the card can say how far it has got rather than
+            // sitting on "Starting" while thousands of files are compared (Ian, 6 Oct 2026).
+            val toCheck = if (allowed(BackupLocation.ONEDRIVE)) oneDrivePending else emptyList()
+            var checked = 0
+            for (entry in toCheck) {
+                if (verifyOnly) onProgress(BackupProgress(checked++, toCheck.size, "", 0L, 0L))
                 // `containsKey` rather than `getOrPut`: getOrPut re-runs its lambda whenever the
                 // stored value is null, so a failed album would be listed again for every one of
                 // its pending files — hundreds of requests in the exact network conditions that
@@ -1011,6 +1016,8 @@ class BackupEngine @Inject constructor(
                     Logger.w(TAG, "uploadPending: ${rows.size} row(s) routed to $location, which is not connected")
                     continue
                 }
+
+                if (verifyOnly) onProgress(BackupProgress(checked, toCheck.size, "", 0L, 0L))
 
                 // Not verified, so not touched: nothing lists these Clouds here, and a verification pass
                 // must never send anything.
