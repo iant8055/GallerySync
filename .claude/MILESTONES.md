@@ -7745,3 +7745,21 @@ recognises and `ReconcileWithCloud` does not, since it compares sizes only. So v
 cloud check over-counted. **Left open:** the cloud check still counts a shrunk file as outstanding, so the card's
 starting figure can be too high on a phone that was optimised before a reinstall; it corrects itself once
 verification runs. Version 23 (0.3.22) built from this.
+
+**Verification at scale on the Moto G (6–7 Oct 2026, version 23 debug).** 2,001 photos copied loose into `DCIM` plus
+62 in `DCIM/Funny stuff`. Fresh install, wizard: `verification: 151 already in the Cloud, 2063 to send, 0 could not
+be checked`; the card counted the 2,063 and the run finished 17:01 → 18:42 with **0 failed and 0 "already there"**
+(nothing sent twice); the ledger holds 2,214 `UPLOADED`, every remote size equal to the local one. Then a second fresh
+install over that library: `verification: 2214 already in the Cloud, 0 to send, 0 could not be checked` in **58
+seconds** (15:50:55 → 15:51:53, worker start to verdict), and the wizard went straight to Finish. Scaled to the
+Fold's 8,642, roughly four minutes. **Ian: the check "went by in an instant — that doesn't instill confidence that
+anything was actually verified."** The card shows *Starting upload… 0%* through it and then *Congratulations… 100%*,
+never what was checked or found. Proposed: a *Checking your Cloud — N of M checked* phase on the ring, and a closing
+line naming what was found (*2,214 checked — all already in OneDrive*). Awaiting Ian.
+
+**Not bugs, found while checking:** the album row behind the wizard's card reading *1205 optimised / 1205 verified in
+OneDrive* is `AlbumsTabPreview`'s sample data (a pretend *WhatsApp* album), drawn behind every tour card, not this
+phone's albums. The Albums tab's *221 of 2001 verified* after the upload was an `album_cloud_status` row written by a
+check taken mid-run; the tab's own recheck replaced it with *2001 verified*. **Auto-rotate** was back on on the
+morning of 7 Oct before any install (it read 1 before the uninstall and stayed 1 through uninstall, install and
+launch), so the Moto turns it on by itself; not GallerySync, which has no permission to change it.
