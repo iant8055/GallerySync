@@ -7790,3 +7790,5 @@ files checked: 2,306 already in OneDrive, 30 sent.*, matching the log (25 + 5 up
 check count sits at 273 for about 30 seconds while `DCIM`'s 2,001-file listing comes back from OneDrive page by page,
 since the count moves per file compared rather than per page listed. On the Fold's `DCIM/Camera` (3,378 files) that
 pause would be longer. Version 24 (0.3.23) built from this.
+
+**Version 24 (0.3.23) submitted to Play for review (Ian, 8 Oct 2026).** Release note: Setup now shows each step of the backup — "Checking your Cloud", then only what needs sending, and a finish line saying how many were checked, already there and sent. The Moto is on the debug build and must be uninstalled before it can take a Play version.
