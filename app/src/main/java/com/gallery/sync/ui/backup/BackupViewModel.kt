@@ -91,7 +91,9 @@ data class AlbumsSummary(
      * has been archived from those folders.
      */
     val archivedCount: Int,
-    val archivedBytes: Long
+    val archivedBytes: Long,
+    /** Files kept at full size, which Archive never removes. */
+    val keptCount: Int = 0
 )
 
 /**
@@ -143,6 +145,10 @@ data class AlbumRow(
 
     /** What those uploaded rows occupy in OneDrive — the only non-zero size an archived album has. */
     val everBackedUpBytes: Long = 0L,
+
+    /** Uploaded files that have left the phone, and their size in the Cloud. See `AlbumCounts.goneFromPhone`. */
+    val goneFromPhoneCount: Int = 0,
+    val goneFromPhoneBytes: Long = 0L,
 
     /** Files here sent to Google Photos. See `AlbumBackupCount.googlePhotosSent` for why this is
      *  kept apart from [backedUpCount] rather than folded into it. */
@@ -455,8 +461,10 @@ data class BackupUiState(
             optimisedCount = rows.sumOf { it.proxiedCount },
             savedBytes = rows.sumOf { it.savedBytes },
             awaitingVerification = rows.sumOf { it.outstanding },
-            archivedCount = rows.sumOf { it.everBackedUpCount },
-            archivedBytes = rows.sumOf { it.everBackedUpBytes }
+            // What has actually left the phone, not everything ever uploaded (Moto G, 8 Oct 2026).
+            archivedCount = rows.sumOf { it.goneFromPhoneCount },
+            archivedBytes = rows.sumOf { it.goneFromPhoneBytes },
+            keptCount = rows.sumOf { it.pinnedCount }
         )
     }
 
@@ -828,6 +836,8 @@ class BackupViewModel @Inject constructor(
                     failedCount = counts?.failed ?: 0,
                     everBackedUpCount = counts?.everBackedUp ?: 0,
                     everBackedUpBytes = counts?.everBackedUpBytes ?: 0L,
+                    goneFromPhoneCount = counts?.goneFromPhone ?: 0,
+                    goneFromPhoneBytes = counts?.goneFromPhoneBytes ?: 0L,
                     sentElsewhereCount = counts?.sentElsewhere ?: 0,
                     sentTo = sentToByAlbum[album.name].orEmpty(),
                     backupLocation = FolderDestination.resolve(
@@ -885,6 +895,8 @@ class BackupViewModel @Inject constructor(
                         savedBytes = counts?.savedBytes ?: 0L,
                         everBackedUpCount = counts?.everBackedUp ?: 0,
                         everBackedUpBytes = counts?.everBackedUpBytes ?: 0L,
+                        goneFromPhoneCount = counts?.goneFromPhone ?: 0,
+                        goneFromPhoneBytes = counts?.goneFromPhoneBytes ?: 0L,
                         sentElsewhereCount = counts?.sentElsewhere ?: 0,
                         sentTo = sentToByAlbum[name].orEmpty(),
                         // Not on the device, so no folder to resolve against — the fallback is right.

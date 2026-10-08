@@ -1397,7 +1397,10 @@ private fun HeroDetail(
             )
         }
 
-        val scheduled = summary.imageCount + summary.videoCount
+        // A file kept at full size (`FilePin`) is never offered for archiving, so it is not scheduled to leave.
+        // Counting it read "3 Scheduled to leave this phone" over an album the Archive tab called "3 kept on
+        // this phone" (Moto G, 8 Oct 2026).
+        val scheduled = (summary.imageCount + summary.videoCount - summary.keptCount).coerceAtLeast(0)
         WithHelp(HelpTopic.ALBUMS_ARCHIVE_LINES) {
             Text(
                 text = if (scheduled == 0) {

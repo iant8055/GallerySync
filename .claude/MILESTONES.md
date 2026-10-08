@@ -7832,3 +7832,33 @@ dialog (`granted=true, USER_SET`).
    repaired from the phone. Not built.
 3. **Videos:** the transcoder now reads the original, but whether Media3 carries the container's location into the
    optimised clip is untested.
+
+## Autonomous test session on the Moto G (8 Oct 2026, evening, Ian at work, debug build of `d136ca3` and after)
+
+Ian: *"keep testing on the Moto - Optimizations - Restores - Archives - with different setting"*, all data and Cloud
+accounts test-only. OneDrive the only Cloud connected (the other Clouds need Ian's sign-ins).
+
+| # | Test | Result |
+|---|---|---|
+| 1a | `verify24b` (30 photos) set to Sync with **Optimise photos off** | Pass: nothing optimised |
+| 1b | Optimise photos **on, Automatic** | Pass: 30 proxied in 13 s, 133 MB → 26 MB, 2048 px, EXIF make/model/date kept, marker set, ledger original size = remote size |
+| 2 | Restore 3 of them | Pass on size (exact bytes), **fail on content**: GPS zeroed. Led to the location fix above |
+| 2b | After the fix: `gpstest` upload → proxy → restore | Pass: proxy keeps GPS, restored files md5-identical to the originals |
+| 3 | Optimise video on, **Medium 720p**, older than 1 day, `Funny stuff` (33 clips) at Sync | Pass: the one 1080p clip → 1280×720, 70.7 MB → 29.4 MB, 58 s, AAC kept, decodes cleanly; 32 clips already ≤ 720p skipped |
+| 3b | Quality changed to **High 480p**, Sync now | **Not retried**: the 32 clips stay `isProxySkipped` from the 720p pass. For Ian: should a stronger quality reopen clips skipped at a weaker one? |
+| 4 | `verify24` (5 photos) to Archive | Pass: confirmation dialog; Check reports 5 confirmed live in OneDrive; Android's trash dialog; all 5 renamed `.trashed-1794091719-…` in place, md5 unchanged, 31-day expiry; ledger `ARCHIVED`; the emptied album's mode forgotten |
+| 5 | Restore the archived 5 | Pass: downloaded into `verify24`, md5-identical; the trashed copies stay in the trash |
+| 6a | Optimise photos **Manual**, new 7.2 MB photo into the Sync album | Pass: uploaded, not optimised; Sync now optimised it (→ 0.5 MB) |
+| 6b | Archive *Only show files older than* = 1 day | Pass after a restart; an Archive tab already open keeps its earlier filter until the app restarts (minor) |
+
+**Fixed in this session (Albums tab, Archive filter):** with `gpstest` at Archive and its three files kept at full
+size (Restore pins what it restores), the hero said *3 files archived · 12 MB in your Cloud* and *3 Scheduled to
+leave this phone* while the row said *3 kept at full size* and the Archive tab *Nothing waiting, 3 kept on this
+phone*. "Archived" counted every uploaded row (`everBackedUp`), including files still on the phone; "scheduled"
+counted pinned files that can never leave. Now "archived" is uploaded rows whose file has left the phone
+(`AlbumCounts.goneFromPhone`, `goneFromPhoneBytes`) and "scheduled" subtracts the kept count. Seen on the Moto:
+*Nothing left to archive*.
+
+**Noted, not changed:** the video quality labels read *High — 480p, Medium — 720p, Low — 1080p*, where "High" means
+high compression; a reader may take High to mean high quality. And the Albums tab's Cloud check runs `scanAll` (a
+full MediaStore scan of 2,351 items) once per album listed, 16 times per check.

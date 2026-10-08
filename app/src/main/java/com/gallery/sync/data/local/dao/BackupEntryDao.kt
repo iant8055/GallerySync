@@ -115,7 +115,15 @@ data class AlbumBackupCount(
      * satisfy `verifiedInCloud()`, so the UI must never call it "verified" the way it does for
      * OneDrive; "sent" is the honest, weaker word for what this count actually confirms.
      */
-    val sentElsewhere: Int = 0
+    val sentElsewhere: Int = 0,
+
+    /**
+     * Uploaded rows whose file has left the phone, and what they occupy in the Cloud: what the Archive filter
+     * means by "archived". [everBackedUp] counts files still here too, so a fully pinned Archive album read
+     * "3 files archived" with all three on the phone (Moto G, 8 Oct 2026).
+     */
+    val goneFromPhone: Int = 0,
+    val goneFromPhoneBytes: Long = 0L
 )
 
 /** How many of one album's files went to one non-OneDrive location. Counted only while on the phone. */
@@ -1271,7 +1279,13 @@ interface BackupEntryDao {
                         THEN 1 ELSE 0 END) AS failed,
                SUM(CASE WHEN state = :uploaded AND location != :oneDrive
                         AND localMissingSinceEpochMillis IS NULL
-                        THEN 1 ELSE 0 END) AS sentElsewhere
+                        THEN 1 ELSE 0 END) AS sentElsewhere,
+               SUM(CASE WHEN state = :uploaded AND localMissingSinceEpochMillis IS NOT NULL
+                        THEN 1 ELSE 0 END) AS goneFromPhone,
+               COALESCE(SUM(
+                   CASE WHEN state = :uploaded AND localMissingSinceEpochMillis IS NOT NULL
+                        THEN COALESCE(remoteSizeBytes, sizeBytes) ELSE 0 END
+               ), 0) AS goneFromPhoneBytes
         FROM backup_entries
         GROUP BY album
         """
