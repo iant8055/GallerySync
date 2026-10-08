@@ -7781,3 +7781,12 @@ counted 28 before Ian added two folders; the card read *24 of 28* at 85%, then *
 never-100%-while-queued rule caught up, and finished capped at 91 though 92 were sent. Now, the first time the
 observer sees verification finished, it sets the total to *sent since the run began + still pending* (the ledger is
 the truth by then) and saves it. Built, unit tests pass; **the rebase itself is not yet seen on a device.**
+
+**The total reset seen on the Moto G (8 Oct 2026, 15:56–15:58).** 30 new photos in `DCIM/verify24b`, fresh install.
+The cloud check's estimate was again 28 (`to send: 28`); `verification: 2306 already in the Cloud, 30 to send`; then
+`card total from verification: 30 (was 28)`. The recording shows *Checking your Cloud 273 → 647 of 2,336*, then
+*1 of 30 … 29 of 30* with the ring rising steadily (3% → 96%) and never jumping back, and the finish reads *2,336
+files checked: 2,306 already in OneDrive, 30 sent.*, matching the log (25 + 5 uploaded). **Noted, not changed:** the
+check count sits at 273 for about 30 seconds while `DCIM`'s 2,001-file listing comes back from OneDrive page by page,
+since the count moves per file compared rather than per page listed. On the Fold's `DCIM/Camera` (3,378 files) that
+pause would be longer. Version 24 (0.3.23) built from this.

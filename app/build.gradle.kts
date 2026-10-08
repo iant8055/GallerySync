@@ -60,8 +60,9 @@ android {
         // The twenty-first (5 Oct 2026): album listings kept between batches (a real 8,642-file library spent 29s per batch re-listing one folder); the progress ring and its count line use the same numbers; Restore's folder header readable in light mode.
         // The twenty-second (5 Oct 2026): only the Finish button ends the wizard (the worker's scheduling record is now its own); New Albums waits for setup and stops asking twice; a boundary in Settings between Clouds and folder routing.
         // The twenty-third (6 Oct 2026): verification writes its answer to the ledger before the backup, and the wizard's card waits for it, so a library already in the Cloud no longer reads "1 of 8642".
-        versionCode = 23
-        versionName = "0.3.22"
+        // The twenty-fourth (8 Oct 2026): the wizard's card shows verification ("Checking your Cloud — N of M checked"), says what it found at the finish, and takes its total from verification.
+        versionCode = 24
+        versionName = "0.3.23"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
