@@ -294,6 +294,27 @@ private fun SignedInApp(
     val backupState by backupViewModel.state.collectAsStateWithLifecycle()
     val activity = LocalActivity.current
 
+    // Locations survive the backup only with ACCESS_MEDIA_LOCATION (see OriginalMedia), and an install that
+    // already holds Photos and videos does not receive it by updating (Moto G, 8 Oct 2026: granted=false after
+    // the update that declared it). So it is asked here, once media access exists, and never decides anything:
+    // refused, the app carries on and reads without locations, as it always has.
+    val permissionContext = androidx.compose.ui.platform.LocalContext.current
+    val locationLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+    ) { granted -> com.gallery.sync.util.Logger.i("MainActivity", "media location access: $granted") }
+    LaunchedEffect(Unit) {
+        val mediaPermission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            android.Manifest.permission.READ_MEDIA_IMAGES
+        } else {
+            android.Manifest.permission.READ_EXTERNAL_STORAGE
+        }
+        val hasMedia = permissionContext.checkSelfPermission(mediaPermission) ==
+            android.content.pm.PackageManager.PERMISSION_GRANTED
+        if (hasMedia && !com.gallery.sync.data.local.media.OriginalMedia.canReadLocation(permissionContext)) {
+            locationLauncher.launch(android.Manifest.permission.ACCESS_MEDIA_LOCATION)
+        }
+    }
+
     var showExitWarning by remember { mutableStateOf(false) }
     val warnOnExit = ExitWarning.shouldWarn(readyCount = backupState.redundantCount)
 

@@ -283,10 +283,13 @@ fun SetupTour(
     }
     val mediaPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
-    ) { results -> if (results.values.all { it }) mediaGranted = true }
+    ) { results ->
+        // Only the media permissions decide it; refusing location must not hold setup up.
+        if (mediaPermissions().all { results[it] == true }) mediaGranted = true
+    }
 
     fun requestMediaPermission() {
-        if (!mediaGranted) mediaPermissionLauncher.launch(mediaPermissions())
+        if (!mediaGranted) mediaPermissionLauncher.launch(mediaPermissions() + mediaLocationPermission())
     }
 
     // Compute effective step count — step 7 only shows if optimization was chosen
@@ -2695,6 +2698,14 @@ private fun formatFileCount(photos: Int, videos: Int): String = when {
 
 private fun pluralCount(n: Int, singular: String): String =
     if (n == 1) "1 $singular" else "$n ${singular}s"
+
+/**
+ * Asked alongside [mediaPermissions], never as a condition of them: without it locations are blanked in what
+ * the app reads (see OriginalMedia), and with it refused the backup still runs. Not part of the "is media
+ * granted" check, so refusing it can never hold up setup.
+ */
+private fun mediaLocationPermission(): Array<String> =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) arrayOf(Manifest.permission.ACCESS_MEDIA_LOCATION) else emptyArray()
 
 private fun mediaPermissions(): Array<String> =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

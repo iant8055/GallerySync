@@ -73,7 +73,8 @@ class ContentUriUploadSource(
 ) : UploadSource {
 
     override fun open(): UploadSource.Reader = object : UploadSource.Reader {
-        private val descriptor = resolver.openFileDescriptor(uri, "r")
+        // With its location: MediaStore blanks it otherwise. See OriginalMedia.
+        private val descriptor = com.gallery.sync.data.local.media.OriginalMedia.openFileDescriptor(resolver, uri)
             ?: throw java.io.FileNotFoundException("could not open $uri")
 
         private val channel = FileInputStream(descriptor.fileDescriptor).channel

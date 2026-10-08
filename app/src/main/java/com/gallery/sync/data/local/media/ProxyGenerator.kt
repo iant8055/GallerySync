@@ -140,7 +140,7 @@ class ProxyGenerator @Inject constructor(
 
     private fun readBounds(uri: Uri): BitmapFactory.Options? = runCatching {
         val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-        resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, options) }
+        OriginalMedia.openInputStream(resolver, uri)?.use { BitmapFactory.decodeStream(it, null, options) }
         options.takeIf { it.outWidth > 0 && it.outHeight > 0 }
     }.getOrNull()
 
@@ -156,7 +156,7 @@ class ProxyGenerator @Inject constructor(
             // Asked for up front so the badge can usually be drawn without copying the bitmap.
             inMutable = true
         }
-        resolver.openInputStream(uri)?.use { BitmapFactory.decodeStream(it, null, options) }
+        OriginalMedia.openInputStream(resolver, uri)?.use { BitmapFactory.decodeStream(it, null, options) }
     }.getOrNull()
 
     private fun ensureMutable(source: Bitmap): Bitmap =
@@ -168,7 +168,7 @@ class ProxyGenerator @Inject constructor(
 
     /** The photo's EXIF rotation, which is what a gallery applies before displaying it. */
     private fun readRotationDegrees(uri: Uri): Int = runCatching {
-        resolver.openInputStream(uri)?.use { ExifInterface(it).rotationDegrees } ?: 0
+        OriginalMedia.openInputStream(resolver, uri)?.use { ExifInterface(it).rotationDegrees } ?: 0
     }.getOrDefault(0)
 
     private fun scaleToTarget(source: Bitmap): Bitmap {
@@ -185,7 +185,8 @@ class ProxyGenerator @Inject constructor(
     }
 
     private fun copyExif(source: Uri, destination: File): Boolean = runCatching {
-        val from = resolver.openInputStream(source)?.use { ExifInterface(it) } ?: return false
+        // The original, or the GPS tags copied below are the zeros MediaStore substitutes. See OriginalMedia.
+        val from = OriginalMedia.openInputStream(resolver, source)?.use { ExifInterface(it) } ?: return false
         val to = ExifInterface(destination.absolutePath)
 
         PRESERVED_EXIF_TAGS.forEach { tag ->

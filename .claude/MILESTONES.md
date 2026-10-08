@@ -7792,3 +7792,43 @@ since the count moves per file compared rather than per page listed. On the Fold
 pause would be longer. Version 24 (0.3.23) built from this.
 
 **Version 24 (0.3.23) submitted to Play for review (Ian, 8 Oct 2026).** Release note: Setup now shows each step of the backup — "Checking your Cloud", then only what needs sending, and a finish line saying how many were checked, already there and sent. The Moto is on the debug build and must be uninstalled before it can take a Play version.
+
+## MAJOR: every backup reached the Cloud without its location (found 8 Oct 2026, Moto G, fixed in the code, NOT RELEASED)
+
+**Found by Restore.** Three photos in `verify24b` (copies of `DCIM` photos taken in 2018) were optimised and restored.
+Each came back at exactly its original byte size, and `md5sum` differed from the source: `cmp` showed 43 bytes, all
+around offset 6000, zeroed in the restored file. That is the EXIF GPS block. Source: 45°03′N 93°18′W, altitude
+218.663, GPS date 2018:07:15; restored: every GPS value zero. The proxies were made from the same blanked read and
+had no location either.
+
+**Cause.** From Android 10, MediaStore redacts location in what an app reads (in place, same length) unless the
+app holds `ACCESS_MEDIA_LOCATION` **and** opens the file through `MediaStore.setRequireOriginal(uri)`. GallerySync did
+neither: `ContentUriUploadSource` (every upload, to every Cloud), `ProxyGenerator` (the EXIF it copies into a proxy,
+whose list deliberately includes the GPS tags) and `VideoTranscoder` (the transcoder's input) all read the redacted
+copy. **No size check could ever catch it**, because the redacted file is exactly as long as the original.
+
+**Consequence.** Every file this app has backed up is in the Cloud without its location, on every device and every
+Cloud. A file still on the phone at full size still has its location, so nothing is lost yet; **a file that was
+optimised or archived has its location only in the phone's trash, if anywhere**. On a real library that is a
+permanent loss once the trash empties. Ian was sent a push notification: do not Sync or Archive on the Fold 8.
+
+**Fix.** `data/local/media/OriginalMedia` opens a MediaStore item as its original (falls back to the plain read, and
+logs it, without the permission; failing the backup would protect nothing). Used by the upload source, all four
+reads in `ProxyGenerator`, and the transcoder's input. `ACCESS_MEDIA_LOCATION` declared, asked with the media
+permissions in the wizard and on the Albums tab (never part of the "is media granted" check, so refusing it cannot
+hold setup up), and asked on launch for an install that already holds media access, because **updating does not
+grant it** (`granted=false` after the update that declared it). On the Moto the launch request was granted with no
+dialog (`granted=true, USER_SET`).
+
+**Proven on the Moto G, 17:05–17:08.** `DCIM/gpstest`, three copies of GPS-tagged photos, album at Sync: uploaded
+(5,084,819 / 3,377,997 / 3,844,024 bytes), proxied (2048 px, GPS 45°03′N 93°18′W intact in the proxy), restored, and
+**all three restored files have the md5 of their originals** (`dbd6b876…`, `2040d3c3…`, `ebbdd4c3…`).
+
+**For Ian to decide:**
+1. **The permission and Play.** `ACCESS_MEDIA_LOCATION` is a new permission. Data safety may need to say that photo
+   location travels with the files to the user's own Cloud.
+2. **The copies already in the Cloud have no location.** A repair would re-send every file whose full-size original
+   is still on the phone, so the Cloud copy gains its location. Files already optimised or archived cannot be
+   repaired from the phone. Not built.
+3. **Videos:** the transcoder now reads the original, but whether Media3 carries the container's location into the
+   optimised clip is untested.

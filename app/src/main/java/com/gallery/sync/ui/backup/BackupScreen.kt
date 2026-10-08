@@ -241,14 +241,14 @@ fun BackupScreen(
             MediaAccess.NONE -> PermissionPrompt(
                 headline = stringResource(R.string.permission_needed_title),
                 detail = stringResource(R.string.permission_needed_detail),
-                onGrant = { permissionLauncher.launch(mediaPermissions()) }
+                onGrant = { permissionLauncher.launch(mediaPermissions() + mediaLocationPermission()) }
             )
 
             MediaAccess.PARTIAL -> {
                 PermissionPrompt(
                     headline = stringResource(R.string.permission_partial_title),
                     detail = stringResource(R.string.permission_partial_detail),
-                    onGrant = { permissionLauncher.launch(mediaPermissions()) }
+                    onGrant = { permissionLauncher.launch(mediaPermissions() + mediaLocationPermission()) }
                 )
                 AlbumList(
                     state = state,
@@ -1620,6 +1620,14 @@ private fun AlbumMode.pillColors(): Pair<Color, Color> {
 }
 
 /** The permissions to ask for on this Android version. */
+/**
+ * Asked alongside [mediaPermissions], never as a condition of them: without it locations are blanked in what
+ * the app reads (see OriginalMedia), and with it refused the backup still runs. Not part of the "is media
+ * granted" check, so refusing it can never hold up setup.
+ */
+private fun mediaLocationPermission(): Array<String> =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) arrayOf(Manifest.permission.ACCESS_MEDIA_LOCATION) else emptyArray()
+
 private fun mediaPermissions(): Array<String> =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         arrayOf(Manifest.permission.READ_MEDIA_IMAGES, Manifest.permission.READ_MEDIA_VIDEO)

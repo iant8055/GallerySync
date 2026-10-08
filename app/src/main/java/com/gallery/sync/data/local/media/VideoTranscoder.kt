@@ -215,7 +215,13 @@ class VideoTranscoder @Inject constructor(
                     })
                     .build()
 
-                val item = EditedMediaItem.Builder(MediaItem.fromUri(input))
+                // The original, so the clip keeps its location where the container carries it. See OriginalMedia.
+                val source = if (
+                    android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q &&
+                    input.authority == android.provider.MediaStore.AUTHORITY &&
+                    OriginalMedia.canReadLocation(context)
+                ) android.provider.MediaStore.setRequireOriginal(input) else input
+                val item = EditedMediaItem.Builder(MediaItem.fromUri(source))
                     .setEffects(
                         Effects(
                             emptyList(),

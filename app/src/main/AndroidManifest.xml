@@ -34,6 +34,12 @@
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
     <uses-permission android:name="android.permission.READ_MEDIA_VISUAL_USER_SELECTED" />
+    <!--
+        Without this, MediaStore blanks the location in every photo and video the app reads, so backups
+        reached the Cloud with their GPS zeroed (Moto G, 8 Oct 2026). It has no dialog of its own: it is
+        granted with Photos and videos. See OriginalMedia.
+    -->
+    <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
 
     <!-- Android 12 and below predate the granular media permissions above. -->
     <uses-permission
