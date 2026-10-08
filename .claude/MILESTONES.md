@@ -7862,3 +7862,11 @@ counted pinned files that can never leave. Now "archived" is uploaded rows whose
 **Noted, not changed:** the video quality labels read *High — 480p, Medium — 720p, Low — 1080p*, where "High" means
 high compression; a reader may take High to mean high quality. And the Albums tab's Cloud check runs `scanAll` (a
 full MediaStore scan of 2,351 items) once per album listed, 16 times per check.
+
+**Videos keep their location too, after the fix (Moto G, 8 Oct 2026, 18:06–18:08).** No clip on the Moto carried a
+location, so one was made: a 10 s 1920×1080 test clip with a QuickTime `©xyz` atom `+45.0552-093.3093/`, pushed as
+`DCIM/vidgps/vidgps_1.mov` with an old modification date. Album at Sync, video quality High 480p: uploaded
+(15,512,104 bytes), transcoded to 854×480 (3,094,413 bytes) **with `©xyz +45.0552-93.3093/` in the optimised
+clip**, and restored from OneDrive md5-identical to the original (`16a99069…`). That closes item 3 of the
+location fix's open questions; items 1 (the permission and Play's Data safety) and 2 (repairing copies already in
+the Cloud) are still Ian's.
