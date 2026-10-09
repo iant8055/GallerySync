@@ -7907,3 +7907,24 @@ buttons now carry longer names: **check they fit on the Moto**.
 **Data safety.** The privacy policy names the *Access media location* permission and a row in its data table:
 location stored inside photos and videos travels with the file to the user's own Cloud; the app never reads where
 the phone is and never reads or uses those locations itself. For Play Console, see the reply of 9 Oct.
+
+**Version 25 on the Moto G (9 Oct 2026, debug build, 16:00–16:12).**
+- **Location repair proven.** Settings → Backup showed *Repair 2,181 files (7.9 GB)*; the dialog, Yes, then
+  *Repairing: 25 of 2,181 checked*. Log: the first batch 25 checked, 0 repaired, 25 without a location; the second 14
+  repaired, 10 without a location, 1 skipped. `repair: replaced 20180715_154203.jpg (5084819 bytes)`. That photo was
+  then moved off the phone (`Download/hold`) and restored from OneDrive: **md5 `dbd6b876…`, identical to the original,
+  GPS 45°03′N present**, where on 8 Oct the same photo came back with its location zeroed.
+- **Re-optimise card proven.** Compression High → Medium asked nothing; Medium → High asked *Re-optimise existing
+  videos?*; Yes: `re-optimise: 32 skipped clips reopened at the new compression`, then `optimising up to 3 of 32 clips
+  at High`.
+- **Bug found and fixed: a loose DCIM file restored into `DCIM/DCIM/`.** `DownloadMissingFile.relativePathFor` built
+  `DCIM/<album>/`, and the album of the files directly in `DCIM` is named `DCIM`. Now an album named DCIM, Pictures
+  or Movies goes back into that folder itself (`TOP_LEVEL_MEDIA_FOLDERS`), and `RestoreProxyInPlace`'s grant check
+  uses the same rule. Re-run after the fix: the photo restored into `DCIM/`, md5 identical.
+- **Auto-rotate solved.** It is the agent's launch command: `monkey -p … 1` sets `accelerometer_rotation` to 1 (Google
+  Photos launched the same way did it too); `am start -n com.gallery.sync/.MainActivity` leaves it at 0. Every report
+  of auto-rotate coming on "with each upgrade" was this. Launches now use `am start`.
+- **Screenshots missing from the Albums tab (Ian's report, same day) was not a scoping bug.** The Moto's 36 earlier
+  screenshots were gone from the phone (not in the trash, so not removed by this app) and the album had no files when
+  the tab was built; the next scan found Ian's new screenshot. With the redundant `Pictures/Screenshots` grant removed
+  again, `Screenshots` stays listed under the `Pictures` grant. Who deleted the 36 is open (asked Ian).

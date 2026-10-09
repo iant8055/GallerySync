@@ -311,7 +311,9 @@ class RestoreProxyInPlace @Inject constructor(
     )
 
     /** MediaStore album names are bucket names; the tree grant is checked against a relative path. */
-    private fun String.asRelativePathGuess(): String = "DCIM/$this/"
+    private fun String.asRelativePathGuess(): String =
+        // The files loose in a top-level folder are the album named after it (see DownloadMissingFile).
+        if (this in setOf("DCIM", "Pictures", "Movies")) "$this/" else "DCIM/$this/"
 
     private companion object {
         const val TAG = "RestoreInPlace"

@@ -230,8 +230,15 @@ class DownloadMissingFile @Inject constructor(
         )
     }
 
-    /** MediaStore album names are bucket names; a write needs the relative path that produces one. */
-    private fun relativePathFor(album: String): String = "DCIM/$album/"
+    /**
+     * MediaStore album names are bucket names; a write needs the relative path that produces one.
+     *
+     * An album named after a top-level media folder is the files lying loose in that folder, so it goes back into
+     * the folder itself. It went to `DCIM/DCIM/` until 9 Oct 2026: on the Moto G a photo from the 2,001 loose in
+     * `DCIM` was restored into a new `DCIM/DCIM` folder, a second album the user never had.
+     */
+    private fun relativePathFor(album: String): String =
+        if (album in TOP_LEVEL_MEDIA_FOLDERS) "$album/" else "DCIM/$album/"
 
     /**
      * Where the album really lives on this phone, from any file MediaStore still holds in a folder of that
@@ -259,5 +266,8 @@ class DownloadMissingFile @Inject constructor(
     private companion object {
         const val TAG = "DownloadMissing"
         const val HTTP_NOT_FOUND = 404
+
+        /** The folders whose own name is the album of the files directly inside them. */
+        val TOP_LEVEL_MEDIA_FOLDERS = setOf("DCIM", "Pictures", "Movies")
     }
 }
