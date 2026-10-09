@@ -105,4 +105,17 @@ interface GraphUploadService {
         @Path(value = "path", encoded = true) path: String,
         @Body body: RequestBody
     ): Response<UploadedItemDto>
+
+    /**
+     * The one upload that **replaces**, and only the item [ifMatch] names. For the location repair alone
+     * (`ChunkedUploader.replaceSameSize`), which has already read that item and found it the same name and
+     * the same size as the full-size original it is replacing it with. The eTag makes Graph refuse (412) if
+     * anything else has been put at the path since. Never used by the backup.
+     */
+    @PUT("me/drive/root:/{path}:/content?@microsoft.graph.conflictBehavior=replace")
+    suspend fun uploadSmallFileReplacing(
+        @Path(value = "path", encoded = true) path: String,
+        @Header("If-Match") ifMatch: String,
+        @Body body: RequestBody
+    ): Response<UploadedItemDto>
 }

@@ -44,9 +44,9 @@
         cannot drift from the code. They vary with content: a first sweep on a dark, sped-up clip
         overstated every one of them by up to 24 points.
     -->
-    <string name="video_quality_high">High — 480p</string>
-    <string name="video_quality_medium">Medium — 720p</string>
-    <string name="video_quality_low">Low — 1080p</string>
+    <string name="video_quality_high">High compression — 480p</string>
+    <string name="video_quality_medium">Medium compression — 720p</string>
+    <string name="video_quality_low">Low compression — 1080p</string>
 
     <!--
         The age gate. Ian, 19 Aug 2026: four values, shared with the Archive age so the app has one
@@ -172,7 +172,7 @@
     <string name="settings_camera_folder_choose">Choose</string>
     <string name="settings_camera_folder_other">Other…</string>
     <string name="settings_camera_folder_hint">Choose the folder your camera saves to. Until you do, no folder has these settings.</string>
-    <string name="settings_camera_video_quality">Video quality</string>
+    <string name="settings_camera_video_quality">Video compression</string>
 
     <!-- The three link cards at the bottom of Settings. -->
     <string name="settings_how_to_guide">How To Guide</string>
@@ -247,7 +247,7 @@
     <string name="settings_optimise_mode_auto">Automatic</string>
     <string name="settings_optimise_mode_manual">Manual</string>
     <string name="settings_older_than">Older than</string>
-    <string name="settings_quality">Quality</string>
+    <string name="settings_quality">Compression</string>
 
     <string name="proxy_unsupported">Optimising photos needs Android 11 or newer.</string>
 
@@ -944,7 +944,7 @@ full size</string>
     <string name="tour_optimise_photos_saving">Estimated photo savings: %1$s</string>
     <string name="tour_optimise_video_saving">Estimated video savings: %1$s</string>
     <string name="tour_optimise_total_saving">Total estimated savings: %1$s</string>
-    <string name="tour_optimise_video_quality">Video optimisation level</string>
+    <string name="tour_optimise_video_quality">Video compression level</string>
     <!--
         The estimate is computed from the reconcile's outstanding tallies, and those read zero for
         two very different reasons: nothing is left to send, or the drive could not be listed and
@@ -976,9 +976,9 @@ full size</string>
         Settings dropdown uses, where there is a full row to draw it on, and it is the only place the
         resolutions now appear.
     -->
-    <string name="video_quality_high_name">High</string>
-    <string name="video_quality_medium_name">Medium</string>
-    <string name="video_quality_low_name">Low</string>
+    <string name="video_quality_high_name">High compression</string>
+    <string name="video_quality_medium_name">Medium compression</string>
+    <string name="video_quality_low_name">Low compression</string>
 
     <string name="tour_delay_title">Ready to Back Up</string>
     <string name="tour_delay_backup_size">You have selected %1$s to back up</string>
@@ -1048,6 +1048,21 @@ full size</string>
     -->
     <string name="tour_progress_starting">Starting upload…</string>
     <string name="tour_progress_verifying">Checking your Cloud</string>
+    <!-- Settings → Backup: the location repair (Ian, 9 Oct 2026). See LocationRepair. -->
+    <string name="repair_title">Photo locations</string>
+    <!-- Settings → Sync → Optimise video, after a stronger compression is chosen (Ian, 9 Oct 2026). -->
+    <string name="reoptimise_title">Re-optimise existing videos?</string>
+    <string name="reoptimise_body">Videos in Sync albums that were too small to shrink at the old compression can be optimised again at this one. Videos already optimised stay as they are. The full-size originals stay in your Cloud.</string>
+    <string name="reoptimise_yes">Yes</string>
+    <string name="reoptimise_no">No</string>
+    <string name="repair_body">Files sent to your Cloud before version 25 lost their location on the way. Repair sends them again from this phone, replacing each Cloud copy with the full-size original. Optimised and archived files cannot be repaired, and files with no location are not sent.</string>
+    <string name="repair_button">Repair %1$,d files (%2$s)</string>
+    <string name="repair_running">Repairing: %1$,d of %2$,d checked, %3$,d repaired</string>
+    <string name="repair_finished">Repair finished: %1$,d files repaired, %2$,d had no location to put back.</string>
+    <string name="repair_confirm_title">Repair photo locations?</string>
+    <string name="repair_confirm_body">GallerySync will check up to %1$,d files (%2$s) and send again each one that has a location, replacing its copy in your Cloud. Nothing is removed. It uses Wi-Fi unless mobile data is allowed, and runs in the background.</string>
+    <string name="repair_confirm_yes">Yes</string>
+    <string name="repair_confirm_no">No</string>
     <string name="tour_progress_verifying_body">Step one: checking your Cloud for the files it already has, by name and size. Nothing is sent during this step.</string>
     <string name="tour_progress_checked">%1$,d of %2$,d checked</string>
     <string name="tour_progress_verified_all">%1$,d files checked: all already in OneDrive. Nothing needed sending.</string>

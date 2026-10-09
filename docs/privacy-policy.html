@@ -59,7 +59,7 @@
 <main>
 
   <h1>Privacy Policy</h1>
-  <p class="sub">GallerySync — last updated 4 October 2026</p>
+  <p class="sub">GallerySync — last updated 9 October 2026</p>
 
   <div class="note">
     <p><strong>The short version.</strong> GallerySync sends your photos and videos to Cloud
@@ -103,6 +103,11 @@
         <td>Photos and videos on your device</td>
         <td>To back them up, at your direction</td>
         <td>The Cloud you chose for that folder. Nowhere else.</td>
+      </tr>
+      <tr>
+        <td>Location stored inside your photos and videos</td>
+        <td>Kept in each file so the Cloud copy is complete; the app does not read or use it</td>
+        <td>With the file, to the Cloud you chose. Nowhere else.</td>
       </tr>
       <tr>
         <td>Photos and videos in your Cloud</td>
@@ -189,14 +194,21 @@
     those folders. Write access is what lets the app replace a photo with a smaller copy, or bring an
     original back, without asking you every time. It is limited to the folders you chose, and you
     can revoke it in Android's settings.</li>
+    <li><strong>Location in your photos and videos</strong> (<em>Access media location</em>) — Android
+    removes the location from a photo or video an app reads unless the app holds this permission. With it,
+    the copy in your Cloud keeps the location your camera recorded, exactly as the original has it, and so
+    does a smaller optimised copy on your phone. The app never reads where your phone is, and never looks at
+    or uses these locations itself: they stay inside your files, which go only to your own Cloud. Android
+    grants it together with Photos and videos, and you can revoke it in Android's settings, in which case
+    files are backed up without their location.</li>
     <li><strong>Internet and network state</strong> — to upload to your Cloud, and to wait for a
     suitable connection before doing so. By default the app uses Wi-Fi only.</li>
     <li><strong>Notifications</strong> — used only for the optional <em>Notify when files are ready to
     archive</em> setting, which is off by default. The app asks for this permission only if you turn
     that setting on.</li>
   </ul>
-  <p>The app does not ask for access to your contacts, location, microphone, camera, calendar or
-  messages.</p>
+  <p>The app does not ask for access to your contacts, your phone's location, microphone, camera, calendar
+  or messages.</p>
   <p>You choose which albums are used, and what happens to each one. Albums you leave switched
   off are not backed up.</p>
 
@@ -272,7 +284,7 @@
   <a href="https://github.com/iant8055/GallerySync/issues">github.com/iant8055/GallerySync/issues</a>.</p>
 
   <footer>
-    GallerySync — Privacy Policy. Last updated 4 October 2026.
+    GallerySync — Privacy Policy. Last updated 9 October 2026.
   </footer>
 
 </main>

@@ -342,7 +342,7 @@ CHAPTER = Chapter(
 
             ## Where it comes from
             The app's own record of what the Cloud has confirmed for each file, and the choices on this
-            screen. Video is made smaller at the Camera video quality chosen in Settings.
+            screen. Video is made smaller at the Camera video compression chosen in Settings.
         """, ui=True),
 
         topic("album-camera-select", "Selecting files in your Camera folder", """

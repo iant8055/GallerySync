@@ -1059,6 +1059,11 @@ class BackupViewModel @Inject constructor(
         viewModelScope.launch { settings.setCameraDefaults(choice.age, choice.photos, choice.videos) }
     }
 
+    /** Location access was just granted: see `BackupPreferences.locationFixedAt`. */
+    fun markLocationFixed() {
+        viewModelScope.launch { settings.markLocationFixed(System.currentTimeMillis()) }
+    }
+
     /** What the open Camera screen's header holds that is not yet the default, or null. See [BackupUiState.cameraUnsaved]. */
     fun setCameraUnsaved(choice: CameraOptimiseChoice?) {
         _state.update { it.copy(cameraUnsaved = choice) }
@@ -1204,6 +1209,21 @@ class BackupViewModel @Inject constructor(
 
     fun setVideoQuality(quality: VideoQuality) {
         viewModelScope.launch { settings.setVideoQuality(quality) }
+    }
+
+    /**
+     * Yes to *Re-optimise existing videos?*, asked when the compression is made stronger. Clips skipped at the
+     * weaker setting are tried again, by the same pass and the same rules as any other: Automatic picks them up
+     * on its next run (on the charger), Manual on Sync now. Nothing is optimised that the Sync settings would not
+     * optimise anyway.
+     */
+    fun reoptimiseExistingVideos() {
+        viewModelScope.launch {
+            val reopened = entryDao.reopenSkippedVideos()
+            Logger.i("BackupViewModel", "re-optimise: $reopened skipped clips reopened at the new compression")
+            videoOptimise.requestAutomatic()
+            refresh()
+        }
     }
 
     /**

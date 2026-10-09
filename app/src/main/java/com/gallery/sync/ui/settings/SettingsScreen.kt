@@ -231,6 +231,9 @@ fun SettingsScreen(
             SettingDivider()
         }
 
+        // Copies sent before the location fix, and the offer to send them again. See LocationRepair.
+        LocationRepairSection()
+
 
         // ── Albums ───────────────────────────────────────────────────────────
         SectionHeader(
@@ -347,12 +350,19 @@ fun SettingsScreen(
                     )
                 }
 
+                // A stronger compression asks whether clips skipped at the weaker one should be tried again
+                // (Ian, 9 Oct 2026: "add a card for user choice re-optimise existing files, yes/no").
+                var askReoptimise by remember { mutableStateOf(false) }
                 SettingDropdown(
                     label = stringResource(R.string.settings_quality),
                     help = HelpTopic.SETTINGS_VIDEO_QUALITY,
                     options = VideoQuality.entries,
                     selected = state.videoQuality,
-                    onSelected = viewModel::setVideoQuality,
+                    onSelected = { chosen ->
+                        val stronger = chosen.targetShortSide < state.videoQuality.targetShortSide
+                        viewModel.setVideoQuality(chosen)
+                        if (stronger) askReoptimise = true
+                    },
                     optionLabel = { quality ->
                         when (quality) {
                             VideoQuality.High -> stringResource(R.string.video_quality_high)
@@ -361,6 +371,24 @@ fun SettingsScreen(
                         }
                     }
                 )
+                if (askReoptimise) {
+                    androidx.compose.material3.AlertDialog(
+                        onDismissRequest = { askReoptimise = false },
+                        title = { Text(stringResource(R.string.reoptimise_title)) },
+                        text = { Text(stringResource(R.string.reoptimise_body)) },
+                        confirmButton = {
+                            androidx.compose.material3.TextButton(onClick = {
+                                askReoptimise = false
+                                viewModel.reoptimiseExistingVideos()
+                            }) { Text(stringResource(R.string.reoptimise_yes)) }
+                        },
+                        dismissButton = {
+                            androidx.compose.material3.TextButton(onClick = { askReoptimise = false }) {
+                                Text(stringResource(R.string.reoptimise_no))
+                            }
+                        }
+                    )
+                }
             }
         }
 

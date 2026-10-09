@@ -83,7 +83,7 @@ CHAPTER = Chapter(
             • A photo that would not get smaller is left as it is.
 
             ## Video
-            • A clip is re-encoded at a lower resolution: **480p** (High, the most shrinking), **720p** (Medium) or **1080p** (Low). Nothing is ever cut, so a clip is never shortened.
+            • A clip is re-encoded at a lower resolution: **480p** (High compression, the most shrinking), **720p** (Medium compression) or **1080p** (Low compression). Nothing is ever cut, so a clip is never shortened.
             • It stays in your gallery under its own name.
             • It happens in the background, a few clips at a time. Automatic waits for the phone to be charging; Manual starts when you press **Sync now**. First-time setup also optimises video once, if you chose a plan that includes it.
             • Only clips old enough to pass the age you set are touched, and a clip that would not get smaller is left as it is and not offered again.

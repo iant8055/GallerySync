@@ -82,6 +82,10 @@ class GallerySyncApplication : Application(), Configuration.Provider {
     private fun armAutomaticSync() {
         scope.launch {
             runCatching {
+                // The line the location repair works behind: from here on, files are read with their location.
+                if (com.gallery.sync.data.local.media.OriginalMedia.canReadLocation(this@GallerySyncApplication)) {
+                    settings.markLocationFixed(System.currentTimeMillis())
+                }
                 val preferences = settings.current()
                 if (preferences.isAutomaticEnabled) {
                     val workManager = WorkManager.getInstance(this@GallerySyncApplication)

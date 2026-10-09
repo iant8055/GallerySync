@@ -111,7 +111,49 @@ class ChunkedUploader @Inject constructor(
      * What to do if the name is already in the folder. [FILL_EMPTY] is only ever chosen for an item that
      * was read and found to hold no bytes.
      */
-    private enum class NameClash { FAIL, RENAME, FILL_EMPTY }
+    private enum class NameClash { FAIL, RENAME, FILL_EMPTY, REPLACE_SAME_SIZE }
+
+    /**
+     * Sends [source] **over** the item already at its path, for the location repair and nothing else.
+     *
+     * Every copy this app sent before 8 Oct 2026 reached OneDrive with its location blanked (see `OriginalMedia`),
+     * at exactly the original's size. Replacing it is the only way to put the location back. This app has refused
+     * to replace anything since an optimised copy once overwrote a full-size original, so the guard is narrow:
+     * the item at the path must already be **exactly [source]'s size**, and the replace names that item by its
+     * eTag, so Graph refuses if anything else has arrived there since. Anything else, including nothing there,
+     * is a failure and nothing is sent. The caller guarantees [source] is a full-size original.
+     */
+    suspend fun replaceSameSize(
+        source: UploadSource,
+        remoteFolderPath: String,
+        onProgress: (bytesSent: Long, total: Long) -> Unit = { _, _ -> }
+    ): UploadOutcome {
+        val total = source.sizeBytes
+        if (total <= 0L) return UploadOutcome.EmptySource
+        val remotePath = buildRemotePath(remoteFolderPath, source.displayName)
+
+        val lookup = uploadApi.itemAtPath(remotePath)
+        val existing = lookup.body()?.takeIf { lookup.isSuccessful }
+            ?: return UploadOutcome.HttpFailure(lookup.code(), "repair: nothing readable at the path")
+        val eTag = existing.eTag
+        if (existing.size != total || eTag == null) {
+            Logger.w(TAG, "repair: ${source.displayName} is ${existing.size} bytes in OneDrive, $total here; not replacing it")
+            return UploadOutcome.HttpFailure(HTTP_PRECONDITION_FAILED, "repair: a different file is at the path")
+        }
+
+        if (total < SMALL_FILE_THRESHOLD_BYTES) {
+            val bytes = ByteArray(total.toInt())
+            source.open().use { it.readFully(0, bytes, total.toInt()) }
+            val response = uploadApi.uploadSmallFileReplacing(remotePath, eTag, bytes.toRequestBody(OCTET_STREAM))
+            return if (response.isSuccessful) {
+                onProgress(total, total)
+                UploadOutcome.Success(response.body() ?: UploadedItemDto())
+            } else {
+                UploadOutcome.HttpFailure(response.code(), response.errorBody()?.string())
+            }
+        }
+        return uploadChunked(source, remotePath, total, onProgress, null, {}, NameClash.REPLACE_SAME_SIZE, eTag)
+    }
 
     private suspend fun attempt(
         source: UploadSource,
@@ -213,6 +255,8 @@ class ChunkedUploader @Inject constructor(
             NameClash.RENAME -> uploadApi.uploadSmallFileRenaming(remotePath, body)
             // Never chosen for a small file (see whenTheNameIsTaken); if it ever were, rename is the safe reading.
             NameClash.FILL_EMPTY -> uploadApi.uploadSmallFileRenaming(remotePath, body)
+            // replaceSameSize sends small files itself, with the eTag; this path never sees one.
+            NameClash.REPLACE_SAME_SIZE -> uploadApi.uploadSmallFileRenaming(remotePath, body)
         }
 
         return if (response.isSuccessful) {
@@ -261,6 +305,7 @@ class ChunkedUploader @Inject constructor(
                             NameClash.FAIL -> UploadablePropertiesDto.CONFLICT_BEHAVIOUR_FAIL
                             NameClash.RENAME -> UploadablePropertiesDto.CONFLICT_BEHAVIOUR_RENAME
                             NameClash.FILL_EMPTY -> UploadablePropertiesDto.CONFLICT_BEHAVIOUR_REPLACE
+                            NameClash.REPLACE_SAME_SIZE -> UploadablePropertiesDto.CONFLICT_BEHAVIOUR_REPLACE
                         }
                     )
                 ),
@@ -386,6 +431,7 @@ class ChunkedUploader @Inject constructor(
 
         private const val HTTP_ACCEPTED = 202
         private const val HTTP_CONFLICT = 409
+        private const val HTTP_PRECONDITION_FAILED = 412
         private const val HTTP_NOT_FOUND = 404
 
         /**

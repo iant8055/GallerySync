@@ -336,7 +336,7 @@ CHAPTER = Chapter(
         topic("settings-optimise-video", "Optimise video", """
             ## What it is
             A switch. Off is the starting choice. Turning it on reveals **Mode**, **Older than** and
-            **Quality**.
+            **Compression**.
 
             ## What it does
             Old video in Sync albums is replaced by a smaller copy on your phone. The full-quality
@@ -401,18 +401,18 @@ CHAPTER = Chapter(
             See [[settings-optimise-video]] for when it happens.
         """, ui=True),
 
-        topic("settings-video-quality", "Quality (video)", """
+        topic("settings-video-quality", "Compression (video)", """
             ## What it is
             A box that sets how much a video is shrunk. The label carries the outcome, so none of the
             three is a bare adjective:
 
-            • **High, 480p.** The smallest files. Saves about 85 percent.
-            • **Medium, 720p.** Saves about 75 percent.
-            • **Low, 1080p.** The least shrinking. Saves about 50 percent.
+            • **High compression, 480p.** The smallest files. Saves about 85 percent.
+            • **Medium compression, 720p.** Saves about 75 percent.
+            • **Low compression, 1080p.** The least shrinking. Saves about 50 percent.
 
             ## Where the figures come from
             They were measured on real clips and are typical, not promised. They depend on the content.
-            The word "High" means the most shrinking, not the highest picture quality.
+            High compression means the most shrinking, so the smallest picture.
 
             ## Good to know
             Optimising re-encodes the clip at a lower resolution. Nothing is cut, and it stays in your
@@ -444,7 +444,7 @@ CHAPTER = Chapter(
             Turn it on and more settings appear:
             • **Camera folder**: the folder your camera saves to. Nothing is chosen for you; pick it from the list, which shows the folders on the Albums tab. If yours is not there yet, usually because nothing has been saved to it, choose **Other…** and pick it in Android's folder picker. GallerySync keeps only the folder's name and writes nothing there.
             • **Select Photos/Videos older than**, **Photos** and **Videos**: your defaults for that folder's own optimise choices ([[album-camera-optimise]]). Out of the box they are **All**, with Photos and Videos both off, so nothing is selected until you choose.
-            • **Video quality**: how much a video is made smaller when you optimise it there. Shown once **Videos** is on.
+            • **Video compression**: how much a video is made smaller when you optimise it there. Shown once **Videos** is on.
 
             ## What changes for the Camera folder
             It has no **Sync** on its menu, and its file list gets the choices, **Sync now** and **Rescan** at

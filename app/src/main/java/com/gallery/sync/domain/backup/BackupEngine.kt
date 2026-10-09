@@ -688,6 +688,88 @@ class BackupEngine @Inject constructor(
      */
     private val uploadMutex = Mutex()
 
+    /**
+     * One batch of the location repair. See [LocationRepair] for what may be sent, and why it replaces.
+     *
+     * Each candidate is checked again here, on the device, before anything is sent: still on the phone at the
+     * size the ledger recorded, no proxy marker, and a location actually in the file. Held under the upload
+     * mutex so it never runs beside a backup batch. A network failure stops the batch where it is ([stopped]),
+     * so the same file is tried again; any other failure is counted and passed over.
+     */
+    suspend fun repairLocations(before: Long, afterId: String, limit: Int = LocationRepair.BATCH): LocationRepairBatch =
+        uploadMutex.withLock {
+            withContext(dispatcher) {
+                val rows = entryDao.locationRepairCandidates(before, afterId, limit)
+                if (rows.isEmpty()) return@withContext LocationRepairBatch(0, 0, 0, 0, 0, null, done = true, stopped = false)
+                if (!com.gallery.sync.data.local.media.OriginalMedia.canReadLocation(context)) {
+                    // Without the permission every read is blanked again, and sending that would repair nothing.
+                    Logger.w(TAG, "repair: no media location access; not sending anything")
+                    return@withContext LocationRepairBatch(0, 0, 0, 0, 0, null, done = false, stopped = true)
+                }
+                var checked = 0; var repaired = 0; var noLocation = 0; var skipped = 0; var failed = 0
+                var lastId: String? = null
+                for (entry in rows) {
+                    val uri = android.net.Uri.parse(entry.contentUri)
+                    val localSize = runCatching {
+                        com.gallery.sync.data.local.media.OriginalMedia.openFileDescriptor(context.contentResolver, uri)
+                            ?.use { it.statSize }
+                    }.getOrNull()
+                    when {
+                        localSize != entry.sizeBytes -> { skipped++; lastId = entry.id; checked++; continue }
+                        proxyMarker.isProxy(uri) -> { skipped++; lastId = entry.id; checked++; continue }
+                        !com.gallery.sync.data.local.media.MediaLocation.has(context, uri, entry.isVideo) -> {
+                            noLocation++; lastId = entry.id; checked++; continue
+                        }
+                    }
+                    val source = ContentUriUploadSource(
+                        resolver = context.contentResolver,
+                        uri = uri,
+                        displayName = uploadNameFor(entry),
+                        sizeBytes = entry.sizeBytes
+                    )
+                    val result = if (entry.location == BackupLocation.ONEDRIVE) {
+                        uploadRepository.replaceSameSize(source, remotePathFor(entry.album))
+                    } else {
+                        val uploader = uploaders.of(entry.location)
+                        if (uploader == null || !uploader.isConnected()) {
+                            skipped++; lastId = entry.id; checked++; continue
+                        }
+                        uploader.upload(source, entry.album)
+                    }
+                    when (result) {
+                        is DataResult.Success -> {
+                            val item = result.value
+                            // OneDrive reports the stored size, and it must be the original's. The others report
+                            // the local size, as at upload.
+                            if (item.sizeBytes == entry.sizeBytes) {
+                                if (item.id.isNotEmpty() && item.id != entry.remoteItemId) {
+                                    entryDao.setRemoteItemId(entry.id, item.id)
+                                }
+                                repaired++
+                            } else {
+                                Logger.w(TAG, "repair: ${entry.displayName} stored at ${item.sizeBytes}, expected ${entry.sizeBytes}")
+                                failed++
+                            }
+                        }
+                        is DataResult.Failure -> {
+                            if (result.error == RemoteError.Network || result.error == RemoteError.NoToken) {
+                                Logger.w(TAG, "repair: ${result.error} at ${entry.displayName}; stopping this batch")
+                                return@withContext LocationRepairBatch(
+                                    checked, repaired, noLocation, skipped, failed, lastId, done = false, stopped = true
+                                )
+                            }
+                            Logger.w(TAG, "repair: ${entry.displayName} not repaired: ${result.error}")
+                            failed++
+                        }
+                    }
+                    lastId = entry.id
+                    checked++
+                }
+                Logger.i(TAG, "repair batch: $checked checked, $repaired repaired, $noLocation without a location, $skipped skipped, $failed failed")
+                LocationRepairBatch(checked, repaired, noLocation, skipped, failed, lastId, done = rows.size < limit, stopped = false)
+            }
+        }
+
     private suspend fun uploadPendingWhileHolding(
         limit: Int,
         maxBytes: Long,

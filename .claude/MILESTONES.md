@@ -7870,3 +7870,40 @@ location, so one was made: a 10 s 1920×1080 test clip with a QuickTime `©xyz` 
 clip**, and restored from OneDrive md5-identical to the original (`16a99069…`). That closes item 3 of the
 location fix's open questions; items 1 (the permission and Play's Data safety) and 2 (repairing copies already in
 the Cloud) are still Ian's.
+
+## Version 25 (0.3.24) built (Ian, 9 Oct 2026): the location fix, its repair, re-optimise, compression labels
+
+Ian's answers to the three questions: Data safety *"add please"*, the repair *"build repair"*, release *"build -
+commit - push"*. Then, mid-build: *"add a card for USER choice REOPTIMIZE EXISTING FILES in CLOUD with YES/NO"*, in
+the Settings tab; and *"replace all instances of LOW/MED/HIGH to LOW/MED/HIGH COMPRESSIONS"*, with *"Quality"* in
+Settings → Sync becoming *"Compression"*.
+
+**Location repair (Settings → Backup → *Photo locations*).** `LocationRepair`, `BackupEngine.repairLocations`,
+`LocationRepairWorker` (batches of 25, cursor in DataStore, Wi-Fi unless mobile data is allowed),
+`LocationRepairViewModel` / `LocationRepairSection`. Candidates: uploaded, still on the phone, not optimised or
+archived, sent before `locationFixedAt` (the first moment the app held `ACCESS_MEDIA_LOCATION`, written once by the
+Application or the grant), to OneDrive, Dropbox, pCloud, IDrive e2 or Backblaze B2. Each is checked again on the
+phone: size equal to the ledger's, no proxy marker, and a location actually in it (`MediaLocation`: EXIF lat/long
+for photos, `METADATA_KEY_LOCATION` for videos, zero counted as none). **OneDrive replaces only through
+`ChunkedUploader.replaceSameSize`**: the item at the path must be exactly the local size, and the replace names it by
+eTag (`If-Match`), so a different file there is never overwritten; this is the only `replace` in the app and the
+backup never uses it. The other four replace a same-named file through their normal upload. Google Drive (would
+file a second copy) and Google Photos (duplicates) are not repaired. Card shows *Repair N files (size)* → a Yes/No
+dialog → progress *Repairing: N of M checked, R repaired* → *Repair finished*. **Built, unit tests pass, NOT YET
+SEEN ON A DEVICE** (the Moto dropped off wireless debugging).
+
+**Re-optimise existing videos (Settings → Sync → Optimise video).** Choosing a stronger compression asks
+*Re-optimise existing videos?* Yes/No. Yes clears `isProxySkipped` on videos not yet optimised
+(`reopenSkippedVideos`), so clips skipped as already at or under the old target are tried at the new one, by the same
+pass and rules as any other (Automatic on the charger, Manual on Sync now). **Clips already optimised are not
+re-shrunk**: that would compress an already-compressed copy. Doing it properly means transcoding from the Cloud
+original, which is not built. Not yet seen on a device.
+
+**Labels.** *High compression — 480p*, *Medium compression — 720p*, *Low compression — 1080p*; Settings → Sync
+*Compression*; Camera *Video compression*; the wizard's *Video compression level* and its three buttons; the guide
+(c2, c3, c6 incl. the topic now titled *Compression (video)*, c7) regenerated. The wizard's three side-by-side
+buttons now carry longer names: **check they fit on the Moto**.
+
+**Data safety.** The privacy policy names the *Access media location* permission and a row in its data table:
+location stored inside photos and videos travels with the file to the user's own Cloud; the app never reads where
+the phone is and never reads or uses those locations itself. For Play Console, see the reply of 9 Oct.

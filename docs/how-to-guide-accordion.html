@@ -224,7 +224,7 @@
   <details class="topic"><summary>Optimisation settings during setup</summary>
   <div class="topic-body" id="setup-optimise">
 <p>You only see this screen if you chose plan 2 or plan 3. It asks how much to shrink.</p>
-<ul><li><strong>Optimise photos</strong> and <strong>Optimise video</strong> are on/off switches.</li><li><strong>Video optimisation level</strong> appears when video is on: <strong>High</strong> (480p, the smallest), <strong>Medium</strong> (720p) or <strong>Low</strong> (1080p, the least shrinking).</li><li>Under each switch you are presented with estimated space saving for each option, and a <strong>Total estimated savings</strong> line adds them up.</li></ul>
+<ul><li><strong>Optimise photos</strong> and <strong>Optimise video</strong> are on/off switches.</li><li><strong>Video compression level</strong> appears when video is on: <strong>High compression</strong> (480p, the smallest), <strong>Medium compression</strong> (720p) or <strong>Low compression</strong> (1080p, the least shrinking).</li><li>Under each switch you are presented with estimated space saving for each option, and a <strong>Total estimated savings</strong> line adds them up.</li></ul>
 <h4>Where the estimates come from</h4>
 <p>The app has just asked Cloud what it holds and has counted the photos and videos in your chosen folders. It multiplies the sizes by the typical saving for each setting. They are estimates, and real results may vary with what is in your files.</p>
   </div></details>
@@ -427,7 +427,7 @@
 <h4>What Sync now does to the selected files</h4>
 <p>It replaces each selected file on your phone with a smaller copy that stays in your gallery under its own name. The full-size original stays in the Cloud, and <strong>Restore</strong> brings it back. Files inside the folders you gave GallerySync access to at setup are done in the background; any outside them need Android's own confirmation first. Nothing is removed. While it runs the button shows how many are left.</p>
 <h4>Where it comes from</h4>
-<p>The app's own record of what the Cloud has confirmed for each file, and the choices on this screen. Video is made smaller at the Camera video quality chosen in Settings.</p>
+<p>The app's own record of what the Cloud has confirmed for each file, and the choices on this screen. Video is made smaller at the Camera video compression chosen in Settings.</p>
   </div></details>
   <details class="topic"><summary>Selecting files in your Camera folder</summary>
   <div class="topic-body" id="album-camera-select">
@@ -868,7 +868,7 @@
   <details class="topic"><summary>Optimise video</summary>
   <div class="topic-body" id="settings-optimise-video">
 <h4>What it is</h4>
-<p>A switch. Off is the starting choice. Turning it on reveals <strong>Mode</strong>, <strong>Older than</strong> and <strong>Quality</strong>.</p>
+<p>A switch. Off is the starting choice. Turning it on reveals <strong>Mode</strong>, <strong>Older than</strong> and <strong>Compression</strong>.</p>
 <h4>What it does</h4>
 <p>Old video in Sync albums is replaced by a smaller copy on your phone. The full-quality original stays in your Cloud, and the Restore tab brings it back. Nothing is ever cut: shortening a clip is the one thing optimising never does, and the smaller copy is checked against the original's length before it replaces anything.</p>
 <h4>Which clips it touches</h4>
@@ -901,13 +901,13 @@
 <p>It reaches clips shot today. They stay in your gallery and still play, but editing one starts from the smaller copy until you fetch the original back with Restore. When you choose it, a warning saying so appears under the setting.</p>
 <p>See <a class="xref" href="#settings-optimise-video">“Optimise video”</a> for when it happens.</p>
   </div></details>
-  <details class="topic"><summary>Quality (video)</summary>
+  <details class="topic"><summary>Compression (video)</summary>
   <div class="topic-body" id="settings-video-quality">
 <h4>What it is</h4>
 <p>A box that sets how much a video is shrunk. The label carries the outcome, so none of the three is a bare adjective:</p>
-<ul><li><strong>High, 480p.</strong> The smallest files. Saves about 85 percent.</li><li><strong>Medium, 720p.</strong> Saves about 75 percent.</li><li><strong>Low, 1080p.</strong> The least shrinking. Saves about 50 percent.</li></ul>
+<ul><li><strong>High compression, 480p.</strong> The smallest files. Saves about 85 percent.</li><li><strong>Medium compression, 720p.</strong> Saves about 75 percent.</li><li><strong>Low compression, 1080p.</strong> The least shrinking. Saves about 50 percent.</li></ul>
 <h4>Where the figures come from</h4>
-<p>They were measured on real clips and are typical, not promised. They depend on the content. The word "High" means the most shrinking, not the highest picture quality.</p>
+<p>They were measured on real clips and are typical, not promised. They depend on the content. High compression means the most shrinking, so the smallest picture.</p>
 <h4>Good to know</h4>
 <p>Optimising re-encodes the clip at a lower resolution. Nothing is cut, and it stays in your gallery. The full-quality original stays in your Cloud.</p>
   </div></details>
@@ -928,7 +928,7 @@
 <h4>What it is</h4>
 <p><strong>Special settings for Camera</strong>, off out of the box. Off, no folder gets them, and every album works the same way, Camera included.</p>
 <p>Turn it on and more settings appear:</p>
-<ul><li><strong>Camera folder</strong>: the folder your camera saves to. Nothing is chosen for you; pick it from the list, which shows the folders on the Albums tab. If yours is not there yet, usually because nothing has been saved to it, choose <strong>Other…</strong> and pick it in Android's folder picker. GallerySync keeps only the folder's name and writes nothing there.</li><li><strong>Select Photos/Videos older than</strong>, <strong>Photos</strong> and <strong>Videos</strong>: your defaults for that folder's own optimise choices (<a class="xref" href="#album-camera-optimise">“Optimise older photos and videos in your Camera folder”</a>). Out of the box they are <strong>All</strong>, with Photos and Videos both off, so nothing is selected until you choose.</li><li><strong>Video quality</strong>: how much a video is made smaller when you optimise it there. Shown once <strong>Videos</strong> is on.</li></ul>
+<ul><li><strong>Camera folder</strong>: the folder your camera saves to. Nothing is chosen for you; pick it from the list, which shows the folders on the Albums tab. If yours is not there yet, usually because nothing has been saved to it, choose <strong>Other…</strong> and pick it in Android's folder picker. GallerySync keeps only the folder's name and writes nothing there.</li><li><strong>Select Photos/Videos older than</strong>, <strong>Photos</strong> and <strong>Videos</strong>: your defaults for that folder's own optimise choices (<a class="xref" href="#album-camera-optimise">“Optimise older photos and videos in your Camera folder”</a>). Out of the box they are <strong>All</strong>, with Photos and Videos both off, so nothing is selected until you choose.</li><li><strong>Video compression</strong>: how much a video is made smaller when you optimise it there. Shown once <strong>Videos</strong> is on.</li></ul>
 <h4>What changes for the Camera folder</h4>
 <p>It has no <strong>Sync</strong> on its menu, and its file list gets the choices, <strong>Sync now</strong> and <strong>Rescan</strong> at the top. Nothing is made smaller until you press <strong>Sync now</strong> there.</p>
 <h4>Good to know</h4>
@@ -1003,7 +1003,7 @@
 <h4>Photos</h4>
 <ul><li>The copy is reduced to about <strong>2048 pixels on the long edge</strong>, roughly a tenth of the size.</li><li>It keeps its name and place, so your gallery shows it as usual, and it keeps information such as date and location.</li><li>It carries a small <strong>cloud badge</strong> so you can tell it has been optimised.</li><li>The <strong>full-quality original stays in your Cloud</strong>, untouched.</li><li>A photo that would not get smaller is left as it is.</li></ul>
 <h4>Video</h4>
-<ul><li>A clip is re-encoded at a lower resolution: <strong>480p</strong> (High, the most shrinking), <strong>720p</strong> (Medium) or <strong>1080p</strong> (Low). Nothing is ever cut, so a clip is never shortened.</li><li>It stays in your gallery under its own name.</li><li>It happens in the background, a few clips at a time. Automatic waits for the phone to be charging; Manual starts when you press <strong>Sync now</strong>. First-time setup also optimises video once, if you chose a plan that includes it.</li><li>Only clips old enough to pass the age you set are touched, and a clip that would not get smaller is left as it is and not offered again.</li></ul>
+<ul><li>A clip is re-encoded at a lower resolution: <strong>480p</strong> (High compression, the most shrinking), <strong>720p</strong> (Medium compression) or <strong>1080p</strong> (Low compression). Nothing is ever cut, so a clip is never shortened.</li><li>It stays in your gallery under its own name.</li><li>It happens in the background, a few clips at a time. Automatic waits for the phone to be charging; Manual starts when you press <strong>Sync now</strong>. First-time setup also optimises video once, if you chose a plan that includes it.</li><li>Only clips old enough to pass the age you set are touched, and a clip that would not get smaller is left as it is and not offered again.</li></ul>
 <h4>The rules it always follows</h4>
 <ul><li>Only files inside albums set to <strong>Sync</strong>.</li><li>Only files whose Cloud has confirmed the original, at the same size, right then.</li><li>Never anything permanently deleted: the original is in your Cloud.</li></ul>
 <h4>Getting the original back</h4>

@@ -54,6 +54,37 @@ class OneDriveUploadRepositoryImpl @Inject constructor(
         return upload(FileUploadSource(localFile), remoteFolderPath, onProgress)
     }
 
+    override suspend fun replaceSameSize(
+        source: UploadSource,
+        remoteFolderPath: String
+    ): DataResult<UploadedItem> = withContext(dispatcher) {
+        if (tokenProvider.getAccessToken() == null) return@withContext DataResult.Failure(RemoteError.NoToken)
+        try {
+            when (val outcome = uploader.replaceSameSize(source, remoteFolderPath)) {
+                is UploadOutcome.Success -> {
+                    val item = outcome.item
+                    Logger.i(TAG, "repair: replaced ${source.displayName} (${item.size ?: -1} bytes)")
+                    DataResult.Success(
+                        UploadedItem(item.id.orEmpty(), item.name ?: source.displayName, item.size ?: -1L, item.eTag)
+                    )
+                }
+                is UploadOutcome.HttpFailure -> mapFailure(outcome)
+                UploadOutcome.EmptySource -> DataResult.Failure(RemoteError.EmptyLocalFile)
+            }
+        } catch (e: FileNotFoundException) {
+            DataResult.Failure(RemoteError.LocalFileMissing)
+        } catch (e: EOFException) {
+            DataResult.Failure(RemoteError.Unknown(e))
+        } catch (e: IOException) {
+            DataResult.Failure(RemoteError.Network)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Throwable) {
+            Logger.e(TAG, "repair: unexpected failure", e)
+            DataResult.Failure(RemoteError.Unknown(e))
+        }
+    }
+
     override suspend fun upload(
         source: UploadSource,
         remoteFolderPath: String,

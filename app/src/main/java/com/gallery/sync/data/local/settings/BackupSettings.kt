@@ -304,6 +304,19 @@ data class BackupPreferences(
     val verifyTotal: Int = 0,
     val verifyAlreadyThere: Int = 0,
     /**
+     * When this app first read files with their location (`ACCESS_MEDIA_LOCATION` held), or 0. Everything sent
+     * before it reached the Cloud with its location blanked, so it is the line the location repair works behind
+     * (`LocationRepair`). Written once.
+     */
+    val locationFixedAt: Long = 0L,
+    /** The location repair: where it has got to (an entry id), what it has done, and whether it is running. */
+    val locationRepairCursor: String = "",
+    val locationRepairChecked: Int = 0,
+    val locationRepairRepaired: Int = 0,
+    val locationRepairNoLocation: Int = 0,
+    val locationRepairRunning: Boolean = false,
+    val locationRepairFinishedAt: Long = 0L,
+    /**
      * What the Archive tab's age filter starts at when the tab is opened. Ian, 22 Sept 2026.
      *
      * A Settings default, not a standing rule the tab enforces on its own — changing the filter on
@@ -426,6 +439,13 @@ class BackupSettings @Inject constructor(
             verifyChecked = stored[KEY_VERIFY_CHECKED] ?: 0,
             verifyTotal = stored[KEY_VERIFY_TOTAL] ?: 0,
             verifyAlreadyThere = stored[KEY_VERIFY_ALREADY_THERE] ?: 0,
+            locationFixedAt = stored[KEY_LOCATION_FIXED_AT] ?: 0L,
+            locationRepairCursor = stored[KEY_REPAIR_CURSOR] ?: "",
+            locationRepairChecked = stored[KEY_REPAIR_CHECKED] ?: 0,
+            locationRepairRepaired = stored[KEY_REPAIR_REPAIRED] ?: 0,
+            locationRepairNoLocation = stored[KEY_REPAIR_NO_LOCATION] ?: 0,
+            locationRepairRunning = stored[KEY_REPAIR_RUNNING] ?: false,
+            locationRepairFinishedAt = stored[KEY_REPAIR_FINISHED_AT] ?: 0L,
             archiveDefaultAge = ArchiveAge.fromNameOrDefault(stored[KEY_ARCHIVE_DEFAULT_AGE]),
             archiveNotifyEnabled = stored[KEY_ARCHIVE_NOTIFY_ENABLED] ?: false,
             archiveReadyLastSeenCount = stored[KEY_ARCHIVE_READY_LAST_SEEN] ?: 0,
@@ -583,6 +603,37 @@ class BackupSettings @Inject constructor(
 
     suspend fun setWizardStep(step: Int) {
         context.dataStore.edit { it[KEY_WIZARD_STEP] = step }
+    }
+
+    /** Records [BackupPreferences.locationFixedAt] the first time location access is seen, and never moves it. */
+    suspend fun markLocationFixed(epochMillis: Long) {
+        context.dataStore.edit { if ((it[KEY_LOCATION_FIXED_AT] ?: 0L) == 0L) it[KEY_LOCATION_FIXED_AT] = epochMillis }
+    }
+
+    /** Starts the location repair from the beginning. */
+    suspend fun startLocationRepair() {
+        context.dataStore.edit {
+            it[KEY_REPAIR_CURSOR] = ""
+            it[KEY_REPAIR_CHECKED] = 0
+            it[KEY_REPAIR_REPAIRED] = 0
+            it[KEY_REPAIR_NO_LOCATION] = 0
+            it[KEY_REPAIR_RUNNING] = true
+            it[KEY_REPAIR_FINISHED_AT] = 0L
+        }
+    }
+
+    /** One repair batch's progress, added to the totals so far. */
+    suspend fun recordLocationRepair(cursor: String?, checked: Int, repaired: Int, noLocation: Int, finished: Boolean) {
+        context.dataStore.edit {
+            if (cursor != null) it[KEY_REPAIR_CURSOR] = cursor
+            it[KEY_REPAIR_CHECKED] = (it[KEY_REPAIR_CHECKED] ?: 0) + checked
+            it[KEY_REPAIR_REPAIRED] = (it[KEY_REPAIR_REPAIRED] ?: 0) + repaired
+            it[KEY_REPAIR_NO_LOCATION] = (it[KEY_REPAIR_NO_LOCATION] ?: 0) + noLocation
+            if (finished) {
+                it[KEY_REPAIR_RUNNING] = false
+                it[KEY_REPAIR_FINISHED_AT] = System.currentTimeMillis()
+            }
+        }
     }
 
     /** Verification's running count. See [BackupPreferences.verifyChecked]. */
@@ -860,6 +911,13 @@ class BackupSettings @Inject constructor(
         val KEY_VERIFY_CHECKED = intPreferencesKey("verify_checked")
         val KEY_VERIFY_TOTAL = intPreferencesKey("verify_total")
         val KEY_VERIFY_ALREADY_THERE = intPreferencesKey("verify_already_there")
+        val KEY_LOCATION_FIXED_AT = longPreferencesKey("location_fixed_at")
+        val KEY_REPAIR_CURSOR = stringPreferencesKey("location_repair_cursor")
+        val KEY_REPAIR_CHECKED = intPreferencesKey("location_repair_checked")
+        val KEY_REPAIR_REPAIRED = intPreferencesKey("location_repair_repaired")
+        val KEY_REPAIR_NO_LOCATION = intPreferencesKey("location_repair_no_location")
+        val KEY_REPAIR_RUNNING = booleanPreferencesKey("location_repair_running")
+        val KEY_REPAIR_FINISHED_AT = longPreferencesKey("location_repair_finished_at")
         val KEY_ALBUM_MERGE_WARNINGS = stringSetPreferencesKey("album_merge_warnings")
         val KEY_ARCHIVE_DEFAULT_AGE = stringPreferencesKey("archive_default_age")
         val KEY_ARCHIVE_NOTIFY_ENABLED = booleanPreferencesKey("archive_notify_enabled")

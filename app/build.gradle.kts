@@ -61,8 +61,9 @@ android {
         // The twenty-second (5 Oct 2026): only the Finish button ends the wizard (the worker's scheduling record is now its own); New Albums waits for setup and stops asking twice; a boundary in Settings between Clouds and folder routing.
         // The twenty-third (6 Oct 2026): verification writes its answer to the ledger before the backup, and the wizard's card waits for it, so a library already in the Cloud no longer reads "1 of 8642".
         // The twenty-fourth (8 Oct 2026): the wizard's card shows verification ("Checking your Cloud — N of M checked"), says what it found at the finish, and takes its total from verification.
-        versionCode = 24
-        versionName = "0.3.23"
+        // The twenty-fifth (9 Oct 2026): photos and videos read as their originals so backups keep their location (ACCESS_MEDIA_LOCATION); Settings repair for copies sent without it; re-optimise videos after a stronger compression; "compression" labels; the Albums tab's Archive summary.
+        versionCode = 25
+        versionName = "0.3.24"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

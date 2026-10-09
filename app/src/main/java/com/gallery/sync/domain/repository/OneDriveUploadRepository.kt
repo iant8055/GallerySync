@@ -42,6 +42,15 @@ interface OneDriveUploadRepository {
      * what stops a large file restarting from zero every time a run is cut short; omit both and the
      * upload simply begins afresh.
      */
+    /**
+     * Replaces the copy already at [source]'s path with [source], only if that copy is exactly the same size.
+     * For the location repair alone; see `ChunkedUploader.replaceSameSize`. Never used by the backup.
+     */
+    suspend fun replaceSameSize(
+        source: UploadSource,
+        remoteFolderPath: String
+    ): DataResult<UploadedItem>
+
     suspend fun upload(
         source: UploadSource,
         remoteFolderPath: String,
