@@ -42,6 +42,7 @@ class GallerySyncApplication : Application(), Configuration.Provider {
         // A channel costs nothing to create and is needed before the first notification can post
         // — done here, unconditionally, whether or not the user ever turns the Settings switch on.
         ArchiveReadyNotifier.createChannel(this)
+        com.gallery.sync.worker.DeletedFilesNotifier.createChannel(this)
         armAutomaticSync()
     }
 

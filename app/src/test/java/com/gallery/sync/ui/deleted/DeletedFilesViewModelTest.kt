@@ -87,7 +87,7 @@ class DeletedFilesViewModelTest {
         whenever(deletions.offer(any(), any())).thenReturn(DeletedFilesOffer(inCloud, notInCloud, complete))
         whenever(deletions.delete(any())).thenReturn(DeletionOutcome(deleted = 1))
         whenever(engine.backUpFromTrash(any(), any())).thenReturn(TrashBackupOutcome(uploaded = 1))
-        return DeletedFilesViewModel(engine, deletions, settings)
+        return DeletedFilesViewModel(engine, deletions, settings, mock())
     }
 
     private val a = file("a.jpg", departedAt = 100L)

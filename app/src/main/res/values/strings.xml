@@ -573,6 +573,14 @@ full size</string>
         <item quantity="other">%1$d files are confirmed in your Cloud and ready to leave this phone.</item>
     </plurals>
     <string name="notification_archive_ready_album">In %1$s.</string>
+    <!-- DeletedFilesNotifier (Ian, 10 Oct 2026): a deleted file still has a Cloud copy. Only under Ask. -->
+    <string name="notification_channel_deleted">Deleted files</string>
+    <string name="notification_channel_deleted_description">A photo or video you deleted still has a copy in your Cloud, and you can choose what happens to it.</string>
+    <string name="notification_deleted_title">Deleted, but still in your Cloud</string>
+    <plurals name="notification_deleted_body">
+        <item quantity="one">%1$d photo or video you deleted still has a copy in your Cloud. Tap to choose what to do with it.</item>
+        <item quantity="other">%1$d photos and videos you deleted still have a copy in your Cloud. Tap to choose what to do with them.</item>
+    </plurals>
 
     <!-- Live re-check before removing a local copy. -->
     <!--

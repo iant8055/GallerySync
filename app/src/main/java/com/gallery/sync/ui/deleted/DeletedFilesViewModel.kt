@@ -108,7 +108,8 @@ data class DeletedFilesUiState(
 class DeletedFilesViewModel @Inject constructor(
     private val engine: BackupEngine,
     private val deletions: SyncDeletionsToCloud,
-    private val settings: BackupSettings
+    private val settings: BackupSettings,
+    @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(DeletedFilesUiState(checking = true))
@@ -185,6 +186,7 @@ class DeletedFilesViewModel @Inject constructor(
         )
 
         if (_state.value.phase == DeletedFilesPhase.HIDDEN) {
+            com.gallery.sync.worker.DeletedFilesNotifier.cancel(context)
             _state.value = DeletedFilesUiState(
                 phase = DeletedFilesPhase.LISTING,
                 step = if (offer.inCloud.isNotEmpty()) DeletedFilesStep.IN_CLOUD else DeletedFilesStep.NOT_IN_CLOUD,

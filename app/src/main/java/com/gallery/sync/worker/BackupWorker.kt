@@ -39,7 +39,8 @@ class BackupWorker @AssistedInject constructor(
     private val charging: ChargingState,
     private val videoOptimise: VideoOptimiseLauncher,
     private val photoOptimise: PhotoOptimiseLauncher,
-    private val archiveReadyNotifier: ArchiveReadyNotifier
+    private val archiveReadyNotifier: ArchiveReadyNotifier,
+    private val deletedFilesNotifier: DeletedFilesNotifier
 ) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result {
@@ -326,6 +327,11 @@ class BackupWorker @AssistedInject constructor(
             // the next time someone happens to open the app. Never allowed to fail the run.
             runCatching { archiveReadyNotifier.checkAndNotify() }
                 .onFailure { Logger.w(TAG, "could not check archive-ready notice: ${it.javaClass.simpleName}") }
+
+            // A photo or video moved to the trash wakes this run too. Under Ask, files with a Cloud copy are
+            // announced, so the question does not wait for the app to be opened. See DeletedFilesNotifier.
+            runCatching { deletedFilesNotifier.checkAndNotify() }
+                .onFailure { Logger.w(TAG, "could not check deleted files: ${it.javaClass.simpleName}") }
         }
 
         // Carried out of the worker so the screen can say what happened. Without this the UI keeps

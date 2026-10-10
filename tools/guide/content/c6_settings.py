@@ -211,7 +211,7 @@ CHAPTER = Chapter(
             Two choices, one selected at a time:
 
             • **Leave the Cloud copy** (the starting choice). Nothing is ever removed from your Cloud. Deleting on your phone only frees space here.
-            • **Ask me about the Cloud copy.** When you open the app after files have gone from your phone, a window lists them, whether or not the app ever backed them up, and asks what you want done: delete or keep their copies in your Cloud, or back up the ones that never made it. It never removes anything on its own. See [[deleted-files-window]].
+            • **Ask me about the Cloud copy.** When you open the app after files have gone from your phone, a window lists them, whether or not the app ever backed them up, and asks what you want done: delete or keep their copies in your Cloud, or back up the ones that never made it. If notifications are allowed, the app also tells you shortly after you delete a photo or video that still has a copy in your Cloud; tapping the notification opens that window. It never removes anything on its own. See [[deleted-files-window]].
 
             ## For now, OneDrive only
             The window that asks works on copies in OneDrive. The copies in any other Cloud are left alone under either choice: nothing is ever removed from them.

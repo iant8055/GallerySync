@@ -7965,3 +7965,17 @@ the phone is and never reads or uses those locations itself. For Play Console, s
   again). Kept: `OriginalMedia` and `ACCESS_MEDIA_LOCATION`, so every backup since v25 keeps its location. Also moot now:
   the wizard never recorded `locationFixedAt` when it granted the permission mid-process (why the Fold showed no card).
 
+**Deleted files are announced by a notification (Ian, 10 Oct 2026).** Under Ask, the question about a deleted file's
+Cloud copy used to wait for the next app open. Now `DeletedFilesNotifier` runs at the end of every complete
+`BackupWorker` run (woken by the media content trigger, which a move to the trash fires): `SyncDeletionsToCloud.offer`
+newer than both the window's seen mark and a new `deletion_notified_up_to`, and one notification for the files with a
+Cloud copy. It decides and removes nothing; the tap opens the app and the existing window asks, nothing ticked. The
+window cancels the notification when it shows. Choosing Ask asks for `POST_NOTIFICATIONS` (already declared for the
+Archive notice; no listing change); refused, Ask works as before. Own channel, *Deleted files*.
+Moto G, debug build: photo `DCIM/20240508_171827.jpg` trashed at 18:05:31 (`is_trashed=1`, renamed `.trashed-…`), run
+woke 18:05:56, notification up by 18:06:10 ("1 photo or video you deleted still has a copy in your Cloud"), tap opened
+the window listing it with nothing selected, notification gone. Decide later; file restored from the trash.
+Not seen: Samsung Gallery's own delete (needs the Fold), and the Manual sync mode, where neither the content trigger nor
+the six-hourly run is armed (`BackupScheduling.enable` is called only for Automatic), so there is no notice and the
+window asks on the next open, as before.
+

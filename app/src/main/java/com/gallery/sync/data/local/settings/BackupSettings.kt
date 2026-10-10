@@ -171,6 +171,8 @@ data class BackupPreferences(
      * file that goes after it does. Ian, 19 Sept 2026: *"shows only when new files."*
      */
     val deletionPromptSeenUpToEpochMillis: Long = 0L,
+    /** The newest deleted file a notification has announced (`DeletedFilesNotifier`), so each is announced once. */
+    val deletionNotifiedUpToEpochMillis: Long = 0L,
     /**
      * Whether the restore screen lists folders OneDrive reports as holding nothing.
      *
@@ -407,6 +409,7 @@ class BackupSettings @Inject constructor(
                 ?.let { runCatching { CloudDeletionPolicy.valueOf(it) }.getOrNull() }
                 ?: CloudDeletionPolicy.DEFAULT,
             deletionPromptSeenUpToEpochMillis = stored[KEY_DELETION_PROMPT_SEEN] ?: 0L,
+            deletionNotifiedUpToEpochMillis = stored[KEY_DELETION_NOTIFIED] ?: 0L,
             showEmptyCloudFolders = stored[KEY_SHOW_EMPTY_FOLDERS] ?: false,
             hasCompletedSetup = stored[KEY_SETUP_COMPLETE] ?: false,
             isPaused = stored[KEY_PAUSED] ?: false,
@@ -723,6 +726,10 @@ class BackupSettings @Inject constructor(
         context.dataStore.edit { it[KEY_DELETION_PROMPT_SEEN] = epochMillis }
     }
 
+    suspend fun setDeletionNotifiedUpTo(epochMillis: Long) {
+        context.dataStore.edit { it[KEY_DELETION_NOTIFIED] = epochMillis }
+    }
+
     suspend fun setFirstBackupStartHour(hour: Int) {
         if (hour !in FirstBackupWindow.SELECTABLE_HOURS) return
         context.dataStore.edit { it[KEY_FIRST_BACKUP_HOUR] = hour }
@@ -840,6 +847,7 @@ class BackupSettings @Inject constructor(
         val KEY_FIRST_BACKUP_WINDOW_LIFTED = booleanPreferencesKey("first_backup_window_lifted")
         val KEY_CLOUD_DELETION_POLICY = stringPreferencesKey("cloud_deletion_policy")
         val KEY_DELETION_PROMPT_SEEN = longPreferencesKey("deletion_prompt_seen_up_to")
+        val KEY_DELETION_NOTIFIED = longPreferencesKey("deletion_notified_up_to")
         val KEY_SHOW_EMPTY_FOLDERS = booleanPreferencesKey("show_empty_cloud_folders")
         val KEY_SETUP_COMPLETE = booleanPreferencesKey("setup_complete")
         val KEY_BACKFILL_CHECKED = booleanPreferencesKey("upgrade_backfill_checked")

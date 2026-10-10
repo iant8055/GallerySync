@@ -12,7 +12,10 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
@@ -22,6 +25,7 @@ import com.gallery.sync.R
 import com.gallery.sync.ui.help.HelpTopic
 import com.gallery.sync.ui.help.WithHelp
 import com.gallery.sync.domain.backup.CloudDeletionPolicy
+import com.gallery.sync.worker.ArchiveNotifyPermission
 
 /**
  * Deletion sync: the one setting, what happens to the OneDrive copy of a file deleted from the phone.
@@ -37,6 +41,10 @@ fun DeletionSection(
     viewModel: DeletionViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    // Ask is set whatever the answer. Granted, a deleted file with a Cloud copy is announced by a notification
+    // (`DeletedFilesNotifier`); refused, the window still asks the next time the app is opened, as before.
+    val requestNotify = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -58,7 +66,12 @@ fun DeletionSection(
             PolicyRow(
                 label = stringResource(R.string.deletion_ask),
                 selected = state.policy == CloudDeletionPolicy.ASK,
-                onSelect = { viewModel.setPolicy(CloudDeletionPolicy.ASK) }
+                onSelect = {
+                    viewModel.setPolicy(CloudDeletionPolicy.ASK)
+                    if (ArchiveNotifyPermission.needsRuntimeRequest() && !ArchiveNotifyPermission.granted(context)) {
+                        requestNotify.launch(ArchiveNotifyPermission.MANIFEST_NAME)
+                    }
+                }
             )
         }
     }
