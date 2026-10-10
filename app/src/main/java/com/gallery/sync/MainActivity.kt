@@ -301,10 +301,7 @@ private fun SignedInApp(
     val permissionContext = androidx.compose.ui.platform.LocalContext.current
     val locationLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        com.gallery.sync.util.Logger.i("MainActivity", "media location access: $granted")
-        if (granted) backupViewModel.markLocationFixed()
-    }
+    ) { granted -> com.gallery.sync.util.Logger.i("MainActivity", "media location access: $granted") }
     LaunchedEffect(Unit) {
         val mediaPermission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
             android.Manifest.permission.READ_MEDIA_IMAGES

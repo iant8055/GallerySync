@@ -231,9 +231,6 @@ fun SettingsScreen(
             SettingDivider()
         }
 
-        // Copies sent before the location fix, and the offer to send them again. See LocationRepair.
-        LocationRepairSection()
-
 
         // ── Albums ───────────────────────────────────────────────────────────
         SectionHeader(

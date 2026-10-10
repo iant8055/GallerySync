@@ -174,14 +174,23 @@ class BackupWorker @AssistedInject constructor(
         //
         // Only on the job that starts a chain: a continuation inherits a ledger this has already reconciled.
         if (inputData.getBoolean(BackupScheduling.KEY_VERIFY_FIRST, false)) {
+            // A retry of this same job after Android stopped it, when the first attempt had already finished
+            // verifying for this wizard run. Its figures stand and this pass only adds to them: the Fold 8,
+            // 10 Oct 2026, stopped twice while its cable was being unplugged and plugged in, and the retry's
+            // re-check of the 81 files left replaced the first check's "7,688 already in OneDrive" with
+            // "80 files checked: 0 already in OneDrive, 96 sent".
+            val before = settings.current()
+            val earlier = before.takeIf {
+                runAttemptCount > 0 && it.wizardRunStartedAt > 0L && it.lastVerifiedAt >= it.wizardRunStartedAt
+            }
             // The count goes to the card once a second, not per file: thousands of DataStore writes in a minute
             // would cost more than the check. Zeroed first, so a card never shows the last run's figures.
-            settings.setVerifyProgress(0, 0)
+            if (earlier == null) settings.setVerifyProgress(0, 0)
             val checked = AtomicInteger(0)
             val ofTotal = AtomicInteger(0)
             val verified = coroutineScope {
                 val reporter = launch {
-                    while (isActive) {
+                    while (isActive && earlier == null) {
                         delay(1_000)
                         settings.setVerifyProgress(checked.get(), ofTotal.get())
                     }
@@ -203,8 +212,8 @@ class BackupWorker @AssistedInject constructor(
             // Tells the wizard's card the ledger now means what it says, and what was found. See
             // BackupPreferences.lastVerifiedAt.
             settings.setVerificationFinished(
-                checked = ofTotal.get(),
-                alreadyThere = verified.skipped,
+                checked = earlier?.verifyChecked ?: ofTotal.get(),
+                alreadyThere = (earlier?.verifyAlreadyThere ?: 0) + verified.skipped,
                 epochMillis = System.currentTimeMillis()
             )
         }

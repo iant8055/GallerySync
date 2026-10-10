@@ -7948,3 +7948,20 @@ the phone is and never reads or uses those locations itself. For Play Console, s
   "remaining" read 2,000 for as long as more than that remained. Now `remainingAll()` counts the same live list
   uncapped; installed over the running pass, the card read 461 of 2274 and held. It can still move by a few when a
   file comes back from a `CloudOriginalCheck` hold (2274 → 2281 seen); not a climb. Not in v25.
+
+**Version 25 published; the Fold 8 on it (10 Oct 2026).**
+- Installed from Play 16:46. Verification: 7,688 already in OneDrive, 96 to send; 96 sent, 0 failed, Finish at 17:19.
+  Android stopped the job twice (16:56, 16:57) while Ian was plugging the cable in and out; it resumed on its own
+  after the backoff and nothing was lost.
+- **The finish summary was wrong after that restart:** "80 files checked: 0 already in OneDrive, 96 sent". The retried
+  job (same request, `runAttemptCount > 0`) verified again and `setVerificationFinished` replaced the first figures.
+  Now a retry within the same wizard run keeps the first check's count and adds what it finds to "already there".
+- **The location repair is removed (Ian: option 2).** On the Fold it would have offered all ~8,700 files: its test was
+  "OneDrive copy older than the fix", which assumed this app made every copy. True on the Moto; on the Fold 8,620 copies
+  were Samsung Gallery's own OneDrive sync and kept their locations, and only the few dozen GallerySync sent between
+  5 and 10 Oct lost theirs. Ian chose to leave those rather than build a per-copy check. Removed: `LocationRepair`,
+  `MediaLocation`, the worker, Settings section and view model, the DAO queries, `locationFixedAt` and the repair
+  progress keys, `replaceSameSize` / `uploadSmallFileReplacing` (the only replacing upload; the app replaces nothing
+  again). Kept: `OriginalMedia` and `ACCESS_MEDIA_LOCATION`, so every backup since v25 keeps its location. Also moot now:
+  the wizard never recorded `locationFixedAt` when it granted the permission mid-process (why the Fold showed no card).
+

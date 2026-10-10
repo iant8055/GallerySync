@@ -1063,53 +1063,6 @@ interface BackupEntryDao {
      * size can never shrink, so leaving it in this list means the count never reaches zero and the
      * user keeps consenting to work that cannot happen.
      */
-    /**
-     * The files the location repair may send again, in id order after [afterId]. See `LocationRepair`: uploaded,
-     * still on the phone, never optimised or archived, sent before [before], to a Cloud that replaces in place.
-     * The repair checks each one again on the device before sending anything.
-     */
-    @Query(
-        """
-        SELECT * FROM backup_entries
-        WHERE state = :uploaded
-          AND isProxied = 0
-          AND localMissingSinceEpochMillis IS NULL
-          AND (cloudDecision IS NULL OR cloudDecision != 'ARCHIVED')
-          AND location IN (${com.gallery.sync.domain.backup.LocationRepair.SQL_LIST})
-          AND uploadedAtEpochMillis < :before
-          AND id > :afterId
-        ORDER BY id
-        LIMIT :limit
-        """
-    )
-    suspend fun locationRepairCandidates(
-        before: Long,
-        afterId: String,
-        limit: Int,
-        uploaded: BackupState = BackupState.UPLOADED
-    ): List<BackupEntryEntity>
-
-    /** How many [locationRepairCandidates] there are from the start, and their size: what Settings offers. */
-    @Query(
-        """
-        SELECT COUNT(*) AS files, COALESCE(SUM(sizeBytes), 0) AS bytes FROM backup_entries
-        WHERE state = :uploaded
-          AND isProxied = 0
-          AND localMissingSinceEpochMillis IS NULL
-          AND (cloudDecision IS NULL OR cloudDecision != 'ARCHIVED')
-          AND location IN (${com.gallery.sync.domain.backup.LocationRepair.SQL_LIST})
-          AND uploadedAtEpochMillis < :before
-        """
-    )
-    suspend fun locationRepairTotals(
-        before: Long,
-        uploaded: BackupState = BackupState.UPLOADED
-    ): LocationRepairTotals
-
-    /** The repair replaced the Cloud copy; keep the id the Cloud now gives it. */
-    @Query("UPDATE backup_entries SET remoteItemId = :remoteItemId WHERE id = :id")
-    suspend fun setRemoteItemId(id: String, remoteItemId: String)
-
     @Query(
         """
         SELECT * FROM backup_entries
@@ -1442,6 +1395,3 @@ interface BackupEntryDao {
     )
     suspend fun verifiedInCloud(uploaded: BackupState = BackupState.UPLOADED): List<BackupEntryEntity>
 }
-
-/** See [BackupEntryDao.locationRepairTotals]. */
-data class LocationRepairTotals(val files: Int, val bytes: Long)

@@ -1059,11 +1059,6 @@ class BackupViewModel @Inject constructor(
         viewModelScope.launch { settings.setCameraDefaults(choice.age, choice.photos, choice.videos) }
     }
 
-    /** Location access was just granted: see `BackupPreferences.locationFixedAt`. */
-    fun markLocationFixed() {
-        viewModelScope.launch { settings.markLocationFixed(System.currentTimeMillis()) }
-    }
-
     /** What the open Camera screen's header holds that is not yet the default, or null. See [BackupUiState.cameraUnsaved]. */
     fun setCameraUnsaved(choice: CameraOptimiseChoice?) {
         _state.update { it.copy(cameraUnsaved = choice) }

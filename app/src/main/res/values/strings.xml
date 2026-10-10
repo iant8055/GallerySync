@@ -1050,21 +1050,11 @@ full size</string>
     -->
     <string name="tour_progress_starting">Starting upload…</string>
     <string name="tour_progress_verifying">Checking your Cloud</string>
-    <!-- Settings → Backup: the location repair (Ian, 9 Oct 2026). See LocationRepair. -->
-    <string name="repair_title">Photo locations</string>
     <!-- Settings → Sync → Optimise video, after a stronger compression is chosen (Ian, 9 Oct 2026). -->
     <string name="reoptimise_title">Re-optimise existing videos?</string>
     <string name="reoptimise_body">Videos in Sync albums that were too small to shrink at the old compression can be optimised again at this one. Videos already optimised stay as they are. The full-size originals stay in your Cloud.</string>
     <string name="reoptimise_yes">Yes</string>
     <string name="reoptimise_no">No</string>
-    <string name="repair_body">Files sent to your Cloud before version 25 lost their location on the way. Repair sends them again from this phone, replacing each Cloud copy with the full-size original. Optimised and archived files cannot be repaired, and files with no location are not sent.</string>
-    <string name="repair_button">Repair %1$,d files (%2$s)</string>
-    <string name="repair_running">Repairing: %1$,d of %2$,d checked, %3$,d repaired</string>
-    <string name="repair_finished">Repair finished: %1$,d files repaired, %2$,d had no location to put back.</string>
-    <string name="repair_confirm_title">Repair photo locations?</string>
-    <string name="repair_confirm_body">GallerySync will check up to %1$,d files (%2$s) and send again each one that has a location, replacing its copy in your Cloud. Nothing is removed. It uses Wi-Fi unless mobile data is allowed, and runs in the background.</string>
-    <string name="repair_confirm_yes">Yes</string>
-    <string name="repair_confirm_no">No</string>
     <string name="tour_progress_verifying_body">Step one: checking your Cloud for the files it already has, by name and size. Nothing is sent during this step.</string>
     <string name="tour_progress_checked">%1$,d of %2$,d checked</string>
     <string name="tour_progress_verified_all">%1$,d files checked: all already in OneDrive. Nothing needed sending.</string>
