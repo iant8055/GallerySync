@@ -184,7 +184,7 @@ CHAPTER = Chapter(
             You only see this screen if you chose plan 2 or plan 3. It asks how much to shrink.
 
             • **Optimise photos** and **Optimise video** are on/off switches.
-            • **Video compression level** appears when video is on: **High compression** (480p, the smallest), **Medium compression** (720p) or **Low compression** (1080p, the least shrinking).
+            • **Video compression level** appears when video is on, with three buttons: **High** (480p, the smallest), **Medium** (720p) or **Low** (1080p, the least shrinking). High compression means the most shrinking.
             • Under each switch you are presented with estimated space saving for each option, and a **Total estimated savings** line adds them up.
 
             ## Where the estimates come from

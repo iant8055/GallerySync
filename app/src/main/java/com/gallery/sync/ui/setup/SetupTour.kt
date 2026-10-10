@@ -159,6 +159,29 @@ internal val DetailAnchors = mapOf(
 private val QualityButtonPadding = PaddingValues(horizontal = 4.dp, vertical = 8.dp)
 
 /**
+ * A compression button's label: the level, and "Compression" under it in a smaller size (Ian, 10 Oct 2026: "High /
+ * Compression" on two lines, three across). One line each, never wrapped, for the reason given at the buttons.
+ */
+@Composable
+private fun QualityButtonLabel(name: String, bold: Boolean) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = name,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = if (bold) FontWeight.Bold else null,
+            maxLines = 1,
+            softWrap = false
+        )
+        Text(
+            text = stringResource(R.string.video_quality_compression_line),
+            style = MaterialTheme.typography.labelSmall,
+            maxLines = 1,
+            softWrap = false
+        )
+    }
+}
+
+/**
  * Content padding for the delay chips.
  *
  * Zero a side, because four of them share the card's width and the content is two or three
@@ -1860,13 +1883,7 @@ private fun OptimizationContent(
                                 shape = MaterialTheme.shapes.medium,
                                 contentPadding = QualityButtonPadding
                             ) {
-                                Text(
-                                    text = name,
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    maxLines = 1,
-                                    softWrap = false
-                                )
+                                QualityButtonLabel(name, bold = true)
                             }
                         } else {
                             OutlinedButton(
@@ -1875,12 +1892,7 @@ private fun OptimizationContent(
                                 shape = MaterialTheme.shapes.medium,
                                 contentPadding = QualityButtonPadding
                             ) {
-                                Text(
-                                    text = name,
-                                    style = MaterialTheme.typography.labelLarge,
-                                    maxLines = 1,
-                                    softWrap = false
-                                )
+                                QualityButtonLabel(name, bold = false)
                             }
                         }
                     }

@@ -7928,3 +7928,13 @@ the phone is and never reads or uses those locations itself. For Play Console, s
   screenshots were gone from the phone (not in the trash, so not removed by this app) and the album had no files when
   the tab was built; the next scan found Ian's new screenshot. With the redundant `Pictures/Screenshots` grant removed
   again, `Screenshots` stays listed under the `Pictures` grant. Who deleted the 36 is open (asked Ian).
+
+**Version 25 finished on the Moto G (10 Oct 2026).**
+- **Location repair: complete.** Finished 9 Oct 17:29 (DataStore): 2,170 checked, **1,575 repaired**, 584 without a
+  location, 11 passed over. Spot check from late in the run: `DCIM/20231230_145744.jpg` (GPS 45°03′N) moved off the
+  phone and restored from OneDrive, md5 `1e5f8937…`, identical to the original.
+- **Wizard compression buttons.** With the names lengthened to "High compression" etc. they were cut off three across
+  ("High compr…", "Medium co…", "Low compre…"). Ian: *"High / Compression"* on two lines, or the heading if that does
+  not fit. Now each button carries the level on one line and *Compression* under it in `labelSmall`
+  (`QualityButtonLabel`), names back to High / Medium / Low; seen fitting three across on the Moto in light and dark
+  mode. The guide sentence in c2 updated and regenerated.

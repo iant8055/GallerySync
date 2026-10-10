@@ -976,9 +976,11 @@ full size</string>
         Settings dropdown uses, where there is a full row to draw it on, and it is the only place the
         resolutions now appear.
     -->
-    <string name="video_quality_high_name">High compression</string>
-    <string name="video_quality_medium_name">Medium compression</string>
-    <string name="video_quality_low_name">Low compression</string>
+    <string name="video_quality_high_name">High</string>
+    <string name="video_quality_medium_name">Medium</string>
+    <string name="video_quality_low_name">Low</string>
+    <!-- Second line of each wizard compression button (Ian, 10 Oct 2026). -->
+    <string name="video_quality_compression_line">Compression</string>
 
     <string name="tour_delay_title">Ready to Back Up</string>
     <string name="tour_delay_backup_size">You have selected %1$s to back up</string>
