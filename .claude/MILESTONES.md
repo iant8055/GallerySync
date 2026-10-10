@@ -7927,7 +7927,7 @@ the phone is and never reads or uses those locations itself. For Play Console, s
 - **Screenshots missing from the Albums tab (Ian's report, same day) was not a scoping bug.** The Moto's 36 earlier
   screenshots were gone from the phone (not in the trash, so not removed by this app) and the album had no files when
   the tab was built; the next scan found Ian's new screenshot. With the redundant `Pictures/Screenshots` grant removed
-  again, `Screenshots` stays listed under the `Pictures` grant. Who deleted the 36 is open (asked Ian).
+  again, `Screenshots` stays listed under the `Pictures` grant. Who deleted the 36: Ian did (10 Oct 2026). Not an app defect.
 
 **Version 25 finished on the Moto G (10 Oct 2026).**
 - **Location repair: complete.** Finished 9 Oct 17:29 (DataStore): 2,170 checked, **1,575 repaired**, 584 without a
@@ -7938,3 +7938,13 @@ the phone is and never reads or uses those locations itself. For Play Console, s
   not fit. Now each button carries the level on one line and *Compression* under it in `labelSmall`
   (`QualityButtonLabel`), names back to High / Medium / Low; seen fitting three across on the Moto in light and dark
   mode. The guide sentence in c2 updated and regenerated.
+
+**After v25 was submitted (10 Oct 2026, Moto G, debug build).**
+- **The wizard's delayed start works.** Ian set a 1 hour delay; the job sat with only `TIMING_DELAY` unsatisfied (on
+  charge, so `CHARGING` held), fired on its own at about 10:22, verified (everything already in OneDrive, nothing to
+  send) and went on to optimise photos. No crash.
+- **The optimise card's total climbed with every file done** ("176 of 2176", "220 of 2220", "236 of 2236"). The
+  observer counted `ProxyApplier.candidatesAll()`, which is capped at 2,000 (one MediaStore write request), so
+  "remaining" read 2,000 for as long as more than that remained. Now `remainingAll()` counts the same live list
+  uncapped; installed over the running pass, the card read 461 of 2274 and held. It can still move by a few when a
+  file comes back from a `CloudOriginalCheck` hold (2274 → 2281 seen); not a climb. Not in v25.

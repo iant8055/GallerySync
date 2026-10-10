@@ -527,7 +527,7 @@ class ReconcileViewModel @Inject constructor(
                 // starts both passes when an unattended first backup drains, so those flags are
                 // false, the observer returned on its first line, and the wizard sat on "Optimising
                 // photos" with every candidate already done.
-                val photoRemaining = proxyApplier.candidatesAll().size
+                val photoRemaining = proxyApplier.remainingAll()
                 val videoRemaining = videoOptimiser.wizardCandidates().size
                 val onVideo = photoRemaining == 0
                 val remaining = if (onVideo) videoRemaining else photoRemaining

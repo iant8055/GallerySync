@@ -119,7 +119,27 @@ class ProxyApplier @Inject constructor(
     suspend fun candidatesAll(): List<BackupEntryEntity> =
         candidatesFrom(entryDao.proxyCandidatesAll(settings.current().optimiseCutoffEpochMillis))
 
+    /**
+     * How many photos [candidatesAll] has left in total, not capped at one write request. The wizard card's
+     * denominator: counting the capped list read "176 of 2176", then "220 of 2220", the total climbing with every
+     * file done for as long as more than 2,000 remained (Moto G, 10 Oct 2026).
+     */
+    suspend fun remainingAll(): Int =
+        liveFrom(entryDao.proxyCandidatesAll(settings.current().optimiseCutoffEpochMillis)).size
+
     private suspend fun candidatesFrom(
+        recorded: List<BackupEntryEntity>
+    ): List<BackupEntryEntity> {
+        val live = liveFrom(recorded)
+        // Largest-first ordering means a capped run still reclaims the most it can, and whatever
+        // is trimmed here stays eligible for the next one.
+        if (live.size > MAX_URIS_PER_REQUEST) {
+            Logger.i(TAG, "capping ${live.size} candidates to $MAX_URIS_PER_REQUEST")
+        }
+        return live.take(MAX_URIS_PER_REQUEST)
+    }
+
+    private suspend fun liveFrom(
         recorded: List<BackupEntryEntity>
     ): List<BackupEntryEntity> = withContext(dispatcher) {
         if (!isSupported()) return@withContext emptyList()
@@ -131,13 +151,7 @@ class ProxyApplier @Inject constructor(
         if (missing > 0) {
             Logger.i(TAG, "ignoring $missing candidates whose local file is gone")
         }
-
-        // Largest-first ordering means a capped run still reclaims the most it can, and whatever
-        // is trimmed here stays eligible for the next one.
-        if (live.size > MAX_URIS_PER_REQUEST) {
-            Logger.i(TAG, "capping ${live.size} candidates to $MAX_URIS_PER_REQUEST")
-        }
-        live.take(MAX_URIS_PER_REQUEST)
+        live
     }
 
     /** [entries] whose file is still on the phone, in the same order. For callers that chose the files themselves. */
