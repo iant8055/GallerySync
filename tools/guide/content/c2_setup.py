@@ -43,7 +43,7 @@ CHAPTER = Chapter(
             • Only OneDrive is checked for files it already holds, so other Clouds may receive a second copy of a file already there.
 
             ## Signing in
-            Each Cloud gets its own **Connect** card (**Cloud 1 of 3**). **Next** waits until all are connected.
+            Each Cloud gets its own numbered **Connect** card. **Next** waits until all are connected.
             • **OneDrive, Google Photos, Google Drive, Dropbox, pCloud:** sign in on the provider's own page. Your password never goes into GallerySync. For Dropbox, allow read and write, or Restore will not work.
             • **IDrive e2, Backblaze B2:** enter the keys from their console. See [[cloud-key-backblaze]] and [[cloud-key-idrive]].
 
@@ -144,7 +144,7 @@ CHAPTER = Chapter(
             A countdown runs until the backup starts, even with the app closed, as long as the phone is plugged in. **SYNC NOW** starts it straight away.
 
             ## Step 1: Checking your Cloud
-            Every file is compared with what your Cloud already holds, by name and size, for example **1,200 of 8,600 checked**. Nothing is sent. Usually a minute or two.
+            Every file is compared with what your Cloud already holds, by name and size, with a running count. Nothing is sent. Usually a minute or two.
 
             ## Step 2: Uploading
             The ring shows overall progress. Below it: the Cloud being sent to and its count. Other Clouds waiting show as **Pending**.
@@ -154,7 +154,7 @@ CHAPTER = Chapter(
 
             ## Buttons
             • **Close:** closes the app; the backup carries on.
-            • **Finish:** appears when everything is done, with a summary such as **8,600 files checked: 8,500 already in OneDrive, 100 sent.**
+            • **Finish:** appears when everything is done, with a summary of what was checked, already in the Cloud, and sent.
             • **Cancel:** asks **Stop the backup?** Files already sent stay sent; nothing is deleted.
         """),
 

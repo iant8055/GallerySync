@@ -16,7 +16,7 @@ CHAPTER = Chapter(
         topic("faq-not-checked-yet", "An album says Not checked against OneDrive yet", """
             OneDrive has not been asked yet. Wait a moment or press **Rescan**. **Could not reach OneDrive** means the connection failed: check you are online and signed in, then **Rescan**.
 
-            Albums on other Clouds show **15 sent to Dropbox** instead. See [[albums-list]].
+            Albums on other Clouds show **sent to** that Cloud instead. See [[albums-list]].
         """),
 
         topic("faq-onedrive-full", "The backup stopped because my Cloud is full", """

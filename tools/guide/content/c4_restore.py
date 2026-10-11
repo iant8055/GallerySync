@@ -7,7 +7,7 @@ CHAPTER = Chapter(
     topics=[
         topic("restore-overview", "What Restore brings back", """
             • **To restore:** an optimised file on the phone. Restoring puts the full-size original back in its place.
-            • **To download:** a file no longer on the phone, for example after Archive. Downloading puts it back in its album.
+            • **To download:** a file no longer on the phone. Downloading puts it back in its album.
 
             Restored files get **Keep at full size**, so they are not optimised or archived again straight away. See [[album-file-pin]].
 
@@ -36,11 +36,11 @@ CHAPTER = Chapter(
             • **Swipe right to select / left to deselect. Tap to open.** on the folder list.
             • **Swipe right to select / left to deselect → Then press Restore.** inside a folder.
             • **Nothing in your Cloud is missing from this phone, so there is nothing to bring back.** when the list is empty.
-            • After a restore, a result such as **3 back to full quality · 2 back on this phone. 1 unchanged.**
+            • After a restore, how many files came back and how many were left unchanged.
         """, ui=True),
 
         topic("restore-selected-summary", "N selected and how much to recover", """
-            For example **6 selected · 1.2 GB to recover**: the files selected across all folders, and the extra space they will take on your phone. Make sure you have that space free.
+            The files selected across all folders, and the extra space they will take on your phone. Make sure you have that space free.
         """, ui=True),
 
         topic("restore-buttons", "Refresh, Select all and Clear", """
@@ -53,21 +53,21 @@ CHAPTER = Chapter(
 
         topic("restore-folders-list", "The folder list", """
             Each folder card shows:
-            • **12 files · 1.2 GB:** what can come back and the space it needs.
-            • **8 to restore · 4 to download.**
-            • **3 already on this phone** (greyed inside; see [[restore-greyed-files]]).
-            • **3 selected here**, or a check mark when the whole folder is selected.
+            • How many files can come back, and the space they need.
+            • How many are **to restore** and **to download**.
+            • How many are **already on this phone** (greyed inside; see [[restore-greyed-files]]).
+            • How many are **selected here**, or a check mark when the whole folder is selected.
 
             **Tap** to open. **Swipe right** to select the whole folder, **left** to deselect.
         """),
 
         topic("restore-files-list", "The file list inside a folder", """
             Swipe right (or tap) to select, left to deselect. Each file shows one of:
-            • **1.2 MB now · 8.4 MB full size:** an optimised copy that can be restored.
-            • **Available for download · 8.4 MB:** not on the phone.
-            • **Already on this phone · 8.4 MB:** greyed; nothing to do.
+            • **now · full size:** an optimised copy that can be restored, with both sizes.
+            • **Available for download:** not on the phone.
+            • **Already on this phone:** greyed; nothing to do.
 
-            While working: **Working... 45%**. Then **Restored to full size**, **Back on this phone**, or **Could not restore, your file is unchanged** with the reason.
+            While working: **Working...** with a percentage. Then **Restored to full size**, **Back on this phone**, or **Could not restore, your file is unchanged** with the reason.
         """),
 
         topic("restore-greyed-files", "Why are some files greyed out?", """
@@ -80,7 +80,7 @@ CHAPTER = Chapter(
             • **Restore:** brings back every selected file, one at a time. Appears once something is selected.
             • **Stop restoring:** stops the batch. Files already restored stay restored.
 
-            Progress shows as **3 of 12 restored · 45%**. Needs an internet connection and enough free space.
+            A progress bar shows how many are restored. Needs an internet connection and enough free space.
         """),
 
         topic("restore-edited", "A photo or video you edited", """
@@ -90,7 +90,7 @@ CHAPTER = Chapter(
             • **Overwrite:** puts the original back; your edit is replaced.
 
             ## Good to know
-            Most editors save a new file, which is never affected. An edited file is backed up as a new file, for example **photo (edited 20260926-231537).jpg**; the original in your Cloud is never replaced.
+            Most editors save a new file, which is never affected. An edited file is backed up as a new file with **edited** and the date in its name; the original in your Cloud is never replaced.
         """),
     ],
 )

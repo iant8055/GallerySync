@@ -58,7 +58,7 @@ CHAPTER = Chapter(
         """, ui=True),
 
         topic("settings-destination", "Where each folder goes", """
-            Each top-level folder (DCIM, Pictures, Movies) and its Cloud, for example **Goes to OneDrive / Samsung Gallery/DCIM**.
+            Each top-level folder (DCIM, Pictures, Movies), the Cloud it goes to, and where in that Cloud.
 
             • Tap the Cloud to change it. It can only be changed with more than one Cloud and Pro or the trial.
             • Only new files follow a change. Files already sent stay where they are.
@@ -80,7 +80,7 @@ CHAPTER = Chapter(
         """, ui=True),
 
         topic("settings-folders", "Folders to back up", """
-            The folders GallerySync may look in, for example **Internal storage / DCIM**.
+            The folders GallerySync may look in.
 
             • **Add a folder:** opens Android's folder picker.
             • **Remove:** select folders, press **Remove**, and confirm.
@@ -124,7 +124,7 @@ CHAPTER = Chapter(
         """, ui=True),
 
         topic("dialog-remove-from-onedrive", "Remove files from OneDrive? (the confirmation)", """
-            **Remove 12 files from OneDrive?** with their size. They go to the OneDrive recycle bin, which GallerySync never empties.
+            Shows how many files and their size. They go to the OneDrive recycle bin, which GallerySync never empties.
 
             **Remove from OneDrive** goes ahead; **Cancel** decides nothing. Any file that has come back to the phone is left alone.
         """, ui=True),

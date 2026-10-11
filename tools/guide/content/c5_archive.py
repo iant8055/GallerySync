@@ -21,7 +21,7 @@ CHAPTER = Chapter(
             ## Good to know
             • Archive needs you present: Android requires a tap. See [[dialog-exit-warning]].
             • Files added to an Archive album later are covered too.
-            • When the last file leaves, the album leaves the list and its mode is forgotten. If it comes back (for example by Restore), it starts at Off.
+            • When the last file leaves, the album leaves the list and its mode is forgotten. If it comes back, it starts at Off.
             • Needs Android 11 or newer.
         """),
 
@@ -43,8 +43,8 @@ CHAPTER = Chapter(
         topic("archive-check-button", "Check these files, and what it reports", """
             • **Check these files** (or **Check all folders**): starts the check.
             • **Checking with your Cloud...** while the Cloud is asked.
-            • **Batch 1 of 3** while files are being removed.
-            • **12 files removed from this phone, freeing 340 MB.** or **Nothing was removed.**
+            • **Batch** progress while files are being removed.
+            • How many files were removed and the space freed, or **Nothing was removed.**
 
             OneDrive is checked by listing each album folder (name and size). Dropbox, Google Drive, pCloud, Backblaze B2 and IDrive e2 are asked about each file.
 
@@ -81,7 +81,7 @@ CHAPTER = Chapter(
         topic("archive-prompt", "The question: All files validated, or some validated", """
             After the check:
             • **All files validated:** every file is confirmed.
-            • **12 files validated:** only those are confirmed; the rest stay on the phone.
+            • **N files validated:** only those are confirmed; the rest stay on the phone.
             • **Nothing can be archived:** none were confirmed. **Continue** closes the message.
 
             **Yes** asks Android to move the confirmed files to the bin. **No** removes nothing. A large album may need several Android confirmations (2,000 files each).
@@ -90,7 +90,7 @@ CHAPTER = Chapter(
         topic("dialog-android-trash", "Android's own confirmation", """
             Android asks you to allow moving the files to the trash. Its wording varies by phone.
 
-            • Android allows 2,000 files per request, so a large album shows **Batch 1 of 3** and so on.
+            • Android allows 2,000 files per request, so a large album is done in batches.
             • If you say no, nothing is removed.
         """),
 

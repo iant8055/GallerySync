@@ -53,7 +53,7 @@ CHAPTER = Chapter(
         """),
 
         topic("words-you-will-see", "Words you will see", """
-            • **Album:** a folder of photos and videos, such as Camera or Screenshots.
+            • **Album:** a folder of photos and videos on your phone.
             • **Mode:** what happens to an album: **Off**, **Backup**, **Sync** or **Archive**. See [[modes-in-depth]].
             • **Cloud:** OneDrive, Google Photos, Google Drive, Dropbox, pCloud, IDrive e2 or Backblaze B2. See [[setup-cloud]].
             • **Pairing:** which Cloud a top-level folder (DCIM, Pictures) sends to. See [[settings-destination]].

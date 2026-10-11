@@ -38,7 +38,7 @@ CHAPTER = Chapter(
         """),
 
         topic("albums-totals", "Album Mode Count", """
-            The total for each mode, for example **Album Mode Count: 3 Backup · 2 Sync · 1 Archive · 6 Off**. Shown with **All Albums** selected. Albums under **Off** are the ones you have not decided about.
+            **Album Mode Count:** the total for each mode. Shown with **All Albums** selected. Albums under **Off** are the ones you have not decided about.
         """),
 
         topic("albums-all-backed-up", "Everything here is backed up", """
@@ -46,7 +46,7 @@ CHAPTER = Chapter(
         """, ui=True),
 
         topic("albums-optimised-line", "Optimised and Saved", """
-            With **Sync** selected: how many files in Sync albums have been optimised and the space saved, for example **3 Optimised · 1.2 GB Saved**.
+            With **Sync** selected: how many files in Sync albums have been optimised, and the space saved.
 
             The originals stay in the Cloud. **Restore** brings them back. See [[how-optimising-works]].
         """, ui=True),
@@ -65,7 +65,7 @@ CHAPTER = Chapter(
             • **Rescan:** looks at the phone and asks OneDrive again.
 
             ## While a backup runs
-            • Progress shows as **Syncing 37%** (by data, not file count).
+            • Progress shows as **Syncing** with a percentage (by data, not file count).
             • **Pause:** holds all backups until **Resume**.
             • **Stop:** ends this run. Automatic backups carry on.
 
@@ -74,7 +74,7 @@ CHAPTER = Chapter(
         """, ui=True),
 
         topic("albums-status-line", "The status line under the card", """
-            • **While uploading:** for example **Uploading 3 of 12 · IMG_0420.jpg · 45%**.
+            • **While uploading:** the file count, the file being sent, and its progress.
             • **While preparing:** **Scanning...** or **No permission to read media.**
             • **After a run:** a summary of what applies: **uploaded**, **already in the Cloud**, **no longer on this phone**, **failed**, **waiting on the Cloud** (tried again later), **still to go**, or **stopped:** with the reason.
         """, ui=True),
@@ -82,12 +82,12 @@ CHAPTER = Chapter(
         topic("albums-list", "The Albums Tab", """
             ## Header
             • Tap **Backup**, **Sync**, **Archive** or **Off** to show only the albums in that mode. Tap **All Albums** to show them all again.
-            • The line under the buttons gives the total for each mode, for example **3 Backup · 2 Sync · 1 Archive · 6 Off**.
+            • The line under the buttons gives the total for each mode.
 
             ## Album cards
             • **Name, file count and size** of the album on your phone.
             • **Second line** (only when needed): how many files are optimised, kept at full size, pending or failed.
-            • **Cloud line:** **12 verified in OneDrive** means OneDrive confirmed every file at the right size. It is checked each time you open the tab. Other Clouds show **15 sent to Dropbox**.
+            • **Cloud line:** **verified in OneDrive** means OneDrive confirmed the files at the right size. It is checked each time you open the tab. Other Clouds show **sent to** that Cloud.
             • **Mode button** (right side): tap to change the album's mode. Archive asks you to confirm first. If the album's Cloud cannot do that mode, the card says so.
             • **Tap the card** to see the album's files. See [[album-detail]].
         """, ui=True),
@@ -96,7 +96,7 @@ CHAPTER = Chapter(
             Opens when you tap an album card.
 
             • **Header:** back arrow, album name, mode and file count, the counts ([[album-file-status]]), **Sort by** ([[album-file-sort]]) and **Keep at full size** ([[album-file-pin]]).
-            • **Files:** one card per file with its size, date and marks, for example **4.2 MB · 12 Sep 2026 · ✓ backed up**. An optimised file shows its smaller size on the phone.
+            • **Files:** one card per file with its size, date and marks. An optimised file shows its smaller size on the phone.
             • **Camera folder** (if chosen in Settings): extra optimise controls. See [[album-camera-optimise]].
 
             No thumbnails or previews. Use your gallery app to look at photos.
@@ -109,7 +109,7 @@ CHAPTER = Chapter(
             • **✗ failed:** could not be sent after several tries.
 
             ## Retry failed
-            **Retry 3 failed** puts failed files back in the queue and starts a backup. It removes nothing.
+            **Retry** puts failed files back in the queue and starts a backup. It removes nothing.
         """, ui=True),
 
         topic("album-file-sort", "Sorting an album's files", """
@@ -159,7 +159,7 @@ CHAPTER = Chapter(
         """, ui=True),
 
         topic("album-merge-warning", "Duplicate album names detected", """
-            Some phones list one folder under two spellings, such as **camera** and **Camera**. GallerySync merges them into one album and sets its mode to **Off**, so choose its mode again. **Dismiss** closes the card.
+            Some phones list one folder under two spellings. GallerySync merges them into one album and sets its mode to **Off**, so choose its mode again. **Dismiss** closes the card.
 
             This is the only time the app sets a mode, and it can only set **Off**.
         """, ui=True),
