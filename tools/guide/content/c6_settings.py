@@ -42,7 +42,7 @@ CHAPTER = Chapter(
             • **Clouds:** connect or sign out of each Cloud. See [[settings-account]].
             • **Where each folder goes:** which Cloud each folder sends to. See [[settings-destination]].
 
-            The Cloud marked **main (free)** is always free. Other Clouds need **Pro**: free for 30 days, then a one-time purchase. Nothing is charged automatically.
+            One Cloud is marked **main (free)**: the first Cloud you selected. It is always free. Other Clouds need **Pro**: free for 30 days (**Start 30-day free trial**), then a one-time purchase (**Unlock Pro**). Nothing is charged automatically.
         """, ui=True),
 
         topic("settings-account", "Your Clouds and Sign out", """
@@ -119,7 +119,7 @@ CHAPTER = Chapter(
             ## Good to know
             • Undecided files stay on the list until you decide.
             • Not listed: files Archive removed, photos edited in place, and files deleted outright with no Cloud copy.
-            • If a huge share of your library seems to vanish at once, nothing is offered: it is treated as a bad scan.
+            • If more than half of your backed-up files seem to vanish at once, nothing is offered; it is treated as a faulty scan rather than real deletions.
             • Back does the same as **Decide later**.
         """, ui=True),
 
@@ -172,7 +172,7 @@ CHAPTER = Chapter(
 
             Typical figures; results vary.
 
-            ## Choosing a stronger compression
+            ## After you make it stronger
             The app asks **Re-optimise existing videos?** **Yes** lets videos that were too small to shrink before be tried again. **No** leaves them. Already optimised videos are not touched.
         """, ui=True),
 

@@ -8,7 +8,7 @@ CHAPTER = Chapter(
         topic("modes-in-depth", "The four modes", """
             Each album has one mode, set with the button on its card.
 
-            • **Off:** nothing happens. Every album starts here.
+            • **Off:** this album is not looked after: nothing is sent or changed. Every album starts here.
             • **Backup:** copies to your Cloud; the phone is never touched.
             • **Sync:** backs up, then optimises if optimising is on in Settings.
             • **Archive:** backs up, verifies, then moves the files to the phone's trash after your tap. The only mode that removes files.

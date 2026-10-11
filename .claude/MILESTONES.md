@@ -7991,3 +7991,9 @@ the deleted-files notice in "When things happen"; the stale Restored-album line;
 Tab": a Header part and an Album cards part, short bullets) and asked for the whole guide and every (?) in that style. All
 109 topics rewritten, ids and (?) links unchanged, source ~2,000 lines to ~1,030; HowToGuideConsistencyTest passes; card
 seen on the Moto.
+
+**New-user review of the guide (11 Oct 2026).** The translation session read the guide as a newcomer (27 findings); reviewed
+here against the code, 20 edits agreed, 3 deletions refused (topics with (?) buttons), dialog-destination/folder-picker left
+for Ian. Facts settled: free Cloud = first selected in setup; OneDrive destination Samsung Gallery/DCIM on every phone;
+the trial starts with "Start 30-day free trial" (Unlock Pro buys); Sync now optimises only with the switch on and Mode
+Manual; MassAbsence = over half of backed-up files. Ian: go.

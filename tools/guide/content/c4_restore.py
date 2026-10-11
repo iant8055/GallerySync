@@ -17,7 +17,7 @@ CHAPTER = Chapter(
             • **Google Photos:** cannot be restored from.
 
             ## Where files go
-            Back into the folder they came from. Files loose at the top of **DCIM**, **Pictures** or **Movies** go back into that folder. If a folder cannot be written, files go to **DCIM/** the album name.
+            Back into the folder they came from. Files loose at the top of **DCIM**, **Pictures** or **Movies** go back into that folder. If a folder cannot be written, files go to a folder in **DCIM** named after the album.
 
             ## Safe to try
             A file is replaced only after the full download arrives and its size checks out. If anything fails, the phone's file is left as it was.
@@ -29,7 +29,7 @@ CHAPTER = Chapter(
 
             A dash means the list is still loading. **Checking your Cloud for more...** means OneDrive is being read. A red message means a folder could not be reached.
 
-            The OneDrive list is remembered and re-read when it is over ten minutes old, or when you press **Refresh**. Folders with nothing to bring back are hidden unless **Show empty folders** is on in Settings.
+            The OneDrive list is remembered, and read again after ten minutes or when you press **Refresh**.
         """, ui=True),
 
         topic("restore-message-line", "The message under the number", """
@@ -63,7 +63,7 @@ CHAPTER = Chapter(
 
         topic("restore-files-list", "The file list inside a folder", """
             Swipe right (or tap) to select, left to deselect. Each file shows one of:
-            • **now · full size:** an optimised copy that can be restored, with both sizes.
+            • **now · full size:** an optimised copy, showing its smaller file size on the phone and the full file size in the Cloud.
             • **Available for download:** not on the phone.
             • **Already on this phone:** greyed; nothing to do.
 

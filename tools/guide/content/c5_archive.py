@@ -6,6 +6,8 @@ CHAPTER = Chapter(
     intro="The only place files leave your phone. Only albums you set to Archive, checked against your Cloud first, and only after your tap.",
     topics=[
         topic("archive-overview", "How Archive works, step by step", """
+            **Archive needs Android 11 or newer.**
+
             1. **Set an album to Archive** on the Albums tab and confirm. See [[dialog-archive-confirm]].
             2. **Press Check these files.** Every file is checked against its Cloud. Files not there yet are sent first.
             3. **See the result:** a check mark or red cross on each file, and how much space will be freed.
@@ -22,7 +24,6 @@ CHAPTER = Chapter(
             • Archive needs you present: Android requires a tap. See [[dialog-exit-warning]].
             • Files added to an Archive album later are covered too.
             • When the last file leaves, the album leaves the list and its mode is forgotten. If it comes back, it starts at Off.
-            • Needs Android 11 or newer.
         """),
 
         topic("archive-hero", "Files to Archive", """
@@ -67,7 +68,7 @@ CHAPTER = Chapter(
             One card per file in your Archive albums.
 
             ## Keeping a file on the phone
-            Swipe **left** to keep it: it greys out and reads **Not archiving**, and is remembered. Swipe **right** to include it again. A file greyed as **too recent for your filter** is held back by the age filter.
+            Use it for a file you want to keep on the phone while the rest of the album is archived. Swipe **left** to keep it: it greys out and reads **Not archiving**, and is remembered. Swipe **right** to include it again. A file greyed as **too recent for your filter** is held back by the age filter.
 
             ## Marks
             • **Spinner:** being checked, sent or removed.
@@ -100,7 +101,7 @@ CHAPTER = Chapter(
             • **Archive now:** opens the Archive tab.
             • **Leave:** closes the app. Nothing is removed.
 
-            Counts OneDrive files only. It does not appear if you press Home or swipe the app away.
+            Counts OneDrive files only: only OneDrive copies are confirmed ahead of time. Other Clouds are checked when you press **Check these files**. The reminder does not appear if you press Home or swipe the app away.
         """, ui=True),
     ],
 )

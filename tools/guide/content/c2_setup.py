@@ -3,7 +3,7 @@ from model import Chapter, topic
 CHAPTER = Chapter(
     id="setup",
     title="First-time setup",
-    intro="A guided setup of nine screens runs the first time you open GallerySync.",
+    intro="A guided setup runs the first time you open GallerySync.",
     topics=[
         topic("setup-overview", "How the setup works", """
             **Next** moves on, **Back** goes back. A screen lets you continue only when it has what it needs.
@@ -35,19 +35,23 @@ CHAPTER = Chapter(
             Select the Clouds you use and press **Next**. Nothing is selected to start with.
 
             ## Your first Cloud is free
-            Each extra Cloud needs **Pro**: free for 30 days, then a one-time purchase. Nothing is charged automatically. If the trial ends, extra Clouds pause and your free Cloud carries on.
+            The first Cloud you select becomes your free Cloud, shown as **main (free)** in Settings. Each further Cloud needs **Pro**: free for 30 days, then a one-time purchase. Nothing is charged automatically. If the trial ends, extra Clouds pause and your free Cloud carries on.
+
+            Start the trial with **Start 30-day free trial** in Settings, under Backup; it appears once a second Cloud is connected. **Unlock Pro** buys it.
 
             ## What each Cloud can do
             • **OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 and Backblaze B2:** Backup, Sync, Archive and Restore.
             • **Google Photos:** backup only.
-            • Only OneDrive is checked for files it already holds, so other Clouds may receive a second copy of a file already there.
+
+            ## A note about duplicates
+            OneDrive is the only Cloud whose contents are checked before anything is sent. Other Clouds may receive a second copy of a file that is already there.
 
             ## Signing in
             Each Cloud gets its own numbered **Connect** card. **Next** waits until all are connected.
             • **OneDrive, Google Photos, Google Drive, Dropbox, pCloud:** sign in on the provider's own page. Your password never goes into GallerySync. For Dropbox, allow read and write, or Restore will not work.
             • **IDrive e2, Backblaze B2:** enter the keys from their console. See [[cloud-key-backblaze]] and [[cloud-key-idrive]].
 
-            OneDrive backups go to **Samsung Gallery / DCIM**, where Samsung's own sync puts photos, so files already there are not sent twice.{{full: See [[dialog-destination]].}}
+            On every phone, OneDrive backups go to **Samsung Gallery / DCIM**, the folder Samsung's own OneDrive sync uses, so photos already synced there are not sent twice.{{full: See [[dialog-destination]].}}
         """),
 
         topic("cloud-key-backblaze", "Connecting Backblaze B2: the keys and where to find them", """
@@ -87,7 +91,7 @@ CHAPTER = Chapter(
         """),
 
         topic("setup-search-permission", "Let GallerySync search this phone", """
-            **Give search permission** opens Android's permission screen, so GallerySync can find your photos and videos.
+            **Give search permission** opens Android's permission screen. This is where you let GallerySync see the photos and videos on your phone.
 
             ## Good to know
             Choose **Allow all**. If you choose **Select photos**, only those photos can be backed up.
@@ -112,12 +116,12 @@ CHAPTER = Chapter(
             What to do with the photos and videos already on your phone. **No plan removes anything.**
 
             • **1. Back up everything not already in the Cloud.** Nothing on the phone changes. Selected when you arrive.
-            • **2. Plan 1, plus optimise every file on the phone.** The most space saved.
-            • **3. Plan 1, but optimise only the files this backup sends.**
-            • **4. Check the Cloud but send nothing.** You choose albums yourself afterwards.
+            • **2. Back up, then optimise every file on the phone.** The most space saved.
+            • **3. Back up, then optimise only the files this backup sent.**
+            • **4. Check the Cloud but send nothing.** You choose each album's mode afterwards on the Albums tab.
 
             ## Good to know
-            No plan sets album modes, so albums show **Off** afterwards. That is correct.{{full: See [[faq-albums-off-after-backup]].}}
+            This first backup is one-shot and runs regardless of mode. Afterwards every album is **Off**, which is correct: from here on you choose each album's mode yourself on the Albums tab.{{full: See [[faq-albums-off-after-backup]].}}
         """),
 
         topic("setup-optimise", "Optimisation settings during setup", """
@@ -159,7 +163,7 @@ CHAPTER = Chapter(
         """),
 
         topic("setup-and-settings", "Setup and Settings are separate", """
-            Setup answers its own questions once. It does not change Settings, and Settings does not change it. If a setup screen and a Settings row differ, that is normal.
+            Setup and Settings keep their own answers. Setup never reads from Settings, and Settings never reads from setup. Setup's folder list starts empty even if Settings already lists folders, and setup's answers do not appear in Settings.
 
             Setup never sets an album's mode. Only you do, on the Albums tab.
         """),

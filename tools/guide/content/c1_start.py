@@ -24,9 +24,9 @@ CHAPTER = Chapter(
             • **Nothing is permanently deleted.** Anything removed goes to a trash or recycle bin you can recover from.
             • **The app never empties a bin.** Only you do that.
             • **Nothing leaves your phone unless you chose Archive for that album**, and you confirm that choice.
-            • **"Safe" means verified.** The Cloud must confirm it holds the file at the same size before anything is optimised or removed.
+            • **"Safe" means verified.** The Cloud must confirm it holds the file at the same file size before anything is optimised or removed.
             • **Out of the box, nothing happens.** No folders are chosen and every album is Off until you decide.
-            • **Your Cloud copies are left alone.** Deleting a photo on your phone never deletes its backup unless you choose **Ask** in Settings and confirm.
+            • **Your Cloud copies are left alone.** By default, deleting a photo on your phone does not touch its Cloud copy. Choose **Ask me about the Cloud copy** in Settings to be offered the choice; nothing is removed unless you select it and confirm.
 
             ## Good to know
             Now and then, open your Cloud and look at a few photos, especially before you empty a bin.
@@ -56,7 +56,7 @@ CHAPTER = Chapter(
             • **Album:** a folder of photos and videos on your phone.
             • **Mode:** what happens to an album: **Off**, **Backup**, **Sync** or **Archive**. See [[modes-in-depth]].
             • **Cloud:** OneDrive, Google Photos, Google Drive, Dropbox, pCloud, IDrive e2 or Backblaze B2. See [[setup-cloud]].
-            • **Pairing:** which Cloud a top-level folder (DCIM, Pictures) sends to. See [[settings-destination]].
+            • **Pairing:** which Cloud each top-level folder on your phone sends to. **DCIM**, **Pictures** and the other folders your phone keeps photos in are what the Guide calls top-level folders. See [[settings-destination]].
             • **Optimise:** replace the phone's copy with a smaller one; the original stays in the Cloud. See [[how-optimising-works]].
             • **Verified:** the Cloud confirmed it holds the file at the same size. See [[how-verification-works]].
             • **Trash / Recycle Bin:** where removed files wait. See [[where-deleted-files-go]].

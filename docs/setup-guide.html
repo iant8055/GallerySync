@@ -97,7 +97,7 @@
     setup in plain language: what a card is for, what its buttons do, and the messages you might meet.
     Tap a heading to open it.</p>
   </div>
-  <p class="chapter-intro">A guided setup of nine screens runs the first time you open GallerySync.</p>
+  <p class="chapter-intro">A guided setup runs the first time you open GallerySync.</p>
   <details class="topic"><summary>How the setup works</summary>
   <div class="topic-body" id="setup-overview">
 <p><strong>Next</strong> moves on, <strong>Back</strong> goes back. A screen lets you continue only when it has what it needs.</p>
@@ -115,13 +115,16 @@
   <div class="topic-body" id="setup-cloud">
 <p>Select the Clouds you use and press <strong>Next</strong>. Nothing is selected to start with.</p>
 <h4>Your first Cloud is free</h4>
-<p>Each extra Cloud needs <strong>Pro</strong>: free for 30 days, then a one-time purchase. Nothing is charged automatically. If the trial ends, extra Clouds pause and your free Cloud carries on.</p>
+<p>The first Cloud you select becomes your free Cloud, shown as <strong>main (free)</strong> in Settings. Each further Cloud needs <strong>Pro</strong>: free for 30 days, then a one-time purchase. Nothing is charged automatically. If the trial ends, extra Clouds pause and your free Cloud carries on.</p>
+<p>Start the trial with <strong>Start 30-day free trial</strong> in Settings, under Backup; it appears once a second Cloud is connected. <strong>Unlock Pro</strong> buys it.</p>
 <h4>What each Cloud can do</h4>
-<ul><li><strong>OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 and Backblaze B2:</strong> Backup, Sync, Archive and Restore.</li><li><strong>Google Photos:</strong> backup only.</li><li>Only OneDrive is checked for files it already holds, so other Clouds may receive a second copy of a file already there.</li></ul>
+<ul><li><strong>OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 and Backblaze B2:</strong> Backup, Sync, Archive and Restore.</li><li><strong>Google Photos:</strong> backup only.</li></ul>
+<h4>A note about duplicates</h4>
+<p>OneDrive is the only Cloud whose contents are checked before anything is sent. Other Clouds may receive a second copy of a file that is already there.</p>
 <h4>Signing in</h4>
 <p>Each Cloud gets its own numbered <strong>Connect</strong> card. <strong>Next</strong> waits until all are connected.</p>
 <ul><li><strong>OneDrive, Google Photos, Google Drive, Dropbox, pCloud:</strong> sign in on the provider's own page. Your password never goes into GallerySync. For Dropbox, allow read and write, or Restore will not work.</li><li><strong>IDrive e2, Backblaze B2:</strong> enter the keys from their console. See <a class="xref" href="#cloud-key-backblaze">“Connecting Backblaze B2: the keys and where to find them”</a> and <a class="xref" href="#cloud-key-idrive">“Connecting IDrive e2: the keys and where to find them”</a>.</li></ul>
-<p>OneDrive backups go to <strong>Samsung Gallery / DCIM</strong>, where Samsung's own sync puts photos, so files already there are not sent twice.</p>
+<p>On every phone, OneDrive backups go to <strong>Samsung Gallery / DCIM</strong>, the folder Samsung's own OneDrive sync uses, so photos already synced there are not sent twice.</p>
   </div></details>
   <details class="topic"><summary>Connecting Backblaze B2: the keys and where to find them</summary>
   <div class="topic-body" id="cloud-key-backblaze">
@@ -145,7 +148,7 @@
   </div></details>
   <details class="topic"><summary>Let GallerySync search this phone</summary>
   <div class="topic-body" id="setup-search-permission">
-<p><strong>Give search permission</strong> opens Android's permission screen, so GallerySync can find your photos and videos.</p>
+<p><strong>Give search permission</strong> opens Android's permission screen. This is where you let GallerySync see the photos and videos on your phone.</p>
 <h4>Good to know</h4>
 <p>Choose <strong>Allow all</strong>. If you choose <strong>Select photos</strong>, only those photos can be backed up.</p>
   </div></details>
@@ -162,9 +165,9 @@
   <details class="topic"><summary>Choose your Backup Plan</summary>
   <div class="topic-body" id="setup-backup-plan">
 <p>What to do with the photos and videos already on your phone. <strong>No plan removes anything.</strong></p>
-<ul><li><strong>1. Back up everything not already in the Cloud.</strong> Nothing on the phone changes. Selected when you arrive.</li><li><strong>2. Plan 1, plus optimise every file on the phone.</strong> The most space saved.</li><li><strong>3. Plan 1, but optimise only the files this backup sends.</strong></li><li><strong>4. Check the Cloud but send nothing.</strong> You choose albums yourself afterwards.</li></ul>
+<ul><li><strong>1. Back up everything not already in the Cloud.</strong> Nothing on the phone changes. Selected when you arrive.</li><li><strong>2. Back up, then optimise every file on the phone.</strong> The most space saved.</li><li><strong>3. Back up, then optimise only the files this backup sent.</strong></li><li><strong>4. Check the Cloud but send nothing.</strong> You choose each album's mode afterwards on the Albums tab.</li></ul>
 <h4>Good to know</h4>
-<p>No plan sets album modes, so albums show <strong>Off</strong> afterwards. That is correct.</p>
+<p>This first backup is one-shot and runs regardless of mode. Afterwards every album is <strong>Off</strong>, which is correct: from here on you choose each album's mode yourself on the Albums tab.</p>
   </div></details>
   <details class="topic"><summary>Optimisation settings during setup</summary>
   <div class="topic-body" id="setup-optimise">
@@ -193,7 +196,7 @@
   </div></details>
   <details class="topic"><summary>Setup and Settings are separate</summary>
   <div class="topic-body" id="setup-and-settings">
-<p>Setup answers its own questions once. It does not change Settings, and Settings does not change it. If a setup screen and a Settings row differ, that is normal.</p>
+<p>Setup and Settings keep their own answers. Setup never reads from Settings, and Settings never reads from setup. Setup's folder list starts empty even if Settings already lists folders, and setup's answers do not appear in Settings.</p>
 <p>Setup never sets an album's mode. Only you do, on the Albums tab.</p>
   </div></details>
 

@@ -61,7 +61,7 @@ CHAPTER = Chapter(
 
         topic("albums-run-controls", "Sync now, Rescan, Pause, Resume and Stop", """
             ## When nothing is running
-            • **Sync now:** backs up now, then optimises anything set to Manual. Greyed out when there is nothing to send or optimise.
+            • **Sync now:** backs up now. If an Optimise switch in Settings is on with its **Mode** set to **Manual**, it then optimises too (see [[settings-optimise-mode]]). Greyed out when there is nothing to send or optimise.
             • **Rescan:** looks at the phone and asks OneDrive again.
 
             ## While a backup runs
@@ -70,7 +70,8 @@ CHAPTER = Chapter(
             • **Stop:** ends this run. Automatic backups carry on.
 
             ## Good to know
-            **Sync now** does not wait for the charger, but still follows your Wi-Fi setting. See [[settings-mobile-data]].
+            • **Sync now** does not wait for the charger, but still follows your Wi-Fi setting. See [[settings-mobile-data]].
+            • It backs up every album set to **Backup**, **Sync** or **Archive**, but only ever optimises files in **Sync** albums.
         """, ui=True),
 
         topic("albums-status-line", "The status line under the card", """
@@ -159,7 +160,7 @@ CHAPTER = Chapter(
         """, ui=True),
 
         topic("album-merge-warning", "Duplicate album names detected", """
-            Some phones list one folder under two spellings. GallerySync merges them into one album and sets its mode to **Off**, so choose its mode again. **Dismiss** closes the card.
+            A single folder can end up recorded under two spellings that differ only in capital letters. GallerySync spots this, merges them into one album, and sets its mode to **Off** so you can choose fresh. **Dismiss** closes the card.
 
             This is the only time the app sets a mode, and it can only set **Off**.
         """, ui=True),
@@ -173,7 +174,7 @@ CHAPTER = Chapter(
             **Archive** confirms; **Cancel** changes nothing.
 
             ## Good to know
-            You confirm once. Files added to the album later are covered too, until the album is empty. Android still asks before each removal. See [[dialog-android-trash]].
+            You confirm once. Files added to the album later are covered too, until the album is empty. Android asks once per batch of up to 2,000 files. See [[dialog-android-trash]].
         """, ui=True),
     ],
 )
