@@ -6,8 +6,9 @@ CHAPTER = Chapter(
     intro="Things people ask, and what is usually going on.",
     topics=[
         topic("faq-sync-now-greyed", "Sync now is greyed out", """
-            It is greyed out when there is nothing to send. That means either every file in your Backup,
-            Sync and Archive albums is already sent, or no album is set to any of those modes yet.
+            It is greyed out when there is nothing to send and nothing waiting to be optimised. That means
+            either every file in your Backup, Sync and Archive albums is already sent, or no album is set to
+            any of those modes yet.
 
             Check the mode counts in the green card. If they are all under **Off**, choose a mode for
             the albums you want looked after. If a backup is already running, the left side of the card
@@ -105,7 +106,7 @@ CHAPTER = Chapter(
         """),
 
         topic("contact-and-privacy", "Contact, privacy and deleting your data", """
-            All three are cards at the bottom of the Settings tab.
+            All three are cards at the bottom of the Settings tab. To report a problem, use the **Bug Report** card just above them.
 
             • **Contact Info** shows the address to write to, with a button that copies it.
             • **Privacy Policy** says what the app does with your data. In short, it sends your files to your own Cloud accounts and nowhere else, and the developer collects nothing.

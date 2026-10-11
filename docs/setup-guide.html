@@ -90,7 +90,7 @@
 <main>
 
   <h1>First-Time Setup</h1>
-  <p class="sub">GallerySync — last updated 25 September 2026</p>
+  <p class="sub">GallerySync — last updated 11 October 2026</p>
 
   <div class="note">
     <p><strong>Every card, in order.</strong> This page explains each step of GallerySync's first-time
@@ -100,11 +100,11 @@
   <p class="chapter-intro">The first time you open GallerySync, a short guided setup walks you through nine screens. Each one is explained here, including the messages you might meet along the way.</p>
   <details class="topic"><summary>How the setup works</summary>
   <div class="topic-body" id="setup-overview">
-<p>Setup is a series of sreens. <strong>Next</strong> moves on and <strong>Back</strong> returns to the previous screen. You can only move on when a screen has what it needs: for example, at least one folder must be selected to backup and you must signed into your Cloud Account before the screen lets you continue.</p>
+<p>Setup is a series of screens. <strong>Next</strong> moves on and <strong>Back</strong> returns to the previous screen. You can only move on when a screen has what it needs: for example, at least one folder must be selected to back up, and you must be signed in to your Cloud account, before the screen lets you continue.</p>
 <h4>What you will be asked, in order</h4>
-<ol><li>A welcome screen, a short tour, and a summary of what's ahead. See <a class="xref" href="#setup-welcome-tour">“Welcome, the tour, and what will be set up”</a>.</li><li>Which Cloud services you use, and signing in to each. See <a class="xref" href="#setup-cloud">“Cloud storage: choosing services, signing in and choosing where backups go”</a>.</li><li>Permission to look for photos and videos on your phone, then which folders to back up and which Cloud each one goes to. See <a class="xref" href="#setup-choose-folders">“Choose folders to back up”</a>.</li><li>Your Backup Plan: one of four choices about the photos and videos already on the phone.</li><li>Only for two of the plans: how much to optimise.</li><li>When the first backup should start.</li><li>The first backup itself, with progress.</li></ol>
+<ol><li>A welcome screen, a short tour, and a summary of what's ahead. See <a class="xref" href="#setup-welcome-tour">“Welcome, the tour, and what will be set up”</a>.</li><li>Which Cloud services you use, and signing in to each. See <a class="xref" href="#setup-cloud">“Cloud storage: choosing services, signing in and choosing where backups go”</a>.</li><li>Permission to look for photos and videos on your phone, then which folders to back up and which Cloud each one goes to. See <a class="xref" href="#setup-choose-folders">“Choose folders to back up”</a>.</li><li>Your Backup Plan: one of four choices about the photos and videos already on the phone.</li><li>Only for two of the plans: how much to optimise.</li><li>When the first backup should start.</li><li>The first backup itself, with progress: first a check of what your Cloud already holds, then the upload, then any optimising your plan includes.</li></ol>
 <h4>Good to know</h4>
-<p>The first backup is the big one, because it sends everything that is not already in the Cloud. It could take hours. But you can monitor its progress.  If you leave the app while the backup is running, it will carry on in the background. When you come back you can see the progress screen. If will always come to that Progress Screen until the first backup has finished and been checked.</p>
+<p>The first backup is the big one, because it sends everything that is not already in the Cloud. It could take hours. But you can monitor its progress.  If you leave the app while the backup is running, it will carry on in the background. When you come back you can see the progress screen. The app always opens on that progress screen until the first backup has finished and been checked.</p>
 <p>Setup answers apply to the first run only. See <a class="xref" href="#setup-and-settings">“Setup and Settings are separate”</a>.</p>
   </div></details>
   <details class="topic"><summary>Welcome, the tour, and what will be set up</summary>
@@ -122,7 +122,7 @@
 <p>The first Cloud you select is the free one. Each further Cloud is part of <strong>Pro</strong>: free for 30 days, then a one-time purchase, not a subscription. You start the trial yourself with a button, the terms are shown first, and nothing is ever charged automatically. If the trial ends and you do not buy it, uploads to the extra Clouds pause and your free Cloud carries on as normal.</p>
 <h4>What each Cloud can do</h4>
 <p>Selecting a Cloud can show an <strong>About this Cloud</strong> note listing what it cannot do.</p>
-<ul><li><strong>OneDrive, Google Drive, Dropbox, IDrive e2 and Backblaze B2</strong> can Backup, Sync, Archive and Restore.</li><li><strong>Google Photos</strong> is <strong>backup only</strong>. Files sent there are not optimised, archived or restored by GallerySync, because the app cannot ask it, right then, whether a copy is safe.</li><li><strong>Outside OneDrive, the app cannot see what a Cloud already holds</strong>, so a photo that is already there may be added a second time.</li></ul>
+<ul><li><strong>OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 and Backblaze B2</strong> can Backup, Sync, Archive and Restore.</li><li><strong>Google Photos</strong> is <strong>backup only</strong>. Files sent there are not optimised, archived or restored by GallerySync, because the app cannot ask it, right then, whether a copy is safe.</li><li><strong>Outside OneDrive, the app cannot see what a Cloud already holds</strong>, so a photo that is already there may be added a second time.</li></ul>
 <h4>Signing in, one Cloud at a time</h4>
 <p>After <strong>Next</strong>, each Cloud you selected gets its own <strong>Connect</strong> card, headed <strong>Cloud 1 of 3</strong> and so on. Each one is finished before the next begins. <strong>Back</strong> returns to the previous card; there is no skip, so <strong>Next</strong> waits until every Cloud you selected is connected.</p>
 <ul><li><strong>OneDrive, Google Photos, Google Drive, Dropbox and pCloud</strong> open the provider's own sign-in page. You type your password there, never into GallerySync. The app only receives a permission that lets it work with your files, and keeps it in encrypted storage on your phone. Dropbox asks for permission to read as well as write: allow both, or Restore will not work.</li><li><strong>IDrive e2 and Backblaze B2</strong> ask for the endpoint, region, bucket and the access key pair you made in their console. The app checks them against the bucket before keeping them. See <a class="xref" href="#cloud-key-backblaze">“Connecting Backblaze B2: the keys and where to find them”</a> and <a class="xref" href="#cloud-key-idrive">“Connecting IDrive e2: the keys and where to find them”</a>.</li></ul>
@@ -204,12 +204,16 @@
 <p>The last screen follows the first backup from start to finish.</p>
 <h4>While it waits</h4>
 <p><strong>Waiting to start</strong> shows a countdown ("until backup starts"). The backup will start on its own, even if you close the app, as long as the phone is plugged in. <strong>SYNC NOW</strong> starts it immediately whatever the battery level.</p>
+<h4>Step one: checking your Cloud</h4>
+<p>Before anything is sent, the screen reads <strong>Checking your Cloud</strong> and counts through your files, for example <strong>1,200 of 8,600 checked</strong>. Each file on the phone is compared with what your Cloud already holds, by name and size, so only what is genuinely missing is sent. Nothing is uploaded during this step. It usually takes a minute or two, even for thousands of files.</p>
+<h4>Step one: checking your Cloud</h4>
+<p>Before anything is sent, the screen reads <strong>Checking your Cloud</strong> and counts through your files, for example <strong>1,200 of 8,600 checked</strong>. Each file on the phone is compared with what your Cloud already holds, by name and size, so only what is genuinely missing is sent. Nothing is uploaded during this step. It usually takes a minute or two, even for thousands of files.</p>
 <h4>While it runs</h4>
 <ul><li><strong>Scanning your library.</strong> Getting ready.</li><li><strong>Starting upload.</strong> The total is known and the first file is on its way.</li><li><strong>Uploading, with a percentage in the ring.</strong> The ring and the large percentage show the whole backup, across every Cloud you use.</li><li><strong>Under the percentage</strong> it names the Cloud being sent to right now (for example <strong>Uploading Google Photos</strong>) and, on the line below, how many are sent of how many there are for that Cloud.</li><li><strong>Below the ring</strong>, each other Cloud that still has files waiting is listed as <strong>Pending</strong>, with the number of its files still waiting to be sent. When one Cloud finishes, the next one moves into the ring.</li><li>Some Clouds take longer than others. Google Photos, for example, only accepts about 27 uploads a minute, so a large library can take hours; the backup carries on in the background if you close the app.</li></ul>
 <h4>When uploading ends</h4>
 <p>The screen then says the upload finished and was verified, and moves through <strong>Optimising photos</strong> and <strong>Optimising video</strong> with a count for each, when your plan includes them. Photos stay in your gallery and stay usable; nothing is cut from your videos.</p>
 <h4>Finishing</h4>
-<p>When everything is done the screen says the backup finished successfully and has been verified, and the button changes to <strong>Finish</strong>. While it is still running the button says <strong>Close</strong>, which closes the app while the backup carries on.</p>
+<p>When everything is done the screen says the backup finished successfully and has been verified, with a line saying what the check found, for example <strong>8,600 files checked: 8,500 already in OneDrive, 100 sent.</strong>, and the button changes to <strong>Finish</strong>. While it is still running the button says <strong>Close</strong>, which closes the app while the backup carries on.</p>
 <h4>Cancel</h4>
 <p><strong>Cancel</strong> (in place of Back) asks <strong>Stop the backup?</strong>. Stopping keeps everything already in the Cloud, resumes later where it left off without sending files twice, and deletes nothing. Photos already optimised stay optimised, with their originals in Cloud.</p>
   </div></details>
@@ -221,7 +225,7 @@
   </div></details>
 
   <footer>
-    GallerySync — First-Time Setup. Last updated 25 September 2026.
+    GallerySync — First-Time Setup. Last updated 11 October 2026.
   </footer>
 
 </main>

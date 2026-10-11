@@ -11,7 +11,7 @@ CHAPTER = Chapter(
 
             It is **not** a gallery app. Looking at photos, searching, editing and sharing are all done by
             the gallery app you already have (Samsung Gallery, Google Photos and so on), and GallerySync
-		deliberately does not copy any of that. It works quietly,  behind the scenes, keeping 
+            deliberately does not copy any of that. It works quietly, behind the scenes, keeping
             every photo and video safe and secure.
 
             ## What it can do for you
@@ -55,7 +55,7 @@ CHAPTER = Chapter(
         """),
 
         topic("quick-start", "Quick start", """
-            1. Finish the first-time setup: allow the app to see your photos, choose the folders to look after, sign in to your Cloud account, and pick a plan. See [[setup-overview]].
+            1. Finish the first-time setup: sign in to your Cloud account, allow the app to see your photos, choose the folders to look after, and pick a plan. See [[setup-overview]].
             2. Open the **Albums** tab. Every album starts as **Off**. Tap the button on an album and Select **Backup**, this as the name suggest copies your photos and videos to the Cloud, leaving the original on your phone.
             3. Press **Sync Now** if you want to manually sync your folders or close out of the tab.  New photos are picked up automatically shortly after you take them, on Wi-Fi or mobile data as well if you authorize it in Settings.
             4. Look at the last line of each album: it says how many of its files have been confirmed backed up to the Cloud.

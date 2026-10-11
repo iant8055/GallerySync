@@ -18,14 +18,14 @@ CHAPTER = Chapter(
 
             ## What your Cloud holds
             • **OneDrive.** Restore lists the photos and videos in your OneDrive backup folders, whoever put them there. It is not limited to what GallerySync uploaded, so an album you archived, a folder from another phone or one added from a computer can all be brought back. Each file goes back into the album with the same name as its OneDrive folder. It is still not a general file browser: only photos and videos, and only in your backup folders.
-            • **Dropbox, Google Drive, Backblaze B2 and IDrive e2.** Restore lists what GallerySync sent there from this phone, and fetches each file by the exact address the app recorded when it sent it.
+            • **Dropbox, Google Drive, pCloud, Backblaze B2 and IDrive e2.** Restore lists what GallerySync sent there from this phone, and fetches each file by the exact address the app recorded when it sent it.
             • **Google Photos** cannot be restored from.
 
             A file the phone already has at full size is shown greyed out, so you can see why it is not
             on offer. See [[restore-greyed-files]].
 
             ## Where restored files go
-            A restored file goes back into the folder it came from. For a folder you gave GallerySync access to in setup, such as one at the top of the phone's storage, the file is written straight into that folder. Android only lets an app create a photo under DCIM or Pictures, and a video under DCIM or Movies, so for a folder GallerySync has no access to and cannot use that way, the files go into **DCIM/** the album's name instead.
+            A restored file goes back into the folder it came from. For a folder you gave GallerySync access to in setup, such as one at the top of the phone's storage, the file is written straight into that folder. Android only lets an app create a photo under DCIM or Pictures, and a video under DCIM or Movies, so for a folder GallerySync has no access to and cannot use that way, the files go into **DCIM/** the album's name instead. Files that were loose at the top of **DCIM**, **Pictures** or **Movies** go back into that folder itself.
 
             ## Folders first
             The tab always opens on a list of folders (albums), even if there is only one. Swipe a folder

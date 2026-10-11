@@ -49,11 +49,12 @@ CHAPTER = Chapter(
 
             ## The test
             • **OneDrive** is asked for the list of files in the album's folder. A file on your phone is **verified** only if OneDrive lists a file with the **same name** and reports the **same size**.
-            • **Dropbox, Google Drive, Backblaze B2 and IDrive e2** are asked about the one file, by the exact address the app recorded when it sent it. The Cloud must say the file is there, not deleted and not in its bin, at exactly the size the phone's copy was. If Sync has already made a photo smaller, the size it must match is the original's.
+            • **Dropbox, Google Drive, pCloud, Backblaze B2 and IDrive e2** are asked about the one file, by the exact address the app recorded when it sent it. The Cloud must say the file is there, not deleted and not in its bin, at exactly the size the phone's copy was. If Sync has already made a photo smaller, the size it must match is the original's.
 
             Anything less, such as missing, deleted, or present at a different size, is not verified.
 
             ## When it is done
+            • At the start of the first backup, before anything is sent, so only files your Cloud does not already have are uploaded.
             • On the Albums tab, every time you open it or press Rescan, for the OneDrive line of each album.
             • On the Archive tab, when you press Check these files, and the files not found are sent first. Files sent to another Cloud are asked about there, and again just before removal.
             • Just before Sync replaces a photo or video with a smaller copy.
@@ -145,6 +146,12 @@ CHAPTER = Chapter(
             **Manual** starts when you press **Sync now**, straight away. It runs in the background and
             you can close the app.
 
+            ## Deleted files
+            Under **Ask** (Settings, Albums), a photo or video you delete that still has a copy in your Cloud
+            is noticed a short while later, and a notification says so if notifications are allowed. It only
+            brings you to the question; nothing is removed until you decide. With **Manual** sync nothing runs
+            in the background, so you are asked the next time you open the app.
+
             ## Archiving
             Only when you say Yes on the Archive tab. Android requires a tap, so this cannot run while
             you are away.
@@ -176,7 +183,6 @@ CHAPTER = Chapter(
             • Only files **on the phone right now**.
             • Only inside the **folders you chose**.
             • Not files in your phone's **Trash**.
-            • Not the small **Restored** album, whose files are already in your Cloud.
 
             Your gallery app may also show cloud-only items, or group folders differently. Neither
             number is wrong; they are counting different things. Each figure in GallerySync says what it

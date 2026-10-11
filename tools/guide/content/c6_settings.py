@@ -4,9 +4,9 @@ CHAPTER = Chapter(
     id="settings",
     title="The Settings tab",
     intro="The things you set once and rarely change. The tab is a single scrolling page divided into "
-          "green bands: General, Backup, Albums, Sync, Restore and Archive. The How To Guide is the "
-          "first card in General, the policy pages are near the bottom, and Language is the very last "
-          "line. Each band has a (?) beside its name, and a thin line separates one setting from the "
+          "green bands: General, Backup, Albums, Sync, Camera Sync, Restore, Archive and Help & Feedback. "
+          "The How To Guide is the first card in General, the policy pages are near the bottom, and "
+          "Language is the very last line. Each band has a (?) beside its name, and a thin line separates one setting from the "
           "next.",
     topics=[
         topic("settings-overview", "How the Settings tab is laid out", """
@@ -309,7 +309,7 @@ CHAPTER = Chapter(
         topic("settings-section-sync", "Sync", """
             ## What it is
             How photos and videos are optimised to save space. Files are only changed after they are
-            verified in your Cloud, and only inside albums you set to Sync. Sync works with OneDrive, Google Drive, Dropbox, IDrive e2 and Backblaze B2.
+            verified in your Cloud, and only inside albums you set to Sync. Sync works with OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 and Backblaze B2.
         """, ui=True),
 
         topic("settings-optimise-photos", "Optimise photos", """
@@ -414,6 +414,13 @@ CHAPTER = Chapter(
             They were measured on real clips and are typical, not promised. They depend on the content.
             High compression means the most shrinking, so the smallest picture.
 
+            ## Choosing a stronger compression
+            When you change to a stronger compression (for example from Low to High), the app asks
+            **Re-optimise existing videos?** Videos in Sync albums that were too small to shrink at the old
+            setting can be tried again at the new one. **Yes** puts them back in line for optimising, on the
+            same rules as any other video; **No** leaves them as they are. Videos already optimised are not
+            touched either way.
+
             ## Good to know
             Optimising re-encodes the clip at a lower resolution. Nothing is cut, and it stays in your
             gallery. The full-quality original stays in your Cloud.
@@ -460,7 +467,7 @@ CHAPTER = Chapter(
 
         topic("settings-section-archive", "Archive (Settings)", """
             ## What it is
-            Two settings, added 22 Sept 2026:
+            Two settings:
             • **Only show files older than**, which sets where the Archive tab's own age filter starts each time you open it. See [[settings-archive-default-age]].
             • **Notify when files are ready to archive**, off by default. See [[settings-archive-notify]].
 
@@ -501,8 +508,13 @@ CHAPTER = Chapter(
             asks again.
         """, ui=True),
 
-        topic("settings-about-cards", "The three link cards at the bottom", """
-            Below the sections are three cards. Tap one to open its page inside the app.
+        topic("settings-about-cards", "Help & Feedback, and the link cards at the bottom", """
+            The last band, **Help & Feedback**, has two cards:
+
+            • **Rate us on Play Store.** Opens the GallerySync listing on Google Play.
+            • **Bug Report.** Something not working? It says what to tell us and the address to write to, and **Copy details** copies the app version, your phone model and its Android version, to paste into the message. It does not open a mail app.
+
+            Below them are three more cards. Tap one to open its page inside the app.
 
             • **Privacy Policy.** How GallerySync handles your photos, videos and account.
             • **Delete Account Info.** How to sign out, remove the app's access to your Cloud accounts, and clear its data.

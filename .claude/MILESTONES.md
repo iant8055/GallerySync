@@ -7979,3 +7979,10 @@ Not seen: Samsung Gallery's own delete (needs the Fold), and the Manual sync mod
 the six-hourly run is armed (`BackupScheduling.enable` is called only for Automatic), so there is no notice and the
 window asks on the next open, as before.
 
+
+**How To Guide audit (11 Oct 2026, Ian asked).** Every chapter read against the code. Fixed: pCloud missing from the
+full-capability, Sync, Restore, Archive-check and verification lists (it is FULL since v19); the setup order in Quick start;
+the first backup's verification step and finish summary (not described); the Archive "files archived" line (now counts
+files that left the phone, kept files not scheduled, 5335abb); Restore's loose DCIM/Pictures/Movies rule (56b455b); the
+Re-optimise question; the Camera Sync and Help & Feedback bands (Rate us, Bug Report) missing from the Settings layout;
+the deleted-files notice in "When things happen"; the stale Restored-album line; typos. LAST_UPDATED 11 October 2026.

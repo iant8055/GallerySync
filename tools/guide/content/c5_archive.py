@@ -83,7 +83,7 @@ CHAPTER = Chapter(
 
             ## Where it comes from
             For OneDrive, the check asks for the list of files in each album's folder and compares names and
-            sizes with the files on your phone. For Dropbox, Google Drive, Backblaze B2 and IDrive e2 it asks about each file by the exact address the app recorded when it sent it, and the Cloud must say the file is there, not deleted or in its bin, at exactly the size it was. The result messages report what actually happened.
+            sizes with the files on your phone. For Dropbox, Google Drive, pCloud, Backblaze B2 and IDrive e2 it asks about each file by the exact address the app recorded when it sent it, and the Cloud must say the file is there, not deleted or in its bin, at exactly the size it was. The result messages report what actually happened.
 
             ## Good to know
             "Freeing 340 MB" is a promise about after the bin is emptied. A removed file still takes its

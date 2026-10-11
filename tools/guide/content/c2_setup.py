@@ -7,9 +7,9 @@ CHAPTER = Chapter(
           "Each one is explained here, including the messages you might meet along the way.",
     topics=[
         topic("setup-overview", "How the setup works", """
-            Setup is a series of sreens. **Next** moves on and **Back** returns to the previous screen. You
+            Setup is a series of screens. **Next** moves on and **Back** returns to the previous screen. You
             can only move on when a screen has what it needs: for example, at least one folder must be
-            selected to backup and you must signed into your Cloud Account before the screen lets you continue.
+            selected to back up, and you must be signed in to your Cloud account, before the screen lets you continue.
 
             ## What you will be asked, in order
             1. A welcome screen, a short tour, and a summary of what's ahead. See [[setup-welcome-tour]].
@@ -18,12 +18,12 @@ CHAPTER = Chapter(
             4. Your Backup Plan: one of four choices about the photos and videos already on the phone.
             5. Only for two of the plans: how much to optimise.
             6. When the first backup should start.
-            7. The first backup itself, with progress.
+            7. The first backup itself, with progress: first a check of what your Cloud already holds, then the upload, then any optimising your plan includes.
 
             ## Good to know
             The first backup is the big one, because it sends everything that is not already in the Cloud.
             It could take hours. But you can monitor its progress.  If you leave the app while the backup is running, it will carry on in the background. 
-            When you come back you can see the progress screen. If will always come to that Progress Screen until the first backup has finished and been checked.
+            When you come back you can see the progress screen. The app always opens on that progress screen until the first backup has finished and been checked.
 
             Setup answers apply to the first run only. See [[setup-and-settings]].
         """),
@@ -58,7 +58,7 @@ CHAPTER = Chapter(
 
             ## What each Cloud can do
             Selecting a Cloud can show an **About this Cloud** note listing what it cannot do.
-            • **OneDrive, Google Drive, Dropbox, IDrive e2 and Backblaze B2** can Backup, Sync, Archive and Restore.
+            • **OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 and Backblaze B2** can Backup, Sync, Archive and Restore.
             • **Google Photos** is **backup only**. Files sent there are not optimised, archived or restored by GallerySync, because the app cannot ask it, right then, whether a copy is safe.
             • **Outside OneDrive, the app cannot see what a Cloud already holds**, so a photo that is already there may be added a second time.
 
@@ -216,6 +216,12 @@ CHAPTER = Chapter(
             own, even if you close the app, as long as the phone is plugged in. **SYNC NOW** starts it
             immediately whatever the battery level.
 
+            ## Step one: checking your Cloud
+            Before anything is sent, the screen reads **Checking your Cloud** and counts through your files, for example **1,200 of 8,600 checked**. Each file on the phone is compared with what your Cloud already holds, by name and size, so only what is genuinely missing is sent. Nothing is uploaded during this step. It usually takes a minute or two, even for thousands of files.
+
+            ## Step one: checking your Cloud
+            Before anything is sent, the screen reads **Checking your Cloud** and counts through your files, for example **1,200 of 8,600 checked**. Each file on the phone is compared with what your Cloud already holds, by name and size, so only what is genuinely missing is sent. Nothing is uploaded during this step. It usually takes a minute or two, even for thousands of files.
+
             ## While it runs
             • **Scanning your library.** Getting ready.
             • **Starting upload.** The total is known and the first file is on its way.
@@ -231,6 +237,7 @@ CHAPTER = Chapter(
 
             ## Finishing
             When everything is done the screen says the backup finished successfully and has been verified,
+            with a line saying what the check found, for example **8,600 files checked: 8,500 already in OneDrive, 100 sent.**,
             and the button changes to **Finish**. While it is still running the button says **Close**,
             which closes the app while the backup carries on.
 

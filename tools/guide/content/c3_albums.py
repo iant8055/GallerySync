@@ -115,12 +115,12 @@ CHAPTER = Chapter(
         topic("albums-archive-lines", "Files archived and Scheduled to leave this phone", """
             ## What it is
             With **Archive** selected, up to two lines:
-            • **N files archived · X in the Cloud.** How many files from your Archive albums the app has sent to the Cloud, and how much room they take there. This counts files that have been sent, whether or not they have left the phone yet.
-            • **N Scheduled to leave this phone.** Files still on the phone in Archive albums. Every one is due to be removed once the Cloud is confirmed to hold it. When there are none, the line says **Nothing left to archive**.
+            • **N files archived · X in your Cloud.** How many files from your Archive albums have already left the phone, with their copies in the Cloud, and how much room those copies take there.
+            • **N Scheduled to leave this phone.** Files still on the phone in Archive albums. Every one is due to be removed once the Cloud is confirmed to hold it. Files you chose to keep on the phone are not counted. When there are none, the line says **Nothing left to archive**.
 
             ## Where it comes from
-            The first line comes from the app's own record of what it has sent. The second is a live count
-            of files in your Archive albums on the phone right now.
+            The first line comes from the app's own record of what it has sent and what has since left the
+            phone. The second is a live count of files in your Archive albums on the phone right now.
 
             ## Good to know
             Nothing leaves the phone from this screen. Removal happens on the Archive tab, after a check
@@ -239,7 +239,7 @@ CHAPTER = Chapter(
             When an album that is being backed up has failed files, a hint and a **Retry** button appear under the counts, reading for example **Retry 3 failed**. Pressing it puts those files back in the queue and starts a backup. It only adds work: nothing is removed from your phone or from the Cloud. If a file fails again, it stays marked failed and the button is still there.
 
             ## Where it comes from
-            The app's own record of each file's progress. The the Cloud-checked answer is the last line of
+            The app's own record of each file's progress. The Cloud-checked answer is the last line of
             the album card on the main list.
         """, ui=True),
 
