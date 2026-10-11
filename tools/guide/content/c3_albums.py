@@ -23,12 +23,6 @@ CHAPTER = Chapter(
             New albums carry a **New** tag and always start at **Off**. A new album can never start as Archive.
         """),
 
-        topic("albums-permission", "The permission message", """
-            • **GallerySync needs access to your photos:** the app cannot see any albums yet.
-            • **Only some photos are shared:** the app can see only the photos you picked, so backups are incomplete.
-
-            **Grant access** opens Android's permission screen. Choose **Allow all**. If no prompt appears: phone **Settings → Apps → GallerySync → Permissions → Photos and videos**.
-        """, ui=True),
 
         topic("albums-filter", "All Albums and the four mode buttons", """
             • Tap **Backup**, **Sync**, **Archive** or **Off** to show only the albums in that mode.

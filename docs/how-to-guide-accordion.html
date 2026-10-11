@@ -248,11 +248,6 @@
 <ul><li><strong>Show new Albums:</strong> lists only the new ones. <strong>Show all Albums</strong> brings the rest back.</li><li><strong>Dismiss:</strong> closes the message.</li></ul>
 <p>New albums carry a <strong>New</strong> tag and always start at <strong>Off</strong>. A new album can never start as Archive.</p>
   </div></details>
-  <details class="topic"><summary>The permission message</summary>
-  <div class="topic-body" id="albums-permission">
-<ul><li><strong>GallerySync needs access to your photos:</strong> the app cannot see any albums yet.</li><li><strong>Only some photos are shared:</strong> the app can see only the photos you picked, so backups are incomplete.</li></ul>
-<p><strong>Grant access</strong> opens Android's permission screen. Choose <strong>Allow all</strong>. If no prompt appears: phone <strong>Settings → Apps → GallerySync → Permissions → Photos and videos</strong>.</p>
-  </div></details>
   <details class="topic"><summary>All Albums and the four mode buttons</summary>
   <div class="topic-body" id="albums-filter">
 <ul><li>Tap <strong>Backup</strong>, <strong>Sync</strong>, <strong>Archive</strong> or <strong>Off</strong> to show only the albums in that mode.</li><li>Tap <strong>All Albums</strong>, or the same button again, to show them all.</li></ul>
@@ -761,9 +756,11 @@
   <div class="topic-body" id="faq-reconnect-cloud">
 <p>The Cloud refused to let the file be read. Sign in again in Settings. For Dropbox, allow reading files; for IDrive e2 and Backblaze B2, use a key that can read the bucket. Your phone's file was not changed.</p>
   </div></details>
-  <details class="topic"><summary>The app says only some photos are shared</summary>
-  <div class="topic-body" id="faq-only-some-photos">
-<p>Press <strong>Grant access</strong> on the Albums tab and choose <strong>Allow all</strong>, or allow Photos and videos for GallerySync in your phone's Settings under Apps.</p>
+  <details class="topic"><summary>GallerySync cannot see my photos</summary>
+  <div class="topic-body" id="albums-permission">
+<p>A message at the top of the Albums tab means GallerySync does not have full access to your photos:</p>
+<ul><li><strong>GallerySync needs access to your photos:</strong> no access was given, or it was taken away.</li><li><strong>Only some photos are shared:</strong> access was limited with <strong>Select photos</strong>, so backups are incomplete.</li></ul>
+<p>Press <strong>Grant access</strong> and choose <strong>Allow all</strong>. If no prompt appears: phone <strong>Settings → Apps → GallerySync → Permissions → Photos and videos</strong>.</p>
   </div></details>
   <details class="topic"><summary>Contact, privacy and deleting your data</summary>
   <div class="topic-body" id="contact-and-privacy">

@@ -63,9 +63,13 @@ CHAPTER = Chapter(
             The Cloud refused to let the file be read. Sign in again in Settings. For Dropbox, allow reading files; for IDrive e2 and Backblaze B2, use a key that can read the bucket. Your phone's file was not changed.
         """),
 
-        topic("faq-only-some-photos", "The app says only some photos are shared", """
-            Press **Grant access** on the Albums tab and choose **Allow all**, or allow Photos and videos for GallerySync in your phone's Settings under Apps.
-        """),
+        topic("albums-permission", "GallerySync cannot see my photos", """
+            A message at the top of the Albums tab means GallerySync does not have full access to your photos:
+            • **GallerySync needs access to your photos:** no access was given, or it was taken away.
+            • **Only some photos are shared:** access was limited with **Select photos**, so backups are incomplete.
+
+            Press **Grant access** and choose **Allow all**. If no prompt appears: phone **Settings → Apps → GallerySync → Permissions → Photos and videos**.
+        """, ui=True),
 
         topic("contact-and-privacy", "Contact, privacy and deleting your data", """
             At the bottom of Settings:

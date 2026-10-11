@@ -4,8 +4,6 @@
     The text the (?) pop-ups show. Change the guide's source and rebuild, or the two drift.
 -->
 <resources>
-    <string name="help_albums_permission_title" formatted="false">The permission message</string>
-    <string name="help_albums_permission_body" formatted="false">• **GallerySync needs access to your photos:** the app cannot see any albums yet.\n• **Only some photos are shared:** the app can see only the photos you picked, so backups are incomplete.\n\n**Grant access** opens Android\'s permission screen. Choose **Allow all**. If no prompt appears: phone **Settings → Apps → GallerySync → Permissions → Photos and videos**.</string>
     <string name="help_albums_all_backed_up_title" formatted="false">Everything here is backed up</string>
     <string name="help_albums_all_backed_up_body" formatted="false">Shown when every album in view has files and none are waiting to be sent. It comes from the app\'s own record; the Cloud\'s own answer is the last line of each album card.</string>
     <string name="help_albums_optimised_line_title" formatted="false">Optimised and Saved</string>
@@ -112,4 +110,6 @@
     <string name="help_settings_archive_default_age_body" formatted="false">Where the Archive tab\'s age filter starts: **1 hour**, **1 day**, **1 week**, **1 month**, **1 year** or **All** (default). Changing it on the Archive tab lasts for that visit only. See “Only show files older than…”.</string>
     <string name="help_settings_archive_notify_title" formatted="false">Notify when files are ready to archive</string>
     <string name="help_settings_archive_notify_body" formatted="false">**Off** by default. When on, you are notified once per new batch of files ready to archive. OneDrive files only.\n\nThe Albums tab and the leaving reminder show this too, so you are never relying on notifications alone. If notifications are blocked, the switch says so.</string>
+    <string name="help_albums_permission_title" formatted="false">GallerySync cannot see my photos</string>
+    <string name="help_albums_permission_body" formatted="false">A message at the top of the Albums tab means GallerySync does not have full access to your photos:\n\n• **GallerySync needs access to your photos:** no access was given, or it was taken away.\n• **Only some photos are shared:** access was limited with **Select photos**, so backups are incomplete.\n\nPress **Grant access** and choose **Allow all**. If no prompt appears: phone **Settings → Apps → GallerySync → Permissions → Photos and videos**.</string>
 </resources>

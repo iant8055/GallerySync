@@ -16,7 +16,6 @@ enum class HelpTopic(
     @param:StringRes val title: Int,
     @param:StringRes val body: Int
 ) {
-    ALBUMS_PERMISSION("albums-permission", R.string.help_albums_permission_title, R.string.help_albums_permission_body),
     ALBUMS_ALL_BACKED_UP("albums-all-backed-up", R.string.help_albums_all_backed_up_title, R.string.help_albums_all_backed_up_body),
     ALBUMS_OPTIMISED_LINE("albums-optimised-line", R.string.help_albums_optimised_line_title, R.string.help_albums_optimised_line_body),
     ALBUMS_ARCHIVE_LINES("albums-archive-lines", R.string.help_albums_archive_lines_title, R.string.help_albums_archive_lines_body),
@@ -69,5 +68,6 @@ enum class HelpTopic(
     SETTINGS_SECTION_CAMERA("settings-section-camera", R.string.help_settings_section_camera_title, R.string.help_settings_section_camera_body),
     SETTINGS_SECTION_ARCHIVE("settings-section-archive", R.string.help_settings_section_archive_title, R.string.help_settings_section_archive_body),
     SETTINGS_ARCHIVE_DEFAULT_AGE("settings-archive-default-age", R.string.help_settings_archive_default_age_title, R.string.help_settings_archive_default_age_body),
-    SETTINGS_ARCHIVE_NOTIFY("settings-archive-notify", R.string.help_settings_archive_notify_title, R.string.help_settings_archive_notify_body);
+    SETTINGS_ARCHIVE_NOTIFY("settings-archive-notify", R.string.help_settings_archive_notify_title, R.string.help_settings_archive_notify_body),
+    ALBUMS_PERMISSION("albums-permission", R.string.help_albums_permission_title, R.string.help_albums_permission_body);
 }
