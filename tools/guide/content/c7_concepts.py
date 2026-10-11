@@ -3,190 +3,110 @@ from model import Chapter, topic
 CHAPTER = Chapter(
     id="concepts",
     title="How it works, in plain English",
-    intro="Short explanations of the ideas behind the buttons. The chapters above link here when a "
-          "word needs more than a line.",
+    intro="The ideas behind the buttons.",
     topics=[
         topic("modes-in-depth", "The four modes", """
-            Every album has exactly one mode. You set it with the coloured pill on the album's card, on
-            the Albums tab. The Cloud copy is identical in the three modes that upload; what differs is
-            what happens to the file **on your phone**.
+            Each album has one mode, set with the button on its card.
 
-            • **Off.** Nothing is sent and nothing on the phone is touched. This is where every album starts. It means "I have not decided, or I do not want this album looked after".
-            • **Backup.** Copies the album to your Cloud and leaves the phone alone, always. The safe choice, and the one to pick when you are unsure.
-            • **Sync.** Backs up, and also makes the album eligible for optimising: photos can be replaced by smaller copies that stay in your gallery. Optimising itself is controlled in Settings, under Sync, and is off until you switch it on.
-            • **Archive.** Backs up, verifies, and then takes the files off the phone into its Trash/Recycle Bin, after your tap. The album leaves your gallery. The only mode that removes files. It is a standing instruction while the album holds files: files added to it later are covered too. Once Archive has emptied the album, the album leaves the list and its mode is forgotten.
+            • **Off:** nothing happens. Every album starts here.
+            • **Backup:** copies to your Cloud; the phone is never touched.
+            • **Sync:** backs up, then optimises if optimising is on in Settings.
+            • **Archive:** backs up, verifies, then moves the files to the phone's trash after your tap. The only mode that removes files.
 
-            ## What each Cloud can do
-            Backup works with every Cloud. **Sync** and **Archive** need a Cloud that GallerySync can ask, at the moment it matters, whether a file is safe: OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 and Backblaze B2. Google Photos is backup only. If an album goes there, choosing Sync or Archive shows a message and nothing happens for that album.
+            ## Which Clouds
+            Backup works with every Cloud. Sync and Archive need OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 or Backblaze B2, not Google Photos.
 
-            ## Your Camera folder can have no Sync
-            If you turn on **Camera Sync** in Settings and choose the folder your camera saves to, that folder
-            offers **Off**, **Backup** and **Archive**. Sync would make a new photo smaller the moment it is
-            backed up, so the Camera folder has its own choices instead: you select what to make smaller, and
-            only then is it touched. See [[album-camera-optimise]]. Until you turn it on, every album,
-            Camera included, offers all four modes.
+            ## Camera folder
+            If you set a Camera folder in Settings, it offers Off, Backup and Archive, with its own optimise controls instead of Sync. See [[album-camera-optimise]].
 
-            ## Only you set a mode
-            Nothing sets an album's mode for you: not first-time setup, not the optimise settings, and not
-            a backup. The one exception is the merge of duplicate album names, which can only ever set
-            **Off**. See [[album-merge-warning]].
+            ## Which to pick
+            • Keep as is, but protected: **Backup**.
+            • Save space but keep viewing: **Sync**.
+            • Old albums you want off the phone: **Archive**.
+            • Unsure: **Off** or **Backup**.
 
-            ## Which one should I pick?
-            • Camera, and albums you want protected but kept as they are: **Backup**.
-            • Albums that fill the phone, where you want space back but still want to see the photos: **Sync**. For the folder your camera saves to, you can instead use **Backup** and optimise old photos by hand from its file list ([[album-camera-optimise]]).
-            • Old albums you rarely open and want off the phone: **Archive**.
-            • Not sure yet: leave it **Off**, or use **Backup**. You can change a mode at any time.
-
-            ## Changing your mind
-            Switching between Off, Backup and Sync is instant and removes nothing. Switching **to**
-            Archive asks you to confirm. Switching **away from** Archive stops any further removals; files
-            already in the bin stay there until you restore or empty them.
+            ## Good to know
+            • Only you set modes. The one exception is merging duplicate albums, which sets **Off**. See [[album-merge-warning]].
+            • Switching to Archive asks you to confirm. Switching away stops further removals.
         """),
 
         topic("how-verification-works", "How verification works", """
-            Before the app shrinks or removes anything on your phone, it makes sure a good copy exists in
-            your Cloud, and it asks the Cloud itself, right then. That check is the guarantee, and nothing skips it.
+            Before anything is optimised or removed, the Cloud is asked, right then, whether it holds a good copy.
 
             ## The test
-            • **OneDrive** is asked for the list of files in the album's folder. A file on your phone is **verified** only if OneDrive lists a file with the **same name** and reports the **same size**.
-            • **Dropbox, Google Drive, pCloud, Backblaze B2 and IDrive e2** are asked about the one file, by the exact address the app recorded when it sent it. The Cloud must say the file is there, not deleted and not in its bin, at exactly the size the phone's copy was. If Sync has already made a photo smaller, the size it must match is the original's.
+            • **OneDrive:** lists the album folder; the file must have the same name and size.
+            • **Dropbox, Google Drive, pCloud, Backblaze B2, IDrive e2:** asked about the exact file; it must be present, not in its bin, at the same size. For an optimised photo, the original's size.
 
-            Anything less, such as missing, deleted, or present at a different size, is not verified.
+            ## When
+            • At the start of the first backup, so only missing files are sent.
+            • Each time you open the Albums tab or press Rescan (OneDrive).
+            • When you check files on the Archive tab, and again just before removal.
+            • Just before a file is optimised.
 
-            ## When it is done
-            • At the start of the first backup, before anything is sent, so only files your Cloud does not already have are uploaded.
-            • On the Albums tab, every time you open it or press Rescan, for the OneDrive line of each album.
-            • On the Archive tab, when you press Check these files, and the files not found are sent first. Files sent to another Cloud are asked about there, and again just before removal.
-            • Just before Sync replaces a photo or video with a smaller copy.
+            ## Three answers
+            • **Verified:** the Cloud has it.
+            • **Not there, or wrong size:** the file stays on the phone.
+            • **Could not check:** treated as unknown. Nothing is removed or optimised.
 
-            Nothing is remembered from an earlier check. A file deleted from your Cloud by hand would otherwise be trusted for ever.
-
-            ## Three different answers
-            • **Verified.** The Cloud has it.
-            • **Not there, or the wrong size.** The file stays on your phone, and the app says so.
-            • **Could not check.** The internet failed, you are signed out, or the Cloud did not answer. That is not the same as "missing", and nothing is removed or shrunk on the strength of an unanswered question.
-
-            ## What it cannot promise
-            A size check cannot catch every kind of damage. So keep an eye on your own backups: open
-            your Cloud's own app or website now and then and open a few photos, and do it before you empty any bin. For
-            anything you could not bear to lose, keep a copy somewhere this app cannot reach.
+            ## Good to know
+            A size check cannot catch every kind of damage. Open your Cloud now and then and check a few photos.
         """),
 
         topic("how-optimising-works", "How optimising works", """
-            Optimising swaps a file on your phone for a smaller copy of itself. The point is to let the
-            phone stop filling up while everything stays in your gallery.
+            Optimising swaps the phone's copy for a smaller one, so the phone stops filling up while everything stays in your gallery.
 
             ## Photos
-            • The copy is reduced to about **2048 pixels on the long edge**, roughly a tenth of the size.
-            • It keeps its name and place, so your gallery shows it as usual, and it keeps information such as date and location.
-            • It carries a small **cloud badge** so you can tell it has been optimised.
-            • The **full-quality original stays in your Cloud**, untouched.
-            • A photo that would not get smaller is left as it is.
+            Reduced to about 2048 pixels on the long edge, roughly a tenth of the size. Same name, place, date and location, with a small cloud badge.
 
             ## Video
-            • A clip is re-encoded at a lower resolution: **480p** (High compression, the most shrinking), **720p** (Medium compression) or **1080p** (Low compression). Nothing is ever cut, so a clip is never shortened.
-            • It stays in your gallery under its own name.
-            • It happens in the background, a few clips at a time. Automatic waits for the phone to be charging; Manual starts when you press **Sync now**. First-time setup also optimises video once, if you chose a plan that includes it.
-            • Only clips old enough to pass the age you set are touched, and a clip that would not get smaller is left as it is and not offered again.
+            Re-encoded at **480p** (High compression), **720p** (Medium) or **1080p** (Low). Never cut. Automatic waits for the charger; Manual runs on **Sync now**.
 
-            ## The rules it always follows
-            • Only files inside albums set to **Sync**.
-            • Only files whose Cloud has confirmed the original, at the same size, right then.
-            • Never anything permanently deleted: the original is in your Cloud.
+            ## Rules
+            • Only in **Sync** albums.
+            • Only after the Cloud confirms the original at the same size.
+            • A file that would not get smaller is left alone.
 
             ## Getting the original back
-            Open the **Restore** tab, choose the folder or files, and press **Restore**. The original
-            replaces the smaller copy in the same place. Editing an optimised photo starts from the smaller
-            copy, so restore first if you want the full detail.
+            Use the **Restore** tab. Restore before editing if you want full detail.
         """),
 
         topic("where-deleted-files-go", "Where removed files go", """
-            GallerySync never permanently deletes anything. Everything it removes goes somewhere you can
-            recover it from.
+            Nothing is permanently deleted.
 
             ## On your phone
-            When Archive removes files they go to Android's media trash. The file is renamed in place
-            and hidden from your gallery's normal view, keeps its size, and stays for a limited time,
-            usually around 30 days, which Android decides. It shows up in your gallery's bin:
+            Archive moves files to Android's trash for about 30 days:
+            • Samsung: **Samsung Gallery's Recycle Bin**.
+            • Other phones: the **Files** app's **Trash**.
 
-            • On Samsung phones, **Samsung Gallery's Recycle Bin**.
-            • On other phones, the **Trash** in the Files app (and often in the gallery app too).
-
-            Open that bin to put files back.
-
-            ## The space is not freed at once
-            A file in the bin still takes its full space. Room only returns when you **empty the bin
-            yourself**, or when the time runs out. The app never empties it, and every "frees X" message
-            means "frees X once the bin is emptied".
+            Files in the bin still take their full space until you empty it.
 
             ## In your Cloud
-            If you use the option to be asked about OneDrive copies after deleting on your phone, files
-            you approve go to your **OneDrive recycle bin**, where you can restore them. The app never
-            empties that either. It never deletes anything in Google Drive, Dropbox, IDrive e2, Backblaze B2, Google Photos or pCloud.
+            Under **Ask**, copies you choose to remove go to the **OneDrive recycle bin**. Nothing is ever removed from other Clouds. The app never empties any bin.
         """),
 
         topic("background-work", "When things happen", """
-            ## Backing up
-            Runs by itself once albums are set to Backup, Sync or Archive:
-            • A short while after new photos or videos appear.
-            • A safety check about every six hours.
-            • Only on Wi-Fi, unless **Use mobile data** is on, and only when the battery and storage are not low.
-
-            **Sync now** starts a run straight away, whether or not the phone is charging.
-
-            ## Optimising photos
-            **Automatic** happens as soon as a file reaches a Sync album, or an album is switched to Sync:
-            after the file has been sent and confirmed in its Cloud, and in the background. **Manual**
-            happens when you press **Sync now** on the Albums tab. Photos outside the folders you gave
-            access to need Android's confirmation, so they wait until you open the app or press **Sync now**.
-
-            ## Optimising video
-            **Automatic** starts after a backup run has finished everything, when an album is switched to
-            Sync, and when you change the video settings, and it waits for the phone to be charging.
-            **Manual** starts when you press **Sync now**, straight away. It runs in the background and
-            you can close the app.
-
-            ## Deleted files
-            Under **Ask** (Settings, Albums), a photo or video you delete that still has a copy in your Cloud
-            is noticed a short while later, and a notification says so if notifications are allowed. It only
-            brings you to the question; nothing is removed until you decide. With **Manual** sync nothing runs
-            in the background, so you are asked the next time you open the app.
-
-            ## Archiving
-            Only when you say Yes on the Archive tab. Android requires a tap, so this cannot run while
-            you are away.
-
-            ## Restoring
-            Only when you press Restore.
+            • **Backing up:** shortly after new photos appear, and every six hours. Wi-Fi only unless mobile data is on; not when battery or storage is low. **Sync now** runs straight away.
+            • **Optimising photos:** Automatic, once the Cloud confirms a file in a Sync album. Manual, on **Sync now**.
+            • **Optimising video:** Automatic, after backups, while charging. Manual, on **Sync now**.
+            • **Deleted files:** under **Ask**, you are notified shortly after deleting a file that has a Cloud copy (Automatic sync only).
+            • **Archiving:** only when you say Yes on the Archive tab.
+            • **Restoring:** only when you press Restore.
 
             ## Closing the app
-            Backing up carries on after you leave the app with the back gesture or the Home button. Swiping
-            the app away from the recent-apps list is different: Android may then stop its background
-            jobs until you next open it. If you are waiting for a large backup, open the app again after
-            swiping it away.
+            Back or Home is fine: work carries on. Swiping the app away from recent apps can stop background work until you open it again.
         """),
 
         topic("where-your-data-lives", "Where your data lives", """
-            • **Your photos and videos** go from your phone directly to your own Cloud accounts, over an encrypted connection. GallerySync has no server, so they never pass through anything belonging to the developer.
-            • **Your sign-ins and keys** are kept in encrypted storage on your phone. You type your password on the provider's own page, never into the app. The keys for IDrive e2 and Backblaze B2 are typed into the app once and kept encrypted.
-            • **The app's own record** of what it has sent, its settings and your folder choices are kept in private storage on your phone, not readable by other apps.
-            • **The developer collects nothing:** no analytics, no crash reporting, no advertising.
+            • **Photos and videos:** go directly between your phone and your own Cloud, encrypted. There are no GallerySync servers.
+            • **Sign-ins and keys:** kept encrypted on your phone. Passwords are typed on the provider's page, never in the app.
+            • **The app's records and settings:** private storage on your phone.
+            • **Nothing is collected:** no analytics, crash reporting or ads.
 
-            The full details are in the **Privacy Policy** card at the bottom of Settings. To sign out,
-            remove the app's access to your Cloud accounts, or clear its data, use the **Delete Account
-            Info** card.
+            Details: **Privacy Policy** and **Delete Account Info** in Settings.
         """),
 
         topic("numbers-explained", "Why the numbers may differ from your gallery app", """
-            The counts in GallerySync answer a narrower question than your gallery does. They count:
-
-            • Only files **on the phone right now**.
-            • Only inside the **folders you chose**.
-            • Not files in your phone's **Trash**.
-
-            Your gallery app may also show cloud-only items, or group folders differently. Neither
-            number is wrong; they are counting different things. Each figure in GallerySync says what it
-            counts, and the **(?)** beside it says where it comes from.
+            GallerySync counts only files on the phone now, in the folders you chose, not in the trash. Your gallery may count cloud-only items or group folders differently. Both are right; they count different things.
         """),
     ],
 )

@@ -3,415 +3,177 @@ from model import Chapter, topic
 CHAPTER = Chapter(
     id="albums",
     title="The Albums tab",
-    intro="The tab you will use most. A green card at the top summarises your albums and holds the "
-          "run controls; below it is one line per album, each with a coloured button for choosing the album mode.",
+    intro="Where you choose each album's mode and run backups.",
     topics=[
         topic("albums-overview", "How the Albums tab is laid out", """
-            From top to bottom:
-            • **The green heading.** with four mode buttons that filters the list, some figures about the albums you are looking at, and the controls that start, pause and stop a manual backup.
-            • **A current Status** which appears only while something is happening or just finished.
-            • **The list of albums**, one line each, defaulted to sort in alphabetical order. On a wide screen, such as an unfolded foldable, the list can run in two columns.
+            • **Green header:** mode buttons, totals, and the backup controls.
+            • **Status line:** shown while something is running or just finished.
+            • **Album list:** one card per album, A to Z. Two columns on a wide screen.
 
-            ## What happens when you open the tab
-            Every time you select the Albums Tab, the app looks at the phone again and asks OneDrive again, so the figures
-            are always the current information. You will see the **Rescan** button say
-            **Checking...** while it does. Other Clouds are not asked when you open the tab; each one is asked about a file right before that file is shrunk or removed. See [[how-verification-works]].
+            Each time you open the tab, it looks at the phone and asks OneDrive again (**Rescan** reads **Checking...**). Other Clouds are asked about a file just before it is optimised or removed.
 
-            ## Nothing here changes a file by itself
-            Choosing a mode is what tells the app what to do with an album. Scrolling, filtering and
-            tapping an album to look at it change nothing.
+            Looking, filtering and scrolling never change a file. Only choosing a mode does.
         """),
 
         topic("albums-new", "New albums", """
-            ## What it is
-            When an album appears on your phone that you have not chosen a mode for, a pop-up called **New Albums** says **1 new Album is waiting for you to choose a mode** (or how many). It has two buttons:
-            • **Show new Albums** lists just the albums you have not decided about, with a line above them saying **Showing new Albums** and a **Show all Albums** button to bring the rest back. It does not change the mode buttons or the summary at the top.
-            • **Dismiss** puts the message away for good.
+            When a new album appears, a pop-up says **1 new Album is waiting for you to choose a mode**.
+            • **Show new Albums:** lists only the new ones. **Show all Albums** brings the rest back.
+            • **Dismiss:** closes the message.
 
-            Touching outside the pop-up, or going back, closes it for now. It asks again only when another new album appears.
-
-            Each such album carries a **New** tag and is highlighted in the list, until you choose a mode for it.
-
-            ## Good to know
-            A new album always starts at **Off**, so nothing is sent and nothing is changed until you choose. A new album can never start as Archive.
+            New albums carry a **New** tag and always start at **Off**. A new album can never start as Archive.
         """),
 
         topic("albums-permission", "The permission message", """
-            ## What it is
-            A message at the top of the tab, in one of two forms:
-            • **GallerySync needs access to your photos.** The app cannot see any albums yet. It reads the albums you choose so it can sync them to the Cloud, and it never deletes anything.
-            • **Only some photos are shared.** Android is letting the app see just the photos you picked, so a sync would be incomplete. The albums it can see are still listed below.
+            • **GallerySync needs access to your photos:** the app cannot see any albums yet.
+            • **Only some photos are shared:** the app can see only the photos you picked, so backups are incomplete.
 
-            The **Grant access** button opens Android's permission screen.
-
-            ## Where it comes from
-            Your phone tells the app which level of access it has: none, some, or all. The message simply
-            reports that.
-
-            ## Good to know
-            To sync whole albums, choose **Allow all** when Android asks. If Android does not show the
-            prompt any more, open your phone's Settings, then Apps, then GallerySync, then Permissions,
-            and allow Photos and videos there.
+            **Grant access** opens Android's permission screen. Choose **Allow all**. If no prompt appears: phone **Settings → Apps → GallerySync → Permissions → Photos and videos**.
         """, ui=True),
 
         topic("albums-filter", "All Albums and the four mode buttons", """
-            ## What it is
-            • **All Albums** is the heading of the list, and it is also a button. Tap it to see every album. It is ringed when nothing is filtered. The **(?)** inside it explains the album cards below.
-            • **Backup, Sync, Archive and Off** are four buttons, each in the colour of its mode. Tap one to show only the albums set to that mode; tap it again, or tap **All Albums**, to see everything again. The chosen button turns solid with a ring and the others turn to outlines.
-            • **Tap to filter by mode** is a reminder that these are buttons and not just labels.
+            • Tap **Backup**, **Sync**, **Archive** or **Off** to show only the albums in that mode.
+            • Tap **All Albums**, or the same button again, to show them all.
 
-            If no album is in the mode you tapped, the list says **No album is in that mode.**
-
-            ## Where it comes from
-            The modes are the choices you made for each album. Filtering changes only what you see: the
-            figures in the card underneath then describe just the albums being shown. It never changes
-            an album's mode. To change a mode, use the pill on the album's own card.
-
-            For what each mode does, see [[modes-in-depth]].
+            Filtering only changes what you see. To change a mode, use the button on the album's card. See [[modes-in-depth]].
         """),
 
         topic("albums-totals", "Album Mode Count", """
-            ## What it is
-            A line of figures under the buttons: **Album Mode Count: 3 Backup · 2 Sync · 1 Archive · 6 Off.**
-            How many albums you have set to each mode. It only appears when **All Albums** is selected,
-            and it is a quick way to spot albums you have not decided about: those are the ones counted
-            under **Off**.
-
-            ## Where it comes from
-            A plain tally of the choices you made on the album cards below.
+            The total for each mode, for example **Album Mode Count: 3 Backup · 2 Sync · 1 Archive · 6 Off**. Shown with **All Albums** selected. Albums under **Off** are the ones you have not decided about.
         """),
 
         topic("albums-all-backed-up", "Everything here is backed up", """
-            ## What it is
-            A short line that appears when every album currently shown has at least one file and none
-            of those files is waiting to be sent.
-
-            ## Where it comes from
-            The app compares the number of files in each shown album with its own record of which files
-            it has already sent. The line is about the albums being shown, so it will not claim
-            "everything" if an album set to Off, which never sends anything, still holds unsent files.
-            With a filter such as Archive, where the albums may hold no files, the line is left out.
-
-            ## Good to know
-            This line comes from the app's own record. For the Cloud's own answer, look at the last line
-            of each album card, which says how many files the Cloud has confirmed.
+            Shown when every album in view has files and none are waiting to be sent. It comes from the app's own record; the Cloud's own answer is the last line of each album card.
         """, ui=True),
 
         topic("albums-optimised-line", "Optimised and Saved", """
-            ## What it is
-            With **Sync** selected, a line such as **3 Optimised · 1.2 GB Saved**: how many photos and
-            videos in your Sync albums have been replaced by smaller copies, and how much room that gave
-            back.
+            With **Sync** selected: how many files in Sync albums have been optimised and the space saved, for example **3 Optimised · 1.2 GB Saved**.
 
-            ## Where it comes from
-            The app's own record. Each time it swaps a file for a smaller copy, it notes the size before
-            and after. The total is the difference, added up across the shown albums.
-
-            ## Good to know
-            Optimised files stay in your gallery and open as normal. The full-quality original is in
-            the Cloud, and the Restore tab brings it back. See [[how-optimising-works]].
+            The originals stay in the Cloud. **Restore** brings them back. See [[how-optimising-works]].
         """, ui=True),
 
         topic("albums-archive-lines", "Files archived and Scheduled to leave this phone", """
-            ## What it is
-            With **Archive** selected, up to two lines:
-            • **N files archived · X in your Cloud.** How many files from your Archive albums have already left the phone, with their copies in the Cloud, and how much room those copies take there.
-            • **N Scheduled to leave this phone.** Files still on the phone in Archive albums. Every one is due to be removed once the Cloud is confirmed to hold it. Files you chose to keep on the phone are not counted. When there are none, the line says **Nothing left to archive**.
+            With **Archive** selected:
+            • **N files archived · X in your Cloud:** files that have left the phone, and the space their copies take in the Cloud.
+            • **N Scheduled to leave this phone:** files still on the phone in Archive albums, not counting files you chose to keep. **Nothing left to archive** when there are none.
 
-            ## Where it comes from
-            The first line comes from the app's own record of what it has sent and what has since left the
-            phone. The second is a live count of files in your Archive albums on the phone right now.
-
-            ## Good to know
-            Nothing leaves the phone from this screen. Removal happens on the Archive tab, after a check
-            and your tap. See [[archive-overview]].
+            Nothing is removed here. Removal happens on the Archive tab. See [[archive-overview]].
         """, ui=True),
 
         topic("albums-run-controls", "Sync now, Rescan, Pause, Resume and Stop", """
-            ## What it is
-            The buttons at the bottom of the green card. They change depending on what is happening.
+            ## When nothing is running
+            • **Sync now:** backs up now, then optimises anything set to Manual. Greyed out when there is nothing to send or optimise.
+            • **Rescan:** looks at the phone and asks OneDrive again.
 
-            **When nothing is running**
-            • **Sync now** starts a backup, and then optimises anything you set to Manual in Settings. It is greyed out when there is nothing to send and nothing waiting to be optimised, meaning every file in your Backup, Sync and Archive albums is already sent.
-            • **Rescan** looks at the phone again and asks OneDrive again, so all the figures are fresh. While it works it says **Checking...** and is disabled.
-
-            **When a backup is running**
-            • The left side reports instead of acting: **Syncing 37%**. Before the figures are known it just says **Syncing...**.
-            • **Pause** holds everything, including automatic syncs, until you press **Resume**. While paused it reads **Paused at 37%**.
-            • **Stop** ends this run and leaves automatic syncing switched on, so it carries on the next time a new photo appears.
-
-            On a narrow screen, Pause, Resume and Stop become small icons with the same meaning.
-
-            ## Where the percentage comes from
-            It is the share of the data in your selected albums that has been sent during this run,
-            counted in bytes, not files. Counting files jumps around when a few large videos are mixed
-            with many small photos.
+            ## While a backup runs
+            • Progress shows as **Syncing 37%** (by data, not file count).
+            • **Pause:** holds all backups until **Resume**.
+            • **Stop:** ends this run. Automatic backups carry on.
 
             ## Good to know
-            **Sync now** goes ahead even when the phone is not charging, and it does not wait for the
-            first-backup start time. It still respects your Wi-Fi setting. See [[settings-mobile-data]].
+            **Sync now** does not wait for the charger, but still follows your Wi-Fi setting. See [[settings-mobile-data]].
         """, ui=True),
 
         topic("albums-status-line", "The status line under the card", """
-            ## What it is
-            One line of text, and sometimes a thin progress bar, describing the current or last run.
-
-            **While uploading:** **Uploading 3 of 12 · IMG_0420.jpg · 45%**. It names the file and how far
-            through that file it is, because on a large video "3 of 12" alone looks stuck. The bar shows
-            the same percentage.
-
-            **While preparing:** **Scanning...** or **No permission to read media.**
-
-            **After a run**, a summary made of the parts that apply, separated by commas:
-            • **N uploaded**: sent this time.
-            • **N already in the Cloud**: found there already, so not sent again.
-            • **N no longer on this phone**: files the app remembered but that have since gone from the phone. This is not a failure.
-            • **N failed**: could not be sent after several attempts.
-            • **N waiting on the Cloud**: their album could not be listed this time. They are untouched and will be tried again.
-            • **N still to go**: left for the next run.
-            • **stopped: ...** with a reason: not signed in, the Cloud rejected the sign-in, the Cloud is full, lost connection, or no access to your photos.
-
-            ## Where it comes from
-            The backup itself reports it as it works.
+            • **While uploading:** for example **Uploading 3 of 12 · IMG_0420.jpg · 45%**.
+            • **While preparing:** **Scanning...** or **No permission to read media.**
+            • **After a run:** a summary of what applies: **uploaded**, **already in the Cloud**, **no longer on this phone**, **failed**, **waiting on the Cloud** (tried again later), **still to go**, or **stopped:** with the reason.
         """, ui=True),
 
-        topic("albums-list", "An album card", """
-            Each album has one card. From top to bottom:
+        topic("albums-list", "The Albums Tab", """
+            ## Header
+            • Tap **Backup**, **Sync**, **Archive** or **Off** to show only the albums in that mode. Tap **All Albums** to show them all again.
+            • The line under the buttons gives the total for each mode, for example **3 Backup · 2 Sync · 1 Archive · 6 Off**.
 
-            • **Album name**, for example Camera.
-            • **12 files · 340 MB.** How many files the album holds on the phone right now, and their total size. From your phone's media library, inside the chosen folders.
-            • **3 optimised · 4 kept at full size · 2 pending.** A second line that appears only when it has something to say, and shows only the parts that are not zero. Optimised counts files replaced by a smaller copy. Kept at full size counts files Restore has put back and that are still selected, which GallerySync leaves alone. Pending counts files not yet sent to the Cloud: the number of files on the phone minus the number the app has recorded as sent. **Failed** counts those of the pending files the app has given up on after several attempts; open the album to retry them.
-            • **The Cloud line.** The only line that describes the Cloud itself. What it says depends on which Cloud the album's files went to. See below.
-            • **All files Archived**, in place of the three lines above, on an Archive album that has nothing left on the phone. This is uncommon now: when an Archive run empties an album, the album leaves this list and its mode is forgotten. See [[modes-in-depth]].
-            • **The mode pill**, at the right, in the mode's colour, with a small arrow. Tap it and choose Off, Backup, Sync or Archive; the current mode is ringed. Choosing Archive first asks you to confirm. See [[dialog-archive-confirm]]. If the Cloud an album goes to cannot do that mode, for example Archive for a folder that goes to Google Photos, the album says so, in a line such as **Archive is not available with Google Photos, so nothing happens for this album.**
-
-            Tap anywhere else on the card to see the album's files. See [[album-detail]].
-
-            ## The Cloud line for a OneDrive album
-            • **Not checked against OneDrive yet.** Nobody has asked yet. That is not the same as zero.
-            • **Could not reach OneDrive when this was last checked.** The answer is unknown, not bad news.
-            • **12 verified in OneDrive**, in green. OneDrive holds every file in the album at the right size.
-            • **10 of 12 verified in OneDrive.** Some files are missing there, or are there at a different size.
-
-            OneDrive is asked directly, each time you open the tab or press Rescan. A file counts as **verified** only if OneDrive has a file with the same name in that album's folder **and** reports the same size. It is deliberately not taken from the app's memory of what it once sent, because that memory cannot know if you have since deleted something in your Cloud.
-
-            ## The Cloud line for any other Cloud
-            **15 sent to Backblaze B2**, or Dropbox, Google Drive, IDrive e2, pCloud or Google Photos. If an album's files went to more than one Cloud there is one such line for each. It says **sent**, not **verified**, because it is the app's own record: those Clouds are not asked when you open the tab. Dropbox, Google Drive, Backblaze B2, IDrive e2 and pCloud are asked, one file at a time and right then, before that file is shrunk or removed. See [[how-verification-works]].
+            ## Album cards
+            • **Name, file count and size** of the album on your phone.
+            • **Second line** (only when needed): how many files are optimised, kept at full size, pending or failed.
+            • **Cloud line:** **12 verified in OneDrive** means OneDrive confirmed every file at the right size. It is checked each time you open the tab. Other Clouds show **15 sent to Dropbox**.
+            • **Mode button** (right side): tap to change the album's mode. Archive asks you to confirm first. If the album's Cloud cannot do that mode, the card says so.
+            • **Tap the card** to see the album's files. See [[album-detail]].
         """, ui=True),
 
         topic("album-detail", "An album's file list", """
-            ## What it is
-            Opens when you tap an album card. It has the same green card at the top as the other tabs.
-            In it, a **return arrow** at the left goes back, and beside it is the folder's name in bold.
-            Under the name is a line such as **Backup · 12 files**: its mode and how many files the app
-            is tracking. Then the counts ([[album-file-status]]) and, on one line, a **Sort by** box
-            ([[album-file-sort]]) and, when some file has one, the **Keep at full size** heading over the
-            checkboxes ([[album-file-pin]]). In your **Camera folder**, if you have chosen one in Settings,
-            there are also controls to optimise older photos and videos ([[album-camera-optimise]]).
+            Opens when you tap an album card.
 
-            Below the card is one rounded card for each file, in the same style as the Restore tab's
-            files. Each shows the file's name and, under it, one line with its size (and **video** if it is
-            a video), its date, then its marks, for example **4.2 MB · 12 Sep 2026 · ✓ backed up**. The date
-            is the one your phone holds for the file, the one **Sort by Date** uses. For a file that has been
-            optimised, the size is the smaller copy on your phone; the full-size original is in the Cloud. A file that Restore has put back also has a checkbox at its
-            right.
+            • **Header:** back arrow, album name, mode and file count, the counts ([[album-file-status]]), **Sort by** ([[album-file-sort]]) and **Keep at full size** ([[album-file-pin]]).
+            • **Files:** one card per file with its size, date and marks, for example **4.2 MB · 12 Sep 2026 · ✓ backed up**. An optimised file shows its smaller size on the phone.
+            • **Camera folder** (if chosen in Settings): extra optimise controls. See [[album-camera-optimise]].
 
-            If the app has not handled any files in the album yet, it says **No files tracked yet**.
-
-            ## Where it comes from
-            The app's own record of the files it has handled in that album. It is a plain list of names
-            and marks: no thumbnails, no preview. Looking at photos is the job of your gallery app.
+            No thumbnails or previews. Use your gallery app to look at photos.
         """, ui=True),
 
         topic("album-file-status", "File marks and counts in an album", """
-            ## What it is
-            Under the album's name, a row of counts, showing only the ones that are not zero:
-            **backed up**, **optimised**, **kept at full size**, **pending** and **failed**. Each file
-            then carries its marks, after its size on the same line:
-
-            • **✓ backed up.** In the Cloud, and still full size on the phone.
-            • **✓ backed up · optimised.** In the Cloud, and the phone holds a smaller copy. Both are true: a smaller copy is only ever made from a file already confirmed in the Cloud.
-            • **✓ optimised.** Smaller on the phone.
-            • **⟳ pending.** Waiting to be sent.
-            • **✗ failed.** Could not be sent after several attempts. The app does not keep retrying a file forever.
+            • **✓ backed up:** in the Cloud, full size on the phone.
+            • **✓ backed up · optimised:** in the Cloud; the phone has a smaller copy.
+            • **⟳ pending:** waiting to be sent.
+            • **✗ failed:** could not be sent after several tries.
 
             ## Retry failed
-            When an album that is being backed up has failed files, a hint and a **Retry** button appear under the counts, reading for example **Retry 3 failed**. Pressing it puts those files back in the queue and starts a backup. It only adds work: nothing is removed from your phone or from the Cloud. If a file fails again, it stays marked failed and the button is still there.
-
-            ## Where it comes from
-            The app's own record of each file's progress. The Cloud-checked answer is the last line of
-            the album card on the main list.
+            **Retry 3 failed** puts failed files back in the queue and starts a backup. It removes nothing.
         """, ui=True),
 
         topic("album-file-sort", "Sorting an album's files", """
-            ## What it is
-            A **Sort by** box above the list of files, showing the order now in force: **Name**, **Date**
-            or **Status**. Tap it and choose another to put the files in that order.
+            • **Name:** A to Z.
+            • **Date:** newest first. A restored file has the date it was restored.
+            • **Status:** failed, then pending, then optimised, then backed up.
 
-            • **Name.** A to Z, ignoring capital letters.
-            • **Date.** Newest first, using the date your phone holds for each file. A file put back by Restore carries the date it was restored.
-            • **Status.** The files that need attention come first: failed, then pending, then optimised, then backed up. Files in the same group are in name order.
-
-            ## Good to know
-            Sorting only changes how the list is shown. It changes nothing about the files, and the list
-            opens in name order each time.
+            The list opens in name order each time. Sorting changes nothing about the files.
         """),
 
         topic("album-file-pin", "Keep at full size", """
-            ## What it is
-            A checkbox at the end of a file in an album's list, under the heading **Keep at full size**.
-            It appears only beside files that Restore has put back. A file Restore has not touched has no
-            box. While the box is selected, GallerySync leaves that one file exactly as it is, whatever
-            mode the album is in.
+            A checkbox beside files that **Restore** brought back. While selected, GallerySync leaves that file alone:
+            • In a **Sync** album, it is not optimised.
+            • In an **Archive** album, it is not removed.
+            • In **Backup** or **Off**, nothing changes, but the choice is remembered.
 
-            ## What selecting it does
-            • In a **Sync** album, the file is not replaced by a smaller copy.
-            • In an **Archive** album, the file is not moved to the Trash. It stays on the phone, and it is not counted as scheduled to leave.
-            • In a **Backup** or **Off** album it changes nothing today. The selection is remembered, in case you change the album's mode later.
-
-            Selecting it can only make GallerySync do less. It never removes, shrinks or sends anything, so it
-            needs no confirmation.
-
-            ## Why Restore selects them
-            Restore selects every file it brings back, so a file you have just restored is not shrunk or
-            archived again straight away. Deselect it whenever you like. From then on the file follows its
-            album's mode again: in a Sync album it can be shrunk the next time optimising runs, and in an
-            Archive album it can be offered for archiving again.
-
-            A file you deselect keeps its box while the list is open, so a slip can be put right. Once you
-            leave the list, only files that are still selected show a box.
-
-            ## Where it comes from
-            The selection is kept on your phone by GallerySync, for that one file. Selecting does not touch the
-            file itself.
+            Restore selects it automatically. Deselect it to let the file follow its album's mode again.
         """, ui=True),
 
         topic("album-camera-optimise", "Optimise older photos and videos in your Camera folder", """
-            ## What it is
-            Only your **Camera folder** has this: the folder you chose in Settings under **Camera Sync**
-            ([[settings-section-camera]]). Until you turn that on and choose a folder, no album has it, and
-            every album, including one named Camera, works like any other.
+            Only the **Camera folder** you chose in Settings under **Camera Sync** ([[settings-section-camera]]) has these controls.
 
-            The list shows **every** file in the folder, as any album does. At the top, under the counts, are
-            three choices that **select** files for optimising:
+            ## Selecting files
+            • **Select Photos/Videos older than:** **1 day** to **1 year**, or **All**.
+            • **Photos** and **Videos:** which kinds to select.
+            • Swipe a file right to select, left to deselect. The card shows how many are selected and the estimated saving.
 
-            • **Select Photos/Videos older than**: **1 day**, **1 week**, **1 month**, **6 months**, **1 year** or **All**.
-            • **Photos** and **Videos**: which kinds to select. A check mark means on.
+            ## Buttons
+            • **Sync now:** backs up anything waiting in the folder, then optimises the selected files only.
+            • **Rescan:** checks the Cloud again.
 
-            The three sit on one line, and start at your defaults from Settings. The large number at the top
-            right of the card is how many files are selected. Selected files are highlighted, as on the Restore tab;
-            the rest are greyed. Changing a choice selects afresh. Then swipe a file right to select it, or
-            left to deselect it. The card says how many files are selected and roughly how much space they
-            would give back, marked **(estimate)**.
-
-            Under them are **Sync now** and **Rescan**, as on the Albums tab. **Sync now** sends anything in
-            the folder that is waiting to be backed up, and makes the selected files smaller. **Rescan** checks
-            the Cloud again.
-
-            Nothing is made smaller until you press **Sync now**. It is a one-off tidy of one folder. It is not a
-            mode and it does not change how new photos are handled: a picture you take stays exactly as it is
-            until you ask. The choices are not shown while the folder is set to **Archive**, because those
-            files are on their way off the phone.
-
-            ## Which files can be selected
-            • Photos and videos that the Cloud has confirmed, at the same size. A file not yet backed up is listed but greyed, and cannot be selected until the Cloud has confirmed it. For now this covers files sent to OneDrive.
-            • Not files that have already been made smaller, or that could not be made smaller.
-            • A file Restore has put back (**Keep at full size**, [[album-file-pin]]) is not selected by the choices, but you can swipe it right to select it. Pressing **Sync now** then makes it smaller again.
-
-            ## Keeping your choices
-            Your choices and swipes last for this visit. When you leave with choices that differ from your
-            defaults, by the return arrow, the phone's Back or another tab in the bar at the bottom, the app asks
-            **Do you want to make these your default settings?** **Yes** saves them in Settings; **No** leaves the
-            defaults as they were. Tapping outside the question keeps you in the Camera folder.
-
-            ## Why the Camera folder has no Sync
-            The Camera folder offers **Off**, **Backup** and **Archive**, and not **Sync**. Sync makes a
-            photo smaller as soon as the Cloud has it, which is right for an album you have set aside and
-            wrong for the folder your camera writes to. This is the alternative: you choose what to make
-            smaller, and only then is it touched. An album that was already set to Sync keeps that setting.
-
-            The **Optimise** switches in Settings are for Sync albums only. They have no effect here, or on any
-            album set to Backup.
-
-            ## What Sync now does to the selected files
-            It replaces each selected file on your phone with a smaller copy that stays in your gallery
-            under its own name. The full-size original stays in the Cloud, and **Restore** brings it back.
-            Files inside the folders you gave GallerySync access to at setup are done in the background;
-            any outside them need Android's own confirmation first. Nothing is removed. While it runs the
-            button shows how many are left.
-
-            ## Where it comes from
-            The app's own record of what the Cloud has confirmed for each file, and the choices on this
-            screen. Video is made smaller at the Camera video compression chosen in Settings.
+            ## Good to know
+            • Only files OneDrive has confirmed at full size can be selected.
+            • Nothing is optimised until you press **Sync now**. New photos stay as they are.
+            • The Camera folder has no **Sync** mode, and the Optimise switches in Settings do not affect it.
+            • Leaving with changed choices asks whether to make them your defaults.
         """, ui=True),
 
         topic("album-camera-select", "Selecting files in your Camera folder", """
-            ## What it is
-            The line under the choices in your Camera folder: how many files are selected and roughly how
-            much space optimising them would give back, marked **(estimate)**. If nothing is selected it says
-            **Nothing selected**, or **Nothing older than 1 year** (with your age) when Photos or Videos is on but
-            no file is that old yet.
+            Shows how many files are selected and the estimated space saved, or **Nothing selected**.
 
-            ## How to select
-            • **Photos**, **Videos** and the age select every file that matches. Changing one selects afresh.
-            • Swipe a file right to select it, or left to deselect it. Selected files are highlighted; the rest are greyed.
-            • **Sync now** optimises the selected files, and nothing else.
+            • **Photos**, **Videos** and the age select every match.
+            • Swipe right to select, left to deselect.
+            • **Sync now** optimises only the selected files.
 
-            ## Why a file cannot be selected
-            Only a file the Cloud has confirmed at its full size can be selected, so the original is safe
-            before the phone's copy is made smaller. A file still waiting to be backed up, or one already
-            made smaller, stays greyed and a swipe does nothing. For now this covers files sent to OneDrive.
-
-            ## Where it comes from
-            Your choices and swipes on this screen, for this visit. See [[album-camera-optimise]].
+            A greyed file cannot be selected: it is not yet confirmed in OneDrive, or is already optimised. See [[album-camera-optimise]].
         """, ui=True),
 
         topic("album-merge-warning", "Duplicate album names detected", """
-            ## What it is
-            A red card at the top of the list. Some phones store a single folder under two spellings, for
-            example **camera** and **Camera**, so the list would show two albums that are really one
-            folder. When GallerySync finds this it joins them and tells you.
+            Some phones list one folder under two spellings, such as **camera** and **Camera**. GallerySync merges them into one album and sets its mode to **Off**, so choose its mode again. **Dismiss** closes the card.
 
-            The card shows a table with **Album Name 1**, **Album Name 2** and **Merged Album Name**,
-            then three sentences: the albums have been merged to avoid confusion, the combined album's
-            mode was switched to **Off**, and please choose a mode for it again. **Dismiss** removes the
-            card.
-
-            ## Where it comes from
-            The app compares folder locations on the phone. Two names pointing at one location is the
-            signal.
-
-            ## Why the mode changes to Off
-            Two spellings might have carried two different modes. Rather than guess, the app sets the
-            merged album to **Off** and asks you. This is the one case where the app sets a mode itself,
-            and it can only ever set **Off**, which cannot remove or change anything.
+            This is the only time the app sets a mode, and it can only set **Off**.
         """, ui=True),
 
         topic("dialog-archive-confirm", "Archive this album?", """
-            ## What it is
-            A confirmation that appears when you choose **Archive** from an album's mode pill. It says:
-            • Archive will verify all files are uploaded to the Cloud.
-            • Archived files will be moved to your phone's Trash/Recycle Bin.
-            • Please empty your Trash/Recycle Bin to free up storage.
+            Shown when you choose **Archive**:
+            • Archive checks all files are in the Cloud.
+            • Archived files move to your phone's Trash/Recycle Bin.
+            • Empty the bin to free the space.
 
-            **Archive** confirms; **Cancel** leaves the album exactly as it was.
+            **Archive** confirms; **Cancel** changes nothing.
 
-            ## Why it asks once
-            Setting an album to Archive is you saying "take this album off the phone once it is safely in
-            the Cloud". This is the moment that choice is confirmed. After that the mode stands until you
-            change it or until Archive has taken every file off the phone: nobody asks again about the
-            mode itself, and files added to the album while it still holds files are covered by the same
-            choice. Android will still show its own confirmation each time files are actually removed.
-            See [[dialog-android-trash]].
-
-            ## What happens next
-            After you confirm, the app takes you to the Archive tab, where you can watch the files being
-            checked. Nothing is removed until they are confirmed in the Cloud at the same size.
-
-            ## The bin is named differently on different phones
-            Samsung Gallery calls it the Recycle Bin and the Files app calls it Trash. It is the same
-            thing. Files stay there for a while and take up their full space until it is emptied, and
-            the app never empties it for you.
+            ## Good to know
+            You confirm once. Files added to the album later are covered too, until the album is empty. Android still asks before each removal. See [[dialog-android-trash]].
         """, ui=True),
     ],
 )

@@ -7986,3 +7986,8 @@ the first backup's verification step and finish summary (not described); the Arc
 files that left the phone, kept files not scheduled, 5335abb); Restore's loose DCIM/Pictures/Movies rule (56b455b); the
 Re-optimise question; the Camera Sync and Help & Feedback bands (Rate us, Bug Report) missing from the Settings layout;
 the deleted-files notice in "When things happen"; the stale Restored-album line; typos. LAST_UPDATED 11 October 2026.
+
+**How To Guide rewritten for brevity (11 Oct 2026, Ian).** Ian approved a short rewrite of the All Albums (?) card ("The Albums
+Tab": a Header part and an Album cards part, short bullets) and asked for the whole guide and every (?) in that style. All
+109 topics rewritten, ids and (?) links unchanged, source ~2,000 lines to ~1,030; HowToGuideConsistencyTest passes; card
+seen on the Moto.

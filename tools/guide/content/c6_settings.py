@@ -3,529 +3,222 @@ from model import Chapter, topic
 CHAPTER = Chapter(
     id="settings",
     title="The Settings tab",
-    intro="The things you set once and rarely change. The tab is a single scrolling page divided into "
-          "green bands: General, Backup, Albums, Sync, Camera Sync, Restore, Archive and Help & Feedback. "
-          "The How To Guide is the first card in General, the policy pages are near the bottom, and "
-          "Language is the very last line. Each band has a (?) beside its name, and a thin line separates one setting from the "
-          "next.",
+    intro="One scrolling page in green bands: General, Backup, Albums, Sync, Camera Sync, Restore, Archive and "
+          "Help & Feedback. Each band has a (?).",
     topics=[
         topic("settings-overview", "How the Settings tab is laid out", """
-            Each green band is a section heading, with a **(?)** that explains the whole section. Under
-            it are that section's settings, each set off from the next by a thin line. Switches turn
-            something on or off; boxes with the current value open a short list; buttons open a page or
-            a dialog.
-
-            ## Two things that are true of every setting
-            • Changing one takes effect straight away. There is no Save button.
-            • Nothing on this page removes a file from your phone. Removing files only happens through the Archive mode.
-
-            ## Settings and first-time setup are separate
-            Setup answered its own questions once. Settings does not read them back. See
-            [[setup-and-settings]].
+            • Changes take effect straight away. There is no Save button.
+            • Nothing here removes a file from your phone. Only Archive does that.
+            • Settings and first-time setup are separate. See [[setup-and-settings]].
         """),
 
         topic("settings-section-general", "General", """
-            ## What it is
-            Settings that apply across the whole app: the **How To Guide** card, **Appearance** and
-            **Use mobile data**. **Language** is not here: it is the last line on the page.
-
-            ## Where it comes from
-            These are stored on your phone and change how the app looks and when it uses your data plan.
+            The **How To Guide**, **Appearance** and **Use mobile data**. **Language** is the last line on the page.
         """, ui=True),
 
         topic("settings-how-to-guide-card", "The How To Guide card", """
-            ## What it is
-            The first card in **General**. It reads **How To Guide**, with a line
-            under it saying it explains what every screen and every line means, and where its
-            information comes from.
-
-            ## What it does
-            Tap it to open this guide inside the app. **Close** returns you to Settings. You reach the
-            same guide from any **(?)** pop-up, by pressing **Read more in the How To Guide**, which
-            opens it at the topic you were reading.
-
-            ## Where it comes from
-            The guide is a web page, shown from the internet, so it needs a connection. If it cannot be
-            loaded you will see **This page could not be loaded**, with **Open in browser** to try it
-            there.
+            Opens this guide. **Read more in the How To Guide** in any **(?)** opens it at that topic. Needs an internet connection; if it will not load, use **Open in browser**.
         """),
 
         topic("settings-language", "Language", """
-            ## What it is
-            A line reading **Language** with **Multi-Language Support Coming Soon** under it, at the very
-            bottom of the Settings tab, below the policy pages. The app is available in English only at
-            the moment, and there is nothing to choose yet.
+            English only for now. **Multi-Language Support Coming Soon**.
         """, ui=True),
 
         topic("settings-appearance", "Appearance", """
-            ## What it is
-            A box showing **System**, **Light** or **Dark**. Tap it to choose.
+            • **System** (default): follows your phone's light or dark setting.
+            • **Light** or **Dark**: always that look.
 
-            • **System** follows your phone's own light/dark setting, and is the starting choice.
-            • **Light** and **Dark** always use that look, whatever the phone is set to.
-
-            ## Where it comes from
-            Your choice is stored on the phone and applies to every screen in the app.
-
-            ## Good to know
-            The guide, privacy and delete-account pages open in a viewer that follows your phone's
-            light/dark setting, rather than this choice.
+            The guide and policy pages follow your phone's setting.
         """, ui=True),
 
         topic("settings-mobile-data", "Use mobile data", """
-            ## What it is
-            A switch. Off (the starting choice) says **Wi-Fi only.** On says **Syncs on Wi-Fi and mobile
-            data.**
+            • **Off** (default): **Wi-Fi only.**
+            • **On:** **Syncs on Wi-Fi and mobile data.**
 
-            ## What it controls
-            Whether backups are allowed to run over your mobile data connection. It covers automatic
-            backups and **Sync now**.
-
-            ## Good to know
-            Off is the safer choice: a first backup can be many gigabytes, which on a metered plan can
-            be expensive. Leave it off unless your data is unlimited and your Wi-Fi is poor. Anything
-            taken while away from Wi-Fi simply waits until the phone is back on it.
+            Covers automatic backups and **Sync now**. Leave it off unless your data plan is unlimited.
         """, ui=True),
 
         topic("settings-section-backup", "Backup", """
-            ## What it is
-            Which Clouds your photos and videos go to, and which Cloud each folder goes to. It has two parts:
-            • **Clouds.** One row for each Cloud, with its account and a **Sign out** or **Connect** button. See [[settings-account]].
-            • **Where each folder goes.** One row for each folder GallerySync watches. See [[settings-destination]].
+            • **Clouds:** connect or sign out of each Cloud. See [[settings-account]].
+            • **Where each folder goes:** which Cloud each folder sends to. See [[settings-destination]].
 
-            ## Your first Cloud is free
-            The Cloud marked **main (free)** is your free one, and it is never switched off by the trial ending. Any other Cloud needs **Pro**, free for 30 days, then a one-time purchase. Once you have connected a second Cloud, this section also shows the trial terms and an **Unlock Pro** button. Nothing is ever charged automatically.
-
-            ## Good to know
-            Changing where a folder goes does not affect files already backed up.
+            The Cloud marked **main (free)** is always free. Other Clouds need **Pro**: free for 30 days, then a one-time purchase. Nothing is charged automatically.
         """, ui=True),
 
         topic("settings-account", "Your Clouds and Sign out", """
-            ## What it is
-            One row for each Cloud. It shows the account it is connected to (or **Not connected**), with a **Sign out** button when connected, or **Connect** or **Enter keys** when not. OneDrive, Google Photos, Google Drive, Dropbox and pCloud sign in on the provider's own page. IDrive e2 and Backblaze B2 ask for keys you made in their console. See [[cloud-key-backblaze]] and [[cloud-key-idrive]].
+            Each Cloud shows its account (or **Not connected**) with **Sign out**, **Connect** or **Enter keys**.
 
-            ## What Sign out does
-            Pressing **Sign out** first shows a warning: GallerySync stops backing up to that Cloud until you sign in again, nothing is deleted, the files already there stay there, and folders paired with that Cloud wait for you. Then, **only if that Cloud holds files that are not at full size on this phone** (photos shrunk by Sync, or files Archive took off the phone), it asks what you want done with them:
-            • **Restore them to the phone first.** Every one comes back from the Cloud, each checked against its recorded size, with a progress bar and a **Stop, stay signed in** button. GallerySync signs out only when every file is back. If some could not be restored it stays signed in and offers **Sign out anyway** or **Stay signed in**, so you can try again.
-            • **Leave them there.** Signs out and changes nothing.
-            • **Cancel.** Stays signed in.
+            ## Sign out
+            A warning first: backups to that Cloud stop, nothing is deleted. If that Cloud holds files that are not full size on the phone (optimised or archived), it asks:
+            • **Restore them to the phone first:** brings them all back, then signs out.
+            • **Leave them there:** signs out.
+            • **Cancel:** stays signed in.
 
-            With nothing to bring back, it signs out straight after the warning.
-
-            Signing out never moves a folder to another Cloud, and never removes a file anywhere. The folders stay paired with the Cloud you signed out of, and their new files wait until you sign in again. To send a folder somewhere else, change it under **Where each folder goes**. To also cancel the app's access from the provider's side, follow the steps on the Delete Account Info page in Settings.
+            Folders stay paired with that Cloud and wait until you sign in again. To send them elsewhere, change **Where each folder goes**.
         """, ui=True),
 
         topic("settings-destination", "Where each folder goes", """
-            ## What it is
-            One row for each top-level folder GallerySync watches (DCIM, Pictures, Movies and so on), with the Cloud that folder sends to, and under it where in that Cloud the files go, for example **Goes to OneDrive / Samsung Gallery/DCIM** or **Goes to Dropbox / GallerySync**. It is chosen per folder, never per album inside it.
+            Each top-level folder (DCIM, Pictures, Movies) and its Cloud, for example **Goes to OneDrive / Samsung Gallery/DCIM**.
 
-            ## Changing it
-            Tap the Cloud to choose another. The menu only opens when there is a real choice: with one Cloud, or without Pro or the trial, the pairing is shown but cannot be changed. A folder still paired with a Cloud that has been signed out keeps it on the menu, so you can see it and move it back.
-
-            ## Changing it is safe
-            Only new files follow the change, and any file still waiting to be sent goes to the new Cloud. Files already sent stay where they are and are never re-sent. A folder paired with a Cloud that is not your free one, with no Pro and no trial, sends nothing, and the row says so.
-
-            ## Good to know
-            An album that has files in two folders with the same name (for example **DCIM/Holiday** and **Movies/Holiday**) is one album to GallerySync. Each file still goes to the Cloud of the folder it is in, and both folders appear in this list.
+            • Tap the Cloud to change it. It can only be changed with more than one Cloud and Pro or the trial.
+            • Only new files follow a change. Files already sent stay where they are.
+            • A folder paired with an extra Cloud without Pro sends nothing, and says so.
         """, ui=True),
 
         topic("dialog-destination", "Where new backups go (the Change dialog)", """
-            ## What it is
-            This dialog belongs to the OneDrive folder chooser, which is not on the Settings tab in this version: new OneDrive backups go to Samsung Gallery/DCIM. It is described here for when it returns. A dialog opened by **Change**:
+            Not available in this version: new OneDrive backups go to **Samsung Gallery/DCIM**.
 
-            • **Folder in OneDrive.** A box holding the folder path. Use a plain path like **Pictures/Backup**, with no slash at the start or end. An unusable path shows **That folder path cannot be used.**
-            • **A note.** New photos and videos will go here. The files already backed up stay where they are, and GallerySync keeps looking in the old folder too, so nothing is uploaded twice. It shows the number of files already backed up when it knows it.
-            • **Browse...** opens a picker so you can pick a folder from OneDrive. See [[dialog-folder-picker]].
-            • **Reset to default.** Appears when the path is not the default. Puts back Samsung Gallery/DCIM.
-            • **Use this folder** saves. **Cancel** closes without changing anything.
-
-            ## Where it comes from
-            The default and the count of files already backed up come from the app's own record on the phone.
+            When it returns: enter a OneDrive folder path or **Browse...** for one, **Reset to default** to go back to Samsung Gallery/DCIM, then **Use this folder** or **Cancel**. Files already backed up stay where they are.
         """, ui=True),
 
         topic("dialog-folder-picker", "Choose a folder (the OneDrive picker)", """
-            ## What it is
-            Part of the OneDrive folder chooser, which is not on the Settings tab in this version. A list of the folders in your OneDrive, starting at the top (**OneDrive**).
-
-            • Tap a folder to go into it. **Up one folder** goes back.
-            • **Use this folder** picks the one you are looking at.
-            • **New folder** asks for a **Folder name** and **Create**s it in OneDrive. If the name is already taken it says **Could not create that folder.**
-            • **Show more** loads more folders when a long list has been cut short.
-            • **No folders here.** The folder you are in has no folders inside it.
-            • **Could not reach OneDrive.** with **Try again**, if the connection failed.
-
-            ## Where it comes from
-            OneDrive itself, live. It only lists folders, never your photos.
+            Not available in this version. Lists your OneDrive folders: tap to open, **Up one folder** to go back, **Use this folder** to choose, **New folder** to create one.
         """, ui=True),
 
         topic("settings-section-albums", "Albums", """
-            ## What it is
-            Which folders GallerySync watches, and what happens to Cloud
-            copies when you delete from this phone, in that order and with a thin line between them. A brand new album always starts at **Off**: there is no setting for that.
+            Which folders GallerySync watches, and what happens to Cloud copies when you delete from the phone. New albums always start at **Off**.
         """, ui=True),
 
         topic("settings-folders", "Folders to back up", """
-            ## What it is
-            The folders GallerySync is allowed to look in, each shown as a path such as **Internal storage
-            / DCIM**, with a box beside it. **Add a folder** opens Android's folder picker. To take
-            folders off the list, select the box beside each one and press **Remove**, which stays greyed
-            out until something is selected.
+            The folders GallerySync may look in, for example **Internal storage / DCIM**.
 
-            ## What it means
-            GallerySync only looks in the folders you choose. Anything outside them is not scanned,
-            listed or touched. Most people want DCIM, where the camera saves photos. A phone can report
-            around ninety albums, almost all of them app caches and thumbnails, which is why the choice
-            is yours.
+            • **Add a folder:** opens Android's folder picker.
+            • **Remove:** select folders, press **Remove**, and confirm.
 
-            ## Messages
-            • **No folders chosen yet. Nothing is backed up, scanned or changed until you pick one.**
-            • **That folder cannot be used. Choose a folder rather than a whole drive.**
-
-            ## Where it comes from
-            The list is the folders you have given the app lasting access to through Android's folder
-            picker, stored on the phone. **Internal storage** is the phone's own memory; an SD card shows its own name.
-
-            ## Removing is safe
-            Removing a folder only stops it being watched. Nothing already backed up is lost, and adding
-            it again restores what you had set for its albums. **Remove** asks you to confirm first.
-            See [[dialog-remove-folder]].
+            Nothing outside these folders is scanned or changed. Removing a folder loses nothing: add it back and everything returns.
         """, ui=True),
 
         topic("dialog-remove-folder", "Stop watching this folder?", """
-            ## What it is
-            A confirmation that appears when you select one or more folders and press **Remove** under
-            **Folders to back up**. **Remove** confirms; **Cancel** leaves the list exactly as it was.
+            **Remove** stops watching the selected folders; **Cancel** changes nothing.
 
-            ## Why it asks
-            A folder can hold several albums, so one tap on a selected box removes more than it looks
-            like. This catches a stray tap before it takes effect.
-
-            ## What actually happens
-            GallerySync stops looking in the folder and hands back its permission. Nothing already
-            backed up is lost: no ledger row and no album mode is deleted. Adding the same folder back
-            brings everything back with its history intact, and nothing is re-uploaded.
+            Nothing already backed up is lost. Adding the folder back restores its albums and history, with nothing sent twice.
         """, ui=True),
 
         topic("settings-deletion", "When you delete a photo or video from this phone", """
-            ## What it is
-            Two choices, one selected at a time:
+            • **Leave the Cloud copy** (default): nothing is ever removed from your Cloud.
+            • **Ask me about the Cloud copy:** when files leave your phone, a window asks what to do with their Cloud copies. If notifications are allowed, you are also told shortly after deleting. Nothing is removed without your say-so. See [[deleted-files-window]].
 
-            • **Leave the Cloud copy** (the starting choice). Nothing is ever removed from your Cloud. Deleting on your phone only frees space here.
-            • **Ask me about the Cloud copy.** When you open the app after files have gone from your phone, a window lists them, whether or not the app ever backed them up, and asks what you want done: delete or keep their copies in your Cloud, or back up the ones that never made it. If notifications are allowed, the app also tells you shortly after you delete a photo or video that still has a copy in your Cloud; tapping the notification opens that window. It never removes anything on its own. See [[deleted-files-window]].
-
-            ## For now, OneDrive only
-            The window that asks works on copies in OneDrive. The copies in any other Cloud are left alone under either choice: nothing is ever removed from them.
-
-            ## Why Leave is the default
-            A copy left in your Cloud costs a little storage. A copy removed by mistake could cost you the
-            photo, because the one on your phone is already gone.
-
-            ## Good to know
-            The app never treats a missing file as an instruction to delete. Under **Ask** it asks you
-            first, and nothing in your Cloud moves without your say-so.
+            OneDrive only for now. Copies in other Clouds are never removed.
         """, ui=True),
 
         topic("deleted-files-window", "Files deleted from your phone (the window that opens with the app)", """
-            ## What it is
-            A full-screen window that opens **before the Albums tab**, when files have left your phone
-            since it last appeared and you have chosen **Ask** in Settings. It covers **every** file
-            deleted from your phone, **whether or not GallerySync ever backed it up**. The green card at
-            the top says **Files deleted from phone** and, in the right half, how many there are. It
-            comes in up to two windows, one after the other, and each appears only if it has files.
+            Opens before the Albums tab when files have left your phone, under **Ask**. Nothing is selected to start with.
 
-            ## Window 1: a backup is in OneDrive
-            These files were deleted from your phone but a copy is in OneDrive, **whether GallerySync put
-            it there or not**. The question is what to do with the OneDrive copies.
+            ## Window 1: a copy is in OneDrive
+            Swipe right (or tap) to select files whose OneDrive copy should go.
+            • **Remove N from OneDrive:** asks you to confirm, then moves those copies to the OneDrive recycle bin. Unselected files stay in OneDrive. See [[dialog-remove-from-onedrive]].
+            • **Keep all in OneDrive.**
+            • **Decide later.**
 
-            **Nothing is selected to start with.** Swipe a card right (or tap it) to select it, and left to deselect it; a selected card turns red and says
-            **Will be removed from OneDrive**.
-            • **Remove N from OneDrive** asks you to confirm first. See [[dialog-remove-from-onedrive]]. The selected files' OneDrive copies go to the OneDrive recycle bin, and **the files you left unselected stay in OneDrive for good.**
-            • **Keep all in OneDrive** leaves every copy alone, whatever is selected.
-            • **Decide later** moves on to the next window without deciding anything.
+            ## Window 2: no copy found
+            These files are still in your phone's trash.
+            • **Back up N to OneDrive:** sends the selected files from the trash. Nothing is deleted.
+            • **Leave all in the trash.**
+            • **Decide later.**
 
-            ## Window 2: no backup can be found
-            These files were deleted from your phone and **no copy could be found in OneDrive**. They are
-            still in your phone's **trash** (Recycle Bin on some phones), where they stay for about a
-            month. The question is what to do with the files themselves.
-
-            **Nothing is selected to start with.** Swipe a card right (or tap it) to select it, and left to deselect it; a selected card says **Will be backed
-            up to OneDrive**.
-            • **Back up N to OneDrive** sends the selected files to OneDrive from the trash. It only adds a copy: **nothing is deleted, and the files stay in the trash.** You can watch it count as it goes. **The files you left unselected stay in the trash.**
-            • **Leave all in the trash** does nothing to any of them.
-            • **Decide later** closes the window without deciding anything.
-
-            A file whose bytes are no longer in the trash (you emptied it) can't be backed up. It is
-            reported and dropped from the list.
-
-            ## What is listed
-            The older files as well as the newest: **a file you have not decided about stays on the list
-            until you decide.** GallerySync looks for a file's copy in the OneDrive folder for its album,
-            by **name and size**.
-
-            Not listed: a file **Archive** took off the phone on purpose (its OneDrive copy is the one you
-            asked to keep); a photo you **edited and saved over**, because a file of the same name is still
-            in the same folder; a file you decided about, **until it comes back to the phone and is
-            deleted again**; and a file that was deleted outright rather than to the trash and has no
-            OneDrive copy, because there is nothing left to do about it.
-
-            ## When it appears
-            Only under **Ask**, only after first-time setup is finished, and **only when there are new
-            files**: something has left the phone since the window was last shown. Opening the app with
-            nothing new shows nothing. There is no waiting period. If a very large share of your library
-            seems to have gone at once, it is treated as a scan going wrong rather than as deletions and
-            nothing is offered. If OneDrive can't be reached, the files it could not check are left out
-            and offered again next time.
-
-            ## When it has finished
-            It says what happened: how many OneDrive copies were moved to the recycle bin, how many were
-            kept, how many files were backed up, how many were left in the trash, how many turned out to be
-            back on your phone, and how many could not be done. **A file that could not be done is not lost
-            and is not decided, so it stays on the list.**
-
-            The back button does the same as **Decide later**. It never removes anything.
-
-            ## Where it comes from
-            The app's own record of the files it has seen on your phone, compared with what is on your
-            phone when you open it. It looks when the app comes to the front, and at most once a minute.
+            ## Good to know
+            • Undecided files stay on the list until you decide.
+            • Not listed: files Archive removed, photos edited in place, and files deleted outright with no Cloud copy.
+            • If a huge share of your library seems to vanish at once, nothing is offered: it is treated as a bad scan.
+            • Back does the same as **Decide later**.
         """, ui=True),
 
         topic("dialog-remove-from-onedrive", "Remove files from OneDrive? (the confirmation)", """
-            ## What it is
-            A confirmation with the number and size: **Remove 12 files from OneDrive?** It says the
-            files are not on your phone any more.
+            **Remove 12 files from OneDrive?** with their size. They go to the OneDrive recycle bin, which GallerySync never empties.
 
-            They go to the **OneDrive recycle bin**, where you can restore them yourself. GallerySync
-            never empties that bin.
-
-            **Remove from OneDrive** goes ahead. **Cancel** closes the confirmation and decides nothing:
-            your selections stay as they were.
-
-            ## Where it comes from
-            The number and size are the files you selected in the window behind it. Just before anything is
-            removed the app looks at your phone again, and any file that has come back, or whose name is
-            back in its folder, is left alone.
+            **Remove from OneDrive** goes ahead; **Cancel** decides nothing. Any file that has come back to the phone is left alone.
         """, ui=True),
 
         topic("settings-section-sync", "Sync", """
-            ## What it is
-            How photos and videos are optimised to save space. Files are only changed after they are
-            verified in your Cloud, and only inside albums you set to Sync. Sync works with OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 and Backblaze B2.
+            How photos and videos in **Sync** albums are optimised. Files change only after the Cloud has verified them. Works with OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 and Backblaze B2.
         """, ui=True),
 
         topic("settings-optimise-photos", "Optimise photos", """
-            ## What it is
-            A switch. Off is the starting choice. On says **Photos in Sync albums are optimised for
-            storage.** A **Mode** row appears under it, and it decides when this happens. See
-            [[settings-optimise-mode]].
+            **Off** by default. When on, photos in Sync albums are replaced with smaller copies: about 2048 pixels on the long edge, roughly a tenth of the size. They stay in your gallery with a small cloud badge. Originals stay in the Cloud.
 
-            ## What optimising a photo does
-            The photo on your phone is replaced with a smaller copy, reduced to about 2048 pixels on the
-            long edge and roughly a tenth of the size. It stays in your gallery and opens normally in every
-            app, and carries a small cloud badge so you can tell which ones are optimised. The full-quality
-            original stays in your Cloud, untouched. Photos are optimised whatever their age.
-
-            ## Only in Sync albums
-            Backup and Archive albums never optimise, and Off does nothing. A photo is only ever
-            optimised after its Cloud has confirmed, right then, that it holds the original at the same size, and a
-            photo that would not get smaller is left alone. A photo you have set to **Keep at full
-            size** is never touched.
-
-            See [[how-optimising-works]].
+            Photos already small enough, and files set to **Keep at full size**, are left alone. **Mode** sets when it runs. See [[settings-optimise-mode]].
         """, ui=True),
 
         topic("settings-optimise-video", "Optimise video", """
-            ## What it is
-            A switch. Off is the starting choice. Turning it on reveals **Mode**, **Older than** and
-            **Compression**.
+            **Off** by default. When on, shows **Mode**, **Older than** and **Compression**.
 
-            ## What it does
-            Old video in Sync albums is replaced by a smaller copy on your phone. The full-quality
-            original stays in your Cloud, and the Restore tab brings it back. Nothing is ever cut:
-            shortening a clip is the one thing optimising never does, and the smaller copy is checked
-            against the original's length before it replaces anything.
+            Videos in Sync albums are re-encoded smaller. Nothing is ever cut. Originals stay in the Cloud.
 
-            ## Which clips it touches
-            A clip has to pass every one of these:
-            • It is in an album set to **Sync**.
-            • Its Cloud has confirmed it at the same size.
-            • It is older than the age you chose.
-            • It is in a folder you gave GallerySync access to. A clip anywhere else is left alone.
-            • It has not been optimised already, and has not been found already small enough to leave.
+            ## Which videos
+            In a Sync album, verified in the Cloud, older than your setting, in a folder you gave access to, and not already optimised.
 
-            ## When it happens
-            **Automatic** starts by itself, and only while the phone is charging, because re-encoding
-            video is the heaviest thing the app does. It starts:
-            • When a backup run finishes everything. That happens after every new video, when you switch an album to Sync, and on the six-hourly check, which is also how a clip that has just grown older than your chosen age is noticed.
-            • When you change Optimise video, Mode or Older than.
-
-            **Manual** waits until you press **Sync now** on the Albums tab. It then starts straight
-            away, without waiting for the charger. See [[albums-run-controls]].
-
-            It works in the background, a few clips at a time, and you can close the app. Switching
-            Optimise video off stops it after the clip in progress.
-
-            See [[how-optimising-works]].
+            ## When
+            • **Automatic:** after backups, only while charging.
+            • **Manual:** when you press **Sync now**.
         """, ui=True),
 
         topic("settings-optimise-mode", "Mode: Automatic or Manual", """
-            ## What it is
-            A box under **Optimise photos** (and another under **Optimise video**) showing
-            **Automatic** or **Manual**. It decides when optimising happens.
+            • **Automatic** (default): files in Sync albums are optimised once the Cloud confirms them. Video waits for the charger.
+            • **Manual:** nothing happens until you press **Sync now** on the Albums tab.
 
-            • **Automatic.** As soon as a file reaches an album set to **Sync**, or an album is switched to Sync. The file is sent to its Cloud first and optimised the moment the Cloud has confirmed it. Photos are optimised in the background, with no prompt, for folders you gave access to during setup. Video waits for the phone to be charging.
-            • **Manual.** Nothing happens until you press **Sync now** on the Albums tab. That sends whatever is waiting and then optimises. **Sync now** can be pressed even when nothing is left to send, if something is ready to optimise. See [[albums-run-controls]].
-
-            ## Photos outside the folders you gave access to
-            The app cannot change these on its own. Android asks you to confirm them, so they wait until
-            you open the app (Automatic) or press **Sync now** (Manual), and the prompt then appears.
-
-            ## Good to know
-            Manual is not the same as switching optimising off. Automatic is the starting mode when you
-            switch the feature on.
+            Photos outside the folders you gave access to need Android's confirmation, so they wait until you open the app or press **Sync now**.
         """, ui=True),
 
         topic("settings-video-age", "Older than (video)", """
-            ## What it is
-            A box that sets how old a video must be before it can be optimised: **Straight away**, **1
-            hour**, **12 hours**, **1 day** or **1 week**.
+            How old a video must be before it is optimised: **Straight away**, **1 hour**, **12 hours**, **1 day** or **1 week**. Backup is not delayed.
 
-            ## What it covers
-            Only the copy on this phone. A video is backed up to your Cloud straight away whatever this is
-            set to. Age is worked out for each file separately, from when it was last modified.
-
-            ## Good to know about "Straight away"
-            It reaches clips shot today. They stay in your gallery and still play, but editing one starts
-            from the smaller copy until you fetch the original back with Restore. When you choose it, a
-            warning saying so appears under the setting.
-
-            See [[settings-optimise-video]] for when it happens.
+            **Straight away** includes clips shot today; editing one starts from the smaller copy until you restore it.
         """, ui=True),
 
         topic("settings-video-quality", "Compression (video)", """
-            ## What it is
-            A box that sets how much a video is shrunk. The label carries the outcome, so none of the
-            three is a bare adjective:
+            • **High compression, 480p:** smallest files, about 85% saved.
+            • **Medium compression, 720p:** about 75% saved.
+            • **Low compression, 1080p:** about 50% saved.
 
-            • **High compression, 480p.** The smallest files. Saves about 85 percent.
-            • **Medium compression, 720p.** Saves about 75 percent.
-            • **Low compression, 1080p.** The least shrinking. Saves about 50 percent.
-
-            ## Where the figures come from
-            They were measured on real clips and are typical, not promised. They depend on the content.
-            High compression means the most shrinking, so the smallest picture.
+            Typical figures; results vary.
 
             ## Choosing a stronger compression
-            When you change to a stronger compression (for example from Low to High), the app asks
-            **Re-optimise existing videos?** Videos in Sync albums that were too small to shrink at the old
-            setting can be tried again at the new one. **Yes** puts them back in line for optimising, on the
-            same rules as any other video; **No** leaves them as they are. Videos already optimised are not
-            touched either way.
-
-            ## Good to know
-            Optimising re-encodes the clip at a lower resolution. Nothing is cut, and it stays in your
-            gallery. The full-quality original stays in your Cloud.
+            The app asks **Re-optimise existing videos?** **Yes** lets videos that were too small to shrink before be tried again. **No** leaves them. Already optimised videos are not touched.
         """, ui=True),
 
         topic("settings-section-restore", "Restore (Settings)", """
-            ## What it is
-            One switch that relates to the Restore tab: **Show empty folders**.
+            One switch for the Restore tab: **Show empty folders**.
         """, ui=True),
 
         topic("settings-show-empty-folders", "Show empty folders", """
-            ## What it is
-            A switch. Off is the starting choice. The wording says: on lists every folder in your backup
-            folders, including ones with nothing in them; off lists only folders that have something to
-            bring back.
-
-            ## What it changes
-            The Restore tab lists the folders in your OneDrive backup folders that have something to
-            bring back. Turn this on and it lists every folder, including those where every file is
-            already on the phone. Off is right for most people. It only affects OneDrive: other Clouds list only what the app sent.
+            **Off** by default. When on, the Restore tab lists every OneDrive folder, including ones with nothing to bring back.
         """, ui=True),
 
         topic("settings-section-camera", "Camera Sync (Settings)", """
-            ## What it is
-            **Special settings for Camera**, off out of the box. Off, no folder gets them, and every album
-            works the same way, Camera included.
+            **Special settings for Camera**, off by default. When on:
+            • **Camera folder:** the folder your camera saves to. Choose it from the list, or **Other…**.
+            • **Select Photos/Videos older than**, **Photos**, **Videos:** defaults for that folder's optimise controls ([[album-camera-optimise]]).
+            • **Video compression:** for videos optimised there.
 
-            Turn it on and more settings appear:
-            • **Camera folder**: the folder your camera saves to. Nothing is chosen for you; pick it from the list, which shows the folders on the Albums tab. If yours is not there yet, usually because nothing has been saved to it, choose **Other…** and pick it in Android's folder picker. GallerySync keeps only the folder's name and writes nothing there.
-            • **Select Photos/Videos older than**, **Photos** and **Videos**: your defaults for that folder's own optimise choices ([[album-camera-optimise]]). Out of the box they are **All**, with Photos and Videos both off, so nothing is selected until you choose.
-            • **Video compression**: how much a video is made smaller when you optimise it there. Shown once **Videos** is on.
-
-            ## What changes for the Camera folder
-            It has no **Sync** on its menu, and its file list gets the choices, **Sync now** and **Rescan** at
-            the top. Nothing is made smaller until you press **Sync now** there.
-
-            ## Good to know
-            These are only starting points. Changing the choices in the Camera folder lasts for that visit,
-            and when you leave with different ones the app asks whether to make them your defaults.
-
-            They are separate from the **Optimise** switches above, which are for Sync albums only and have no
-            effect on the Camera folder or on any album set to Backup.
+            The Camera folder has no **Sync** mode, and nothing is optimised until you press **Sync now** in it. The Optimise switches above do not affect it.
         """, ui=True),
 
         topic("settings-section-archive", "Archive (Settings)", """
-            ## What it is
-            Two settings:
-            • **Only show files older than**, which sets where the Archive tab's own age filter starts each time you open it. See [[settings-archive-default-age]].
-            • **Notify when files are ready to archive**, off by default. See [[settings-archive-notify]].
-
-            Everything else about Archive is still controlled album by album on the Albums tab, and carried out on the Archive tab. See [[archive-overview]].
+            • **Only show files older than:** where the Archive tab's filter starts. See [[settings-archive-default-age]].
+            • **Notify when files are ready to archive:** off by default. See [[settings-archive-notify]].
         """, ui=True),
 
         topic("settings-archive-default-age", "Only show files older than (Settings)", """
-            ## What it is
-            Where the Archive tab's **Only show files older than** filter starts each time you open the
-            tab fresh: 1 hour, 1 day, 1 week, 1 month, 1 year, or **All**. See [[archive-age-filter]] for
-            what the filter itself does.
-
-            ## Good to know
-            This is only a starting point. Changing the filter on the Archive tab itself, once you are
-            there, lasts for that visit and does not change this default.
-
-            The default is **All** out of the box, so nothing is held back until you choose otherwise —
-            the same as before this setting existed.
+            Where the Archive tab's age filter starts: **1 hour**, **1 day**, **1 week**, **1 month**, **1 year** or **All** (default). Changing it on the Archive tab lasts for that visit only. See [[archive-age-filter]].
         """, ui=True),
 
         topic("settings-archive-notify", "Notify when files are ready to archive", """
-            ## What it is
-            A switch, off by default. On, GallerySync asks Android for permission to post
-            notifications, then lets you know when files in an Archive album have been confirmed in
-            your Cloud and are ready to leave your phone. For now it only covers files sent to OneDrive.
+            **Off** by default. When on, you are notified once per new batch of files ready to archive. OneDrive files only.
 
-            ## Why it is not the only way to find out
-            The Albums tab already shows this, and a reminder appears if you try to leave the app with
-            files waiting. Those need no permission and cannot be silently switched off. A notification
-            can — Android may refuse it, or you can turn it off later in your phone's own Settings,
-            outside this app entirely — so it is offered as an extra, never as the only way you would
-            know.
-
-            ## Good to know
-            It tells you once per new batch of files becoming ready, not once per file and not again for
-            a batch that is still sitting there unchanged. If your phone has already told Android not to
-            notify for GallerySync, the switch says so underneath it, and turning it off and back on here
-            asks again.
+            The Albums tab and the leaving reminder show this too, so you are never relying on notifications alone. If notifications are blocked, the switch says so.
         """, ui=True),
 
         topic("settings-about-cards", "Help & Feedback, and the link cards at the bottom", """
-            The last band, **Help & Feedback**, has two cards:
+            ## Help & Feedback
+            • **Rate us on Play Store:** opens the GallerySync listing.
+            • **Bug Report:** where to write, and **Copy details** for your app version, phone model and Android version.
 
-            • **Rate us on Play Store.** Opens the GallerySync listing on Google Play.
-            • **Bug Report.** Something not working? It says what to tell us and the address to write to, and **Copy details** copies the app version, your phone model and its Android version, to paste into the message. It does not open a mail app.
+            ## At the bottom
+            • **Privacy Policy.**
+            • **Delete Account Info:** how to sign out, remove the app's access and clear its data.
+            • **Contact Info:** the address, with **Copy address**.
 
-            Below them are three more cards. Tap one to open its page inside the app.
-
-            • **Privacy Policy.** How GallerySync handles your photos, videos and account.
-            • **Delete Account Info.** How to sign out, remove the app's access to your Cloud accounts, and clear its data.
-            • **Contact Info.** Questions or problems? It shows the address, which you can select and copy with **Copy address**. It does not open a mail app.
-
-            The How To Guide card is not down here: it is the first card in General. See
-            [[settings-how-to-guide-card]].
-
-            The Privacy Policy and Delete Account Info pages are shown from the internet, so they need
-            a connection. If a page cannot be loaded you will see **This page could not be
-            loaded**, with **Open in browser** to try it there. Close returns you to Settings.
+            Pages load from the internet. If one will not load, use **Open in browser**.
         """),
     ],
 )
