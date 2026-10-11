@@ -800,7 +800,7 @@ private fun FolderCard(
                     Text(
                         text = stringResource(
                             R.string.restore_folder_detail,
-                            folder.total,
+                            androidx.compose.ui.res.pluralStringResource(R.plurals.file_count, folder.total, folder.total),
                             formatBytes(context, folder.bytesToRecover)
                         ),
                         style = MaterialTheme.typography.bodySmall

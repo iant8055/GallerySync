@@ -27,27 +27,27 @@ CHAPTER = Chapter(
         """),
 
         topic("archive-hero", "Files to Archive", """
-            **Files to Archive**, with the number of files that will be archived: in every Archive folder on the folder list, or in the folder you opened. Files you kept on the phone are not counted.
+            **Files to Archive**, with the number of files that will be archived: in every Archive album on the album list, or in the album you opened. Files you kept on the phone are not counted.
 
             Below it: your Archive albums, and a reminder that archived files can be brought back on the **Restore** tab.
         """, ui=True),
 
-        topic("archive-folder-list", "The Archive folders", """
-            One card per Archive folder: how many files are waiting and their size, plus any kept, held back by the age filter, confirmed, or not confirmed.
+        topic("archive-folder-list", "The Archive albums", """
+            One card per Archive album: how many files are waiting and their size, plus any kept, held back by the age filter, confirmed, or not confirmed.
 
-            • On the folder list, the button reads **Check all folders** and checks every folder.
-            • Tap a folder to open it; **Check these files** then checks only that folder.
+            • On the album list, the button reads **Check all albums** and checks every album.
+            • Tap an album to open it; **Check these files** then checks only that album.
 
-            Choosing a folder removes nothing and does not change any mode.
+            Choosing an album removes nothing and does not change any mode.
         """, ui=True),
 
         topic("archive-check-button", "Check these files, and what it reports", """
-            • **Check these files** (or **Check all folders**): starts the check.
+            • **Check these files** (or **Check all albums**): starts the check.
             • **Checking with your Cloud...** while the Cloud is asked.
             • **Batch** progress while files are being removed.
             • How many files were removed and the space freed, or **Nothing was removed.**
 
-            OneDrive is checked by listing each album folder (name and size). Dropbox, Google Drive, pCloud, Backblaze B2 and IDrive e2 are asked about each file.
+            OneDrive is checked by listing each album's folder in OneDrive (name and size). Dropbox, Google Drive, pCloud, Backblaze B2 and IDrive e2 are asked about each file.
 
             "Freeing" means after you empty the bin.
         """, ui=True),

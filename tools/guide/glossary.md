@@ -88,7 +88,7 @@ own language and must be translated.
 - Camera folder
 - Camera Sync
 - Special settings for Camera
-- Files in this folder
+- Files in this album *[changed 2026-10-11 by the GallerySync main session: was "Files in this folder"; the app now says Album for its own groups and Folder only for Android or Cloud folders (Ian, 11 Oct 2026)]*
 - Only show files older than
 - How To Guide
 - (?)   *(the help button symbol — leave as-is wherever it appears)*
@@ -166,7 +166,7 @@ permanently deleted.") is translated.
 - Back up N to OneDrive [+2026-10-11 02:40 CDT]
 - Bug Report [+2026-10-11 02:40 CDT]
 - Cancel [+2026-10-11 02:40 CDT]
-- Check all folders [+2026-10-11 02:40 CDT]
+- Check all albums [+2026-10-11 02:40 CDT] *[changed 2026-10-11 by the GallerySync main session: was "Check all folders"; the app now says Album for its own groups and Folder only for Android or Cloud folders (Ian, 11 Oct 2026)]*
 - Choose all [+2026-10-11 02:40 CDT]
 - Clear [+2026-10-11 02:40 CDT]
 - Close [+2026-10-11 02:40 CDT]
@@ -244,7 +244,7 @@ permanently deleted.") is translated.
 
 ### Headers, counts and states
 - Album Mode Count [+2026-10-11 02:40 CDT]
-- Folders to Restore [+2026-10-11 02:40 CDT]
+- Albums to Restore [+2026-10-11 02:40 CDT] *[changed 2026-10-11 by the GallerySync main session: was "Folders to Restore"; the app now says Album for its own groups and Folder only for Android or Cloud folders (Ian, 11 Oct 2026)]*
 - Files to Archive [+2026-10-11 02:40 CDT]
 - Checking your Cloud [+2026-10-11 02:40 CDT]
 - Pending [+2026-10-11 02:40 CDT]

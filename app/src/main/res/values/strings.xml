@@ -225,9 +225,9 @@
     <string name="archive_action_keep">Deselect (keep on this phone)</string>
     <string name="archive_action_archive">Select (archive this file)</string>
     <string name="archive_list_heading">Files</string>
-    <string name="archive_folders_heading">Folders</string>
-    <string name="archive_folders_hint">Tap a folder to see its files. Inside a folder, Check and Archive cover that folder only.</string>
-    <string name="archive_hero_label_files">Files in this folder</string>
+    <string name="archive_folders_heading">Albums</string>
+    <string name="archive_folders_hint">Tap an album to see its files. Inside an album, Check and Archive cover that album only.</string>
+    <string name="archive_hero_label_files">Files in this album</string>
     <string name="archive_folder_nothing">Nothing waiting</string>
     <string name="archive_folder_detail">%1$s · %2$s</string>
     <string name="archive_folder_kept">%1$d kept on this phone</string>
@@ -496,7 +496,7 @@ full size</string>
     <string name="archive_empty_hint">Set an album to Archive on the Albums tab, and its files will be listed here for checking before anything leaves your phone.</string>
     <string name="archive_intro">Every file below is checked against your Cloud first. Anything that is not there yet is backed up before it is verified.</string>
     <string name="archive_validate">Check these files</string>
-    <string name="archive_validate_all">Check all folders</string>
+    <string name="archive_validate_all">Check all albums</string>
     <string name="archive_validating">Checking with your Cloud…</string>
     <string name="archive_unsupported">This version of Android has no media trash, so removing local copies is not offered here.</string>
 
@@ -658,11 +658,11 @@ full size</string>
         Distinct from the old drive-listing tab, which fetched second copies into DCIM/Restored.
     -->
     <!-- One title over two lines, "Folders to" and "Restore" directly under it (Ian, 19 Sept 2026). -->
-    <string name="restore_hero_label_top">Folders to</string>
+    <string name="restore_hero_label_top">Albums to</string>
     <string name="restore_hero_label_bottom">Restore</string>
-    <string name="restore_hero_label_files">Files in this folder</string>
+    <string name="restore_hero_label_files">Files in this album</string>
     <!-- Search and sort inside one folder on the Restore tab (Ian, 4 Oct 2026). -->
-    <string name="restore_search">Search this folder</string>
+    <string name="restore_search">Search this album</string>
     <string name="restore_search_hint">File name</string>
     <string name="restore_search_close">Close search</string>
     <string name="restore_sort_by">Sort by</string>
@@ -677,7 +677,7 @@ full size</string>
     <string name="restore_selected_summary">%1$d selected · %2$s to recover</string>
     <!-- The same, stacked, for the half-width slot beside "Files in this folder" so it breaks between the two facts and not mid-phrase. -->
     <string name="restore_selected_summary_stacked">%1$d selected\n%2$s to recover</string>
-    <string name="restore_folder_detail">%1$d files · %2$s</string>
+    <string name="restore_folder_detail">%1$s · %2$s</string>
     <!-- Named separately: they are different operations on the phone, and one total would hide that. -->
     <!-- Parallel verbs, matching the file rows and the button: two things one action does. -->
     <string name="restore_folder_split">%1$d to restore · %2$d to download</string>
@@ -704,7 +704,7 @@ full size</string>
     <string name="retrieve_action">Restore</string>
     <!-- Its own line under the swipes, so the two gestures do not read as one instruction. -->
     <!-- The way out of a folder, spoken by TalkBack. The glyph itself carries no words. -->
-    <string name="retrieve_back">Back to folders</string>
+    <string name="retrieve_back">Back to albums</string>
     <string name="retrieve_select_all">Select all</string>
     <string name="retrieve_clear_selection">Clear</string>
     <string name="retrieve_picked_here">%1$d selected here</string>
@@ -879,7 +879,7 @@ full size</string>
 
     <string name="tour_description_title">How the app works</string>
     <string name="tour_description_body">GallerySync keeps your photos and videos backed up in Cloud Services and manages how much space they take on your phone. Here\'s what you\'ll find:</string>
-    <string name="tour_description_tabs">See your folders and choose what to back up</string>
+    <string name="tour_description_tabs">See your albums and choose what to back up</string>
     <string name="tour_description_navigation">Browse and download files from Cloud Services</string>
     <string name="tour_description_archive">Review files verified in the Cloud and free up space</string>
     <string name="tour_description_settings">Backup destination, optimisation, and preferences</string>

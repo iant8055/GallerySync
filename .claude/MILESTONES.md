@@ -7997,3 +7997,8 @@ here against the code, 20 edits agreed, 3 deletions refused (topics with (?) but
 for Ian. Facts settled: free Cloud = first selected in setup; OneDrive destination Samsung Gallery/DCIM on every phone;
 the trial starts with "Start 30-day free trial" (Unlock Pro buys); Sync now optimises only with the switch on and Mode
 Manual; MassAbsence = over half of backed-up files. Ian: go.
+
+**Album vs Folder (Ian, 11 Oct 2026).** The app says Album for its own groups and Folder only for Android or Cloud folders.
+Renamed on the Restore and Archive tabs (Albums to Restore, Files in this album, Search this album, Back to albums, Check all
+albums, the Archive album list) and the tour line; guide and glossary to match. Also fixed "1 files" on the Restore album card
+(restore_folder_detail now takes the file_count plural). Seen on the Moto.

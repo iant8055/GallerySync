@@ -23,45 +23,45 @@ CHAPTER = Chapter(
             A file is replaced only after the full download arrives and its size checks out. If anything fails, the phone's file is left as it was.
         """),
 
-        topic("restore-hero", "Folders to Restore and Files in this folder", """
-            • **Folder list:** **Folders to Restore**, with how many folders have something to bring back.
-            • **Inside a folder:** back arrow, folder name, and **Files in this folder** with the count and what you have selected.
+        topic("restore-hero", "Albums to Restore and Files in this album", """
+            • **Album list:** **Albums to Restore**, with how many albums have something to bring back.
+            • **Inside an album:** back arrow, album name, and **Files in this album** with the count and what you have selected.
 
-            A dash means the list is still loading. **Checking your Cloud for more...** means OneDrive is being read. A red message means a folder could not be reached.
+            A dash means the list is still loading. **Checking your Cloud for more...** means OneDrive is being read. A red message means a Cloud folder could not be reached.
 
             The OneDrive list is remembered, and read again after ten minutes or when you press **Refresh**.
         """, ui=True),
 
         topic("restore-message-line", "The message under the number", """
-            • **Swipe right to select / left to deselect. Tap to open.** on the folder list.
-            • **Swipe right to select / left to deselect → Then press Restore.** inside a folder.
+            • **Swipe right to select / left to deselect. Tap to open.** on the album list.
+            • **Swipe right to select / left to deselect → Then press Restore.** inside an album.
             • **Nothing in your Cloud is missing from this phone, so there is nothing to bring back.** when the list is empty.
             • After a restore, how many files came back and how many were left unchanged.
         """, ui=True),
 
         topic("restore-selected-summary", "N selected and how much to recover", """
-            The files selected across all folders, and the extra space they will take on your phone. Make sure you have that space free.
+            The files selected across all albums, and the extra space they will take on your phone. Make sure you have that space free.
         """, ui=True),
 
         topic("restore-buttons", "Refresh, Select all and Clear", """
-            • **Refresh** (folder list): reads the list again, including OneDrive.
-            • **Select all** (inside a folder): selects every file in it.
+            • **Refresh** (album list): reads the list again, including OneDrive.
+            • **Select all** (inside an album): selects every file in it.
             • **Clear:** removes every selection.
 
             Greyed out while a restore is running.
         """, ui=True),
 
-        topic("restore-folders-list", "The folder list", """
-            Each folder card shows:
+        topic("restore-folders-list", "The album list", """
+            Each album card shows:
             • How many files can come back, and the space they need.
             • How many are **to restore** and **to download**.
             • How many are **already on this phone** (greyed inside; see [[restore-greyed-files]]).
-            • How many are **selected here**, or a check mark when the whole folder is selected.
+            • How many are **selected here**, or a check mark when the whole album is selected.
 
-            **Tap** to open. **Swipe right** to select the whole folder, **left** to deselect.
+            **Tap** to open. **Swipe right** to select the whole album, **left** to deselect.
         """),
 
-        topic("restore-files-list", "The file list inside a folder", """
+        topic("restore-files-list", "The file list inside an album", """
             Swipe right (or tap) to select, left to deselect. Each file shows one of:
             • **now · full size:** an optimised copy, showing its smaller file size on the phone and the full file size in the Cloud.
             • **Available for download:** not on the phone.
@@ -71,7 +71,7 @@ CHAPTER = Chapter(
         """),
 
         topic("restore-greyed-files", "Why are some files greyed out?", """
-            They are already on the phone at full size (same folder, name and size), so there is nothing to restore. They are shown so the folder matches your Cloud.
+            They are already on the phone at full size (same album, name and size), so there is nothing to restore. They are shown so the album matches your Cloud.
 
             A file with the same name but a different size is not offered: it may be an edit, and Restore never overwrites an edit.
         """, ui=True),
