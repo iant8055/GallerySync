@@ -202,6 +202,7 @@ permanently deleted.") is translated.
 - Show all Albums [+2026-10-11 02:40 CDT]
 - Show new Albums [+2026-10-11 02:40 CDT]
 - Skip [+2026-10-11 02:40 CDT]
+- Start 30-day free trial [+2026-10-11]  *(added during the 11 Oct Guide revision; the Settings button that starts the Pro trial, distinct from Unlock Pro which purchases)*
 - Stop [+2026-10-11 02:40 CDT]
 - Stop restoring [+2026-10-11 02:40 CDT]
 - SYNC NOW [+2026-10-11 02:40 CDT]  *(the wizard's capitalised button; "Sync now" on the Albums tab is §5)*
