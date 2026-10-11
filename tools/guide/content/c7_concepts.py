@@ -88,7 +88,7 @@ CHAPTER = Chapter(
             • **Backing up:** shortly after new photos appear, and every six hours. Wi-Fi only unless mobile data is on; not when battery or storage is low. **Sync now** runs straight away.
             • **Optimising photos:** Automatic, once the Cloud confirms a file in a Sync album. Manual, on **Sync now**.
             • **Optimising video:** Automatic, after backups, while charging. Manual, on **Sync now**.
-            • **Deleted files:** under **Ask**, you are notified shortly after deleting a file that has a Cloud copy (Automatic sync only).
+            • **Deleted files:** under **Ask**, you are notified shortly after deleting a file that has a Cloud copy (not while backups are paused).
             • **Archiving:** only when you say Yes on the Archive tab.
             • **Restoring:** only when you press Restore.
 

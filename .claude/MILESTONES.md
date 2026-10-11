@@ -7975,9 +7975,9 @@ Archive notice; no listing change); refused, Ask works as before. Own channel, *
 Moto G, debug build: photo `DCIM/20240508_171827.jpg` trashed at 18:05:31 (`is_trashed=1`, renamed `.trashed-…`), run
 woke 18:05:56, notification up by 18:06:10 ("1 photo or video you deleted still has a copy in your Cloud"), tap opened
 the window listing it with nothing selected, notification gone. Decide later; file restored from the trash.
-Not seen: Samsung Gallery's own delete (needs the Fold), and the Manual sync mode, where neither the content trigger nor
-the six-hourly run is armed (`BackupScheduling.enable` is called only for Automatic), so there is no notice and the
-window asks on the next open, as before.
+Not seen: Samsung Gallery's own delete (needs the Fold), and Pause, which holds the background runs, so no notice until
+Resume. (Corrected 11 Oct 2026: there is no user-facing Automatic/Manual backup switch. `isAutomaticEnabled` defaults
+to true and `BackupViewModel.setAutomaticEnabled` is called from no screen, so automatic backup is always on.)
 
 
 **How To Guide audit (11 Oct 2026, Ian asked).** Every chapter read against the code. Fixed: pCloud missing from the
