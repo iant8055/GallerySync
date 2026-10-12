@@ -794,6 +794,15 @@ full size</string>
     <string name="destination_change">Change</string>
     <string name="destination_dialog_title">Where new backups go</string>
     <string name="destination_label">Folder in OneDrive</string>
+    <!-- The backup folder in each Cloud (Ian, 12 Oct 2026): a line under each connected Cloud, in Settings and the wizard. -->
+    <string name="cloud_backup_folder">Backup folder</string>
+    <!-- The album file list's header: where this album's new files go, and any other Cloud already holding some (Ian, 12 Oct 2026). -->
+    <string name="album_backs_up_to">Backs up to %1$s / %2$s</string>
+    <string name="album_backs_up_library">Backs up to your Google Photos library</string>
+    <string name="album_also_in">Also has files in %1$s</string>
+    <string name="album_detail_mode_files">%1$s · %2$s</string>
+    <string name="cloud_folder_label">Folder in %1$s</string>
+    <string name="cloud_folder_body">New photos and videos will go here. Files already backed up stay where they are.</string>
     <!--
         The reassurance that makes this safe to change. The previous folder stays in the search set,
         so nothing already uploaded is stranded and nothing is sent twice.

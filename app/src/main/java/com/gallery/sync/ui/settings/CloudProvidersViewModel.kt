@@ -12,6 +12,8 @@ import com.gallery.sync.data.remote.cloud.ConnectionKind
 import com.gallery.sync.data.remote.cloud.KeyField
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.domain.backup.BackupLocation
+import com.gallery.sync.data.local.settings.folderFor
+import com.gallery.sync.domain.backup.RemoteRoots
 import com.gallery.sync.domain.backup.WizardGate
 import com.gallery.sync.domain.backup.RestoreEverythingFrom
 import com.gallery.sync.domain.billing.BillingRepository
@@ -96,7 +98,13 @@ data class CloudProvidersUiState(
     /** Whether the "which cloud do you want to keep free?" question has been answered. */
     val keepFreeAnswered: Boolean = false,
     /** The question shown when the user signs out of a cloud that holds files; null when none is open. */
-    val signOut: SignOutState? = null
+    val signOut: SignOutState? = null,
+    /** The backup folder in each Cloud that has folders (Ian, 12 Oct 2026). See `BackupPreferences.folderFor`. */
+    val folders: Map<BackupLocation, String> = emptyMap(),
+    /** The Cloud whose folder is being changed, or null. */
+    val choosingFolderFor: BackupLocation? = null,
+    /** The typed folder could not be used. */
+    val folderRejected: Boolean = false
 ) {
     val connected: List<ProviderState> get() = providers.filter { it.isConnected }
 
@@ -162,8 +170,33 @@ class CloudProvidersViewModel @Inject constructor(
                 isProUnlocked = billing.isPurchased(),
                 trial = entitlement.trialState(),
                 keepFreeAnswered = settings.current().keepFreeAnswered,
+                folders = BackupLocation.entries.filter { RemoteRoots.hasFolders(it) }
+                    .associateWith { settings.current().folderFor(it) },
                 loaded = true
             )
+        }
+    }
+
+    fun chooseFolder(location: BackupLocation) {
+        _state.value = _state.value.copy(choosingFolderFor = location, folderRejected = false)
+    }
+
+    fun dismissFolderChooser() {
+        _state.value = _state.value.copy(choosingFolderFor = null, folderRejected = false)
+    }
+
+    /**
+     * The backup folder in [location]. The same value in the wizard and in Settings: Ian's second exception to
+     * their independence, 12 Oct 2026 (CLAUDE.md). Only new files go to the new folder.
+     */
+    fun setFolder(location: BackupLocation, path: String) {
+        viewModelScope.launch {
+            if (settings.setCloudFolder(location, path)) {
+                _state.value = _state.value.copy(choosingFolderFor = null, folderRejected = false)
+                refresh()
+            } else {
+                _state.value = _state.value.copy(folderRejected = true)
+            }
         }
     }
 

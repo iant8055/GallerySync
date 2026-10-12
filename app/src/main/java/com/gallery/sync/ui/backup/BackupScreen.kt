@@ -161,6 +161,8 @@ fun BackupScreen(
             albumName = album.name,
             mode = album.mode,
             entries = detailEntries,
+            backsUpTo = album.backupLocation,
+            backupFolder = state.cloudFolders[album.backupLocation],
             onBack = { detailAlbum = null },
             onSetPinned = { entry, pinned ->
                 scope.launch {

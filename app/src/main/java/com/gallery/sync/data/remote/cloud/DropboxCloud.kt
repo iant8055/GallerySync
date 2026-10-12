@@ -29,7 +29,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Dropbox: files land in `/GallerySync/<album>/<name>` in the app's own area of the user's Dropbox
+ * Dropbox: files land in `/<backup folder>/<album>/<name>` (GallerySync unless the user chose another) in the app's own area of the user's Dropbox
  * (an "app folder" app) or the root, depending on how the app is registered.
  *
  * Sign-in is standard PKCE with no client secret. Not offered until an app key is filled in
@@ -89,7 +89,8 @@ class DropboxCloud @Inject constructor(
     override suspend fun upload(
         source: UploadSource,
         album: String,
-        onProgress: (bytesSent: Long, total: Long) -> Unit
+        onProgress: (bytesSent: Long, total: Long) -> Unit,
+        root: String
     ): DataResult<UploadedItem> = withContext(dispatcher) {
         val token = tokens.accessToken(location) ?: return@withContext DataResult.Failure(RemoteError.NoToken)
         if (source.sizeBytes <= 0L) {
@@ -97,7 +98,7 @@ class DropboxCloud @Inject constructor(
             return@withContext DataResult.Failure(RemoteError.EmptyLocalFile)
         }
 
-        val path = "/GallerySync/${album.trim('/')}/${source.displayName}"
+        val path = "/${root.trim('/')}/${album.trim('/')}/${source.displayName}"
         try {
             if (source.sizeBytes <= singleRequestLimit) {
                 uploadSingle(token, path, source, onProgress)

@@ -190,4 +190,12 @@ class S3CompatibleCloudTest {
         assertEquals(0, server.requestCount)
         assertEquals(BackupLocation.BACKBLAZE_B2, cloud.location)
     }
+
+    /** The backup folder the user chose replaces GallerySync at the front of the key (Ian, 12 Oct 2026). */
+    @Test
+    fun objectKeyUsesTheChosenFolder() {
+        assertEquals("GallerySync/Car Show/a.jpg", S3CompatibleCloud.objectKey("Car Show", "a.jpg"))
+        assertEquals("Backups/Phone/Car Show/a.jpg", S3CompatibleCloud.objectKey("Car Show", "a.jpg", "Backups/Phone"))
+        assertEquals("Backups/Car Show/a.jpg", S3CompatibleCloud.objectKey("/Car Show/", "a.jpg", "/Backups/"))
+    }
 }

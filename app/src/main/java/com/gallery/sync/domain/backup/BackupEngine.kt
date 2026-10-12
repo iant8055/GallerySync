@@ -20,6 +20,7 @@ import com.gallery.sync.data.local.media.MediaScanRules
 import com.gallery.sync.data.local.media.ProxyMarker
 import com.gallery.sync.data.local.media.RestoredAlbum
 import com.gallery.sync.data.local.settings.BackupSettings
+import com.gallery.sync.data.local.settings.folderFor
 import com.gallery.sync.data.remote.onedrive.ContentUriUploadSource
 import com.gallery.sync.data.remote.onedrive.ResumableSession
 import com.gallery.sync.data.remote.onedrive.UploadSource
@@ -1042,6 +1043,7 @@ class BackupEngine @Inject constructor(
                     val result = uploader.upload(
                         source = source,
                         album = entry.album,
+                        root = folderFor(location),
                         onProgress = { sent, total ->
                             onProgress(
                                 BackupProgress(
@@ -1066,6 +1068,7 @@ class BackupEngine @Inject constructor(
                                 remoteItemId = result.value.id,
                                 uploadedAt = System.currentTimeMillis()
                             )
+                            Logger.i(TAG, "sent ${entry.displayName} to $location: ${folderFor(location)}/${entry.album}")
                             uploaded++
                         }
 
@@ -1694,7 +1697,7 @@ class BackupEngine @Inject constructor(
     suspend fun cloudFolders(): List<RestorableFolder>? = withContext(dispatcher) {
         val found = mutableMapOf<String, RemoteMediaNode.Folder>()
 
-        for (root in RemoteRoots.searchOrder(destinationRoot())) {
+        for (root in RemoteRoots.searchOrder(destinationRoot(), settings.current().pastDestinationRoots)) {
             var page = when (val result = repository.listFolderByPath(root)) {
                 is DataResult.Success -> result.value
                 is DataResult.Failure -> {
@@ -2074,7 +2077,7 @@ class BackupEngine @Inject constructor(
     ): Map<String, RemoteFileRef>? {
         val merged = mutableMapOf<String, RemoteFileRef>()
 
-        for (root in RemoteRoots.searchOrder(destinationRoot())) {
+        for (root in RemoteRoots.searchOrder(destinationRoot(), settings.current().pastDestinationRoots)) {
             // One unreachable root makes the whole answer unknown. Merging what did list would
             // under-report what is backed up, and under-reporting here means re-uploading files the
             // user already has — the same "failing to ask is not evidence of absence" rule that the
@@ -2147,6 +2150,9 @@ class BackupEngine @Inject constructor(
      * next process. The cost is a DataStore read, which is already in memory after the first.
      */
     private suspend fun destinationRoot(): String = settings.current().destinationRoot
+
+    /** The backup folder the user chose in [location]. See `BackupPreferences.folderFor`. */
+    private suspend fun folderFor(location: BackupLocation): String = settings.current().folderFor(location)
 
     private fun stopReasonFor(error: RemoteError): StopReason? = when (error) {
         RemoteError.NoToken -> StopReason.NO_TOKEN

@@ -90,7 +90,7 @@ CHAPTER = Chapter(
         topic("album-detail", "An album's file list", """
             Opens when you tap an album card.
 
-            • **Header:** back arrow, album name, mode and file count, the counts ([[album-file-status]]), **Sort by** ([[album-file-sort]]) and **Keep at full size** ([[album-file-pin]]).
+            • **Header:** back arrow, album name, mode and file count, **Backs up to** (the Cloud and folder new files go to, plus any other Cloud already holding some), the counts ([[album-file-status]]), **Sort by** ([[album-file-sort]]) and **Keep at full size** ([[album-file-pin]]).
             • **Files:** one card per file with its size, date and marks. An optimised file shows its smaller size on the phone.
             • **Camera folder** (if chosen in Settings): extra optimise controls. See [[album-camera-optimise]].
 

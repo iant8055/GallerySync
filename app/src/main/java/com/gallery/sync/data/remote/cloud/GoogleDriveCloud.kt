@@ -30,7 +30,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Google Drive: files land in `GallerySync/<album>/<name>` in the user's own Drive.
+ * Google Drive: files land in `<backup folder>/<album>/<name>` (GallerySync unless the user chose another) in the user's own Drive.
  *
  * Uses the **`drive.file`** scope only — the app can see and touch only what it created itself, never
  * the rest of the user's Drive. That is also why no Drive listing is ever needed to find the user's own
@@ -163,7 +163,8 @@ class GoogleDriveCloud @Inject constructor(
     override suspend fun upload(
         source: UploadSource,
         album: String,
-        onProgress: (bytesSent: Long, total: Long) -> Unit
+        onProgress: (bytesSent: Long, total: Long) -> Unit,
+        root: String
     ): DataResult<UploadedItem> = withContext(dispatcher) {
         val token = tokens.accessToken(location) ?: return@withContext DataResult.Failure(RemoteError.NoToken)
         if (source.sizeBytes <= 0L) {
@@ -172,10 +173,11 @@ class GoogleDriveCloud @Inject constructor(
         }
 
         try {
-            val root = ensureFolder(token, "GallerySync", "root")
-                ?: return@withContext failureAfterLookup()
-            val parent = ensureFolder(token, album.trim('/'), root)
-                ?: return@withContext failureAfterLookup()
+            // One folder per path segment: Drive has no paths, only folders inside folders.
+            var parent = "root"
+            for (segment in root.trim('/').split('/') + album.trim('/')) {
+                parent = ensureFolder(token, segment, parent) ?: return@withContext failureAfterLookup()
+            }
             uploadFile(token, parent, source, onProgress)
         } catch (e: FileNotFoundException) {
             DataResult.Failure(RemoteError.LocalFileMissing)

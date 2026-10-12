@@ -35,7 +35,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * pCloud: files land in `/GallerySync/<album>/<name>`.
+ * pCloud: files land in `/<backup folder>/<album>/<name>` (GallerySync unless the user chose another).
  *
  * pCloud's authorisation-code flow needs a client **secret**, which cannot live in an app. Its
  * *token* flow (`response_type=token`) returns the access token in the redirect and needs none, so that
@@ -101,7 +101,8 @@ class PCloudCloud @Inject constructor(
     override suspend fun upload(
         source: UploadSource,
         album: String,
-        onProgress: (bytesSent: Long, total: Long) -> Unit
+        onProgress: (bytesSent: Long, total: Long) -> Unit,
+        root: String
     ): DataResult<UploadedItem> = withContext(dispatcher) {
         val token = secrets.read(KEY_TOKEN) ?: return@withContext DataResult.Failure(RemoteError.NoToken)
         if (source.sizeBytes <= 0L) {
@@ -111,8 +112,12 @@ class PCloudCloud @Inject constructor(
         val base = baseOverride ?: "https://${secrets.read(KEY_HOST) ?: DEFAULT_HOST}"
 
         try {
-            val folder = "/GallerySync/${album.trim('/')}"
-            for (path in listOf("/GallerySync", folder)) {
+            // Each level made in turn: createfolderifnotexists makes one folder, not a path.
+            val levels = (root.trim('/').split('/') + album.trim('/'))
+                .runningReduce { acc, part -> "$acc/$part" }
+                .map { "/$it" }
+            val folder = levels.last()
+            for (path in levels) {
                 if (path in ensured) continue
                 val result = call(base, "createfolderifnotexists", token, "path" to path)
                 if (result != null) return@withContext result

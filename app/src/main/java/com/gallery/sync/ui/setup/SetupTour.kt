@@ -1523,33 +1523,6 @@ private fun CloudStorageContent(
             )
             CloudProvidersSection(only = setOf(current), showTitle = false, viewModel = cloudViewModel)
 
-            // OneDrive's own folder for its backups, once it is signed in.
-            if (current == BackupLocation.ONEDRIVE && cloudState.connected.any { it.location == BackupLocation.ONEDRIVE }) {
-                // The path takes the slack and the button keeps its own width. SpaceBetween let a
-                // long destination squeeze the button until "Change" rendered as "Chang" — a button
-                // narrower than its own label, which is how a truncated label happens at all.
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(R.string.tour_cloud_destination),
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                        Text(
-                            text = state.destinationRoot,
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                    }
-                    // Filled, not outlined. Outlined read as a label with a box round it here, next to
-                    // two lines of plain text; filled is unambiguous.
-                    Button(onClick = onChangeDestination) {
-                        Text(stringResource(R.string.tour_cloud_change), maxLines = 1)
-                    }
-                }
-            }
         }
 
         limitsFor?.let { (about, isExtra) ->

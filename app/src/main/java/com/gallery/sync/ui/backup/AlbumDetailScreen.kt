@@ -52,6 +52,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import com.gallery.sync.domain.backup.BackupLocation
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
@@ -133,6 +134,9 @@ fun AlbumDetailScreen(
     mode: AlbumMode,
     entries: List<BackupEntryEntity>,
     onBack: () -> Unit,
+    /** The Cloud this album's new files go to, and the backup folder chosen there (null for Google Photos). */
+    backsUpTo: BackupLocation? = null,
+    backupFolder: String? = null,
     /** The tick box: keep one file at full size, or let it follow its album again. See `FilePin`. */
     onSetPinned: (BackupEntryEntity, Boolean) -> Unit,
     /** *Retry failed*: put the failed files back in the queue and start a backup. See `RetryFailed`. */
@@ -260,7 +264,9 @@ fun AlbumDetailScreen(
                     )
                 },
                 onRetryFailed = onRetryFailed,
-                onBack = leave
+                onBack = leave,
+                backsUpTo = backsUpTo,
+                backupFolder = backupFolder
             )
         }
 
@@ -353,7 +359,9 @@ private fun DetailHeader(
     showKeepColumn: Boolean,
     camera: CameraHeader?,
     onRetryFailed: () -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    backsUpTo: BackupLocation? = null,
+    backupFolder: String? = null
 ) {
     val signal = LocalGallerySyncColors.current
     var sortMenuOpen by remember { mutableStateOf(false) }
@@ -408,9 +416,38 @@ private fun DetailHeader(
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 Text(
-                    text = "${mode.label()} · ${entries.size} files",
+                    text = stringResource(
+                        R.string.album_detail_mode_files,
+                        mode.label(),
+                        pluralStringResource(R.plurals.file_count, entries.size, entries.size)
+                    ),
                     style = MaterialTheme.typography.bodyMedium
                 )
+
+                // Where this album's files go: the Cloud and the folder in it (Ian, 12 Oct 2026). New files follow
+                // the folder's pairing and the folder chosen in that Cloud; files already sent elsewhere are named too.
+                if (backsUpTo != null) {
+                    Text(
+                        text = if (backsUpTo == BackupLocation.GOOGLE_PHOTOS || backupFolder == null) {
+                            stringResource(R.string.album_backs_up_library)
+                        } else {
+                            stringResource(R.string.album_backs_up_to, stringResource(backsUpTo.labelRes()), "$backupFolder/$albumName")
+                        },
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    val elsewhere = entries.asSequence()
+                        .filter { it.state == BackupState.UPLOADED && it.location != backsUpTo }
+                        .map { it.location }.distinct().toList()
+                    if (elsewhere.isNotEmpty()) {
+                        Text(
+                            text = stringResource(
+                                R.string.album_also_in,
+                                elsewhere.map { stringResource(it.labelRes()) }.joinToString(", ")
+                            ),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
 
                 if (entries.isNotEmpty()) {
                     // Plain text in the card's own ink: the coloured counts this line used to have

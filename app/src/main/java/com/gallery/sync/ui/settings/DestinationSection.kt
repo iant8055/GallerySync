@@ -139,7 +139,14 @@ fun DestinationDialog(
     alreadyBackedUp: Int,
     rejected: Boolean,
     onConfirm: (String) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    /** The Cloud this folder is in, named in the field's label. Null keeps the OneDrive wording. */
+    cloudName: String? = null,
+    defaultFolder: String = RemoteRoots.DEFAULT_DESTINATION,
+    /** Only OneDrive has a folder browser so far; the others take a typed path. */
+    canBrowse: Boolean = true,
+    /** Only OneDrive keeps checking earlier folders for files already there; the others have no such check. */
+    searchesOldFolders: Boolean = true
 ) {
     var typed by rememberSaveable(current) { mutableStateOf(current) }
     var browsing by rememberSaveable { mutableStateOf(false) }
@@ -171,7 +178,12 @@ fun DestinationDialog(
                 OutlinedTextField(
                     value = typed,
                     onValueChange = { typed = it },
-                    label = { Text(stringResource(R.string.destination_label)) },
+                    label = {
+                        Text(
+                            if (cloudName != null) stringResource(R.string.cloud_folder_label, cloudName)
+                            else stringResource(R.string.destination_label)
+                        )
+                    },
                     singleLine = true,
                     isError = rejected,
                     // The 280dp default minimum is what broke the album rows; a dialog is narrower
@@ -179,7 +191,9 @@ fun DestinationDialog(
                     modifier = Modifier.fillMaxWidth().widthIn(min = 0.dp)
                 )
                 Text(
-                    text = if (alreadyBackedUp > 0) {
+                    text = if (!searchesOldFolders) {
+                        stringResource(R.string.cloud_folder_body)
+                    } else if (alreadyBackedUp > 0) {
                         stringResource(R.string.destination_dialog_body, alreadyBackedUp)
                     } else {
                         stringResource(R.string.destination_dialog_body_unknown)
@@ -193,11 +207,13 @@ fun DestinationDialog(
                         color = MaterialTheme.colorScheme.error
                     )
                 }
-                OutlinedButton(onClick = { browsing = true }) {
-                    Text(stringResource(R.string.destination_browse), maxLines = 1)
+                if (canBrowse) {
+                    OutlinedButton(onClick = { browsing = true }) {
+                        Text(stringResource(R.string.destination_browse), maxLines = 1)
+                    }
                 }
-                if (typed != RemoteRoots.DEFAULT_DESTINATION) {
-                    TextButton(onClick = { typed = RemoteRoots.DEFAULT_DESTINATION }) {
+                if (typed != defaultFolder) {
+                    TextButton(onClick = { typed = defaultFolder }) {
                         Text(stringResource(R.string.destination_reset), maxLines = 1)
                     }
                 }

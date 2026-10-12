@@ -54,6 +54,7 @@ import com.gallery.sync.ui.common.labelRes
 import com.gallery.sync.data.local.settings.ThemeMode
 import com.gallery.sync.domain.backup.ArchiveAge
 import com.gallery.sync.domain.backup.BackupLocation
+import com.gallery.sync.domain.backup.RemoteRoots
 import com.gallery.sync.domain.backup.CameraAlbum
 import com.gallery.sync.domain.backup.CameraOptimiseAge
 import com.gallery.sync.domain.backup.MediaAge
@@ -218,12 +219,12 @@ fun SettingsScreen(
                         // sent there. Say so on the row rather than let it sit silent.
                         stringResource(R.string.pairing_needs_pro, stringResource(folder.location.labelRes()))
                     } else when (folder.location) {
-                        BackupLocation.ONEDRIVE -> stringResource(
-                            R.string.pairing_path, stringResource(folder.location.labelRes()), state.destinationRoot
-                        )
                         BackupLocation.GOOGLE_PHOTOS -> stringResource(R.string.pairing_path_library)
+                        // The folder chosen for that Cloud (Ian, 12 Oct 2026), changed on its row under Clouds.
                         else -> stringResource(
-                            R.string.pairing_path, stringResource(folder.location.labelRes()), "GallerySync"
+                            R.string.pairing_path,
+                            stringResource(folder.location.labelRes()),
+                            cloudState.folders[folder.location] ?: RemoteRoots.defaultFor(folder.location)
                         )
                     }
                 )

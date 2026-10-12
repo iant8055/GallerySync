@@ -8002,3 +8002,20 @@ Manual; MassAbsence = over half of backed-up files. Ian: go.
 Renamed on the Restore and Archive tabs (Albums to Restore, Files in this album, Search this album, Back to albums, Check all
 albums, the Archive album list) and the tour line; guide and glossary to match. Also fixed "1 files" on the Restore album card
 (restore_folder_detail now takes the file_count plural). Seen on the Moto.
+
+**Backup folder in every Cloud (Ian, 12 Oct 2026).** Ian: the user chooses where in each Cloud account backups go, in the wizard
+AND in Settings; recorded as the second exception to wizard/Settings independence in CLAUDE.md. (OneDrive's folder chooser had
+left Settings on 24 Sept, f12ab67, as a side effect of a layout tidy-up, not a decision.) Built: `BackupPreferences.cloudFolders` and
+`folderFor(location)` (OneDrive keeps `destinationRoot`), `setCloudFolder`, `CloudUploader.upload(.., root)`; Dropbox, Google Drive
+(one folder per segment), pCloud (each level created) and S3 (`objectKey(album, name, root)`) use it. OneDrive now remembers every
+earlier destination (`pastDestinationRoots`) and searches them, so the dialog's "keeps looking in the old folder too" is true for
+any earlier folder, not only Samsung Gallery/DCIM. UI: a **Backup folder** line with **Change** under each connected Cloud in
+`CloudProvidersSection` (so both Settings and the wizard Connect card), the dialog generalised (Browse for OneDrive only, typed path
+elsewhere); the wizard's separate OneDrive block removed; Settings pairing rows show each Cloud's folder. Album header: **Backs up
+to** Cloud / folder/album, and **Also has files in** other Clouds. Header file count pluralised.
+Moto G (debug, trial started, all clouds test accounts): folders set to GSTest/Drive, GSTest/Dropbox, GSTest/pCloud, GSTest/IDrive;
+Pictures paired with each in turn and a new photo backed up to each (log: "sent ft_x.jpg to <CLOUD>: GSTest/<x>/FolderTest"; the
+IDrive object key recorded is GSTest/IDrive/FolderTest/ft_idrive.jpg). All four deleted from the phone and restored from the Restore
+tab: md5 identical to the original (fb5ccc58...). Header seen in light and dark. **Found, not fixed:** restored files landed in
+DCIM/FolderTest, not Pictures/FolderTest. The ledger has no top-level folder per file, so once an album has no files left on the
+phone Restore falls back to DCIM/<album>. Pre-existing; a fix needs a Room column (migration), so it is Ian's call.

@@ -94,7 +94,7 @@ class GooglePhotosBillingGateTest {
 
         val result = engine.uploadPending()
 
-        verify(googlePhotosUploader, never()).upload(any<UploadSource>(), any(), any())
+        verify(googlePhotosUploader, never()).upload(any<UploadSource>(), any(), any(), any())
         assertEquals(0, result.uploaded)
     }
 

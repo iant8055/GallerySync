@@ -144,9 +144,10 @@
 <h4>Signing in</h4>
 <p>Each Cloud gets its own numbered <strong>Connect</strong> card. <strong>Next</strong> waits until all are connected.</p>
 <ul><li><strong>OneDrive, Google Photos, Google Drive, Dropbox, pCloud:</strong> sign in on the provider's own page. Your password never goes into GallerySync. For Dropbox, allow read and write, or Restore will not work.</li><li><strong>IDrive e2, Backblaze B2:</strong> enter the keys from their console. See <a class="xref" href="#cloud-key-backblaze">“Connecting Backblaze B2: the keys and where to find them”</a> and <a class="xref" href="#cloud-key-idrive">“Connecting IDrive e2: the keys and where to find them”</a>.</li></ul>
-<p>On every phone, OneDrive backups go to <strong>Samsung Gallery / DCIM</strong>, the folder Samsung's own OneDrive sync uses, so photos already synced there are not sent twice. See <a class="xref" href="#dialog-destination">“Where new backups go (the Change dialog)”</a>.</p>
+<h4>Backup folder</h4>
+<p>Once a Cloud is connected, its card shows its <strong>Backup folder</strong>, with <strong>Change</strong> to pick another (not Google Photos, which has no folders). OneDrive starts at <strong>Samsung Gallery / DCIM</strong>, the folder Samsung's own OneDrive sync uses, so photos already synced there are not sent twice. Other Clouds start at <strong>GallerySync</strong>. See <a class="xref" href="#dialog-destination">“Where new backups go (the Change dialog)”</a>.</p>
   <h3 id="cloud-key-backblaze">Connecting Backblaze B2: the keys and where to find them</h3>
-<p>GallerySync only writes inside a <strong>GallerySync</strong> folder in your bucket, so an existing bucket is safe to use.</p>
+<p>GallerySync only writes inside its backup folder in your bucket (<strong>GallerySync</strong> unless you choose another), so an existing bucket is safe to use.</p>
 <h4>In Backblaze</h4>
 <ol><li><strong>A private bucket:</strong> use one you have, or <strong>Buckets → Create a Bucket</strong>.</li><li><strong>Its endpoint:</strong> shown in the bucket's details, for example <strong>s3.us-east-005.backblazeb2.com</strong>.</li><li><strong>An application key:</strong> <strong>Application Keys → Add a New Application Key</strong>, for that one bucket, <strong>Read and Write</strong>. Not the Master key.</li><li><strong>Copy both halves:</strong> the <strong>keyID</strong> and the <strong>applicationKey</strong>. The applicationKey is shown only once.</li></ol>
 <h4>In GallerySync</h4>
@@ -154,7 +155,7 @@
 <h4>If the keys are rejected</h4>
 <p>The message says what to check. It is nearly always a typo: <strong>O</strong> vs zero, <strong>I</strong> vs <strong>l</strong>, <strong>J</strong> vs <strong>j</strong>. Pasting avoids this.</p>
   <h3 id="cloud-key-idrive">Connecting IDrive e2: the keys and where to find them</h3>
-<p>GallerySync only writes inside a <strong>GallerySync</strong> folder in your bucket, so an existing bucket is safe to use.</p>
+<p>GallerySync only writes inside its backup folder in your bucket (<strong>GallerySync</strong> unless you choose another), so an existing bucket is safe to use.</p>
 <h4>In IDrive e2</h4>
 <ol><li><strong>A private bucket.</strong></li><li><strong>The region's endpoint</strong>, for example <strong>s3.us-west-1.idrivee2.com</strong>. Not the address with the bucket name in front.</li><li><strong>The region name</strong>, for example <strong>us-west-1</strong>.</li><li><strong>An access key:</strong> an <strong>access key ID</strong> and <strong>secret access key</strong>. The secret is shown only once.</li></ol>
 <h4>In GallerySync</h4>
@@ -240,7 +241,7 @@
 <ul><li><strong>Name, file count and size</strong> of the album on your phone.</li><li><strong>Second line</strong> (only when needed): how many files are optimised, kept at full size, pending or failed.</li><li><strong>Cloud line:</strong> <strong>verified in OneDrive</strong> means OneDrive confirmed the files at the right size. It is checked each time you open the tab. Other Clouds show <strong>sent to</strong> that Cloud.</li><li><strong>Mode button</strong> (right side): tap to change the album's mode. Archive asks you to confirm first. If the album's Cloud cannot do that mode, the card says so.</li><li><strong>Tap the card</strong> to see the album's files. See <a class="xref" href="#album-detail">“An album's file list”</a>.</li></ul>
   <h3 id="album-detail">An album&#x27;s file list</h3>
 <p>Opens when you tap an album card.</p>
-<ul><li><strong>Header:</strong> back arrow, album name, mode and file count, the counts (<a class="xref" href="#album-file-status">“File marks and counts in an album”</a>), <strong>Sort by</strong> (<a class="xref" href="#album-file-sort">“Sorting an album's files”</a>) and <strong>Keep at full size</strong> (<a class="xref" href="#album-file-pin">“Keep at full size”</a>).</li><li><strong>Files:</strong> one card per file with its size, date and marks. An optimised file shows its smaller size on the phone.</li><li><strong>Camera folder</strong> (if chosen in Settings): extra optimise controls. See <a class="xref" href="#album-camera-optimise">“Optimise older photos and videos in your Camera folder”</a>.</li></ul>
+<ul><li><strong>Header:</strong> back arrow, album name, mode and file count, <strong>Backs up to</strong> (the Cloud and folder new files go to, plus any other Cloud already holding some), the counts (<a class="xref" href="#album-file-status">“File marks and counts in an album”</a>), <strong>Sort by</strong> (<a class="xref" href="#album-file-sort">“Sorting an album's files”</a>) and <strong>Keep at full size</strong> (<a class="xref" href="#album-file-pin">“Keep at full size”</a>).</li><li><strong>Files:</strong> one card per file with its size, date and marks. An optimised file shows its smaller size on the phone.</li><li><strong>Camera folder</strong> (if chosen in Settings): extra optimise controls. See <a class="xref" href="#album-camera-optimise">“Optimise older photos and videos in your Camera folder”</a>.</li></ul>
 <p>No thumbnails or previews. Use your gallery app to look at photos.</p>
   <h3 id="album-file-status">File marks and counts in an album</h3>
 <ul><li><strong>✓ backed up:</strong> in the Cloud, full size on the phone.</li><li><strong>✓ backed up · optimised:</strong> in the Cloud; the phone has a smaller copy.</li><li><strong>⟳ pending:</strong> waiting to be sent.</li><li><strong>✗ failed:</strong> could not be sent after several tries.</li></ul>
@@ -382,6 +383,8 @@
 <p>One Cloud is marked <strong>main (free)</strong>: the first Cloud you selected. It is always free. Other Clouds need <strong>Pro</strong>: free for 30 days (<strong>Start 30-day free trial</strong>), then a one-time purchase (<strong>Unlock Pro</strong>). Nothing is charged automatically.</p>
   <h3 id="settings-account">Your Clouds and Sign out</h3>
 <p>Each Cloud shows its account (or <strong>Not connected</strong>) with <strong>Sign out</strong>, <strong>Connect</strong> or <strong>Enter keys</strong>.</p>
+<h4>Backup folder</h4>
+<p>Under each connected Cloud (except Google Photos): the folder its backups go to, with <strong>Change</strong>. See <a class="xref" href="#dialog-destination">“Where new backups go (the Change dialog)”</a>.</p>
 <h4>Sign out</h4>
 <p>A warning first: backups to that Cloud stop, nothing is deleted. If that Cloud holds files that are not full size on the phone (optimised or archived), it asks:</p>
 <ul><li><strong>Restore them to the phone first:</strong> brings them all back, then signs out.</li><li><strong>Leave them there:</strong> signs out.</li><li><strong>Cancel:</strong> stays signed in.</li></ul>
@@ -390,10 +393,11 @@
 <p>Each top-level folder (DCIM, Pictures, Movies), the Cloud it goes to, and where in that Cloud.</p>
 <ul><li>Tap the Cloud to change it. It can only be changed with more than one Cloud and Pro or the trial.</li><li>Only new files follow a change. Files already sent stay where they are.</li><li>A folder paired with an extra Cloud without Pro sends nothing, and says so.</li></ul>
   <h3 id="dialog-destination">Where new backups go (the Change dialog)</h3>
-<p>Not available in this version: new OneDrive backups go to <strong>Samsung Gallery/DCIM</strong>.</p>
-<p>When it returns: enter a OneDrive folder path or <strong>Browse...</strong> for one, <strong>Reset to default</strong> to go back to Samsung Gallery/DCIM, then <strong>Use this folder</strong> or <strong>Cancel</strong>. Files already backed up stay where they are.</p>
+<p>Opened by <strong>Change</strong> beside a Cloud's <strong>Backup folder</strong>, in Settings or on its card during setup.</p>
+<ul><li>Type the folder path, or for OneDrive use <strong>Browse...</strong>.</li><li><strong>Reset to default:</strong> back to <strong>Samsung Gallery/DCIM</strong> (OneDrive) or <strong>GallerySync</strong> (other Clouds).</li><li><strong>Use this folder</strong> saves; <strong>Cancel</strong> changes nothing.</li></ul>
+<p>Only new files go to the new folder. Files already backed up stay where they are. OneDrive keeps checking earlier folders, so nothing is sent twice.</p>
   <h3 id="dialog-folder-picker">Choose a folder (the OneDrive picker)</h3>
-<p>Not available in this version. Lists your OneDrive folders: tap to open, <strong>Up one folder</strong> to go back, <strong>Use this folder</strong> to choose, <strong>New folder</strong> to create one.</p>
+<p>Opened by <strong>Browse...</strong> for OneDrive. Lists your OneDrive folders: tap to open, <strong>Up one folder</strong> to go back, <strong>Use this folder</strong> to choose, <strong>New folder</strong> to create one.</p>
   <h3 id="settings-section-albums">Albums</h3>
 <p>Which folders GallerySync watches, and what happens to Cloud copies when you delete from the phone. New albums always start at <strong>Off</strong>.</p>
   <h3 id="settings-folders">Folders to back up</h3>

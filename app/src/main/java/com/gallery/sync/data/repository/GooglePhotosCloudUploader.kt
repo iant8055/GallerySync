@@ -22,6 +22,7 @@ class GooglePhotosCloudUploader @Inject constructor(
     override suspend fun upload(
         source: UploadSource,
         album: String,
-        onProgress: (bytesSent: Long, total: Long) -> Unit
+        onProgress: (bytesSent: Long, total: Long) -> Unit,
+        root: String
     ): DataResult<UploadedItem> = repository.upload(source, onProgress)
 }

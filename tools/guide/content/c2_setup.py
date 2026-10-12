@@ -51,11 +51,12 @@ CHAPTER = Chapter(
             • **OneDrive, Google Photos, Google Drive, Dropbox, pCloud:** sign in on the provider's own page. Your password never goes into GallerySync. For Dropbox, allow read and write, or Restore will not work.
             • **IDrive e2, Backblaze B2:** enter the keys from their console. See [[cloud-key-backblaze]] and [[cloud-key-idrive]].
 
-            On every phone, OneDrive backups go to **Samsung Gallery / DCIM**, the folder Samsung's own OneDrive sync uses, so photos already synced there are not sent twice.{{full: See [[dialog-destination]].}}
+            ## Backup folder
+            Once a Cloud is connected, its card shows its **Backup folder**, with **Change** to pick another (not Google Photos, which has no folders). OneDrive starts at **Samsung Gallery / DCIM**, the folder Samsung's own OneDrive sync uses, so photos already synced there are not sent twice. Other Clouds start at **GallerySync**.{{full: See [[dialog-destination]].}}
         """),
 
         topic("cloud-key-backblaze", "Connecting Backblaze B2: the keys and where to find them", """
-            GallerySync only writes inside a **GallerySync** folder in your bucket, so an existing bucket is safe to use.
+            GallerySync only writes inside its backup folder in your bucket (**GallerySync** unless you choose another), so an existing bucket is safe to use.
 
             ## In Backblaze
             1. **A private bucket:** use one you have, or **Buckets → Create a Bucket**.
@@ -75,7 +76,7 @@ CHAPTER = Chapter(
         """),
 
         topic("cloud-key-idrive", "Connecting IDrive e2: the keys and where to find them", """
-            GallerySync only writes inside a **GallerySync** folder in your bucket, so an existing bucket is safe to use.
+            GallerySync only writes inside its backup folder in your bucket (**GallerySync** unless you choose another), so an existing bucket is safe to use.
 
             ## In IDrive e2
             1. **A private bucket.**

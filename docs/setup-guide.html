@@ -124,11 +124,12 @@
 <h4>Signing in</h4>
 <p>Each Cloud gets its own numbered <strong>Connect</strong> card. <strong>Next</strong> waits until all are connected.</p>
 <ul><li><strong>OneDrive, Google Photos, Google Drive, Dropbox, pCloud:</strong> sign in on the provider's own page. Your password never goes into GallerySync. For Dropbox, allow read and write, or Restore will not work.</li><li><strong>IDrive e2, Backblaze B2:</strong> enter the keys from their console. See <a class="xref" href="#cloud-key-backblaze">“Connecting Backblaze B2: the keys and where to find them”</a> and <a class="xref" href="#cloud-key-idrive">“Connecting IDrive e2: the keys and where to find them”</a>.</li></ul>
-<p>On every phone, OneDrive backups go to <strong>Samsung Gallery / DCIM</strong>, the folder Samsung's own OneDrive sync uses, so photos already synced there are not sent twice.</p>
+<h4>Backup folder</h4>
+<p>Once a Cloud is connected, its card shows its <strong>Backup folder</strong>, with <strong>Change</strong> to pick another (not Google Photos, which has no folders). OneDrive starts at <strong>Samsung Gallery / DCIM</strong>, the folder Samsung's own OneDrive sync uses, so photos already synced there are not sent twice. Other Clouds start at <strong>GallerySync</strong>.</p>
   </div></details>
   <details class="topic"><summary>Connecting Backblaze B2: the keys and where to find them</summary>
   <div class="topic-body" id="cloud-key-backblaze">
-<p>GallerySync only writes inside a <strong>GallerySync</strong> folder in your bucket, so an existing bucket is safe to use.</p>
+<p>GallerySync only writes inside its backup folder in your bucket (<strong>GallerySync</strong> unless you choose another), so an existing bucket is safe to use.</p>
 <h4>In Backblaze</h4>
 <ol><li><strong>A private bucket:</strong> use one you have, or <strong>Buckets → Create a Bucket</strong>.</li><li><strong>Its endpoint:</strong> shown in the bucket's details, for example <strong>s3.us-east-005.backblazeb2.com</strong>.</li><li><strong>An application key:</strong> <strong>Application Keys → Add a New Application Key</strong>, for that one bucket, <strong>Read and Write</strong>. Not the Master key.</li><li><strong>Copy both halves:</strong> the <strong>keyID</strong> and the <strong>applicationKey</strong>. The applicationKey is shown only once.</li></ol>
 <h4>In GallerySync</h4>
@@ -138,7 +139,7 @@
   </div></details>
   <details class="topic"><summary>Connecting IDrive e2: the keys and where to find them</summary>
   <div class="topic-body" id="cloud-key-idrive">
-<p>GallerySync only writes inside a <strong>GallerySync</strong> folder in your bucket, so an existing bucket is safe to use.</p>
+<p>GallerySync only writes inside its backup folder in your bucket (<strong>GallerySync</strong> unless you choose another), so an existing bucket is safe to use.</p>
 <h4>In IDrive e2</h4>
 <ol><li><strong>A private bucket.</strong></li><li><strong>The region's endpoint</strong>, for example <strong>s3.us-west-1.idrivee2.com</strong>. Not the address with the bucket name in front.</li><li><strong>The region name</strong>, for example <strong>us-west-1</strong>.</li><li><strong>An access key:</strong> an <strong>access key ID</strong> and <strong>secret access key</strong>. The secret is shown only once.</li></ol>
 <h4>In GallerySync</h4>

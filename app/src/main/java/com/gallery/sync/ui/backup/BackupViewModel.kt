@@ -17,6 +17,7 @@ import com.gallery.sync.data.local.media.VideoReadiness
 import com.gallery.sync.worker.PhotoOptimiseLauncher
 import com.gallery.sync.worker.VideoOptimiseLauncher
 import com.gallery.sync.data.local.settings.BackupSettings
+import com.gallery.sync.data.local.settings.folderFor
 import com.gallery.sync.domain.backup.AlbumMergeWarning
 import com.gallery.sync.worker.BackupScheduling
 import com.gallery.sync.worker.BackupWorker
@@ -34,6 +35,7 @@ import com.gallery.sync.domain.backup.AlbumCloudClaim
 import com.gallery.sync.domain.backup.ArchiveAge
 import com.gallery.sync.domain.backup.BackupEngine
 import com.gallery.sync.domain.backup.BackupLocation
+import com.gallery.sync.domain.backup.RemoteRoots
 import com.gallery.sync.domain.backup.CameraAlbum
 import com.gallery.sync.domain.backup.CameraOptimiseAge
 import com.gallery.sync.domain.backup.CameraOptimiseChoice
@@ -321,6 +323,8 @@ data class BackupUiState(
     val acknowledgedAlbums: Set<String> = emptySet(),
     /** The OneDrive folder new uploads go into, for the folder-to-cloud pairing in Settings. */
     val destinationRoot: String = "",
+    /** The backup folder in each Cloud with folders, for the album header's "Backs up to" line. */
+    val cloudFolders: Map<BackupLocation, String> = emptyMap(),
     val backupLocation: BackupLocation = BackupLocation.DEFAULT,
     /** Top-level folders found on the device, each with its own destination. */
     val folders: List<FolderRow> = emptyList(),
@@ -546,6 +550,8 @@ class BackupViewModel @Inject constructor(
                     backupLocation = prefs.backupLocation,
                     acknowledgedAlbums = prefs.acknowledgedAlbums,
                     destinationRoot = prefs.destinationRoot,
+                    cloudFolders = BackupLocation.entries.filter { RemoteRoots.hasFolders(it) }
+                        .associateWith { prefs.folderFor(it) },
                     isOptimiseEnabled = prefs.isOptimiseEnabled,
                     optimisePhotos = prefs.optimisePhotos,
                     photoOptimiseMode = prefs.photoOptimiseMode,

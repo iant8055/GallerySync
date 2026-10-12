@@ -25,13 +25,14 @@ interface CloudUploader {
     suspend fun isConnected(): Boolean
 
     /**
-     * Sends [source]. [album] is the phone folder it came from, for providers that keep a folder
-     * structure (`GallerySync/<album>/<name>`); providers with no folders ignore it.
+     * Sends [source] to `<root>/<album>/<name>`. [root] is the backup folder the user chose in this Cloud (Ian,
+     * 12 Oct 2026), [album] the phone album the file came from. Providers with no folders ignore both.
      */
     suspend fun upload(
         source: UploadSource,
         album: String,
-        onProgress: (bytesSent: Long, total: Long) -> Unit = { _, _ -> }
+        onProgress: (bytesSent: Long, total: Long) -> Unit = { _, _ -> },
+        root: String = com.gallery.sync.domain.backup.RemoteRoots.OTHER_CLOUD_DEFAULT
     ): DataResult<UploadedItem>
 }
 

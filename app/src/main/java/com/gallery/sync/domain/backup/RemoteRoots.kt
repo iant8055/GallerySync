@@ -39,8 +39,21 @@ object RemoteRoots {
      * name in two roots is the same file — and this index is a reconciliation hint, not the
      * guarantee. What makes a removal safe is `remoteSizeBytes` recorded per ledger row.
      */
-    fun searchOrder(destination: String): List<String> =
-        (listOf(destination) + SAMSUNG_GALLERY).distinct()
+    fun searchOrder(destination: String, past: Set<String> = emptySet()): List<String> =
+        (listOf(destination) + past.sorted() + SAMSUNG_GALLERY).distinct()
+
+    /**
+     * Where the Clouds other than OneDrive put backups until the user chooses otherwise (Ian, 12 Oct 2026: the
+     * backup folder is the user's choice in every Cloud). Google Photos has no folders and ignores it.
+     */
+    const val OTHER_CLOUD_DEFAULT = "GallerySync"
+
+    /** The folder a Cloud starts with. */
+    fun defaultFor(location: BackupLocation): String =
+        if (location == BackupLocation.ONEDRIVE) DEFAULT_DESTINATION else OTHER_CLOUD_DEFAULT
+
+    /** Whether the user can choose a folder in [location]: every Cloud but Google Photos, which has none. */
+    fun hasFolders(location: BackupLocation): Boolean = location != BackupLocation.GOOGLE_PHOTOS
 
     /**
      * Whether [path] is usable as a destination.

@@ -339,6 +339,16 @@ table, the same table Settings lists. That is not the wizard writing Settings: t
 routing itself, not a Settings value, and the wizard still reads none of it. It writes no album modes
 and no optimise settings, and none of the rules above changed. See TASK-026.
 
+**A second deliberate exception, Ian, 12 Oct 2026: the backup folder inside each Cloud.** The user chooses where
+in each Cloud account the backups go (every Cloud with folders; Google Photos has none), both on that Cloud's
+Connect card in the wizard and in Settings, and it is one stored value per Cloud that both surfaces read and write.
+Ian: *"the user should be able to change where in any Cloud account they want to backup to — this should be during
+the Wizard AND in Settings."* Like the routing above, it is the destination itself rather than a preference about
+how the app behaves, and it widens nothing else: the wizard still writes no album modes, no optimise settings and
+no other Settings value. Changing it moves nothing: files already sent stay where they are, and only new files go
+to the new folder. (It was removed from Settings on 24 Sept 2026, `f12ab67`, as a side effect of a layout tidy-up,
+not a decision.)
+
 **Enforced in code, 26 Sept 2026.** The wizard's Optimisation Settings card stores its answers in its own `wizard_optimise_photos`, 
 `wizard_optimise_video` and `wizard_video_quality` values and never in the ones Settings shows. They were shared from 31 Aug to 26 Sept, 
 against this rule, and Ian found Video Optimisation already on in Settings on a phone that had only been through the wizard. 

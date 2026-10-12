@@ -85,6 +85,17 @@ data class BackupPreferences(
      */
     val destinationRoot: String = RemoteRoots.DEFAULT_DESTINATION,
     /**
+     * Every OneDrive folder that was the destination before the current one. Searched as well (see
+     * [RemoteRoots.searchOrder]), so changing the folder never makes files already sent there look missing.
+     */
+    val pastDestinationRoots: Set<String> = emptySet(),
+    /**
+     * The backup folder in each Cloud other than OneDrive (OneDrive's is [destinationRoot]). Ian, 12 Oct 2026: the
+     * user chooses it, in the wizard and in Settings. Absent means [RemoteRoots.OTHER_CLOUD_DEFAULT]. Only new files
+     * follow a change; each sent file's own location was recorded when it was sent.
+     */
+    val cloudFolders: Map<BackupLocation, String> = emptyMap(),
+    /**
      * Where **new** uploads go, app-wide — one setting, not per-album. Ian, 23 Sept 2026, after
      * walking through the per-album alternative: the split-history problem (files already uploaded
      * stay wherever they are; only new ones follow a destination change) exists either way, and a
@@ -388,6 +399,10 @@ class BackupSettings @Inject constructor(
             destinationRoot = stored[KEY_DESTINATION_ROOT]
                 ?.takeIf { RemoteRoots.isValidDestination(it) }
                 ?: RemoteRoots.DEFAULT_DESTINATION,
+            pastDestinationRoots = stored[KEY_PAST_DESTINATION_ROOTS] ?: emptySet(),
+            cloudFolders = BackupLocation.entries.mapNotNull { location ->
+                stored[cloudFolderKey(location)]?.takeIf { RemoteRoots.isValidDestination(it) }?.let { location to it }
+            }.toMap(),
             backupLocation = BackupLocation.fromNameOrDefault(stored[KEY_BACKUP_LOCATION]),
             multiCloudTrialStartedAtEpochMillis = stored[KEY_MULTI_CLOUD_TRIAL_STARTED_AT],
             acknowledgedAlbums = stored[KEY_ACKNOWLEDGED_ALBUMS] ?: emptySet(),
@@ -785,7 +800,25 @@ class BackupSettings @Inject constructor(
     suspend fun setDestinationRoot(path: String): Boolean {
         val normalised = RemoteRoots.normalise(path)
         if (!RemoteRoots.isValidDestination(normalised)) return false
-        context.dataStore.edit { it[KEY_DESTINATION_ROOT] = normalised }
+        context.dataStore.edit {
+            val old = it[KEY_DESTINATION_ROOT]?.takeIf { root -> RemoteRoots.isValidDestination(root) }
+                ?: RemoteRoots.DEFAULT_DESTINATION
+            if (old != normalised) it[KEY_PAST_DESTINATION_ROOTS] = (it[KEY_PAST_DESTINATION_ROOTS] ?: emptySet()) + old
+            it[KEY_DESTINATION_ROOT] = normalised
+        }
+        return true
+    }
+
+    /**
+     * Changes the backup folder in [location]. OneDrive's is [setDestinationRoot]. Rejects a path that cannot work,
+     * leaving the old one in place. Nothing already sent moves.
+     */
+    suspend fun setCloudFolder(location: BackupLocation, path: String): Boolean {
+        if (location == BackupLocation.ONEDRIVE) return setDestinationRoot(path)
+        if (!RemoteRoots.hasFolders(location)) return false
+        val normalised = RemoteRoots.normalise(path)
+        if (!RemoteRoots.isValidDestination(normalised)) return false
+        context.dataStore.edit { it[cloudFolderKey(location)] = normalised }
         return true
     }
 
@@ -834,6 +867,8 @@ class BackupSettings @Inject constructor(
         val KEY_OPTIMISE_VIDEO = booleanPreferencesKey("optimise_video")
         val KEY_PHOTO_OPTIMISE_MODE = stringPreferencesKey("photo_optimise_mode")
         val KEY_VIDEO_OPTIMISE_MODE = stringPreferencesKey("video_optimise_mode")
+        val KEY_PAST_DESTINATION_ROOTS = stringSetPreferencesKey("past_destination_roots")
+        fun cloudFolderKey(location: BackupLocation) = stringPreferencesKey("cloud_folder_${location.name}")
         val KEY_DESTINATION_ROOT = stringPreferencesKey("destination_root")
         val KEY_BACKUP_LOCATION = stringPreferencesKey("backup_location")
         val KEY_MULTI_CLOUD_TRIAL_STARTED_AT = longPreferencesKey("multi_cloud_trial_started_at")
@@ -881,3 +916,8 @@ class BackupSettings @Inject constructor(
         val KEY_CAMERA_VIDEO_QUALITY = stringPreferencesKey("camera_video_quality")
     }
 }
+
+/** The backup folder in [location]: OneDrive's destination, or the folder chosen for that Cloud, or its default. */
+fun BackupPreferences.folderFor(location: BackupLocation): String =
+    if (location == BackupLocation.ONEDRIVE) destinationRoot
+    else cloudFolders[location] ?: RemoteRoots.OTHER_CLOUD_DEFAULT

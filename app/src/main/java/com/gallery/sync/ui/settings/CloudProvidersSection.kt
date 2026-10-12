@@ -32,6 +32,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
 import com.gallery.sync.data.remote.cloud.ConnectionKind
 import com.gallery.sync.domain.backup.BackupLocation
+import com.gallery.sync.domain.backup.RemoteRoots
 import com.gallery.sync.domain.billing.MultiCloudTrial
 import com.gallery.sync.ui.common.LabelWithAction
 import com.gallery.sync.ui.common.formatBytes
@@ -132,6 +133,39 @@ fun CloudProvidersSection(
                     )
                 }
             }
+            // Where in this Cloud the backups go, once it is connected. Every Cloud with folders (Ian, 12 Oct 2026).
+            val folder = state.folders[provider.location]
+            if (provider.isConnected && folder != null) {
+                LabelWithAction(
+                    action = {
+                        OutlinedButton(onClick = { viewModel.chooseFolder(provider.location) }, enabled = !state.isBusy) {
+                            Text(stringResource(R.string.destination_change), maxLines = 1)
+                        }
+                    }
+                ) {
+                    Column {
+                        Text(
+                            text = stringResource(R.string.cloud_backup_folder),
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                        Text(text = folder, style = MaterialTheme.typography.bodyMedium)
+                    }
+                }
+            }
+        }
+
+        state.choosingFolderFor?.let { location ->
+            DestinationDialog(
+                current = state.folders[location] ?: RemoteRoots.defaultFor(location),
+                alreadyBackedUp = 0,
+                rejected = state.folderRejected,
+                onConfirm = { viewModel.setFolder(location, it) },
+                onDismiss = viewModel::dismissFolderChooser,
+                cloudName = stringResource(location.labelRes()),
+                defaultFolder = RemoteRoots.defaultFor(location),
+                canBrowse = location == BackupLocation.ONEDRIVE,
+                searchesOldFolders = location == BackupLocation.ONEDRIVE
+            )
         }
 
         // Only reachable once something is connected — paying or trialling with nothing to unlock yet

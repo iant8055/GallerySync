@@ -73,4 +73,21 @@ class RemoteRootsTest {
             )
         }
     }
+
+    /** Changing the OneDrive folder must not make files already sent to an earlier one look missing. */
+    @Test
+    fun earlierDestinationsAreStillSearched() {
+        val order = RemoteRoots.searchOrder("Backups/Phone", setOf("Pictures/Old"))
+        assertEquals(listOf("Backups/Phone", "Pictures/Old", RemoteRoots.SAMSUNG_GALLERY), order)
+    }
+
+    @Test
+    fun everyCloudButGooglePhotosHasAFolderWithItsOwnDefault() {
+        assertEquals(RemoteRoots.SAMSUNG_GALLERY, RemoteRoots.defaultFor(BackupLocation.ONEDRIVE))
+        for (location in BackupLocation.entries.filter { it != BackupLocation.ONEDRIVE && it != BackupLocation.GOOGLE_PHOTOS }) {
+            assertTrue("$location has folders", RemoteRoots.hasFolders(location))
+            assertEquals("GallerySync", RemoteRoots.defaultFor(location))
+        }
+        assertFalse(RemoteRoots.hasFolders(BackupLocation.GOOGLE_PHOTOS))
+    }
 }

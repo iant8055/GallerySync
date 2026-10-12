@@ -48,6 +48,9 @@ CHAPTER = Chapter(
         topic("settings-account", "Your Clouds and Sign out", """
             Each Cloud shows its account (or **Not connected**) with **Sign out**, **Connect** or **Enter keys**.
 
+            ## Backup folder
+            Under each connected Cloud (except Google Photos): the folder its backups go to, with **Change**. See [[dialog-destination]].
+
             ## Sign out
             A warning first: backups to that Cloud stop, nothing is deleted. If that Cloud holds files that are not full size on the phone (optimised or archived), it asks:
             • **Restore them to the phone first:** brings them all back, then signs out.
@@ -66,13 +69,17 @@ CHAPTER = Chapter(
         """, ui=True),
 
         topic("dialog-destination", "Where new backups go (the Change dialog)", """
-            Not available in this version: new OneDrive backups go to **Samsung Gallery/DCIM**.
+            Opened by **Change** beside a Cloud's **Backup folder**, in Settings or on its card during setup.
 
-            When it returns: enter a OneDrive folder path or **Browse...** for one, **Reset to default** to go back to Samsung Gallery/DCIM, then **Use this folder** or **Cancel**. Files already backed up stay where they are.
+            • Type the folder path, or for OneDrive use **Browse...**.
+            • **Reset to default:** back to **Samsung Gallery/DCIM** (OneDrive) or **GallerySync** (other Clouds).
+            • **Use this folder** saves; **Cancel** changes nothing.
+
+            Only new files go to the new folder. Files already backed up stay where they are. OneDrive keeps checking earlier folders, so nothing is sent twice.
         """, ui=True),
 
         topic("dialog-folder-picker", "Choose a folder (the OneDrive picker)", """
-            Not available in this version. Lists your OneDrive folders: tap to open, **Up one folder** to go back, **Use this folder** to choose, **New folder** to create one.
+            Opened by **Browse...** for OneDrive. Lists your OneDrive folders: tap to open, **Up one folder** to go back, **Use this folder** to choose, **New folder** to create one.
         """, ui=True),
 
         topic("settings-section-albums", "Albums", """

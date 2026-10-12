@@ -11,6 +11,7 @@ import com.gallery.sync.data.remote.cloud.EncryptedCloudSecretsStore
 import com.gallery.sync.data.remote.cloud.KeyField
 import com.gallery.sync.data.remote.onedrive.UploadSource
 import com.gallery.sync.domain.backup.BackupLocation
+import com.gallery.sync.domain.backup.RemoteRoots
 import com.gallery.sync.domain.model.DataResult
 import com.gallery.sync.domain.model.RemoteError
 import com.gallery.sync.domain.model.UploadedItem
@@ -166,7 +167,8 @@ abstract class S3CompatibleCloud(
     override suspend fun upload(
         source: UploadSource,
         album: String,
-        onProgress: (bytesSent: Long, total: Long) -> Unit
+        onProgress: (bytesSent: Long, total: Long) -> Unit,
+        root: String
     ): DataResult<UploadedItem> = withContext(dispatcher) {
         val config = loadConfig() ?: return@withContext DataResult.Failure(RemoteError.NoToken)
         if (source.sizeBytes <= 0L) {
@@ -174,7 +176,7 @@ abstract class S3CompatibleCloud(
             return@withContext DataResult.Failure(RemoteError.EmptyLocalFile)
         }
 
-        val key = objectKey(album, source.displayName)
+        val key = objectKey(album, source.displayName, root)
         try {
             s3.putObject(config, key, source, mimeTypeFor(source.displayName), onProgress).use { response ->
                 when {
@@ -248,9 +250,9 @@ abstract class S3CompatibleCloud(
             else -> "$MSG_KEYS_REJECTED ($code)"
         }
 
-        /** `GallerySync/<album>/<name>` — the same shape for every provider that keeps folders. */
-        fun objectKey(album: String, displayName: String): String =
-            "GallerySync/${album.trim('/')}/$displayName"
+        /** `<backup folder>/<album>/<name>`, GallerySync unless the user chose another folder. */
+        fun objectKey(album: String, displayName: String, root: String = RemoteRoots.OTHER_CLOUD_DEFAULT): String =
+            "${root.trim('/')}/${album.trim('/')}/$displayName"
 
         /**
          * Turns what the user typed into a config, or null if anything is missing or the endpoint is
