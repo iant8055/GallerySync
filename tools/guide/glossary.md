@@ -164,6 +164,7 @@ permanently deleted.") is translated.
 - Add a folder [+2026-10-11 02:40 CDT]
 - Archive now [+2026-10-11 02:40 CDT]
 - Back up N to OneDrive [+2026-10-11 02:40 CDT]
+- Browse... [+2026-10-12]  *(the OneDrive folder picker button in the Where new backups go dialog; added with the choose-backup-folder feature)*
 - Bug Report [+2026-10-11 02:40 CDT]
 - Cancel [+2026-10-11 02:40 CDT]
 - Check all albums [+2026-10-11 02:40 CDT] *[changed 2026-10-11 by the GallerySync main session: was "Check all folders"; the app now says Album for its own groups and Folder only for Android or Cloud folders (Ian, 11 Oct 2026)]*
@@ -217,6 +218,7 @@ permanently deleted.") is translated.
 - Appearance, System, Light, Dark [+2026-10-11 02:40 CDT]
 - Use mobile data [+2026-10-11 02:40 CDT]
 - Clouds [+2026-10-11 02:40 CDT]
+- Backup folder [+2026-10-12]  *(the line under each connected Cloud in Settings → Backup, showing where that Cloud's backups go; has a Change button beside it)*
 - Where each folder goes [+2026-10-11 02:40 CDT]
 - Goes to [+2026-10-11 02:40 CDT]
 - Folders to back up [+2026-10-11 02:40 CDT]
@@ -255,6 +257,9 @@ permanently deleted.") is translated.
 - Batch [+2026-10-11 02:40 CDT]
 - verified in OneDrive [+2026-10-11 02:40 CDT]
 - sent to [+2026-10-11 02:40 CDT]  *(as in the album card's Cloud line)*
+- Backs up to [+2026-10-12]  *(album file list header; names the Cloud this album is backed up to)*
+- Also has files in [+2026-10-12]  *(album file list header; names other Clouds that also hold files from this album)*
+- Where new backups go [+2026-10-12]  *(the dialog title shown when choosing a Cloud's backup folder)*
 - to restore, to download, already on this phone, selected here [+2026-10-11 02:40 CDT]
 - Available for download, Already on this phone [+2026-10-11 02:40 CDT]
 - Not archiving [+2026-10-11 02:40 CDT]
@@ -291,6 +296,6 @@ glossary terms.
 
 ---
 
-*Last reviewed: 2026-10-11 02:40 CDT, after the How To Guide was rewritten and shortened. Update this file whenever a new user-facing label is
+*Last reviewed: 2026-10-12, after the choose-backup-folder feature (sibling commit 963e00c) added five new on-screen labels. Update this file whenever a new user-facing label is
 added to the app, so the next translation sweep stays consistent with what is
 on screen.*
