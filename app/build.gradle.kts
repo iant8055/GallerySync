@@ -62,8 +62,9 @@ android {
         // The twenty-third (6 Oct 2026): verification writes its answer to the ledger before the backup, and the wizard's card waits for it, so a library already in the Cloud no longer reads "1 of 8642".
         // The twenty-fourth (8 Oct 2026): the wizard's card shows verification ("Checking your Cloud — N of M checked"), says what it found at the finish, and takes its total from verification.
         // The twenty-fifth (9 Oct 2026): photos and videos read as their originals so backups keep their location (ACCESS_MEDIA_LOCATION); Settings repair for copies sent without it; re-optimise videos after a stronger compression; "compression" labels; the Albums tab's Archive summary.
-        versionCode = 25
-        versionName = "0.3.24"
+        // The twenty-sixth (12 Oct 2026): choose the backup folder in every Cloud, in setup and Settings; the album header says where it backs up; Restore returns a file to the folder it came from (Room 15); a notification when a deleted file still has a Cloud copy (Ask); the location repair removed; Album/Folder wording; the shorter How To Guide.
+        versionCode = 26
+        versionName = "0.3.25"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

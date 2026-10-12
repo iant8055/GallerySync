@@ -8028,3 +8028,8 @@ then the old guesses. Moto G: the live migration kept all 2,315 rows; one scan l
 FolderTest photos moved back to Pictures/FolderTest were recorded there, deleted, and restored from Dropbox, Google Drive, pCloud
 and IDrive e2 into Pictures/FolderTest, md5 identical, no DCIM/FolderTest created. MigrationTest (instrumented, run on the Moto
 with am instrument so the app was not uninstalled): 23 tests OK, including migrate14To15. Schema 15.json exported.
+
+**Version 26 (0.3.25) built, 12 Oct 2026** (Ian: "build the release"). app-release.aab 11:07, unit tests pass. Contents since v25: backup
+folder per Cloud (setup + Settings) and the album header line; Restore back to the original folder (Room 15); deleted-files
+notification under Ask; location repair removed; finish-summary keeps first figures after a retry; optimise card total uncapped;
+Album/Folder wording; "1 file" plurals; the rewritten How To Guide and (?) cards.
