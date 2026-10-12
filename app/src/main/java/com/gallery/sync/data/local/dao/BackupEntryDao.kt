@@ -148,6 +148,14 @@ interface BackupEntryDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertIfNew(entries: List<BackupEntryEntity>)
 
+    /** Every row's recorded phone folder, for the scan to compare with where each file is now. */
+    @Query("SELECT id, mediaStoreId, relativePath FROM backup_entries WHERE mediaStoreId != 0")
+    suspend fun relativePaths(): List<RecordedPath>
+
+    /** Records where the file is on the phone now. See [BackupEntryEntity.relativePath]. */
+    @Query("UPDATE backup_entries SET relativePath = :path WHERE id = :id")
+    suspend fun setRelativePath(id: String, path: String)
+
     /**
      * The worker's queue: what still needs uploading, from albums the user chose to back up.
      *
@@ -1395,3 +1403,6 @@ interface BackupEntryDao {
     )
     suspend fun verifiedInCloud(uploaded: BackupState = BackupState.UPLOADED): List<BackupEntryEntity>
 }
+
+/** See [BackupEntryDao.relativePaths]. */
+data class RecordedPath(val id: String, val mediaStoreId: Long, val relativePath: String?)

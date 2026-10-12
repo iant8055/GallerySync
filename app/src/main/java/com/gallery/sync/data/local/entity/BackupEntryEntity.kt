@@ -172,7 +172,17 @@ data class BackupEntryEntity(
      * row before this column existed really did go to OneDrive, which is what [BackupLocation.DEFAULT]
      * correctly says for them.
      */
-    val location: BackupLocation = BackupLocation.DEFAULT
+    val location: BackupLocation = BackupLocation.DEFAULT,
+
+    /**
+     * Where the file lived on the phone, MediaStore's `RELATIVE_PATH` (`Pictures/FolderTest/`), so Restore can
+     * put it back in the same folder after it has left the phone. Ian, 12 Oct 2026: four photos from
+     * `Pictures/FolderTest` came back into `DCIM/FolderTest`, because nothing recorded the top-level folder and
+     * an album with no files left on the phone could only be guessed. Null for rows made before this column
+     * (filled in by the next scan while the file is still on the phone), for a file from the Cloud alone, and
+     * below API 29, which has no such column.
+     */
+    val relativePath: String? = null
 )
 
 /**

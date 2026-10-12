@@ -298,12 +298,14 @@ class BackupEngine @Inject constructor(
                 mimeType = item.mimeType,
                 isVideo = item.isVideo,
                 state = BackupState.PENDING,
-                location = FolderDestination.resolve(folder, folderLocations, defaultLocation)
+                location = FolderDestination.resolve(folder, folderLocations, defaultLocation),
+                relativePath = item.relativePath
             )
         }
 
         // IGNORE on conflict, so a rescan never resets an uploaded row back to pending.
         entryDao.insertIfNew(entries)
+
 
         // Give every discovered folder a row too, same reasoning and same IGNORE-only-if-absent
         // shape as seeding album_preferences below — a folder already chosen is never touched, and
@@ -332,6 +334,23 @@ class BackupEngine @Inject constructor(
         // about the device, not about what the user currently wants watched. Driving either from a
         // scoped scan would treat a narrowed folder as a deletion.
         val everything = scanner.scanEverything()
+
+        // Each row learns where its file is on the phone now: rows made before the folder was recorded, and files
+        // moved to another folder since. From the unscoped scan, because it is a fact about the device, and so a row
+        // whose folder is no longer watched still knows where to go back to. Only rows whose folder differs are
+        // written, so a quiet scan writes nothing.
+        // Matched by MediaStore id rather than ledger key: an optimised photo's size on the phone is no longer the
+        // size its key was made from, and it can still be archived and need a folder to come back to.
+        val pathOnPhone = everything.mapNotNull { item -> item.relativePath?.let { item.mediaStoreId to it } }.toMap()
+        var updated = 0
+        for (row in entryDao.relativePaths().orEmpty()) {
+            val path = pathOnPhone[row.mediaStoreId] ?: continue
+            if (row.relativePath != path) {
+                entryDao.setRelativePath(row.id, path)
+                updated++
+            }
+        }
+        if (updated > 0) Logger.i(TAG, "refreshLedger: recorded the phone folder for $updated file(s)")
 
         markWhatIsNoLongerOnTheDevice(everything)
         pruneAlbumsNoLongerOnDevice(everything.map { it.album }.distinct())

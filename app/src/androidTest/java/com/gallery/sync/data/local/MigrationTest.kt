@@ -427,6 +427,34 @@ class MigrationTest {
         db.close()
     }
 
+    @Test
+    fun migrate14To15_addsAnEmptyRelativePathAndKeepsTheRow() {
+        helper.createDatabase(TEST_DB, 14).apply {
+            execSQL(
+                """
+                INSERT INTO backup_entries
+                    (id, mediaStoreId, contentUri, displayName, album, sizeBytes,
+                     dateModifiedEpochSeconds, mimeType, isVideo, state, attemptCount,
+                     isProxied, isProxySkipped, location)
+                VALUES
+                    ('k1', 42, 'content://media/external/images/media/42', 'IMG_1.jpg',
+                     'Camera', 1024, 1700000000, 'image/jpeg', 0, 'UPLOADED', 0, 0, 0, 'DROPBOX')
+                """.trimIndent()
+            )
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(TEST_DB, 15, true, Migrations.MIGRATION_14_15)
+
+        db.query("SELECT location, state, relativePath FROM backup_entries WHERE id = 'k1'").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals("DROPBOX", cursor.getString(0))
+            assertEquals("UPLOADED", cursor.getString(1))
+            assertTrue(cursor.isNull(2))
+        }
+        db.close()
+    }
+
     private companion object {
         const val TEST_DB = "migration-test.db"
     }

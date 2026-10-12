@@ -8019,3 +8019,12 @@ IDrive object key recorded is GSTest/IDrive/FolderTest/ft_idrive.jpg). All four 
 tab: md5 identical to the original (fb5ccc58...). Header seen in light and dark. **Found, not fixed:** restored files landed in
 DCIM/FolderTest, not Pictures/FolderTest. The ledger has no top-level folder per file, so once an album has no files left on the
 phone Restore falls back to DCIM/<album>. Pre-existing; a fix needs a Room column (migration), so it is Ian's call.
+
+**Restore puts a file back in the folder it came from (Ian, 12 Oct 2026: "add the column and fix restore").** Room 14 to 15,
+`MIGRATION_14_15`: `backup_entries.relativePath` (TEXT, nullable), MediaStore's RELATIVE_PATH. Set on new rows, and every scan
+updates any row whose file is on the phone in a different folder (matched by MediaStore id from the unscoped scan, so optimised
+photos and unwatched folders are covered too). `DownloadMissingFile` uses it first when Android allows that kind of file there,
+then the old guesses. Moto G: the live migration kept all 2,315 rows; one scan later all 2,317 rows had a folder; the four
+FolderTest photos moved back to Pictures/FolderTest were recorded there, deleted, and restored from Dropbox, Google Drive, pCloud
+and IDrive e2 into Pictures/FolderTest, md5 identical, no DCIM/FolderTest created. MigrationTest (instrumented, run on the Moto
+with am instrument so the app was not uninstalled): 23 tests OK, including migrate14To15. Schema 15.json exported.

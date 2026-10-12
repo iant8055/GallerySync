@@ -128,11 +128,14 @@ class DownloadMissingFile @Inject constructor(
             writer.write(
                 displayName = entry.displayName,
                 mimeType = entry.mimeType,
-                relativePath = if (viaOtherCloud) {
-                    deviceRelativePathOf(entry.album, entry.isVideo) ?: relativePathFor(entry.album)
-                } else {
-                    relativePathFor(entry.album)
-                },
+                // The folder it left, when the ledger recorded it and Android lets an app write that kind of file
+                // there (Ian, 12 Oct 2026). Otherwise the old guesses: where the album lives now, then DCIM.
+                relativePath = entry.relativePath?.takeIf { isWritableRoot(it, entry.isVideo) }
+                    ?: if (viaOtherCloud) {
+                        deviceRelativePathOf(entry.album, entry.isVideo) ?: relativePathFor(entry.album)
+                    } else {
+                        relativePathFor(entry.album)
+                    },
                 isVideo = entry.isVideo,
                 expectedBytes = expected,
                 onProgress = { written -> onProgress(written, expected) },
