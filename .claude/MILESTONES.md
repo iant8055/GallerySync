@@ -8050,4 +8050,10 @@ Pictures/V26Test, md5 identical, no DCIM/V26Test. (2) Ask: Android's notificatio
 a trashed DCIM photo gave the notification in 32 s; tap opened the window, nothing selected; Decide later; photo untrashed.
 (3) Archive on pCloud: confirm dialog, Archive tab counted 1 (the restored photo pinned, left out), Check confirmed it live
 ("1 confirmed in your Cloud"), Yes, Android's trash prompt, file renamed .trashed-...-v26_archive.jpg; pinned file stayed.
-**Bug found and fixed:** the Albums status line stayed on "Uploading 1 of 1 · v26_archive.jpg · 100
+**Bug found and fixed:** the Albums status line stayed on "Uploading 1 of 1 · v26_archive.jpg · 100 percent" after the run had
+succeeded (WorkManager diagnostics: manual and continuation SUCCEEDED, nothing running); the album card also lagged until a
+tab switch. The automatic-chain observer cleared it only on SUCCEEDED, which the self-re-queuing trigger and periodic chains
+never show. Now a chain that stops running clears an Uploading status and refreshes. Not yet seen on a device (needs a debug
+install over the Play build, or the next release). Also: finish summary now "OneDrive: N files checked, M already there. K
+files sent in all."; folder screen says Select. Outlined buttons (Sign out, Change, Unlock Pro) are the theme's grey style,
+not disabled; left as is.
