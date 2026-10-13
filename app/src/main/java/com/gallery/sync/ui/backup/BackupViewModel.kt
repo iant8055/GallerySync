@@ -683,9 +683,20 @@ class BackupViewModel @Inject constructor(
         for (name in workNames) {
             viewModelScope.launch {
                 workManager.getWorkInfosForUniqueWorkFlow(name).collectLatest { infos ->
-                    runningWork.update { live ->
-                        if (infos.any { it.state == WorkInfo.State.RUNNING }) live + name
-                        else live - name
+                    val wasRunning = name in runningWork.value
+                    val nowRunning = infos.any { it.state == WorkInfo.State.RUNNING }
+                    runningWork.update { live -> if (nowRunning) live + name else live - name }
+
+                    // A run of this chain has just ended. The trigger and periodic chains re-queue
+                    // themselves the moment they finish, so they go from RUNNING straight back to
+                    // ENQUEUED and never show SUCCEEDED; waiting for it left "Uploading 1 of 1 ·
+                    // file · 100%" on screen for good after the run was over (Moto G, v26 from Play,
+                    // 13 Oct 2026). Ending is the signal, whatever state follows.
+                    if (wasRunning && !nowRunning) {
+                        if (_state.value.status is BackupStatus.Uploading) {
+                            _state.value = _state.value.copy(status = null)
+                        }
+                        refresh()
                     }
 
                     val running = infos.firstOrNull { it.state == WorkInfo.State.RUNNING }

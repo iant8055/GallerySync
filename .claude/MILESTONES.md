@@ -8042,3 +8042,12 @@ no crash. **For the next build:** (1) the finish summary reads "2,254 files chec
 looks like it adds up wrong: the check is OneDrive-only and 115 of the 116 went to other Clouds; say so. (2) "Check the ones you
 want backed up" on the folder screen should say select. (3) Outlined buttons on the Connect card (Sign out, Change) are drawn so
 faint they read as disabled; they are enabled.
+
+**v26 from Play, feature tests on the Moto (13 Oct 2026).** Release build, so checked by screen and disk only (no logs, no
+run-as). (1) Backup folder: Dropbox set to GSTest/v26Dropbox, pCloud to GSTest/v26pCloud; a new photo in Pictures/V26Test
+(Pictures paired with pCloud) backed up, header "Backs up to pCloud / GSTest/v26pCloud/V26Test"; deleted, restored into
+Pictures/V26Test, md5 identical, no DCIM/V26Test. (2) Ask: Android's notification prompt appeared on choosing it (allowed);
+a trashed DCIM photo gave the notification in 32 s; tap opened the window, nothing selected; Decide later; photo untrashed.
+(3) Archive on pCloud: confirm dialog, Archive tab counted 1 (the restored photo pinned, left out), Check confirmed it live
+("1 confirmed in your Cloud"), Yes, Android's trash prompt, file renamed .trashed-...-v26_archive.jpg; pinned file stayed.
+**Bug found and fixed:** the Albums status line stayed on "Uploading 1 of 1 · v26_archive.jpg · 100
