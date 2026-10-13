@@ -8033,3 +8033,12 @@ with am instrument so the app was not uninstalled): 23 tests OK, including migra
 folder per Cloud (setup + Settings) and the album header line; Restore back to the original folder (Room 15); deleted-files
 notification under Ask; location repair removed; finish-summary keeps first figures after a retry; optimise card total uncapped;
 Album/Folder wording; "1 file" plurals; the rewritten How To Guide and (?) cards.
+
+**Version 26 from Play on a fresh Moto G (13 Oct 2026, Ian driving, watched over adb).** Installed 15:56 by Play. Wizard: the
+Connect cards show **Backup folder** with Change (OneDrive Samsung Gallery/DCIM, Dropbox GallerySync); Change opened the dialog
+and Browse the OneDrive picker. Check: 2,254 checked, 2,253 already there, 116 to send, in about 90 s; card total 116 at once.
+Upload: 116 sent across OneDrive, pCloud and Dropbox in five batches, 0 failed; Finish at 16:09:53; New Albums pop-up after;
+no crash. **For the next build:** (1) the finish summary reads "2,254 files checked: 2,253 already in OneDrive, 116 sent", which
+looks like it adds up wrong: the check is OneDrive-only and 115 of the 116 went to other Clouds; say so. (2) "Check the ones you
+want backed up" on the folder screen should say select. (3) Outlined buttons on the Connect card (Sign out, Change) are drawn so
+faint they read as disabled; they are enabled.
