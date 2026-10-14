@@ -8089,3 +8089,9 @@ SETTINGS_DESTINATION (?) that only the removed screen had (caught by HowToGuideC
 MigrationTest 24 OK on the Moto (am instrument, app kept); the Moto's live database upgraded to 16 with the two tables gone; no
 crash. Note for Ian: CLAUDE.md's opening still describes the app as a ContentProvider serving cloud files on demand; that
 mechanism is gone and the description is his to update.
+
+**Welcome language picker reshaped (Ian, 14 Oct 2026: "looks bad", "a scroll through list at the very bottom", "smaller - 1 line",
+"not sideways - rolling", "the please select should scroll with the rest of the choices").** Now a one-line wheel in a strip at the
+very bottom of the Welcome picture: its first line is "Please select your language to continue", and rolling it up or down snaps to
+each language (LazyColumn 48dp tall with snap fling); tapping a language chooses it and moves on, tapping the prompt does nothing.
+Moto G: rolls and snaps, readable in light and dark, a tap on 日本語 moved on to the tour.
