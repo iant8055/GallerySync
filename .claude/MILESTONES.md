@@ -8062,3 +8062,7 @@ not disabled; left as is.
 album: the line read Uploading 1 of 1 from 3 to 95 percent, then cleared when the automatic run ended (72 s); the card read
 "2 sent to Google Drive" without a tab switch. The new finish summary seen: "OneDrive: 2,254 files checked, 2,254 already
 there. 126 files sent in all."
+
+**Version 27 (0.3.26) built, 14 Oct 2026** (Ian: "yes - we are getting close to finished Closed Testing"). app-release.aab 16:00,
+unit tests pass. Contents since v26: the status line clears when an automatic run ends; the finish summary names OneDrive and
+says "sent in all"; Select on the folder screen.
