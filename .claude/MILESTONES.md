@@ -8057,3 +8057,8 @@ never show. Now a chain that stops running clears an Uploading status and refres
 install over the Play build, or the next release). Also: finish summary now "OneDrive: N files checked, M already there. K
 files sent in all."; folder screen says Select. Outlined buttons (Sign out, Change, Unlock Pro) are the theme's grey style,
 not disabled; left as is.
+
+**Status-line fix confirmed (14 Oct 2026, Moto G, debug build of 08bdc4b over a fresh setup).** A 96 MB video added to a Backup
+album: the line read Uploading 1 of 1 from 3 to 95 percent, then cleared when the automatic run ended (72 s); the card read
+"2 sent to Google Drive" without a tab switch. The new finish summary seen: "OneDrive: 2,254 files checked, 2,254 already
+there. 126 files sent in all."
