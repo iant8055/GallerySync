@@ -96,6 +96,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import androidx.core.content.ContextCompat
@@ -689,8 +690,8 @@ fun SetupTour(
                             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text("▲", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Text("▼", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("▲", fontSize = 22.sp, lineHeight = 22.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("▼", fontSize = 22.sp, lineHeight = 22.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                             androidx.compose.foundation.lazy.LazyColumn(
                                 state = wheel,
@@ -732,8 +733,8 @@ fun SetupTour(
                                 }
                             }
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text("▲", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Text("▼", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("▲", fontSize = 22.sp, lineHeight = 22.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text("▼", fontSize = 22.sp, lineHeight = 22.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                     }
