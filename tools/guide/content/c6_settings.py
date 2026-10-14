@@ -21,7 +21,7 @@ CHAPTER = Chapter(
         """),
 
         topic("settings-language", "Language", """
-            English only for now. **Multi-Language Support Coming Soon**.
+            The language you chose on the Welcome screen. Tap it to change. The How To Guide follows this choice; the app's screens are in English for now.
         """, ui=True),
 
         topic("settings-appearance", "Appearance", """

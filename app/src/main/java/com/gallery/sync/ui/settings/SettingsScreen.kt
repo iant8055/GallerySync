@@ -602,18 +602,18 @@ fun SettingsScreen(
         // Language is the last thing on the page (Ian, 20 Sept 2026). It is a placeholder for now.
         SettingDivider()
 
-        WithHelp(HelpTopic.SETTINGS_LANGUAGE) {
-            Column {
-                Text(
-                    text = stringResource(R.string.settings_language),
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                Text(
-                    text = stringResource(R.string.settings_language_detail),
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-        }
+        // The same choice as the Welcome screen's (Ian, 14 Oct 2026): the one value the wizard and Settings share.
+        val languageViewModel: LanguageViewModel = hiltViewModel()
+        val language by languageViewModel.language.collectAsStateWithLifecycle()
+        SettingDropdown(
+            label = stringResource(R.string.settings_language),
+            help = HelpTopic.SETTINGS_LANGUAGE,
+            options = com.gallery.sync.domain.model.AppLanguage.entries,
+            selected = language,
+            onSelected = languageViewModel::setLanguage,
+            optionLabel = { it.nativeName },
+            note = stringResource(R.string.settings_language_detail)
+        )
     }
 
     page?.let { InAppPageDialog(page = it, onDismiss = { page = null }) }

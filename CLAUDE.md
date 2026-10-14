@@ -349,6 +349,12 @@ no other Settings value. Changing it moves nothing: files already sent stay wher
 to the new folder. (It was removed from Settings on 24 Sept 2026, `f12ab67`, as a side effect of a layout tidy-up,
 not a decision.)
 
+**A third deliberate exception, Ian, 14 Oct 2026: the language.** The Welcome screen asks *"Please select your language
+to continue"*, and Settings → Language shows and changes the same stored value (`BackupPreferences.appLanguage`,
+`LanguageViewModel`). Ian: *"this (and only this) will be reflected in the Language picker in Settings."* It decides
+which How To Guide pages open (a language not yet published falls back to English); the app's own screens are English
+only for now. Nothing else the wizard asks is shared, and the rules above are unchanged.
+
 **Enforced in code, 26 Sept 2026.** The wizard's Optimisation Settings card stores its answers in its own `wizard_optimise_photos`, 
 `wizard_optimise_video` and `wizard_video_quality` values and never in the ones Settings shows. They were shared from 31 Aug to 26 Sept, 
 against this rule, and Ian found Video Optimisation already on in Settings on a phone that had only been through the wizard. 

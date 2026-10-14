@@ -100,6 +100,9 @@ class MainActivity : ComponentActivity() {
             // than flashing the system one and correcting itself a frame later.
             val themeViewModel: ThemeViewModel = hiltViewModel()
             val themeMode by themeViewModel.themeMode.collectAsStateWithLifecycle()
+            // The language chosen on the Welcome screen or in Settings decides which How To Guide pages open.
+            val languageViewModel: com.gallery.sync.ui.settings.LanguageViewModel = hiltViewModel()
+            val language by languageViewModel.language.collectAsStateWithLifecycle()
 
             GallerySyncTheme(
                 darkTheme = when (themeMode) {
@@ -108,8 +111,12 @@ class MainActivity : ComponentActivity() {
                     ThemeMode.DARK -> true
                 }
             ) {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    GallerySyncApp(modifier = Modifier.padding(innerPadding), initialTab = if (openArchive) ArchiveTab else 0)
+                androidx.compose.runtime.CompositionLocalProvider(
+                    com.gallery.sync.ui.settings.LocalGuideLanguage provides language.code
+                ) {
+                    Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                        GallerySyncApp(modifier = Modifier.padding(innerPadding), initialTab = if (openArchive) ArchiveTab else 0)
+                    }
                 }
             }
         }

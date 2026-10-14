@@ -90,6 +90,12 @@ data class BackupPreferences(
      */
     val pastDestinationRoots: Set<String> = emptySet(),
     /**
+     * The language chosen on the Welcome screen and in Settings, a BCP-47 code (`AppLanguage.code`). Ian, 14 Oct
+     * 2026: the one value both surfaces share (CLAUDE.md, third exception). It picks the How To Guide's pages; the
+     * app's own screens are English only for now.
+     */
+    val appLanguage: String = "en",
+    /**
      * The backup folder in each Cloud other than OneDrive (OneDrive's is [destinationRoot]). Ian, 12 Oct 2026: the
      * user chooses it, in the wizard and in Settings. Absent means [RemoteRoots.OTHER_CLOUD_DEFAULT]. Only new files
      * follow a change; each sent file's own location was recorded when it was sent.
@@ -400,6 +406,7 @@ class BackupSettings @Inject constructor(
                 ?.takeIf { RemoteRoots.isValidDestination(it) }
                 ?: RemoteRoots.DEFAULT_DESTINATION,
             pastDestinationRoots = stored[KEY_PAST_DESTINATION_ROOTS] ?: emptySet(),
+            appLanguage = stored[KEY_APP_LANGUAGE] ?: "en",
             cloudFolders = BackupLocation.entries.mapNotNull { location ->
                 stored[cloudFolderKey(location)]?.takeIf { RemoteRoots.isValidDestination(it) }?.let { location to it }
             }.toMap(),
@@ -741,6 +748,11 @@ class BackupSettings @Inject constructor(
         context.dataStore.edit { it[KEY_DELETION_PROMPT_SEEN] = epochMillis }
     }
 
+    /** See [BackupPreferences.appLanguage]. */
+    suspend fun setAppLanguage(code: String) {
+        context.dataStore.edit { it[KEY_APP_LANGUAGE] = code }
+    }
+
     suspend fun setDeletionNotifiedUpTo(epochMillis: Long) {
         context.dataStore.edit { it[KEY_DELETION_NOTIFIED] = epochMillis }
     }
@@ -867,6 +879,7 @@ class BackupSettings @Inject constructor(
         val KEY_OPTIMISE_VIDEO = booleanPreferencesKey("optimise_video")
         val KEY_PHOTO_OPTIMISE_MODE = stringPreferencesKey("photo_optimise_mode")
         val KEY_VIDEO_OPTIMISE_MODE = stringPreferencesKey("video_optimise_mode")
+        val KEY_APP_LANGUAGE = stringPreferencesKey("app_language")
         val KEY_PAST_DESTINATION_ROOTS = stringSetPreferencesKey("past_destination_roots")
         fun cloudFolderKey(location: BackupLocation) = stringPreferencesKey("cloud_folder_${location.name}")
         val KEY_DESTINATION_ROOT = stringPreferencesKey("destination_root")

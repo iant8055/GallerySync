@@ -24,7 +24,7 @@ CHAPTER = Chapter(
         """),
 
         topic("setup-welcome-tour", "Welcome, the tour, and what will be set up", """
-            • **Welcome:** tap anywhere to continue.
+            • **Welcome:** choose your language to continue. You can change it later in Settings.
             • **The tour:** five screens, one for each tab and one for Help.
             • **What we'll set up:** sign in to your Cloud, allow photo access, choose folders, and allow changes to those folders.
 

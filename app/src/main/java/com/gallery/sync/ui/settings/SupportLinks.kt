@@ -46,6 +46,18 @@ enum class SupportPage(val url: String, @param:StringRes val title: Int) {
     )
 }
 
+/**
+ * The address of [page] in [languageCode]: the How To Guide and the setup guide are published per language
+ * (`how-to-guide-accordion.es.html`); the policy pages are English only. English, or a page with no translations,
+ * is the page's own address.
+ */
+fun SupportPage.urlIn(languageCode: String): String =
+    if (languageCode == "en" || (this != SupportPage.HOW_TO_GUIDE && this != SupportPage.SETUP_GUIDE)) url
+    else url.removeSuffix(".html") + ".$languageCode.html"
+
+/** The language the guide pages open in. Provided at the root from the user's choice (`LanguageViewModel`). */
+val LocalGuideLanguage = androidx.compose.runtime.staticCompositionLocalOf { "en" }
+
 object SupportLinks {
     const val HOST = "iant8055.github.io"
     const val SITE = "https://$HOST/GallerySync"

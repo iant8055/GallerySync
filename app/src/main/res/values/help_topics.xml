@@ -59,7 +59,7 @@
     <string name="help_settings_section_general_title" formatted="false">General</string>
     <string name="help_settings_section_general_body" formatted="false">The **How To Guide**, **Appearance** and **Use mobile data**. **Language** is the last line on the page.</string>
     <string name="help_settings_language_title" formatted="false">Language</string>
-    <string name="help_settings_language_body" formatted="false">English only for now. **Multi-Language Support Coming Soon**.</string>
+    <string name="help_settings_language_body" formatted="false">The language you chose on the Welcome screen. Tap it to change. The How To Guide follows this choice; the app\'s screens are in English for now.</string>
     <string name="help_settings_appearance_title" formatted="false">Appearance</string>
     <string name="help_settings_appearance_body" formatted="false">• **System** (default): follows your phone\'s light or dark setting.\n• **Light** or **Dark**: always that look.\n\nThe guide and policy pages follow your phone\'s setting.</string>
     <string name="help_settings_mobile_data_title" formatted="false">Use mobile data</string>

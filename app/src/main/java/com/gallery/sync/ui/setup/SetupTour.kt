@@ -208,8 +208,11 @@ private const val DelayChipsPerRow = 3
  * tap that launched it landing on the very first frame) dismisses it before anyone has actually seen
  * it. This does not change the interaction otherwise: tap-to-continue still works, just not before
  * this much time has genuinely passed.
+ *
+ * Since 14 Oct 2026 only a language button moves on (the picture itself is no longer a button), so a stray tap
+ * would have to land on one; a second is enough, and three made a deliberate quick choice look ignored.
  */
-private const val WelcomeMinimumVisibleMillis = 3_000L
+private const val WelcomeMinimumVisibleMillis = 1_000L
 
 /**
  * Guided setup as tooltip-style bubbles overlaying the Albums tab.
@@ -644,13 +647,16 @@ fun SetupTour(
             // The welcome picture is a fixed dark green with a phone running off its bottom edge, so it
             // sits on that same green and is pinned to the bottom: on a tall screen the spare room is
             // above it, on a wide one (the Fold unfolded) it is at the sides, and it never floats.
+            //
+            // Then the language, chosen here before anything else (Ian, 14 Oct 2026: "please select your language
+            // to continue"). Choosing one is what moves on, so the tap that used to go anywhere now lands on a
+            // language. The same choice is shown and changed in Settings: the one value the two share (CLAUDE.md).
+            val languageViewModel: com.gallery.sync.ui.settings.LanguageViewModel = hiltViewModel()
+            val chosen by languageViewModel.language.collectAsStateWithLifecycle()
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(SignalWelcomeGround)
-                    .clickable(onClick = {
-                        if (System.currentTimeMillis() - shownAtMillis >= WelcomeMinimumVisibleMillis) onNext()
-                    }),
+                    .background(SignalWelcomeGround),
                 contentAlignment = Alignment.BottomCenter
             ) {
                 Image(
@@ -660,6 +666,41 @@ fun SetupTour(
                     alignment = Alignment.BottomCenter,
                     modifier = Modifier.fillMaxSize()
                 )
+                Surface(
+                    shape = RoundedCornerShape(28.dp),
+                    color = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier
+                        .padding(horizontal = 24.dp, vertical = 32.dp)
+                        .widthIn(max = 420.dp)
+                        .fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 20.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.welcome_language_prompt),
+                            style = MaterialTheme.typography.titleMedium,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                        )
+                        com.gallery.sync.domain.model.AppLanguage.entries.forEach { language ->
+                            val isChosen = language == chosen
+                            val pick = {
+                                if (System.currentTimeMillis() - shownAtMillis >= WelcomeMinimumVisibleMillis) {
+                                    languageViewModel.setLanguage(language)
+                                    onNext()
+                                }
+                            }
+                            if (isChosen) {
+                                Button(onClick = pick, modifier = Modifier.fillMaxWidth()) { Text(language.nativeName) }
+                            } else {
+                                OutlinedButton(onClick = pick, modifier = Modifier.fillMaxWidth()) { Text(language.nativeName) }
+                            }
+                        }
+                    }
+                }
             }
         } else if (step == 2) {
             // Step 2: individual tooltip cards pointing at the nav bar tabs

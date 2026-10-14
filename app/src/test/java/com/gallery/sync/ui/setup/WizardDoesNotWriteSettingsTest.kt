@@ -17,7 +17,12 @@ import java.io.File
  */
 class WizardDoesNotWriteSettingsTest {
 
-    /** Setters for values the Settings tab reads and writes. Adding a Settings value means adding it here. */
+    /**
+     * Setters for values the Settings tab reads and writes. Adding a Settings value means adding it here.
+     *
+     * Deliberately absent, because Ian made them shared (CLAUDE.md): `setDestinationRoot` / `setCloudFolder` (the
+     * backup folder in each Cloud, 12 Oct 2026) and `setAppLanguage` (the language, 14 Oct 2026).
+     */
     private val settingsOwned = listOf(
         "setOptimiseEnabled", "setOptimisePhotos", "setOptimiseVideo", "setPhotoOptimiseMode",
         "setVideoOptimiseMode", "setVideoQuality", "setVideoOptimiseAge", "setAllowMeteredNetwork",

@@ -109,7 +109,10 @@ private fun FullScreenPageDialog(
 @Composable
 fun InAppPageDialog(page: SupportPage, onDismiss: () -> Unit, anchor: String? = null) {
     val context = LocalContext.current
-    val address = if (anchor == null) page.url else "${page.url}#$anchor"
+    // The chosen language's page first; English if that one is not published (a 404 below falls back).
+    val englishAddress = if (anchor == null) page.url else "${page.url}#$anchor"
+    val localised = page.urlIn(LocalGuideLanguage.current)
+    val address = if (anchor == null) localised else "$localised#$anchor"
     var webView by remember { mutableStateOf<WebView?>(null) }
     var loading by remember { mutableStateOf(true) }
     var failed by remember { mutableStateOf(false) }
@@ -179,7 +182,15 @@ fun InAppPageDialog(page: SupportPage, onDismiss: () -> Unit, anchor: String? = 
                                 request: WebResourceRequest,
                                 errorResponse: WebResourceResponse
                             ) {
-                                if (request.isForMainFrame) failed = true
+                                if (!request.isForMainFrame) return
+                                // That language's page is not published yet: show the English one instead.
+                                if (errorResponse.statusCode == 404 && request.url.toString().substringBefore('#') ==
+                                    address.substringBefore('#') && address != englishAddress
+                                ) {
+                                    view.loadUrl(englishAddress)
+                                } else {
+                                    failed = true
+                                }
                             }
                         }
                         loadUrl(address)

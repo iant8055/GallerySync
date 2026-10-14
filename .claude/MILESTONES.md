@@ -8066,3 +8066,12 @@ there. 126 files sent in all."
 **Version 27 (0.3.26) built, 14 Oct 2026** (Ian: "yes - we are getting close to finished Closed Testing"). app-release.aab 16:00,
 unit tests pass. Contents since v26: the status line clears when an automatic run ends; the finish summary names OneDrive and
 says "sent in all"; Select on the folder screen.
+
+**Language picker on the Welcome screen (Ian, 14 Oct 2026).** "Please select your language to continue" on the Welcome card, and the
+same stored value in Settings → Language (CLAUDE.md, third exception; `BackupPreferences.appLanguage`, `LanguageViewModel`,
+`AppLanguage`: en, es, pt-BR, fr, de, ja, hi, each named in its own language). It picks the How To Guide pages: `SupportPage.urlIn`
+asks for `<page>.<code>.html` (guide and setup guide only) and `InAppPageDialog` falls back to the English page on a 404, so a
+language not yet published shows English rather than an error. The app's screens stay English. Choosing a language is now what
+leaves the Welcome screen (the picture is no longer a button); the bleed-through guard is 1 s. Moto G (debug): card readable in
+light and dark, Español chosen and stored as `es`, the setup guide link opened the English page (Spanish not published).
+Not yet seen: the Settings dropdown (setup needs a Cloud sign-in).

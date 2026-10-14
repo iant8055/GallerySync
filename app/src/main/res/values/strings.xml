@@ -10,7 +10,9 @@
     <string name="settings_general">General</string>
     <string name="settings_albums">Albums</string>
     <string name="settings_language">Language</string>
-    <string name="settings_language_detail">Multi-Language Support Coming Soon</string>
+    <!-- The language choice (Ian, 14 Oct 2026). Language names themselves are AppLanguage.nativeName, never translated. -->
+    <string name="settings_language_detail">The How To Guide follows this choice. The app\'s screens are in English for now.</string>
+    <string name="welcome_language_prompt">Please select your language to continue</string>
     <!-- The Archive band. "Coming soon" until 22 Sept 2026, when the age filter and the
          "come of age" notification gave it real content. The age row reuses archive_age_label —
          the same words as the Archive tab's own filter, since this sets where that starts. -->
