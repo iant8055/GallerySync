@@ -666,37 +666,48 @@ fun SetupTour(
                     alignment = Alignment.BottomCenter,
                     modifier = Modifier.fillMaxSize()
                 )
+                // A short strip at the very bottom (Ian, 14 Oct 2026: "a scroll through list at the very bottom of the
+                // Welcome screen"): the prompt, then three languages at a time, the rest a scroll away.
                 Surface(
-                    shape = RoundedCornerShape(28.dp),
+                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
                     color = MaterialTheme.colorScheme.surface,
                     contentColor = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier
-                        .padding(horizontal = 24.dp, vertical = 32.dp)
-                        .widthIn(max = 420.dp)
-                        .fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 20.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                        modifier = Modifier
+                            .widthIn(max = 480.dp)
+                            .fillMaxWidth()
+                            .padding(top = 14.dp, bottom = 8.dp)
                     ) {
                         Text(
                             text = stringResource(R.string.welcome_language_prompt),
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.titleSmall,
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)
                         )
-                        com.gallery.sync.domain.model.AppLanguage.entries.forEach { language ->
-                            val isChosen = language == chosen
-                            val pick = {
-                                if (System.currentTimeMillis() - shownAtMillis >= WelcomeMinimumVisibleMillis) {
-                                    languageViewModel.setLanguage(language)
-                                    onNext()
-                                }
-                            }
-                            if (isChosen) {
-                                Button(onClick = pick, modifier = Modifier.fillMaxWidth()) { Text(language.nativeName) }
-                            } else {
-                                OutlinedButton(onClick = pick, modifier = Modifier.fillMaxWidth()) { Text(language.nativeName) }
+                        androidx.compose.foundation.lazy.LazyColumn(
+                            modifier = Modifier.fillMaxWidth().height(156.dp)
+                        ) {
+                            items(com.gallery.sync.domain.model.AppLanguage.entries.size) { index ->
+                                val language = com.gallery.sync.domain.model.AppLanguage.entries[index]
+                                val isChosen = language == chosen
+                                Text(
+                                    text = language.nativeName,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = if (isChosen) FontWeight.Bold else FontWeight.Normal,
+                                    color = if (isChosen) MaterialTheme.colorScheme.primary else androidx.compose.material3.LocalContentColor.current,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            if (System.currentTimeMillis() - shownAtMillis >= WelcomeMinimumVisibleMillis) {
+                                                languageViewModel.setLanguage(language)
+                                                onNext()
+                                            }
+                                        }
+                                        .padding(vertical = 14.dp)
+                                )
                             }
                         }
                     }
