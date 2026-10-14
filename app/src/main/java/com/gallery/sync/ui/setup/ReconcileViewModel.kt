@@ -96,10 +96,6 @@ data class ReconcileUiState(
     val noMediaAccess: Boolean = false,
     /** Where new uploads go. Only the destination — old roots stay searchable. */
     val destinationRoot: String = RemoteRoots.DEFAULT_DESTINATION,
-    /** True while the user is choosing a new destination. */
-    val choosingDestination: Boolean = false,
-    /** Set when a typed path was refused, so the dialog can say so rather than closing silently. */
-    val destinationRejected: Boolean = false,
     val firstBackupStartHour: Int = FirstBackupWindow.DEFAULT_START_HOUR,
     val firstBackupRequiresCharging: Boolean = true,
     /** When the wizard's delayed first backup is due, or null when there is no delay pending. */
@@ -242,13 +238,6 @@ data class ReconcileUiState(
      * reintroduce it quietly.
      */
     val setupDecisionReady: Boolean get() = settingsLoaded && migrationChecked && sourcesLoaded
-    /**
-     * Whether changing the destination now would leave already-backed-up files behind.
-     *
-     * It would not — [RemoteRoots] keeps the old root searchable — and this exists so the dialog can
-     * say so with a number instead of asking the user to take it on trust.
-     */
-    val alreadyFoundHere: Int get() = result?.backedUp?.files ?: 0
 }
 
 @HiltViewModel
@@ -1229,42 +1218,6 @@ class ReconcileViewModel @Inject constructor(
 
     fun removeSource(treeUri: String) {
         viewModelScope.launch { sources.remove(treeUri) }
-    }
-
-    fun setFirstBackupStartHour(hour: Int) {
-        viewModelScope.launch { settings.setFirstBackupStartHour(hour) }
-    }
-
-    fun setFirstBackupRequiresCharging(required: Boolean) {
-        viewModelScope.launch { settings.setFirstBackupRequiresCharging(required) }
-    }
-
-    fun openDestinationChooser() {
-        _state.value = _state.value.copy(choosingDestination = true, destinationRejected = false)
-    }
-
-    fun dismissDestinationChooser() {
-        _state.value = _state.value.copy(choosingDestination = false, destinationRejected = false)
-    }
-
-    /**
-     * Changes where new uploads go.
-     *
-     * Does **not** re-run the check afterwards. The figures on screen stay true, because the old
-     * root remains in the search set — that is the whole point of separating destination from
-     * search, and re-running would spend ninety requests to print the same numbers.
-     */
-    fun setDestination(path: String) {
-        viewModelScope.launch {
-            if (settings.setDestinationRoot(path)) {
-                _state.value = _state.value.copy(
-                    choosingDestination = false,
-                    destinationRejected = false
-                )
-            } else {
-                _state.value = _state.value.copy(destinationRejected = true)
-            }
-        }
     }
 
     /**

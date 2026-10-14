@@ -8075,3 +8075,17 @@ language not yet published shows English rather than an error. The app's screens
 leaves the Welcome screen (the picture is no longer a button); the bleed-through guard is 1 s. Moto G (debug): card readable in
 light and dark, Español chosen and stored as `es`, the setup guide link opened the English page (Spanish not published).
 Not yet seen: the Settings dropdown (setup needs a Cloud sign-in).
+
+**Code cleanup after Closed Testing (Ian, 14 Oct 2026: "Go with Code Cleanup").** Removed: the original ContentProvider
+(`provider/` MediaContentProvider, MediaContract, MediaUriMatcher, its manifest entry and two tests); its index tables `media_items`
+and `media_folders` with MediaItemDao, MediaFolderDao, the entities, MediaSource and its converter (Room 15 to 16,
+`MIGRATION_15_16` drops both tables; GallerySyncDatabaseTest, MediaSourceConverterTest and MediaCompositeIdTest went with them);
+the test-only code listed after the 26 Sept audit (FirstBackupWindow.hoursUntilOpen and mayRunNow, LibraryEstimate,
+MediaAge.hasElapsedFor, TreeScope.withoutRedundant, BackupLocations, BackupLocation.isBackupOnly, CloudCapabilities.RESTORE_ONLY,
+AlbumMode.removesLocal) and the 24 tests that only exercised them; the old OneDrive folder screen's leftovers (DestinationSection,
+FirstBackupSettings and its hour picker, the wizard's separate destination dialog and ReconcileViewModel's chooser functions and
+state). DestinationDialog stays (the Backup folder line uses it). The "Where each folder goes" heading now carries the
+SETTINGS_DESTINATION (?) that only the removed screen had (caught by HowToGuideConsistencyTest). Verified: unit tests pass;
+MigrationTest 24 OK on the Moto (am instrument, app kept); the Moto's live database upgraded to 16 with the two tables gone; no
+crash. Note for Ian: CLAUDE.md's opening still describes the app as a ContentProvider serving cloud files on demand; that
+mechanism is gone and the description is his to update.

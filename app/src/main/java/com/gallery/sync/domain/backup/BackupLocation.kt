@@ -31,14 +31,6 @@ enum class BackupLocation {
     /** Whether this location can be switched on in this build. */
     val isUsable: Boolean get() = this == ONEDRIVE
 
-    /**
-     * Everything but OneDrive is backup-only for now: no Archive, no Sync (optimise), no Restore.
-     * Those all act on `BackupEntryDao.verifiedInCloud()` and Restore downloads by the OneDrive id, so a
-     * row sent anywhere else must never satisfy either. Each adapter records its rows through
-     * `markUploadedWithoutSizeVerification`, which always leaves the remote size NULL.
-     */
-    val isBackupOnly: Boolean get() = capabilities == CloudCapabilities.BACKUP_ONLY
-
     companion object {
         /**
          * Every album's destination, implicitly, before this was a per-album choice at all — see
@@ -50,14 +42,4 @@ enum class BackupLocation {
         fun fromNameOrDefault(name: String?): BackupLocation =
             entries.firstOrNull { it.name == name } ?: DEFAULT
     }
-}
-
-object BackupLocations {
-
-    /** The locations in use in this build: what is switched on, out of what can be. */
-    val inUse: Set<BackupLocation> = BackupLocation.entries.filter { it.isUsable }.toSet()
-
-    /** May [which] be switched off, given what is [active]? Never if it would leave nothing. */
-    fun canSwitchOff(active: Set<BackupLocation>, which: BackupLocation): Boolean =
-        which in active && active.size > 1
 }

@@ -86,27 +86,6 @@ class TreeScopeTest {
     // ---------- tidying ----------
 
     @Test
-    fun aNestedGrantIsDroppedWhenItsParentIsAlsoGranted() {
-        assertEquals(
-            listOf("DCIM"),
-            TreeScope.withoutRedundant(listOf("DCIM", "DCIM/Camera"))
-        )
-    }
-
-    @Test
-    fun unrelatedGrantsAreAllKept() {
-        assertEquals(
-            listOf("DCIM", "Pictures"),
-            TreeScope.withoutRedundant(listOf("DCIM", "Pictures"))
-        )
-    }
-
-    @Test
-    fun duplicatesAndSlashesAreTidiedAway() {
-        assertEquals(listOf("DCIM"), TreeScope.withoutRedundant(listOf("DCIM", "/DCIM/", "DCIM")))
-    }
-
-    @Test
     fun theDisplayNameIsTheFolderTheUserPicked() {
         assertEquals("Camera", TreeScope.displayNameOf("DCIM/Camera"))
         assertEquals("DCIM", TreeScope.displayNameOf("DCIM"))

@@ -7,20 +7,15 @@ import com.gallery.sync.data.local.converter.AlbumModeConverter
 import com.gallery.sync.data.local.converter.BackupLocationConverter
 import com.gallery.sync.data.local.converter.CloudCopyDecisionConverter
 import com.gallery.sync.data.local.converter.BackupStateConverter
-import com.gallery.sync.data.local.converter.MediaSourceConverter
 import com.gallery.sync.data.local.dao.AlbumCloudStatusDao
 import com.gallery.sync.data.local.dao.AlbumPreferenceDao
 import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.dao.FolderPreferenceDao
-import com.gallery.sync.data.local.dao.MediaFolderDao
-import com.gallery.sync.data.local.dao.MediaItemDao
 import com.gallery.sync.data.local.dao.UnsentDepartureDao
 import com.gallery.sync.data.local.entity.AlbumCloudStatusEntity
 import com.gallery.sync.data.local.entity.AlbumPreferenceEntity
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.entity.FolderPreferenceEntity
-import com.gallery.sync.data.local.entity.MediaFolderEntity
-import com.gallery.sync.data.local.entity.MediaItemEntity
 import com.gallery.sync.data.local.entity.UnsentDepartureEntity
 
 /**
@@ -43,19 +38,16 @@ import com.gallery.sync.data.local.entity.UnsentDepartureEntity
  */
 @Database(
     entities = [
-        MediaItemEntity::class,
-        MediaFolderEntity::class,
         BackupEntryEntity::class,
         AlbumPreferenceEntity::class,
         AlbumCloudStatusEntity::class,
         UnsentDepartureEntity::class,
         FolderPreferenceEntity::class
     ],
-    version = 15,
+    version = 16,
     exportSchema = true
 )
 @TypeConverters(
-    MediaSourceConverter::class,
     BackupStateConverter::class,
     AlbumModeConverter::class,
     CloudCopyDecisionConverter::class,
@@ -63,9 +55,7 @@ import com.gallery.sync.data.local.entity.UnsentDepartureEntity
 )
 abstract class GallerySyncDatabase : RoomDatabase() {
 
-    abstract fun mediaItemDao(): MediaItemDao
 
-    abstract fun mediaFolderDao(): MediaFolderDao
 
     abstract fun backupEntryDao(): BackupEntryDao
 

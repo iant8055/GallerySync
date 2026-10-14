@@ -42,27 +42,8 @@ object FirstBackupWindow {
         windowHours: Int = WINDOW_HOURS
     ): Boolean = hoursSinceOpening(hourOfDay, startHour) < windowHours
 
-    /** Hours until the window next opens; 0 when it is open now. */
-    fun hoursUntilOpen(hourOfDay: Int, startHour: Int = DEFAULT_START_HOUR): Int =
-        if (isOpen(hourOfDay, startHour)) 0 else (startHour - hourOfDay + 24) % 24
-
     private fun hoursSinceOpening(hourOfDay: Int, startHour: Int): Int =
         (hourOfDay - startHour + 24) % 24
-
-    /**
-     * Whether an automatic first-backup run may proceed right now.
-     *
-     * [isCharging] is checked here rather than left to a WorkManager constraint because the answer
-     * has to be explainable: a run that silently never happens because the phone was not plugged in
-     * looks identical to a broken app. The screen reads this same function to say why it is waiting.
-     */
-    fun mayRunNow(
-        hourOfDay: Int,
-        isCharging: Boolean,
-        startHour: Int = DEFAULT_START_HOUR,
-        requiresCharging: Boolean = true,
-        windowHours: Int = WINDOW_HOURS
-    ): Boolean = isOpen(hourOfDay, startHour, windowHours) && (isCharging || !requiresCharging)
 
     /** Why a first-backup run is being held, or null when nothing is holding it. */
     fun heldBecause(

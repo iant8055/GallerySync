@@ -39,52 +39,6 @@ class FirstBackupWindowTest {
         }
     }
 
-    @Test
-    fun hoursUntilOpenIsZeroWhileOpen() {
-        assertEquals(0, FirstBackupWindow.hoursUntilOpen(hourOfDay = 2, startHour = 1))
-    }
-
-    @Test
-    fun hoursUntilOpenCountsForwardAcrossMidnight() {
-        assertEquals(3, FirstBackupWindow.hoursUntilOpen(hourOfDay = 22, startHour = 1))
-        assertEquals(13, FirstBackupWindow.hoursUntilOpen(hourOfDay = 12, startHour = 1))
-    }
-
-    @Test
-    fun chargingIsRequiredByDefault() {
-        assertFalse(
-            "inside the window but unplugged",
-            FirstBackupWindow.mayRunNow(hourOfDay = 2, isCharging = false)
-        )
-        assertTrue(
-            "inside the window and plugged in",
-            FirstBackupWindow.mayRunNow(hourOfDay = 2, isCharging = true)
-        )
-    }
-
-    @Test
-    fun chargingCanBeWaived() {
-        assertTrue(
-            FirstBackupWindow.mayRunNow(
-                hourOfDay = 2,
-                isCharging = false,
-                requiresCharging = false
-            )
-        )
-    }
-
-    /** Waiving charging does not open the window — the two conditions are independent. */
-    @Test
-    fun waivingChargingDoesNotIgnoreTheClock() {
-        assertFalse(
-            FirstBackupWindow.mayRunNow(
-                hourOfDay = 12,
-                isCharging = true,
-                requiresCharging = false
-            )
-        )
-    }
-
     /**
      * The screen has to say *which* condition is holding it. "Waiting until 1am" and "waiting for
      * you to plug in" ask different things of the user; "waiting" asks nothing and explains nothing.

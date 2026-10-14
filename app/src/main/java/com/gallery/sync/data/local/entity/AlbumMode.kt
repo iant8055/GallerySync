@@ -47,9 +47,6 @@ enum class AlbumMode {
     /** Whether photos may be replaced by proxies. [ARCHIVE] removes them instead of shrinking them. */
     val proxiesPhotos: Boolean get() = this == SYNC
 
-    /** Whether the local file is removed once the cloud copy is verified. */
-    val removesLocal: Boolean get() = this == ARCHIVE
-
     companion object {
 
         /**

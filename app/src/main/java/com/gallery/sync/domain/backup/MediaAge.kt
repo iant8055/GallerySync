@@ -84,10 +84,6 @@ enum class MediaAge(val duration: Duration) {
 
     OneWeek(Duration.ofDays(7));
 
-    /** True when a file last modified at [modifiedAt] is old enough for this threshold. */
-    fun hasElapsedFor(modifiedAt: Instant, now: Instant): Boolean =
-        !modifiedAt.plus(duration).isAfter(now)
-
     companion object {
 
         /**

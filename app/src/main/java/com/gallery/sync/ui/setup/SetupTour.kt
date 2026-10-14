@@ -776,7 +776,6 @@ fun SetupTour(
                         4 -> CloudStorageContent(
                             state = state,
                             cloudState = cloudState,
-                            onChangeDestination = viewModel::openDestinationChooser,
                             phase = cloudPhase,
                             picked = pickedClouds,
                             extras = chosenClouds,
@@ -877,15 +876,6 @@ fun SetupTour(
             )
         }
 
-        if (state.choosingDestination) {
-            DestinationDialog(
-                current = state.destinationRoot,
-                alreadyBackedUp = state.alreadyFoundHere,
-                rejected = state.destinationRejected,
-                onConfirm = viewModel::setDestination,
-                onDismiss = viewModel::dismissDestinationChooser
-            )
-        }
     }
 }
 
@@ -1494,7 +1484,6 @@ private fun CloudStorageContent(
     onExtrasChange: (BackupLocation, Boolean) -> Unit,
     phase: Int,
     picked: List<BackupLocation>,
-    onChangeDestination: () -> Unit,
     cloudViewModel: CloudProvidersViewModel
 ) {
     // Which cloud the limits pop-up is about, and whether it is an extra one. Shown when a cloud is ticked,

@@ -153,8 +153,7 @@ fun SettingsScreen(
         // The clouds come first (Ian, 24 Sept 2026): which clouds are connected is what the pairings below
         // choose between. The account itself is named on its row in the list (no separate Account row), and
         // there is no separate "Current folder location" section either: each pairing below already says
-        // where in its cloud the folder goes. `DestinationSection` is kept, unused, for the OneDrive folder
-        // chooser if it is wanted back.
+        // where in its cloud the folder goes. The folder itself is chosen on each Cloud's row (Backup folder).
         CloudProvidersSection(viewModel = cloudViewModel)
 
         // A clear boundary between connecting Clouds and routing folders to them (Ian, 5 Oct 2026). They ran
@@ -173,10 +172,12 @@ fun SettingsScreen(
         // lapsed or been disconnected keeps it on the menu, so it reads truthfully and can be moved back.
         if (state.folders.isNotEmpty()) {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Text(
-                    text = stringResource(R.string.backup_folders_heading),
-                    style = MaterialTheme.typography.titleSmall
-                )
+                WithHelp(HelpTopic.SETTINGS_DESTINATION) {
+                    Text(
+                        text = stringResource(R.string.backup_folders_heading),
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                }
                 Text(
                     text = stringResource(R.string.backup_folders_explainer),
                     style = MaterialTheme.typography.bodySmall,
@@ -918,10 +919,12 @@ fun SettingsTabPreview(onGuideCardPositioned: ((androidx.compose.ui.geometry.Rec
         }
         SettingDivider()
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(
-                text = stringResource(R.string.backup_folders_heading),
-                style = MaterialTheme.typography.titleSmall
-            )
+            WithHelp(HelpTopic.SETTINGS_DESTINATION) {
+                Text(
+                    text = stringResource(R.string.backup_folders_heading),
+                    style = MaterialTheme.typography.titleSmall
+                )
+            }
             Text(
                 text = stringResource(R.string.backup_folders_explainer),
                 style = MaterialTheme.typography.bodySmall,

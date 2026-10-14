@@ -341,10 +341,22 @@ object Migrations {
         }
     }
 
+    /**
+     * 15 → 16: the two tables of the original ContentProvider index, `media_items` and `media_folders`, are gone with
+     * it (Ian, 14 Oct 2026: "Go with Code Cleanup", after Closed Testing). Nothing in the app had read or written them
+     * since the provider stopped being the way files were served; only tests used them. The backup ledger is untouched.
+     */
+    val MIGRATION_15_16 = object : Migration(15, 16) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("DROP TABLE IF EXISTS `media_items`")
+            db.execSQL("DROP TABLE IF EXISTS `media_folders`")
+        }
+    }
+
     /** Every migration, in order, for the database builder. */
     val ALL = arrayOf(
         MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7,
         MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12,
-        MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15
+        MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16
     )
 }

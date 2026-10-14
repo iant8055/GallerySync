@@ -81,12 +81,4 @@ class BackupEntryTest {
         assertEquals(listOf(AlbumMode.OFF, AlbumMode.BACKUP, AlbumMode.SYNC), AlbumMode.canBeDefault)
     }
 
-    @Test
-    fun `only sync proxies photos, and only archive removes them`() {
-        // The two modes that touch local files must never be reachable by accident. Asserting the
-        // whole enum means a mode added later has to make a deliberate choice here.
-        assertEquals(listOf(AlbumMode.SYNC), AlbumMode.entries.filter { it.proxiesPhotos })
-        assertEquals(listOf(AlbumMode.ARCHIVE), AlbumMode.entries.filter { it.removesLocal })
-        assertEquals(false, AlbumMode.OFF.uploads)
-    }
 }

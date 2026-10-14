@@ -8,8 +8,6 @@ import com.gallery.sync.data.local.dao.AlbumCloudStatusDao
 import com.gallery.sync.data.local.dao.AlbumPreferenceDao
 import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.dao.FolderPreferenceDao
-import com.gallery.sync.data.local.dao.MediaFolderDao
-import com.gallery.sync.data.local.dao.MediaItemDao
 import com.gallery.sync.data.local.dao.UnsentDepartureDao
 import dagger.Module
 import dagger.Provides
@@ -38,14 +36,7 @@ object DatabaseModule {
         .addMigrations(*Migrations.ALL)
         .build()
 
-    @Provides
-    @Singleton
-    fun provideMediaItemDao(database: GallerySyncDatabase): MediaItemDao = database.mediaItemDao()
 
-    @Provides
-    @Singleton
-    fun provideMediaFolderDao(database: GallerySyncDatabase): MediaFolderDao =
-        database.mediaFolderDao()
 
     @Provides
     @Singleton

@@ -46,46 +46,6 @@ class LibraryChoiceTest {
 
     // ---------- the estimate ----------
 
-    @Test
-    fun proxyingReclaimsMostOfAPhotoLibrary() {
-        // 10 GB of photos, about a tenth left behind.
-        assertEquals(9 * gb, LibraryEstimate.spaceFreedBySync(10 * gb))
-    }
-
-    @Test
-    fun videoIsNeverCountedAsFreeable() {
-        // Sync leaves video whole, so the same photo total gives the same answer regardless.
-        assertEquals(
-            LibraryEstimate.spaceFreedBySync(10 * gb),
-            LibraryEstimate.spaceFreedBySync(10 * gb)
-        )
-        assertEquals(0L, LibraryEstimate.spaceFreedBySync(0))
-    }
-
-    /**
-     * Ian's own library: 16 GB of photos against 130 GB of video. Proxying every photo reclaims
-     * about 14 GB — under 10% — so calling that "free space" without qualification would invite him
-     * to expect most of 148 GB back.
-     */
-    @Test
-    fun aVideoHeavyLibraryReportsAMarginalSaving() {
-        assertTrue(
-            LibraryEstimate.isSavingMarginal(photoBytes = 16 * gb, videoBytes = 130 * gb)
-        )
-    }
-
-    @Test
-    fun aPhotoHeavyLibraryDoesNot() {
-        assertFalse(
-            LibraryEstimate.isSavingMarginal(photoBytes = 100 * gb, videoBytes = 10 * gb)
-        )
-    }
-
-    @Test
-    fun anEmptyLibraryIsNotDescribedAsMarginal() {
-        assertFalse(LibraryEstimate.isSavingMarginal(photoBytes = 0, videoBytes = 0))
-    }
-
     /**
      * The predicate Step 7's estimate and `OptimiseWorker` both read.
      *

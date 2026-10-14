@@ -63,19 +63,6 @@ object TreeScope {
     }
 
     /**
-     * Removes any granted path already covered by another.
-     *
-     * Granting `DCIM` and then `DCIM/Camera` is not an error, but keeping both would count the
-     * nested one twice when reporting how many albums a directory brings.
-     */
-    fun withoutRedundant(granted: Collection<String>): List<String> {
-        val cleaned = granted.map { it.trim('/') }.filter { it.isNotEmpty() }.distinct()
-        return cleaned.filterNot { candidate ->
-            cleaned.any { other -> other != candidate && isInScope(candidate, listOf(other)) }
-        }
-    }
-
-    /**
      * The folder name to show for a granted path.
      *
      * The last segment, because that is what the user picked and recognises — a row reading

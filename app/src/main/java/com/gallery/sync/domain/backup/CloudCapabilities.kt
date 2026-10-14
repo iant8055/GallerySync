@@ -40,9 +40,6 @@ data class CloudCapabilities(val restore: Boolean, val archive: Boolean, val syn
         val FULL = CloudCapabilities(restore = true, archive = true, sync = true)
         val BACKUP_ONLY = CloudCapabilities(restore = false, archive = false, sync = false)
 
-        /** Can fetch a file back, but the copy is not proved by size, so nothing may be removed or replaced. */
-        val RESTORE_ONLY = CloudCapabilities(restore = true, archive = false, sync = false)
-
 
     }
 }
