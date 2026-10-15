@@ -231,6 +231,33 @@ fun SetupTour(
     onStepChanged: (Int) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    // The wizard, and only the wizard, speaks the language chosen on its Welcome screen (Ian, 14 Oct 2026); the
+    // rest of the app is English. See InLanguage.
+    val languageViewModel: com.gallery.sync.ui.settings.LanguageViewModel = hiltViewModel()
+    val wizardLanguage by languageViewModel.language.collectAsStateWithLifecycle()
+    // Popups and dialogs read the Activity's resources; see MainActivity.wizardLanguage.
+    val activity = androidx.activity.compose.LocalActivity.current as? com.gallery.sync.MainActivity
+    // Set during composition, before any popup below reads the Activity's resources.
+    activity?.wizardLanguage = wizardLanguage.code
+    androidx.compose.runtime.DisposableEffect(activity, wizardLanguage.code) {
+        activity?.wizardLanguage = wizardLanguage.code
+        onDispose { activity?.wizardLanguage = null }
+    }
+    com.gallery.sync.ui.common.InLanguage(wizardLanguage.code) {
+        SetupTourBody(viewModel, signInViewModel, cloudViewModel, onComplete, onSwitchTab, onStepChanged, modifier)
+    }
+}
+
+@Composable
+private fun SetupTourBody(
+    viewModel: ReconcileViewModel,
+    signInViewModel: SignInViewModel?,
+    cloudViewModel: CloudProvidersViewModel,
+    onComplete: () -> Unit,
+    onSwitchTab: (Int) -> Unit,
+    onStepChanged: (Int) -> Unit,
+    modifier: Modifier
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     // Resume at persisted step if the wizard was interrupted during backup
@@ -2686,19 +2713,21 @@ private val PhoneFrameCorner = 36.dp
 
 // ── Tab Mockups (decorative backgrounds for Step 2 cards) ──────────────────
 
+// The mock tabs picture the app as it is, and the app is English (Ian, 14 Oct 2026), so they are drawn in English
+// whatever language the wizard is speaking around them.
 @Composable
-private fun AlbumsMockup() = AlbumsTabPreview()
+private fun AlbumsMockup() = com.gallery.sync.ui.common.InLanguage("en") { AlbumsTabPreview() }
 
 @Composable
-private fun RestoreMockup() = RestoreTabPreview()
+private fun RestoreMockup() = com.gallery.sync.ui.common.InLanguage("en") { RestoreTabPreview() }
 
 @Composable
-private fun ArchiveMockup() = ArchiveTabPreview()
+private fun ArchiveMockup() = com.gallery.sync.ui.common.InLanguage("en") { ArchiveTabPreview() }
 
 @Composable
 private fun SettingsMockup(
     onGuideCardPositioned: ((Rect) -> Unit)? = null
-) = SettingsTabPreview(onGuideCardPositioned)
+) = com.gallery.sync.ui.common.InLanguage("en") { SettingsTabPreview(onGuideCardPositioned) }
 
 /** Which of step 9's three phases is running. See where it is derived, in the tour body. */
 /**

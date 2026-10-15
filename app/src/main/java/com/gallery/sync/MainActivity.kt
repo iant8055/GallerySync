@@ -1,6 +1,7 @@
 package com.gallery.sync
 
 import android.os.Bundle
+import com.gallery.sync.ui.common.pinnedToEnglish
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.LocalActivity
@@ -77,6 +78,30 @@ import com.gallery.sync.util.Logger
 class MainActivity : ComponentActivity() {
 
     @Inject lateinit var recentsCard: RecentsCard
+
+    // The app's text is English whatever the phone's language; only the wizard is translated (Ian, 14 Oct 2026).
+    override fun attachBaseContext(newBase: android.content.Context) {
+        super.attachBaseContext(newBase.pinnedToEnglish())
+    }
+
+    /**
+     * The wizard's language while the wizard is on screen, else null. Set by `SetupTour`. The wizard's cards and
+     * dialogs are popups and dialogs, and Compose gives those their own window whose text comes from the Activity's
+     * resources, not from the wizard's `InLanguage`; so while it shows, the Activity answers in its language. The
+     * wizard covers the whole screen, so nothing else is visible meanwhile, and the app is English again after.
+     */
+    @Volatile var wizardLanguage: String? = null
+    private var wizardResources: Pair<String, android.content.res.Resources>? = null
+
+    override fun getResources(): android.content.res.Resources {
+        val tag = wizardLanguage ?: return super.getResources()
+        wizardResources?.let { (cachedTag, resources) -> if (cachedTag == tag) return resources }
+        val config = android.content.res.Configuration(super.getResources().configuration)
+            .apply { setLocale(java.util.Locale.forLanguageTag(tag)) }
+        val resources = applicationContext.createConfigurationContext(config).resources
+        wizardResources = tag to resources
+        return resources
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
