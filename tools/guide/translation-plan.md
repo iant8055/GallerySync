@@ -4,6 +4,17 @@
 for publication, and the features and wording are final. A page that is not accurate is not worth translating.
 *(Ian, 11 Oct 2026. "Live" in this plan means: finished Closed Testing.)*
 
+**Closed Testing finished (14 Oct 2026 window).** Awaiting Ian's explicit go for the sweep, coordinated with
+final publication approval so the multi-language wizard and the multi-language Guide roll out together
+*(Ian, 14 Oct 2026)*. The wizard owner (the GallerySync main session running alongside this one) has already
+shipped translated wizards in all six languages (commits a70529a and later); the sweep below delivers the
+matching Guide content and (?) pop-ups.
+
+**The wizard owner is a sibling Claude session**, referred to below in commit annotations as "sibling". A cold
+agent reading this file for instructions can treat "the wizard owner" and "the sibling" as synonyms for that
+other session. The agents run in this session; messages to the wizard owner go via `SendMessage` to the
+"GallerySync version 11 build status" address.
+
 Everything here operates on the docs side only (`tools/guide/content/` and the files it emits) and never changes
 the Android app in this pass.
 
@@ -53,15 +64,27 @@ Done once, in English only, so the pipeline is ready when the sweep begins.
 3. **Fallback rule.** A language is published only when every topic is translated **and verified** by the Head
    Editor. Until then that language is not emitted at all and readers get the English Guide. No partial foreign
    pages, never a half-English hybrid *(confirmed by Ian, 11 Oct 2026)*.
-4. **Language picker.** Add a small `<select>` at the top of each HTML output,
-   listing only the locales that fully built. English is always present.
-5. **Extend the checking test** *(added 11 Oct 2026)*. `HowToGuideConsistencyTest` reads only the English outputs
-   today. For each locale that builds, it must also check: every topic id is present in the flat and accordion
-   pages and matches English; every `[[topic-id]]` link resolves; the translated (?) file has a title and body for
-   every topic with a (?) button; every glossary §1–6, §9 and §10 term that appears in an English topic appears,
-   unchanged, in the same topic's translation; and the markup counts (headings, bullets, numbered items, bold runs,
-   links, `{{full: }}` markers) match English. A stale translation (English changed since it was made, see Phase 4)
-   fails the test for that locale, which keeps it unpublished.
+4. **Language picker.** A row of plain `<a>` links at the top of each HTML output, listing only the locales
+   that fully built. English is always present. *(Shipped as plain links rather than a `<select>` because the
+   in-app guide viewer runs with JavaScript disabled — `InAppPage.kt` sets `javaScriptEnabled = false` — and a
+   `<select>` cannot navigate without JS.)*
+5. **Extend the checking test** *(added 11 Oct 2026; shipped in Phase 0 commit `7e9b97e`)*. The checks live in
+   two places on purpose: a build-side Python check that fails `build_guide.py --check` for genuine build
+   problems, and a smaller Kotlin loop in `HowToGuideConsistencyTest` that iterates over any per-locale HTML
+   present in `docs/`.
+
+   - **Build-side (fails `--check`):** English outputs out of date; orphan per-locale output files on disk that
+     no complete locale produces. These are blocking.
+   - **Build-side (informational only):** per-locale translation progress — missing or stale topics, chapters
+     or chrome. These are warnings, printed but non-blocking, so a half-translated locale does not block the
+     sibling's English work. *(Changed from the original design during Phase 0 follow-ups, `bd554ec`.)*
+   - **Kotlin side (`HowToGuideConsistencyTest`):** per locale that fully built, every topic id is present in
+     the flat and accordion pages; every `[[topic-id]]` link resolves on each per-locale page; and all three
+     variants (flat, accordion, setup) are present together (never a half-published language). English
+     assertions are unchanged.
+
+   A locale that is not complete is simply not emitted — the fallback rule above (Phase 0 item 3) handles the
+   outcome. Stale locale pages left over from a prior build are detected by the orphan scan and removed.
 6. **The (?) pop-ups ship multilingual.** *(Ian, 14 Oct 2026 — see item 2 above.)* The translated
    `help_topics.xml` files land directly under `app/src/main/res/values-<androidloc>/`, so Android's own
    resource system serves them in the user's chosen language. The rest of the app is pinned to English; only
@@ -93,28 +116,42 @@ well:
 Expand later from this base. Italian, Korean, Simplified Chinese are the next
 tier; add them once the pipeline has run cleanly once.
 
-### Hindi — explicit script exception
+### Hindi — explicit script rule
 
-Hindi uses the Devanagari script, which puts the glossary rule under more
-pressure than it is in Latin-script languages. The `translator-hi` agent must
+Hindi uses the Devanagari script, and the shipped wizard sets the convention the
+Guide follows (sibling commits a70529a and later). The `translator-hi` agent must
 be told, explicitly and in addition to the standard glossary preamble:
 
-> **Do not transliterate glossary terms into Devanagari.** Terms such as
-> **Cloud**, **Backup**, **Sync**, **Archive**, **Restore**, **Optimise**,
-> **Rescan**, **Album**, **Mode**, **Pairing**, **Pro**, **GallerySync**, every
-> brand name in §6, and every button label in §5 of the glossary must appear in
-> Latin script, exactly as spelled in English, inside the Devanagari sentence.
+> **Keep these in Latin script, exactly as spelled in English, inside the
+> Devanagari sentence** — the app itself renders them in Latin and the Guide
+> must match on screen:
 >
-> Do not render **Backup** as **बैकअप**, **Cloud** as **क्लाउड**,
-> **Archive** as **आर्काइव**, or any other glossary term in Devanagari, even
-> when a transliteration would be grammatically convenient. This is standard
-> practice in Indian technology writing and matches what the user sees on
-> screen in the still-English app.
+> - **GallerySync**, **Pro**, every brand name in §6 (OneDrive, Google Photos,
+>   Google Drive, Dropbox, pCloud, IDrive e2, Backblaze B2, Samsung Gallery,
+>   Google, Microsoft, Android, Play Store, Wi-Fi).
+> - **The four album modes:** Off, **Backup**, **Sync**, **Archive**.
+> - **The four tab names:** Albums, Restore, Archive, Settings.
+> - **"How To Guide"** (the Settings card).
+> - Every on-screen label in glossary §10 that the shipped wizard renders in
+>   Latin (the wizard's own source at `tools/wizard/hi.py` is authoritative;
+>   follow it, not the escaped XML under `values-hi/`).
+>
+> **Transliterate the common technical nouns into Devanagari** the way the
+> shipped wizard does: **बैकअप** (backup as a general verb/noun), **क्लाउड**
+> (Cloud as a general noun), **सिंक** (sync as an action verb; **never as the
+> mode name Sync**, which stays Latin per the list above). This matches
+> standard Indian technology writing and is what Hindi readers expect.
+>
+> The rule of thumb: if the word is a thing *on an app button or tab*, keep it
+> in Latin. If it is prose describing the action, Devanagari is natural.
+> Example from the shipped wizard: "Archive या Sync नहीं" (mode names Latin)
+> vs. "बैकअप या सिंक" (same words as verbs, Devanagari). Both are correct.
 
-The Head Editor's glossary-adherence check (Phase 2, item 1) catches this
-automatically for Hindi — a Devanagari rendering is not an exact match for the
-English spelling and will flag — but stating the rule up front avoids a wasted
-first round.
+*(Amended 15 Oct 2026 to match the shipped Spanish-through-Hindi wizard. The
+earlier version banned all Devanagari transliteration of glossary terms; Ian's
+14 Oct decision to translate the wizard reversed that, and the sibling's work
+has made the exact convention concrete. The Head Editor's glossary check needs
+the matching Hindi-aware exemption — see Phase 2.)*
 
 ---
 
@@ -129,20 +166,27 @@ Six **Translator** agents (one per language) run in parallel, then one
   `translator-pt-br`).
 - **Base type:** `general-purpose` (no project-specific tooling needed; this is a
   text task against known inputs).
+- **Full brief:** [tools/guide/translator-brief.md](translator-brief.md).
 - **Inputs each one receives:**
   - [tools/guide/glossary.md](glossary.md) as a preamble, with the rule
     "preserve these exactly, in English, inside any sentence of the target
-    language".
+    language" (plus the Hindi-specific amendment above for `translator-hi`).
   - The target language code and name.
-  - One chapter file at a time (`c1_start.py` through `c8_help.py`) — eight
-    sub-tasks per language, not one giant one. Smaller passes stay accurate.
+  - One English chapter file at a time (`c1_start.py` through `c8_help.py`) plus
+    the English chrome at `content/_chrome.py` — nine sub-tasks per language,
+    not one giant one. Smaller passes stay accurate.
   - The format rules from `build_guide.py`'s header comment: `##` headings on
     their own line, `• ` bullets, `1. ` numbered lists, `**bold**`, `[[topic-id]]`
     links, `{{full: ...}}` markers, blank lines separate paragraphs. **These
     markup tokens must survive translation unchanged.**
-- **Output per sub-task:** a translated body string, same structure as the
-  English, dropped into the content file as `{"en": "...", "es": "..."}` next to
-  the English.
+- **Output per sub-task:** a new file at `content/<locale>/<same_filename>.py`
+  exporting a `TRANSLATIONS` dict keyed by topic id (plus `"_chapter"` for the
+  chapter's own title and intro). Each entry carries `title`, `body` (or `intro`
+  for the chapter) and `en_hash` computed with
+  `model.english_hash(title, body_or_intro)`. The English content files are
+  never touched. For the chrome file, the output is
+  `content/<locale>/_chrome.py` exporting `STRINGS` + `EN_HASH =
+  model.english_chrome_hash(CHROME_EN)`.
 - **One-pass policy:** raw LLM translation. No human review in this sweep (per
   Ian's decision, 10 Oct 2026). Head Editor is the only review step.
 
@@ -150,16 +194,22 @@ Six **Translator** agents (one per language) run in parallel, then one
 
 - **Agent name:** `head-editor`.
 - **Base type:** `general-purpose`.
+- **Full brief:** [tools/guide/head-editor-brief.md](head-editor-brief.md).
 - **Role:** collects every translation produced by the Translators and verifies
   it against the English and the glossary.
 - **What it checks, per topic, per language:**
 
   1. **Glossary adherence (hard check).** Every term in `glossary.md` sections
-     1–6, 8, 9 must appear in the translation **exactly as spelled in English**,
-     at least as often as in the English source minus a reasonable tolerance (the
-     target language may fold two sentences into one). A missing or inflected
-     term is a flag. This can be done mechanically — grep each term, count the
-     hits, compare to the English count.
+     1–6, 8, 9 and §10 must appear in the translation **exactly as spelled in
+     English**, at least as often as in the English source minus a reasonable
+     tolerance (the target language may fold two sentences into one). A missing
+     or inflected term is a flag. This can be done mechanically — grep each
+     term, count the hits, compare to the English count.
+     *Hindi exemption:* for the Hindi translation, glossary terms in §4 that are
+     not also tabs/modes/brand names (e.g. "Rescan", "Pairing", "Verified"), and
+     general §5 action labels (e.g. "Sync now" when it appears as a verb phrase)
+     may be rendered in Devanagari per the Phase 1 Hindi script rule above. The
+     specific list of terms that MUST stay Latin in Hindi is in that rule.
   2. **Markup preservation (hard check).** Count of `##` headings, bullet lines,
      numbered-list items, `**bold**` runs, `[[topic-id]]` links, and
      `{{full: ...}}` markers must match the English exactly. Any mismatch is a
@@ -176,6 +226,16 @@ Six **Translator** agents (one per language) run in parallel, then one
   6. **Section 7 compliance.** Platform words (Trash, Recycle Bin, gallery) in
      the English source *are* translated in the output. If a Translator left
      them English, flag.
+  7. **Setup chapter cross-check (new).** When the Guide's setup chapter
+     references a wizard label (per the glossary §10 amendment of 14 Oct 2026),
+     the Translator must have used the exact string from the matching wizard
+     file at `tools/wizard/<lang>.py` (NOT the escaped Android XML, which
+     differs on apostrophes and HTML entities). Diff the quoted label against
+     the `.py` file; any mismatch is a flag.
+  8. **Chrome completeness (new).** `content/<locale>/_chrome.py` must exist,
+     export a `STRINGS` dict with every key the English chrome has, and carry
+     an `EN_HASH` matching `model.english_chrome_hash(CHROME_EN)`. Missing keys
+     or stale hash means the whole locale fails to publish.
 
 - **Output:** a per-language report of flags, grouped by topic. For each flag:
   the English line, the translation, the rule it broke, and a suggested fix.
@@ -189,18 +249,38 @@ Six **Translator** agents (one per language) run in parallel, then one
 
 ## Phase 3 — Running order
 
-1. Phase 0 lands and is committed. English build is unchanged.
-2. Head Editor is dry-run against English-only (should produce zero flags; this
-   is the test that the checker itself works).
-3. Six Translator agents launched in parallel, each with its chapter list.
-4. All six finish. Content files now hold `{"en": ..., "<lang>": ...}` dicts.
-5. Head Editor runs over the six languages.
-6. Flagged topics go back to their Translator for round two.
-7. Head Editor re-runs. Report any residual flags.
-8. `build_guide.py` runs. If it emits the six extra HTML sets, the sweep passed.
-9. Commit the six languages together, one commit per language with the Head
-   Editor's final report in the commit message.
-10. Publish `docs/*.html`.
+**Coordination goal (Ian, 15 Oct 2026):** roll out the multi-language wizard and the multi-language Guide
+together. The wizard is already shipped in all six languages (sibling commits a70529a and later), waiting on
+final publication approval. The Guide sweep below should complete BEFORE that approval lands, so that:
+
+- the next app version ships carrying translated `help_topics.xml` under `values-<androidloc>/`;
+- `docs/how-to-guide.<locale>.html` et al. are published on GitHub Pages at the same moment;
+- a user updating the app sees Spanish wizard, Spanish (?) pop-ups and a Spanish Guide, all together.
+
+### Running order
+
+1. ✓ Phase 0 landed and committed (`bd554ec`). English build is byte-identical to pre-Phase-0.
+2. Head Editor dry-run against English-only (should produce zero flags; this is the test that the checker
+   itself works). The build-side `--check` serves this role: 0 outputs out of date, 0 orphans, 0 warnings.
+3. Six Translator agents launched in parallel, each with its chapter list of eight chapter files plus the
+   chrome file (nine sub-tasks per language).
+4. All six finish. New files exist at `content/<locale>/c1_start.py` … `c8_help.py` + `content/<locale>/_chrome.py`
+   for every language. English files unchanged.
+5. `build_guide.py --check` runs. Any blocking issues (stale output, orphan) stop the sweep until fixed.
+   Translation warnings are informational.
+6. Head Editor runs over the six languages, following the Head Editor brief.
+7. Flagged topics go back to their Translator for round two.
+8. Head Editor re-runs. Report any residual flags.
+9. `build_guide.py` runs (write mode). It emits the six extra HTML sets under `docs/` and the six translated
+   `help_topics.xml` under `app/src/main/res/values-<androidloc>/`.
+10. Collect the per-language `guide_name` values from each `_chrome.py` and send them to the wizard owner (the
+    GallerySync main session, via `SendMessage` to "GallerySync version 11 build status") so the wizard's
+    `help_open_guide` placeholder ("Read more in the guide" etc.) can be replaced with the real
+    "Read more in <Guide name>" per language. Wizard owner applies and commits.
+11. Commit the six languages together — one commit per language, with the Head Editor's final report in the
+    commit message. Push to main; GitHub Pages republishes `docs/*.html`.
+12. Confirm with Ian that the next app build picks up the new `values-<androidloc>/help_topics.xml`. Ian releases
+    the pending final publication; the multi-language wizard and the multi-language Guide go live together.
 
 The translated `help_topics.xml` files ship in the app via `app/src/main/res/values-<androidloc>/` — Android's
 own resource system serves them in the (?) pop-ups in the user's chosen language. *(Ian, 14 Oct 2026, reversing
@@ -233,5 +313,6 @@ the earlier plan to hold them outside the Android source tree. See Phase 0 item 
 
 ---
 
-*Written 2026-10-10; updated 2026-10-11 02:45 CDT with Ian's decisions. Not to be executed until Ian gives the go
-(after Closed Testing).*
+*Written 2026-10-10. Updated 2026-10-11 02:45 CDT with Ian's decisions; 2026-10-14 for the Android-path pivot
+and non-blocking warnings; 2026-10-15 for the Hindi script rule reversal and the coordinated wizard-and-Guide
+rollout. Not to be executed until Ian gives the explicit go.*
