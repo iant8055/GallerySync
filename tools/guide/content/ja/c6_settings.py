@@ -1,0 +1,259 @@
+TRANSLATIONS = {
+    "_chapter": {
+        "title": "Settings タブ",
+        "intro": "緑の帯で区切られた 1 ページのスクロール画面：General、Backup、Albums、Sync、Camera Sync、Restore、Archive、Help & Feedback。各帯に (?) があります。",
+        "en_hash": "fdc210cbde6172d8",
+    },
+    "settings-overview": {
+        "title": "Settings タブの構成",
+        "body": """• 変更はすぐに反映されます。Save ボタンはありません。
+• ここにあるものでスマートフォンからファイルが削除されることはありません。削除するのは Archive だけです。
+• Settings と初回セットアップは別々です。[[setup-and-settings]]を参照してください。""",
+        "en_hash": "523b8f790e8db56b",
+    },
+    "settings-section-general": {
+        "title": "General",
+        "body": """**How To Guide**、**Appearance**、**Use mobile data**。**Language** は、ページの最後の行です。""",
+        "en_hash": "b8038bbcadfcd8b3",
+    },
+    "settings-how-to-guide-card": {
+        "title": "How To Guide カード",
+        "body": """このガイドを開きます。どの **(?)** でも **Read more in the How To Guide** を押すと、そのトピックでガイドが開きます。インターネット接続が必要です。読み込めない場合は、**Open in browser** を使ってください。""",
+        "en_hash": "a7dec55c7b2218a4",
+    },
+    "settings-language": {
+        "title": "Language",
+        "body": """ウェルカム画面で選んだ言語です。タップして変更します。How To Guide はこの選択に従います。アプリの画面は、今のところ英語です。""",
+        "en_hash": "e1597813fc836e98",
+    },
+    "settings-appearance": {
+        "title": "Appearance",
+        "body": """• **System**（既定）：スマートフォンのライト/ダークの設定に従います。
+• **Light** または **Dark**：常にその表示になります。
+
+ガイドとポリシーのページは、スマートフォンの設定に従います。""",
+        "en_hash": "b2ab8ff47282bc06",
+    },
+    "settings-mobile-data": {
+        "title": "Use mobile data",
+        "body": """• **Off**（既定）：**Wi-Fi only.**
+• **On**：**Syncs on Wi-Fi and mobile data.**
+
+自動バックアップと **Sync now** に適用されます。データ通信量が無制限でない限り、オフのままにしておいてください。""",
+        "en_hash": "e8860c60b1961fee",
+    },
+    "settings-section-backup": {
+        "title": "Backup",
+        "body": """• **Clouds**：各 Cloud に接続、またはログアウトします。[[settings-account]]を参照してください。
+• **Where each folder goes**：各フォルダの送信先 Cloud。[[settings-destination]]を参照してください。
+
+1 つの Cloud には **main (free)** が付きます。最初に選んだ Cloud で、常に無料です。ほかの Cloud には **Pro** が必要です：30 日間は無料（**Start 30-day free trial**）で、その後は 1 回限りの購入（**Unlock Pro**）です。自動的に請求されることはありません。""",
+        "en_hash": "0db12d3ebcb633de",
+    },
+    "settings-account": {
+        "title": "Clouds と Sign out",
+        "body": """各 Cloud には、アカウント（または **Not connected**）と、**Sign out**、**Connect**、**Enter keys** のいずれかが表示されます。
+
+## Backup folder
+接続済みの各 Cloud の下（Google Photos を除く）に、バックアップの送信先フォルダと **Change** が表示されます。[[dialog-destination]]を参照してください。
+
+## Sign out
+最初に警告が表示されます：その Cloud へのバックアップは停止しますが、何も削除されません。その Cloud に、スマートフォン上でフルサイズでないファイル（最適化またはアーカイブ済み）がある場合は、次を尋ねられます：
+• **Restore them to the phone first**：すべて戻してから、ログアウトします。
+• **Leave them there**：ログアウトします。
+• **Cancel**：ログインしたままにします。
+
+フォルダはその Cloud との組み合わせのまま、再びログインするまで待機します。別の送信先にしたい場合は、**Where each folder goes** を変更してください。""",
+        "en_hash": "788b2237bf1a173f",
+    },
+    "settings-destination": {
+        "title": "Where each folder goes",
+        "body": """最上位の各フォルダ（DCIM、Pictures、Movies）、その送信先 Cloud、およびその Cloud 内の場所。
+
+• Cloud をタップして変更します。変更できるのは、Cloud が複数あり、Pro または試用中の場合だけです。
+• 変更の対象になるのは、新しいファイルだけです。送信済みのファイルは、そのまま残ります。
+• Pro なしで追加の Cloud に割り当てたフォルダは、何も送らず、その旨が表示されます。""",
+        "en_hash": "22adac22e50fbdf0",
+    },
+    "dialog-destination": {
+        "title": "Where new backups go（Change ダイアログ）",
+        "body": """Settings、またはセットアップ中の Cloud のカードで、Cloud の **Backup folder** の横にある **Change** から開きます。
+
+• フォルダのパスを入力します。OneDrive では **Browse...** も使えます。
+• **Reset to default**：**Samsung Gallery/DCIM**（OneDrive）または **GallerySync**（ほかの Cloud）に戻します。
+• **Use this folder** で保存し、**Cancel** では何も変わりません。
+
+新しいフォルダに送られるのは、新しいファイルだけです。バックアップ済みのファイルは、そのまま残ります。OneDrive は以前のフォルダも引き続き確認するため、二重に送信されることはありません。""",
+        "en_hash": "910e0378a5a8b208",
+    },
+    "dialog-folder-picker": {
+        "title": "Choose a folder（OneDrive のピッカー）",
+        "body": """OneDrive の **Browse...** から開きます。OneDrive のフォルダを一覧表示します：タップして開き、**Up one folder** で戻り、**Use this folder** で選択し、**New folder** で新規作成します。""",
+        "en_hash": "f45e3349352eea44",
+    },
+    "settings-section-albums": {
+        "title": "Albums",
+        "body": """GallerySync が監視するフォルダと、スマートフォンから削除したときの Cloud 上のコピーの扱い。新しいアルバムは、必ず **Off** から始まります。""",
+        "en_hash": "dad7459947f2d8e1",
+    },
+    "settings-folders": {
+        "title": "Folders to back up",
+        "body": """GallerySync が調べてよいフォルダです。
+
+• **Add a folder**：Android のフォルダピッカーを開きます。
+• **Remove**：フォルダを選択し、**Remove** を押して、確認します。
+
+これらのフォルダの外にあるものは、スキャンも変更もされません。フォルダを削除しても、何も失われません。追加し直せば、すべて戻ります。""",
+        "en_hash": "3789c04bb52baef5",
+    },
+    "dialog-remove-folder": {
+        "title": "Stop watching this folder?",
+        "body": """**Remove** は選択したフォルダの監視を止め、**Cancel** では何も変わりません。
+
+すでにバックアップされたものは、失われません。フォルダを追加し直すと、そのアルバムと履歴が戻り、二重に送信されることはありません。""",
+        "en_hash": "5b84d0c4a6ec8a9a",
+    },
+    "settings-deletion": {
+        "title": "スマートフォンから写真や動画を削除したとき",
+        "body": """• **Leave the Cloud copy**（既定）：Cloud から何かが削除されることは、決してありません。
+• **Ask me about the Cloud copy**：ファイルがスマートフォンから消えたとき、その Cloud 上のコピーをどうするか尋ねるウィンドウが表示されます。通知が許可されていれば、削除の少し後に通知も届きます。あなたの了承なしに、何も削除されません。[[deleted-files-window]]を参照してください。
+
+今のところ OneDrive のみ対象です。ほかの Cloud のコピーが削除されることはありません。""",
+        "en_hash": "5fce34ecb857a3f6",
+    },
+    "deleted-files-window": {
+        "title": "スマートフォンから削除されたファイル（アプリと一緒に開くウィンドウ）",
+        "body": """**Ask** の場合、ファイルがスマートフォンから消えていると、Albums タブの前に開きます。最初は何も選択されていません。
+
+## ウィンドウ 1：OneDrive にコピーがある
+右にスワイプ（またはタップ）して、OneDrive のコピーを削除したいファイルを選択します。
+• **Remove N from OneDrive**：確認を求めた後、それらのコピーを OneDrive のゴミ箱に移します。選択しなかったファイルは、OneDrive に残ります。[[dialog-remove-from-onedrive]]を参照してください。
+• **Keep all in OneDrive.**
+• **Decide later.**
+
+## ウィンドウ 2：コピーが見つからない
+これらのファイルは、まだスマートフォンのゴミ箱にあります。
+• **Back up N to OneDrive**：選択したファイルを、ゴミ箱から送信します。何も削除されません。
+• **Leave all in the trash.**
+• **Decide later.**
+
+## 知っておくと便利なこと
+• 未決定のファイルは、決めるまで一覧に残ります。
+• 一覧に出ないもの：Archive が削除したファイル、その場で編集された写真、Cloud にコピーがなく完全に削除されたファイル。
+• バックアップ済みのファイルの半数以上が一度に消えたように見える場合、何も表示されません。実際の削除ではなく、スキャンの不具合として扱われます。
+• 戻る操作は、**Decide later** と同じ動作です。""",
+        "en_hash": "4cf138e07d6f0844",
+    },
+    "dialog-remove-from-onedrive": {
+        "title": "Remove files from OneDrive?（確認ダイアログ）",
+        "body": """ファイル数とそのサイズが表示されます。それらは OneDrive のゴミ箱に移動し、GallerySync がそれを空にすることはありません。
+
+**Remove from OneDrive** で実行し、**Cancel** では何も決まりません。スマートフォンに戻ってきたファイルには、手を付けません。""",
+        "en_hash": "a5707f1ea8aad403",
+    },
+    "settings-section-sync": {
+        "title": "Sync",
+        "body": """**Sync** アルバムの写真と動画を、どのように最適化するか。ファイルが変更されるのは、Cloud が確認した後だけです。OneDrive、Google Drive、Dropbox、pCloud、IDrive e2、Backblaze B2 で使えます。""",
+        "en_hash": "1147f4e959ac06bc",
+    },
+    "settings-optimise-photos": {
+        "title": "Optimise photos",
+        "body": """既定では **Off** です。オンにすると、Sync アルバム内の写真が小さなコピーに置き換えられます：長辺が約 2048 ピクセル、サイズは約 10 分の 1 です。小さなクラウドバッジが付いたまま、ギャラリーに残ります。元のファイルは Cloud に残ります。
+
+すでに十分小さい写真と、**Keep at full size** に設定されたファイルには、手を付けません。**Mode** で、実行するタイミングを設定します。[[settings-optimise-mode]]を参照してください。""",
+        "en_hash": "dee027d401742ca5",
+    },
+    "settings-optimise-video": {
+        "title": "Optimise video",
+        "body": """既定では **Off** です。オンにすると、**Mode**、**Older than**、**Compression** が表示されます。
+
+Sync アルバム内の動画が、より小さく再エンコードされます。カットされることはありません。元のファイルは Cloud に残ります。
+
+## 対象の動画
+Sync アルバム内にあり、verified in the Cloud で、設定より古く、アクセスを許可したフォルダにあり、まだ最適化されていないもの。
+
+## 実行するタイミング
+• **Automatic**：バックアップの後、充電中のみ。
+• **Manual**：**Sync now** を押したとき。""",
+        "en_hash": "09cf14026b288ef6",
+    },
+    "settings-optimise-mode": {
+        "title": "Mode: Automatic or Manual",
+        "body": """• **Automatic**（既定）：Sync アルバムのファイルは、Cloud が確認した時点で最適化されます。動画は、充電器につなぐまで待ちます。
+• **Manual**：Albums タブで **Sync now** を押すまで、何も起きません。
+
+アクセスを許可したフォルダの外にある写真は、Android の確認が必要なため、アプリを開くか **Sync now** を押すまで待機します。""",
+        "en_hash": "2d55959b2e538398",
+    },
+    "settings-video-age": {
+        "title": "Older than (video)",
+        "body": """動画を最適化するまでに必要な経過時間：**Straight away**、**1 hour**、**12 hours**、**1 day**、または **1 week**。Backup の実行は遅れません。
+
+**Straight away** には、今日撮影したクリップも含まれます。編集すると、復元するまでは小さい方のコピーが元になります。""",
+        "en_hash": "b69444389e56afe8",
+    },
+    "settings-video-quality": {
+        "title": "Compression (video)",
+        "body": """• **High compression, 480p**：最も小さいファイル、約 85% 節約。
+• **Medium compression, 720p**：約 75% 節約。
+• **Low compression, 1080p**：約 50% 節約。
+
+一般的な数値で、結果は異なります。
+
+## 圧縮を強くした後
+アプリが **Re-optimise existing videos?** と尋ねます。**Yes** にすると、以前は小さすぎて縮小できなかった動画を、もう一度試します。**No** では、そのままです。すでに最適化された動画には、手を付けません。""",
+        "en_hash": "b68338f9be222883",
+    },
+    "settings-section-restore": {
+        "title": "Restore (Settings)",
+        "body": """Restore タブ用のスイッチが 1 つあります：**Show empty folders**。""",
+        "en_hash": "58571cb29a96c3ed",
+    },
+    "settings-show-empty-folders": {
+        "title": "Show empty folders",
+        "body": """既定では **Off** です。オンにすると、Restore タブに OneDrive のすべてのフォルダが表示されます。戻すものがないフォルダも含まれます。""",
+        "en_hash": "44bada9612e80a0d",
+    },
+    "settings-section-camera": {
+        "title": "Camera Sync (Settings)",
+        "body": """**Special settings for Camera**。既定ではオフです。オンにすると：
+• **Camera folder**：カメラが保存先にするフォルダ。一覧から選ぶか、**Other…** を選びます。
+• **Select Photos/Videos older than**、**Photos**、**Videos**：そのフォルダの最適化コントロールの既定値（[[album-camera-optimise]]）。
+• **Video compression**：そこで最適化される動画用。
+
+Camera folder には **Sync** モードがなく、その中で **Sync now** を押すまで、何も最適化されません。上の Optimise スイッチは影響しません。""",
+        "en_hash": "d596a9c99a8de79d",
+    },
+    "settings-section-archive": {
+        "title": "Archive (Settings)",
+        "body": """• **Only show files older than**：Archive タブのフィルターの開始値。[[settings-archive-default-age]]を参照してください。
+• **Notify when files are ready to archive**：既定ではオフ。[[settings-archive-notify]]を参照してください。""",
+        "en_hash": "7b4561ddc010537d",
+    },
+    "settings-archive-default-age": {
+        "title": "Only show files older than (Settings)",
+        "body": """Archive タブの期間フィルターの開始値：**1 hour**、**1 day**、**1 week**、**1 month**、**1 year**、または **All**（既定）。Archive タブで変更しても、その表示中のみ有効です。[[archive-age-filter]]を参照してください。""",
+        "en_hash": "215ff23fa51a5fca",
+    },
+    "settings-archive-notify": {
+        "title": "Notify when files are ready to archive",
+        "body": """既定では **Off** です。オンにすると、アーカイブ準備ができたファイルの新しいバッチごとに、1 回通知されます。OneDrive のファイルのみ。
+
+Albums タブと終了時のリマインダーにも同じ内容が表示されるため、通知だけに頼る必要はありません。通知がブロックされている場合は、スイッチにその旨が表示されます。""",
+        "en_hash": "a0b5e2290fe1eaae",
+    },
+    "settings-about-cards": {
+        "title": "Help & Feedback と、下部のリンクカード",
+        "body": """## Help & Feedback
+• **Rate us on Play Store**：GallerySync のストアページを開きます。
+• **Bug Report**：書き込み先と、アプリのバージョン、機種、Android バージョンをコピーする **Copy details**。
+
+## 下部
+• **Privacy Policy.**
+• **Delete Account Info**：ログアウト、アプリのアクセスの削除、データ消去の方法。
+• **Contact Info**：アドレスと、**Copy address**。
+
+ページはインターネットから読み込まれます。読み込めない場合は、**Open in browser** を使ってください。""",
+        "en_hash": "8a454188917d719a",
+    },
+}

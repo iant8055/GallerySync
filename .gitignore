@@ -39,3 +39,7 @@ desktop.ini
 # Node (if companion tools added later)
 node_modules/
 design/gallerysync-app-directions.html
+
+# Head Editor's per-language flag reports — intermediate artifacts of the
+# Guide translation sweep, not committed to history (regenerated per sweep).
+tools/guide/out/

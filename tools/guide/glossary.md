@@ -51,7 +51,7 @@ own language and must be translated.
 - Mode
 - Album
 - Cloud  *(capitalised, treated as a proper noun — Ian's convention)*
-- Backup Plan  *(capitalised — Ian's convention)*
+- Backup Plan  *(capitalised — Ian's convention; amended 15 Oct 2026: each language keeps its wizard form throughout the Guide — "Plan de copia" / "Plano de Backup" / "Plan de sauvegarde" / "Backup-Plan" / バックアッププラン / बैकअप प्लान. Setup-chapter rule unchanged, non-setup chapters now follow the wizard per Ian.)*
 
 ## 5. Button and screen labels
 

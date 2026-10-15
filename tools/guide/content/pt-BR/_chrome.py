@@ -1,0 +1,21 @@
+STRINGS = {
+    'guide_browser_title': 'Guia de uso — GallerySync',
+    'guide_heading': 'Guia de uso',
+    'guide_name': 'Guia de uso',
+    'setup_browser_title': 'Configuração inicial — GallerySync',
+    'setup_heading': 'Configuração inicial',
+    'setup_name': 'Configuração inicial',
+    'page_sub': 'GallerySync — última atualização em {date}',
+    'footer_text': 'GallerySync — {name}. Última atualização em {date}.',
+    'contents_heading': 'Conteúdo',
+    'intro_lede': 'Cada tela, cada linha.',
+    'intro_body': 'Este guia explica cada parte do GallerySync em linguagem\n    simples &mdash; o que você está vendo e de onde vêm as informações. Dentro do app, os botões\n    <strong>(?)</strong> abrem as mesmas explicações em um pop-up.',
+    'flat_switch_text': 'Prefere seções recolhíveis?',
+    'flat_switch_link': 'Abrir a versão expansível.',
+    'accordion_switch_text': 'Prefere uma página só?',
+    'accordion_switch_link': 'Abrir a versão em página única.',
+    'accordion_switch_tap_tip': 'Toque em um título para abri-lo.',
+    'setup_lede': 'Cada cartão, em ordem.',
+    'setup_body': 'Esta página explica cada etapa da configuração inicial do GallerySync\n    em linguagem simples: para que serve cada cartão, o que fazem os botões dele e as mensagens que você pode encontrar.\n    Toque em um título para abri-lo.',
+}
+EN_HASH = "3896ea3a0ec08a29"
