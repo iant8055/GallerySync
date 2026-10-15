@@ -183,4 +183,7 @@ T = {
 "wizard_guide_link_action": "こちら",
 "wizard_next": "次へ",
 "tab_help": "ヘルプ",
+"tour_discover_folder_count": {"other": "%d 個のフォルダ"},
+"tour_discover_photo_count": {"other": "%d 枚の写真"},
+"tour_discover_video_count": {"other": "%d 本の動画"},
 }

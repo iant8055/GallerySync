@@ -40,7 +40,8 @@ fun formatBytes(context: Context, bytes: Long): String = when {
 
     else -> context.getString(
         R.string.size_gigabytes,
-        String.format(Locale.getDefault(), "%.1f", bytes / GB.toDouble())
+        // The wizard's language decides the decimal mark (2,2 GB in German); the app is English.
+        String.format(context.resources?.configuration?.locales?.get(0) ?: Locale.getDefault(), "%.1f", bytes / GB.toDouble())
     )
 }
 

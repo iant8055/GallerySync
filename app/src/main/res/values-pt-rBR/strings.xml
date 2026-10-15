@@ -126,9 +126,24 @@
     <string name="tour_description_tabs">Veja seus álbuns e escolha o que copiar</string>
     <string name="tour_description_title">Como o app funciona</string>
     <string name="tour_discover_body">A busca encontrou estas pastas. Selecione as que você quer no backup. Toque em Próximo para dar ao GallerySync permissão para usar essas pastas.</string>
+    <plurals name="tour_discover_folder_count">
+        <item quantity="one">%d pasta</item>
+        <item quantity="many">%d pastas</item>
+        <item quantity="other">%d pastas</item>
+    </plurals>
     <string name="tour_discover_none_found">Nenhuma pasta de mídia encontrada neste aparelho.</string>
+    <plurals name="tour_discover_photo_count">
+        <item quantity="one">%d foto</item>
+        <item quantity="many">%d fotos</item>
+        <item quantity="other">%d fotos</item>
+    </plurals>
     <string name="tour_discover_scanning">Analisando suas fotos e vídeos…</string>
     <string name="tour_discover_title">Escolha as pastas para o backup</string>
+    <plurals name="tour_discover_video_count">
+        <item quantity="one">%d vídeo</item>
+        <item quantity="many">%d vídeos</item>
+        <item quantity="other">%d vídeos</item>
+    </plurals>
     <string name="tour_folder_choose_hint">Escolha para qual Nuvem vai cada pasta selecionada.</string>
     <string name="tour_folder_goes_to">Vai para: %1$s</string>
     <string name="tour_grant_cancelled">Nenhum acesso foi dado a %1$s. O GallerySync precisa dele para fazer backup e otimizar os arquivos em %1$s. Pular deixa %1$s fora do backup.</string>
@@ -175,8 +190,8 @@
     <string name="tour_progress_until_start">até o backup começar</string>
     <string name="tour_progress_uploading">Enviando %1$d de %2$d</string>
     <string name="tour_progress_uploading_cloud">Enviando para %1$s</string>
-    <string name="tour_progress_verified_all">%1$,d arquivos verificados: todos já estavam no OneDrive. Nada precisou ser enviado.</string>
-    <string name="tour_progress_verified_some">OneDrive: %1$,d arquivos verificados, %2$,d já estavam lá. %3$,d arquivos enviados no total.</string>
+    <string name="tour_progress_verified_all">Arquivos verificados: %1$,d. Todos já estavam no OneDrive; nada precisou ser enviado.</string>
+    <string name="tour_progress_verified_some">Arquivos verificados no OneDrive: %1$,d (já estavam lá: %2$,d). Enviados no total: %3$,d.</string>
     <string name="tour_progress_verifying">Verificando sua Nuvem</string>
     <string name="tour_progress_verifying_body">Primeiro passo: verificar na sua Nuvem quais arquivos ela já tem, por nome e tamanho. Nada é enviado nesta etapa.</string>
     <string name="tour_progress_waiting">Aguardando o início</string>

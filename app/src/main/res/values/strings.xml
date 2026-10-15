@@ -907,6 +907,18 @@ full size</string>
     <string name="tour_search_title">Let GallerySync search this phone</string>
     <string name="tour_search_body">First, permission to search. GallerySync needs to find where your photos and videos are located on your device.</string>
     <string name="tour_search_action">Give search permission</string>
+    <plurals name="tour_discover_folder_count">
+        <item quantity="one">%d folder</item>
+        <item quantity="other">%d folders</item>
+    </plurals>
+    <plurals name="tour_discover_photo_count">
+        <item quantity="one">%d photo</item>
+        <item quantity="other">%d photos</item>
+    </plurals>
+    <plurals name="tour_discover_video_count">
+        <item quantity="one">%d video</item>
+        <item quantity="other">%d videos</item>
+    </plurals>
     <string name="tour_discover_title">Choose folders to back up</string>
     <string name="tour_discover_body">The search found these folders. Select the ones you want backed up. Press next to give GallerySync specific permission to use these folders.</string>
     <string name="tour_discover_scanning">Scanning your photos and videos…</string>

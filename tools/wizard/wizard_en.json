@@ -569,9 +569,25 @@
   "en": "The search found these folders. Select the ones you want backed up. Press next to give GallerySync specific permission to use these folders."
  },
  {
+  "key": "tour_discover_folder_count",
+  "type": "plurals",
+  "en": {
+   "one": "%d folder",
+   "other": "%d folders"
+  }
+ },
+ {
   "key": "tour_discover_none_found",
   "type": "string",
   "en": "No media folders found on this device."
+ },
+ {
+  "key": "tour_discover_photo_count",
+  "type": "plurals",
+  "en": {
+   "one": "%d photo",
+   "other": "%d photos"
+  }
  },
  {
   "key": "tour_discover_scanning",
@@ -582,6 +598,14 @@
   "key": "tour_discover_title",
   "type": "string",
   "en": "Choose folders to back up"
+ },
+ {
+  "key": "tour_discover_video_count",
+  "type": "plurals",
+  "en": {
+   "one": "%d video",
+   "other": "%d videos"
+  }
  },
  {
   "key": "tour_folder_choose_hint",

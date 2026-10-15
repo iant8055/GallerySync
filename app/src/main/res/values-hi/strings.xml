@@ -123,9 +123,21 @@
     <string name="tour_description_tabs">अपने एल्बम देखें और चुनें कि किसका बैकअप हो</string>
     <string name="tour_description_title">ऐप कैसे काम करता है</string>
     <string name="tour_discover_body">खोज में ये फ़ोल्डर मिले। जिनका बैकअप चाहिए, उन्हें चुनें। इन फ़ोल्डर को इस्तेमाल करने की अनुमति GallerySync को देने के लिए आगे दबाएँ।</string>
+    <plurals name="tour_discover_folder_count">
+        <item quantity="one">%d फ़ोल्डर</item>
+        <item quantity="other">%d फ़ोल्डर</item>
+    </plurals>
     <string name="tour_discover_none_found">इस डिवाइस पर कोई मीडिया फ़ोल्डर नहीं मिला।</string>
+    <plurals name="tour_discover_photo_count">
+        <item quantity="one">%d फ़ोटो</item>
+        <item quantity="other">%d फ़ोटो</item>
+    </plurals>
     <string name="tour_discover_scanning">आपकी फ़ोटो और वीडियो स्कैन हो रहे हैं…</string>
     <string name="tour_discover_title">बैकअप के लिए फ़ोल्डर चुनें</string>
+    <plurals name="tour_discover_video_count">
+        <item quantity="one">%d वीडियो</item>
+        <item quantity="other">%d वीडियो</item>
+    </plurals>
     <string name="tour_folder_choose_hint">चुना गया हर फ़ोल्डर किस क्लाउड में जाएगा, यह चुनें।</string>
     <string name="tour_folder_goes_to">जाएगा: %1$s</string>
     <string name="tour_grant_cancelled">%1$s को कोई ऐक्सेस नहीं दिया गया। %1$s की फ़ाइलों का बैकअप लेने और उन्हें ऑप्टिमाइज़ करने के लिए GallerySync को इसकी ज़रूरत है। छोड़ने पर %1$s बैकअप से बाहर रहेगा।</string>
@@ -172,8 +184,8 @@
     <string name="tour_progress_until_start">बैकअप शुरू होने तक</string>
     <string name="tour_progress_uploading">%2$d में से %1$d अपलोड हो रही है</string>
     <string name="tour_progress_uploading_cloud">%1$s में अपलोड हो रहा है</string>
-    <string name="tour_progress_verified_all">%1$,d फ़ाइलें जाँची गईं: सभी पहले से OneDrive में थीं। कुछ भेजने की ज़रूरत नहीं पड़ी।</string>
-    <string name="tour_progress_verified_some">OneDrive: %1$,d फ़ाइलें जाँची गईं, %2$,d पहले से वहाँ थीं। कुल %3$,d फ़ाइलें भेजी गईं।</string>
+    <string name="tour_progress_verified_all">जाँची गई फ़ाइलें: %1$,d। सभी पहले से OneDrive में थीं, कुछ भेजने की ज़रूरत नहीं पड़ी।</string>
+    <string name="tour_progress_verified_some">OneDrive में जाँची गई फ़ाइलें: %1$,d (पहले से थीं: %2$,d)। कुल भेजी गईं: %3$,d।</string>
     <string name="tour_progress_verifying">आपका क्लाउड जाँचा जा रहा है</string>
     <string name="tour_progress_verifying_body">पहला चरण: नाम और साइज़ से जाँचना कि आपके क्लाउड में कौन-सी फ़ाइलें पहले से हैं। इस चरण में कुछ भी नहीं भेजा जाता।</string>
     <string name="tour_progress_waiting">शुरू होने का इंतज़ार</string>

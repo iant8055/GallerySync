@@ -126,9 +126,24 @@
     <string name="tour_description_tabs">Voyez vos albums et choisissez quoi sauvegarder</string>
     <string name="tour_description_title">Comment fonctionne l\'application</string>
     <string name="tour_discover_body">La recherche a trouvé ces dossiers. Sélectionnez ceux que vous voulez sauvegarder. Touchez Suivant pour autoriser GallerySync à utiliser ces dossiers.</string>
+    <plurals name="tour_discover_folder_count">
+        <item quantity="one">%d dossier</item>
+        <item quantity="many">%d dossiers</item>
+        <item quantity="other">%d dossiers</item>
+    </plurals>
     <string name="tour_discover_none_found">Aucun dossier multimédia trouvé sur cet appareil.</string>
+    <plurals name="tour_discover_photo_count">
+        <item quantity="one">%d photo</item>
+        <item quantity="many">%d photos</item>
+        <item quantity="other">%d photos</item>
+    </plurals>
     <string name="tour_discover_scanning">Analyse de vos photos et vidéos…</string>
     <string name="tour_discover_title">Choisir les dossiers à sauvegarder</string>
+    <plurals name="tour_discover_video_count">
+        <item quantity="one">%d vidéo</item>
+        <item quantity="many">%d vidéos</item>
+        <item quantity="other">%d vidéos</item>
+    </plurals>
     <string name="tour_folder_choose_hint">Choisissez vers quel Cloud va chaque dossier sélectionné.</string>
     <string name="tour_folder_goes_to">Va vers : %1$s</string>
     <string name="tour_grant_cancelled">Aucun accès n\'a été accordé à %1$s. GallerySync en a besoin pour sauvegarder et optimiser les fichiers de %1$s. Ignorer laisse %1$s hors de la sauvegarde.</string>
@@ -175,8 +190,8 @@
     <string name="tour_progress_until_start">avant le début de la sauvegarde</string>
     <string name="tour_progress_uploading">Envoi de %1$d sur %2$d</string>
     <string name="tour_progress_uploading_cloud">Envoi vers %1$s</string>
-    <string name="tour_progress_verified_all">%1$,d fichiers vérifiés : tous déjà dans OneDrive. Rien à envoyer.</string>
-    <string name="tour_progress_verified_some">OneDrive : %1$,d fichiers vérifiés, %2$,d déjà présents. %3$,d fichiers envoyés au total.</string>
+    <string name="tour_progress_verified_all">Fichiers vérifiés : %1$,d. Tous déjà dans OneDrive ; rien à envoyer.</string>
+    <string name="tour_progress_verified_some">Fichiers vérifiés dans OneDrive : %1$,d (déjà présents : %2$,d). Envoyés au total : %3$,d.</string>
     <string name="tour_progress_verifying">Vérification de votre Cloud</string>
     <string name="tour_progress_verifying_body">Première étape : vérifier dans votre Cloud les fichiers qu\'il possède déjà, par nom et par taille. Rien n\'est envoyé pendant cette étape.</string>
     <string name="tour_progress_waiting">En attente de démarrage</string>

@@ -123,9 +123,21 @@
     <string name="tour_description_tabs">Deine Alben ansehen und auswählen, was gesichert wird</string>
     <string name="tour_description_title">So funktioniert die App</string>
     <string name="tour_discover_body">Die Suche hat diese Ordner gefunden. Wähle die aus, die gesichert werden sollen. Tippe auf Weiter, um GallerySync die Erlaubnis für diese Ordner zu geben.</string>
+    <plurals name="tour_discover_folder_count">
+        <item quantity="one">%d Ordner</item>
+        <item quantity="other">%d Ordner</item>
+    </plurals>
     <string name="tour_discover_none_found">Auf diesem Gerät wurden keine Medienordner gefunden.</string>
+    <plurals name="tour_discover_photo_count">
+        <item quantity="one">%d Foto</item>
+        <item quantity="other">%d Fotos</item>
+    </plurals>
     <string name="tour_discover_scanning">Deine Fotos und Videos werden durchsucht…</string>
     <string name="tour_discover_title">Ordner zum Sichern wählen</string>
+    <plurals name="tour_discover_video_count">
+        <item quantity="one">%d Video</item>
+        <item quantity="other">%d Videos</item>
+    </plurals>
     <string name="tour_folder_choose_hint">Wähle, in welche Cloud jeder ausgewählte Ordner geht.</string>
     <string name="tour_folder_goes_to">Geht nach: %1$s</string>
     <string name="tour_grant_cancelled">Für %1$s wurde kein Zugriff erteilt. GallerySync braucht ihn, um die Dateien in %1$s zu sichern und zu optimieren. Überspringen lässt %1$s aus dem Backup heraus.</string>
@@ -172,8 +184,8 @@
     <string name="tour_progress_until_start">bis das Backup startet</string>
     <string name="tour_progress_uploading">Hochladen: %1$d von %2$d</string>
     <string name="tour_progress_uploading_cloud">Hochladen nach %1$s</string>
-    <string name="tour_progress_verified_all">%1$,d Dateien geprüft: alle schon in OneDrive. Es musste nichts gesendet werden.</string>
-    <string name="tour_progress_verified_some">OneDrive: %1$,d Dateien geprüft, %2$,d schon vorhanden. Insgesamt %3$,d Dateien gesendet.</string>
+    <string name="tour_progress_verified_all">Geprüfte Dateien: %1$,d. Alle schon in OneDrive, es musste nichts gesendet werden.</string>
+    <string name="tour_progress_verified_some">In OneDrive geprüfte Dateien: %1$,d (schon vorhanden: %2$,d). Insgesamt gesendet: %3$,d.</string>
     <string name="tour_progress_verifying">Deine Cloud wird geprüft</string>
     <string name="tour_progress_verifying_body">Schritt eins: In deiner Cloud wird nach Name und Größe geprüft, welche Dateien sie schon hat. In diesem Schritt wird nichts gesendet.</string>
     <string name="tour_progress_waiting">Warten auf den Start</string>
@@ -182,7 +194,7 @@
     <string name="tour_search_body">Zuerst die Erlaubnis zur Suche. GallerySync muss herausfinden, wo deine Fotos und Videos auf deinem Gerät liegen.</string>
     <string name="tour_search_title">GallerySync dieses Telefon durchsuchen lassen</string>
     <string name="tour_welcome_title">Willkommen bei GallerySync</string>
-    <string name="video_quality_compression_line">Komprimierung</string>
+    <string name="video_quality_compression_line">Kompression</string>
     <string name="video_quality_high_name">Hoch</string>
     <string name="video_quality_low_name">Niedrig</string>
     <string name="video_quality_medium_name">Mittel</string>

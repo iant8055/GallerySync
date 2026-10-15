@@ -160,8 +160,8 @@ T = {
 "tour_progress_until_start": "até o backup começar",
 "tour_progress_uploading": "Enviando %1$d de %2$d",
 "tour_progress_uploading_cloud": "Enviando para %1$s",
-"tour_progress_verified_all": "%1$,d arquivos verificados: todos já estavam no OneDrive. Nada precisou ser enviado.",
-"tour_progress_verified_some": "OneDrive: %1$,d arquivos verificados, %2$,d já estavam lá. %3$,d arquivos enviados no total.",
+"tour_progress_verified_all": "Arquivos verificados: %1$,d. Todos já estavam no OneDrive; nada precisou ser enviado.",
+"tour_progress_verified_some": "Arquivos verificados no OneDrive: %1$,d (já estavam lá: %2$,d). Enviados no total: %3$,d.",
 "tour_progress_verifying": "Verificando sua Nuvem",
 "tour_progress_verifying_body": "Primeiro passo: verificar na sua Nuvem quais arquivos ela já tem, por nome e tamanho. Nada é enviado nesta etapa.",
 "tour_progress_waiting": "Aguardando o início",
@@ -184,4 +184,7 @@ T = {
 "wizard_guide_link_action": "toque aqui",
 "wizard_next": "Próximo",
 "tab_help": "Ajuda",
+"tour_discover_folder_count": {"one": "%d pasta", "other": "%d pastas"},
+"tour_discover_photo_count": {"one": "%d foto", "other": "%d fotos"},
+"tour_discover_video_count": {"one": "%d vídeo", "other": "%d vídeos"},
 }

@@ -160,8 +160,8 @@ T = {
 "tour_progress_until_start": "बैकअप शुरू होने तक",
 "tour_progress_uploading": "%2$d में से %1$d अपलोड हो रही है",
 "tour_progress_uploading_cloud": "%1$s में अपलोड हो रहा है",
-"tour_progress_verified_all": "%1$,d फ़ाइलें जाँची गईं: सभी पहले से OneDrive में थीं। कुछ भेजने की ज़रूरत नहीं पड़ी।",
-"tour_progress_verified_some": "OneDrive: %1$,d फ़ाइलें जाँची गईं, %2$,d पहले से वहाँ थीं। कुल %3$,d फ़ाइलें भेजी गईं।",
+"tour_progress_verified_all": "जाँची गई फ़ाइलें: %1$,d। सभी पहले से OneDrive में थीं, कुछ भेजने की ज़रूरत नहीं पड़ी।",
+"tour_progress_verified_some": "OneDrive में जाँची गई फ़ाइलें: %1$,d (पहले से थीं: %2$,d)। कुल भेजी गईं: %3$,d।",
 "tour_progress_verifying": "आपका क्लाउड जाँचा जा रहा है",
 "tour_progress_verifying_body": "पहला चरण: नाम और साइज़ से जाँचना कि आपके क्लाउड में कौन-सी फ़ाइलें पहले से हैं। इस चरण में कुछ भी नहीं भेजा जाता।",
 "tour_progress_waiting": "शुरू होने का इंतज़ार",
@@ -184,4 +184,7 @@ T = {
 "wizard_guide_link_action": "यहाँ टैप करें",
 "wizard_next": "आगे",
 "tab_help": "सहायता",
+"tour_discover_folder_count": {"one": "%d फ़ोल्डर", "other": "%d फ़ोल्डर"},
+"tour_discover_photo_count": {"one": "%d फ़ोटो", "other": "%d फ़ोटो"},
+"tour_discover_video_count": {"one": "%d वीडियो", "other": "%d वीडियो"},
 }

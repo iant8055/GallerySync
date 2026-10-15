@@ -120,9 +120,18 @@
     <string name="tour_description_tabs">アルバムを確認し、バックアップするものを選ぶ</string>
     <string name="tour_description_title">アプリのしくみ</string>
     <string name="tour_discover_body">次のフォルダが見つかりました。バックアップしたいフォルダを選んでください。「次へ」を押すと、これらのフォルダを使う権限を GallerySync に与えます。</string>
+    <plurals name="tour_discover_folder_count">
+        <item quantity="other">%d 個のフォルダ</item>
+    </plurals>
     <string name="tour_discover_none_found">このデバイスにメディアフォルダは見つかりませんでした。</string>
+    <plurals name="tour_discover_photo_count">
+        <item quantity="other">%d 枚の写真</item>
+    </plurals>
     <string name="tour_discover_scanning">写真と動画をスキャンしています…</string>
     <string name="tour_discover_title">バックアップするフォルダを選ぶ</string>
+    <plurals name="tour_discover_video_count">
+        <item quantity="other">%d 本の動画</item>
+    </plurals>
     <string name="tour_folder_choose_hint">選んだフォルダごとに、保存先のクラウドを選んでください。</string>
     <string name="tour_folder_goes_to">保存先：%1$s</string>
     <string name="tour_grant_cancelled">%1$s へのアクセスが許可されませんでした。%1$s のファイルをバックアップして最適化するには、このアクセスが必要です。スキップすると %1$s はバックアップされません。</string>

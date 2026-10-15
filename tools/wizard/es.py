@@ -158,8 +158,8 @@ T = {
 "tour_progress_until_start": "para que empiece la copia",
 "tour_progress_uploading": "Subiendo %1$d de %2$d",
 "tour_progress_uploading_cloud": "Subiendo a %1$s",
-"tour_progress_verified_all": "%1$,d archivos revisados: todos estaban ya en OneDrive. No hacía falta enviar nada.",
-"tour_progress_verified_some": "OneDrive: %1$,d archivos revisados, %2$,d ya estaban allí. %3$,d archivos enviados en total.",
+"tour_progress_verified_all": "Archivos revisados: %1$,d. Todos ya estaban en OneDrive; no hizo falta enviar nada.",
+"tour_progress_verified_some": "Archivos revisados en OneDrive: %1$,d (ya estaban: %2$,d). Enviados en total: %3$,d.",
 "tour_progress_verifying": "Revisando tu Nube",
 "tour_progress_verifying_body": "Paso uno: se revisa qué archivos tiene ya tu Nube, por nombre y tamaño. Durante este paso no se envía nada.",
 "tour_progress_waiting": "Esperando para empezar",
@@ -184,4 +184,7 @@ T = {
 "settings_page_close": "Cerrar",
 "help_open_guide": "Leer más en la guía",
 "tab_help": "Ayuda",
+"tour_discover_folder_count": {"one": "%d carpeta", "other": "%d carpetas"},
+"tour_discover_photo_count": {"one": "%d foto", "other": "%d fotos"},
+"tour_discover_video_count": {"one": "%d vídeo", "other": "%d vídeos"},
 }

@@ -160,8 +160,8 @@ T = {
 "tour_progress_until_start": "avant le début de la sauvegarde",
 "tour_progress_uploading": "Envoi de %1$d sur %2$d",
 "tour_progress_uploading_cloud": "Envoi vers %1$s",
-"tour_progress_verified_all": "%1$,d fichiers vérifiés : tous déjà dans OneDrive. Rien à envoyer.",
-"tour_progress_verified_some": "OneDrive : %1$,d fichiers vérifiés, %2$,d déjà présents. %3$,d fichiers envoyés au total.",
+"tour_progress_verified_all": "Fichiers vérifiés : %1$,d. Tous déjà dans OneDrive ; rien à envoyer.",
+"tour_progress_verified_some": "Fichiers vérifiés dans OneDrive : %1$,d (déjà présents : %2$,d). Envoyés au total : %3$,d.",
 "tour_progress_verifying": "Vérification de votre Cloud",
 "tour_progress_verifying_body": "Première étape : vérifier dans votre Cloud les fichiers qu'il possède déjà, par nom et par taille. Rien n'est envoyé pendant cette étape.",
 "tour_progress_waiting": "En attente de démarrage",
@@ -184,6 +184,9 @@ T = {
 "wizard_guide_link_action": "touchez ici",
 "wizard_next": "Suivant",
 "tab_help": "Aide",
+"tour_discover_folder_count": {"one": "%d dossier", "other": "%d dossiers"},
+"tour_discover_photo_count": {"one": "%d photo", "other": "%d photos"},
+"tour_discover_video_count": {"one": "%d vidéo", "other": "%d vidéos"},
 }
 
 # French spacing: a no-break space before ? and :, so the mark never wraps onto a line of its own.

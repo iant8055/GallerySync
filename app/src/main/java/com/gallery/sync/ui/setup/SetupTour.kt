@@ -1497,11 +1497,11 @@ private fun DirectoryRow(
                 text = directory.name,
                 style = MaterialTheme.typography.bodyLarge
             )
-            val line1 = buildString {
-                append(directory.albumCount)
-                append(if (directory.albumCount == 1) " folder, " else " folders, ")
-                append(formatFileCount(directory.photoCount, directory.videoCount))
-            }
+            // From resources, so the wizard's language reaches it (it was built from English words until 14 Oct 2026).
+            val line1 = listOf(
+                context.resources.getQuantityString(R.plurals.tour_discover_folder_count, directory.albumCount, directory.albumCount),
+                formatFileCount(context.resources, directory.photoCount, directory.videoCount)
+            ).joinToString(", ")
             Text(
                 text = line1,
                 style = MaterialTheme.typography.bodySmall,
@@ -2772,14 +2772,15 @@ private fun BulletItem(text: String) {
     }
 }
 
-private fun formatFileCount(photos: Int, videos: Int): String = when {
-    photos > 0 && videos > 0 -> "${pluralCount(photos, "photo")}, ${pluralCount(videos, "video")}"
-    videos == 0 -> pluralCount(photos, "photo")
-    else -> pluralCount(videos, "video")
+private fun formatFileCount(resources: android.content.res.Resources, photos: Int, videos: Int): String {
+    val photoText = resources.getQuantityString(R.plurals.tour_discover_photo_count, photos, photos)
+    val videoText = resources.getQuantityString(R.plurals.tour_discover_video_count, videos, videos)
+    return when {
+        photos > 0 && videos > 0 -> "$photoText, $videoText"
+        videos == 0 -> photoText
+        else -> videoText
+    }
 }
-
-private fun pluralCount(n: Int, singular: String): String =
-    if (n == 1) "1 $singular" else "$n ${singular}s"
 
 /**
  * Asked alongside [mediaPermissions], never as a condition of them: without it locations are blanked in what
