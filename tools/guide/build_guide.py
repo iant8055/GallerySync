@@ -40,7 +40,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from content import CHAPTERS, CHROME_EN, CHROME_LOCALES, LAST_UPDATED, LOCALES  # noqa: E402
+from content import CHAPTERS, CHROME_EN, CHROME_LOCALES, LAST_UPDATED, LAST_UPDATED_BY_LOCALE, LOCALES  # noqa: E402
 from model import Topic, english_chrome_hash  # noqa: E402
 
 OUT_FLAT = ROOT / "docs" / "how-to-guide.html"
@@ -84,6 +84,18 @@ def android_folder(locale: str) -> str:
         return locale
     language, region = locale.split("-", 1)
     return f"{language}-r{region}"
+
+
+def last_updated(locale: str) -> str:
+    """The LAST_UPDATED date rendered for a locale, falling back to English.
+
+    A locale that has not been added to ``LAST_UPDATED_BY_LOCALE`` gets the
+    English string; the completeness check does not block a locale on this
+    because the fallback keeps the page readable, but the next release should
+    add the proper rendering so a user does not see an English date on a
+    translated page.
+    """
+    return LAST_UPDATED_BY_LOCALE.get(locale, LAST_UPDATED)
 
 
 def chrome(key: str, locale: str = "en") -> str:
@@ -472,10 +484,10 @@ def build_flat(topics: dict[str, Topic], locale: str = "en", published: list[str
             parts.append(blocks_html(for_guide(t.body_for(locale)), topics, "h4", locale))
     return page(
         browser_title=chrome("guide_browser_title", locale),
-        sub=chrome("page_sub", locale).format(date=LAST_UPDATED),
+        sub=chrome("page_sub", locale).format(date=last_updated(locale)),
         heading=chrome("guide_heading", locale),
         body="\n".join(parts),
-        footer=chrome("footer_text", locale).format(name=chrome("guide_name", locale), date=LAST_UPDATED),
+        footer=chrome("footer_text", locale).format(name=chrome("guide_name", locale), date=last_updated(locale)),
         lang=locale,
     )
 
@@ -504,10 +516,10 @@ def build_accordion(topics: dict[str, Topic], locale: str = "en", published: lis
             )
     return page(
         browser_title=chrome("guide_browser_title", locale),
-        sub=chrome("page_sub", locale).format(date=LAST_UPDATED),
+        sub=chrome("page_sub", locale).format(date=last_updated(locale)),
         heading=chrome("guide_heading", locale),
         body="\n".join(parts),
-        footer=chrome("footer_text", locale).format(name=chrome("guide_name", locale), date=LAST_UPDATED),
+        footer=chrome("footer_text", locale).format(name=chrome("guide_name", locale), date=last_updated(locale)),
         lang=locale,
     )
 
@@ -554,10 +566,10 @@ def build_setup(topics: dict[str, Topic], locale: str = "en", published: list[st
         )
     return page(
         browser_title=chrome("setup_browser_title", locale),
-        sub=chrome("page_sub", locale).format(date=LAST_UPDATED),
+        sub=chrome("page_sub", locale).format(date=last_updated(locale)),
         heading=chrome("setup_heading", locale),
         body="\n".join(parts),
-        footer=chrome("footer_text", locale).format(name=chrome("setup_name", locale), date=LAST_UPDATED),
+        footer=chrome("footer_text", locale).format(name=chrome("setup_name", locale), date=last_updated(locale)),
         lang=locale,
     )
 

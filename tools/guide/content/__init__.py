@@ -43,6 +43,20 @@ from . import (
 
 LAST_UPDATED = "11 October 2026"
 
+# Per-locale rendering of the same date. Used by the build when it formats the
+# page_sub and footer_text chrome strings, which both carry a {date} placeholder.
+# When LAST_UPDATED changes, every entry here needs updating too; a missing locale
+# falls back to the English string, so a new locale is never silently wrong.
+LAST_UPDATED_BY_LOCALE: dict[str, str] = {
+    "en": "11 October 2026",
+    "es": "11 de octubre de 2026",
+    "pt-BR": "11 de outubro de 2026",
+    "fr": "11 octobre 2026",
+    "de": "11. Oktober 2026",
+    "ja": "2026年10月11日",
+    "hi": "11 अक्टूबर 2026",
+}
+
 CHAPTERS = [
     c1_start.CHAPTER,
     c2_setup.CHAPTER,
