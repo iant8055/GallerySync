@@ -286,6 +286,7 @@ permanently deleted.") is translated.
 - Stop the backup? [+2026-10-11 02:40 CDT]
 - Re-optimise existing videos? [+2026-10-11 02:40 CDT]
 - This photo has been edited since it was backed up. Overwrite it with the original? [+2026-10-11 02:40 CDT]
+- Please select your language to continue [+2026-10-14]  *(Welcome-screen prompt for the language picker added in sibling commit aaa11cc; the language names below it are shown in their own language and are not translated at all)*
 
 ## 11. Android's own words (not our concern)
 
@@ -296,6 +297,6 @@ glossary terms.
 
 ---
 
-*Last reviewed: 2026-10-12, after the choose-backup-folder feature (sibling commit 963e00c) added five new on-screen labels. Update this file whenever a new user-facing label is
+*Last reviewed: 2026-10-14, after Phase 0 of the translation pipeline (per-locale build) and the Welcome-screen language picker (sibling commit aaa11cc). Update this file whenever a new user-facing label is
 added to the app, so the next translation sweep stays consistent with what is
 on screen.*
