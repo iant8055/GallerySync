@@ -187,4 +187,5 @@ T = {
 "tour_discover_folder_count": {"one": "%d Ordner", "other": "%d Ordner"},
 "tour_discover_photo_count": {"one": "%d Foto", "other": "%d Fotos"},
 "tour_discover_video_count": {"one": "%d Video", "other": "%d Videos"},
+"tour_delay_backup_nothing": "Du hast nichts zum Sichern ausgewählt",
 }

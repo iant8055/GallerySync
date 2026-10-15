@@ -97,6 +97,7 @@
     <string name="tour_cloud_google_photos_limit_restore">Todavía no se puede restaurar desde ella.</string>
     <string name="tour_cloud_google_photos_limits_title">Sobre esta Nube</string>
     <string name="tour_cloud_title">Almacenamiento en la Nube</string>
+    <string name="tour_delay_backup_nothing">No has seleccionado nada para copiar</string>
     <string name="tour_delay_backup_size">Has seleccionado %1$s para copiar</string>
     <string name="tour_delay_chip_hours">%1$d h</string>
     <string name="tour_delay_chip_minutes">%1$d min</string>

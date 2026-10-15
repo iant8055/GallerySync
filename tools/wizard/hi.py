@@ -187,4 +187,5 @@ T = {
 "tour_discover_folder_count": {"one": "%d फ़ोल्डर", "other": "%d फ़ोल्डर"},
 "tour_discover_photo_count": {"one": "%d फ़ोटो", "other": "%d फ़ोटो"},
 "tour_discover_video_count": {"one": "%d वीडियो", "other": "%d वीडियो"},
+"tour_delay_backup_nothing": "आपने बैकअप के लिए कुछ नहीं चुना है",
 }

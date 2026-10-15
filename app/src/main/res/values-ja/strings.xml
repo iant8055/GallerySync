@@ -95,6 +95,7 @@
     <string name="tour_cloud_google_photos_limit_restore">このクラウドからの復元はまだ利用できません。</string>
     <string name="tour_cloud_google_photos_limits_title">このクラウドについて</string>
     <string name="tour_cloud_title">クラウドストレージ</string>
+    <string name="tour_delay_backup_nothing">バックアップ対象として選択したものはありません</string>
     <string name="tour_delay_backup_size">バックアップ対象として %1$s を選択しました</string>
     <string name="tour_delay_chip_hours">%1$d 時間</string>
     <string name="tour_delay_chip_minutes">%1$d 分</string>

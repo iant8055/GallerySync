@@ -1023,6 +1023,7 @@ full size</string>
     <string name="video_quality_compression_line">Compression</string>
 
     <string name="tour_delay_title">Ready to Back Up</string>
+    <string name="tour_delay_backup_nothing">You have selected nothing to back up</string>
     <string name="tour_delay_backup_size">You have selected %1$s to back up</string>
     <string name="tour_delay_saving_size">You will save %1$s in local storage</string>
     <string name="tour_delay_scanning">Scanning your library…</string>
@@ -1097,9 +1098,9 @@ full size</string>
     <string name="reoptimise_no">No</string>
     <string name="tour_progress_verifying_body">Step one: checking your Cloud for the files it already has, by name and size. Nothing is sent during this step.</string>
     <string name="tour_progress_checked">%1$,d of %2$,d checked</string>
-    <string name="tour_progress_verified_all">%1$,d files checked: all already in OneDrive. Nothing needed sending.</string>
+    <string name="tour_progress_verified_all">%1$,d file(s) checked: all already in OneDrive. Nothing needed sending.</string>
     <!-- The check covers OneDrive only; the sent figure counts every Cloud, so it can exceed what was missing from OneDrive (Moto G, 13 Oct 2026). -->
-    <string name="tour_progress_verified_some">OneDrive: %1$,d files checked, %2$,d already there. %3$,d files sent in all.</string>
+    <string name="tour_progress_verified_some">OneDrive: %1$,d file(s) checked, %2$,d already there. %3$,d file(s) sent in all.</string>
     <!--
         The ring's own label, which says which half of the run is on screen. Ian, 4 Sept 2026: the
         two optimise phases both read a bare "Optimising", so the ring gave no way to tell the photo

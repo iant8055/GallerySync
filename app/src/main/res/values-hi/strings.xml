@@ -96,6 +96,7 @@
     <string name="tour_cloud_google_photos_limit_restore">इससे वापस लाने की सुविधा अभी उपलब्ध नहीं है।</string>
     <string name="tour_cloud_google_photos_limits_title">इस क्लाउड के बारे में</string>
     <string name="tour_cloud_title">क्लाउड स्टोरेज</string>
+    <string name="tour_delay_backup_nothing">आपने बैकअप के लिए कुछ नहीं चुना है</string>
     <string name="tour_delay_backup_size">आपने बैकअप के लिए %1$s चुना है</string>
     <string name="tour_delay_chip_hours">%1$d घं.</string>
     <string name="tour_delay_chip_minutes">%1$d मि.</string>

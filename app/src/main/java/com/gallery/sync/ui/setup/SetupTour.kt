@@ -2115,10 +2115,12 @@ private fun BackupDelayContent(
 
         if (result != null) {
             Text(
-                text = stringResource(
-                    R.string.tour_delay_backup_size,
-                    formatBytes(context, totalBackupBytes)
-                ),
+                // "Nothing" rather than "0 B" when everything selected is already in the Cloud (Ian, 15 Oct 2026).
+                text = if (totalBackupBytes > 0) {
+                    stringResource(R.string.tour_delay_backup_size, formatBytes(context, totalBackupBytes))
+                } else {
+                    stringResource(R.string.tour_delay_backup_nothing)
+                },
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold
             )

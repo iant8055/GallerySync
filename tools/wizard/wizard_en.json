@@ -458,6 +458,11 @@
   "en": "Cloud Storage"
  },
  {
+  "key": "tour_delay_backup_nothing",
+  "type": "string",
+  "en": "You have selected nothing to back up"
+ },
+ {
   "key": "tour_delay_backup_size",
   "type": "string",
   "en": "You have selected %1$s to back up"
@@ -840,12 +845,12 @@
  {
   "key": "tour_progress_verified_all",
   "type": "string",
-  "en": "%1$,d files checked: all already in OneDrive. Nothing needed sending."
+  "en": "%1$,d file(s) checked: all already in OneDrive. Nothing needed sending."
  },
  {
   "key": "tour_progress_verified_some",
   "type": "string",
-  "en": "OneDrive: %1$,d files checked, %2$,d already there. %3$,d files sent in all."
+  "en": "OneDrive: %1$,d file(s) checked, %2$,d already there. %3$,d file(s) sent in all."
  },
  {
   "key": "tour_progress_verifying",

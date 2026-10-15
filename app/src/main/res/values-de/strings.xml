@@ -96,6 +96,7 @@
     <string name="tour_cloud_google_photos_limit_restore">Wiederherstellen aus dieser Cloud ist noch nicht möglich.</string>
     <string name="tour_cloud_google_photos_limits_title">Über diese Cloud</string>
     <string name="tour_cloud_title">Cloud-Speicher</string>
+    <string name="tour_delay_backup_nothing">Du hast nichts zum Sichern ausgewählt</string>
     <string name="tour_delay_backup_size">Du hast %1$s zum Sichern ausgewählt</string>
     <string name="tour_delay_chip_hours">%1$d Std.</string>
     <string name="tour_delay_chip_minutes">%1$d Min.</string>

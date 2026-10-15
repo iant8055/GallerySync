@@ -36,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -118,6 +119,10 @@ fun InAppPageDialog(page: SupportPage, onDismiss: () -> Unit, anchor: String? = 
     var failed by remember { mutableStateOf(false) }
     // The theme's own surface colour, so the moment before the page paints is not a white flash.
     val background = MaterialTheme.colorScheme.background.toArgb()
+    // The pages carry a dark palette under `prefers-color-scheme: dark`, and a WebView answers that from its context's
+    // theme. The app's XML theme is always Light (Compose does the colours), so the guide stayed light in dark mode.
+    // It now follows what the app is showing, which is the Appearance setting (Ian, 15 Oct 2026).
+    val dark = MaterialTheme.colorScheme.background.luminance() < 0.5f
 
     DisposableEffect(Unit) { onDispose { webView?.destroy() } }
 
@@ -137,7 +142,11 @@ fun InAppPageDialog(page: SupportPage, onDismiss: () -> Unit, anchor: String? = 
             AndroidView(
                 modifier = Modifier.fillMaxSize(),
                 factory = { viewContext ->
-                    WebView(viewContext).apply {
+                    val themed = android.view.ContextThemeWrapper(
+                        viewContext,
+                        if (dark) android.R.style.Theme_Material_NoActionBar else android.R.style.Theme_Material_Light_NoActionBar
+                    )
+                    WebView(themed).apply {
                         setBackgroundColor(background)
                         settings.apply {
                             javaScriptEnabled = false

@@ -187,6 +187,7 @@ T = {
 "tour_discover_folder_count": {"one": "%d dossier", "other": "%d dossiers"},
 "tour_discover_photo_count": {"one": "%d photo", "other": "%d photos"},
 "tour_discover_video_count": {"one": "%d vidéo", "other": "%d vidéos"},
+"tour_delay_backup_nothing": "Vous n'avez rien sélectionné à sauvegarder",
 }
 
 # French spacing: a no-break space before ? and :, so the mark never wraps onto a line of its own.
