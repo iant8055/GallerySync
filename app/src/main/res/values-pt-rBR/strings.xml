@@ -60,7 +60,7 @@
     <string name="google_photos_connected">Conectado</string>
     <string name="google_photos_not_connected">Não conectado</string>
     <string name="google_photos_trial_active_terms">Teste grátis: faltam %1$d dias. Depois, um desbloqueio único: US$ 2,49 (ou o preço local).</string>
-    <string name="google_photos_trial_ended">O teste terminou. O Google Photos fica pausado até você desbloquear o Pro (pagamento único de US$ 2,49, ou o preço local). Sua Nuvem principal não é afetada.</string>
+    <string name="google_photos_trial_ended">O teste terminou. Os novos backups para suas outras Nuvens ficam pausados até você desbloquear o Pro (pagamento único de US$ 2,49, ou o preço local). O que já está lá continua lá, e sua Nuvem principal não é afetada.</string>
     <string name="google_photos_trial_offer">Grátis por 30 dias, depois um desbloqueio único: US$ 2,49 (ou o preço local). Nada é cobrado automaticamente.</string>
     <string name="google_photos_trial_start_action">Começar o teste grátis de 30 dias</string>
     <string name="google_photos_unlock_pro_action">Desbloquear o Pro</string>

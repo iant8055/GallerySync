@@ -123,7 +123,7 @@
          auto-charge a one-time product; when the 30 days end the second cloud simply pauses. -->
     <string name="google_photos_trial_offer">Free for 30 days, then a one-time unlock: $2.49 (or your local price). Nothing is charged automatically.</string>
     <string name="google_photos_trial_active_terms">Free trial: %1$d days left. After that, a one-time unlock: $2.49 (or your local price).</string>
-    <string name="google_photos_trial_ended">Trial ended. Google Photos is paused until you unlock Pro (one-time $2.49, or your local price). Your main Cloud is not affected.</string>
+    <string name="google_photos_trial_ended">Trial ended. New backups to your other Clouds are paused until you unlock Pro (one-time $2.49, or your local price). Files already there stay there, and your main Cloud is not affected.</string>
     <string name="backup_location_google_photos">Google Photos</string>
     <!-- Not built (see BackupLocation.isUsable) — exists only so the destination picker's option
          label stays exhaustive over the enum rather than guessing at a fallback. -->
@@ -576,6 +576,15 @@ full size</string>
     </plurals>
     <string name="notification_archive_ready_album">In %1$s.</string>
     <!-- DeletedFilesNotifier (Ian, 10 Oct 2026): a deleted file still has a Cloud copy. Only under Ask. -->
+    <string name="notification_channel_trial">Free trial</string>
+    <string name="notification_channel_trial_description">Your free trial of extra Clouds is ending, or has ended.</string>
+    <plurals name="notification_trial_ending_title">
+        <item quantity="one">Your free trial ends in %d day</item>
+        <item quantity="other">Your free trial ends in %d days</item>
+    </plurals>
+    <string name="notification_trial_ending_body">After that, new photos and videos stop going to your extra Clouds until you unlock Pro. Nothing already backed up is affected.</string>
+    <string name="notification_trial_ended_title">Your free trial has ended</string>
+    <string name="notification_trial_ended_body">New photos and videos are no longer sent to your extra Clouds. Unlock Pro in Settings, or pair those folders with your main Cloud. Nothing already backed up is affected.</string>
     <string name="notification_channel_deleted">Deleted files</string>
     <string name="notification_channel_deleted_description">A photo or video you deleted still has a copy in your Cloud, and you can choose what happens to it.</string>
     <string name="notification_deleted_title">Deleted, but still in your Cloud</string>

@@ -54,7 +54,7 @@ T = {
 "google_photos_connected": "Connecté",
 "google_photos_not_connected": "Non connecté",
 "google_photos_trial_active_terms": "Essai gratuit : %1$d jours restants. Ensuite, un déblocage unique : 2,49 $ (ou le prix local).",
-"google_photos_trial_ended": "L'essai est terminé. Google Photos est en pause jusqu'à ce que vous débloquiez Pro (2,49 $ une seule fois, ou le prix local). Votre Cloud principal n'est pas concerné.",
+"google_photos_trial_ended": "L'essai est terminé. Les nouvelles sauvegardes vers vos autres Clouds sont en pause jusqu'à ce que vous débloquiez Pro (2,49 $ une seule fois, ou le prix local). Ce qui s'y trouve déjà y reste, et votre Cloud principal n'est pas concerné.",
 "google_photos_trial_offer": "Gratuit pendant 30 jours, puis un déblocage unique : 2,49 $ (ou le prix local). Rien n'est facturé automatiquement.",
 "google_photos_trial_start_action": "Commencer l'essai gratuit de 30 jours",
 "google_photos_unlock_pro_action": "Débloquer Pro",

@@ -43,6 +43,7 @@ class GallerySyncApplication : Application(), Configuration.Provider {
         // — done here, unconditionally, whether or not the user ever turns the Settings switch on.
         ArchiveReadyNotifier.createChannel(this)
         com.gallery.sync.worker.DeletedFilesNotifier.createChannel(this)
+        com.gallery.sync.worker.TrialEndingNotifier.createChannel(this)
         armAutomaticSync()
     }
 

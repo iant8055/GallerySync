@@ -40,7 +40,8 @@ class BackupWorker @AssistedInject constructor(
     private val videoOptimise: VideoOptimiseLauncher,
     private val photoOptimise: PhotoOptimiseLauncher,
     private val archiveReadyNotifier: ArchiveReadyNotifier,
-    private val deletedFilesNotifier: DeletedFilesNotifier
+    private val deletedFilesNotifier: DeletedFilesNotifier,
+    private val trialEndingNotifier: TrialEndingNotifier
 ) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result {
@@ -332,6 +333,10 @@ class BackupWorker @AssistedInject constructor(
             // announced, so the question does not wait for the app to be opened. See DeletedFilesNotifier.
             runCatching { deletedFilesNotifier.checkAndNotify() }
                 .onFailure { Logger.w(TAG, "could not check deleted files: ${it.javaClass.simpleName}") }
+
+            // The extra-Cloud trial ending soon, or ended. See TrialEndingNotifier.
+            runCatching { trialEndingNotifier.checkAndNotify() }
+                .onFailure { Logger.w(TAG, "could not check the trial notice: ${it.javaClass.simpleName}") }
         }
 
         // Carried out of the worker so the screen can say what happened. Without this the UI keeps

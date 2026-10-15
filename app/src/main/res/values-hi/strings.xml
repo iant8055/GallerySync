@@ -59,7 +59,7 @@
     <string name="google_photos_connected">कनेक्ट है</string>
     <string name="google_photos_not_connected">कनेक्ट नहीं है</string>
     <string name="google_photos_trial_active_terms">मुफ़्त ट्रायल: %1$d दिन बाकी। उसके बाद एक बार का अनलॉक: $2.49 (या आपकी स्थानीय कीमत)।</string>
-    <string name="google_photos_trial_ended">ट्रायल खत्म हो गया। जब तक आप Pro अनलॉक नहीं करते, Google Photos रुका रहेगा (एक बार $2.49, या आपकी स्थानीय कीमत)। आपके मुख्य क्लाउड पर कोई असर नहीं पड़ता।</string>
+    <string name="google_photos_trial_ended">ट्रायल खत्म हो गया। जब तक आप Pro अनलॉक नहीं करते, आपके दूसरे क्लाउड में नए बैकअप रुके रहेंगे (एक बार $2.49, या आपकी स्थानीय कीमत)। जो पहले से वहाँ है, वह वहीं रहेगा, और आपके मुख्य क्लाउड पर कोई असर नहीं पड़ता।</string>
     <string name="google_photos_trial_offer">30 दिन मुफ़्त, फिर एक बार का अनलॉक: $2.49 (या आपकी स्थानीय कीमत)। अपने-आप कोई शुल्क नहीं लिया जाता।</string>
     <string name="google_photos_trial_start_action">30 दिन का मुफ़्त ट्रायल शुरू करें</string>
     <string name="google_photos_unlock_pro_action">Pro अनलॉक करें</string>

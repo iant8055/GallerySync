@@ -54,7 +54,7 @@ T = {
 "google_photos_connected": "Conectado",
 "google_photos_not_connected": "No conectado",
 "google_photos_trial_active_terms": "Prueba gratuita: quedan %1$d días. Después, un desbloqueo único: 2,49 $ (o tu precio local).",
-"google_photos_trial_ended": "La prueba ha terminado. Google Photos está en pausa hasta que desbloquees Pro (pago único de 2,49 $ o tu precio local). Tu Nube principal no se ve afectada.",
+"google_photos_trial_ended": "La prueba ha terminado. Las nuevas copias a tus otras Nubes están en pausa hasta que desbloquees Pro (pago único de 2,49 $ o tu precio local). Lo que ya está allí se queda allí, y tu Nube principal no se ve afectada.",
 "google_photos_trial_offer": "Gratis durante 30 días; después, un desbloqueo único: 2,49 $ (o tu precio local). Nada se cobra automáticamente.",
 "google_photos_trial_start_action": "Empezar prueba gratuita de 30 días",
 "google_photos_unlock_pro_action": "Desbloquear Pro",

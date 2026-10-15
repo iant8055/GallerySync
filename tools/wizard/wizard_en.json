@@ -275,7 +275,7 @@
  {
   "key": "google_photos_trial_ended",
   "type": "string",
-  "en": "Trial ended. Google Photos is paused until you unlock Pro (one-time $2.49, or your local price). Your main Cloud is not affected."
+  "en": "Trial ended. New backups to your other Clouds are paused until you unlock Pro (one-time $2.49, or your local price). Files already there stay there, and your main Cloud is not affected."
  },
  {
   "key": "google_photos_trial_offer",

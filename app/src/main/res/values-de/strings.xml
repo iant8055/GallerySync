@@ -59,7 +59,7 @@
     <string name="google_photos_connected">Verbunden</string>
     <string name="google_photos_not_connected">Nicht verbunden</string>
     <string name="google_photos_trial_active_terms">Kostenloser Test: noch %1$d Tage. Danach eine einmalige Freischaltung: 2,49 $ (oder dein lokaler Preis).</string>
-    <string name="google_photos_trial_ended">Der Test ist beendet. Google Photos ist pausiert, bis du Pro freischaltest (einmalig 2,49 $ oder dein lokaler Preis). Deine Haupt-Cloud ist nicht betroffen.</string>
+    <string name="google_photos_trial_ended">Der Test ist beendet. Neue Backups in deine anderen Clouds sind pausiert, bis du Pro freischaltest (einmalig 2,49 $ oder dein lokaler Preis). Was schon dort ist, bleibt dort, und deine Haupt-Cloud ist nicht betroffen.</string>
     <string name="google_photos_trial_offer">30 Tage kostenlos, danach eine einmalige Freischaltung: 2,49 $ (oder dein lokaler Preis). Es wird nichts automatisch berechnet.</string>
     <string name="google_photos_trial_start_action">30 Tage kostenlos testen</string>
     <string name="google_photos_unlock_pro_action">Pro freischalten</string>
