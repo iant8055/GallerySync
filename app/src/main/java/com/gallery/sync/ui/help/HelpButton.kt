@@ -30,7 +30,9 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.gallery.sync.R
 import com.gallery.sync.ui.common.SignalIcons
+import com.gallery.sync.ui.common.rememberResourcesIn
 import com.gallery.sync.ui.settings.InAppPageDialog
+import com.gallery.sync.ui.settings.LocalGuideLanguage
 import com.gallery.sync.ui.settings.SupportPage
 
 /**
@@ -128,12 +130,14 @@ fun TitleWithHelp(title: String, topic: HelpTopic) {
 @Composable
 fun HelpDialog(topic: HelpTopic, onDismiss: () -> Unit) {
     var showGuide by remember { mutableStateOf(false) }
-    val body = stringResource(topic.body)
+    // The card speaks the guide's language; the screen behind it stays English.
+    val words = rememberResourcesIn(LocalGuideLanguage.current)
+    val body = words.getString(topic.body)
     val blocks = remember(body) { HelpText.parse(body) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(topic.title)) },
+        title = { Text(words.getString(topic.title)) },
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
@@ -143,7 +147,7 @@ fun HelpDialog(topic: HelpTopic, onDismiss: () -> Unit) {
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.settings_page_close)) }
+            TextButton(onClick = onDismiss) { Text(words.getString(R.string.settings_page_close)) }
         },
         // Withdrawn during first-time setup, where the setup page is all of the guide a person can
         // open. A pop-up there would otherwise lead into every other chapter.
@@ -152,7 +156,7 @@ fun HelpDialog(topic: HelpTopic, onDismiss: () -> Unit) {
         } else {
             {
                 TextButton(onClick = { showGuide = true }) {
-                    Text(stringResource(R.string.help_open_guide))
+                    Text(words.getString(R.string.help_open_guide))
                 }
             }
         }

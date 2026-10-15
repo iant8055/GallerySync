@@ -8105,3 +8105,11 @@ wiz/gen.py with placeholder checks); tab names and the Welcome prompt stay Engli
 **Open:** the Settings mock-up in the tour still shows two Spanish strings ("Nubes", "principal (gratis)") although wrapped in
 InLanguage("en"); the five other languages (pt-BR, fr, de, ja, hi) not written; the translation session to get the wizard wording
 for the guide's setup chapter and review it; light/dark and overflow checks per language not done.
+
+### 14 Oct 2026 — the (?) pop-ups follow the chosen language
+Ian: *"the entire point of making the how to guide multilingual was to get those little pop-up cards from the (?) in
+different languages."* `HelpDialog` now reads its title, body and two buttons through `rememberResourcesIn(LocalGuideLanguage)`;
+the screens around it stay English (Activity pinned). Until the translation session publishes a language's
+`values-<loc>/help_topics.xml` into `app/src/main/res/`, the card falls back to English. The guide's setup chapter
+quotes the wizard's translated labels; every other chapter keeps quoting English labels. Installed on the Moto, no crash;
+a translated card can only be seen once a language is published.

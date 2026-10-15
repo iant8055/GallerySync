@@ -44,6 +44,22 @@ fun InLanguage(languageTag: String, content: @Composable () -> Unit) {
     }
 }
 
+/**
+ * Resources that answer in [languageTag], for text read outside any [InLanguage] wrapper, such as the (?) pop-ups.
+ *
+ * Ian, 14 Oct 2026: the point of a multilingual guide is that the (?) cards speak the chosen language, while the
+ * screens around them stay English. A string with no translation falls back to English.
+ */
+@Composable
+fun rememberResourcesIn(languageTag: String): Resources {
+    val base = LocalContext.current
+    val configuration = LocalConfiguration.current
+    return remember(base, configuration, languageTag) {
+        val config = Configuration(configuration).apply { setLocale(Locale.forLanguageTag(languageTag)) }
+        base.applicationContext.createConfigurationContext(config).resources
+    }
+}
+
 /** The app's own text is English whatever the phone's language (Ian, 14 Oct 2026); see [InLanguage]. */
 fun Context.pinnedToEnglish(): Context {
     val config = Configuration(resources.configuration).apply { setLocale(Locale.ENGLISH) }
