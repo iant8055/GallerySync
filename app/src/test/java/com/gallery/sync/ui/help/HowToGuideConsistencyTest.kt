@@ -96,6 +96,61 @@ class HowToGuideConsistencyTest {
         }
     }
 
+    // ── Per-locale: no-op today, loads once translations arrive ──────────────
+    // The build publishes a translation only when every chapter and every topic is translated and
+    // fresh (see tools/guide/build_guide.py: complete_locales). These checks run against whatever
+    // locales the build emitted and make the same promise the English build gives: a page with
+    // every topic as an anchor, no broken in-page links, and all three variants of a given locale
+    // present together (never a half-published language).
+
+    private fun docsDir(): File = File("../docs")
+
+    private fun localesFound(): List<String> =
+        docsDir().listFiles()
+            ?.map { it.name }
+            ?.mapNotNull { Regex("""^how-to-guide\.([^.]+)\.html$""").matchEntire(it)?.groupValues?.get(1) }
+            ?.distinct()
+            ?.sorted()
+            .orEmpty()
+
+    @Test
+    fun everyLocaleHasAllThreeVariants() {
+        for (locale in localesFound()) {
+            for (base in listOf("how-to-guide", "how-to-guide-accordion", "setup-guide")) {
+                val file = File(docsDir(), "$base.$locale.html")
+                assertTrue("$base.$locale.html is missing: a locale publishes all three variants or none", file.exists())
+            }
+        }
+    }
+
+    @Test
+    fun everyLocalePublishesEveryTopic() {
+        val expected = HelpTopic.entries.map { it.slug }
+        for (locale in localesFound()) {
+            for (base in listOf("how-to-guide", "how-to-guide-accordion")) {
+                val page = read("../docs/$base.$locale.html")
+                for (slug in expected) {
+                    assertTrue("$slug missing from $base.$locale.html", "id=\"$slug\"" in page)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun everyLinkInEveryLocalePageLandsSomewhere() {
+        for (locale in localesFound()) {
+            for (base in listOf("how-to-guide", "how-to-guide-accordion", "setup-guide")) {
+                val page = read("../docs/$base.$locale.html")
+                val ids = idsIn(page)
+                val dead = Regex("href=\"#([^\"]+)\"").findAll(page)
+                    .map { it.groupValues[1] }
+                    .filter { it !in ids }
+                    .toList()
+                assertTrue("$base.$locale.html links to anchors that do not exist: $dead", dead.isEmpty())
+            }
+        }
+    }
+
     @Test
     fun theSettingsCardOpensAPageThatExistsAndStaysInsideTheApp() {
         val url = SupportPage.HOW_TO_GUIDE.url
