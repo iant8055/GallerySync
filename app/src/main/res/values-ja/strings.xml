@@ -66,7 +66,7 @@
     <string name="library_back_up_all">クラウドストレージを確認し、まだバックアップされていないものをすべてバックアップする</string>
     <string name="library_free_space">1 番のすべてに加え、スマートフォン上の全ファイルを最適化して容量を最大限に節約する</string>
     <string name="library_optimise_new">1 番のすべてに加え、新しくバックアップしたファイルだけを最適化して容量をほどほどに節約する</string>
-    <string name="library_per_album">クラウドストレージを確認するが、新しいファイルはバックアップしない。容量の節約なし。バックアップや同期するアルバムは自分で選ぶ</string>
+    <string name="library_per_album">クラウドストレージを確認するが、新しいファイルはバックアップしない。容量の節約なし。Backup または Sync にするアルバムは自分で選ぶ</string>
     <string name="picker_back">1 つ上のフォルダ</string>
     <string name="picker_create">作成</string>
     <string name="picker_create_failed">フォルダを作成できませんでした。その名前はすでに使われている可能性があります。</string>
@@ -89,7 +89,7 @@
     <string name="tour_cloud_body">使っているクラウドを選んでください。クラウド 1 つは無料です。追加のクラウドは Pro の機能で、30 日間無料です。次のカードでそれぞれにログインします。</string>
     <string name="tour_cloud_connect_progress">クラウド %1$d / %2$d</string>
     <string name="tour_cloud_connect_title">%1$s に接続</string>
-    <string name="tour_cloud_google_photos_limit_backup_only">バックアップのみ — Archive と Sync は使えません。</string>
+    <string name="tour_cloud_google_photos_limit_backup_only">Backup のみ — Archive と Sync は使えません。</string>
     <string name="tour_cloud_google_photos_limit_duplicates">このクラウドにすでにある写真が二重に追加されることがあります。</string>
     <string name="tour_cloud_google_photos_limit_pro">30 日間無料、その後は 1 回限りの購入です。</string>
     <string name="tour_cloud_google_photos_limit_restore">このクラウドからの復元はまだ利用できません。</string>

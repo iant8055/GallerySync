@@ -68,7 +68,7 @@
     <string name="library_back_up_all">Verificar o armazenamento na Nuvem e fazer backup de tudo o que ainda não tem backup</string>
     <string name="library_free_space">Tudo do nº 1, mais otimizar todos os arquivos do telefone para a máxima economia de espaço</string>
     <string name="library_optimise_new">Tudo do nº 1, mas otimizar só os arquivos com backup recente, para uma economia moderada de espaço</string>
-    <string name="library_per_album">Verificar o armazenamento na Nuvem sem fazer backup de arquivos novos, sem economia de espaço. Você escolhe manualmente quais álbuns copiar ou sincronizar</string>
+    <string name="library_per_album">Verificar o armazenamento na Nuvem sem fazer backup de arquivos novos, sem economia de espaço. Você escolhe manualmente quais álbuns colocar em Backup ou Sync</string>
     <string name="picker_back">Subir uma pasta</string>
     <string name="picker_create">Criar</string>
     <string name="picker_create_failed">Não foi possível criar essa pasta. O nome pode já estar em uso.</string>
@@ -91,7 +91,7 @@
     <string name="tour_cloud_body">Selecione as Nuvens que você usa. Uma Nuvem é grátis. Cada Nuvem extra faz parte do Pro, grátis por 30 dias. Você entra em cada uma nos próximos cartões.</string>
     <string name="tour_cloud_connect_progress">Nuvem %1$d de %2$d</string>
     <string name="tour_cloud_connect_title">Conectar ao %1$s</string>
-    <string name="tour_cloud_google_photos_limit_backup_only">Só backup — sem Archive nem Sync.</string>
+    <string name="tour_cloud_google_photos_limit_backup_only">Só Backup — sem Archive nem Sync.</string>
     <string name="tour_cloud_google_photos_limit_duplicates">Fotos que já estão nessa Nuvem podem ser adicionadas duas vezes.</string>
     <string name="tour_cloud_google_photos_limit_pro">Grátis por 30 dias, depois uma compra única.</string>
     <string name="tour_cloud_google_photos_limit_restore">Ainda não é possível restaurar a partir dela.</string>

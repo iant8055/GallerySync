@@ -8123,3 +8123,4 @@ card, composed behind it. Walked on the Moto as far as setup goes without signin
 German and Hindi and Portuguese light, Japanese and French dark, no overflow, no crash. Cards past the Cloud sign-in
 (folders, Backup Plan, optimise, delay, progress) are not yet seen in any language.
 - 14 Oct: editor review of the six wizard languages applied (es: endpoint hint, Reset, trial line; fr: endpoint hint, SYNCHRONISER MAINTENANT; ja: Backup folder; hi: plural of hours). Declined: de "Haupt (kostenlos)" (not grammatical alone), ja/hi Sync-now button wording. Backup/Sync naming waits on Ian.
+- 14 Oct: Ian: "All references to any functionality that has a rendering inside the app should remain in English". Mode names Backup/Sync/Archive stay English in every language (library_per_album, the Google Photos Backup-only line); "back up" as a plain action is translated naturally.

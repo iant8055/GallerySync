@@ -68,7 +68,7 @@
     <string name="library_back_up_all">Vérifier le stockage Cloud et sauvegarder tout ce qui ne l\'est pas encore</string>
     <string name="library_free_space">Tout le n° 1, plus optimiser tous les fichiers du téléphone pour un gain de place maximal</string>
     <string name="library_optimise_new">Tout le n° 1, mais optimiser seulement les fichiers nouvellement sauvegardés, pour un gain de place modéré</string>
-    <string name="library_per_album">Vérifier le stockage Cloud sans sauvegarder de nouveaux fichiers, sans gain de place. Vous choisissez vous-même les albums à sauvegarder ou synchroniser</string>
+    <string name="library_per_album">Vérifier le stockage Cloud sans sauvegarder de nouveaux fichiers, sans gain de place. Vous choisissez vous-même les albums à passer en Backup ou Sync</string>
     <string name="picker_back">Dossier parent</string>
     <string name="picker_create">Créer</string>
     <string name="picker_create_failed">Impossible de créer ce dossier. Le nom est peut-être déjà pris.</string>
@@ -91,7 +91,7 @@
     <string name="tour_cloud_body">Sélectionnez les Clouds que vous utilisez. Un Cloud est gratuit. Chaque Cloud supplémentaire fait partie de Pro, gratuit pendant 30 jours. Vous vous connectez à chacun sur les cartes suivantes.</string>
     <string name="tour_cloud_connect_progress">Cloud %1$d sur %2$d</string>
     <string name="tour_cloud_connect_title">Se connecter à %1$s</string>
-    <string name="tour_cloud_google_photos_limit_backup_only">Sauvegarde uniquement : ni Archive ni Sync.</string>
+    <string name="tour_cloud_google_photos_limit_backup_only">Backup uniquement : ni Archive ni Sync.</string>
     <string name="tour_cloud_google_photos_limit_duplicates">Les photos déjà présentes dans ce Cloud peuvent être ajoutées deux fois.</string>
     <string name="tour_cloud_google_photos_limit_pro">Gratuit pendant 30 jours, puis un achat unique.</string>
     <string name="tour_cloud_google_photos_limit_restore">La restauration depuis ce Cloud n\'est pas encore disponible.</string>

@@ -62,7 +62,7 @@ T = {
 "library_back_up_all": "Cloud-Speicher prüfen und alles sichern, was noch nicht gesichert ist",
 "library_free_space": "Alles aus Nr. 1, dazu alle Dateien auf dem Telefon optimieren für maximale Platzersparnis",
 "library_optimise_new": "Alles aus Nr. 1, aber nur neu gesicherte Dateien optimieren, für mäßige Platzersparnis",
-"library_per_album": "Cloud-Speicher prüfen, aber keine neuen Dateien sichern, keine Platzersparnis. Du wählst selbst aus, welche Alben gesichert oder synchronisiert werden",
+"library_per_album": "Cloud-Speicher prüfen, aber keine neuen Dateien sichern, keine Platzersparnis. Du wählst selbst aus, welche Alben auf Backup oder Sync gestellt werden",
 "picker_back": "Einen Ordner höher",
 "picker_create": "Erstellen",
 "picker_create_failed": "Der Ordner konnte nicht erstellt werden. Der Name ist vielleicht schon vergeben.",

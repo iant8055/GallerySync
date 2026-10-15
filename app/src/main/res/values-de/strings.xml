@@ -67,7 +67,7 @@
     <string name="library_back_up_all">Cloud-Speicher prüfen und alles sichern, was noch nicht gesichert ist</string>
     <string name="library_free_space">Alles aus Nr. 1, dazu alle Dateien auf dem Telefon optimieren für maximale Platzersparnis</string>
     <string name="library_optimise_new">Alles aus Nr. 1, aber nur neu gesicherte Dateien optimieren, für mäßige Platzersparnis</string>
-    <string name="library_per_album">Cloud-Speicher prüfen, aber keine neuen Dateien sichern, keine Platzersparnis. Du wählst selbst aus, welche Alben gesichert oder synchronisiert werden</string>
+    <string name="library_per_album">Cloud-Speicher prüfen, aber keine neuen Dateien sichern, keine Platzersparnis. Du wählst selbst aus, welche Alben auf Backup oder Sync gestellt werden</string>
     <string name="picker_back">Einen Ordner höher</string>
     <string name="picker_create">Erstellen</string>
     <string name="picker_create_failed">Der Ordner konnte nicht erstellt werden. Der Name ist vielleicht schon vergeben.</string>

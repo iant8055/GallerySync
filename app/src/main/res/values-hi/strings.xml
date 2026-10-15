@@ -67,7 +67,7 @@
     <string name="library_back_up_all">क्लाउड स्टोरेज जाँचें और जिस किसी का बैकअप नहीं हुआ है, उसका बैकअप लें</string>
     <string name="library_free_space">नंबर 1 का सब कुछ, साथ ही अधिकतम जगह बचाने के लिए फ़ोन की सभी फ़ाइलें ऑप्टिमाइज़ करें</string>
     <string name="library_optimise_new">नंबर 1 का सब कुछ, पर सिर्फ़ नए बैकअप हुई फ़ाइलें ऑप्टिमाइज़ करें, थोड़ी जगह बचाने के लिए</string>
-    <string name="library_per_album">क्लाउड स्टोरेज जाँचें, पर कोई नई फ़ाइल बैकअप न करें, जगह की कोई बचत नहीं। किन एल्बम का बैकअप या सिंक हो, यह आप खुद चुनेंगे</string>
+    <string name="library_per_album">क्लाउड स्टोरेज जाँचें, पर कोई नई फ़ाइल बैकअप न करें, जगह की कोई बचत नहीं। किन एल्बम को Backup या Sync पर रखना है, यह आप खुद चुनेंगे</string>
     <string name="picker_back">एक फ़ोल्डर ऊपर</string>
     <string name="picker_create">बनाएँ</string>
     <string name="picker_create_failed">यह फ़ोल्डर नहीं बन सका। शायद यह नाम पहले से इस्तेमाल में है।</string>
@@ -90,7 +90,7 @@
     <string name="tour_cloud_body">आप जिन क्लाउड का इस्तेमाल करते हैं, उन्हें चुनें। एक क्लाउड मुफ़्त है। हर अतिरिक्त क्लाउड Pro का हिस्सा है, 30 दिन मुफ़्त। अगले कार्ड पर आप हर एक में साइन इन करेंगे।</string>
     <string name="tour_cloud_connect_progress">क्लाउड %1$d / %2$d</string>
     <string name="tour_cloud_connect_title">%1$s से कनेक्ट करें</string>
-    <string name="tour_cloud_google_photos_limit_backup_only">सिर्फ़ बैकअप — Archive या Sync नहीं।</string>
+    <string name="tour_cloud_google_photos_limit_backup_only">सिर्फ़ Backup — Archive या Sync नहीं।</string>
     <string name="tour_cloud_google_photos_limit_duplicates">जो फ़ोटो पहले से उस क्लाउड में हैं, वे दो बार जुड़ सकती हैं।</string>
     <string name="tour_cloud_google_photos_limit_pro">30 दिन मुफ़्त, फिर एक बार की खरीदारी।</string>
     <string name="tour_cloud_google_photos_limit_restore">इससे वापस लाने की सुविधा अभी उपलब्ध नहीं है।</string>
