@@ -203,7 +203,9 @@ class HowToGuideConsistencyTest {
         val ids = idsIn(setupGuide)
         val links = Regex("href=\"([^\"]*)\"").findAll(setupGuide).map { it.groupValues[1] }.toList()
 
-        val outside = links.filter { !it.startsWith("#") || it.removePrefix("#") !in ids }
+        // The language row links to this same page in another language, which is still only the setup page.
+        val sameSetupPage = Regex("""^setup-guide(\.[^.]+)?\.html$""")
+        val outside = links.filter { !sameSetupPage.matches(it) && (!it.startsWith("#") || it.removePrefix("#") !in ids) }
         assertTrue("the setup page links outside itself: $outside", outside.isEmpty())
         assertTrue("the setup page mentions the full guide's file", "how-to-guide" !in setupGuide)
     }
