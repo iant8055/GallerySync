@@ -182,7 +182,7 @@ T = {
 "wizard_guide_link_action": "pulsa aquí",
 "wizard_next": "Siguiente",
 "settings_page_close": "Cerrar",
-"help_open_guide": "Leer más en la guía",
+"help_open_guide": "Leer más en la Guía de uso",
 "tab_help": "Ayuda",
 "tour_discover_folder_count": {"one": "%d carpeta", "other": "%d carpetas"},
 "tour_discover_photo_count": {"one": "%d foto", "other": "%d fotos"},

@@ -59,7 +59,7 @@
     <string name="google_photos_connected">Verbunden</string>
     <string name="google_photos_not_connected">Nicht verbunden</string>
     <string name="google_photos_trial_active_terms">Kostenloser Test: noch %1$d Tage. Danach eine einmalige Freischaltung: 2,49 $ (oder dein lokaler Preis).</string>
-    <string name="google_photos_trial_ended">Der Test ist beendet. Google Fotos ist pausiert, bis du Pro freischaltest (einmalig 2,49 $ oder dein lokaler Preis). Deine Haupt-Cloud ist nicht betroffen.</string>
+    <string name="google_photos_trial_ended">Der Test ist beendet. Google Photos ist pausiert, bis du Pro freischaltest (einmalig 2,49 $ oder dein lokaler Preis). Deine Haupt-Cloud ist nicht betroffen.</string>
     <string name="google_photos_trial_offer">30 Tage kostenlos, danach eine einmalige Freischaltung: 2,49 $ (oder dein lokaler Preis). Es wird nichts automatisch berechnet.</string>
     <string name="google_photos_trial_start_action">30 Tage kostenlos testen</string>
     <string name="google_photos_unlock_pro_action">Pro freischalten</string>
@@ -164,7 +164,7 @@
     <string name="tour_optimise_title">Optimierungseinstellungen</string>
     <string name="tour_optimise_total_saving">Geschätzte Gesamtersparnis: %1$s</string>
     <string name="tour_optimise_unchecked">Deine Cloud konnte gerade nicht geprüft werden, daher lässt sich noch keine Ersparnis schätzen. Diese Einstellungen gelten trotzdem: Sie wirken auf alles, was das erste Backup sendet.</string>
-    <string name="tour_optimise_video_quality">Videokomprimierung</string>
+    <string name="tour_optimise_video_quality">Videokompression</string>
     <string name="tour_optimise_video_saving">Geschätzte Ersparnis bei Videos: %1$s</string>
     <string name="tour_progress_body">Dein Backup läuft. Es läuft im Hintergrund — du kannst dein Telefon ganz normal nutzen.</string>
     <string name="tour_progress_checked">%1$,d von %2$,d geprüft</string>

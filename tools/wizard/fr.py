@@ -58,7 +58,7 @@ T = {
 "google_photos_trial_offer": "Gratuit pendant 30 jours, puis un déblocage unique : 2,49 $ (ou le prix local). Rien n'est facturé automatiquement.",
 "google_photos_trial_start_action": "Commencer l'essai gratuit de 30 jours",
 "google_photos_unlock_pro_action": "Débloquer Pro",
-"help_open_guide": "En savoir plus dans le guide",
+"help_open_guide": "En savoir plus dans le Mode d'emploi",
 "library_back_up_all": "Vérifier le stockage Cloud et sauvegarder tout ce qui ne l'est pas encore",
 "library_free_space": "Tout le n° 1, plus optimiser tous les fichiers du téléphone pour un gain de place maximal",
 "library_optimise_new": "Tout le n° 1, mais optimiser seulement les fichiers nouvellement sauvegardés, pour un gain de place modéré",
