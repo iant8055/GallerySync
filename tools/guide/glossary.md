@@ -156,6 +156,14 @@ the reference should remain in English"). Found by matching the Guide's bold tex
 strings, plus labels the Guide shortens (N stands for a number the app fills in). The same words used as
 ordinary prose, not as a reference to the screen, are translated normally.*
 
+**Amended 2026-10-14 (Ian):** the first-time setup wizard now translates alongside the Guide, and its (?) pop-ups
+appear in the chosen language. So inside the Guide's **setup chapter**, a translated page quotes the wizard's
+translated labels from `app/src/main/res/values-<loc>/strings.xml` — a Spanish reader sees a Spanish screen,
+so the Spanish Guide must quote the Spanish buttons. Everywhere else in the Guide (Albums, Restore, Archive,
+Settings and the rest), the labels in this section stay in English because the rest of the app's screens
+stay English. The entries below remain the English references and are what the non-setup chapters quote;
+setup-chapter quotes come from the wizard's own `strings.xml` for the target language.
+
 **Rule of thumb:** in the Guide, on-screen labels are written in **bold**. A bold run that is a label or message
 stays English. A bold run that is only emphasis (for example a heading-like phrase such as "Nothing is
 permanently deleted.") is translated.

@@ -30,6 +30,7 @@ import importlib
 from pathlib import Path
 
 from . import (
+    _chrome,
     c1_start,
     c2_setup,
     c3_albums,
@@ -64,12 +65,22 @@ _CHAPTER_MODULE_NAMES = (
     "c8_help",
 )
 
+# English chrome. See ``content/_chrome.py`` for what each key is for.
+CHROME_EN: dict[str, str] = dict(_chrome.STRINGS)
+
+# Translated chrome, locale -> {"strings": dict[str, str], "en_hash": str}.
+# Populated by the loader. A missing entry means that locale has no chrome
+# translation; an entry whose ``en_hash`` no longer matches the current English
+# chrome is treated as stale, exactly like a stale topic.
+CHROME_LOCALES: dict[str, dict[str, object]] = {}
+
 
 def _load_translations() -> list[str]:
     """Attach any `content/<locale>/*.py` translations to the English objects.
 
     Returns the list of locale codes found, sorted. Missing files are simply
-    skipped — the build's completeness check reports it per topic, not here.
+    skipped — the build's completeness check reports them per topic/chapter,
+    not here.
     """
     here = Path(__file__).parent
     locales: list[str] = []
@@ -94,6 +105,13 @@ def _load_translations() -> list[str]:
                 topic_entry = translations.get(topic.id)
                 if isinstance(topic_entry, dict):
                     topic.translations[locale] = topic_entry
+        # Optional chrome: content/<locale>/_chrome.py exporting STRINGS + EN_HASH.
+        if (entry / "_chrome.py").exists():
+            chrome_module = importlib.import_module(f".{locale}._chrome", package=__name__)
+            strings = getattr(chrome_module, "STRINGS", None)
+            en_hash = getattr(chrome_module, "EN_HASH", None)
+            if isinstance(strings, dict) and isinstance(en_hash, str):
+                CHROME_LOCALES[locale] = {"strings": dict(strings), "en_hash": en_hash}
     return locales
 
 

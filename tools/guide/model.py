@@ -30,6 +30,20 @@ def english_hash(title: str, body_or_intro: str) -> str:
     return hashlib.sha256(joined.encode("utf-8")).hexdigest()[:16]
 
 
+def english_chrome_hash(strings: dict[str, str]) -> str:
+    """The identity of the chrome's English — one hash over every key, in sorted order.
+
+    One hash for the whole chrome (not one per key) keeps the ``_chrome.py`` file
+    simple on both the English and the translation side: a translator writes an
+    ``EN_HASH`` constant equal to the hash of the English they translated from,
+    and any later English edit anywhere in chrome invalidates that whole file.
+    Chrome has few strings and changes infrequently, so re-translating all of it
+    together is cheaper than tracking per-key hashes.
+    """
+    joined = "\n".join(f"{key}={strings[key]}" for key in sorted(strings))
+    return hashlib.sha256(joined.encode("utf-8")).hexdigest()[:16]
+
+
 @dataclass
 class Topic:
     id: str

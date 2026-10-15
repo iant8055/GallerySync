@@ -41,10 +41,12 @@ Done once, in English only, so the pipeline is ready when the sweep begins.
    `how-to-guide-accordion.es.html`, `setup-guide.es.html`, and a translated
    `help_topics.xml`. English stays at the current filenames.
 
-   **The translated `help_topics.xml` must NOT be written under `app/src/main/res/`.** Android builds every
-   `values-xx` folder there into the app automatically, so a Spanish phone would show Spanish (?) cards in an
-   English app with nobody having decided to ship them. Write them to `tools/guide/out/<locale>/help_topics.xml`
-   (or similar) until Ian decides the app goes multilingual.
+   **The translated `help_topics.xml` goes to `app/src/main/res/values-<androidloc>/help_topics.xml`**
+   *(Ian, 14 Oct 2026, reversing the 11 Oct direction: "the entire point of making the how to guide multilingual
+   was to get those little pop-up cards from the (?) in different languages")*. Android's resource system then
+   serves the (?) pop-up in the user's chosen language through `HelpDialog`. The surrounding `values-<loc>/`
+   folders are shared with the wizard's translated `strings.xml`, so the build touches only `help_topics.xml`
+   and the orphan cleanup never removes the folder or anything else inside it.
 
    **Locale codes differ by target** *(note added 11 Oct 2026)*. Web pages use BCP 47 (`pt-BR`); Android resource
    folders use `values-pt-rBR`. The build keeps one locale code and maps it per output.
@@ -60,8 +62,12 @@ Done once, in English only, so the pipeline is ready when the sweep begins.
    unchanged, in the same topic's translation; and the markup counts (headings, bullets, numbered items, bold runs,
    links, `{{full: }}` markers) match English. A stale translation (English changed since it was made, see Phase 4)
    fails the test for that locale, which keeps it unpublished.
-6. **No app changes yet.** The translated `help_topics.xml` files are generated outside `app/src/main/res/` and
-   committed; moving them into the app is a separate decision for a later app release. The HTML Guides go live independently of the app.
+6. **The (?) pop-ups ship multilingual.** *(Ian, 14 Oct 2026 — see item 2 above.)* The translated
+   `help_topics.xml` files land directly under `app/src/main/res/values-<androidloc>/`, so Android's own
+   resource system serves them in the user's chosen language. The rest of the app is pinned to English; only
+   the (?) pop-ups and the first-time setup wizard change language. The HTML Guides on `docs/` go live
+   independently of the app, which still carries over from before: a translated Guide can publish without an
+   app release.
 
 Owner: **general-purpose** or **builder** agent, one task, ~1–2 days.
 Deliverable: the pipeline builds English identically to today, and would build
@@ -196,9 +202,9 @@ Six **Translator** agents (one per language) run in parallel, then one
    Editor's final report in the commit message.
 10. Publish `docs/*.html`.
 
-The translated `help_topics.xml` files are generated **outside `app/src/main/res/`** and committed, so they are
-**not** shipped in the app until a separate decision in a future app release. Ian makes
-that call when the app itself goes multilingual, not now.
+The translated `help_topics.xml` files ship in the app via `app/src/main/res/values-<androidloc>/` — Android's
+own resource system serves them in the (?) pop-ups in the user's chosen language. *(Ian, 14 Oct 2026, reversing
+the earlier plan to hold them outside the Android source tree. See Phase 0 item 2.)*
 
 ---
 
@@ -220,8 +226,7 @@ that call when the app itself goes multilingual, not now.
 - Translating the privacy policy, delete-account page, or promo terms. Legal
   text; English is sufficient for Play. Revisit separately if a specific market
   needs it.
-- Shipping multilingual (?) pop-ups in the app. That is a future app release,
-  not this plan.
+- *(Removed 14 Oct 2026 by Ian: the (?) pop-ups DO ship multilingual the moment a locale publishes — see Phase 0 item 6. The hold has been lifted.)*
 - Human review of translations. Deliberately omitted (Ian's call). If a
   specific language flags badly in Head Editor's report, raise it with Ian
   rather than silently commissioning a reviewer.

@@ -40,8 +40,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from content import CHAPTERS, LAST_UPDATED, LOCALES  # noqa: E402
-from model import Topic  # noqa: E402
+from content import CHAPTERS, CHROME_EN, CHROME_LOCALES, LAST_UPDATED, LOCALES  # noqa: E402
+from model import Topic, english_chrome_hash  # noqa: E402
 
 OUT_FLAT = ROOT / "docs" / "how-to-guide.html"
 OUT_ACCORDION = ROOT / "docs" / "how-to-guide-accordion.html"
@@ -49,12 +49,17 @@ OUT_SETUP = ROOT / "docs" / "setup-guide.html"
 OUT_XML = ROOT / "app" / "src" / "main" / "res" / "values" / "help_topics.xml"
 OUT_KOTLIN = ROOT / "app" / "src" / "main" / "java" / "com" / "gallery" / "sync" / "ui" / "help" / "HelpTopic.kt"
 
-# Translated Android resources never land under app/src/main/res/: anything named
-# values-xx/ there is auto-swept into the APK by the Android build, which would ship
-# a translated (?) card to any phone in that locale before the app was decided to go
-# multilingual. They go to a staging area outside the Android source tree instead,
-# ready to be copied in by a later app release when that decision is made.
-OUT_LOCALE_ROOT = ROOT / "tools" / "guide" / "out"
+OUT_RES_VALUES = ROOT / "app" / "src" / "main" / "res"
+# Translated help_topics.xml files land under app/src/main/res/values-<loc>/, so
+# Android's resource system serves the (?) pop-ups in the user's chosen language
+# through HelpDialog (Ian, 14 Oct 2026 — "the entire point of making the how to
+# guide multilingual was to get those little pop-up cards from the (?) in
+# different languages"). This reverses the earlier choice to keep translated XML
+# outside the Android source tree: Ian has decided a multilingual (?) is the
+# intended behaviour. The surrounding `values-<loc>/` folders already exist and
+# are shared with the wizard's own translated `strings.xml`, so the orphan
+# cleanup here is scoped to `help_topics.xml` alone — the folder and anything
+# else inside it belong to the wizard translation and must not be touched.
 
 # What a reader of the language picker sees for each locale — in its own language, so a
 # Spanish reader finds "Español" rather than "Spanish". English stays "English".
@@ -81,17 +86,57 @@ def android_folder(locale: str) -> str:
     return f"{language}-r{region}"
 
 
+def chrome(key: str, locale: str = "en") -> str:
+    """A chrome string in the asked locale, falling back to English.
+
+    Chrome is the Guide's own framing text (page titles, "Contents", intro notes,
+    the flat/accordion switch, the footer). English lives in ``content/_chrome.py``;
+    translations live in ``content/<locale>/_chrome.py``. A locale that has not
+    translated a particular key is served the English value for that one key —
+    but the completeness check holds the whole locale back from publication
+    until every key is translated and the chrome's ``EN_HASH`` matches, so this
+    fallback is never reached in a published build.
+    """
+    if locale != "en":
+        locale_strings = CHROME_LOCALES.get(locale, {}).get("strings")
+        if isinstance(locale_strings, dict) and key in locale_strings:
+            return locale_strings[key]
+    return CHROME_EN[key]
+
+
+def chrome_is_fresh(locale: str) -> bool:
+    """True iff a locale's chrome is complete and matches current English chrome.
+
+    English is always fresh. For any other locale: a chrome entry must exist,
+    cover every key English has, and carry an ``en_hash`` equal to the current
+    English hash.
+    """
+    if locale == "en":
+        return True
+    entry = CHROME_LOCALES.get(locale)
+    if not entry:
+        return False
+    strings = entry.get("strings")
+    if not isinstance(strings, dict):
+        return False
+    if any(key not in strings for key in CHROME_EN):
+        return False
+    return entry.get("en_hash") == english_chrome_hash(CHROME_EN)
+
+
 def complete_locales(topics: dict[str, Topic]) -> list[str]:
     """Non-English locales that are fully translated and current.
 
-    A locale is complete iff every chapter and every topic has a translation whose
-    `en_hash` matches the current English. Anything short of that holds the whole
-    locale back from publication — no half-English hybrid pages.
+    A locale is complete iff every chapter, every topic, AND the chrome has a
+    translation whose hash matches the current English. Anything short of that
+    holds the whole locale back from publication — no half-English hybrid pages.
     """
     complete: list[str] = []
     for locale in LOCALES:
-        if all(chapter.is_fresh_in(locale) for chapter in CHAPTERS) and all(
-            topic.is_fresh_in(locale) for topic in topics.values()
+        if (
+            chrome_is_fresh(locale)
+            and all(chapter.is_fresh_in(locale) for chapter in CHAPTERS)
+            and all(topic.is_fresh_in(locale) for topic in topics.values())
         ):
             complete.append(locale)
     return complete
@@ -100,11 +145,18 @@ def complete_locales(topics: dict[str, Topic]) -> list[str]:
 def staleness_report(topics: dict[str, Topic]) -> list[str]:
     """One line per missing or stale piece of translation, across every known locale.
 
-    Used by `--check` so a partially translated locale fails the build the same way a
-    stale English output does. Empty list means every known locale is complete.
+    Advisory: used by ``main()`` to print per-locale translation progress. These
+    are not blocking build problems — a partial or stale locale simply does not
+    publish, which is the all-or-nothing fallback rule in action. Empty list
+    means every known locale is complete.
     """
     problems: list[str] = []
     for locale in LOCALES:
+        if not chrome_is_fresh(locale):
+            if locale not in CHROME_LOCALES:
+                problems.append(f"{locale}: chrome is not translated")
+            else:
+                problems.append(f"{locale}: chrome is stale or incomplete (English has changed)")
         for chapter in CHAPTERS:
             if locale not in chapter.translations:
                 problems.append(f"{locale}: chapter {chapter.id!r} is not translated")
@@ -310,7 +362,7 @@ CSS = """
 """
 
 
-def page(title: str, sub: str, body: str, lang: str = "en", heading: str = "How To Guide", name: str = "How To Guide") -> str:
+def page(browser_title: str, sub: str, heading: str, body: str, footer: str, lang: str = "en") -> str:
     return f"""<!DOCTYPE html>
 <!-- GENERATED by tools/guide/build_guide.py from tools/guide/content/. Do not edit this file: change the source and rebuild. -->
 <html lang="{html.escape(lang, quote=True)}">
@@ -318,7 +370,7 @@ def page(title: str, sub: str, body: str, lang: str = "en", heading: str = "How 
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="light dark">
-<title>{html.escape(title)}</title>
+<title>{html.escape(browser_title)}</title>
 <style>{CSS}</style>
 </head>
 <body>
@@ -330,7 +382,7 @@ def page(title: str, sub: str, body: str, lang: str = "en", heading: str = "How 
 {body}
 
   <footer>
-    GallerySync — {html.escape(name)}. Last updated {LAST_UPDATED}.
+    {html.escape(footer)}
   </footer>
 
 </main>
@@ -369,12 +421,12 @@ def language_picker_html(current: str, published: list[str], base_name: str) -> 
     return '<p class="switch picker">' + " · ".join(parts) + "</p>"
 
 
-def intro_note(switch_html: str, picker_html: str = "") -> str:
+def intro_note(switch_html: str, picker_html: str = "", locale: str = "en") -> str:
     picker_line = f"\n  {picker_html}" if picker_html else ""
+    lede = chrome("intro_lede", locale)
+    body = chrome("intro_body", locale)
     return f"""  <div class="note">
-    <p><strong>Every screen, every line.</strong> This guide explains each part of GallerySync in plain
-    language &mdash; what you are looking at, and where the information comes from. Inside the app, the
-    <strong>(?)</strong> buttons open the same explanations as a pop-up.</p>
+    <p><strong>{lede}</strong> {body}</p>
   </div>
   <p class="switch">{switch_html}</p>{picker_line}"""
 
@@ -389,7 +441,8 @@ def toc(topics: dict[str, Topic], with_topics: bool, locale: str = "en") -> str:
             )
             row += f"<ul>{items}</ul>"
         rows.append(row + "</li>")
-    return '  <h2 id="contents" style="border-top:0;margin-top:24px">Contents</h2>\n  <ul class="toc">' + "".join(rows) + "</ul>"
+    contents_heading = html.escape(chrome("contents_heading", locale))
+    return f'  <h2 id="contents" style="border-top:0;margin-top:24px">{contents_heading}</h2>\n  <ul class="toc">' + "".join(rows) + "</ul>"
 
 
 def _accordion_target(locale: str) -> str:
@@ -402,10 +455,13 @@ def _flat_target(locale: str) -> str:
 
 def build_flat(topics: dict[str, Topic], locale: str = "en", published: list[str] | None = None) -> str:
     published = published or ["en"]
-    switch = f'Prefer collapsible sections? <a href="{_accordion_target(locale)}">Open the expandable version.</a>'
+    switch = (
+        f'{chrome("flat_switch_text", locale)} '
+        f'<a href="{_accordion_target(locale)}">{chrome("flat_switch_link", locale)}</a>'
+    )
     picker = language_picker_html(locale, published, "how-to-guide")
     parts = [
-        intro_note(switch, picker),
+        intro_note(switch, picker, locale=locale),
         toc(topics, with_topics=True, locale=locale),
     ]
     for chapter in CHAPTERS:
@@ -415,20 +471,25 @@ def build_flat(topics: dict[str, Topic], locale: str = "en", published: list[str
             parts.append(f'  <h3 id="{t.id}">{html.escape(t.title_for(locale))}</h3>')
             parts.append(blocks_html(for_guide(t.body_for(locale)), topics, "h4", locale))
     return page(
-        "How To Guide — GallerySync",
-        f"GallerySync — last updated {LAST_UPDATED}",
-        "\n".join(parts),
+        browser_title=chrome("guide_browser_title", locale),
+        sub=chrome("page_sub", locale).format(date=LAST_UPDATED),
+        heading=chrome("guide_heading", locale),
+        body="\n".join(parts),
+        footer=chrome("footer_text", locale).format(name=chrome("guide_name", locale), date=LAST_UPDATED),
         lang=locale,
     )
 
 
 def build_accordion(topics: dict[str, Topic], locale: str = "en", published: list[str] | None = None) -> str:
     published = published or ["en"]
-    switch = (f'Prefer one long page? <a href="{_flat_target(locale)}">Open the single-page version.</a> '
-              "Tap a heading to open it.")
+    switch = (
+        f'{chrome("accordion_switch_text", locale)} '
+        f'<a href="{_flat_target(locale)}">{chrome("accordion_switch_link", locale)}</a> '
+        f'{chrome("accordion_switch_tap_tip", locale)}'
+    )
     picker = language_picker_html(locale, published, "how-to-guide-accordion")
     parts = [
-        intro_note(switch, picker),
+        intro_note(switch, picker, locale=locale),
         toc(topics, with_topics=False, locale=locale),
     ]
     for chapter in CHAPTERS:
@@ -442,9 +503,11 @@ def build_accordion(topics: dict[str, Topic], locale: str = "en", published: lis
                 f'  <div class="topic-body" id="{t.id}">\n{blocks_html(for_guide(t.body_for(locale)), topics, "h4", locale)}\n  </div></details>'
             )
     return page(
-        "How To Guide — GallerySync",
-        f"GallerySync — last updated {LAST_UPDATED}",
-        "\n".join(parts),
+        browser_title=chrome("guide_browser_title", locale),
+        sub=chrome("page_sub", locale).format(date=LAST_UPDATED),
+        heading=chrome("guide_heading", locale),
+        body="\n".join(parts),
+        footer=chrome("footer_text", locale).format(name=chrome("guide_name", locale), date=LAST_UPDATED),
         lang=locale,
     )
 
@@ -470,11 +533,11 @@ def build_setup(topics: dict[str, Topic], locale: str = "en", published: list[st
 
     picker = language_picker_html(locale, published, "setup-guide")
     picker_block = f"\n  {picker}" if picker else ""
+    setup_lede = chrome("setup_lede", locale)
+    setup_body = chrome("setup_body", locale)
     parts = [
         f"""  <div class="note">
-    <p><strong>Every card, in order.</strong> This page explains each step of GallerySync's first-time
-    setup in plain language: what a card is for, what its buttons do, and the messages you might meet.
-    Tap a heading to open it.</p>
+    <p><strong>{setup_lede}</strong> {setup_body}</p>
   </div>{picker_block}""",
         f'  <p class="chapter-intro">{inline_html(chapter.intro_for(locale), topics, locale)}</p>',
     ]
@@ -490,12 +553,12 @@ def build_setup(topics: dict[str, Topic], locale: str = "en", published: list[st
             f'  <div class="topic-body" id="{t.id}">\n{blocks_html(body, topics, "h4", locale)}\n  </div></details>'
         )
     return page(
-        "First-Time Setup — GallerySync",
-        f"GallerySync — last updated {LAST_UPDATED}",
-        "\n".join(parts),
+        browser_title=chrome("setup_browser_title", locale),
+        sub=chrome("page_sub", locale).format(date=LAST_UPDATED),
+        heading=chrome("setup_heading", locale),
+        body="\n".join(parts),
+        footer=chrome("footer_text", locale).format(name=chrome("setup_name", locale), date=LAST_UPDATED),
         lang=locale,
-        heading="First-Time Setup",
-        name="First-Time Setup",
     )
 
 
@@ -599,14 +662,67 @@ def _locale_html_paths(locale: str) -> tuple[Path, Path, Path]:
 def _locale_xml_path(locale: str) -> Path:
     """Where a locale's help_topics.xml lands.
 
-    English keeps the current path under ``app/src/main/res/`` because that is
-    the resource the English app actually loads. Every other locale goes to
-    ``tools/guide/out/values-<androidloc>/``, outside the Android source tree —
-    see ``OUT_LOCALE_ROOT`` for why that matters.
+    English stays at ``values/help_topics.xml``; every other locale lands in its
+    matching ``values-<androidloc>/help_topics.xml`` so Android's own resource
+    system serves the (?) pop-up in the user's language. The folder is shared
+    with the wizard's translated ``strings.xml`` — our writes touch only the
+    one filename and the orphan cleanup never removes the folder.
     """
     if locale == "en":
         return OUT_XML
-    return OUT_LOCALE_ROOT / f"values-{android_folder(locale)}" / "help_topics.xml"
+    return OUT_RES_VALUES / f"values-{android_folder(locale)}" / "help_topics.xml"
+
+
+def _android_folder_to_bcp47(android_loc: str) -> str:
+    """Reverse of :func:`android_folder`: ``pt-rBR`` → ``pt-BR``; ``es`` → ``es``."""
+    if "-r" in android_loc:
+        lang, region = android_loc.split("-r", 1)
+        return f"{lang}-{region}"
+    return android_loc
+
+
+_LOCALE_HTML_PATTERNS = (
+    re.compile(r"^how-to-guide\.([^.]+)\.html$"),
+    re.compile(r"^how-to-guide-accordion\.([^.]+)\.html$"),
+    re.compile(r"^setup-guide\.([^.]+)\.html$"),
+)
+
+
+def orphans(published: list[str]) -> list[Path]:
+    """Per-locale output files that currently exist but should not.
+
+    When a locale drops out of ``published`` — a once-complete translation that
+    the latest English edit has made stale, say — the files it wrote last build
+    sit on disk and keep being served. The build removes them, and ``--check``
+    reports them so a CI run catches the state. Scans ``docs/`` for the three
+    HTML variants, and ``app/src/main/res/`` for stray ``values-<loc>/help_topics.xml``
+    files whose locale no longer publishes. The surrounding ``values-<loc>/``
+    folder and anything else inside it (``strings.xml`` from the wizard
+    translation, in particular) are left alone — only ``help_topics.xml`` is
+    ours to remove.
+    """
+    found: list[Path] = []
+    docs = ROOT / "docs"
+    if docs.exists():
+        for entry in docs.iterdir():
+            if not entry.is_file():
+                continue
+            for pattern in _LOCALE_HTML_PATTERNS:
+                m = pattern.match(entry.name)
+                if m and m.group(1) not in published:
+                    found.append(entry)
+                    break
+    if OUT_RES_VALUES.exists():
+        for sub in OUT_RES_VALUES.iterdir():
+            if not sub.is_dir() or not sub.name.startswith("values-") or sub.name == "values":
+                continue
+            bcp47 = _android_folder_to_bcp47(sub.name.removeprefix("values-"))
+            if bcp47 in published:
+                continue
+            xml_file = sub / "help_topics.xml"
+            if xml_file.exists():
+                found.append(xml_file)
+    return found
 
 
 def outputs() -> dict[Path, str]:
@@ -627,45 +743,64 @@ def outputs() -> dict[Path, str]:
     return out
 
 
+def _remove_orphan(path: Path) -> None:
+    """Delete an orphan file. The containing ``values-<loc>/`` folder is left in place:
+    it belongs to the wizard's own translation (``strings.xml`` and friends live there).
+    """
+    path.unlink()
+
+
 def main() -> int:
     check_only = "--check" in sys.argv
+    expected = outputs()
     stale: list[Path] = []
-    for path, text in outputs().items():
+    for path, text in expected.items():
         current = path.read_text(encoding="utf-8") if path.exists() else None
         if current != text:
             stale.append(path)
             if not check_only:
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text(text, encoding="utf-8", newline="\n")
+
     topics = all_topics()
-    ui = sum(1 for t in topics.values() if t.ui)
-    translation_problems = staleness_report(topics)
     published = ["en"] + complete_locales(topics)
+    orphan_files = orphans(published)
+    if not check_only:
+        for path in orphan_files:
+            _remove_orphan(path)
+
+    ui = sum(1 for t in topics.values() if t.ui)
+    translation_warnings = staleness_report(topics)
+    locales_summary = ", ".join(published)
 
     if check_only:
         for path in stale:
             print(f"out of date: {path.relative_to(ROOT)}")
-        for problem in translation_problems:
-            print(f"translation: {problem}")
-        locales_summary = ", ".join(published)
+        for path in orphan_files:
+            print(f"orphan (should be removed): {path.relative_to(ROOT)}")
+        for warning in translation_warnings:
+            print(f"translation (informational): {warning}")
         print(
             f"{len(topics)} topics ({ui} with a (?) button), "
             f"{len(stale)} output(s) out of date, "
-            f"{len(translation_problems)} translation problem(s); "
+            f"{len(orphan_files)} orphan(s), "
+            f"{len(translation_warnings)} translation warning(s); "
             f"published locales: {locales_summary}"
         )
-        return 1 if stale or translation_problems else 0
+        # Translation warnings are informational — a partial or stale locale
+        # simply does not publish, which is the all-or-nothing fallback rule in
+        # action and must not block the English-only build from being green.
+        return 1 if (stale or orphan_files) else 0
 
-    locales_summary = ", ".join(published)
     print(
         f"{len(topics)} topics ({ui} with a (?) button); "
-        f"wrote {len(stale)} changed file(s); "
+        f"wrote {len(stale)} changed file(s), removed {len(orphan_files)} orphan(s); "
         f"published locales: {locales_summary}"
     )
-    if translation_problems:
-        print(f"warning: {len(translation_problems)} translation problem(s) — those locales were not emitted:")
-        for problem in translation_problems:
-            print(f"  {problem}")
+    if translation_warnings:
+        print(f"note: {len(translation_warnings)} translation issue(s) — those locales were not emitted:")
+        for warning in translation_warnings:
+            print(f"  {warning}")
     return 0
 
 
