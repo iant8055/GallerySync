@@ -6,7 +6,7 @@
     <string name="abort_backup_confirm">停止して戻る</string>
     <string name="abort_backup_keep">バックアップを続ける</string>
     <string name="abort_backup_title">バックアップを停止しますか？</string>
-    <string name="cloud_backup_folder">バックアップ先フォルダ</string>
+    <string name="cloud_backup_folder">バックアップフォルダ</string>
     <string name="cloud_cancel">キャンセル</string>
     <string name="cloud_enter_keys_action">キーを入力</string>
     <string name="cloud_field_access_key">アクセスキー ID</string>

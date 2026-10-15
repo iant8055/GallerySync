@@ -103,7 +103,7 @@
     <string name="tour_delay_late_start">जाँच की प्रक्रिया के कारण बैकअप तय समय के बाद शुरू हो सकता है।</string>
     <plurals name="tour_delay_later">
         <item quantity="one">%1$d घंटे में शुरू करें</item>
-        <item quantity="other">%1$d घंटे में शुरू करें</item>
+        <item quantity="other">%1$d घंटों में शुरू करें</item>
     </plurals>
     <plurals name="tour_delay_later_minutes">
         <item quantity="one">%1$d मिनट में शुरू करें</item>

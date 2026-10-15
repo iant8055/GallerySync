@@ -3,7 +3,7 @@ T = {
 "abort_backup_confirm": "停止して戻る",
 "abort_backup_keep": "バックアップを続ける",
 "abort_backup_title": "バックアップを停止しますか？",
-"cloud_backup_folder": "バックアップ先フォルダ",
+"cloud_backup_folder": "バックアップフォルダ",
 "cloud_cancel": "キャンセル",
 "cloud_enter_keys_action": "キーを入力",
 "cloud_field_access_key": "アクセスキー ID",

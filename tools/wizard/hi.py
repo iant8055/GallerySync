@@ -95,7 +95,7 @@ T = {
 "tour_delay_chip_minutes": "%1$d मि.",
 "tour_delay_hours_label": "देरी",
 "tour_delay_late_start": "जाँच की प्रक्रिया के कारण बैकअप तय समय के बाद शुरू हो सकता है।",
-"tour_delay_later": {"one": "%1$d घंटे में शुरू करें", "other": "%1$d घंटे में शुरू करें"},
+"tour_delay_later": {"one": "%1$d घंटे में शुरू करें", "other": "%1$d घंटों में शुरू करें"},
 "tour_delay_later_minutes": {"one": "%1$d मिनट में शुरू करें", "other": "%1$d मिनट में शुरू करें"},
 "tour_delay_right_now": "अभी",
 "tour_delay_saving_size": "आप फ़ोन के स्टोरेज में %1$s बचाएँगे",

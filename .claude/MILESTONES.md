@@ -8122,3 +8122,4 @@ translated (it is not a tab). The sample Settings screen was already English: th
 card, composed behind it. Walked on the Moto as far as setup goes without signing in (Welcome to Connect to OneDrive):
 German and Hindi and Portuguese light, Japanese and French dark, no overflow, no crash. Cards past the Cloud sign-in
 (folders, Backup Plan, optimise, delay, progress) are not yet seen in any language.
+- 14 Oct: editor review of the six wizard languages applied (es: endpoint hint, Reset, trial line; fr: endpoint hint, SYNCHRONISER MAINTENANT; ja: Backup folder; hi: plural of hours). Declined: de "Haupt (kostenlos)" (not grammatical alone), ja/hi Sync-now button wording. Backup/Sync naming waits on Ian.
