@@ -64,8 +64,9 @@ android {
         // The twenty-fifth (9 Oct 2026): photos and videos read as their originals so backups keep their location (ACCESS_MEDIA_LOCATION); Settings repair for copies sent without it; re-optimise videos after a stronger compression; "compression" labels; the Albums tab's Archive summary.
         // The twenty-sixth (12 Oct 2026): choose the backup folder in every Cloud, in setup and Settings; the album header says where it backs up; Restore returns a file to the folder it came from (Room 15); a notification when a deleted file still has a Cloud copy (Ask); the location repair removed; Album/Folder wording; the shorter How To Guide.
         // The twenty-seventh (14 Oct 2026): the Albums status line clears when an automatic backup ends; the finish summary says the check is OneDrive's and the sent figure covers every Cloud; "Select" on the folder screen.
-        versionCode = 27
-        versionName = "0.3.26"
+        // The twenty-eighth (15 Oct 2026): the setup wizard, the How To Guide and the (?) cards in six languages beside English (the rest of the app stays English); notices before and when the extra-Cloud trial ends; the guide follows Appearance; code cleanup (Room 16).
+        versionCode = 28
+        versionName = "0.3.27"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -83,6 +84,15 @@ android {
                 keyAlias = keystoreProperties["keyAlias"] as String
                 keyPassword = keystoreProperties["keyPassword"] as String
             }
+        }
+    }
+
+    // Every language in every install. By default Play delivers only the phone's own languages, but the wizard, the
+    // (?) cards and the guide follow the language chosen on the Welcome screen, which need not be the phone's: a
+    // Spanish choice on an English phone would otherwise find no Spanish strings and fall back to English.
+    bundle {
+        language {
+            enableSplit = false
         }
     }
 
