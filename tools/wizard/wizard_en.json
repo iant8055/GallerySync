@@ -1,0 +1,931 @@
+[
+ {
+  "key": "abort_backup_body",
+  "type": "string",
+  "en": "Uploading stops so you can change your settings. Files already in your Cloud stay there, and starting again picks up where this left off rather than sending them twice. Nothing is deleted. Photos already optimised stay optimised, with their full-size originals in your Cloud."
+ },
+ {
+  "key": "abort_backup_confirm",
+  "type": "string",
+  "en": "Stop and go back"
+ },
+ {
+  "key": "abort_backup_keep",
+  "type": "string",
+  "en": "Keep backing up"
+ },
+ {
+  "key": "abort_backup_title",
+  "type": "string",
+  "en": "Stop the backup?"
+ },
+ {
+  "key": "cloud_backup_folder",
+  "type": "string",
+  "en": "Backup folder"
+ },
+ {
+  "key": "cloud_cancel",
+  "type": "string",
+  "en": "Cancel"
+ },
+ {
+  "key": "cloud_enter_keys_action",
+  "type": "string",
+  "en": "Enter keys"
+ },
+ {
+  "key": "cloud_field_access_key",
+  "type": "string",
+  "en": "Access key ID"
+ },
+ {
+  "key": "cloud_field_bucket",
+  "type": "string",
+  "en": "Bucket name"
+ },
+ {
+  "key": "cloud_field_endpoint",
+  "type": "string",
+  "en": "Endpoint"
+ },
+ {
+  "key": "cloud_field_region",
+  "type": "string",
+  "en": "Region"
+ },
+ {
+  "key": "cloud_field_secret_key",
+  "type": "string",
+  "en": "Secret access key"
+ },
+ {
+  "key": "cloud_folder_body",
+  "type": "string",
+  "en": "New photos and videos will go here. Files already backed up stay where they are."
+ },
+ {
+  "key": "cloud_folder_label",
+  "type": "string",
+  "en": "Folder in %1$s"
+ },
+ {
+  "key": "cloud_hint_b2_endpoint",
+  "type": "string",
+  "en": "s3.us-west-004.backblazeb2.com"
+ },
+ {
+  "key": "cloud_hint_b2_region",
+  "type": "string",
+  "en": "Optional: read from the endpoint"
+ },
+ {
+  "key": "cloud_hint_idrive_endpoint",
+  "type": "string",
+  "en": "Copy it from your e2 console"
+ },
+ {
+  "key": "cloud_hint_idrive_region",
+  "type": "string",
+  "en": "for example us-west-1"
+ },
+ {
+  "key": "cloud_keys_dialog_title",
+  "type": "string",
+  "en": "Connect %1$s"
+ },
+ {
+  "key": "cloud_keys_guide",
+  "type": "string",
+  "en": "Step-by-step guide"
+ },
+ {
+  "key": "cloud_keys_hide",
+  "type": "string",
+  "en": "Hide"
+ },
+ {
+  "key": "cloud_keys_show",
+  "type": "string",
+  "en": "Show"
+ },
+ {
+  "key": "cloud_main_tag",
+  "type": "string",
+  "en": "main (free)"
+ },
+ {
+  "key": "cloud_providers_section_title",
+  "type": "string",
+  "en": "Clouds"
+ },
+ {
+  "key": "cloud_signout_anyway",
+  "type": "string",
+  "en": "Sign out anyway"
+ },
+ {
+  "key": "cloud_signout_body",
+  "type": "string",
+  "en": "There are %1$d files (%2$s) not at full size on this phone. What do you want to do with them?"
+ },
+ {
+  "key": "cloud_signout_edited_body",
+  "type": "plurals",
+  "en": {
+   "one": "%d file has been edited since it was backed up. Overwrite it with the original, or keep your edit?",
+   "other": "%d files have been edited since they were backed up. Overwrite them with the originals, or keep your edits?"
+  }
+ },
+ {
+  "key": "cloud_signout_edited_overwrite",
+  "type": "string",
+  "en": "Overwrite"
+ },
+ {
+  "key": "cloud_signout_edited_title",
+  "type": "string",
+  "en": "Edited files"
+ },
+ {
+  "key": "cloud_signout_files_title",
+  "type": "string",
+  "en": "What about the files there?"
+ },
+ {
+  "key": "cloud_signout_incomplete_body",
+  "type": "string",
+  "en": "%1$d restored, %2$d could not be. You are still signed in to %3$s."
+ },
+ {
+  "key": "cloud_signout_incomplete_title",
+  "type": "string",
+  "en": "Not everything came back"
+ },
+ {
+  "key": "cloud_signout_leave",
+  "type": "string",
+  "en": "Leave them there"
+ },
+ {
+  "key": "cloud_signout_restore",
+  "type": "string",
+  "en": "Restore them to the phone first"
+ },
+ {
+  "key": "cloud_signout_restoring_progress",
+  "type": "string",
+  "en": "%1$d of %2$d"
+ },
+ {
+  "key": "cloud_signout_restoring_title",
+  "type": "string",
+  "en": "Restoring from %1$s"
+ },
+ {
+  "key": "cloud_signout_stay",
+  "type": "string",
+  "en": "Stay signed in"
+ },
+ {
+  "key": "cloud_signout_stop",
+  "type": "string",
+  "en": "Stop, stay signed in"
+ },
+ {
+  "key": "cloud_signout_title",
+  "type": "string",
+  "en": "Sign out of %1$s?"
+ },
+ {
+  "key": "cloud_signout_warning",
+  "type": "string",
+  "en": "GallerySync will stop backing up to %1$s until you sign in again. Nothing is deleted, and the files already there stay there. Folders paired with %1$s wait for you."
+ },
+ {
+  "key": "destination_browse",
+  "type": "string",
+  "en": "Browse…"
+ },
+ {
+  "key": "destination_cancel",
+  "type": "string",
+  "en": "Cancel"
+ },
+ {
+  "key": "destination_change",
+  "type": "string",
+  "en": "Change"
+ },
+ {
+  "key": "destination_dialog_body",
+  "type": "string",
+  "en": "New photos and videos will go here. The %1$d files already backed up stay where they are, and GallerySync keeps looking in the old folder too, so nothing is uploaded twice."
+ },
+ {
+  "key": "destination_dialog_body_unknown",
+  "type": "string",
+  "en": "New photos and videos will go here. Anything already backed up stays where it is, and GallerySync keeps looking in the old folder too, so nothing is uploaded twice."
+ },
+ {
+  "key": "destination_dialog_title",
+  "type": "string",
+  "en": "Where new backups go"
+ },
+ {
+  "key": "destination_invalid",
+  "type": "string",
+  "en": "That folder path cannot be used. Use a plain path like Pictures/Backup, with no leading or trailing slash."
+ },
+ {
+  "key": "destination_label",
+  "type": "string",
+  "en": "Folder in OneDrive"
+ },
+ {
+  "key": "destination_reset",
+  "type": "string",
+  "en": "Reset to default"
+ },
+ {
+  "key": "destination_save",
+  "type": "string",
+  "en": "Use this folder"
+ },
+ {
+  "key": "google_photos_connect_action",
+  "type": "string",
+  "en": "Connect"
+ },
+ {
+  "key": "google_photos_connected",
+  "type": "string",
+  "en": "Connected"
+ },
+ {
+  "key": "google_photos_not_connected",
+  "type": "string",
+  "en": "Not connected"
+ },
+ {
+  "key": "google_photos_trial_active_terms",
+  "type": "string",
+  "en": "Free trial: %1$d days left. After that, a one-time unlock: $2.49 (or your local price)."
+ },
+ {
+  "key": "google_photos_trial_ended",
+  "type": "string",
+  "en": "Trial ended. Google Photos is paused until you unlock Pro (one-time $2.49, or your local price). Your main Cloud is not affected."
+ },
+ {
+  "key": "google_photos_trial_offer",
+  "type": "string",
+  "en": "Free for 30 days, then a one-time unlock: $2.49 (or your local price). Nothing is charged automatically."
+ },
+ {
+  "key": "google_photos_trial_start_action",
+  "type": "string",
+  "en": "Start 30-day free trial"
+ },
+ {
+  "key": "google_photos_unlock_pro_action",
+  "type": "string",
+  "en": "Unlock Pro"
+ },
+ {
+  "key": "help_open_guide",
+  "type": "string",
+  "en": "Read more in the How To Guide"
+ },
+ {
+  "key": "library_back_up_all",
+  "type": "string",
+  "en": "Check Cloud Storage and back up everything that isn\\'t already backed up"
+ },
+ {
+  "key": "library_free_space",
+  "type": "string",
+  "en": "All #1 - plus Optimise All files on phone for maximum storage saving"
+ },
+ {
+  "key": "library_optimise_new",
+  "type": "string",
+  "en": "All #1 - but only Optimise newly backed up files - for moderate storage saving"
+ },
+ {
+  "key": "library_per_album",
+  "type": "string",
+  "en": "Check Cloud Storage but do not back up any new files - no storage savings. You will manually select which Albums to backup/Sync"
+ },
+ {
+  "key": "picker_back",
+  "type": "string",
+  "en": "Up one folder"
+ },
+ {
+  "key": "picker_create",
+  "type": "string",
+  "en": "Create"
+ },
+ {
+  "key": "picker_create_failed",
+  "type": "string",
+  "en": "Could not create that folder. The name may already be taken."
+ },
+ {
+  "key": "picker_empty",
+  "type": "string",
+  "en": "No folders here."
+ },
+ {
+  "key": "picker_failed",
+  "type": "string",
+  "en": "Could not reach OneDrive."
+ },
+ {
+  "key": "picker_new_folder",
+  "type": "string",
+  "en": "New folder"
+ },
+ {
+  "key": "picker_new_folder_name",
+  "type": "string",
+  "en": "Folder name"
+ },
+ {
+  "key": "picker_retry",
+  "type": "string",
+  "en": "Try again"
+ },
+ {
+  "key": "picker_root",
+  "type": "string",
+  "en": "OneDrive"
+ },
+ {
+  "key": "picker_show_more",
+  "type": "string",
+  "en": "Show more"
+ },
+ {
+  "key": "picker_title",
+  "type": "string",
+  "en": "Choose a folder"
+ },
+ {
+  "key": "picker_use",
+  "type": "string",
+  "en": "Use this folder"
+ },
+ {
+  "key": "restore_edited_keep",
+  "type": "string",
+  "en": "Keep my edits"
+ },
+ {
+  "key": "settings_optimise_photos",
+  "type": "string",
+  "en": "Optimise photos"
+ },
+ {
+  "key": "settings_optimise_videos",
+  "type": "string",
+  "en": "Optimise video"
+ },
+ {
+  "key": "settings_page_close",
+  "type": "string",
+  "en": "Close"
+ },
+ {
+  "key": "sign_out_action",
+  "type": "string",
+  "en": "Sign out"
+ },
+ {
+  "key": "tab_help",
+  "type": "string",
+  "en": "Help"
+ },
+ {
+  "key": "tour_backup_title",
+  "type": "string",
+  "en": "Choose your Backup Plan"
+ },
+ {
+  "key": "tour_cloud_body",
+  "type": "string",
+  "en": "Select the Clouds you use. One Cloud is free. Each extra Cloud is part of Pro, free for 30 days. You sign in to each one on the next cards."
+ },
+ {
+  "key": "tour_cloud_connect_progress",
+  "type": "string",
+  "en": "Cloud %1$d of %2$d"
+ },
+ {
+  "key": "tour_cloud_connect_title",
+  "type": "string",
+  "en": "Connect to %1$s"
+ },
+ {
+  "key": "tour_cloud_google_photos_limit_backup_only",
+  "type": "string",
+  "en": "Backup only — no Archive or Sync."
+ },
+ {
+  "key": "tour_cloud_google_photos_limit_duplicates",
+  "type": "string",
+  "en": "Photos already in that Cloud may be added twice."
+ },
+ {
+  "key": "tour_cloud_google_photos_limit_pro",
+  "type": "string",
+  "en": "Free for 30 days, then a one-time purchase."
+ },
+ {
+  "key": "tour_cloud_google_photos_limit_restore",
+  "type": "string",
+  "en": "Restoring from it is not available yet."
+ },
+ {
+  "key": "tour_cloud_google_photos_limits_title",
+  "type": "string",
+  "en": "About this Cloud"
+ },
+ {
+  "key": "tour_cloud_title",
+  "type": "string",
+  "en": "Cloud Storage"
+ },
+ {
+  "key": "tour_delay_backup_size",
+  "type": "string",
+  "en": "You have selected %1$s to back up"
+ },
+ {
+  "key": "tour_delay_chip_hours",
+  "type": "string",
+  "en": "%1$dh"
+ },
+ {
+  "key": "tour_delay_chip_minutes",
+  "type": "string",
+  "en": "%1$dm"
+ },
+ {
+  "key": "tour_delay_hours_label",
+  "type": "string",
+  "en": "Delay"
+ },
+ {
+  "key": "tour_delay_late_start",
+  "type": "string",
+  "en": "Backup may start after the set time due to the verification process."
+ },
+ {
+  "key": "tour_delay_later",
+  "type": "plurals",
+  "en": {
+   "one": "Start in %1$d hour",
+   "other": "Start in %1$d hours"
+  }
+ },
+ {
+  "key": "tour_delay_later_minutes",
+  "type": "plurals",
+  "en": {
+   "one": "Start in %1$d minute",
+   "other": "Start in %1$d minutes"
+  }
+ },
+ {
+  "key": "tour_delay_right_now",
+  "type": "string",
+  "en": "Right now"
+ },
+ {
+  "key": "tour_delay_saving_size",
+  "type": "string",
+  "en": "You will save %1$s in local storage"
+ },
+ {
+  "key": "tour_delay_scanning",
+  "type": "string",
+  "en": "Scanning your library…"
+ },
+ {
+  "key": "tour_delay_security",
+  "type": "string",
+  "en": "For the security of your data, the app will be unavailable until a backup has been successfully completed and verified."
+ },
+ {
+  "key": "tour_delay_title",
+  "type": "string",
+  "en": "Ready to Back Up"
+ },
+ {
+  "key": "tour_delay_when",
+  "type": "string",
+  "en": "Do you want to perform backup now?"
+ },
+ {
+  "key": "tour_description_archive",
+  "type": "string",
+  "en": "Review files verified in the Cloud and free up space"
+ },
+ {
+  "key": "tour_description_body",
+  "type": "string",
+  "en": "GallerySync keeps your photos and videos backed up in Cloud Services and manages how much space they take on your phone. Here\\'s what you\\'ll find:"
+ },
+ {
+  "key": "tour_description_help",
+  "type": "string",
+  "en": "Press any (?) for a quick explanation of that line. For everything in one place, open the How To Guide at the top of Settings."
+ },
+ {
+  "key": "tour_description_navigation",
+  "type": "string",
+  "en": "Browse and download files from Cloud Services"
+ },
+ {
+  "key": "tour_description_settings",
+  "type": "string",
+  "en": "Backup destination, optimisation, and preferences"
+ },
+ {
+  "key": "tour_description_tabs",
+  "type": "string",
+  "en": "See your albums and choose what to back up"
+ },
+ {
+  "key": "tour_description_title",
+  "type": "string",
+  "en": "How the app works"
+ },
+ {
+  "key": "tour_discover_body",
+  "type": "string",
+  "en": "The search found these folders. Select the ones you want backed up. Press next to give GallerySync specific permission to use these folders."
+ },
+ {
+  "key": "tour_discover_none_found",
+  "type": "string",
+  "en": "No media folders found on this device."
+ },
+ {
+  "key": "tour_discover_scanning",
+  "type": "string",
+  "en": "Scanning your photos and videos…"
+ },
+ {
+  "key": "tour_discover_title",
+  "type": "string",
+  "en": "Choose folders to back up"
+ },
+ {
+  "key": "tour_folder_choose_hint",
+  "type": "string",
+  "en": "Choose which Cloud each selected folder goes to."
+ },
+ {
+  "key": "tour_folder_goes_to",
+  "type": "string",
+  "en": "Goes to: %1$s"
+ },
+ {
+  "key": "tour_grant_cancelled",
+  "type": "string",
+  "en": "No access was given to %1$s. GallerySync needs it to back up and optimise the files in %1$s. Skipping leaves %1$s out of the backup."
+ },
+ {
+  "key": "tour_grant_choose_whole",
+  "type": "string",
+  "en": "Choose all of %1$s"
+ },
+ {
+  "key": "tour_grant_elsewhere",
+  "type": "string",
+  "en": "%2$s isn\\'t %1$s, so it wasn\\'t used. GallerySync needs access to %1$s itself to back it up. Skipping leaves %1$s out of the backup."
+ },
+ {
+  "key": "tour_grant_keep_narrower",
+  "type": "string",
+  "en": "Keep %1$s only"
+ },
+ {
+  "key": "tour_grant_narrower",
+  "type": "string",
+  "en": "You chose %2$s, which is inside %1$s. Only %2$s would be backed up. The rest of %1$s would be left out."
+ },
+ {
+  "key": "tour_grant_skip",
+  "type": "string",
+  "en": "Skip %1$s"
+ },
+ {
+  "key": "tour_grant_try_again",
+  "type": "string",
+  "en": "Try again"
+ },
+ {
+  "key": "tour_grant_unusable",
+  "type": "string",
+  "en": "That choice can\\'t be used. GallerySync needs access to %1$s itself to back it up. Skipping leaves %1$s out of the backup."
+ },
+ {
+  "key": "tour_install_body",
+  "type": "string",
+  "en": "There are four simple steps to get you started."
+ },
+ {
+  "key": "tour_install_cloud",
+  "type": "string",
+  "en": "Choose your Cloud storage and sign in to it"
+ },
+ {
+  "key": "tour_install_grant_gallery",
+  "type": "string",
+  "en": "Give permission to change files in those folders"
+ },
+ {
+  "key": "tour_install_search",
+  "type": "string",
+  "en": "Give permission to search this phone for photos and videos"
+ },
+ {
+  "key": "tour_install_select_gallery",
+  "type": "string",
+  "en": "Choose which of the folders it finds you want backed up, and where each one goes"
+ },
+ {
+  "key": "tour_install_title",
+  "type": "string",
+  "en": "What we\\'ll set up"
+ },
+ {
+  "key": "tour_ok",
+  "type": "string",
+  "en": "OK"
+ },
+ {
+  "key": "tour_optimise_body",
+  "type": "string",
+  "en": "Optimisation allows you to free up storage space on your phone while still being able to see all your photos and videos on your Gallery."
+ },
+ {
+  "key": "tour_optimise_checking",
+  "type": "string",
+  "en": "Checking your Cloud to work out what this would save…"
+ },
+ {
+  "key": "tour_optimise_incomplete",
+  "type": "string",
+  "en": "Could not check %1$d of your albums, so the real saving is likely to be larger than this."
+ },
+ {
+  "key": "tour_optimise_later_only",
+  "type": "string",
+  "en": "These settings apply to any album you later set to Sync. This install will not optimise anything on its own."
+ },
+ {
+  "key": "tour_optimise_nothing",
+  "type": "string",
+  "en": "No photos or videos were found in the folders you chose, so there is nothing to optimise."
+ },
+ {
+  "key": "tour_optimise_photos_saving",
+  "type": "string",
+  "en": "Estimated photo savings: %1$s"
+ },
+ {
+  "key": "tour_optimise_title",
+  "type": "string",
+  "en": "Optimisation Settings"
+ },
+ {
+  "key": "tour_optimise_total_saving",
+  "type": "string",
+  "en": "Total estimated savings: %1$s"
+ },
+ {
+  "key": "tour_optimise_unchecked",
+  "type": "string",
+  "en": "Your Cloud could not be checked just now, so there is no saving to estimate yet. These settings still apply — they act on whatever the first backup sends."
+ },
+ {
+  "key": "tour_optimise_video_quality",
+  "type": "string",
+  "en": "Video compression level"
+ },
+ {
+  "key": "tour_optimise_video_saving",
+  "type": "string",
+  "en": "Estimated video savings: %1$s"
+ },
+ {
+  "key": "tour_progress_body",
+  "type": "string",
+  "en": "Your backup is running. The backup runs in the background — you can use your phone normally."
+ },
+ {
+  "key": "tour_progress_checked",
+  "type": "string",
+  "en": "%1$,d of %2$,d checked"
+ },
+ {
+  "key": "tour_progress_complete",
+  "type": "string",
+  "en": "Congratulations your backup has finished successfully and has been verified. Press Finish."
+ },
+ {
+  "key": "tour_progress_count",
+  "type": "string",
+  "en": "%1$d of %2$d"
+ },
+ {
+  "key": "tour_progress_note",
+  "type": "string",
+  "en": "You can check progress any time by opening the app."
+ },
+ {
+  "key": "tour_progress_optimising_photos",
+  "type": "string",
+  "en": "Upload finished and verified. Now optimising your photos: they stay in your gallery and stay usable, and the full-size originals stay in your Cloud."
+ },
+ {
+  "key": "tour_progress_optimising_photos_label",
+  "type": "string",
+  "en": "Optimising photos"
+ },
+ {
+  "key": "tour_progress_optimising_video",
+  "type": "string",
+  "en": "Upload finished and verified. Now optimising your videos: nothing is cut, they stay in your gallery, and the full-size originals stay in your Cloud."
+ },
+ {
+  "key": "tour_progress_optimising_video_label",
+  "type": "string",
+  "en": "Optimising video"
+ },
+ {
+  "key": "tour_progress_pending_cloud",
+  "type": "string",
+  "en": "Pending %1$s: %2$d"
+ },
+ {
+  "key": "tour_progress_plug_in",
+  "type": "string",
+  "en": "Make sure your phone is plugged in for the backup to start on its own."
+ },
+ {
+  "key": "tour_progress_scanning",
+  "type": "string",
+  "en": "Scanning your library…"
+ },
+ {
+  "key": "tour_progress_starting",
+  "type": "string",
+  "en": "Starting upload…"
+ },
+ {
+  "key": "tour_progress_sync_now",
+  "type": "string",
+  "en": "SYNC NOW"
+ },
+ {
+  "key": "tour_progress_title",
+  "type": "string",
+  "en": "Backup Progress"
+ },
+ {
+  "key": "tour_progress_until_start",
+  "type": "string",
+  "en": "until backup starts"
+ },
+ {
+  "key": "tour_progress_uploading",
+  "type": "string",
+  "en": "Uploading %1$d of %2$d"
+ },
+ {
+  "key": "tour_progress_uploading_cloud",
+  "type": "string",
+  "en": "Uploading %1$s"
+ },
+ {
+  "key": "tour_progress_verified_all",
+  "type": "string",
+  "en": "%1$,d files checked: all already in OneDrive. Nothing needed sending."
+ },
+ {
+  "key": "tour_progress_verified_some",
+  "type": "string",
+  "en": "OneDrive: %1$,d files checked, %2$,d already there. %3$,d files sent in all."
+ },
+ {
+  "key": "tour_progress_verifying",
+  "type": "string",
+  "en": "Checking your Cloud"
+ },
+ {
+  "key": "tour_progress_verifying_body",
+  "type": "string",
+  "en": "Step one: checking your Cloud for the files it already has, by name and size. Nothing is sent during this step."
+ },
+ {
+  "key": "tour_progress_waiting",
+  "type": "string",
+  "en": "Waiting to start"
+ },
+ {
+  "key": "tour_progress_waiting_body",
+  "type": "string",
+  "en": "Your backup starts on its own, even if you close the app. Backup may start after the set time due to the verification process. Or start it now."
+ },
+ {
+  "key": "tour_search_action",
+  "type": "string",
+  "en": "Give search permission"
+ },
+ {
+  "key": "tour_search_body",
+  "type": "string",
+  "en": "First, permission to search. GallerySync needs to find where your photos and videos are located on your device."
+ },
+ {
+  "key": "tour_search_title",
+  "type": "string",
+  "en": "Let GallerySync search this phone"
+ },
+ {
+  "key": "tour_welcome_title",
+  "type": "string",
+  "en": "Welcome to GallerySync"
+ },
+ {
+  "key": "video_quality_compression_line",
+  "type": "string",
+  "en": "Compression"
+ },
+ {
+  "key": "video_quality_high_name",
+  "type": "string",
+  "en": "High"
+ },
+ {
+  "key": "video_quality_low_name",
+  "type": "string",
+  "en": "Low"
+ },
+ {
+  "key": "video_quality_medium_name",
+  "type": "string",
+  "en": "Medium"
+ },
+ {
+  "key": "wizard_back",
+  "type": "string",
+  "en": "Back"
+ },
+ {
+  "key": "wizard_cancel",
+  "type": "string",
+  "en": "Cancel"
+ },
+ {
+  "key": "wizard_close_label",
+  "type": "string",
+  "en": "Close"
+ },
+ {
+  "key": "wizard_detail_link",
+  "type": "string",
+  "en": "For a more detailed explanation %1$s"
+ },
+ {
+  "key": "wizard_detail_link_action",
+  "type": "string",
+  "en": "Click Here"
+ },
+ {
+  "key": "wizard_finish_label",
+  "type": "string",
+  "en": "Finish"
+ },
+ {
+  "key": "wizard_guide_link",
+  "type": "string",
+  "en": "For a more detailed breakdown of the set up process %1$s"
+ },
+ {
+  "key": "wizard_guide_link_action",
+  "type": "string",
+  "en": "click here"
+ },
+ {
+  "key": "wizard_next",
+  "type": "string",
+  "en": "Next"
+ }
+]

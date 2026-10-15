@@ -8113,3 +8113,12 @@ the screens around it stay English (Activity pinned). Until the translation sess
 `values-<loc>/help_topics.xml` into `app/src/main/res/`, the card falls back to English. The guide's setup chapter
 quotes the wizard's translated labels; every other chapter keeps quoting English labels. Installed on the Moto, no crash;
 a translated card can only be seen once a language is published.
+
+### 14 Oct 2026 — the wizard in all six languages
+Brazilian Portuguese, French, German, Japanese and Hindi join Spanish (184 strings each, placeholders checked). Sources
+and the generator now live in `tools/wizard/` (`python tools/wizard/gen.py es pt-BR fr de ja hi`); an English wizard
+string changed later means updating `wizard_en.json` and every `<lang>.py`. The wizard's "Help" card title is now
+translated (it is not a tab). The sample Settings screen was already English: the Spanish seen earlier was the next
+card, composed behind it. Walked on the Moto as far as setup goes without signing in (Welcome to Connect to OneDrive):
+German and Hindi and Portuguese light, Japanese and French dark, no overflow, no crash. Cards past the Cloud sign-in
+(folders, Backup Plan, optimise, delay, progress) are not yet seen in any language.
