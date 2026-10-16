@@ -85,16 +85,17 @@ class MainActivity : ComponentActivity() {
     }
 
     /**
-     * The wizard's language while the wizard is on screen, else null. Set by `SetupTour`. The wizard's cards and
-     * dialogs are popups and dialogs, and Compose gives those their own window whose text comes from the Activity's
-     * resources, not from the wizard's `InLanguage`; so while it shows, the Activity answers in its language. The
-     * wizard covers the whole screen, so nothing else is visible meanwhile, and the app is English again after.
+     * The chosen language while a translated surface is on screen (the wizard, or the Settings tab), else null. Set by
+     * `InChosenLanguage`. Their cards and dialogs are popups and dialogs, and Compose gives those their own window
+     * whose text comes from the Activity's resources, not from `InLanguage`; so while one shows, the Activity answers
+     * in its language. What is already drawn (the tab bar) keeps the resources it was composed with, and the app is
+     * English again once the surface leaves.
      */
-    @Volatile var wizardLanguage: String? = null
+    @Volatile var localisedLanguage: String? = null
     private var wizardResources: Pair<String, android.content.res.Resources>? = null
 
     override fun getResources(): android.content.res.Resources {
-        val tag = wizardLanguage ?: return super.getResources()
+        val tag = localisedLanguage ?: return super.getResources()
         wizardResources?.let { (cachedTag, resources) -> if (cachedTag == tag) return resources }
         val config = android.content.res.Configuration(super.getResources().configuration)
             .apply { setLocale(java.util.Locale.forLanguageTag(tag)) }
@@ -446,7 +447,10 @@ private fun SignedInApp(
                 0 -> BackupScreen(onAlbumArchived = { selectedTab = archiveTab })
                 1 -> RestoreScreen()
                 2 -> ArchiveScreen()
-                else -> SettingsScreen(accountName = accountName, onSignOut = onSignOut)
+                // The Settings tab speaks the chosen language (Ian, 15 Oct 2026); the other tabs stay English.
+                else -> com.gallery.sync.ui.common.InChosenLanguage {
+                    SettingsScreen(accountName = accountName, onSignOut = onSignOut)
+                }
             }
 
             if (tourVisible && setupViewModel != null) {

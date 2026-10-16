@@ -231,19 +231,8 @@ fun SetupTour(
     onStepChanged: (Int) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    // The wizard, and only the wizard, speaks the language chosen on its Welcome screen (Ian, 14 Oct 2026); the
-    // rest of the app is English. See InLanguage.
-    val languageViewModel: com.gallery.sync.ui.settings.LanguageViewModel = hiltViewModel()
-    val wizardLanguage by languageViewModel.language.collectAsStateWithLifecycle()
-    // Popups and dialogs read the Activity's resources; see MainActivity.wizardLanguage.
-    val activity = androidx.activity.compose.LocalActivity.current as? com.gallery.sync.MainActivity
-    // Set during composition, before any popup below reads the Activity's resources.
-    activity?.wizardLanguage = wizardLanguage.code
-    androidx.compose.runtime.DisposableEffect(activity, wizardLanguage.code) {
-        activity?.wizardLanguage = wizardLanguage.code
-        onDispose { activity?.wizardLanguage = null }
-    }
-    com.gallery.sync.ui.common.InLanguage(wizardLanguage.code) {
+    // The wizard speaks the language chosen on its Welcome screen (Ian, 14 Oct 2026). See InChosenLanguage.
+    com.gallery.sync.ui.common.InChosenLanguage {
         SetupTourBody(viewModel, signInViewModel, cloudViewModel, onComplete, onSwitchTab, onStepChanged, modifier)
     }
 }
@@ -2729,7 +2718,7 @@ private fun ArchiveMockup() = com.gallery.sync.ui.common.InLanguage("en") { Arch
 @Composable
 private fun SettingsMockup(
     onGuideCardPositioned: ((Rect) -> Unit)? = null
-) = com.gallery.sync.ui.common.InLanguage("en") { SettingsTabPreview(onGuideCardPositioned) }
+) = SettingsTabPreview(onGuideCardPositioned)
 
 /** Which of step 9's three phases is running. See where it is derived, in the tour body. */
 /**

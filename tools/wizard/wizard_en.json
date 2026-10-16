@@ -20,6 +20,69 @@
   "en": "Stop the backup?"
  },
  {
+  "key": "backup_allow_metered",
+  "type": "string",
+  "en": "Use mobile data"
+ },
+ {
+  "key": "backup_allow_metered_off",
+  "type": "string",
+  "en": "Wi-Fi only."
+ },
+ {
+  "key": "backup_allow_metered_on",
+  "type": "string",
+  "en": "Syncs on Wi-Fi and mobile data."
+ },
+ {
+  "key": "backup_folder_label",
+  "type": "plurals",
+  "en": {
+   "one": "%1$s · %2$d file",
+   "other": "%1$s · %2$d files"
+  }
+ },
+ {
+  "key": "backup_folders_explainer",
+  "type": "string",
+  "en": "New photos and videos in each folder go to the Cloud you pick. Anything already sent stays where it is."
+ },
+ {
+  "key": "backup_folders_heading",
+  "type": "string",
+  "en": "Where each folder goes"
+ },
+ {
+  "key": "bug_report_clip_label",
+  "type": "string",
+  "en": "GallerySync bug report"
+ },
+ {
+  "key": "bug_report_copied",
+  "type": "string",
+  "en": "Copied"
+ },
+ {
+  "key": "bug_report_copy_details",
+  "type": "string",
+  "en": "Copy details"
+ },
+ {
+  "key": "bug_report_details_heading",
+  "type": "string",
+  "en": "Please include these details"
+ },
+ {
+  "key": "bug_report_details_hint",
+  "type": "string",
+  "en": "They tell us which build and which phone, which is usually the difference between a fix and a guess."
+ },
+ {
+  "key": "bug_report_intro",
+  "type": "string",
+  "en": "Tell us what went wrong, what you expected to happen, and which screen you were on. Write to:"
+ },
+ {
   "key": "cloud_backup_folder",
   "type": "string",
   "en": "Backup folder"
@@ -203,6 +266,41 @@
   "en": "GallerySync will stop backing up to %1$s until you sign in again. Nothing is deleted, and the files already there stay there. Folders paired with %1$s wait for you."
  },
  {
+  "key": "contact_page_clip_label",
+  "type": "string",
+  "en": "GallerySync contact"
+ },
+ {
+  "key": "contact_page_copied",
+  "type": "string",
+  "en": "Copied"
+ },
+ {
+  "key": "contact_page_copy",
+  "type": "string",
+  "en": "Copy address"
+ },
+ {
+  "key": "contact_page_intro",
+  "type": "string",
+  "en": "Questions or problems with GallerySync? Write to:"
+ },
+ {
+  "key": "deletion_ask",
+  "type": "string",
+  "en": "Ask me about the Cloud copy"
+ },
+ {
+  "key": "deletion_leave",
+  "type": "string",
+  "en": "Leave the Cloud copy"
+ },
+ {
+  "key": "deletion_title",
+  "type": "string",
+  "en": "When you delete a photo/video from this phone"
+ },
+ {
   "key": "destination_browse",
   "type": "string",
   "en": "Browse…"
@@ -318,6 +416,66 @@
   "en": "Check Cloud Storage but do not back up any new files - no storage savings. You will manually select which Albums to backup/Sync"
  },
  {
+  "key": "media_age_immediately",
+  "type": "string",
+  "en": "Straight away"
+ },
+ {
+  "key": "media_age_immediately_warning",
+  "type": "string",
+  "en": "Reaches clips shot today. They stay in your gallery and still play, but editing one starts from the smaller copy until you fetch the original back."
+ },
+ {
+  "key": "media_age_one_day",
+  "type": "string",
+  "en": "1 day"
+ },
+ {
+  "key": "media_age_one_hour",
+  "type": "string",
+  "en": "1 hour"
+ },
+ {
+  "key": "media_age_one_week",
+  "type": "string",
+  "en": "1 week"
+ },
+ {
+  "key": "media_age_twelve_hours",
+  "type": "string",
+  "en": "12 hours"
+ },
+ {
+  "key": "pairing_needs_pro",
+  "type": "string",
+  "en": "Needs Pro: nothing is being sent to %1$s until you unlock it, or pair this folder with your free Cloud."
+ },
+ {
+  "key": "pairing_no_cloud",
+  "type": "string",
+  "en": "No Cloud"
+ },
+ {
+  "key": "pairing_not_connected",
+  "type": "string",
+  "en": "%1$s is not connected. Nothing in this folder is being backed up. Connect it above, or pick another Cloud."
+ },
+ {
+  "key": "pairing_option_not_connected",
+  "type": "string",
+  "en": "%1$s (not connected)"
+ },
+ {
+  "key": "pairing_path",
+  "type": "string",
+  "en": "Goes to %1$s / %2$s"
+ },
+ {
+  "key": "pairing_path_library",
+  "type": "string",
+  "en": "Goes to your Google Photos library"
+ },
+ {
   "key": "picker_back",
   "type": "string",
   "en": "Up one folder"
@@ -378,14 +536,174 @@
   "en": "Use this folder"
  },
  {
+  "key": "proxy_unsupported",
+  "type": "string",
+  "en": "Optimising photos needs Android 11 or newer."
+ },
+ {
+  "key": "reoptimise_body",
+  "type": "string",
+  "en": "Videos in Sync albums that were too small to shrink at the old compression can be optimised again at this one. Videos already optimised stay as they are. The full-size originals stay in your Cloud."
+ },
+ {
+  "key": "reoptimise_no",
+  "type": "string",
+  "en": "No"
+ },
+ {
+  "key": "reoptimise_title",
+  "type": "string",
+  "en": "Re-optimise existing videos?"
+ },
+ {
+  "key": "reoptimise_yes",
+  "type": "string",
+  "en": "Yes"
+ },
+ {
   "key": "restore_edited_keep",
   "type": "string",
   "en": "Keep my edits"
  },
  {
+  "key": "settings_appearance",
+  "type": "string",
+  "en": "Appearance"
+ },
+ {
+  "key": "settings_archive_notify",
+  "type": "string",
+  "en": "Notify when files are ready to archive"
+ },
+ {
+  "key": "settings_archive_notify_blocked",
+  "type": "string",
+  "en": "Notifications are turned off for GallerySync in your phone\\'s settings, so nothing will arrive until you turn them back on there."
+ },
+ {
+  "key": "settings_bug_report",
+  "type": "string",
+  "en": "Bug Report"
+ },
+ {
+  "key": "settings_bug_report_detail",
+  "type": "string",
+  "en": "Something not working? Send us what happened."
+ },
+ {
+  "key": "settings_camera",
+  "type": "string",
+  "en": "Camera Sync"
+ },
+ {
+  "key": "settings_camera_folder",
+  "type": "string",
+  "en": "Camera folder"
+ },
+ {
+  "key": "settings_camera_folder_choose",
+  "type": "string",
+  "en": "Choose"
+ },
+ {
+  "key": "settings_camera_folder_hint",
+  "type": "string",
+  "en": "Choose the folder your camera saves to. Until you do, no folder has these settings."
+ },
+ {
+  "key": "settings_camera_folder_other",
+  "type": "string",
+  "en": "Other…"
+ },
+ {
+  "key": "settings_camera_special",
+  "type": "string",
+  "en": "Special settings for Camera"
+ },
+ {
+  "key": "settings_camera_video_quality",
+  "type": "string",
+  "en": "Video compression"
+ },
+ {
+  "key": "settings_contact",
+  "type": "string",
+  "en": "Contact Info"
+ },
+ {
+  "key": "settings_contact_detail",
+  "type": "string",
+  "en": "Questions or problems? Email %1$s"
+ },
+ {
+  "key": "settings_delete_account",
+  "type": "string",
+  "en": "Delete Account Info"
+ },
+ {
+  "key": "settings_delete_account_detail",
+  "type": "string",
+  "en": "How to sign out, remove the app\\'s access to your Microsoft account, and clear its data."
+ },
+ {
+  "key": "settings_general",
+  "type": "string",
+  "en": "General"
+ },
+ {
+  "key": "settings_help_feedback",
+  "type": "string",
+  "en": "Help & Feedback"
+ },
+ {
+  "key": "settings_how_to_guide",
+  "type": "string",
+  "en": "How To Guide"
+ },
+ {
+  "key": "settings_how_to_guide_detail",
+  "type": "string",
+  "en": "What every screen and every line means, and where its information comes from."
+ },
+ {
+  "key": "settings_language",
+  "type": "string",
+  "en": "Language"
+ },
+ {
+  "key": "settings_language_detail",
+  "type": "string",
+  "en": "This tab, the setup screens, the (?) cards and the How To Guide follow this choice. The other tabs are in English."
+ },
+ {
+  "key": "settings_older_than",
+  "type": "string",
+  "en": "Older than"
+ },
+ {
+  "key": "settings_optimise_mode",
+  "type": "string",
+  "en": "Mode"
+ },
+ {
+  "key": "settings_optimise_mode_auto",
+  "type": "string",
+  "en": "Automatic"
+ },
+ {
+  "key": "settings_optimise_mode_manual",
+  "type": "string",
+  "en": "Manual"
+ },
+ {
   "key": "settings_optimise_photos",
   "type": "string",
   "en": "Optimise photos"
+ },
+ {
+  "key": "settings_optimise_photos_on",
+  "type": "string",
+  "en": "Photos in Sync albums are optimised for storage."
  },
  {
   "key": "settings_optimise_videos",
@@ -398,14 +716,122 @@
   "en": "Close"
  },
  {
+  "key": "settings_page_load_failed",
+  "type": "string",
+  "en": "This page could not be loaded. Check your connection and try again."
+ },
+ {
+  "key": "settings_page_open_browser",
+  "type": "string",
+  "en": "Open in browser"
+ },
+ {
+  "key": "settings_privacy_policy",
+  "type": "string",
+  "en": "Privacy Policy"
+ },
+ {
+  "key": "settings_privacy_policy_detail",
+  "type": "string",
+  "en": "How GallerySync handles your photos, videos and account."
+ },
+ {
+  "key": "settings_quality",
+  "type": "string",
+  "en": "Compression"
+ },
+ {
+  "key": "settings_rate",
+  "type": "string",
+  "en": "Rate us on Play Store"
+ },
+ {
+  "key": "settings_rate_detail",
+  "type": "string",
+  "en": "Opens the GallerySync listing on Google Play."
+ },
+ {
+  "key": "settings_show_empty_folders",
+  "type": "string",
+  "en": "Show empty folders"
+ },
+ {
   "key": "sign_out_action",
   "type": "string",
   "en": "Sign out"
  },
  {
+  "key": "sources_add",
+  "type": "string",
+  "en": "Add a folder"
+ },
+ {
+  "key": "sources_empty",
+  "type": "string",
+  "en": "No folders chosen yet. Nothing is backed up, scanned or changed until you pick one."
+ },
+ {
+  "key": "sources_full_path",
+  "type": "string",
+  "en": "%1$s / %2$s"
+ },
+ {
+  "key": "sources_refused",
+  "type": "string",
+  "en": "That folder cannot be used. Choose a folder rather than a whole drive."
+ },
+ {
+  "key": "sources_remove",
+  "type": "string",
+  "en": "Remove"
+ },
+ {
+  "key": "sources_remove_confirm_accept",
+  "type": "string",
+  "en": "Remove"
+ },
+ {
+  "key": "sources_remove_confirm_body",
+  "type": "plurals",
+  "en": {
+   "one": "GallerySync will stop looking in this folder. Nothing already backed up is lost, and adding the folder back restores everything as it was.",
+   "other": "GallerySync will stop looking in these %1$d folders. Nothing already backed up is lost, and adding a folder back restores everything as it was."
+  }
+ },
+ {
+  "key": "sources_remove_confirm_cancel",
+  "type": "string",
+  "en": "Cancel"
+ },
+ {
+  "key": "sources_remove_confirm_title",
+  "type": "string",
+  "en": "Stop watching this folder?"
+ },
+ {
+  "key": "sources_title",
+  "type": "string",
+  "en": "Folders to back up"
+ },
+ {
   "key": "tab_help",
   "type": "string",
   "en": "Help"
+ },
+ {
+  "key": "theme_dark",
+  "type": "string",
+  "en": "Dark"
+ },
+ {
+  "key": "theme_light",
+  "type": "string",
+  "en": "Light"
+ },
+ {
+  "key": "theme_system",
+  "type": "string",
+  "en": "System"
  },
  {
   "key": "tour_backup_title",
@@ -898,9 +1324,19 @@
   "en": "Compression"
  },
  {
+  "key": "video_quality_high",
+  "type": "string",
+  "en": "High compression — 480p"
+ },
+ {
   "key": "video_quality_high_name",
   "type": "string",
   "en": "High"
+ },
+ {
+  "key": "video_quality_low",
+  "type": "string",
+  "en": "Low compression — 1080p"
  },
  {
   "key": "video_quality_low_name",
@@ -908,9 +1344,19 @@
   "en": "Low"
  },
  {
+  "key": "video_quality_medium",
+  "type": "string",
+  "en": "Medium compression — 720p"
+ },
+ {
   "key": "video_quality_medium_name",
   "type": "string",
   "en": "Medium"
+ },
+ {
+  "key": "volume_internal",
+  "type": "string",
+  "en": "Internal storage"
  },
  {
   "key": "wizard_back",

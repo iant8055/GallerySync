@@ -102,11 +102,28 @@ fun SettingsScreen(
         )
 
         // First in General (Ian, 18 Sept 2026). The setup tour's Help card rings the mock of this card,
-        // so the two move together. Language used to follow it and now sits at the foot of the page.
+        // so the two move together.
         LinkCard(
             title = stringResource(R.string.settings_how_to_guide),
             detail = stringResource(R.string.settings_how_to_guide_detail),
             onClick = { page = SupportPage.HOW_TO_GUIDE }
+        )
+
+        SettingDivider()
+
+        // Below the How To Guide and above Appearance (Ian, 15 Oct 2026). The same choice as the Welcome screen's
+        // (Ian, 14 Oct 2026): the one value the wizard and Settings share. It decides the language of this tab, the
+        // wizard, the (?) cards and the guide.
+        val languageViewModel: LanguageViewModel = hiltViewModel()
+        val language by languageViewModel.language.collectAsStateWithLifecycle()
+        SettingDropdown(
+            label = stringResource(R.string.settings_language),
+            help = HelpTopic.SETTINGS_LANGUAGE,
+            options = com.gallery.sync.domain.model.AppLanguage.entries,
+            selected = language,
+            onSelected = languageViewModel::setLanguage,
+            optionLabel = { it.nativeName },
+            note = stringResource(R.string.settings_language_detail)
         )
 
         SettingDivider()
@@ -600,21 +617,6 @@ fun SettingsScreen(
             onClick = { showContact = true }
         )
 
-        // Language is the last thing on the page (Ian, 20 Sept 2026). It is a placeholder for now.
-        SettingDivider()
-
-        // The same choice as the Welcome screen's (Ian, 14 Oct 2026): the one value the wizard and Settings share.
-        val languageViewModel: LanguageViewModel = hiltViewModel()
-        val language by languageViewModel.language.collectAsStateWithLifecycle()
-        SettingDropdown(
-            label = stringResource(R.string.settings_language),
-            help = HelpTopic.SETTINGS_LANGUAGE,
-            options = com.gallery.sync.domain.model.AppLanguage.entries,
-            selected = language,
-            onSelected = languageViewModel::setLanguage,
-            optionLabel = { it.nativeName },
-            note = stringResource(R.string.settings_language_detail)
-        )
     }
 
     page?.let { InAppPageDialog(page = it, onDismiss = { page = null }) }

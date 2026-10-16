@@ -6,7 +6,9 @@ import android.content.res.Configuration
 import android.content.res.Resources
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import java.util.Locale
@@ -42,6 +44,26 @@ fun InLanguage(languageTag: String, content: @Composable () -> Unit) {
     ) {
         content()
     }
+}
+
+/**
+ * [content] in the language chosen on the Welcome screen and in Settings → Language, dialogs and popups included. Used
+ * by the surfaces that are translated: the setup wizard (Ian, 14 Oct 2026) and the Settings tab (15 Oct 2026). The
+ * Activity answers in the language while [content] is on screen (see `MainActivity.localisedLanguage`), and English
+ * again once it leaves.
+ */
+@Composable
+fun InChosenLanguage(content: @Composable () -> Unit) {
+    val languageViewModel: com.gallery.sync.ui.settings.LanguageViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+    val language by languageViewModel.language.collectAsStateWithLifecycle()
+    val activity = androidx.activity.compose.LocalActivity.current as? com.gallery.sync.MainActivity
+    // Set during composition, before any popup below reads the Activity's resources.
+    activity?.localisedLanguage = language.code
+    androidx.compose.runtime.DisposableEffect(activity, language.code) {
+        activity?.localisedLanguage = language.code
+        onDispose { activity?.localisedLanguage = null }
+    }
+    InLanguage(language.code, content)
 }
 
 /**
