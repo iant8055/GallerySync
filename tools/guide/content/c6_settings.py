@@ -28,7 +28,7 @@ CHAPTER = Chapter(
             • **System** (default): follows your phone's light or dark setting.
             • **Light** or **Dark**: always that look.
 
-            The guide and policy pages follow your phone's setting.
+            The guide and policy pages follow this setting too.
         """, ui=True),
 
         topic("settings-mobile-data", "Use mobile data", """

@@ -31,8 +31,8 @@ TRANSLATIONS = {
         "body": """• **System** (Standard): folgt der Hell- oder Dunkel-Einstellung deines Telefons.
 • **Hell** oder **Dunkel**: immer dieses Aussehen.
 
-Die Anleitung und die Richtlinienseiten folgen der Einstellung deines Telefons.""",
-        "en_hash": "b2ab8ff47282bc06",
+Die Anleitung und die Richtlinienseiten folgen ebenfalls dieser Einstellung.""",
+        "en_hash": "373e3bf77ff126af",
     },
     "settings-mobile-data": {
         "title": "Mobile Daten verwenden",

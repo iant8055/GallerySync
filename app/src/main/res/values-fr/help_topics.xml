@@ -61,7 +61,7 @@
     <string name="help_settings_language_title" formatted="false">Langue</string>
     <string name="help_settings_language_body" formatted="false">La langue que vous avez choisie sur l\'écran Bienvenue. Touchez-la pour la changer. Le Mode d\'emploi suit ce choix ; les écrans de l\'application sont pour l\'instant en anglais.</string>
     <string name="help_settings_appearance_title" formatted="false">Apparence</string>
-    <string name="help_settings_appearance_body" formatted="false">• **Système** (par défaut) : suit le réglage clair ou sombre de votre téléphone.\n• **Clair** ou **Sombre** : toujours cet aspect.\n\nLe guide et les pages de politique suivent le réglage de votre téléphone.</string>
+    <string name="help_settings_appearance_body" formatted="false">• **Système** (par défaut) : suit le réglage clair ou sombre de votre téléphone.\n• **Clair** ou **Sombre** : toujours cet aspect.\n\nLe guide et les pages de politique suivent aussi ce réglage.</string>
     <string name="help_settings_mobile_data_title" formatted="false">Utiliser les données mobiles</string>
     <string name="help_settings_mobile_data_body" formatted="false">• **Off** (par défaut) : **Wi-Fi uniquement.**\n• **On :** **Synchronise en Wi-Fi et en données mobiles.**\n\nConcerne les sauvegardes automatiques et **Sync now**. Laissez-le désactivé sauf si votre forfait de données est illimité.</string>
     <string name="help_settings_section_backup_title" formatted="false">Backup</string>

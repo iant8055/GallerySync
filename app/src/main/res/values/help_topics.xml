@@ -61,7 +61,7 @@
     <string name="help_settings_language_title" formatted="false">Language</string>
     <string name="help_settings_language_body" formatted="false">The language you chose on the Welcome screen. Tap it to change. The How To Guide follows this choice; the app\'s screens are in English for now.</string>
     <string name="help_settings_appearance_title" formatted="false">Appearance</string>
-    <string name="help_settings_appearance_body" formatted="false">• **System** (default): follows your phone\'s light or dark setting.\n• **Light** or **Dark**: always that look.\n\nThe guide and policy pages follow your phone\'s setting.</string>
+    <string name="help_settings_appearance_body" formatted="false">• **System** (default): follows your phone\'s light or dark setting.\n• **Light** or **Dark**: always that look.\n\nThe guide and policy pages follow this setting too.</string>
     <string name="help_settings_mobile_data_title" formatted="false">Use mobile data</string>
     <string name="help_settings_mobile_data_body" formatted="false">• **Off** (default): **Wi-Fi only.**\n• **On:** **Syncs on Wi-Fi and mobile data.**\n\nCovers automatic backups and **Sync now**. Leave it off unless your data plan is unlimited.</string>
     <string name="help_settings_section_backup_title" formatted="false">Backup</string>

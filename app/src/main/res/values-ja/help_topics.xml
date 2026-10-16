@@ -61,7 +61,7 @@
     <string name="help_settings_language_title" formatted="false">言語</string>
     <string name="help_settings_language_body" formatted="false">ウェルカム画面で選んだ言語です。タップして変更します。How To Guide はこの選択に従います。アプリの画面は、今のところ英語です。</string>
     <string name="help_settings_appearance_title" formatted="false">表示</string>
-    <string name="help_settings_appearance_body" formatted="false">• **システム**（既定）：スマートフォンのライト/ダークの設定に従います。\n• **ライト** または **ダーク**：常にその表示になります。\n\nガイドとポリシーのページは、スマートフォンの設定に従います。</string>
+    <string name="help_settings_appearance_body" formatted="false">• **システム**（既定）：スマートフォンのライト/ダークの設定に従います。\n• **ライト** または **ダーク**：常にその表示になります。\n\nガイドとポリシーのページもこの設定に従います。</string>
     <string name="help_settings_mobile_data_title" formatted="false">モバイルデータを使用</string>
     <string name="help_settings_mobile_data_body" formatted="false">• **Off**（既定）：**Wi-Fi のみ。**\n• **On**：**Wi-Fi とモバイルデータで同期します。**\n\n自動バックアップと **Sync now** に適用されます。データ通信量が無制限でない限り、オフのままにしておいてください。</string>
     <string name="help_settings_section_backup_title" formatted="false">Backup</string>

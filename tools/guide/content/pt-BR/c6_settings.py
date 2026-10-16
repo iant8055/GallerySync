@@ -31,8 +31,8 @@ TRANSLATIONS = {
         "body": """• **Sistema** (padrão): segue a configuração clara ou escura do seu telefone.
 • **Claro** ou **Escuro**: sempre essa aparência.
 
-O guia e as páginas de política seguem a configuração do seu telefone.""",
-        "en_hash": "b2ab8ff47282bc06",
+O guia e as páginas de política também seguem esta configuração.""",
+        "en_hash": "373e3bf77ff126af",
     },
     'settings-mobile-data': {
         "title": 'Usar dados móveis',

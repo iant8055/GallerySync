@@ -61,7 +61,7 @@
     <string name="help_settings_language_title" formatted="false">Sprache</string>
     <string name="help_settings_language_body" formatted="false">Die Sprache, die du auf dem Willkommensbildschirm gewählt hast. Tippe darauf, um sie zu ändern. Die Anleitung folgt dieser Wahl; die Bildschirme der App sind vorerst auf Englisch.</string>
     <string name="help_settings_appearance_title" formatted="false">Darstellung</string>
-    <string name="help_settings_appearance_body" formatted="false">• **System** (Standard): folgt der Hell- oder Dunkel-Einstellung deines Telefons.\n• **Hell** oder **Dunkel**: immer dieses Aussehen.\n\nDie Anleitung und die Richtlinienseiten folgen der Einstellung deines Telefons.</string>
+    <string name="help_settings_appearance_body" formatted="false">• **System** (Standard): folgt der Hell- oder Dunkel-Einstellung deines Telefons.\n• **Hell** oder **Dunkel**: immer dieses Aussehen.\n\nDie Anleitung und die Richtlinienseiten folgen ebenfalls dieser Einstellung.</string>
     <string name="help_settings_mobile_data_title" formatted="false">Mobile Daten verwenden</string>
     <string name="help_settings_mobile_data_body" formatted="false">• **Aus** (Standard): **Nur WLAN.**\n• **An:** **Synchronisiert über WLAN und mobile Daten.**\n\nGilt für automatische Backups und **Sync now**. Lass es aus, es sei denn, dein Datentarif ist unbegrenzt.</string>
     <string name="help_settings_section_backup_title" formatted="false">Backup</string>

@@ -31,8 +31,8 @@ TRANSLATIONS = {
         "body": """• **Système** (par défaut) : suit le réglage clair ou sombre de votre téléphone.
 • **Clair** ou **Sombre** : toujours cet aspect.
 
-Le guide et les pages de politique suivent le réglage de votre téléphone.""",
-        "en_hash": "b2ab8ff47282bc06",
+Le guide et les pages de politique suivent aussi ce réglage.""",
+        "en_hash": "373e3bf77ff126af",
     },
     "settings-mobile-data": {
         "title": "Utiliser les données mobiles",

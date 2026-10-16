@@ -61,7 +61,7 @@
     <string name="help_settings_language_title" formatted="false">Idioma</string>
     <string name="help_settings_language_body" formatted="false">El idioma que elegiste en la pantalla de bienvenida. Púlsalo para cambiarlo. La Guía de uso sigue esta elección; las pantallas de la app están por ahora en inglés.</string>
     <string name="help_settings_appearance_title" formatted="false">Apariencia</string>
-    <string name="help_settings_appearance_body" formatted="false">• **Sistema** (predeterminado): sigue el ajuste claro u oscuro de tu teléfono.\n• **Claro** u **Oscuro**: siempre ese aspecto.\n\nLa guía y las páginas de política siguen el ajuste de tu teléfono.</string>
+    <string name="help_settings_appearance_body" formatted="false">• **Sistema** (predeterminado): sigue el ajuste claro u oscuro de tu teléfono.\n• **Claro** u **Oscuro**: siempre ese aspecto.\n\nLa guía y las páginas de política también siguen este ajuste.</string>
     <string name="help_settings_mobile_data_title" formatted="false">Usar datos móviles</string>
     <string name="help_settings_mobile_data_body" formatted="false">• **Off** (predeterminado): **Solo wifi.**\n• **On:** **Sincroniza con wifi y con datos móviles.**\n\nAfecta a las copias automáticas y a **Sync now**. Déjalo desactivado salvo que tu plan de datos sea ilimitado.</string>
     <string name="help_settings_section_backup_title" formatted="false">Backup</string>

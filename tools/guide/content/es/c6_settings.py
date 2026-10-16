@@ -35,8 +35,8 @@ TRANSLATIONS = {
         "body": """• **Sistema** (predeterminado): sigue el ajuste claro u oscuro de tu teléfono.
 • **Claro** u **Oscuro**: siempre ese aspecto.
 
-La guía y las páginas de política siguen el ajuste de tu teléfono.""",
-        "en_hash": "b2ab8ff47282bc06",
+La guía y las páginas de política también siguen este ajuste.""",
+        "en_hash": "373e3bf77ff126af",
     },
 
     "settings-mobile-data": {
