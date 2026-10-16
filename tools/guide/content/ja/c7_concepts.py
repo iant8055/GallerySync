@@ -16,8 +16,8 @@ TRANSLATIONS = {
 ## 対応する Cloud
 Backup は、すべての Cloud で使えます。Sync と Archive には、OneDrive、Google Drive、Dropbox、pCloud、IDrive e2、Backblaze B2 のいずれかが必要で、Google Photos では使えません。
 
-## Camera folder
-Settings で Camera folder を設定すると、Off、Backup、Archive が選べ、Sync の代わりに独自の最適化コントロールがあります。[[album-camera-optimise]]を参照してください。
+## カメラのフォルダ
+Settings でカメラのフォルダを設定すると、Off、Backup、Archive が選べ、Sync の代わりに独自の最適化コントロールがあります。[[album-camera-optimise]]を参照してください。
 
 ## どれを選ぶか
 • そのままにして、保護したい：**Backup**。
@@ -61,7 +61,7 @@ Settings で Camera folder を設定すると、Off、Backup、Archive が選べ
 長辺が約 2048 ピクセルまで縮小され、サイズは約 10 分の 1 になります。名前、場所、日付、位置情報は同じで、小さなクラウドバッジが付きます。
 
 ## 動画
-**480p**（High compression）、**720p**（Medium）、または **1080p**（Low）で再エンコードされます。カットされることはありません。Automatic は充電器につなぐまで待ち、Manual は **Sync now** で実行されます。
+**480p**（High compression）、**720p**（Medium）、または **1080p**（Low）で再エンコードされます。カットされることはありません。自動は充電器につなぐまで待ち、手動は **Sync now** で実行されます。
 
 ## ルール
 • **Sync** アルバムのみ。
@@ -84,15 +84,15 @@ Archive は、ファイルを約 30 日間、Android のゴミ箱に移します
 ゴミ箱に入ったファイルは、空にするまで元の容量を使い続けます。
 
 ## Cloud 上
-**Ask** を選んでいる場合、削除を選んだコピーは **OneDrive のゴミ箱** に移ります。ほかの Cloud からは、何も削除されません。アプリがゴミ箱を空にすることはありません。""",
+**クラウドのコピーについて確認する** を選んでいる場合、削除を選んだコピーは **OneDrive のゴミ箱** に移ります。ほかの Cloud からは、何も削除されません。アプリがゴミ箱を空にすることはありません。""",
         "en_hash": "ab2cd9530770d041",
     },
     "background-work": {
         "title": "いつ何が起きるか",
         "body": """• **バックアップ**：新しい写真が現れた少し後と、6 時間ごと。モバイルデータがオンでない限り Wi-Fi のみで、バッテリーやストレージが少ないときは実行されません。**Sync now** はすぐに実行されます。
-• **Optimising photos**：Automatic は、Sync アルバムのファイルを Cloud が確認した時点で。Manual は、**Sync now** で。
-• **Optimising video**：Automatic は、バックアップの後、充電中に。Manual は、**Sync now** で。
-• **削除されたファイル**：**Ask** の場合、Cloud にコピーがあるファイルを削除した少し後に通知されます（バックアップが一時停止中は除く）。
+• **Optimising photos**：自動は、Sync アルバムのファイルを Cloud が確認した時点で。手動は、**Sync now** で。
+• **Optimising video**：自動は、バックアップの後、充電中に。手動は、**Sync now** で。
+• **削除されたファイル**：**クラウドのコピーについて確認する** の場合、Cloud にコピーがあるファイルを削除した少し後に通知されます（バックアップが一時停止中は除く）。
 • **Archive**：Archive タブで Yes と答えたときだけ。
 • **Restore**：Restore を押したときだけ。
 
@@ -107,7 +107,7 @@ Back やホームなら問題ありません。作業は続きます。最近使
 • **アプリの記録と設定**：スマートフォン上の非公開ストレージ。
 • **何も収集しません**：分析、クラッシュレポート、広告はありません。
 
-詳細：Settings の **Privacy Policy** と **Delete Account Info**。""",
+詳細：Settings の **プライバシーポリシー** と **アカウント情報の削除**。""",
         "en_hash": "989af3b026b90273",
     },
     "numbers-explained": {

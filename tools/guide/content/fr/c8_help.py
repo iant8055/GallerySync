@@ -53,17 +53,17 @@ Les albums d'autres Clouds affichent plutôt **sent to** ce Cloud. Voir [[albums
     },
     "faq-wrong-account": {
         "title": "Je me suis connecté à un Cloud avec le mauvais compte",
-        "body": """**Settings → Backup → Sign out** à côté de ce Cloud, choisissez **Leave them there**, puis reconnectez-vous avec le bon compte. Les fichiers déjà envoyés restent dans le premier compte. Voir [[settings-account]].""",
+        "body": """**Settings → Backup → Se déconnecter** à côté de ce Cloud, choisissez **Les laisser là-bas**, puis reconnectez-vous avec le bon compte. Les fichiers déjà envoyés restent dans le premier compte. Voir [[settings-account]].""",
         "en_hash": "a033d25dffca0535",
     },
     "faq-folder-waiting": {
         "title": "Je me suis déconnecté d'un Cloud et ses dossiers n'envoient plus",
-        "body": """C'est normal. Les dossiers attendent, en sécurité sur votre téléphone, que vous vous reconnectiez. Pour les envoyer ailleurs, changez **Where each folder goes**. Voir [[settings-destination]].""",
+        "body": """C'est normal. Les dossiers attendent, en sécurité sur votre téléphone, que vous vous reconnectiez. Pour les envoyer ailleurs, changez **Où va chaque dossier**. Voir [[settings-destination]].""",
         "en_hash": "286529a95f8327e7",
     },
     "faq-keys-rejected": {
         "title": "IDrive e2 ou Backblaze B2 dit que mes clés ont été rejetées",
-        "body": """Généralement une faute de frappe. Vérifiez le point de terminaison (sans https://), la région, le bucket et les deux clés ; touchez **Show** sur le secret. Attention à **O** contre zéro, **I** contre **l**, **J** contre **j**. Le copier-coller évite cela. Voir [[cloud-key-backblaze]] et [[cloud-key-idrive]].""",
+        "body": """Généralement une faute de frappe. Vérifiez le point de terminaison (sans https://), la région, le bucket et les deux clés ; touchez **Afficher** sur le secret. Attention à **O** contre zéro, **I** contre **l**, **J** contre **j**. Le copier-coller évite cela. Voir [[cloud-key-backblaze]] et [[cloud-key-idrive]].""",
         "en_hash": "e0b15236b548a066",
     },
     "faq-could-not-check": {
@@ -73,7 +73,7 @@ Les albums d'autres Clouds affichent plutôt **sent to** ce Cloud. Voir [[albums
     },
     "faq-reconnect-cloud": {
         "title": "Restore dit de reconnecter ce Cloud",
-        "body": """Le Cloud a refusé que le fichier soit lu. Reconnectez-vous dans Settings. Pour Dropbox, autorisez la lecture des fichiers ; pour IDrive e2 et Backblaze B2, utilisez une clé qui peut lire le bucket. Le fichier de votre téléphone n'a pas été modifié.""",
+        "body": """Le Cloud a refusé que le fichier soit lu. Reconnectez-vous dans Settings. Pour Dropbox, autorisez la lecture des fichiers ; pour IDrive e2 et Backblaze B2, utilisez une clé qui peut lire le bucket. Le fichier de votre téléphone n'a pas été modifié.""",
         "en_hash": "23bf7817d447a418",
     },
     "albums-permission": {
@@ -88,11 +88,11 @@ Appuyez sur **Grant access** et choisissez **Tout autoriser**. Si aucune invitat
     "contact-and-privacy": {
         "title": "Contact, confidentialité et suppression de vos données",
         "body": """En bas de Settings :
-• **Contact Info :** l'adresse, avec un bouton de copie.
-• **Privacy Policy :** vos fichiers vont uniquement vers votre propre Cloud ; rien n'est collecté.
-• **Delete Account Info :** comment se déconnecter, retirer l'accès et effacer les données. Vos fichiers Cloud restent.
+• **Contact :** l'adresse, avec un bouton de copie.
+• **Politique de confidentialité :** vos fichiers vont uniquement vers votre propre Cloud ; rien n'est collecté.
+• **Supprimer les données du compte :** comment se déconnecter, retirer l'accès et effacer les données. Vos fichiers Cloud restent.
 
-Pour signaler un problème, utilisez **Bug Report** juste au-dessus.""",
+Pour signaler un problème, utilisez **Signaler un bug** juste au-dessus.""",
         "en_hash": "3e29c01351fc7319",
     },
 }

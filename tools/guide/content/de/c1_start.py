@@ -27,7 +27,7 @@ Es gibt keine GallerySync-Server. Deine Dateien gehen direkt zwischen deinem Tel
 • **Nichts verlässt dein Telefon, außer du hast für dieses Album Archive gewählt**, und du bestätigst diese Wahl.
 • **„Sicher“ heißt überprüft.** Die Cloud muss bestätigen, dass sie die Datei in derselben Dateigröße hat, bevor etwas optimiert oder entfernt wird.
 • **Ohne dein Zutun passiert nichts.** Es sind keine Ordner ausgewählt, und jedes Album steht auf Off, bis du dich entscheidest.
-• **Deine Cloud-Kopien bleiben unberührt.** Standardmäßig lässt das Löschen eines Fotos auf deinem Telefon dessen Cloud-Kopie in Ruhe. Wähle in Settings **Ask me about the Cloud copy**, um die Wahl angeboten zu bekommen; nichts wird entfernt, wenn du es nicht auswählst und bestätigst.
+• **Deine Cloud-Kopien bleiben unberührt.** Standardmäßig lässt das Löschen eines Fotos auf deinem Telefon dessen Cloud-Kopie in Ruhe. Wähle in Settings **Mich zur Kopie in der Cloud fragen**, um die Wahl angeboten zu bekommen; nichts wird entfernt, wenn du es nicht auswählst und bestätigst.
 
 ## Gut zu wissen
 Öffne ab und zu deine Cloud und sieh dir ein paar Fotos an, besonders bevor du einen Papierkorb leerst.""",

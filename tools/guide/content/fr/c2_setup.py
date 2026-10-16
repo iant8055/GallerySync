@@ -37,9 +37,9 @@ Le lien en bas de cet écran ouvre ce guide de configuration. C'est la seule par
         "body": """Sélectionnez les Clouds que vous utilisez et appuyez sur **Suivant**. Rien n'est sélectionné au départ.
 
 ## Votre premier Cloud est gratuit
-Le premier Cloud que vous sélectionnez devient votre Cloud gratuit, affiché comme **main (free)** dans Settings. Chaque Cloud supplémentaire demande **Pro** : gratuit pendant 30 jours, puis un achat unique. Rien n'est facturé automatiquement. Si l'essai se termine, les Clouds supplémentaires se mettent en pause et votre Cloud gratuit continue.
+Le premier Cloud que vous sélectionnez devient votre Cloud gratuit, affiché comme **principal (gratuit)** dans Settings. Chaque Cloud supplémentaire demande **Pro** : gratuit pendant 30 jours, puis un achat unique. Rien n'est facturé automatiquement. Si l'essai se termine, les Clouds supplémentaires se mettent en pause et votre Cloud gratuit continue.
 
-Lancez l'essai avec **Start 30-day free trial** dans Settings, sous Backup ; il apparaît dès qu'un deuxième Cloud est connecté. **Unlock Pro** l'achète.
+Lancez l'essai avec **Commencer l'essai gratuit de 30 jours** dans Settings, sous Backup ; il apparaît dès qu'un deuxième Cloud est connecté. **Débloquer Pro** l'achète.
 
 ## Ce que chaque Cloud peut faire
 • **OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 et Backblaze B2 :** Backup, Sync, Archive et Restore.
@@ -108,7 +108,7 @@ Choisissez **Tout autoriser**. Si vous choisissez **Sélectionner des photos**, 
         "body": """Sélectionnez les dossiers à sauvegarder et appuyez sur **Suivant**. La plupart des photos sont dans **DCIM**.
 
 ## Vers quel Cloud va chaque dossier
-Avec plusieurs Clouds, chaque dossier affiche **Va vers**. Choisissez un Cloud pour chaque dossier sélectionné. Les fichiers déjà envoyés ne bougent jamais ; seuls les nouveaux fichiers suivent un changement.{{full: Voir [[settings-destination]].}}
+Avec plusieurs Clouds, chaque dossier affiche **Va vers**. Choisissez un Cloud pour chaque dossier sélectionné. Les fichiers déjà envoyés ne bougent jamais ; seuls les nouveaux fichiers suivent un changement.{{full: Voir [[settings-destination]].}}
 
 ## Android redemande pour chaque dossier
 Android affiche son propre écran d'autorisation de dossier. En cas de problème :
@@ -168,9 +168,9 @@ L'anneau montre la progression globale. En dessous : le Cloud vers lequel on en
 **Optimisation des photos**, puis **Optimisation des vidéos**, si votre plan les inclut.
 
 ## Boutons
-• **Fermer :** ferme l'application ; la sauvegarde continue.
+• **Fermer :** ferme l'application ; la sauvegarde continue.
 • **Terminer :** apparaît quand tout est fini, avec un résumé de ce qui a été vérifié, déjà dans le Cloud, et envoyé.
-• **Annuler :** demande **Arrêter la sauvegarde ?** Les fichiers déjà envoyés restent envoyés ; rien n'est supprimé.""",
+• **Annuler :** demande **Arrêter la sauvegarde ?** Les fichiers déjà envoyés restent envoyés ; rien n'est supprimé.""",
         "en_hash": "625986b0864a86c8",
     },
     "setup-and-settings": {

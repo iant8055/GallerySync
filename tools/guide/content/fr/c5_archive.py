@@ -38,7 +38,7 @@ En dessous : vos albums Archive, et un rappel que les fichiers archivés peuven
         "body": """Une carte par album Archive : combien de fichiers attendent et leur taille, plus tout ce qui est gardé, retenu par le filtre d'ancienneté, confirmé, ou non confirmé.
 
 • Sur la liste d'albums, le bouton affiche **Check all albums** et vérifie chaque album.
-• Touchez un album pour l'ouvrir ; **Check these files** ne vérifie alors que cet album.
+• Touchez un album pour l'ouvrir ; **Check these files** ne vérifie alors que cet album.
 
 Choisir un album ne retire rien et ne change aucun mode.""",
         "en_hash": "e1a713efaeea9168",
@@ -79,7 +79,7 @@ Il commence à votre valeur par défaut de Settings. Le modifier ici ne vaut que
 ## Marques
 • **Indicateur tournant :** en cours de vérification, d'envoi ou de retrait.
 • **Coche verte :** confirmé dans votre Cloud, ou retiré.
-• **Croix rouge :** non confirmé ; il reste sur le téléphone.
+• **Croix rouge :** non confirmé ; il reste sur le téléphone.
 
 ## Messages
 **Backing up...**, **Moving to Trash/Recycle Bin...**, **Removed from this phone.**, ou, en rouge, pourquoi un fichier reste : **Could not check your Cloud**, **Not in your Cloud**, ou **In your Cloud but the wrong size**.""",
@@ -89,7 +89,7 @@ Il commence à votre valeur par défaut de Settings. Le modifier ici ne vaut que
         "title": "La question : All files validated, ou seulement certains fichiers",
         "body": """Après la vérification :
 • **All files validated :** chaque fichier est confirmé.
-• **N files validated :** seuls ceux-là sont confirmés ; les autres restent sur le téléphone.
+• **N files validated :** seuls ceux-là sont confirmés ; les autres restent sur le téléphone.
 • **Nothing can be archived :** aucun n'a été confirmé. **Continue** ferme le message.
 
 **Yes** demande à Android de déplacer les fichiers confirmés vers la corbeille. **No** ne retire rien. Un grand album peut demander plusieurs confirmations Android (2 000 fichiers chacune).""",

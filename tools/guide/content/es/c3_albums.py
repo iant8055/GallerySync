@@ -68,7 +68,7 @@ Aquí no se quita nada. La eliminación ocurre en la pestaña Archive. Consulta 
     "albums-run-controls": {
         "title": "Sync now, Rescan, Pause, Resume y Stop",
         "body": """## Cuando no se está ejecutando nada
-• **Sync now:** hace la copia ahora. Si un interruptor Optimise de Settings está activado con su **Mode** en **Manual**, entonces también optimiza (consulta [[settings-optimise-mode]]). Aparece en gris cuando no hay nada que enviar ni optimizar.
+• **Sync now:** hace la copia ahora. Si un interruptor de optimización de Settings está activado con su **Modo** en **Manual**, entonces también optimiza (consulta [[settings-optimise-mode]]). Aparece en gris cuando no hay nada que enviar ni optimizar.
 • **Rescan:** mira el teléfono y vuelve a consultar OneDrive.
 
 ## Mientras se ejecuta una copia
@@ -111,7 +111,7 @@ Aquí no se quita nada. La eliminación ocurre en la pestaña Archive. Consulta 
 
 • **Cabecera:** flecha atrás, nombre del álbum, modo y número de archivos, **Backs up to** (la Cloud y la carpeta a las que van los archivos nuevos, más cualquier otra Cloud que ya tenga algunos), los recuentos ([[album-file-status]]), **Sort by** ([[album-file-sort]]) y **Keep at full size** ([[album-file-pin]]).
 • **Archivos:** una tarjeta por archivo con su tamaño, fecha y marcas. Un archivo optimizado muestra en el teléfono su tamaño menor.
-• **Camera folder** (si se eligió en Settings): controles de optimización adicionales. Consulta [[album-camera-optimise]].
+• **Carpeta de la cámara** (si se eligió en Settings): controles de optimización adicionales. Consulta [[album-camera-optimise]].
 
 Sin miniaturas ni vistas previas. Usa tu app de galería para ver las fotos.""",
         "en_hash": "c5a7c5d01cd7947b",
@@ -151,8 +151,8 @@ Restore la selecciona automáticamente. Deselecciónala para que el archivo vuel
     },
 
     "album-camera-optimise": {
-        "title": "Optimizar fotos y vídeos antiguos de tu Camera folder",
-        "body": """Solo la **Camera folder** que elegiste en Settings, en **Camera Sync** ([[settings-section-camera]]), tiene estos controles.
+        "title": "Optimizar fotos y vídeos antiguos de tu carpeta de la cámara",
+        "body": """Solo la **Carpeta de la cámara** que elegiste en Settings, en **Sync de la cámara** ([[settings-section-camera]]), tiene estos controles.
 
 ## Seleccionar archivos
 • **Select Photos/Videos older than:** de **1 day** a **1 year**, o **All**.
@@ -166,13 +166,13 @@ Restore la selecciona automáticamente. Deselecciónala para que el archivo vuel
 ## Conviene saber
 • Solo se pueden seleccionar los archivos que OneDrive ha confirmado a tamaño completo.
 • No se optimiza nada hasta que pulsas **Sync now**. Las fotos nuevas se quedan como están.
-• La Camera folder no tiene modo **Sync**, y los interruptores Optimise de Settings no la afectan.
+• La carpeta de la cámara no tiene modo **Sync**, y los interruptores de optimización de Settings no la afectan.
 • Si sales con las opciones cambiadas, se pregunta si quieres convertirlas en tus valores predeterminados.""",
         "en_hash": "f06a5a7ce89e99c4",
     },
 
     "album-camera-select": {
-        "title": "Seleccionar archivos en tu Camera folder",
+        "title": "Seleccionar archivos en tu carpeta de la cámara",
         "body": """Muestra cuántos archivos hay seleccionados y el espacio estimado que se ahorra, o **Nothing selected**.
 
 • **Photos**, **Videos** y la antigüedad seleccionan todo lo que coincide.

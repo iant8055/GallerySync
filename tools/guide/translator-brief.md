@@ -24,24 +24,31 @@ script rule block at the end of this document also applies.
    text).
 3. **`tools/guide/content/c1_start.py` through `c8_help.py`** — the English
    Guide content, 108 topics across 8 chapters.
-4. **For the setup chapter (`c2_setup.py`) only:**
-   `tools/wizard/<lang>.py` — the wizard's source translation in your target
-   language, authored and owned by the wizard owner (the GallerySync main
-   session). File names map by locale code: `es.py`, `pt_BR.py`, `fr.py`,
-   `de.py`, `ja.py`, `hi.py` (BCP-47 hyphens become underscores). Each file
-   defines `T = { "key": "value", ... }` with the wizard's strings in your
-   language. **Read `tools/wizard/<lang>.py`, not the Android resource XML.**
-   The XML under `app/src/main/res/values-*/strings.xml` is the same text
-   escaped (`\'` for apostrophe, `&amp;` for ampersand, `\"` for quote), so a
-   character-for-character match against it fails on every apostrophe and
-   HTML entity. The `.py` files hold the unescaped text and are authoritative
-   for cross-referencing.
+4. **For the setup chapter (`c2_setup.py`) AND the Settings chapter (`c6_settings.py`):**
+   `tools/wizard/<lang>.py` — the wizard's AND Settings tab's source translation
+   in your target language, authored and owned by the wizard owner (the
+   GallerySync main session). File names map by locale code: `es.py`,
+   `pt_BR.py`, `fr.py`, `de.py`, `ja.py`, `hi.py` (BCP-47 hyphens become
+   underscores). Each file defines `T = { "key": "value", ... }` with the
+   wizard's and Settings' strings in your language. **Read `tools/wizard/<lang>.py`,
+   not the Android resource XML.** The XML under
+   `app/src/main/res/values-*/strings.xml` is the same text escaped (`\'` for
+   apostrophe, `&amp;` for ampersand, `\"` for quote), so a character-for-character
+   match against it fails on every apostrophe and HTML entity. The `.py` files
+   hold the unescaped text and are authoritative for cross-referencing.
 
    Any wizard button, screen title or message the Guide quotes in the setup
-   chapter must match the value in `tools/wizard/<lang>.py` EXACTLY — pick the
-   string from the wizard, do not re-translate it. If a label the English
-   Guide quotes is not in the wizard, flag it in your output rather than
-   guessing.
+   or Settings chapter must match the value in `tools/wizard/<lang>.py`
+   EXACTLY — pick the string from the wizard, do not re-translate it. If a
+   label the English Guide quotes is not in the wizard, flag it in your output
+   rather than guessing.
+
+   **Still English in every translated chapter, including setup and Settings:**
+   - the four tab names (Albums, Restore, Archive, Settings itself);
+   - the four album modes (Off, Backup, Sync, Archive);
+   - section headers in Settings named after a tab or a mode;
+   - the Archive tab's age filter (`archive_age_*`, "Only show files older than", "All", ...);
+   - the camera folder's controls (`camera_age_*`, `camera_kind_*`, `camera_optimise_heading`).
 
 ## Scope — nine sub-tasks per language
 
@@ -149,13 +156,15 @@ at build time; the rest of each string is rendered verbatim.
    The §10 list of on-screen labels is long; keep each one as the English
    reference says it (except in the setup chapter, see below).
 
-4. **Setup chapter rule.** When the Guide's setup chapter quotes a wizard
-   label, use the exact string from `tools/wizard/<lang>.py` (NOT from the
-   escaped Android XML — see Required reading item 4). If a Spanish Guide
-   quotes the Next button, it says "Siguiente" (the value in
-   `tools/wizard/es.py`), not "Next" (the glossary's English). Everywhere
-   else in the Guide (Albums, Restore, Archive, Settings and the rest),
-   labels stay English per §10 because those screens stay English.
+4. **Setup chapter and Settings chapter rule.** When the Guide's setup
+   chapter or Settings chapter quotes an on-screen label, use the exact
+   string from `tools/wizard/<lang>.py` (NOT from the escaped Android XML —
+   see Required reading item 4). If a Spanish Guide quotes the Next button,
+   it says "Siguiente" (the value in `tools/wizard/es.py`), not "Next" (the
+   glossary's English). Everywhere else in the Guide (Albums, Restore,
+   Archive and the rest), labels stay English per §10 because those screens
+   stay English. Within setup and Settings, the carve-outs under Required
+   reading item 4 stay English even in a translated chapter.
 
 5. **Platform words translate (§7).** Trash, Recycle Bin, gallery (as a
    generic lower-case noun) are translated to match what the user sees in

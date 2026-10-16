@@ -61,7 +61,7 @@ Hier wird nichts entfernt. Das Entfernen geschieht im Archive-Tab. Siehe [[archi
     "albums-run-controls": {
         "title": "Sync now, Rescan, Pause, Resume and Stop",
         "body": """## Wenn nichts läuft
-• **Sync now:** sichert jetzt. Ist in Settings ein Optimise-Schalter an und sein **Mode** auf **Manual** gestellt, wird danach auch optimiert (siehe [[settings-optimise-mode]]). Ausgegraut, wenn nichts zu senden oder zu optimieren ist.
+• **Sync now:** sichert jetzt. Ist in Settings ein Optimierungsschalter an und sein **Modus** auf **Manuell** gestellt, wird danach auch optimiert (siehe [[settings-optimise-mode]]). Ausgegraut, wenn nichts zu senden oder zu optimieren ist.
 • **Rescan:** sieht sich das Telefon an und fragt OneDrive erneut.
 
 ## Während ein Backup läuft
@@ -70,7 +70,7 @@ Hier wird nichts entfernt. Das Entfernen geschieht im Archive-Tab. Siehe [[archi
 • **Stop:** beendet diesen Durchlauf. Automatische Backups laufen weiter.
 
 ## Gut zu wissen
-• **Sync now** wartet nicht auf das Ladegerät, beachtet aber weiterhin deine Wi-Fi-Einstellung. Siehe [[settings-mobile-data]].
+• **Sync now** wartet nicht auf das Ladegerät, beachtet aber weiterhin deine Einstellung „Mobile Daten verwenden“. Siehe [[settings-mobile-data]].
 • Es sichert jedes Album, das auf **Backup**, **Sync** oder **Archive** steht, optimiert aber nur Dateien in **Sync**-Alben.""",
         "en_hash": "846b4240970f2d4a",
     },
@@ -101,7 +101,7 @@ Hier wird nichts entfernt. Das Entfernen geschieht im Archive-Tab. Siehe [[archi
 
 • **Kopfzeile:** Zurück-Pfeil, Albumname, Modus und Dateizahl, **Backs up to** (die Cloud und der Ordner, in die neue Dateien gehen, plus jede andere Cloud, die schon einige hält), die Zahlen ([[album-file-status]]), **Sort by** ([[album-file-sort]]) und **Keep at full size** ([[album-file-pin]]).
 • **Dateien:** eine Karte pro Datei mit Größe, Datum und Markierungen. Eine optimierte Datei zeigt ihre kleinere Größe auf dem Telefon.
-• **Camera folder** (falls in Settings gewählt): zusätzliche Optimise-Steuerung. Siehe [[album-camera-optimise]].
+• **Kameraordner** (falls in Settings gewählt): zusätzliche Optimise-Steuerung. Siehe [[album-camera-optimise]].
 
 Keine Miniaturansichten oder Vorschauen. Nutze deine Galerie-App, um Fotos anzusehen.""",
         "en_hash": "c5a7c5d01cd7947b",
@@ -137,8 +137,8 @@ Restore wählt es automatisch aus. Hebe die Auswahl auf, damit die Datei wieder 
         "en_hash": "34b89b8b5829a956",
     },
     "album-camera-optimise": {
-        "title": "Ältere Fotos und Videos in deinem Camera folder optimieren",
-        "body": """Nur der **Camera folder**, den du in Settings unter **Camera Sync** gewählt hast ([[settings-section-camera]]), hat diese Steuerung.
+        "title": "Ältere Fotos und Videos in deinem Kameraordner optimieren",
+        "body": """Nur der **Kameraordner**, den du in Settings unter **Kamera-Sync** gewählt hast ([[settings-section-camera]]), hat diese Steuerung.
 
 ## Dateien auswählen
 • **Select Photos/Videos older than:** **1 day** bis **1 year**, oder **All**.
@@ -152,12 +152,12 @@ Restore wählt es automatisch aus. Hebe die Auswahl auf, damit die Datei wieder 
 ## Gut zu wissen
 • Nur Dateien, die OneDrive in voller Größe bestätigt hat, können ausgewählt werden.
 • Nichts wird optimiert, bis du **Sync now** drückst. Neue Fotos bleiben, wie sie sind.
-• Der Camera folder hat keinen **Sync**-Modus, und die Optimise-Schalter in Settings wirken sich nicht auf ihn aus.
+• Der Kameraordner hat keinen **Sync**-Modus, und die Optimierungsschalter in Settings wirken sich nicht auf ihn aus.
 • Wenn du mit geänderten Auswahlen gehst, wirst du gefragt, ob sie deine Standardeinstellungen werden sollen.""",
         "en_hash": "f06a5a7ce89e99c4",
     },
     "album-camera-select": {
-        "title": "Dateien in deinem Camera folder auswählen",
+        "title": "Dateien in deinem Kameraordner auswählen",
         "body": """Zeigt, wie viele Dateien ausgewählt sind und wie viel Platz voraussichtlich gespart wird, oder **Nothing selected**.
 
 • **Photos**, **Videos** und das Alter wählen jeden Treffer aus.

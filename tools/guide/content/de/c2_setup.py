@@ -37,9 +37,9 @@ Der Link unten auf diesem Bildschirm öffnet diese Einrichtungsanleitung. Sie is
         "body": """Wähle die Clouds aus, die du nutzt, und drücke **Weiter**. Zu Beginn ist nichts ausgewählt.
 
 ## Deine erste Cloud ist kostenlos
-Die erste Cloud, die du auswählst, wird deine kostenlose Cloud, in Settings als **main (free)** angezeigt. Jede weitere Cloud gehört zu **Pro**: 30 Tage kostenlos, danach ein einmaliger Kauf. Es wird nichts automatisch berechnet. Endet der Test, pausieren zusätzliche Clouds, und deine kostenlose Cloud läuft weiter.
+Die erste Cloud, die du auswählst, wird deine kostenlose Cloud, in Settings als **Haupt-Cloud (kostenlos)** angezeigt. Jede weitere Cloud gehört zu **Pro**: 30 Tage kostenlos, danach ein einmaliger Kauf. Es wird nichts automatisch berechnet. Endet der Test, pausieren zusätzliche Clouds, und deine kostenlose Cloud läuft weiter.
 
-Starte den Test mit **Start 30-day free trial** in Settings unter Backup; die Schaltfläche erscheint, sobald eine zweite Cloud verbunden ist. **Unlock Pro** kauft Pro.
+Starte den Test mit **30 Tage kostenlos testen** in Settings unter Backup; die Schaltfläche erscheint, sobald eine zweite Cloud verbunden ist. **Pro freischalten** kauft Pro.
 
 ## Was jede Cloud kann
 • **OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 und Backblaze B2:** Backup, Sync, Archive und Restore.
@@ -137,7 +137,7 @@ Dieses erste Backup ist einmalig und läuft unabhängig vom Modus. Danach steht 
         "body": """Nur für Plan 2 und 3.
 
 • **Fotos optimieren** und **Videos optimieren:** an oder aus.
-• **Videokomprimierung:** **Hoch** (480p, am kleinsten), **Mittel** (720p) oder **Niedrig** (1080p).
+• **Videokompression:** **Hoch** (480p, am kleinsten), **Mittel** (720p) oder **Niedrig** (1080p).
 • Jede zeigt eine geschätzte Ersparnis, mit einer Zeile **Geschätzte Gesamtersparnis**. Die tatsächlichen Ergebnisse variieren.""",
         "en_hash": "d3ff8b60c0328479",
     },

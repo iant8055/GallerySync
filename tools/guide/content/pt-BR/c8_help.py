@@ -53,7 +53,7 @@ Os álbuns em outras Clouds mostram **sent to** essa Cloud. Veja [[albums-list]]
     },
     'faq-wrong-account': {
         "title": 'Entrei em uma Cloud com a conta errada',
-        "body": """**Settings → Backup → Sign out** ao lado dessa Cloud, escolha **Leave them there** e depois entre com a conta certa. Os arquivos já enviados ficam na primeira conta. Veja [[settings-account]].""",
+        "body": """**Settings → Backup → Sair** ao lado dessa Cloud, escolha **Deixar lá** e depois entre com a conta certa. Os arquivos já enviados ficam na primeira conta. Veja [[settings-account]].""",
         "en_hash": "a033d25dffca0535",
     },
     'faq-folder-waiting': {
@@ -63,7 +63,7 @@ Os álbuns em outras Clouds mostram **sent to** essa Cloud. Veja [[albums-list]]
     },
     'faq-keys-rejected': {
         "title": 'O IDrive e2 ou o Backblaze B2 diz que minhas chaves foram rejeitadas',
-        "body": """Em geral é um erro de digitação. Confira o endpoint (sem o https://), a região, o bucket e as duas chaves; toque em **Show** na chave secreta. Cuidado com **O** e zero, **I** e **l**, **J** e **j**. Colar evita isso. Veja [[cloud-key-backblaze]] e [[cloud-key-idrive]].""",
+        "body": """Em geral é um erro de digitação. Confira o endpoint (sem o https://), a região, o bucket e as duas chaves; toque em **Mostrar** na chave secreta. Cuidado com **O** e zero, **I** e **l**, **J** e **j**. Colar evita isso. Veja [[cloud-key-backblaze]] e [[cloud-key-idrive]].""",
         "en_hash": "e0b15236b548a066",
     },
     'faq-could-not-check': {
@@ -88,11 +88,11 @@ Pressione **Grant access** e escolha **Permitir tudo**. Se nenhum pedido aparece
     'contact-and-privacy': {
         "title": 'Contato, privacidade e apagar os seus dados',
         "body": """No fim de Settings:
-• **Contact Info:** o endereço, com um botão de copiar.
-• **Privacy Policy:** seus arquivos vão só para a sua própria Cloud; nada é coletado.
-• **Delete Account Info:** como sair, remover o acesso e limpar os dados. Os arquivos da sua Cloud ficam.
+• **Contato:** o endereço, com um botão de copiar.
+• **Política de privacidade:** seus arquivos vão só para a sua própria Cloud; nada é coletado.
+• **Excluir dados da conta:** como sair, remover o acesso e limpar os dados. Os arquivos da sua Cloud ficam.
 
-Para relatar um problema, use **Bug Report** logo acima deles.""",
+Para relatar um problema, use **Relatar um erro** logo acima deles.""",
         "en_hash": "3e29c01351fc7319",
     },
 }

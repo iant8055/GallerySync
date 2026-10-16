@@ -69,7 +69,7 @@ TRANSLATIONS = {
         "title": "Sync now, Rescan, Pause, Resume and Stop",
         "body": """\
 ## जब कुछ नहीं चल रहा
-• **Sync now:** अभी बैकअप करता है। अगर Settings में कोई Optimise स्विच चालू है और उसका **Mode** **Manual** पर है, तो फिर वह ऑप्टिमाइज़ भी करता है (देखें [[settings-optimise-mode]])। जब भेजने या ऑप्टिमाइज़ करने को कुछ न हो, तब धूसर रहता है।
+• **Sync now:** अभी बैकअप करता है। अगर Settings में कोई Optimise स्विच चालू है और उसका **मोड** **मैन्युअल** पर है, तो फिर वह ऑप्टिमाइज़ भी करता है (देखें [[settings-optimise-mode]])। जब भेजने या ऑप्टिमाइज़ करने को कुछ न हो, तब धूसर रहता है।
 • **Rescan:** फ़ोन को देखता है और OneDrive से दोबारा पूछता है।
 
 ## जब बैकअप चल रहा हो
@@ -153,7 +153,7 @@ Restore इसे अपने-आप चुन देता है। फ़ा
     "album-camera-optimise": {
         "title": "अपने Camera folder में पुरानी फ़ोटो और वीडियो ऑप्टिमाइज़ करें",
         "body": """\
-सिर्फ़ उस **Camera folder** में ये नियंत्रण होते हैं जिसे आपने Settings में **Camera Sync** के तहत चुना है ([[settings-section-camera]])।
+सिर्फ़ उस **कैमरा फ़ोल्डर** में ये नियंत्रण होते हैं जिसे आपने Settings में **कैमरा Sync** के तहत चुना है ([[settings-section-camera]])।
 
 ## फ़ाइलें चुनना
 • **Select Photos/Videos older than:** **1 day** से **1 year** तक, या **All**।

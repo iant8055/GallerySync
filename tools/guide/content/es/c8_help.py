@@ -62,19 +62,19 @@ Los álbumes de otras Clouds muestran en su lugar **sent to** esa Cloud. Consult
 
     "faq-wrong-account": {
         "title": "Inicié sesión en una Cloud con la cuenta equivocada",
-        "body": """**Settings → Backup → Sign out** junto a esa Cloud, elige **Leave them there** y luego inicia sesión con la cuenta correcta. Los archivos ya enviados se quedan en la primera cuenta. Consulta [[settings-account]].""",
+        "body": """**Settings → Backup → Cerrar sesión** junto a esa Cloud, elige **Dejarlos allí** y luego inicia sesión con la cuenta correcta. Los archivos ya enviados se quedan en la primera cuenta. Consulta [[settings-account]].""",
         "en_hash": "a033d25dffca0535",
     },
 
     "faq-folder-waiting": {
         "title": "Cerré sesión en una Cloud y sus carpetas dejaron de enviar",
-        "body": """Es lo esperado. Las carpetas esperan, a salvo en tu teléfono, hasta que vuelvas a iniciar sesión. Para enviarlas a otro sitio, cambia **Where each folder goes**. Consulta [[settings-destination]].""",
+        "body": """Es lo esperado. Las carpetas esperan, a salvo en tu teléfono, hasta que vuelvas a iniciar sesión. Para enviarlas a otro sitio, cambia **Adónde va cada carpeta**. Consulta [[settings-destination]].""",
         "en_hash": "286529a95f8327e7",
     },
 
     "faq-keys-rejected": {
         "title": "IDrive e2 o Backblaze B2 dice que mis claves fueron rechazadas",
-        "body": """Normalmente es una errata. Revisa el endpoint (sin https://), la región, el bucket y las dos claves; pulsa **Show** en el secreto. Ojo con **O** frente a cero, **I** frente a **l**, **J** frente a **j**. Pegar evita este problema. Consulta [[cloud-key-backblaze]] y [[cloud-key-idrive]].""",
+        "body": """Normalmente es una errata. Revisa el endpoint (sin https://), la región, el bucket y las dos claves; pulsa **Mostrar** en el secreto. Ojo con **O** frente a cero, **I** frente a **l**, **J** frente a **j**. Pegar evita este problema. Consulta [[cloud-key-backblaze]] y [[cloud-key-idrive]].""",
         "en_hash": "e0b15236b548a066",
     },
 
@@ -103,11 +103,11 @@ Pulsa **Grant access** y elige **Permitir todo**. Si no aparece ningún aviso: *
     "contact-and-privacy": {
         "title": "Contacto, privacidad y cómo borrar tus datos",
         "body": """En la parte inferior de Settings:
-• **Contact Info:** la dirección, con un botón de copiar.
-• **Privacy Policy:** tus archivos van solo a tu propia Cloud; no se recopila nada.
-• **Delete Account Info:** cómo cerrar sesión, quitar el acceso y borrar los datos. Los archivos de tu Cloud se quedan.
+• **Contacto:** la dirección, con un botón de copiar.
+• **Política de privacidad:** tus archivos van solo a tu propia Cloud; no se recopila nada.
+• **Eliminar datos de la cuenta:** cómo cerrar sesión, quitar el acceso y borrar los datos. Los archivos de tu Cloud se quedan.
 
-Para informar de un problema, usa **Bug Report**, justo encima.""",
+Para informar de un problema, usa **Informar de un error**, justo encima.""",
         "en_hash": "3e29c01351fc7319",
     },
 

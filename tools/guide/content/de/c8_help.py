@@ -53,17 +53,17 @@ Alben in anderen Clouds zeigen stattdessen **sent to** und die jeweilige Cloud. 
     },
     "faq-wrong-account": {
         "title": "Ich habe mich mit dem falschen Konto bei einer Cloud angemeldet",
-        "body": """**Settings → Backup → Sign out** neben dieser Cloud, wähle **Leave them there**, dann melde dich mit dem richtigen Konto an. Bereits gesendete Dateien bleiben im ersten Konto. Siehe [[settings-account]].""",
+        "body": """**Settings → Backup → Abmelden** neben dieser Cloud, wähle **Dort lassen**, dann melde dich mit dem richtigen Konto an. Bereits gesendete Dateien bleiben im ersten Konto. Siehe [[settings-account]].""",
         "en_hash": "a033d25dffca0535",
     },
     "faq-folder-waiting": {
         "title": "Ich habe mich von einer Cloud abgemeldet, und ihre Ordner senden nicht mehr",
-        "body": """Das ist zu erwarten. Die Ordner warten, sicher auf deinem Telefon, bis du dich wieder anmeldest. Um sie anderswohin zu senden, ändere **Where each folder goes**. Siehe [[settings-destination]].""",
+        "body": """Das ist zu erwarten. Die Ordner warten, sicher auf deinem Telefon, bis du dich wieder anmeldest. Um sie anderswohin zu senden, ändere **Wohin jeder Ordner geht**. Siehe [[settings-destination]].""",
         "en_hash": "286529a95f8327e7",
     },
     "faq-keys-rejected": {
         "title": "IDrive e2 oder Backblaze B2 sagt, meine Schlüssel wurden abgelehnt",
-        "body": """Meist ein Tippfehler. Prüfe den Endpunkt (ohne https://), die Region, den Bucket und beide Schlüssel; tippe beim Secret auf **Show**. Achte auf **O** statt Null, **I** statt **l**, **J** statt **j**. Einfügen vermeidet das. Siehe [[cloud-key-backblaze]] und [[cloud-key-idrive]].""",
+        "body": """Meist ein Tippfehler. Prüfe den Endpunkt (ohne https://), die Region, den Bucket und beide Schlüssel; tippe beim Secret auf **Anzeigen**. Achte auf **O** statt Null, **I** statt **l**, **J** statt **j**. Einfügen vermeidet das. Siehe [[cloud-key-backblaze]] und [[cloud-key-idrive]].""",
         "en_hash": "e0b15236b548a066",
     },
     "faq-could-not-check": {
@@ -88,11 +88,11 @@ Drücke **Grant access** und wähle **Alle zulassen**. Erscheint keine Abfrage: 
     "contact-and-privacy": {
         "title": "Kontakt, Datenschutz und Löschen deiner Daten",
         "body": """Ganz unten in Settings:
-• **Contact Info:** die Adresse, mit einer Kopieren-Schaltfläche.
-• **Privacy Policy:** deine Dateien gehen nur an deine eigene Cloud; nichts wird erfasst.
-• **Delete Account Info:** wie du dich abmeldest, den Zugriff entfernst und Daten löschst. Deine Cloud-Dateien bleiben.
+• **Kontakt:** die Adresse, mit einer Kopieren-Schaltfläche.
+• **Datenschutzerklärung:** deine Dateien gehen nur an deine eigene Cloud; nichts wird erfasst.
+• **Kontodaten löschen:** wie du dich abmeldest, den Zugriff entfernst und Daten löschst. Deine Cloud-Dateien bleiben.
 
-Um ein Problem zu melden, nutze **Bug Report** direkt darüber.""",
+Um ein Problem zu melden, nutze **Fehler melden** direkt darüber.""",
         "en_hash": "3e29c01351fc7319",
     },
 }

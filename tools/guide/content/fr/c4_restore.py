@@ -1,7 +1,7 @@
 TRANSLATIONS = {
     "_chapter": {
         "title": "L'onglet Restore",
-        "intro": "Ramène des photos et vidéos depuis votre Cloud. Il ne fait que lire le Cloud ; rien n'y est modifié.",
+        "intro": "Ramène des photos et vidéos depuis votre Cloud. Il ne fait que lire le Cloud ; rien n'y est modifié.",
         "en_hash": "e472722c1c5b626f",
     },
     "restore-overview": {
@@ -60,7 +60,7 @@ Grisés pendant qu'une restauration est en cours.""",
         "body": """Chaque carte d'album affiche :
 • Combien de fichiers peuvent revenir, et l'espace qu'il leur faut.
 • Combien sont **to restore** et **to download**.
-• Combien sont **already on this phone** (grisés à l'intérieur ; voir [[restore-greyed-files]]).
+• Combien sont **already on this phone** (grisés à l'intérieur ; voir [[restore-greyed-files]]).
 • Combien sont **selected here**, ou une coche quand tout l'album est sélectionné.
 
 **Touchez** pour ouvrir. **Glissez vers la droite** pour sélectionner tout l'album, **vers la gauche** pour le désélectionner.""",
@@ -71,7 +71,7 @@ Grisés pendant qu'une restauration est en cours.""",
         "body": """Glissez vers la droite (ou touchez) pour sélectionner, vers la gauche pour désélectionner. Chaque fichier affiche l'une de ces mentions :
 • **now · full size :** une copie optimisée, avec sa taille réduite sur le téléphone et la taille réelle dans le Cloud.
 • **Available for download :** pas sur le téléphone.
-• **Already on this phone :** grisé ; rien à faire.
+• **Already on this phone :** grisé ; rien à faire.
 
 Pendant le travail : **Working...** avec un pourcentage. Puis **Restored to full size**, **Back on this phone**, ou **Could not restore, your file is unchanged** avec la raison.""",
         "en_hash": "486e3275bedd2609",
@@ -93,13 +93,13 @@ Une barre de progression montre combien sont restaurés. Nécessite une connexio
     },
     "restore-edited": {
         "title": "Une photo ou une vidéo que vous avez modifiée",
-        "body": """Si vous avez modifié une copie optimisée et enregistré par-dessus, restaurer remplacerait votre modification ; l'application demande donc : **This photo has been edited since it was backed up. Overwrite it with the original?**
+        "body": """Si vous avez modifié une copie optimisée et enregistré par-dessus, restaurer remplacerait votre modification ; l'application demande donc : **This photo has been edited since it was backed up. Overwrite it with the original?**
 
 • **Keep my edits :** laisse le fichier tel quel.
-• **Overwrite :** remet l'original ; votre modification est remplacée.
+• **Overwrite :** remet l'original ; votre modification est remplacée.
 
 ## Bon à savoir
-La plupart des éditeurs enregistrent un nouveau fichier, qui n'est jamais touché. Un fichier modifié est sauvegardé comme un nouveau fichier avec **edited** et la date dans son nom ; l'original dans votre Cloud n'est jamais remplacé.""",
+La plupart des éditeurs enregistrent un nouveau fichier, qui n'est jamais touché. Un fichier modifié est sauvegardé comme un nouveau fichier avec **edited** et la date dans son nom ; l'original dans votre Cloud n'est jamais remplacé.""",
         "en_hash": "6292714bbfa760d3",
     },
 }

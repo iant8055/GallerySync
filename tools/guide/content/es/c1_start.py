@@ -28,7 +28,7 @@ No hay servidores de GallerySync. Tus archivos van directamente entre tu teléfo
 • **Nada sale de tu teléfono a menos que hayas elegido Archive para ese álbum**, y confirmes esa elección.
 • **"A salvo" significa verificado.** La Cloud debe confirmar que tiene el archivo con el mismo tamaño antes de optimizar o quitar nada.
 • **De entrada, no pasa nada.** No hay carpetas elegidas y todos los álbumes están en Off hasta que tú decidas.
-• **Las copias de tu Cloud no se tocan.** Por defecto, borrar una foto en el teléfono no afecta a su copia en la Cloud. Elige **Ask me about the Cloud copy** en Settings para que se te ofrezca la opción; no se quita nada a menos que lo selecciones y confirmes.
+• **Las copias de tu Cloud no se tocan.** Por defecto, borrar una foto en el teléfono no afecta a su copia en la Cloud. Elige **Preguntarme por la copia en la Nube** en Settings para que se te ofrezca la opción; no se quita nada a menos que lo selecciones y confirmes.
 
 ## Conviene saber
 De vez en cuando, abre tu Cloud y echa un vistazo a algunas fotos, sobre todo antes de vaciar una papelera.""",

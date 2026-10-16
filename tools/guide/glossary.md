@@ -158,11 +158,26 @@ ordinary prose, not as a reference to the screen, are translated normally.*
 
 **Amended 2026-10-14 (Ian):** the first-time setup wizard now translates alongside the Guide, and its (?) pop-ups
 appear in the chosen language. So inside the Guide's **setup chapter**, a translated page quotes the wizard's
-translated labels from `app/src/main/res/values-<loc>/strings.xml` — a Spanish reader sees a Spanish screen,
-so the Spanish Guide must quote the Spanish buttons. Everywhere else in the Guide (Albums, Restore, Archive,
-Settings and the rest), the labels in this section stay in English because the rest of the app's screens
-stay English. The entries below remain the English references and are what the non-setup chapters quote;
-setup-chapter quotes come from the wizard's own `strings.xml` for the target language.
+translated labels from `tools/wizard/<lang>.py` — a Spanish reader sees a Spanish screen, so the Spanish Guide
+must quote the Spanish buttons. (Use the `.py` source, not the escaped Android XML; the XML differs on apostrophes
+and HTML entities.)
+
+**Amended 2026-10-15 (Ian):** the **Settings tab** is now also translated, under the same rules as the wizard
+(sibling commit 5ccb389). So inside the Guide's **Settings chapter** (c6_settings.py) and in any Settings (?)
+pop-up card, a translated page quotes the Settings labels from `tools/wizard/<lang>.py` as well — the same file
+holds both the wizard and the Settings translations now (88 new keys per language).
+
+**Still English in every translated chapter**, even now that Settings is translated:
+- the four tab names (Albums, Restore, Archive, Settings itself);
+- the four album modes (Off, Backup, Sync, Archive);
+- section headers in Settings that are named after a tab or a mode (same list);
+- the Archive tab's age filter (`archive_age_*`, "Only show files older than", "All", ...);
+- the camera folder's controls (`camera_age_*`, `camera_kind_*`, `camera_optimise_heading`).
+
+Everywhere else in the Guide (Albums, Restore, Archive and the rest), the labels in this section stay in English
+because the rest of the app's screens stay English. The entries below remain the English references and are what
+those chapters quote; setup-chapter and Settings-chapter quotes come from the wizard's own `tools/wizard/<lang>.py`
+for the target language.
 
 **Rule of thumb:** in the Guide, on-screen labels are written in **bold**. A bold run that is a label or message
 stays English. A bold run that is only emphasis (for example a heading-like phrase such as "Nothing is

@@ -61,7 +61,7 @@ TRANSLATIONS = {
     "albums-run-controls": {
         "title": "Sync now, Rescan, Pause, Resume and Stop",
         "body": """## 何も実行していないとき
-• **Sync now**：今すぐバックアップします。Settings で Optimise スイッチがオンで、その **Mode** が **Manual** の場合は、最適化も行います（[[settings-optimise-mode]]を参照）。送るものも最適化するものもないときは、グレーアウトします。
+• **Sync now**：今すぐバックアップします。Settings で最適化のスイッチがオンで、その **モード** が **手動** の場合は、最適化も行います（[[settings-optimise-mode]]を参照）。送るものも最適化するものもないときは、グレーアウトします。
 • **Rescan**：スマートフォンを調べ、OneDrive にもう一度問い合わせます。
 
 ## バックアップの実行中
@@ -101,7 +101,7 @@ TRANSLATIONS = {
 
 • **ヘッダー**：戻る矢印、アルバム名、モードとファイル数、**Backs up to**（新しいファイルの送信先の Cloud とフォルダ、およびすでにファイルを保持しているほかの Cloud）、件数（[[album-file-status]]）、**Sort by**（[[album-file-sort]]）、**Keep at full size**（[[album-file-pin]]）。
 • **ファイル**：ファイルごとに 1 枚のカードで、サイズ、日付、マークが表示されます。最適化されたファイルには、スマートフォン上の小さいサイズが表示されます。
-• **Camera folder**（Settings で選んだ場合）：追加の最適化コントロール。[[album-camera-optimise]]を参照してください。
+• **カメラのフォルダ**（Settings で選んだ場合）：追加の最適化コントロール。[[album-camera-optimise]]を参照してください。
 
 サムネイルやプレビューはありません。写真を見るには、ギャラリーアプリを使ってください。""",
         "en_hash": "c5a7c5d01cd7947b",
@@ -137,8 +137,8 @@ Restore は自動的に選択します。選択を外すと、ファイルはア
         "en_hash": "34b89b8b5829a956",
     },
     "album-camera-optimise": {
-        "title": "Camera folder の古い写真と動画を最適化する",
-        "body": """Settings の **Camera Sync**（[[settings-section-camera]]）で選んだ **Camera folder** にだけ、これらのコントロールがあります。
+        "title": "カメラのフォルダの古い写真と動画を最適化する",
+        "body": """Settings の **カメラの Sync**（[[settings-section-camera]]）で選んだ **カメラのフォルダ** にだけ、これらのコントロールがあります。
 
 ## ファイルを選択する
 • **Select Photos/Videos older than**：**1 day** から **1 year**、または **All**。
@@ -152,12 +152,12 @@ Restore は自動的に選択します。選択を外すと、ファイルはア
 ## 知っておくと便利なこと
 • OneDrive がフルサイズで確認したファイルだけが、選択できます。
 • **Sync now** を押すまで、何も最適化されません。新しい写真はそのままです。
-• Camera folder には **Sync** モードがなく、Settings の Optimise スイッチも影響しません。
+• カメラのフォルダには **Sync** モードがなく、Settings の最適化スイッチも影響しません。
 • 選択を変更したまま離れると、それを既定にするかどうか尋ねられます。""",
         "en_hash": "f06a5a7ce89e99c4",
     },
     "album-camera-select": {
-        "title": "Camera folder のファイルを選択する",
+        "title": "カメラのフォルダのファイルを選択する",
         "body": """選択したファイルの数と、節約できる推定容量、または **Nothing selected** が表示されます。
 
 • **Photos**、**Videos**、および期間で、一致するものがすべて選択されます。

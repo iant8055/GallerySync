@@ -16,8 +16,8 @@ TRANSLATIONS = {
 ## Welche Clouds
 Backup funktioniert mit jeder Cloud. Sync und Archive brauchen OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 oder Backblaze B2, nicht Google Photos.
 
-## Camera folder
-Wenn du in Settings einen Camera folder festlegst, bietet er Off, Backup und Archive, mit eigener Optimise-Steuerung statt Sync. Siehe [[album-camera-optimise]].
+## Kameraordner
+Wenn du in Settings einen Kameraordner festlegst, bietet er Off, Backup und Archive, mit eigener Optimise-Steuerung statt Sync. Siehe [[album-camera-optimise]].
 
 ## Was du wählen solltest
 • So lassen, aber geschützt: **Backup**.
@@ -61,7 +61,7 @@ Eine Größenprüfung kann nicht jede Art von Schaden erkennen. Öffne ab und zu
 Auf etwa 2048 Pixel an der langen Kante verkleinert, ungefähr ein Zehntel der Größe. Gleicher Name, Ort, Datum und Standort, mit einem kleinen Wolkensymbol.
 
 ## Video
-Neu kodiert mit **480p** (High compression), **720p** (Medium) oder **1080p** (Low). Nie abgeschnitten. Automatic wartet auf das Ladegerät; Manual läuft bei **Sync now**.
+Neu kodiert mit **480p** (Hohe Kompression), **720p** (Mittlere) oder **1080p** (Niedrige). Nie abgeschnitten. Automatisch wartet auf das Ladegerät; Manuell läuft bei **Sync now**.
 
 ## Regeln
 • Nur in **Sync**-Alben.
@@ -84,15 +84,15 @@ Archive verschiebt Dateien für etwa 30 Tage in den Papierkorb von Android:
 Dateien im Papierkorb belegen weiter ihren vollen Platz, bis du ihn leerst.
 
 ## In deiner Cloud
-Bei **Ask** gehen Kopien, deren Entfernung du wählst, in den **OneDrive-Papierkorb**. Aus anderen Clouds wird nie etwas entfernt. Die App leert nie einen Papierkorb.""",
+Bei **Mich zur Kopie in der Cloud fragen** gehen Kopien, deren Entfernung du wählst, in den **OneDrive-Papierkorb**. Aus anderen Clouds wird nie etwas entfernt. Die App leert nie einen Papierkorb.""",
         "en_hash": "ab2cd9530770d041",
     },
     "background-work": {
         "title": "Wann was passiert",
-        "body": """• **Sichern:** kurz nachdem neue Fotos erscheinen, und alle sechs Stunden. Nur über Wi-Fi, außer mobile Daten sind an; nicht bei niedrigem Akkustand oder wenig Speicher. **Sync now** läuft sofort.
-• **Optimising photos:** Automatic, sobald die Cloud eine Datei in einem Sync-Album bestätigt. Manual, bei **Sync now**.
-• **Optimising video:** Automatic, nach Backups, beim Laden. Manual, bei **Sync now**.
-• **Gelöschte Dateien:** bei **Ask** wirst du kurz nach dem Löschen einer Datei mit Cloud-Kopie benachrichtigt (nicht, solange Backups pausiert sind).
+        "body": """• **Sichern:** kurz nachdem neue Fotos erscheinen, und alle sechs Stunden. Nur über WLAN, außer „Mobile Daten verwenden“ ist an; nicht bei niedrigem Akkustand oder wenig Speicher. **Sync now** läuft sofort.
+• **Optimising photos:** Automatisch, sobald die Cloud eine Datei in einem Sync-Album bestätigt. Manuell, bei **Sync now**.
+• **Optimising video:** Automatisch, nach Backups, beim Laden. Manuell, bei **Sync now**.
+• **Gelöschte Dateien:** bei **Mich zur Kopie in der Cloud fragen** wirst du kurz nach dem Löschen einer Datei mit Cloud-Kopie benachrichtigt (nicht, solange Backups pausiert sind).
 • **Archivieren:** nur, wenn du im Archive-Tab Yes sagst.
 • **Wiederherstellen:** nur, wenn du Restore drückst.
 
@@ -107,7 +107,7 @@ Zurück oder Home ist in Ordnung: Die Arbeit läuft weiter. Wenn du die App aus 
 • **Die Aufzeichnungen und Einstellungen der App:** privater Speicher auf deinem Telefon.
 • **Nichts wird erfasst:** keine Analysen, keine Absturzberichte, keine Werbung.
 
-Details: **Privacy Policy** und **Delete Account Info** in Settings.""",
+Details: **Datenschutzerklärung** und **Kontodaten löschen** in Settings.""",
         "en_hash": "989af3b026b90273",
     },
     "numbers-explained": {

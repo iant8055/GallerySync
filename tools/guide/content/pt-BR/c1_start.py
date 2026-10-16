@@ -27,7 +27,7 @@ Não existem servidores do GallerySync. Seus arquivos vão direto entre o seu te
 • **Nada sai do seu telefone a menos que você tenha escolhido Archive para aquele álbum**, e você confirma essa escolha.
 • **"Seguro" significa verificado.** A Cloud precisa confirmar que tem o arquivo com o mesmo tamanho antes de qualquer coisa ser otimizada ou removida.
 • **De fábrica, nada acontece.** Nenhuma pasta é escolhida e todo álbum fica em Off até você decidir.
-• **As cópias na sua Cloud são deixadas em paz.** Por padrão, apagar uma foto no telefone não mexe na cópia dela na Cloud. Escolha **Ask me about the Cloud copy** em Settings para receber a opção; nada é removido a menos que você selecione e confirme.
+• **As cópias na sua Cloud são deixadas em paz.** Por padrão, apagar uma foto no telefone não mexe na cópia dela na Cloud. Escolha **Perguntar sobre a cópia na Nuvem** em Settings para receber a opção; nada é removido a menos que você selecione e confirme.
 
 ## Bom saber
 De vez em quando, abra sua Cloud e olhe algumas fotos, principalmente antes de esvaziar uma lixeira.""",

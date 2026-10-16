@@ -39,7 +39,7 @@ Filtrer ne change que ce que vous voyez. Pour changer un mode, utilisez le bouto
     },
     "albums-all-backed-up": {
         "title": "Tout ici est sauvegardé",
-        "body": """Affiché quand chaque album visible contient des fichiers et qu'aucun n'attend d'être envoyé. Cela vient du registre propre à l'application ; la réponse du Cloud lui-même est la dernière ligne de chaque carte d'album.""",
+        "body": """Affiché quand chaque album visible contient des fichiers et qu'aucun n'attend d'être envoyé. Cela vient du registre propre à l'application ; la réponse du Cloud lui-même est la dernière ligne de chaque carte d'album.""",
         "en_hash": "79b43044d6005ada",
     },
     "albums-optimised-line": {
@@ -61,7 +61,7 @@ Rien n'est retiré ici. Le retrait se fait dans l'onglet Archive. Voir [[archive
     "albums-run-controls": {
         "title": "Sync now, Rescan, Pause, Resume et Stop",
         "body": """## Quand rien ne s'exécute
-• **Sync now :** sauvegarde maintenant. Si un interrupteur Optimise de Settings est activé avec son **Mode** sur **Manual**, il optimise aussi ensuite (voir [[settings-optimise-mode]]). Grisé quand il n'y a rien à envoyer ni à optimiser.
+• **Sync now :** sauvegarde maintenant. Si un des interrupteurs d'optimisation de Settings est activé avec son **Mode** sur **Manuel**, il optimise aussi ensuite (voir [[settings-optimise-mode]]). Grisé quand il n'y a rien à envoyer ni à optimiser.
 • **Rescan :** regarde le téléphone et interroge à nouveau OneDrive.
 
 ## Pendant une sauvegarde
@@ -109,7 +109,7 @@ Pas de miniatures ni d'aperçus. Utilisez votre application de galerie pour rega
     "album-file-status": {
         "title": "Marques et compteurs des fichiers d'un album",
         "body": """• **✓ backed up :** dans le Cloud, taille réelle sur le téléphone.
-• **✓ backed up · optimised :** dans le Cloud ; le téléphone a une copie plus petite.
+• **✓ backed up · optimised :** dans le Cloud ; le téléphone a une copie plus petite.
 • **⟳ pending :** en attente d'envoi.
 • **✗ failed :** n'a pas pu être envoyé après plusieurs essais.
 
@@ -138,7 +138,7 @@ Restore la sélectionne automatiquement. Désélectionnez-la pour que le fichier
     },
     "album-camera-optimise": {
         "title": "Optimiser les anciennes photos et vidéos de votre Camera folder",
-        "body": """Seul le **Camera folder** que vous avez choisi dans Settings sous **Camera Sync** ([[settings-section-camera]]) a ces commandes.
+        "body": """Seul le **Dossier de l'appareil photo** que vous avez choisi dans Settings sous **Sync de l'appareil photo** ([[settings-section-camera]]) a ces commandes.
 
 ## Sélectionner des fichiers
 • **Select Photos/Videos older than :** de **1 day** à **1 year**, ou **All**.
@@ -152,7 +152,7 @@ Restore la sélectionne automatiquement. Désélectionnez-la pour que le fichier
 ## Bon à savoir
 • Seuls les fichiers qu'OneDrive a confirmés en taille réelle peuvent être sélectionnés.
 • Rien n'est optimisé avant que vous appuyiez sur **Sync now**. Les nouvelles photos restent telles quelles.
-• Le Camera folder n'a pas de mode **Sync**, et les interrupteurs Optimise de Settings ne l'affectent pas.
+• Le Camera folder n'a pas de mode **Sync**, et les interrupteurs d'optimisation de Settings ne l'affectent pas.
 • Quitter avec des choix modifiés demande si vous voulez en faire vos valeurs par défaut.""",
         "en_hash": "f06a5a7ce89e99c4",
     },
@@ -181,7 +181,7 @@ C'est la seule fois où l'application définit un mode, et elle ne peut définir
 • Les fichiers archivés vont dans la corbeille de votre téléphone.
 • Videz la corbeille pour libérer l'espace.
 
-**Archive** confirme ; **Cancel** ne change rien.
+**Archive** confirme ; **Cancel** ne change rien.
 
 ## Bon à savoir
 Vous confirmez une seule fois. Les fichiers ajoutés plus tard à l'album sont aussi couverts, jusqu'à ce que l'album soit vide. Android demande une fois par lot de 2 000 fichiers au plus. Voir [[dialog-android-trash]].""",

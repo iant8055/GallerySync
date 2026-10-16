@@ -61,7 +61,7 @@ Nada é removido aqui. A remoção acontece na aba Archive. Veja [[archive-overv
     'albums-run-controls': {
         "title": 'Sync now, Rescan, Pause, Resume e Stop',
         "body": """## Quando nada está rodando
-• **Sync now:** faz o backup agora. Se um botão Optimise em Settings estiver ligado com o **Mode** em **Manual**, ele também otimiza em seguida (veja [[settings-optimise-mode]]). Fica cinza quando não há nada para enviar ou otimizar.
+• **Sync now:** faz o backup agora. Se um botão Optimise em Settings estiver ligado com o **Modo** em **Manual**, ele também otimiza em seguida (veja [[settings-optimise-mode]]). Fica cinza quando não há nada para enviar ou otimizar.
 • **Rescan:** olha o telefone e pergunta de novo ao OneDrive.
 
 ## Enquanto um backup roda
@@ -101,7 +101,7 @@ Nada é removido aqui. A remoção acontece na aba Archive. Veja [[archive-overv
 
 • **Cabeçalho:** seta de voltar, nome do álbum, modo e número de arquivos, **Backs up to** (a Cloud e a pasta para onde vão os arquivos novos, mais qualquer outra Cloud que já guarde alguns), as contagens ([[album-file-status]]), **Sort by** ([[album-file-sort]]) e **Keep at full size** ([[album-file-pin]]).
 • **Arquivos:** um cartão por arquivo com tamanho, data e marcas. Um arquivo otimizado mostra o tamanho menor que tem no telefone.
-• **Camera folder** (se escolhida em Settings): controles extras de otimização. Veja [[album-camera-optimise]].
+• **Pasta da câmera** (se escolhida em Settings): controles extras de otimização. Veja [[album-camera-optimise]].
 
 Sem miniaturas nem pré-visualizações. Use o seu app de galeria para ver as fotos.""",
         "en_hash": "c5a7c5d01cd7947b",
@@ -137,8 +137,8 @@ O Restore a seleciona automaticamente. Desmarque para que o arquivo volte a segu
         "en_hash": "34b89b8b5829a956",
     },
     'album-camera-optimise': {
-        "title": 'Otimizar fotos e vídeos mais antigos na sua Camera folder',
-        "body": """Só a **Camera folder** que você escolheu em Settings, em **Camera Sync** ([[settings-section-camera]]), tem estes controles.
+        "title": 'Otimizar fotos e vídeos mais antigos na sua Pasta da câmera',
+        "body": """Só a **Pasta da câmera** que você escolheu em Settings, em **Sync da câmera** ([[settings-section-camera]]), tem estes controles.
 
 ## Selecionar arquivos
 • **Select Photos/Videos older than:** de **1 day** a **1 year**, ou **All**.
@@ -152,12 +152,12 @@ O Restore a seleciona automaticamente. Desmarque para que o arquivo volte a segu
 ## Bom saber
 • Só os arquivos que o OneDrive confirmou em tamanho real podem ser selecionados.
 • Nada é otimizado até você pressionar **Sync now**. As fotos novas ficam como estão.
-• A Camera folder não tem o modo **Sync**, e os botões Optimise em Settings não afetam essa pasta.
+• A Pasta da câmera não tem o modo **Sync**, e os botões Optimise em Settings não afetam essa pasta.
 • Sair com escolhas alteradas pergunta se você quer torná-las seus padrões.""",
         "en_hash": "f06a5a7ce89e99c4",
     },
     'album-camera-select': {
-        "title": 'Selecionar arquivos na sua Camera folder',
+        "title": 'Selecionar arquivos na sua Pasta da câmera',
         "body": """Mostra quantos arquivos estão selecionados e o espaço estimado que será economizado, ou **Nothing selected**.
 
 • **Photos**, **Videos** e a idade selecionam todos os arquivos que combinam.

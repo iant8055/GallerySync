@@ -16,8 +16,8 @@ TRANSLATIONS = {
 ## Quais Clouds
 O Backup funciona com todas as Clouds. O Sync e o Archive exigem OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 ou Backblaze B2, não o Google Photos.
 
-## Camera folder
-Se você definir uma Camera folder em Settings, ela oferece Off, Backup e Archive, com controles de otimização próprios no lugar do Sync. Veja [[album-camera-optimise]].
+## Pasta da câmera
+Se você definir uma Pasta da câmera em Settings, ela oferece Off, Backup e Archive, com controles de otimização próprios no lugar do Sync. Veja [[album-camera-optimise]].
 
 ## Qual escolher
 • Manter como está, mas protegido: **Backup**.
@@ -61,7 +61,7 @@ Uma checagem de tamanho não detecta todo tipo de dano. Abra a sua Cloud de vez 
 Reduzidas a cerca de 2048 pixels no lado maior, aproximadamente um décimo do tamanho. Mesmo nome, lugar, data e local, com um pequeno selo de nuvem.
 
 ## Vídeo
-Recodificado em **480p** (High compression), **720p** (Medium) ou **1080p** (Low). Nunca cortado. O Automatic espera o carregador; o Manual roda no **Sync now**.
+Recodificado em **480p** (Compressão alta), **720p** (Média) ou **1080p** (Baixa). Nunca cortado. O Automático espera o carregador; o Manual roda no **Sync now**.
 
 ## Regras
 • Só em álbuns **Sync**.
@@ -90,8 +90,8 @@ Em **Ask**, as cópias que você escolhe remover vão para a **lixeira do OneDri
     'background-work': {
         "title": 'Quando as coisas acontecem',
         "body": """• **Fazer backup:** pouco depois de aparecerem fotos novas, e a cada seis horas. Só no Wi-Fi, a menos que os dados móveis estejam ligados; não quando a bateria ou o armazenamento estão baixos. O **Sync now** roda na hora.
-• **Optimising photos:** no Automatic, assim que a Cloud confirma um arquivo em um álbum Sync. No Manual, no **Sync now**.
-• **Optimising video:** no Automatic, depois dos backups, com o aparelho carregando. No Manual, no **Sync now**.
+• **Optimising photos:** no Automático, assim que a Cloud confirma um arquivo em um álbum Sync. No Manual, no **Sync now**.
+• **Optimising video:** no Automático, depois dos backups, com o aparelho carregando. No Manual, no **Sync now**.
 • **Arquivos apagados:** em **Ask**, você é avisado pouco depois de apagar um arquivo que tem uma cópia na Cloud (não enquanto os backups estão pausados).
 • **Arquivar:** só quando você diz Yes na aba Archive.
 • **Restaurar:** só quando você pressiona Restore.
@@ -107,7 +107,7 @@ Voltar ou Home não tem problema: o trabalho continua. Fechar o app deslizando-o
 • **Os registros e as configurações do app:** armazenamento privado no seu telefone.
 • **Nada é coletado:** sem análises, relatórios de falhas nem anúncios.
 
-Detalhes: **Privacy Policy** e **Delete Account Info** em Settings.""",
+Detalhes: **Política de privacidade** e **Excluir dados da conta** em Settings.""",
         "en_hash": "989af3b026b90273",
     },
     'numbers-explained': {

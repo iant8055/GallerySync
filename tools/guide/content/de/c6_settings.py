@@ -1,7 +1,7 @@
 TRANSLATIONS = {
     "_chapter": {
         "title": "Der Settings-Tab",
-        "intro": "Eine scrollende Seite in grünen Bändern: General, Backup, Albums, Sync, Camera Sync, Restore, Archive und Help & Feedback. Jedes Band hat ein (?).",
+        "intro": "Eine scrollende Seite in grünen Bändern: Allgemein, Backup, Albums, Sync, Kamera-Sync, Restore, Archive und Hilfe und Feedback. Jedes Band hat ein (?).",
         "en_hash": "fdc210cbde6172d8",
     },
     "settings-overview": {
@@ -12,32 +12,32 @@ TRANSLATIONS = {
         "en_hash": "523b8f790e8db56b",
     },
     "settings-section-general": {
-        "title": "General",
-        "body": """Der **How To Guide**, **Appearance** und **Use mobile data**. **Language** ist die letzte Zeile der Seite.""",
+        "title": "Allgemein",
+        "body": """Die **Anleitung**, **Darstellung** und **Mobile Daten verwenden**. **Sprache** ist die letzte Zeile der Seite.""",
         "en_hash": "b8038bbcadfcd8b3",
     },
     "settings-how-to-guide-card": {
-        "title": "Die Karte How To Guide",
-        "body": """Öffnet diese Anleitung. **Read more in the How To Guide** in einem beliebigen **(?)** öffnet sie bei diesem Thema. Braucht eine Internetverbindung; wenn sie nicht lädt, nutze **Open in browser**.""",
+        "title": "Die Karte „Anleitung“",
+        "body": """Öffnet diese Anleitung. **Mehr in der Anleitung** in einem beliebigen **(?)** öffnet sie bei diesem Thema. Braucht eine Internetverbindung; wenn sie nicht lädt, nutze **Im Browser öffnen**.""",
         "en_hash": "a7dec55c7b2218a4",
     },
     "settings-language": {
-        "title": "Language",
-        "body": """Die Sprache, die du auf dem Willkommensbildschirm gewählt hast. Tippe darauf, um sie zu ändern. Der How To Guide folgt dieser Wahl; die Bildschirme der App sind vorerst auf Englisch.""",
+        "title": "Sprache",
+        "body": """Die Sprache, die du auf dem Willkommensbildschirm gewählt hast. Tippe darauf, um sie zu ändern. Die Anleitung folgt dieser Wahl; die Bildschirme der App sind vorerst auf Englisch.""",
         "en_hash": "e1597813fc836e98",
     },
     "settings-appearance": {
-        "title": "Appearance",
+        "title": "Darstellung",
         "body": """• **System** (Standard): folgt der Hell- oder Dunkel-Einstellung deines Telefons.
-• **Light** oder **Dark**: immer dieses Aussehen.
+• **Hell** oder **Dunkel**: immer dieses Aussehen.
 
 Die Anleitung und die Richtlinienseiten folgen der Einstellung deines Telefons.""",
         "en_hash": "b2ab8ff47282bc06",
     },
     "settings-mobile-data": {
-        "title": "Use mobile data",
-        "body": """• **Off** (Standard): **Wi-Fi only.**
-• **On:** **Syncs on Wi-Fi and mobile data.**
+        "title": "Mobile Daten verwenden",
+        "body": """• **Aus** (Standard): **Nur WLAN.**
+• **An:** **Synchronisiert über WLAN und mobile Daten.**
 
 Gilt für automatische Backups und **Sync now**. Lass es aus, es sei denn, dein Datentarif ist unbegrenzt.""",
         "en_hash": "e8860c60b1961fee",
@@ -45,29 +45,29 @@ Gilt für automatische Backups und **Sync now**. Lass es aus, es sei denn, dein 
     "settings-section-backup": {
         "title": "Backup",
         "body": """• **Clouds:** verbinde jede Cloud oder melde dich bei ihr ab. Siehe [[settings-account]].
-• **Where each folder goes:** zu welcher Cloud jeder Ordner sendet. Siehe [[settings-destination]].
+• **Wohin jeder Ordner geht:** zu welcher Cloud jeder Ordner sendet. Siehe [[settings-destination]].
 
-Eine Cloud ist als **main (free)** markiert: die erste Cloud, die du gewählt hast. Sie ist immer kostenlos. Andere Clouds brauchen **Pro**: 30 Tage kostenlos (**Start 30-day free trial**), danach ein einmaliger Kauf (**Unlock Pro**). Es wird nichts automatisch berechnet.""",
+Eine Cloud ist als **Haupt-Cloud (kostenlos)** markiert: die erste Cloud, die du gewählt hast. Sie ist immer kostenlos. Andere Clouds brauchen **Pro**: 30 Tage kostenlos (**30 Tage kostenlos testen**), danach ein einmaliger Kauf (**Pro freischalten**). Es wird nichts automatisch berechnet.""",
         "en_hash": "0db12d3ebcb633de",
     },
     "settings-account": {
-        "title": "Deine Clouds und Sign out",
-        "body": """Jede Cloud zeigt ihr Konto (oder **Not connected**) mit **Sign out**, **Connect** oder **Enter keys**.
+        "title": "Deine Clouds und Abmelden",
+        "body": """Jede Cloud zeigt ihr Konto (oder **Nicht verbunden**) mit **Abmelden**, **Verbinden** oder **Schlüssel eingeben**.
 
-## Backup folder
-Unter jeder verbundenen Cloud (außer Google Photos): der Ordner, in den ihre Backups gehen, mit **Change**. Siehe [[dialog-destination]].
+## Backup-Ordner
+Unter jeder verbundenen Cloud (außer Google Photos): der Ordner, in den ihre Backups gehen, mit **Ändern**. Siehe [[dialog-destination]].
 
-## Sign out
+## Abmelden
 Zuerst eine Warnung: Backups in diese Cloud stoppen, nichts wird gelöscht. Wenn diese Cloud Dateien hält, die auf dem Telefon nicht in voller Größe sind (optimiert oder archiviert), fragt die App:
-• **Restore them to the phone first:** holt sie alle zurück und meldet dich dann ab.
-• **Leave them there:** meldet dich ab.
-• **Cancel:** du bleibst angemeldet.
+• **Erst auf das Telefon wiederherstellen:** holt sie alle zurück und meldet dich dann ab.
+• **Dort lassen:** meldet dich ab.
+• **Abbrechen:** du bleibst angemeldet.
 
-Ordner bleiben dieser Cloud zugeordnet und warten, bis du dich wieder anmeldest. Um sie anderswohin zu senden, ändere **Where each folder goes**.""",
+Ordner bleiben dieser Cloud zugeordnet und warten, bis du dich wieder anmeldest. Um sie anderswohin zu senden, ändere **Wohin jeder Ordner geht**.""",
         "en_hash": "788b2237bf1a173f",
     },
     "settings-destination": {
-        "title": "Where each folder goes",
+        "title": "Wohin jeder Ordner geht",
         "body": """Jeder Hauptordner (DCIM, Pictures, Movies), die Cloud, zu der er geht, und wo in dieser Cloud.
 
 • Tippe auf die Cloud, um sie zu ändern. Das geht nur mit mehr als einer Cloud und mit Pro oder dem Test.
@@ -76,19 +76,19 @@ Ordner bleiben dieser Cloud zugeordnet und warten, bis du dich wieder anmeldest.
         "en_hash": "22adac22e50fbdf0",
     },
     "dialog-destination": {
-        "title": "Where new backups go (der Change-Dialog)",
-        "body": """Geöffnet durch **Change** neben dem **Backup folder** einer Cloud, in Settings oder auf ihrer Karte bei der Einrichtung.
+        "title": "Wohin neue Backups gehen (der Ändern-Dialog)",
+        "body": """Geöffnet durch **Ändern** neben dem **Backup-Ordner** einer Cloud, in Settings oder auf ihrer Karte bei der Einrichtung.
 
-• Gib den Ordnerpfad ein, oder nutze bei OneDrive **Browse...**.
-• **Reset to default:** zurück zu **Samsung Gallery/DCIM** (OneDrive) oder **GallerySync** (andere Clouds).
-• **Use this folder** speichert; **Cancel** ändert nichts.
+• Gib den Ordnerpfad ein, oder nutze bei OneDrive **Durchsuchen…**.
+• **Auf Standard zurücksetzen:** zurück zu **Samsung Gallery/DCIM** (OneDrive) oder **GallerySync** (andere Clouds).
+• **Diesen Ordner verwenden** speichert; **Abbrechen** ändert nichts.
 
 Nur neue Dateien gehen in den neuen Ordner. Bereits gesicherte Dateien bleiben, wo sie sind. OneDrive prüft weiterhin frühere Ordner, daher wird nichts doppelt gesendet.""",
         "en_hash": "910e0378a5a8b208",
     },
     "dialog-folder-picker": {
-        "title": "Choose a folder (die OneDrive-Auswahl)",
-        "body": """Geöffnet durch **Browse...** bei OneDrive. Listet deine OneDrive-Ordner auf: Tippe zum Öffnen, **Up one folder** zum Zurückgehen, **Use this folder** zum Wählen, **New folder** zum Anlegen eines Ordners.""",
+        "title": "Ordner wählen (die OneDrive-Auswahl)",
+        "body": """Geöffnet durch **Durchsuchen…** bei OneDrive. Listet deine OneDrive-Ordner auf: Tippe zum Öffnen, **Einen Ordner höher** zum Zurückgehen, **Diesen Ordner verwenden** zum Wählen, **Neuer Ordner** zum Anlegen eines Ordners.""",
         "en_hash": "f45e3349352eea44",
     },
     "settings-section-albums": {
@@ -97,33 +97,33 @@ Nur neue Dateien gehen in den neuen Ordner. Bereits gesicherte Dateien bleiben, 
         "en_hash": "dad7459947f2d8e1",
     },
     "settings-folders": {
-        "title": "Folders to back up",
+        "title": "Ordner zum Sichern",
         "body": """Die Ordner, in denen GallerySync nachsehen darf.
 
-• **Add a folder:** öffnet die Ordnerauswahl von Android.
-• **Remove:** wähle Ordner aus, drücke **Remove** und bestätige.
+• **Ordner hinzufügen:** öffnet die Ordnerauswahl von Android.
+• **Entfernen:** wähle Ordner aus, drücke **Entfernen** und bestätige.
 
 Nichts außerhalb dieser Ordner wird durchsucht oder verändert. Das Entfernen eines Ordners verliert nichts: Füge ihn wieder hinzu, und alles kommt zurück.""",
         "en_hash": "3789c04bb52baef5",
     },
     "dialog-remove-folder": {
-        "title": "Stop watching this folder?",
-        "body": """**Remove** hört auf, die ausgewählten Ordner zu beobachten; **Cancel** ändert nichts.
+        "title": "Diesen Ordner nicht mehr beobachten?",
+        "body": """**Entfernen** hört auf, die ausgewählten Ordner zu beobachten; **Abbrechen** ändert nichts.
 
 Nichts bereits Gesichertes geht verloren. Wenn du den Ordner wieder hinzufügst, kommen seine Alben und sein Verlauf zurück, ohne dass etwas doppelt gesendet wird.""",
         "en_hash": "5b84d0c4a6ec8a9a",
     },
     "settings-deletion": {
         "title": "Wenn du ein Foto oder Video von diesem Telefon löschst",
-        "body": """• **Leave the Cloud copy** (Standard): Aus deiner Cloud wird nie etwas entfernt.
-• **Ask me about the Cloud copy:** Wenn Dateien dein Telefon verlassen, fragt ein Fenster, was mit ihren Cloud-Kopien geschehen soll. Sind Benachrichtigungen erlaubt, wirst du kurz nach dem Löschen auch benachrichtigt. Nichts wird ohne dein Einverständnis entfernt. Siehe [[deleted-files-window]].
+        "body": """• **Kopie in der Cloud lassen** (Standard): Aus deiner Cloud wird nie etwas entfernt.
+• **Mich zur Kopie in der Cloud fragen:** Wenn Dateien dein Telefon verlassen, fragt ein Fenster, was mit ihren Cloud-Kopien geschehen soll. Sind Benachrichtigungen erlaubt, wirst du kurz nach dem Löschen auch benachrichtigt. Nichts wird ohne dein Einverständnis entfernt. Siehe [[deleted-files-window]].
 
 Vorerst nur OneDrive. Kopien in anderen Clouds werden nie entfernt.""",
         "en_hash": "5fce34ecb857a3f6",
     },
     "deleted-files-window": {
         "title": "Files deleted from your phone (das Fenster, das sich mit der App öffnet)",
-        "body": """Öffnet sich vor dem Albums-Tab, wenn Dateien dein Telefon verlassen haben, bei **Ask**. Zu Beginn ist nichts ausgewählt.
+        "body": """Öffnet sich vor dem Albums-Tab, wenn Dateien dein Telefon verlassen haben, bei **Mich zur Kopie in der Cloud fragen**. Zu Beginn ist nichts ausgewählt.
 
 ## Fenster 1: eine Kopie ist in OneDrive
 Wische nach rechts (oder tippe), um Dateien auszuwählen, deren OneDrive-Kopie entfernt werden soll.
@@ -157,15 +157,15 @@ Diese Dateien liegen noch im Papierkorb deines Telefons.
         "en_hash": "1147f4e959ac06bc",
     },
     "settings-optimise-photos": {
-        "title": "Optimise photos",
-        "body": """Standardmäßig **Off**. Wenn an, werden Fotos in Sync-Alben durch kleinere Kopien ersetzt: etwa 2048 Pixel an der langen Kante, ungefähr ein Zehntel der Größe. Sie bleiben in deiner Galerie mit einem kleinen Wolkensymbol. Die Originale bleiben in der Cloud.
+        "title": "Fotos optimieren",
+        "body": """Standardmäßig **Aus**. Wenn an, werden Fotos in Sync-Alben durch kleinere Kopien ersetzt: etwa 2048 Pixel an der langen Kante, ungefähr ein Zehntel der Größe. Sie bleiben in deiner Galerie mit einem kleinen Wolkensymbol. Die Originale bleiben in der Cloud.
 
-Fotos, die schon klein genug sind, und Dateien mit **Keep at full size** bleiben unberührt. **Mode** legt fest, wann es läuft. Siehe [[settings-optimise-mode]].""",
+Fotos, die schon klein genug sind, und Dateien mit **Keep at full size** bleiben unberührt. **Modus** legt fest, wann es läuft. Siehe [[settings-optimise-mode]].""",
         "en_hash": "dee027d401742ca5",
     },
     "settings-optimise-video": {
-        "title": "Optimise video",
-        "body": """Standardmäßig **Off**. Wenn an, erscheinen **Mode**, **Older than** und **Compression**.
+        "title": "Videos optimieren",
+        "body": """Standardmäßig **Aus**. Wenn an, erscheinen **Modus**, **Älter als** und **Kompression**.
 
 Videos in Sync-Alben werden kleiner neu kodiert. Nichts wird je abgeschnitten. Die Originale bleiben in der Cloud.
 
@@ -173,61 +173,61 @@ Videos in Sync-Alben werden kleiner neu kodiert. Nichts wird je abgeschnitten. D
 In einem Sync-Album, verified in the Cloud, älter als deine Einstellung, in einem Ordner, auf den du Zugriff gegeben hast, und noch nicht optimiert.
 
 ## Wann
-• **Automatic:** nach Backups, nur beim Laden.
-• **Manual:** wenn du **Sync now** drückst.""",
+• **Automatisch:** nach Backups, nur beim Laden.
+• **Manuell:** wenn du **Sync now** drückst.""",
         "en_hash": "09cf14026b288ef6",
     },
     "settings-optimise-mode": {
-        "title": "Mode: Automatic or Manual",
-        "body": """• **Automatic** (Standard): Dateien in Sync-Alben werden optimiert, sobald die Cloud sie bestätigt. Videos warten auf das Ladegerät.
-• **Manual:** nichts geschieht, bis du im Albums-Tab **Sync now** drückst.
+        "title": "Modus: Automatisch oder Manuell",
+        "body": """• **Automatisch** (Standard): Dateien in Sync-Alben werden optimiert, sobald die Cloud sie bestätigt. Videos warten auf das Ladegerät.
+• **Manuell:** nichts geschieht, bis du im Albums-Tab **Sync now** drückst.
 
 Fotos außerhalb der Ordner, auf die du Zugriff gegeben hast, brauchen die Bestätigung von Android, warten also, bis du die App öffnest oder **Sync now** drückst.""",
         "en_hash": "2d55959b2e538398",
     },
     "settings-video-age": {
-        "title": "Older than (video)",
-        "body": """Wie alt ein Video sein muss, bevor es optimiert wird: **Straight away**, **1 hour**, **12 hours**, **1 day** oder **1 week**. Das Backup wird nicht verzögert.
+        "title": "Älter als (Video)",
+        "body": """Wie alt ein Video sein muss, bevor es optimiert wird: **Sofort**, **1 Stunde**, **12 Stunden**, **1 Tag** oder **1 Woche**. Das Backup wird nicht verzögert.
 
-**Straight away** schließt Clips ein, die heute gedreht wurden; wenn du einen davon bearbeitest, beginnst du mit der kleineren Kopie, bis du sie wiederherstellst.""",
+**Sofort** schließt Clips ein, die heute gedreht wurden; wenn du einen davon bearbeitest, beginnst du mit der kleineren Kopie, bis du sie wiederherstellst.""",
         "en_hash": "b69444389e56afe8",
     },
     "settings-video-quality": {
-        "title": "Compression (video)",
-        "body": """• **High compression, 480p:** kleinste Dateien, etwa 85 % gespart.
-• **Medium compression, 720p:** etwa 75 % gespart.
-• **Low compression, 1080p:** etwa 50 % gespart.
+        "title": "Kompression (Video)",
+        "body": """• **Hohe Kompression — 480p:** kleinste Dateien, etwa 85 % gespart.
+• **Mittlere Kompression — 720p:** etwa 75 % gespart.
+• **Niedrige Kompression — 1080p:** etwa 50 % gespart.
 
 Typische Werte; die Ergebnisse variieren.
 
 ## Nachdem du sie verstärkt hast
-Die App fragt **Re-optimise existing videos?** **Yes** lässt Videos, die zuvor zu klein zum Verkleinern waren, erneut versuchen. **No** lässt sie unberührt. Bereits optimierte Videos werden nicht angefasst.""",
+Die App fragt **Vorhandene Videos neu optimieren?** **Ja** lässt Videos, die zuvor zu klein zum Verkleinern waren, erneut versuchen. **Nein** lässt sie unberührt. Bereits optimierte Videos werden nicht angefasst.""",
         "en_hash": "b68338f9be222883",
     },
     "settings-section-restore": {
         "title": "Restore (Settings)",
-        "body": """Ein Schalter für den Restore-Tab: **Show empty folders**.""",
+        "body": """Ein Schalter für den Restore-Tab: **Leere Ordner anzeigen**.""",
         "en_hash": "58571cb29a96c3ed",
     },
     "settings-show-empty-folders": {
-        "title": "Show empty folders",
-        "body": """Standardmäßig **Off**. Wenn an, listet der Restore-Tab jeden OneDrive-Ordner auf, auch solche, bei denen nichts zurückzuholen ist.""",
+        "title": "Leere Ordner anzeigen",
+        "body": """Standardmäßig **Aus**. Wenn an, listet der Restore-Tab jeden OneDrive-Ordner auf, auch solche, bei denen nichts zurückzuholen ist.""",
         "en_hash": "44bada9612e80a0d",
     },
     "settings-section-camera": {
-        "title": "Camera Sync (Settings)",
-        "body": """**Special settings for Camera**, standardmäßig aus. Wenn an:
-• **Camera folder:** der Ordner, in dem deine Kamera speichert. Wähle ihn aus der Liste oder **Other…**.
+        "title": "Kamera-Sync (Settings)",
+        "body": """**Spezielle Einstellungen für die Kamera**, standardmäßig aus. Wenn an:
+• **Kameraordner:** der Ordner, in dem deine Kamera speichert. Wähle ihn aus der Liste oder **Anderer…**.
 • **Select Photos/Videos older than**, **Photos**, **Videos:** Standardwerte für die Optimise-Steuerung dieses Ordners ([[album-camera-optimise]]).
-• **Video compression:** für dort optimierte Videos.
+• **Videokompression:** für dort optimierte Videos.
 
-Der Camera folder hat keinen **Sync**-Modus, und nichts wird optimiert, bis du darin **Sync now** drückst. Die Optimise-Schalter oben wirken sich nicht auf ihn aus.""",
+Der Kameraordner hat keinen **Sync**-Modus, und nichts wird optimiert, bis du darin **Sync now** drückst. Die Optimierungsschalter oben wirken sich nicht auf ihn aus.""",
         "en_hash": "d596a9c99a8de79d",
     },
     "settings-section-archive": {
         "title": "Archive (Settings)",
         "body": """• **Only show files older than:** wo der Filter des Archive-Tabs beginnt. Siehe [[settings-archive-default-age]].
-• **Notify when files are ready to archive:** standardmäßig aus. Siehe [[settings-archive-notify]].""",
+• **Benachrichtigen, wenn Dateien für Archive bereit sind:** standardmäßig aus. Siehe [[settings-archive-notify]].""",
         "en_hash": "7b4561ddc010537d",
     },
     "settings-archive-default-age": {
@@ -236,24 +236,24 @@ Der Camera folder hat keinen **Sync**-Modus, und nichts wird optimiert, bis du d
         "en_hash": "215ff23fa51a5fca",
     },
     "settings-archive-notify": {
-        "title": "Notify when files are ready to archive",
-        "body": """Standardmäßig **Off**. Wenn an, wirst du einmal pro neuem Stapel archivierbarer Dateien benachrichtigt. Nur OneDrive-Dateien.
+        "title": "Benachrichtigen, wenn Dateien für Archive bereit sind",
+        "body": """Standardmäßig **Aus**. Wenn an, wirst du einmal pro neuem Stapel archivierbarer Dateien benachrichtigt. Nur OneDrive-Dateien.
 
 Der Albums-Tab und die Erinnerung beim Verlassen zeigen das ebenfalls, sodass du dich nie nur auf Benachrichtigungen verlassen musst. Wenn Benachrichtigungen blockiert sind, sagt der Schalter es.""",
         "en_hash": "a0b5e2290fe1eaae",
     },
     "settings-about-cards": {
-        "title": "Help & Feedback und die Link-Karten unten",
-        "body": """## Help & Feedback
-• **Rate us on Play Store:** öffnet den Eintrag von GallerySync.
-• **Bug Report:** wo du schreiben kannst, und **Copy details** für deine App-Version, dein Telefonmodell und deine Android-Version.
+        "title": "Hilfe und Feedback und die Link-Karten unten",
+        "body": """## Hilfe und Feedback
+• **Im Play Store bewerten:** öffnet den Eintrag von GallerySync.
+• **Fehler melden:** wo du schreiben kannst, und **Details kopieren** für deine App-Version, dein Telefonmodell und deine Android-Version.
 
 ## Ganz unten
-• **Privacy Policy.**
-• **Delete Account Info:** wie du dich abmeldest, den Zugriff der App entfernst und ihre Daten löschst.
-• **Contact Info:** die Adresse, mit **Copy address**.
+• **Datenschutzerklärung.**
+• **Kontodaten löschen:** wie du dich abmeldest, den Zugriff der App entfernst und ihre Daten löschst.
+• **Kontakt:** die Adresse, mit **Adresse kopieren**.
 
-Die Seiten werden aus dem Internet geladen. Wenn eine nicht lädt, nutze **Open in browser**.""",
+Die Seiten werden aus dem Internet geladen. Wenn eine nicht lädt, nutze **Im Browser öffnen**.""",
         "en_hash": "8a454188917d719a",
     },
 }
