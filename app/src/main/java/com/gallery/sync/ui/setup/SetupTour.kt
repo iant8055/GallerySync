@@ -559,9 +559,9 @@ private fun SetupTourBody(
                 // Close did nothing at all until 3 Sept.
                 if (backupComplete) {
                     viewModel.completeSetupAfterBackup()
-                    // The one moment a user has just seen it work: ask for a rating (Ian, 17 Oct 2026). Finish is
-                    // pressed once per install, and Play itself decides whether the sheet appears.
-                    (activity as? androidx.activity.ComponentActivity)?.let { com.gallery.sync.ui.common.ReviewPrompt.ask(it) }
+                    // The one moment a user has just seen it work: a rating is owed (Ian, 17 Oct 2026). Asked on the
+                    // Albums tab once the New Albums pop-up is cleared; see ReviewPrompt.
+                    com.gallery.sync.ui.common.ReviewPrompt.pending = true
                     onComplete()
                 } else {
                     // `finish`, not `finishAndRemoveTask`. Reverted 4 Sept 2026, same evening it

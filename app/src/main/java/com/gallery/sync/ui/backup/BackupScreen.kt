@@ -444,14 +444,22 @@ private fun AlbumList(
     // Never while the wizard is running — Ian, 5 Oct 2026, after it appeared over the Backup Progress card
     // on a fresh install and asked him to choose a mode for 86 albums mid-setup. The condition lives in
     // NewAlbumsPrompt so it asks WizardGate the same question the wizard itself is decided by.
-    if (
-        NewAlbumsPrompt.shows(
-            firstBackupDone = state.hasCompletedFirstBackup,
-            setupCompleted = state.hasCompletedSetup,
-            waitingAlbums = waitingNames.size,
-            showingNewOnly = showingNew
-        )
-    ) {
+    val newAlbumsShowing = NewAlbumsPrompt.shows(
+        firstBackupDone = state.hasCompletedFirstBackup,
+        setupCompleted = state.hasCompletedSetup,
+        waitingAlbums = waitingNames.size,
+        showingNewOnly = showingNew
+    )
+    // The rating Finish asked for waits until this pop-up is cleared (Ian, 17 Oct 2026). The pause lets a pop-up that
+    // is about to appear (the album list loads just after setup) do so first; if it does, this restarts and waits again.
+    val reviewActivity = androidx.activity.compose.LocalActivity.current as? androidx.activity.ComponentActivity
+    if (com.gallery.sync.ui.common.ReviewPrompt.pending && !newAlbumsShowing && reviewActivity != null) {
+        LaunchedEffect(newAlbumsShowing) {
+            kotlinx.coroutines.delay(2_000)
+            com.gallery.sync.ui.common.ReviewPrompt.askIfPending(reviewActivity)
+        }
+    }
+    if (newAlbumsShowing) {
         NewAlbumsDialog(
             count = waitingNames.size,
             // All three exits record that these albums have been seen (Ian, 5 Oct 2026: the pop-up returned
