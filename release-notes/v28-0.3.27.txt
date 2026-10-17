@@ -1,0 +1,49 @@
+<en-US>
+• Choose your language on the Welcome screen. Setup, Settings, the (?) help cards and the How To Guide now come in English, Español, Português (Brasil), Français, Deutsch, 日本語 and हिन्दी.
+• A reminder 3 days before your free Pro trial ends, and on the day.
+• The How To Guide follows your Appearance setting, dark or light.
+• Clearer backup summary, and the status line clears when a backup ends.
+• Fixes and tidying throughout.
+</en-US>
+<es-ES>
+• Elige tu idioma en la pantalla de bienvenida. La configuración, Settings, las tarjetas de ayuda (?) y la Guía de uso ya están en English, Español, Português (Brasil), Français, Deutsch, 日本語 y हिन्दी.
+• Un aviso 3 días antes de que termine tu prueba gratuita de Pro, y el mismo día.
+• La Guía de uso sigue tu ajuste de Apariencia, oscuro o claro.
+• Resumen de copia más claro, y la línea de estado se borra al terminar.
+• Correcciones y mejoras.
+</es-ES>
+<pt-BR>
+• Escolha seu idioma na tela de boas-vindas. A configuração, Settings, os cartões de ajuda (?) e o Guia de uso agora estão em English, Español, Português (Brasil), Français, Deutsch, 日本語 e हिन्दी.
+• Um aviso 3 dias antes do fim do seu teste grátis do Pro, e no próprio dia.
+• O Guia de uso segue sua configuração de Aparência, escura ou clara.
+• Resumo do backup mais claro, e a linha de status some quando o backup termina.
+• Correções e melhorias.
+</pt-BR>
+<fr-FR>
+• Choisissez votre langue sur l'écran d'accueil. La configuration, Settings, les cartes d'aide (?) et le Mode d'emploi sont désormais en English, Español, Português (Brasil), Français, Deutsch, 日本語 et हिन्दी.
+• Un rappel 3 jours avant la fin de votre essai gratuit de Pro, et le jour même.
+• Le Mode d'emploi suit votre réglage d'Apparence, sombre ou clair.
+• Résumé de sauvegarde plus clair ; la ligne d'état s'efface à la fin.
+• Corrections et améliorations.
+</fr-FR>
+<de-DE>
+• Wähle deine Sprache auf dem Willkommensbildschirm. Einrichtung, Settings, die (?)-Hilfekarten und die Anleitung gibt es jetzt auf English, Español, Português (Brasil), Français, Deutsch, 日本語 und हिन्दी.
+• Eine Erinnerung 3 Tage vor Ende deines kostenlosen Pro-Tests und am Tag selbst.
+• Die Anleitung folgt deiner Darstellung-Einstellung, dunkel oder hell.
+• Klarere Backup-Zusammenfassung; die Statuszeile verschwindet nach dem Backup.
+• Fehlerbehebungen und Verbesserungen.
+</de-DE>
+<ja-JP>
+• ウェルカム画面で言語を選べるようになりました。セットアップ、Settings、(?) ヘルプカード、使い方ガイドが English、Español、Português (Brasil)、Français、Deutsch、日本語、हिन्दी に対応しました。
+• Pro の無料試用が終わる 3 日前と当日にお知らせします。
+• 使い方ガイドが「表示」の設定（ダーク／ライト）に従うようになりました。
+• バックアップの結果がわかりやすくなり、終了後はステータス行が消えます。
+• その他の修正と改善。
+</ja-JP>
+<hi-IN>
+• वेलकम स्क्रीन पर अपनी भाषा चुनें। सेटअप, Settings, (?) सहायता कार्ड और How To Guide अब English, Español, Português (Brasil), Français, Deutsch, 日本語 और हिन्दी में हैं।
+• आपका मुफ़्त Pro ट्रायल खत्म होने से 3 दिन पहले और उसी दिन याद दिलाया जाएगा।
+• How To Guide आपकी रूप (डार्क या लाइट) सेटिंग के हिसाब से दिखता है।
+• बैकअप का सार अब ज़्यादा साफ़ है, और बैकअप खत्म होने पर स्टेटस लाइन हट जाती है।
+• कई छोटे सुधार।
+</hi-IN>
