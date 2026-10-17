@@ -368,17 +368,17 @@
  {
   "key": "google_photos_trial_active_terms",
   "type": "string",
-  "en": "Free trial: %1$d days left. After that, a one-time unlock: $2.49 (or your local price)."
+  "en": "Free trial: %1$d days left. After that, a one-time unlock: $9.99 (or your local price)."
  },
  {
   "key": "google_photos_trial_ended",
   "type": "string",
-  "en": "Trial ended. New backups to your other Clouds are paused until you unlock Pro (one-time $2.49, or your local price). Files already there stay there, and your main Cloud is not affected."
+  "en": "Trial ended. New backups to your other Clouds are paused until you unlock Pro (one-time $9.99, or your local price). Files already there stay there, and your main Cloud is not affected."
  },
  {
   "key": "google_photos_trial_offer",
   "type": "string",
-  "en": "Free for 30 days, then a one-time unlock: $2.49 (or your local price). Nothing is charged automatically."
+  "en": "Free for 30 days, then a one-time unlock: $9.99 (or your local price). Nothing is charged automatically."
  },
  {
   "key": "google_photos_trial_start_action",
