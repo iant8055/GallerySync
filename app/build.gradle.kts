@@ -204,6 +204,8 @@ dependencies {
 
     // Play Billing — the pro_unlock IAP. CLAUDE.md's monetization section.
     implementation(libs.billing.ktx)
+    // Play In-App Review: the rating sheet after setup. Adds no permission.
+    implementation(libs.play.review.ktx)
 
     testImplementation(libs.junit)
     testImplementation(libs.mockito.core)

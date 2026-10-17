@@ -32,6 +32,8 @@ appauth = "0.11.1"
 # Library 8+ for any new app or update from 31 Aug 2026; 9.1.0 (18 Jun 2026) is current as of
 # checking, 23 Sept 2026.
 billing = "9.1.0"
+# Google Play In-App Review — the rating sheet shown once, when Finish ends setup (Ian, 17 Oct 2026).
+playReview = "2.0.2"
 mockito = "5.20.0"
 mockitoKotlin = "6.1.0"
 turbine = "1.2.1"
@@ -106,6 +108,7 @@ appauth = { group = "net.openid", name = "appauth", version.ref = "appauth" }
 # Google Play Billing — the pro_unlock one-time in-app purchase. Its own manifest declares the
 # com.android.vending.BILLING permission Play Console requires before any product can be created.
 billing-ktx = { group = "com.android.billingclient", name = "billing-ktx", version.ref = "billing" }
+play-review-ktx = { group = "com.google.android.play", name = "review-ktx", version.ref = "playReview" }
 
 # Testing
 mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
