@@ -43,3 +43,7 @@ design/gallerysync-app-directions.html
 # Head Editor's per-language flag reports — intermediate artifacts of the
 # Guide translation sweep, not committed to history (regenerated per sweep).
 tools/guide/out/
+
+# Promo videos, clips and other large media live here and never go in the repository (18 Oct 2026).
+media/
+design/promo/
