@@ -1,0 +1,28 @@
+<en-US>
+• Easier start: tap the Welcome screen, choose your language from a simple list, then press OK.
+• Fixes and tidying.
+</en-US>
+<es-ES>
+• Inicio más fácil: toca la pantalla de bienvenida, elige tu idioma en una lista sencilla y pulsa Aceptar.
+• Correcciones y mejoras.
+</es-ES>
+<pt-BR>
+• Início mais fácil: toque na tela de boas-vindas, escolha seu idioma em uma lista simples e toque em OK.
+• Correções e melhorias.
+</pt-BR>
+<fr-FR>
+• Démarrage plus simple : touchez l'écran d'accueil, choisissez votre langue dans une liste, puis touchez OK.
+• Corrections et améliorations.
+</fr-FR>
+<de-DE>
+• Einfacherer Start: Tippe auf den Willkommensbildschirm, wähle deine Sprache aus einer Liste und tippe auf OK.
+• Fehlerbehebungen und Verbesserungen.
+</de-DE>
+<ja-JP>
+• はじめやすくなりました：ウェルカム画面をタップし、一覧から言語を選んで OK を押してください。
+• その他の修正と改善。
+</ja-JP>
+<hi-IN>
+• आसान शुरुआत: वेलकम स्क्रीन पर टैप करें, सूची से अपनी भाषा चुनें, फिर ठीक है दबाएँ।
+• कई छोटे सुधार।
+</hi-IN>
