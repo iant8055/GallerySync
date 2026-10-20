@@ -154,6 +154,13 @@ val SignalOnNav = Color(0xFFD5DAE0)
  */
 val SignalWelcomeGround = Color(0xFF003322)
 
+/**
+ * The Welcome picture's "Tap to continue" hint. The picture is a fixed image, the same in light and dark mode, so its hint
+ * is fixed too: near-white ink on a see-through dark pill, readable over both the picture's green and its light phone.
+ */
+val SignalWelcomeHintInk = Color(0xFFF2F7F4)
+val SignalWelcomeHintPill = Color(0x99001A11)
+
 // --- Error ---
 val SignalErrorLight = Color(0xFFA51E24)
 val SignalErrorDark = Color(0xFFF47B74)

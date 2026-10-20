@@ -278,4 +278,5 @@ T = {
 "video_quality_low": "कम कंप्रेशन — 1080p",
 "video_quality_medium": "मध्यम कंप्रेशन — 720p",
 "volume_internal": "इंटरनल स्टोरेज",
+"welcome_tap_to_continue": "आगे बढ़ने के लिए टैप करें",
 }

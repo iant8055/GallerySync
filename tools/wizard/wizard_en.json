@@ -1359,6 +1359,11 @@
   "en": "Internal storage"
  },
  {
+  "key": "welcome_tap_to_continue",
+  "type": "string",
+  "en": "Tap to continue"
+ },
+ {
   "key": "wizard_back",
   "type": "string",
   "en": "Back"

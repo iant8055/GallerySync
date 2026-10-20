@@ -301,6 +301,7 @@
     <string name="video_quality_medium">Compression moyenne — 720p</string>
     <string name="video_quality_medium_name">Moyenne</string>
     <string name="volume_internal">Stockage interne</string>
+    <string name="welcome_tap_to_continue">Touchez pour continuer</string>
     <string name="wizard_back">Retour</string>
     <string name="wizard_cancel">Annuler</string>
     <string name="wizard_close_label">Fermer</string>

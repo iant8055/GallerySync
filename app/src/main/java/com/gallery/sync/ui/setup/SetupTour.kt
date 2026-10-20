@@ -1,5 +1,8 @@
 package com.gallery.sync.ui.setup
 
+import androidx.compose.foundation.layout.heightIn
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
 import android.Manifest
 import android.os.Build
 import androidx.activity.compose.LocalActivity
@@ -128,6 +131,8 @@ import com.gallery.sync.ui.common.SignalIcons
 import com.gallery.sync.ui.common.SignalNavBar
 import com.gallery.sync.ui.theme.LocalGallerySyncColors
 import com.gallery.sync.ui.theme.SignalWelcomeGround
+import com.gallery.sync.ui.theme.SignalWelcomeHintInk
+import com.gallery.sync.ui.theme.SignalWelcomeHintPill
 import com.gallery.sync.ui.settings.DestinationDialog
 import com.gallery.sync.ui.settings.InAppPageDialog
 import com.gallery.sync.ui.settings.SupportPage
@@ -201,6 +206,60 @@ private val DelayChoiceMinutes = listOf(60, 120, 240, 480, 720, 1440)
 
 /** Chips per row. Six chips make two even rows of three, and every chip keeps the same width. */
 private const val DelayChipsPerRow = 3
+
+/**
+ * The Welcome screen's language question (Ian, 20 Oct 2026). Every language is listed in its own name and is a button;
+ * there is no OK, because choosing is the answer. Tapping outside does nothing, and Back leaves the app.
+ */
+@Composable
+private fun LanguageChoiceDialog(
+    chosen: com.gallery.sync.domain.model.AppLanguage,
+    onChoose: (com.gallery.sync.domain.model.AppLanguage) -> Unit,
+    onLeave: () -> Unit
+) {
+    androidx.compose.ui.window.Dialog(
+        onDismissRequest = onLeave,
+        properties = androidx.compose.ui.window.DialogProperties(dismissOnClickOutside = false)
+    ) {
+        Surface(
+            shape = RoundedCornerShape(28.dp),
+            color = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
+        ) {
+            Column(modifier = Modifier.padding(vertical = 20.dp)) {
+                Text(
+                    text = stringResource(R.string.welcome_language_prompt),
+                    style = MaterialTheme.typography.titleLarge,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 8.dp)
+                )
+                Spacer(Modifier.height(8.dp))
+                for (language in com.gallery.sync.domain.model.AppLanguage.entries) {
+                    val isChosen = language == chosen
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(min = 52.dp)
+                            .clickable(role = androidx.compose.ui.semantics.Role.Button) { onChoose(language) }
+                            .padding(horizontal = 28.dp)
+                    ) {
+                        Text(
+                            text = language.nativeName,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = if (isChosen) FontWeight.Bold else FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.weight(1f)
+                        )
+                        if (isChosen) {
+                            Text("✓", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 /**
  * How long the welcome picture stays up no matter what. Ian, 22 Sept 2026: *"sometimes when you
@@ -661,22 +720,25 @@ private fun SetupTourBody(
         )
 
         if (step == 1) {
-            // Reset only if this step is re-entered fresh; see WelcomeMinimumVisibleMillis.
-            val shownAtMillis = remember { System.currentTimeMillis() }
-
             // The welcome picture is a fixed dark green with a phone running off its bottom edge, so it
             // sits on that same green and is pinned to the bottom: on a tall screen the spare room is
             // above it, on a wide one (the Fold unfolded) it is at the sides, and it never floats.
             //
             // Then the language, chosen here before anything else (Ian, 14 Oct 2026: "please select your language
-            // to continue"). Choosing one is what moves on, so the tap that used to go anywhere now lands on a
-            // language. The same choice is shown and changed in Settings: the one value the two share (CLAUDE.md).
+            // to continue"), in the pop-up below.
             val languageViewModel: com.gallery.sync.ui.settings.LanguageViewModel = hiltViewModel()
             val chosen by languageViewModel.language.collectAsStateWithLifecycle()
+            // Reset only if this step is re-entered fresh; see WelcomeMinimumVisibleMillis.
+            val shownAtMillis = remember { System.currentTimeMillis() }
+            var askLanguage by remember { mutableStateOf(false) }
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(SignalWelcomeGround),
+                    .background(SignalWelcomeGround)
+                    // A tap on the picture opens the language pop-up (Ian, 20 Oct 2026).
+                    .clickable {
+                        if (System.currentTimeMillis() - shownAtMillis >= WelcomeMinimumVisibleMillis) askLanguage = true
+                    },
                 contentAlignment = Alignment.BottomCenter
             ) {
                 Image(
@@ -686,78 +748,34 @@ private fun SetupTourBody(
                     alignment = Alignment.BottomCenter,
                     modifier = Modifier.fillMaxSize()
                 )
-                // A short strip at the very bottom (Ian, 14 Oct 2026: "a scroll through list at the very bottom of the
-                // Welcome screen"): one line that rolls: the prompt, then each language.
-                Surface(
-                    shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-                    color = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .widthIn(max = 480.dp)
-                            .fillMaxWidth()
-                            .padding(vertical = 6.dp)
-                    ) {
-                        // One line that rolls (Ian, 14 Oct 2026: "smaller - 1 line", "not sideways - rolling"): a wheel one
-                        // language tall that snaps from one to the next. Tapping the one showing chooses it and moves on.
-                        // The prompt is the wheel's first line and rolls away with the choices (Ian, 14 Oct 2026).
-                        val wheel = androidx.compose.foundation.lazy.rememberLazyListState()
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
-                        ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text("▲", fontSize = 22.sp, lineHeight = 22.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Text("▼", fontSize = 22.sp, lineHeight = 22.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            }
-                            androidx.compose.foundation.lazy.LazyColumn(
-                                state = wheel,
-                                flingBehavior = androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior(wheel),
-                                modifier = Modifier.weight(1f).height(48.dp)
-                            ) {
-                                item {
-                                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth().height(48.dp)) {
-                                        Text(
-                                            text = stringResource(R.string.welcome_language_prompt),
-                                            style = MaterialTheme.typography.titleSmall,
-                                            textAlign = TextAlign.Center,
-                                            maxLines = 1
-                                        )
-                                    }
-                                }
-                                items(com.gallery.sync.domain.model.AppLanguage.entries.size) { index ->
-                                    val language = com.gallery.sync.domain.model.AppLanguage.entries[index]
-                                    Box(
-                                        contentAlignment = Alignment.Center,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(48.dp)
-                                            .clickable {
-                                                if (System.currentTimeMillis() - shownAtMillis >= WelcomeMinimumVisibleMillis) {
-                                                    languageViewModel.setLanguage(language)
-                                                    onNext()
-                                                }
-                                            }
-                                    ) {
-                                        Text(
-                                            text = language.nativeName,
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.primary,
-                                            maxLines = 1
-                                        )
-                                    }
-                                }
-                            }
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text("▲", fontSize = 22.sp, lineHeight = 22.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                Text("▼", fontSize = 22.sp, lineHeight = 22.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            }
-                        }
-                    }
-                }
+                // A quiet hint that the picture is the way on (Ian, 20 Oct 2026: "a 'tap to continue' somewhere
+                // discreetly"). On a see-through pill so it reads over the picture's light phone as well as its green.
+                Text(
+                    text = stringResource(R.string.welcome_tap_to_continue),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = SignalWelcomeHintInk,
+                    modifier = Modifier
+                        .padding(bottom = 28.dp)
+                        .background(SignalWelcomeHintPill, RoundedCornerShape(50))
+                        .padding(horizontal = 18.dp, vertical = 8.dp)
+                )
+            }
+            // The language, asked in a pop-up of its own over the picture (Ian, 20 Oct 2026, after testers could not
+            // get past this screen with the one-line rolling strip: "please add a completely separate pop up dialog box
+            // for language choice", then "tap on welcome screen then language pop-up appears"). Every language is a
+            // full-width button, and choosing one is what moves on. The same choice is shown and changed in Settings:
+            // the one value the two share (CLAUDE.md).
+            val welcomeActivity = LocalActivity.current
+            if (askLanguage) {
+                LanguageChoiceDialog(
+                    chosen = chosen,
+                    onChoose = { language ->
+                        languageViewModel.setLanguage(language)
+                        onNext()
+                    },
+                    // Nothing can be set up without a language, so Back leaves the app rather than the dialog.
+                    onLeave = { welcomeActivity?.finish() }
+                )
             }
         } else if (step == 2) {
             // Step 2: individual tooltip cards pointing at the nav bar tabs

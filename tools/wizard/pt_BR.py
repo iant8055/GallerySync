@@ -278,4 +278,5 @@ T = {
 "video_quality_low": "Compressão baixa — 1080p",
 "video_quality_medium": "Compressão média — 720p",
 "volume_internal": "Armazenamento interno",
+"welcome_tap_to_continue": "Toque para continuar",
 }

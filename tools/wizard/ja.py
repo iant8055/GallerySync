@@ -277,4 +277,5 @@ T = {
 "video_quality_low": "低圧縮 — 1080p",
 "video_quality_medium": "中圧縮 — 720p",
 "volume_internal": "内部ストレージ",
+"welcome_tap_to_continue": "タップして続行",
 }

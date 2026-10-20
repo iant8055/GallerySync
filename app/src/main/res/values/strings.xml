@@ -12,6 +12,7 @@
     <string name="settings_language">Language</string>
     <!-- The language choice (Ian, 14 Oct 2026). Language names themselves are AppLanguage.nativeName, never translated. -->
     <string name="settings_language_detail">This tab, the setup screens, the (?) cards and the How To Guide follow this choice. The other tabs are in English.</string>
+    <string name="welcome_tap_to_continue">Tap to continue</string>
     <string name="welcome_language_prompt">Please select your language to continue</string>
     <!-- The Archive band. "Coming soon" until 22 Sept 2026, when the age filter and the
          "come of age" notification gave it real content. The age row reuses archive_age_label —
