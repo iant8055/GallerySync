@@ -208,13 +208,15 @@ private val DelayChoiceMinutes = listOf(60, 120, 240, 480, 720, 1440)
 private const val DelayChipsPerRow = 3
 
 /**
- * The Welcome screen's language question (Ian, 20 Oct 2026). Every language is listed in its own name and is a button;
- * there is no OK, because choosing is the answer. Tapping outside does nothing, and Back leaves the app.
+ * The Welcome screen's language question (Ian, 20 Oct 2026). Every language is listed in its own name; tapping one
+ * selects it (the check moves, and the wizard's text follows at once) and OK moves on, so a wrong tap is easy to undo.
+ * Tapping outside does nothing, and Back leaves the app.
  */
 @Composable
 private fun LanguageChoiceDialog(
     chosen: com.gallery.sync.domain.model.AppLanguage,
     onChoose: (com.gallery.sync.domain.model.AppLanguage) -> Unit,
+    onConfirm: () -> Unit,
     onLeave: () -> Unit
 ) {
     androidx.compose.ui.window.Dialog(
@@ -255,6 +257,13 @@ private fun LanguageChoiceDialog(
                             Text("✓", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
                         }
                     }
+                }
+                Spacer(Modifier.height(12.dp))
+                Button(
+                    onClick = onConfirm,
+                    modifier = Modifier.align(Alignment.End).padding(horizontal = 24.dp)
+                ) {
+                    Text(stringResource(R.string.tour_ok))
                 }
             }
         }
@@ -769,10 +778,10 @@ private fun SetupTourBody(
             if (askLanguage) {
                 LanguageChoiceDialog(
                     chosen = chosen,
-                    onChoose = { language ->
-                        languageViewModel.setLanguage(language)
-                        onNext()
-                    },
+                    // Choosing only selects (the wizard switches to it at once, so a wrong tap is plain to see); OK moves
+                    // on (Ian, 20 Oct 2026: "just in case user taps wrong language").
+                    onChoose = { language -> languageViewModel.setLanguage(language) },
+                    onConfirm = onNext,
                     // Nothing can be set up without a language, so Back leaves the app rather than the dialog.
                     onLeave = { welcomeActivity?.finish() }
                 )
