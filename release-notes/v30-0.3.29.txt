@@ -1,28 +1,56 @@
 <en-US>
-• Easier start: tap the Welcome screen, choose your language from a simple list, then press OK.
-• Fixes and tidying.
+• Seven languages: tap the Welcome screen and pick English, Español, Português, Français, Deutsch, 日本語 or हिन्दी. Setup, Settings, the (?) help and the How To Guide follow it.
+• Change language any time in Settings.
+• Reminders before your free Pro trial ends. Pro is $9.99, one-time.
+• The guide follows your dark or light setting.
+• Clearer backup progress and wording.
+• Fixes, including the Welcome screen.
 </en-US>
 <es-ES>
-• Inicio más fácil: toca la pantalla de bienvenida, elige tu idioma en una lista sencilla y pulsa Aceptar.
-• Correcciones y mejoras.
+• Siete idiomas: toca la pantalla de bienvenida y elige English, Español, Português, Français, Deutsch, 日本語 o हिन्दी. La configuración, Settings, la ayuda (?) y la Guía de uso lo siguen.
+• Cambia el idioma cuando quieras en Settings.
+• Avisos antes de que termine tu prueba gratuita de Pro. Pro cuesta 9,99 $, pago único.
+• La guía sigue tu modo oscuro o claro.
+• Progreso de copia más claro.
+• Correcciones, incluida la pantalla de bienvenida.
 </es-ES>
 <pt-BR>
-• Início mais fácil: toque na tela de boas-vindas, escolha seu idioma em uma lista simples e toque em OK.
-• Correções e melhorias.
+• Sete idiomas: toque na tela de boas-vindas e escolha English, Español, Português, Français, Deutsch, 日本語 ou हिन्दी. A configuração, Settings, a ajuda (?) e o Guia de uso seguem a escolha.
+• Mude o idioma quando quiser em Settings.
+• Avisos antes do fim do teste grátis do Pro. O Pro custa US$ 9,99, pagamento único.
+• O guia segue o modo escuro ou claro.
+• Progresso do backup mais claro.
+• Correções, incluindo a tela de boas-vindas.
 </pt-BR>
 <fr-FR>
-• Démarrage plus simple : touchez l'écran d'accueil, choisissez votre langue dans une liste, puis touchez OK.
-• Corrections et améliorations.
+• Sept langues : touchez l'écran d'accueil et choisissez English, Español, Português, Français, Deutsch, 日本語 ou हिन्दी. La configuration, Settings, l'aide (?) et le Mode d'emploi suivent ce choix.
+• Changez de langue à tout moment dans Settings.
+• Rappels avant la fin de l'essai gratuit de Pro. Pro coûte 9,99 $, une seule fois.
+• Le guide suit le mode sombre ou clair.
+• Progression plus claire.
+• Corrections, dont l'écran d'accueil.
 </fr-FR>
 <de-DE>
-• Einfacherer Start: Tippe auf den Willkommensbildschirm, wähle deine Sprache aus einer Liste und tippe auf OK.
-• Fehlerbehebungen und Verbesserungen.
+• Sieben Sprachen: Tippe auf den Willkommensbildschirm und wähle English, Español, Português, Français, Deutsch, 日本語 oder हिन्दी. Einrichtung, Settings, die (?)-Hilfe und die Anleitung folgen der Wahl.
+• Sprache jederzeit in Settings ändern.
+• Erinnerungen vor Ende des kostenlosen Pro-Tests. Pro kostet einmalig 9,99 $.
+• Die Anleitung folgt dem hellen oder dunklen Modus.
+• Klarerer Backup-Fortschritt.
+• Fehlerbehebungen, auch beim Willkommensbildschirm.
 </de-DE>
 <ja-JP>
-• はじめやすくなりました：ウェルカム画面をタップし、一覧から言語を選んで OK を押してください。
-• その他の修正と改善。
+• 7 つの言語に対応：ウェルカム画面をタップし、English、Español、Português、Français、Deutsch、日本語、हिन्दी から選べます。セットアップ、Settings、(?) ヘルプ、使い方ガイドがその言語になります。
+• 言語は Settings でいつでも変更できます。
+• Pro の無料試用が終わる前にお知らせします。Pro は 1 回限り $9.99 です。
+• ガイドがダーク／ライトの設定に従います。
+• バックアップの進行状況がわかりやすくなりました。
+• ウェルカム画面などの修正。
 </ja-JP>
 <hi-IN>
-• आसान शुरुआत: वेलकम स्क्रीन पर टैप करें, सूची से अपनी भाषा चुनें, फिर ठीक है दबाएँ।
-• कई छोटे सुधार।
+• सात भाषाएँ: वेलकम स्क्रीन पर टैप करें और English, Español, Português, Français, Deutsch, 日本語 या हिन्दी चुनें। सेटअप, Settings, (?) सहायता और How To Guide इसी भाषा में दिखते हैं।
+• भाषा कभी भी Settings में बदलें।
+• मुफ़्त Pro ट्रायल खत्म होने से पहले याद दिलाया जाएगा। Pro एक बार $9.99 का है।
+• गाइड डार्क या लाइट मोड के हिसाब से दिखती है।
+• बैकअप की प्रगति ज़्यादा साफ़।
+• वेलकम स्क्रीन समेत कई सुधार।
 </hi-IN>
