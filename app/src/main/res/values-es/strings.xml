@@ -301,6 +301,7 @@
     <string name="video_quality_medium">Compresión media — 720p</string>
     <string name="video_quality_medium_name">Media</string>
     <string name="volume_internal">Almacenamiento interno</string>
+    <string name="welcome_language_prompt">Selecciona tu idioma para continuar</string>
     <string name="welcome_tap_to_continue">Toca para continuar</string>
     <string name="wizard_back">Atrás</string>
     <string name="wizard_cancel">Cancelar</string>

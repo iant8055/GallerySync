@@ -279,4 +279,5 @@ T = {
 "video_quality_medium": "Compressão média — 720p",
 "volume_internal": "Armazenamento interno",
 "welcome_tap_to_continue": "Toque para continuar",
+"welcome_language_prompt": "Selecione seu idioma para continuar",
 }

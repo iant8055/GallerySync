@@ -293,6 +293,7 @@
     <string name="video_quality_medium">मध्यम कंप्रेशन — 720p</string>
     <string name="video_quality_medium_name">मध्यम</string>
     <string name="volume_internal">इंटरनल स्टोरेज</string>
+    <string name="welcome_language_prompt">जारी रखने के लिए अपनी भाषा चुनें</string>
     <string name="welcome_tap_to_continue">आगे बढ़ने के लिए टैप करें</string>
     <string name="wizard_back">पीछे</string>
     <string name="wizard_cancel">रद्द करें</string>

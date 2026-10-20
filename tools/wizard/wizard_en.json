@@ -1359,6 +1359,11 @@
   "en": "Internal storage"
  },
  {
+  "key": "welcome_language_prompt",
+  "type": "string",
+  "en": "Please select your language to continue"
+ },
+ {
   "key": "welcome_tap_to_continue",
   "type": "string",
   "en": "Tap to continue"

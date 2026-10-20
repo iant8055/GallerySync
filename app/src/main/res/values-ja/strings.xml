@@ -285,6 +285,7 @@
     <string name="video_quality_medium">中圧縮 — 720p</string>
     <string name="video_quality_medium_name">中</string>
     <string name="volume_internal">内部ストレージ</string>
+    <string name="welcome_language_prompt">続行するには言語を選択してください</string>
     <string name="welcome_tap_to_continue">タップして続行</string>
     <string name="wizard_back">戻る</string>
     <string name="wizard_cancel">キャンセル</string>

@@ -279,6 +279,7 @@ T = {
 "video_quality_medium": "Compression moyenne — 720p",
 "volume_internal": "Stockage interne",
 "welcome_tap_to_continue": "Touchez pour continuer",
+"welcome_language_prompt": "Choisissez votre langue pour continuer",
 }
 
 # French spacing: a no-break space before ? and :, so the mark never wraps onto a line of its own.
