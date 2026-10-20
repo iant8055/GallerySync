@@ -66,8 +66,9 @@ android {
         // The twenty-seventh (14 Oct 2026): the Albums status line clears when an automatic backup ends; the finish summary says the check is OneDrive's and the sent figure covers every Cloud; "Select" on the folder screen.
         // The twenty-eighth (16 Oct 2026): the setup wizard, the Settings tab, the How To Guide and the (?) cards in six languages beside English (Albums, Restore and Archive stay English); notices before and when the extra-Cloud trial ends; the guide follows Appearance; code cleanup (Room 16).
         // The twenty-ninth (20 Oct 2026): testers could not get past the Welcome screen. The rolling language strip is replaced by "Tap to continue" and a language pop-up with OK.
-        versionCode = 29
-        versionName = "0.3.28"
+        // The thirtieth (20 Oct 2026): the same code as the twenty-ninth, for the Closed Testing track, which would not take the build already in production review.
+        versionCode = 30
+        versionName = "0.3.29"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
