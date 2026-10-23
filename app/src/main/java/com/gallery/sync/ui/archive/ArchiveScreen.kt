@@ -1,5 +1,9 @@
 package com.gallery.sync.ui.archive
 
+import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.heightIn
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -146,7 +150,18 @@ fun ArchiveScreen(
     // then the names. The list keeps its own scroll under the question rather than being pushed off,
     // because the whole argument for this screen is that the user can see what they are authorising
     // while they authorise it.
-    Column(modifier = modifier.fillMaxSize()) {
+    // On a short screen or with large text (the Fold 8's cover screen, Ian, 23 Oct 2026) the header and the question
+    // together were taller than the screen, so the question's own buttons were cut off below it with no way to reach
+    // them. They now share a block that keeps its natural height up to most of the screen and scrolls inside it past
+    // that, so the buttons can always be reached and the list keeps the rest.
+    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+    val topLimit = maxHeight * 0.72f
+    Column(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .heightIn(max = topLimit)
+                .verticalScroll(rememberScrollState())
+        ) {
         Column(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -174,6 +189,7 @@ fun ArchiveScreen(
                 },
                 onNo = viewModel::dismiss
             )
+        }
         }
 
         // Every file in an Archive album: the ones that will be archived, the ones the user has
@@ -264,6 +280,7 @@ fun ArchiveScreen(
                 }
             }
         }
+    }
     }
 }
 
@@ -365,8 +382,9 @@ private fun ArchiveHeader(
                 // Inside a folder, as Restore's: the way back and the folder's name on the left, the
                 // number of files in this folder on the right with its label under it.
                 Row(verticalAlignment = Alignment.CenterVertically) {
+                    // The name gets the larger share, so on a narrow screen it does not break mid-word (23 Oct 2026).
                     Row(
-                        modifier = Modifier.weight(1f),
+                        modifier = Modifier.weight(1.6f),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         IconButton(onClick = onCloseAlbum) {
@@ -377,12 +395,20 @@ private fun ArchiveHeader(
                                 tint = LocalContentColor.current
                             )
                         }
-                        Text(
+                        // Shrinks to fit rather than breaking a word in two on a narrow screen with large text.
+                        androidx.compose.foundation.text.BasicText(
                             text = open,
-                            style = MaterialTheme.typography.headlineMedium,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 2,
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = LocalContentColor.current
+                            ),
+                            // One word is kept on one line (two would split it); a name of several words may take two.
+                            maxLines = if (open.trim().contains(' ')) 2 else 1,
                             overflow = TextOverflow.Ellipsis,
+                            autoSize = androidx.compose.foundation.text.TextAutoSize.StepBased(
+                                minFontSize = 14.sp,
+                                maxFontSize = MaterialTheme.typography.headlineMedium.fontSize
+                            ),
                             modifier = Modifier.weight(1f, fill = false)
                         )
                     }
@@ -394,7 +420,7 @@ private fun ArchiveHeader(
                     }
                 }
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    Box(modifier = Modifier.weight(1f))
+                    Box(modifier = Modifier.weight(1.6f))
                     Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
                         Text(
                             text = stringResource(R.string.archive_hero_label_files),
@@ -492,7 +518,13 @@ private fun ArchiveAgeSection(age: ArchiveAge, hiddenCount: Int, enabled: Boolea
 
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text(text = stringResource(R.string.archive_age_label), style = MaterialTheme.typography.bodySmall)
+            // Wraps rather than taking the whole row, so the choice beside it stays visible on a narrow screen with
+            // large text (the Fold 8's cover screen, 23 Oct 2026, where the button was squeezed out).
+            Text(
+                text = stringResource(R.string.archive_age_label),
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.weight(1f, fill = false)
+            )
             HelpButton(HelpTopic.ARCHIVE_AGE_FILTER)
             Box {
                 HeroOutlinedButton(
