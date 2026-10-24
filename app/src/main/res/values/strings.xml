@@ -20,6 +20,9 @@
     <string name="settings_archive_notify">Notify when files are ready to archive</string>
     <string name="settings_archive_notify_blocked">Notifications are turned off for GallerySync in your phone\'s settings, so nothing will arrive until you turn them back on there.</string>
     <string name="settings_appearance">Appearance</string>
+    <string name="settings_font">Font</string>
+    <string name="font_app">App font</string>
+    <string name="font_phone">Phone\'s font</string>
     <string name="theme_system">System</string>
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>

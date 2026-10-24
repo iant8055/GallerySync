@@ -73,6 +73,7 @@ import com.gallery.sync.domain.backup.CameraSelection
 import com.gallery.sync.domain.backup.FilePin
 import com.gallery.sync.domain.backup.FileSort
 import com.gallery.sync.domain.backup.RetryFailed
+import com.gallery.sync.ui.common.CappedTextSize
 import com.gallery.sync.ui.common.HeroOutlinedButton
 import com.gallery.sync.ui.common.SignalIcons
 import com.gallery.sync.ui.common.SwipeChoiceBox
@@ -372,161 +373,163 @@ private fun DetailHeader(
         color = signal.heroContainer,
         contentColor = signal.onHero
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                // The app's own return glyph, in the card's ink: it was the theme's green, which is
-                // the card's own colour here and would have vanished.
-                IconButton(onClick = onBack) {
-                    Icon(
-                        imageVector = SignalIcons.Back,
-                        contentDescription = stringResource(R.string.retrieve_back),
-                        modifier = Modifier.size(32.dp),
-                        tint = LocalContentColor.current
-                    )
-                }
-                // The folder's name, bold. Ian, 18 Sept 2026.
-                Text(
-                    text = albumName,
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
-                // In the camera folder, how many files Sync now will optimise, large, as Restore and Archive show
-                // their number (Ian, 27 Sept 2026). It moves as the choices change and files are swiped.
-                // Set a little lower and to the right of centre (Ian, 28 Sept 2026).
-                if (camera != null) {
-                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                        Text(
-                            text = camera.toOptimise.size.toString(),
-                            style = MaterialTheme.typography.displayMedium,
-                            modifier = Modifier.padding(start = 24.dp, top = 8.dp)
-                        )
-                    }
-                }
-                HelpButton(HelpTopic.ALBUM_DETAIL)
-            }
-
+        CappedTextSize {
             Column(
-                modifier = Modifier.padding(horizontal = 8.dp),
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Text(
-                    text = stringResource(
-                        R.string.album_detail_mode_files,
-                        mode.label(),
-                        pluralStringResource(R.plurals.file_count, entries.size, entries.size)
-                    ),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-
-                // Where this album's files go: the Cloud and the folder in it (Ian, 12 Oct 2026). New files follow
-                // the folder's pairing and the folder chosen in that Cloud; files already sent elsewhere are named too.
-                if (backsUpTo != null) {
-                    Text(
-                        text = if (backsUpTo == BackupLocation.GOOGLE_PHOTOS || backupFolder == null) {
-                            stringResource(R.string.album_backs_up_library)
-                        } else {
-                            stringResource(R.string.album_backs_up_to, stringResource(backsUpTo.labelRes()), "$backupFolder/$albumName")
-                        },
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    val elsewhere = entries.asSequence()
-                        .filter { it.state == BackupState.UPLOADED && it.location != backsUpTo }
-                        .map { it.location }.distinct().toList()
-                    if (elsewhere.isNotEmpty()) {
-                        Text(
-                            text = stringResource(
-                                R.string.album_also_in,
-                                elsewhere.map { stringResource(it.labelRes()) }.joinToString(", ")
-                            ),
-                            style = MaterialTheme.typography.bodySmall
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    // The app's own return glyph, in the card's ink: it was the theme's green, which is
+                    // the card's own colour here and would have vanished.
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            imageVector = SignalIcons.Back,
+                            contentDescription = stringResource(R.string.retrieve_back),
+                            modifier = Modifier.size(32.dp),
+                            tint = LocalContentColor.current
                         )
                     }
+                    // The folder's name, bold. Ian, 18 Sept 2026.
+                    Text(
+                        text = albumName,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                    // In the camera folder, how many files Sync now will optimise, large, as Restore and Archive show
+                    // their number (Ian, 27 Sept 2026). It moves as the choices change and files are swiped.
+                    // Set a little lower and to the right of centre (Ian, 28 Sept 2026).
+                    if (camera != null) {
+                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                            Text(
+                                text = camera.toOptimise.size.toString(),
+                                style = MaterialTheme.typography.displayMedium,
+                                modifier = Modifier.padding(start = 24.dp, top = 8.dp)
+                            )
+                        }
+                    }
+                    HelpButton(HelpTopic.ALBUM_DETAIL)
                 }
 
-                if (entries.isNotEmpty()) {
-                    // Plain text in the card's own ink: the coloured counts this line used to have
-                    // were the theme's primary and tertiary, which are not made to sit on green.
-                    val keptText = stringResource(R.string.album_status_kept, entries.count { FilePin.isPinned(it.modeOverride) })
-                    val counts = buildList {
-                        val backed = entries.count { it.state == BackupState.UPLOADED }
-                        val proxied = entries.count { it.isProxied }
-                        val kept = entries.count { FilePin.isPinned(it.modeOverride) }
-                        val pending = entries.count { it.state == BackupState.PENDING }
-                        val failed = entries.count { it.state == BackupState.FAILED }
-                        if (backed > 0) add("$backed backed up")
-                        if (proxied > 0) add("$proxied optimised")
-                        if (kept > 0) add(keptText)
-                        if (pending > 0) add("$pending pending")
-                        if (failed > 0) add("$failed failed")
-                    }
-                    WithHelp(HelpTopic.ALBUM_FILE_STATUS) {
+                Column(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        text = stringResource(
+                            R.string.album_detail_mode_files,
+                            mode.label(),
+                            pluralStringResource(R.plurals.file_count, entries.size, entries.size)
+                        ),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+
+                    // Where this album's files go: the Cloud and the folder in it (Ian, 12 Oct 2026). New files follow
+                    // the folder's pairing and the folder chosen in that Cloud; files already sent elsewhere are named too.
+                    if (backsUpTo != null) {
                         Text(
-                            text = counts.joinToString(" · "),
+                            text = if (backsUpTo == BackupLocation.GOOGLE_PHOTOS || backupFolder == null) {
+                                stringResource(R.string.album_backs_up_library)
+                            } else {
+                                stringResource(R.string.album_backs_up_to, stringResource(backsUpTo.labelRes()), "$backupFolder/$albumName")
+                            },
                             style = MaterialTheme.typography.bodyMedium
                         )
-                    }
-
-                    // Files that failed five times are left alone by the queue, so this is the way back.
-                    val failedFiles = entries.count { it.state == BackupState.FAILED }
-                    if (RetryFailed.offered(mode, failedFiles)) {
-                        Text(
-                            text = stringResource(R.string.album_retry_failed_hint),
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                        HeroOutlinedButton(
-                            onClick = onRetryFailed,
-                            label = stringResource(R.string.album_retry_failed, failedFiles)
-                        )
-                    }
-
-                    if (camera != null) CameraOptimiseSection(camera)
-
-                    // Sort by and Keep at full size on one line. The heading is two lines, and only
-                    // there when some file has a box.
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.album_sort_label),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        Box {
-                            HeroOutlinedButton(
-                                onClick = { sortMenuOpen = true },
-                                label = stringResource(sort.label())
+                        val elsewhere = entries.asSequence()
+                            .filter { it.state == BackupState.UPLOADED && it.location != backsUpTo }
+                            .map { it.location }.distinct().toList()
+                        if (elsewhere.isNotEmpty()) {
+                            Text(
+                                text = stringResource(
+                                    R.string.album_also_in,
+                                    elsewhere.map { stringResource(it.labelRes()) }.joinToString(", ")
+                                ),
+                                style = MaterialTheme.typography.bodySmall
                             )
-                            DropdownMenu(
-                                expanded = sortMenuOpen,
-                                onDismissRequest = { sortMenuOpen = false }
-                            ) {
-                                FileSort.entries.forEach { option ->
-                                    DropdownMenuItem(
-                                        text = { Text(stringResource(option.label())) },
-                                        onClick = {
-                                            onSort(option)
-                                            sortMenuOpen = false
-                                        }
-                                    )
+                        }
+                    }
+
+                    if (entries.isNotEmpty()) {
+                        // Plain text in the card's own ink: the coloured counts this line used to have
+                        // were the theme's primary and tertiary, which are not made to sit on green.
+                        val keptText = stringResource(R.string.album_status_kept, entries.count { FilePin.isPinned(it.modeOverride) })
+                        val counts = buildList {
+                            val backed = entries.count { it.state == BackupState.UPLOADED }
+                            val proxied = entries.count { it.isProxied }
+                            val kept = entries.count { FilePin.isPinned(it.modeOverride) }
+                            val pending = entries.count { it.state == BackupState.PENDING }
+                            val failed = entries.count { it.state == BackupState.FAILED }
+                            if (backed > 0) add("$backed backed up")
+                            if (proxied > 0) add("$proxied optimised")
+                            if (kept > 0) add(keptText)
+                            if (pending > 0) add("$pending pending")
+                            if (failed > 0) add("$failed failed")
+                        }
+                        WithHelp(HelpTopic.ALBUM_FILE_STATUS) {
+                            Text(
+                                text = counts.joinToString(" · "),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
+
+                        // Files that failed five times are left alone by the queue, so this is the way back.
+                        val failedFiles = entries.count { it.state == BackupState.FAILED }
+                        if (RetryFailed.offered(mode, failedFiles)) {
+                            Text(
+                                text = stringResource(R.string.album_retry_failed_hint),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                            HeroOutlinedButton(
+                                onClick = onRetryFailed,
+                                label = stringResource(R.string.album_retry_failed, failedFiles)
+                            )
+                        }
+
+                        if (camera != null) CameraOptimiseSection(camera)
+
+                        // Sort by and Keep at full size on one line. The heading is two lines, and only
+                        // there when some file has a box.
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.album_sort_label),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Box {
+                                HeroOutlinedButton(
+                                    onClick = { sortMenuOpen = true },
+                                    label = stringResource(sort.label())
+                                )
+                                DropdownMenu(
+                                    expanded = sortMenuOpen,
+                                    onDismissRequest = { sortMenuOpen = false }
+                                ) {
+                                    FileSort.entries.forEach { option ->
+                                        DropdownMenuItem(
+                                            text = { Text(stringResource(option.label())) },
+                                            onClick = {
+                                                onSort(option)
+                                                sortMenuOpen = false
+                                            }
+                                        )
+                                    }
                                 }
                             }
-                        }
-                        Spacer(Modifier.weight(1f))
-                        if (showKeepColumn) {
-                            HelpButton(HelpTopic.ALBUM_FILE_PIN)
-                            Text(
-                                text = stringResource(R.string.album_keep_column),
-                                style = MaterialTheme.typography.bodySmall,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.width(56.dp)
-                            )
+                            Spacer(Modifier.weight(1f))
+                            if (showKeepColumn) {
+                                HelpButton(HelpTopic.ALBUM_FILE_PIN)
+                                Text(
+                                    text = stringResource(R.string.album_keep_column),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.width(56.dp)
+                                )
+                            }
                         }
                     }
                 }

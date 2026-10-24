@@ -79,6 +79,8 @@
     <string name="destination_label">Pasta no OneDrive</string>
     <string name="destination_reset">Voltar ao padrão</string>
     <string name="destination_save">Usar esta pasta</string>
+    <string name="font_app">Do app</string>
+    <string name="font_phone">Do telefone</string>
     <string name="google_photos_connect_action">Conectar</string>
     <string name="google_photos_connected">Conectado</string>
     <string name="google_photos_not_connected">Não conectado</string>
@@ -138,6 +140,7 @@
     <string name="settings_contact_detail">Dúvidas ou problemas? Escreva para %1$s</string>
     <string name="settings_delete_account">Excluir dados da conta</string>
     <string name="settings_delete_account_detail">Como sair, remover o acesso do app à sua conta Microsoft e apagar os dados dele.</string>
+    <string name="settings_font">Fonte</string>
     <string name="settings_general">Geral</string>
     <string name="settings_help_feedback">Ajuda e feedback</string>
     <string name="settings_how_to_guide">Guia de uso</string>

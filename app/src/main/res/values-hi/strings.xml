@@ -77,6 +77,8 @@
     <string name="destination_label">OneDrive में फ़ोल्डर</string>
     <string name="destination_reset">डिफ़ॉल्ट पर लौटाएँ</string>
     <string name="destination_save">यह फ़ोल्डर इस्तेमाल करें</string>
+    <string name="font_app">ऐप का</string>
+    <string name="font_phone">फ़ोन का</string>
     <string name="google_photos_connect_action">कनेक्ट करें</string>
     <string name="google_photos_connected">कनेक्ट है</string>
     <string name="google_photos_not_connected">कनेक्ट नहीं है</string>
@@ -136,6 +138,7 @@
     <string name="settings_contact_detail">सवाल या समस्या? %1$s पर ईमेल करें</string>
     <string name="settings_delete_account">खाते की जानकारी डिलीट करें</string>
     <string name="settings_delete_account_detail">साइन आउट कैसे करें, आपके Microsoft खाते से ऐप का ऐक्सेस कैसे हटाएँ, और उसका डेटा कैसे मिटाएँ।</string>
+    <string name="settings_font">फ़ॉन्ट</string>
     <string name="settings_general">सामान्य</string>
     <string name="settings_help_feedback">सहायता और फ़ीडबैक</string>
     <string name="settings_how_to_guide">How To Guide</string>

@@ -3,6 +3,7 @@ package com.gallery.sync.ui.theme
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gallery.sync.data.local.settings.AppearanceSettings
+import com.gallery.sync.data.local.settings.FontChoice
 import com.gallery.sync.data.local.settings.ThemeMode
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -30,6 +31,17 @@ class ThemeViewModel @Inject constructor(
 
     fun setThemeMode(mode: ThemeMode) {
         viewModelScope.launch { appearance.setThemeMode(mode) }
+    }
+
+    /** The app's own font or the phone's (Ian, 24 Oct 2026); see [FontChoice]. */
+    val fontChoice: StateFlow<FontChoice> = appearance.fontChoice.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
+        initialValue = FontChoice.DEFAULT
+    )
+
+    fun setFontChoice(choice: FontChoice) {
+        viewModelScope.launch { appearance.setFontChoice(choice) }
     }
 
     private companion object {

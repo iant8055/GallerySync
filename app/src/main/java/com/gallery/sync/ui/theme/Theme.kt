@@ -90,6 +90,8 @@ private val DarkColorScheme = darkColorScheme(
 fun GallerySyncTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = false,
+    /** The app's own font (Noto Sans) rather than the phone's; see `FontChoice`. */
+    appFont: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
@@ -119,8 +121,10 @@ fun GallerySyncTheme(
     CompositionLocalProvider(LocalGallerySyncColors provides signalColors(darkTheme)) {
         MaterialTheme(
             colorScheme = colorScheme,
-            typography = Typography,
+            typography = if (appFont) AppTypography else Typography,
             content = content
         )
     }
 }
+
+private val AppTypography = typographyIn(NotoSans)

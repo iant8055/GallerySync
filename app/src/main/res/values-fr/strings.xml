@@ -79,6 +79,8 @@
     <string name="destination_label">Dossier dans OneDrive</string>
     <string name="destination_reset">Rétablir par défaut</string>
     <string name="destination_save">Utiliser ce dossier</string>
+    <string name="font_app">De l\'appli</string>
+    <string name="font_phone">Du téléphone</string>
     <string name="google_photos_connect_action">Connecter</string>
     <string name="google_photos_connected">Connecté</string>
     <string name="google_photos_not_connected">Non connecté</string>
@@ -138,6 +140,7 @@
     <string name="settings_contact_detail">Des questions ou des problèmes ? Écrivez à %1$s</string>
     <string name="settings_delete_account">Supprimer les données du compte</string>
     <string name="settings_delete_account_detail">Comment se déconnecter, retirer l\'accès de l\'application à votre compte Microsoft et effacer ses données.</string>
+    <string name="settings_font">Police</string>
     <string name="settings_general">Général</string>
     <string name="settings_help_feedback">Aide et commentaires</string>
     <string name="settings_how_to_guide">Mode d\'emploi</string>

@@ -67,6 +67,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
+import com.gallery.sync.ui.common.CappedTextSize
 import com.gallery.sync.ui.common.HeroCard
 import com.gallery.sync.ui.help.HelpButton
 import com.gallery.sync.ui.help.HelpTopic
@@ -318,38 +319,40 @@ private fun ListHeaderCard(
         color = signal.heroContainer,
         contentColor = signal.onHero
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                // Larger than it was (Ian, 19 Sept 2026): two short lines have room for it.
-                Column(modifier = Modifier.weight(1f).padding(start = 8.dp)) {
-                    Text(
-                        text = stringResource(R.string.restore_hero_label_top),
-                        style = MaterialTheme.typography.headlineMedium
-                    )
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+        CappedTextSize {
+            Column(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    // Larger than it was (Ian, 19 Sept 2026): two short lines have room for it.
+                    Column(modifier = Modifier.weight(1f).padding(start = 8.dp)) {
                         Text(
-                            text = stringResource(R.string.restore_hero_label_bottom),
+                            text = stringResource(R.string.restore_hero_label_top),
                             style = MaterialTheme.typography.headlineMedium
                         )
-                        HelpButton(HelpTopic.RESTORE_HERO)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = stringResource(R.string.restore_hero_label_bottom),
+                                style = MaterialTheme.typography.headlineMedium
+                            )
+                            HelpButton(HelpTopic.RESTORE_HERO)
+                        }
+                    }
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                        Text(text = figure, style = MaterialTheme.typography.displayMedium)
                     }
                 }
-                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                    Text(text = figure, style = MaterialTheme.typography.displayMedium)
-                }
-            }
 
-            HeaderLower(
-                state = state,
-                context = context,
-                message = message,
-                firstLabel = stringResource(R.string.retrieve_refresh),
-                onFirst = onRefresh,
-                onClear = onClear
-            )
+                HeaderLower(
+                    state = state,
+                    context = context,
+                    message = message,
+                    firstLabel = stringResource(R.string.retrieve_refresh),
+                    onFirst = onRefresh,
+                    onClear = onClear
+                )
+            }
         }
     }
 }
@@ -457,164 +460,166 @@ private fun FolderHeader(
         color = signal.heroContainer,
         contentColor = signal.onHero
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            // The folder's name and the number share a line and a centre (Ian, 19 Sept 2026): the name
-            // on the left half, larger, and the number in the middle of the right half.
-            Row(verticalAlignment = Alignment.CenterVertically) {
+        CappedTextSize {
+            Column(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // The folder's name and the number share a line and a centre (Ian, 19 Sept 2026): the name
+                // on the left half, larger, and the number in the middle of the right half.
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        modifier = Modifier.weight(1f),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // The app's own return glyph, in the card's ink.
+                        IconButton(onClick = viewModel::closeFolder) {
+                            Icon(
+                                imageVector = SignalIcons.Back,
+                                contentDescription = stringResource(R.string.retrieve_back),
+                                modifier = Modifier.size(32.dp),
+                                tint = LocalContentColor.current
+                            )
+                        }
+                        // Two lines allowed: half the card is not much room for a long folder name, and
+                        // wrapping keeps all of it where an ellipsis would not.
+                        Text(
+                            text = folder,
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false)
+                        )
+                    }
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                        Text(text = figure, style = MaterialTheme.typography.displayMedium)
+                    }
+                }
+
+                // What is selected, on the same level as what the number counts. The row keeps room for
+                // two lines whether or not anything is selected, so the card does not change height as
+                // files are ticked.
                 Row(
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 44.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // The app's own return glyph, in the card's ink.
-                    IconButton(onClick = viewModel::closeFolder) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 8.dp)
+                    ) {
+                        if (state.hasSelection) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(
+                                        R.string.restore_selected_summary_stacked,
+                                        state.selection.size,
+                                        formatBytes(context, state.bytesToRecover)
+                                    ),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    modifier = Modifier.weight(1f, fill = false)
+                                )
+                                HelpButton(HelpTopic.RESTORE_SELECTED_SUMMARY)
+                            }
+                        }
+                    }
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = stringResource(R.string.restore_hero_label_files),
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center,
+                            maxLines = 2
+                        )
+                    }
+                }
+
+                // Sort and search get a line of their own. They shared the label's line on the first
+                // build and the three would not fit at 360dp: *Files in this folder* wrapped to two lines
+                // and the controls were squeezed against it (seen on the Moto, version 20). The search
+                // box still opens directly under this, where Ian asked for it.
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.restore_sort_by),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    SortControl(current = state.sort, onPick = viewModel::setSort)
+                    Spacer(modifier = Modifier.weight(1f))
+                    IconButton(onClick = viewModel::toggleSearch) {
                         Icon(
-                            imageVector = SignalIcons.Back,
-                            contentDescription = stringResource(R.string.retrieve_back),
-                            modifier = Modifier.size(32.dp),
+                            imageVector = SignalIcons.Search,
+                            contentDescription = stringResource(R.string.restore_search),
                             tint = LocalContentColor.current
                         )
                     }
-                    // Two lines allowed: half the card is not much room for a long folder name, and
-                    // wrapping keeps all of it where an ellipsis would not.
-                    Text(
-                        text = folder,
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f, fill = false)
-                    )
                 }
-                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                    Text(text = figure, style = MaterialTheme.typography.displayMedium)
-                }
-            }
 
-            // What is selected, on the same level as what the number counts. The row keeps room for
-            // two lines whether or not anything is selected, so the card does not change height as
-            // files are ticked.
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(min = 44.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 8.dp)
-                ) {
-                    if (state.hasSelection) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Text(
-                                text = stringResource(
-                                    R.string.restore_selected_summary_stacked,
-                                    state.selection.size,
-                                    formatBytes(context, state.bytesToRecover)
-                                ),
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.weight(1f, fill = false)
-                            )
-                            HelpButton(HelpTopic.RESTORE_SELECTED_SUMMARY)
-                        }
-                    }
-                }
-                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = stringResource(R.string.restore_hero_label_files),
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center,
-                        maxLines = 2
+                // The search box takes the whole width when it is open, under the name and the number and
+                // above the swipe instruction — the place the label was in, which is where the person was
+                // already looking. Closing it clears the query, so the list cannot stay filtered invisibly.
+                if (state.searchOpen) {
+                    val ink = LocalContentColor.current
+                    OutlinedTextField(
+                        value = state.query,
+                        onValueChange = viewModel::setQuery,
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text(stringResource(R.string.restore_search_hint)) },
+                        leadingIcon = {
+                            Icon(imageVector = SignalIcons.Search, contentDescription = null)
+                        },
+                        trailingIcon = {
+                            IconButton(onClick = viewModel::toggleSearch) {
+                                Icon(
+                                    imageVector = SignalIcons.Cross,
+                                    contentDescription = stringResource(R.string.restore_search_close)
+                                )
+                            }
+                        },
+                        // Every colour is taken from the hero band's own ink (LocalContentColor), not
+                        // named here: the field sits on heroContainer, not on surface, so the defaults —
+                        // which are built from onSurface — put near-black text on dark green in the light
+                        // theme. That shipped in version 20 and was unreadable on the Moto. Deriving from
+                        // the theme token is not the hardcoding CLAUDE.md forbids; Color(0xFF…) is.
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = ink,
+                            unfocusedTextColor = ink,
+                            cursorColor = ink,
+                            focusedBorderColor = ink.copy(alpha = 0.65f),
+                            unfocusedBorderColor = ink.copy(alpha = 0.35f),
+                            focusedPlaceholderColor = ink.copy(alpha = 0.7f),
+                            unfocusedPlaceholderColor = ink.copy(alpha = 0.7f),
+                            focusedLeadingIconColor = ink.copy(alpha = 0.7f),
+                            unfocusedLeadingIconColor = ink.copy(alpha = 0.7f),
+                            focusedTrailingIconColor = ink,
+                            unfocusedTrailingIconColor = ink
+                        )
                     )
                 }
-            }
 
-            // Sort and search get a line of their own. They shared the label's line on the first
-            // build and the three would not fit at 360dp: *Files in this folder* wrapped to two lines
-            // and the controls were squeezed against it (seen on the Moto, version 20). The search
-            // box still opens directly under this, where Ian asked for it.
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.restore_sort_by),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                SortControl(current = state.sort, onPick = viewModel::setSort)
-                Spacer(modifier = Modifier.weight(1f))
-                IconButton(onClick = viewModel::toggleSearch) {
-                    Icon(
-                        imageVector = SignalIcons.Search,
-                        contentDescription = stringResource(R.string.restore_search),
-                        tint = LocalContentColor.current
-                    )
-                }
-            }
-
-            // The search box takes the whole width when it is open, under the name and the number and
-            // above the swipe instruction — the place the label was in, which is where the person was
-            // already looking. Closing it clears the query, so the list cannot stay filtered invisibly.
-            if (state.searchOpen) {
-                val ink = LocalContentColor.current
-                OutlinedTextField(
-                    value = state.query,
-                    onValueChange = viewModel::setQuery,
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text(stringResource(R.string.restore_search_hint)) },
-                    leadingIcon = {
-                        Icon(imageVector = SignalIcons.Search, contentDescription = null)
-                    },
-                    trailingIcon = {
-                        IconButton(onClick = viewModel::toggleSearch) {
-                            Icon(
-                                imageVector = SignalIcons.Cross,
-                                contentDescription = stringResource(R.string.restore_search_close)
-                            )
-                        }
-                    },
-                    // Every colour is taken from the hero band's own ink (LocalContentColor), not
-                    // named here: the field sits on heroContainer, not on surface, so the defaults —
-                    // which are built from onSurface — put near-black text on dark green in the light
-                    // theme. That shipped in version 20 and was unreadable on the Moto. Deriving from
-                    // the theme token is not the hardcoding CLAUDE.md forbids; Color(0xFF…) is.
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = ink,
-                        unfocusedTextColor = ink,
-                        cursorColor = ink,
-                        focusedBorderColor = ink.copy(alpha = 0.65f),
-                        unfocusedBorderColor = ink.copy(alpha = 0.35f),
-                        focusedPlaceholderColor = ink.copy(alpha = 0.7f),
-                        unfocusedPlaceholderColor = ink.copy(alpha = 0.7f),
-                        focusedLeadingIconColor = ink.copy(alpha = 0.7f),
-                        unfocusedLeadingIconColor = ink.copy(alpha = 0.7f),
-                        focusedTrailingIconColor = ink,
-                        unfocusedTrailingIconColor = ink
-                    )
+                HeaderLower(
+                    state = state,
+                    context = context,
+                    message = state.summary ?: stringResource(
+                        if (state.hasSelection) R.string.restore_intro_files_selected else R.string.restore_intro_files
+                    ),
+                    firstLabel = stringResource(R.string.retrieve_select_all),
+                    onFirst = viewModel::selectAllHere,
+                    onClear = viewModel::clearSelection,
+                    compact = true
                 )
             }
-
-            HeaderLower(
-                state = state,
-                context = context,
-                message = state.summary ?: stringResource(
-                    if (state.hasSelection) R.string.restore_intro_files_selected else R.string.restore_intro_files
-                ),
-                firstLabel = stringResource(R.string.retrieve_select_all),
-                onFirst = viewModel::selectAllHere,
-                onClear = viewModel::clearSelection,
-                compact = true
-            )
         }
     }
 }

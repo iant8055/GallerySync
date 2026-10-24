@@ -280,4 +280,7 @@ T = {
 "volume_internal": "Interner Speicher",
 "welcome_tap_to_continue": "Zum Fortfahren tippen",
 "welcome_language_prompt": "Wähle deine Sprache, um fortzufahren",
+"settings_font": "Schriftart",
+"font_app": "App",
+"font_phone": "Telefon",
 }

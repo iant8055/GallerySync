@@ -126,6 +126,7 @@ class MainActivity : ComponentActivity() {
             // than flashing the system one and correcting itself a frame later.
             val themeViewModel: ThemeViewModel = hiltViewModel()
             val themeMode by themeViewModel.themeMode.collectAsStateWithLifecycle()
+            val fontChoice by themeViewModel.fontChoice.collectAsStateWithLifecycle()
             // The language chosen on the Welcome screen or in Settings decides which How To Guide pages open.
             val languageViewModel: com.gallery.sync.ui.settings.LanguageViewModel = hiltViewModel()
             val language by languageViewModel.language.collectAsStateWithLifecycle()
@@ -135,7 +136,8 @@ class MainActivity : ComponentActivity() {
                     ThemeMode.SYSTEM -> isSystemInDarkTheme()
                     ThemeMode.LIGHT -> false
                     ThemeMode.DARK -> true
-                }
+                },
+                appFont = fontChoice == com.gallery.sync.data.local.settings.FontChoice.APP
             ) {
                 androidx.compose.runtime.CompositionLocalProvider(
                     com.gallery.sync.ui.settings.LocalGuideLanguage provides language.code

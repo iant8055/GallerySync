@@ -280,4 +280,7 @@ T = {
 "volume_internal": "Armazenamento interno",
 "welcome_tap_to_continue": "Toque para continuar",
 "welcome_language_prompt": "Selecione seu idioma para continuar",
+"settings_font": "Fonte",
+"font_app": "Do app",
+"font_phone": "Do telefone",
 }

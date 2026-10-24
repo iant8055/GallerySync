@@ -148,6 +148,26 @@ fun SettingsScreen(
 
         SettingDivider()
 
+        // The app's own font (Noto Sans) or the phone's (Ian, 24 Oct 2026). Size always follows the phone.
+        val fontChoice by themeViewModel.fontChoice.collectAsStateWithLifecycle()
+        SettingDropdown(
+            label = stringResource(R.string.settings_font),
+            help = HelpTopic.SETTINGS_APPEARANCE,
+            options = com.gallery.sync.data.local.settings.FontChoice.entries,
+            selected = fontChoice,
+            onSelected = { themeViewModel.setFontChoice(it) },
+            optionLabel = { choice ->
+                stringResource(
+                    when (choice) {
+                        com.gallery.sync.data.local.settings.FontChoice.APP -> R.string.font_app
+                        com.gallery.sync.data.local.settings.FontChoice.PHONE -> R.string.font_phone
+                    }
+                )
+            }
+        )
+
+        SettingDivider()
+
         SettingSwitch(
             label = stringResource(R.string.backup_allow_metered),
             help = HelpTopic.SETTINGS_MOBILE_DATA,

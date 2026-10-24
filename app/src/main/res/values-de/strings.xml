@@ -77,6 +77,8 @@
     <string name="destination_label">Ordner in OneDrive</string>
     <string name="destination_reset">Auf Standard zurücksetzen</string>
     <string name="destination_save">Diesen Ordner verwenden</string>
+    <string name="font_app">App</string>
+    <string name="font_phone">Telefon</string>
     <string name="google_photos_connect_action">Verbinden</string>
     <string name="google_photos_connected">Verbunden</string>
     <string name="google_photos_not_connected">Nicht verbunden</string>
@@ -136,6 +138,7 @@
     <string name="settings_contact_detail">Fragen oder Probleme? Schreib an %1$s</string>
     <string name="settings_delete_account">Kontodaten löschen</string>
     <string name="settings_delete_account_detail">Wie du dich abmeldest, den Zugriff der App auf dein Microsoft-Konto entfernst und ihre Daten löschst.</string>
+    <string name="settings_font">Schriftart</string>
     <string name="settings_general">Allgemein</string>
     <string name="settings_help_feedback">Hilfe und Feedback</string>
     <string name="settings_how_to_guide">Anleitung</string>

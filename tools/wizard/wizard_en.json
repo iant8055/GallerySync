@@ -351,6 +351,16 @@
   "en": "Use this folder"
  },
  {
+  "key": "font_app",
+  "type": "string",
+  "en": "App font"
+ },
+ {
+  "key": "font_phone",
+  "type": "string",
+  "en": "Phone's font"
+ },
+ {
   "key": "google_photos_connect_action",
   "type": "string",
   "en": "Connect"
@@ -644,6 +654,11 @@
   "key": "settings_delete_account_detail",
   "type": "string",
   "en": "How to sign out, remove the app\\'s access to your Microsoft account, and clear its data."
+ },
+ {
+  "key": "settings_font",
+  "type": "string",
+  "en": "Font"
  },
  {
   "key": "settings_general",

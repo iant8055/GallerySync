@@ -64,6 +64,7 @@ import com.gallery.sync.ui.help.HelpButton
 import com.gallery.sync.ui.help.HelpTopic
 import com.gallery.sync.ui.help.TitleWithHelp
 import com.gallery.sync.ui.help.WithHelp
+import com.gallery.sync.ui.common.CappedTextSize
 import com.gallery.sync.ui.common.HeroOutlinedButton
 import com.gallery.sync.ui.common.SignalIcons
 import com.gallery.sync.ui.common.SwipeChoiceBox
@@ -350,150 +351,152 @@ private fun ArchiveHeader(
         color = signal.heroContainer,
         contentColor = signal.onHero
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            if (open == null) {
-                // The folder list keeps the tab's own title and its count of files waiting. Opened on a folder
-                // the title becomes that folder's name with a way back, as on Restore (Ian, 25 Sept 2026).
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Column(modifier = Modifier.weight(1f).padding(start = 8.dp)) {
-                        Text(
-                            text = stringResource(R.string.archive_hero_label_top),
-                            style = MaterialTheme.typography.headlineMedium
-                        )
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = stringResource(R.string.archive_hero_label_bottom),
-                                style = MaterialTheme.typography.headlineMedium
-                            )
-                            HelpButton(HelpTopic.ARCHIVE_HERO)
-                        }
-                    }
-                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                        Text(
-                            text = state.scopedEntries.size.toString(),
-                            style = MaterialTheme.typography.displayMedium
-                        )
-                    }
-                }
-            } else {
-                // Inside a folder, as Restore's: the way back and the folder's name on the left, the
-                // number of files in this folder on the right with its label under it.
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    // The name gets the larger share, so on a narrow screen it does not break mid-word (23 Oct 2026).
-                    Row(
-                        modifier = Modifier.weight(1.6f),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(onClick = onCloseAlbum) {
-                            Icon(
-                                imageVector = SignalIcons.Back,
-                                contentDescription = stringResource(R.string.retrieve_back),
-                                modifier = Modifier.size(32.dp),
-                                tint = LocalContentColor.current
-                            )
-                        }
-                        // Shrinks to fit rather than breaking a word in two on a narrow screen with large text.
-                        androidx.compose.foundation.text.BasicText(
-                            text = open,
-                            style = MaterialTheme.typography.headlineMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = LocalContentColor.current
-                            ),
-                            // One word is kept on one line (two would split it); a name of several words may take two.
-                            maxLines = if (open.trim().contains(' ')) 2 else 1,
-                            overflow = TextOverflow.Ellipsis,
-                            autoSize = androidx.compose.foundation.text.TextAutoSize.StepBased(
-                                minFontSize = 14.sp,
-                                maxFontSize = MaterialTheme.typography.headlineMedium.fontSize
-                            ),
-                            modifier = Modifier.weight(1f, fill = false)
-                        )
-                    }
-                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                        Text(
-                            text = state.scopedEntries.size.toString(),
-                            style = MaterialTheme.typography.displayMedium
-                        )
-                    }
-                }
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Box(modifier = Modifier.weight(1.6f))
-                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                        Text(
-                            text = stringResource(R.string.archive_hero_label_files),
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
-            }
-
+        CappedTextSize {
             Column(
-                modifier = Modifier.padding(horizontal = 8.dp),
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                when {
-                    !state.isSupported -> WithHelp(HelpTopic.ARCHIVE_EMPTY) {
-                        Text(
-                            text = stringResource(R.string.archive_unsupported),
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-
-                    // Two different emptinesses. No Archive album at all means nothing here can
-                    // remove anything; Archive albums holding no files means the mode finished
-                    // and is still standing. Telling the user the first when the second is true
-                    // would be false about the one mode that takes files off the phone.
-                    state.plan.isEmpty && state.archiveAlbums.isEmpty() -> {
-                        WithHelp(HelpTopic.ARCHIVE_EMPTY) {
+                if (open == null) {
+                    // The folder list keeps the tab's own title and its count of files waiting. Opened on a folder
+                    // the title becomes that folder's name with a way back, as on Restore (Ian, 25 Sept 2026).
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Column(modifier = Modifier.weight(1f).padding(start = 8.dp)) {
                             Text(
-                                text = stringResource(R.string.archive_empty),
+                                text = stringResource(R.string.archive_hero_label_top),
+                                style = MaterialTheme.typography.headlineMedium
+                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = stringResource(R.string.archive_hero_label_bottom),
+                                    style = MaterialTheme.typography.headlineMedium
+                                )
+                                HelpButton(HelpTopic.ARCHIVE_HERO)
+                            }
+                        }
+                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                            Text(
+                                text = state.scopedEntries.size.toString(),
+                                style = MaterialTheme.typography.displayMedium
+                            )
+                        }
+                    }
+                } else {
+                    // Inside a folder, as Restore's: the way back and the folder's name on the left, the
+                    // number of files in this folder on the right with its label under it.
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        // The name gets the larger share, so on a narrow screen it does not break mid-word (23 Oct 2026).
+                        Row(
+                            modifier = Modifier.weight(1.6f),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            IconButton(onClick = onCloseAlbum) {
+                                Icon(
+                                    imageVector = SignalIcons.Back,
+                                    contentDescription = stringResource(R.string.retrieve_back),
+                                    modifier = Modifier.size(32.dp),
+                                    tint = LocalContentColor.current
+                                )
+                            }
+                            // Shrinks to fit rather than breaking a word in two on a narrow screen with large text.
+                            androidx.compose.foundation.text.BasicText(
+                                text = open,
+                                style = MaterialTheme.typography.headlineMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = LocalContentColor.current
+                                ),
+                                // One word is kept on one line (two would split it); a name of several words may take two.
+                                maxLines = if (open.trim().contains(' ')) 2 else 1,
+                                overflow = TextOverflow.Ellipsis,
+                                autoSize = androidx.compose.foundation.text.TextAutoSize.StepBased(
+                                    minFontSize = 14.sp,
+                                    maxFontSize = MaterialTheme.typography.headlineMedium.fontSize
+                                ),
+                                modifier = Modifier.weight(1f, fill = false)
+                            )
+                        }
+                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                            Text(
+                                text = state.scopedEntries.size.toString(),
+                                style = MaterialTheme.typography.displayMedium
+                            )
+                        }
+                    }
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Box(modifier = Modifier.weight(1.6f))
+                        Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                            Text(
+                                text = stringResource(R.string.archive_hero_label_files),
+                                style = MaterialTheme.typography.bodyMedium,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                }
+
+                Column(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    when {
+                        !state.isSupported -> WithHelp(HelpTopic.ARCHIVE_EMPTY) {
+                            Text(
+                                text = stringResource(R.string.archive_unsupported),
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
-                        Text(
-                            text = stringResource(R.string.archive_empty_hint),
-                            style = MaterialTheme.typography.bodySmall
+
+                        // Two different emptinesses. No Archive album at all means nothing here can
+                        // remove anything; Archive albums holding no files means the mode finished
+                        // and is still standing. Telling the user the first when the second is true
+                        // would be false about the one mode that takes files off the phone.
+                        state.plan.isEmpty && state.archiveAlbums.isEmpty() -> {
+                            WithHelp(HelpTopic.ARCHIVE_EMPTY) {
+                                Text(
+                                    text = stringResource(R.string.archive_empty),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                            Text(
+                                text = stringResource(R.string.archive_empty_hint),
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+
+                        // Archive albums exist and hold nothing: the mode ran to completion, and the card
+                        // already says so, with the number at zero. The two sentences that sat here
+                        // restated the standing-instruction rule on every visit to a finished tab; that
+                        // explanation belongs in Help (TASK-017), not here. Ian, 27 Aug 2026.
+                        state.plan.isEmpty -> Unit
+
+                        else -> ArchiveHeroDetail(state)
+                    }
+
+                    // Shown whenever an Archive album exists, even if the filter currently hides every
+                    // file in it — otherwise there would be no way back from a filter that empties the
+                    // list. Ian, 22 Sept 2026.
+                    if (state.isSupported && state.archiveAlbums.isNotEmpty()) {
+                        ArchiveAgeSection(
+                            age = state.ageFilter,
+                            hiddenCount = state.hiddenByAge.size,
+                            // Not while a check or a removal is running, or the question is up: each
+                            // describes a list already fixed. Mirrors Camera's own `enabled = !running`.
+                            enabled = state.phase == ArchivePhase.IDLE || state.phase == ArchivePhase.DONE,
+                            onSetAge = onSetAgeFilter
                         )
                     }
 
-                    // Archive albums exist and hold nothing: the mode ran to completion, and the card
-                    // already says so, with the number at zero. The two sentences that sat here
-                    // restated the standing-instruction rule on every visit to a finished tab; that
-                    // explanation belongs in Help (TASK-017), not here. Ian, 27 Aug 2026.
-                    state.plan.isEmpty -> Unit
-
-                    else -> ArchiveHeroDetail(state)
-                }
-
-                // Shown whenever an Archive album exists, even if the filter currently hides every
-                // file in it — otherwise there would be no way back from a filter that empties the
-                // list. Ian, 22 Sept 2026.
-                if (state.isSupported && state.archiveAlbums.isNotEmpty()) {
-                    ArchiveAgeSection(
-                        age = state.ageFilter,
-                        hiddenCount = state.hiddenByAge.size,
-                        // Not while a check or a removal is running, or the question is up: each
-                        // describes a list already fixed. Mirrors Camera's own `enabled = !running`.
-                        enabled = state.phase == ArchivePhase.IDLE || state.phase == ArchivePhase.DONE,
-                        onSetAge = onSetAgeFilter
+                    // Where an archived album goes to be brought back. Moved here from the Albums header
+                    // (Ian, 18 Sept 2026): it is about Archive, so it belongs on this tab.
+                    Text(
+                        text = stringResource(R.string.archive_restore_pointer),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = LocalContentColor.current.copy(alpha = 0.7f)
                     )
-                }
 
-                // Where an archived album goes to be brought back. Moved here from the Albums header
-                // (Ian, 18 Sept 2026): it is about Archive, so it belongs on this tab.
-                Text(
-                    text = stringResource(R.string.archive_restore_pointer),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = LocalContentColor.current.copy(alpha = 0.7f)
-                )
-
-                if (state.isSupported && state.scopedEntries.isNotEmpty()) {
-                    WithHelp(HelpTopic.ARCHIVE_CHECK_BUTTON) {
-                        ArchiveHeroActions(state = state, onValidate = onValidate)
+                    if (state.isSupported && state.scopedEntries.isNotEmpty()) {
+                        WithHelp(HelpTopic.ARCHIVE_CHECK_BUTTON) {
+                            ArchiveHeroActions(state = state, onValidate = onValidate)
+                        }
                     }
                 }
             }

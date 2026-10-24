@@ -27,6 +27,20 @@ enum class ThemeMode {
     }
 }
 
+/**
+ * Which font the app draws its text in (Ian, 24 Oct 2026). Its own Noto Sans by default, so the app looks the same on
+ * every phone however the phone's font style is set; or the phone's own font for anyone who prefers it. Text SIZE always
+ * follows the phone's setting either way: that is an accessibility choice and is not the app's to override.
+ */
+enum class FontChoice {
+    APP,
+    PHONE;
+
+    companion object {
+        val DEFAULT = APP
+    }
+}
+
 private val Context.appearanceDataStore: DataStore<Preferences> by preferencesDataStore(
     name = "appearance_settings"
 )
@@ -56,7 +70,18 @@ class AppearanceSettings @Inject constructor(
         context.appearanceDataStore.edit { it[KEY_THEME_MODE] = mode.name }
     }
 
+    val fontChoice: Flow<FontChoice> = context.appearanceDataStore.data.map { stored ->
+        stored[KEY_FONT]
+            ?.let { name -> runCatching { FontChoice.valueOf(name) }.getOrNull() }
+            ?: FontChoice.DEFAULT
+    }
+
+    suspend fun setFontChoice(choice: FontChoice) {
+        context.appearanceDataStore.edit { it[KEY_FONT] = choice.name }
+    }
+
     private companion object {
         val KEY_THEME_MODE = stringPreferencesKey("theme_mode")
+        val KEY_FONT = stringPreferencesKey("font_choice")
     }
 }

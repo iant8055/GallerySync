@@ -42,6 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
 import com.gallery.sync.domain.backup.DeletedFile
 import com.gallery.sync.domain.backup.DeletionOutcome
+import com.gallery.sync.ui.common.CappedTextSize
 import com.gallery.sync.ui.common.HeroOutlinedButton
 import com.gallery.sync.ui.common.SwipeChoiceBox
 import com.gallery.sync.ui.common.formatBytes
@@ -216,86 +217,88 @@ private fun DeletedFilesHeader(state: DeletedFilesUiState, viewModel: DeletedFil
         color = signal.heroContainer,
         contentColor = signal.onHero
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Column(modifier = Modifier.weight(1f).padding(start = 8.dp)) {
-                    Text(
-                        text = stringResource(R.string.deleted_files_label_top),
-                        style = MaterialTheme.typography.headlineMedium
-                    )
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = stringResource(R.string.deleted_files_label_bottom),
-                            style = MaterialTheme.typography.headlineMedium
-                        )
-                        HelpButton(HelpTopic.DELETED_FILES_WINDOW)
-                    }
-                }
-                Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = if (state.phase == DeletedFilesPhase.DONE) {
-                            (state.inCloud.size + state.notInCloud.size).toString()
-                        } else {
-                            state.files.size.toString()
-                        },
-                        style = MaterialTheme.typography.displayMedium
-                    )
-                }
-            }
-
+        CappedTextSize {
             Column(
-                modifier = Modifier.padding(horizontal = 8.dp),
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                if (state.phase == DeletedFilesPhase.DONE) {
-                    Text(
-                        text = stringResource(R.string.deleted_files_done),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                } else {
-                    val inCloud = state.step == DeletedFilesStep.IN_CLOUD
-                    Text(
-                        text = stringResource(
-                            if (inCloud) R.string.deleted_files_intro else R.string.deleted_nocopy_intro,
-                            formatBytes(context, state.totalBytes)
-                        ),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    // Always there, so the card does not change height as files are ticked.
-                    Text(
-                        text = if (state.selected.isEmpty()) {
-                            stringResource(
-                                if (inCloud) R.string.deleted_files_none_selected
-                                else R.string.deleted_nocopy_none_selected
-                            )
-                        } else {
-                            stringResource(
-                                if (inCloud) R.string.deleted_files_selected else R.string.deleted_nocopy_selected,
-                                state.selected.size,
-                                formatBytes(context, state.selectedBytes)
-                            )
-                        },
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        HeroOutlinedButton(
-                            onClick = viewModel::selectAll,
-                            label = stringResource(R.string.retrieve_select_all),
-                            modifier = Modifier.weight(1f),
-                            enabled = listing
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(modifier = Modifier.weight(1f).padding(start = 8.dp)) {
+                        Text(
+                            text = stringResource(R.string.deleted_files_label_top),
+                            style = MaterialTheme.typography.headlineMedium
                         )
-                        HeroOutlinedButton(
-                            onClick = viewModel::clearSelection,
-                            label = stringResource(R.string.retrieve_clear_selection),
-                            modifier = Modifier.weight(1f),
-                            enabled = listing && state.selected.isNotEmpty()
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = stringResource(R.string.deleted_files_label_bottom),
+                                style = MaterialTheme.typography.headlineMedium
+                            )
+                            HelpButton(HelpTopic.DELETED_FILES_WINDOW)
+                        }
+                    }
+                    Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = if (state.phase == DeletedFilesPhase.DONE) {
+                                (state.inCloud.size + state.notInCloud.size).toString()
+                            } else {
+                                state.files.size.toString()
+                            },
+                            style = MaterialTheme.typography.displayMedium
                         )
+                    }
+                }
+
+                Column(
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    if (state.phase == DeletedFilesPhase.DONE) {
+                        Text(
+                            text = stringResource(R.string.deleted_files_done),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    } else {
+                        val inCloud = state.step == DeletedFilesStep.IN_CLOUD
+                        Text(
+                            text = stringResource(
+                                if (inCloud) R.string.deleted_files_intro else R.string.deleted_nocopy_intro,
+                                formatBytes(context, state.totalBytes)
+                            ),
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        // Always there, so the card does not change height as files are ticked.
+                        Text(
+                            text = if (state.selected.isEmpty()) {
+                                stringResource(
+                                    if (inCloud) R.string.deleted_files_none_selected
+                                    else R.string.deleted_nocopy_none_selected
+                                )
+                            } else {
+                                stringResource(
+                                    if (inCloud) R.string.deleted_files_selected else R.string.deleted_nocopy_selected,
+                                    state.selected.size,
+                                    formatBytes(context, state.selectedBytes)
+                                )
+                            },
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            HeroOutlinedButton(
+                                onClick = viewModel::selectAll,
+                                label = stringResource(R.string.retrieve_select_all),
+                                modifier = Modifier.weight(1f),
+                                enabled = listing
+                            )
+                            HeroOutlinedButton(
+                                onClick = viewModel::clearSelection,
+                                label = stringResource(R.string.retrieve_clear_selection),
+                                modifier = Modifier.weight(1f),
+                                enabled = listing && state.selected.isNotEmpty()
+                            )
+                        }
                     }
                 }
             }

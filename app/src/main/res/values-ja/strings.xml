@@ -75,6 +75,8 @@
     <string name="destination_label">OneDrive 内のフォルダ</string>
     <string name="destination_reset">既定に戻す</string>
     <string name="destination_save">このフォルダを使う</string>
+    <string name="font_app">アプリ</string>
+    <string name="font_phone">端末</string>
     <string name="google_photos_connect_action">接続</string>
     <string name="google_photos_connected">接続済み</string>
     <string name="google_photos_not_connected">未接続</string>
@@ -134,6 +136,7 @@
     <string name="settings_contact_detail">質問や問題は %1$s へメールしてください</string>
     <string name="settings_delete_account">アカウント情報の削除</string>
     <string name="settings_delete_account_detail">ログアウトの方法、Microsoft アカウントへのアプリのアクセスを取り消す方法、データを消去する方法。</string>
+    <string name="settings_font">フォント</string>
     <string name="settings_general">全般</string>
     <string name="settings_help_feedback">ヘルプとフィードバック</string>
     <string name="settings_how_to_guide">使い方ガイド</string>

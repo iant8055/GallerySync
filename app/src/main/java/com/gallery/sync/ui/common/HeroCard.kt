@@ -102,56 +102,58 @@ fun HeroCard(
         color = signal.heroContainer,
         contentColor = signal.onHero
     ) {
-        BoxWithConstraints(modifier = Modifier.padding(20.dp)) {
-            if (maxWidth >= HeroWideBreakpoint) {
-                Row(
-                    // IntrinsicSize.Min, so the fillMaxHeight below resolves against the taller
-                    // COLUMN rather than against the incoming constraint. Without it the card grew
-                    // to the height of the screen and pushed the album list off the bottom.
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .then(if (actionsAtBottom) Modifier.height(IntrinsicSize.Min) else Modifier),
-                    horizontalArrangement = Arrangement.spacedBy(24.dp),
-                    // Tops, always. Centred, a column that grows re-centres itself and everything
-                    // in it moves: on Restore, selecting files added a line under the figure and
-                    // the label above it jumped upward, which is a label moving to report
-                    // something that did not happen to it. Ian, 27 Aug 2026. Pinned to the top,
-                    // the label and the first line of the detail column start at the same height
-                    // and stay there whatever either column does underneath.
-                    verticalAlignment = Alignment.Top
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        if (figureContent != null) figureContent() else HeroFigure(label, figure, figureFooter, help)
-                    }
-                    Column(
+        CappedTextSize {
+            BoxWithConstraints(modifier = Modifier.padding(20.dp)) {
+                if (maxWidth >= HeroWideBreakpoint) {
+                    Row(
+                        // IntrinsicSize.Min, so the fillMaxHeight below resolves against the taller
+                        // COLUMN rather than against the incoming constraint. Without it the card grew
+                        // to the height of the screen and pushed the album list off the bottom.
                         modifier = Modifier
-                            .weight(1f)
-                            .then(if (actionsAtBottom) Modifier.fillMaxHeight() else Modifier),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                            .fillMaxWidth()
+                            .then(if (actionsAtBottom) Modifier.height(IntrinsicSize.Min) else Modifier),
+                        horizontalArrangement = Arrangement.spacedBy(24.dp),
+                        // Tops, always. Centred, a column that grows re-centres itself and everything
+                        // in it moves: on Restore, selecting files added a line under the figure and
+                        // the label above it jumped upward, which is a label moving to report
+                        // something that did not happen to it. Ian, 27 Aug 2026. Pinned to the top,
+                        // the label and the first line of the detail column start at the same height
+                        // and stay there whatever either column does underneath.
+                        verticalAlignment = Alignment.Top
                     ) {
-                        if (actionsAtBottom) {
-                            // Equal spacers above and below, so the text sits in the middle of the
-                            // space it has rather than clinging to the top of the card while the
-                            // controls hold the bottom. Ian, 27 Aug 2026. Indented too: the column
-                            // starts hard against the gap, and a little inset settles it into its
-                            // half instead of leaning on the mode buttons.
-                            Spacer(modifier = Modifier.weight(1f))
-                            Column(
-                                modifier = Modifier.padding(start = 16.dp),
-                                verticalArrangement = Arrangement.spacedBy(12.dp)
-                            ) { detail() }
-                            Spacer(modifier = Modifier.weight(1f))
-                        } else {
-                            detail()
+                        Column(modifier = Modifier.weight(1f)) {
+                            if (figureContent != null) figureContent() else HeroFigure(label, figure, figureFooter, help)
                         }
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .then(if (actionsAtBottom) Modifier.fillMaxHeight() else Modifier),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            if (actionsAtBottom) {
+                                // Equal spacers above and below, so the text sits in the middle of the
+                                // space it has rather than clinging to the top of the card while the
+                                // controls hold the bottom. Ian, 27 Aug 2026. Indented too: the column
+                                // starts hard against the gap, and a little inset settles it into its
+                                // half instead of leaning on the mode buttons.
+                                Spacer(modifier = Modifier.weight(1f))
+                                Column(
+                                    modifier = Modifier.padding(start = 16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                ) { detail() }
+                                Spacer(modifier = Modifier.weight(1f))
+                            } else {
+                                detail()
+                            }
+                            actions()
+                        }
+                    }
+                } else {
+                    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                        if (figureContent != null) figureContent() else HeroFigure(label, figure, figureFooter, help)
+                        detail()
                         actions()
                     }
-                }
-            } else {
-                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    if (figureContent != null) figureContent() else HeroFigure(label, figure, figureFooter, help)
-                    detail()
-                    actions()
                 }
             }
         }

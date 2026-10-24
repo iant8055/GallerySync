@@ -280,4 +280,7 @@ T = {
 "volume_internal": "इंटरनल स्टोरेज",
 "welcome_tap_to_continue": "आगे बढ़ने के लिए टैप करें",
 "welcome_language_prompt": "जारी रखने के लिए अपनी भाषा चुनें",
+"settings_font": "फ़ॉन्ट",
+"font_app": "ऐप का",
+"font_phone": "फ़ोन का",
 }
