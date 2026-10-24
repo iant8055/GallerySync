@@ -479,10 +479,10 @@ full size</string>
     <string name="album_merge_dismiss">Dismiss</string>
 
     <!-- Sizes. Units are conventionally left untranslated, but the format is overridable. -->
-    <string name="size_bytes">%1$d B</string>
-    <string name="size_kilobytes">%1$d KB</string>
-    <string name="size_megabytes">%1$d MB</string>
-    <string name="size_gigabytes">%1$s GB</string>
+    <string name="size_bytes">%1$d B</string>
+    <string name="size_kilobytes">%1$d KB</string>
+    <string name="size_megabytes">%1$d MB</string>
+    <string name="size_gigabytes">%1$s GB</string>
 
     <!--
         Temporary tab. This screen belongs in the guided first run (TASK-014) as step 6, between the

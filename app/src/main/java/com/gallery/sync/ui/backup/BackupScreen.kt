@@ -700,10 +700,9 @@ private fun ModeFilterChip(
             else -> null
         }
     ) {
-        Text(
+        com.gallery.sync.ui.common.FitText(
             text = mode.label(),
             style = MaterialTheme.typography.labelLarge,
-            maxLines = 1,
             textAlign = TextAlign.Center,
             // 4dp a side: four share the line, and "Archive" is the longest of the names.
             modifier = Modifier
@@ -1517,7 +1516,7 @@ private fun HeroActions(
                         disabledContentColor = LocalContentColor.current.copy(alpha = 0.55f)
                     )
                 ) {
-                    Text(stringResource(R.string.backup_run_now), maxLines = 1)
+                    com.gallery.sync.ui.common.FitText(stringResource(R.string.backup_run_now))
                 }
             }
 

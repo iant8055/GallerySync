@@ -199,7 +199,8 @@ fun HeroOutlinedButton(
             content.copy(alpha = if (enabled) 0.35f else 0.18f)
         )
     ) {
-        Text(label, maxLines = 1)
+        // Shrinks rather than cutting the word off on a narrow screen with large text (24 Oct 2026).
+        FitText(label)
     }
 }
 
