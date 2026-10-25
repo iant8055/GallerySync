@@ -28,7 +28,7 @@ enum class ThemeMode {
 }
 
 /**
- * Which font the app draws its text in (Ian, 24 Oct 2026). Its own Noto Sans by default, so the app looks the same on
+ * Which font the app draws its text in (Ian, 24 Oct 2026). Its own Roboto by default, so the app looks the same on
  * every phone however the phone's font style is set; or the phone's own font for anyone who prefers it. Text SIZE always
  * follows the phone's setting either way: that is an accessibility choice and is not the app's to override.
  */

@@ -148,7 +148,7 @@ fun SettingsScreen(
 
         SettingDivider()
 
-        // The app's own font (Noto Sans) or the phone's (Ian, 24 Oct 2026). Size always follows the phone.
+        // The app's own font (Roboto) or the phone's (Ian, 24 Oct 2026). Size always follows the phone.
         val fontChoice by themeViewModel.fontChoice.collectAsStateWithLifecycle()
         SettingDropdown(
             label = stringResource(R.string.settings_font),

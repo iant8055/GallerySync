@@ -90,7 +90,7 @@ private val DarkColorScheme = darkColorScheme(
 fun GallerySyncTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = false,
-    /** The app's own font (Noto Sans) rather than the phone's; see `FontChoice`. */
+    /** The app's own font (Roboto) rather than the phone's; see `FontChoice`. */
     appFont: Boolean = false,
     content: @Composable () -> Unit
 ) {
@@ -127,4 +127,4 @@ fun GallerySyncTheme(
     }
 }
 
-private val AppTypography = typographyIn(NotoSans)
+private val AppTypography = typographyIn(AppFont)

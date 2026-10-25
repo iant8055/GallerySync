@@ -10,16 +10,18 @@ import androidx.compose.ui.unit.sp
 import com.gallery.sync.R
 
 /**
- * The app's own font: Noto Sans, bundled (Ian, 24 Oct 2026), under the SIL Open Font License
- * (assets/licenses/NotoSans-OFL.txt). One variable file holds every weight. It covers the Latin languages; for
- * Japanese and Hindi Android draws the characters in its own Noto Sans JP and Noto Sans Devanagari, the same family,
- * so all seven languages match without bundling those (5-10 MB more).
+ * The app's own font: Roboto, bundled under the SIL Open Font License (assets/licenses/Roboto-OFL.txt). One variable
+ * file holds every weight. Japanese and Hindi are drawn in the phone's own fonts for those scripts.
+ *
+ * Noto Sans for its first day (24 Oct 2026). Ian found it larger than his own large font on the Fold 8, and with the
+ * phone's bold text on it went much heavier than Samsung's font does (reproduced on the Moto). Roboto is narrower and
+ * is the face most Android apps use, so at the same size it reads smaller (Ian, 25 Oct 2026).
  */
 @OptIn(androidx.compose.ui.text.ExperimentalTextApi::class)
-val NotoSans = FontFamily(
+val AppFont = FontFamily(
     listOf(FontWeight.Normal, FontWeight.Medium, FontWeight.SemiBold, FontWeight.Bold).map { weight ->
         Font(
-            R.font.noto_sans,
+            R.font.roboto,
             weight = weight,
             variationSettings = FontVariation.Settings(FontVariation.weight(weight.weight))
         )
@@ -36,7 +38,7 @@ private val Base = Typography(
     )
 )
 
-/** Every Material text style in [family]: Noto Sans for the app's own font, the phone's default otherwise. */
+/** Every Material text style in [family]: Roboto for the app's own font, the phone's default otherwise. */
 fun typographyIn(family: FontFamily): Typography = Base.copy(
     displayLarge = Base.displayLarge.copy(fontFamily = family),
     displayMedium = Base.displayMedium.copy(fontFamily = family),

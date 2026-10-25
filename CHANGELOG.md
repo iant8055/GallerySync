@@ -3,7 +3,7 @@
 Every change since version 26 (0.3.25), the last build the Closed Testing group had. The short notes Play shows to users
 (500 characters per language) are in `release-notes/`; this file is the full record.
 
-## Version 31 (0.3.30) — built 24 Oct 2026
+## Version 31 (0.3.30) — built 25 Oct 2026
 
 **Large text on narrow screens** (seen on the Galaxy Z Fold 8's cover screen)
 - The Archive tab's question: its Yes and No can always be scrolled into reach, and the age choice stays visible.
@@ -13,7 +13,8 @@ Every change since version 26 (0.3.25), the last build the Closed Testing group 
   phone's text size in full.
 
 **Font**
-- The app draws its text in its own font, Noto Sans, so it looks the same on every phone whatever the phone's font style.
+- The app draws its text in its own font, Roboto (the standard Android font), so it looks the same on every phone
+  whatever the phone's font style. (Noto Sans was tried first and looked too large and too heavy with bold text.)
 - **Settings → Font** switches between **App font** and **Phone's font**. Text size follows the phone either way.
 
 ## Version 30 (0.3.29) — 20 Oct 2026, Closed Testing
