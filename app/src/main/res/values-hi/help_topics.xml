@@ -57,11 +57,11 @@
     <string name="help_dialog_exit_warning_title" formatted="false">Files ready to Archive (बाहर निकलते समय की याद दिलाने वाली सूचना)</string>
     <string name="help_dialog_exit_warning_body" formatted="false">तब दिखती है जब आप बाहर निकलने के लिए Back दबाते हैं जबकि फ़ाइलें कन्फ़र्म होकर Archive के इंतज़ार में हों।\n\n• **Archive now:** Archive टैब खोलता है।\n• **Leave:** ऐप बंद करता है। कुछ नहीं हटता।\n\nसिर्फ़ OneDrive की फ़ाइलें गिनता है: सिर्फ़ OneDrive की कॉपियाँ पहले से कन्फ़र्म होती हैं। दूसरे क्लाउड तब जाँचे जाते हैं जब आप **Check these files** दबाते हैं। अगर आप होम दबाते हैं या ऐप को स्वाइप करके हटा देते हैं, तो यह सूचना नहीं दिखती।</string>
     <string name="help_settings_section_general_title" formatted="false">सामान्य</string>
-    <string name="help_settings_section_general_body" formatted="false">**How To Guide**, **रूप** और **मोबाइल डेटा इस्तेमाल करें**। **भाषा** पेज की आखिरी लाइन है।</string>
+    <string name="help_settings_section_general_body" formatted="false">**How To Guide**, **रूप**, **फ़ॉन्ट** और **मोबाइल डेटा इस्तेमाल करें**। **भाषा** पेज की आखिरी लाइन है।</string>
     <string name="help_settings_language_title" formatted="false">भाषा</string>
     <string name="help_settings_language_body" formatted="false">वह भाषा जो आपने स्वागत स्क्रीन पर चुनी थी। बदलने के लिए उस पर टैप करें। How To Guide इसी चुनाव का पालन करती है; ऐप की स्क्रीन फ़िलहाल अंग्रेज़ी में हैं।</string>
     <string name="help_settings_appearance_title" formatted="false">रूप</string>
-    <string name="help_settings_appearance_body" formatted="false">• **सिस्टम** (डिफ़ॉल्ट): आपके फ़ोन की लाइट या डार्क सेटिंग का पालन करता है।\n• **लाइट** या **डार्क**: हमेशा वही रूप।\n\nगाइड और पॉलिसी पेज भी इसी सेटिंग का पालन करते हैं।</string>
+    <string name="help_settings_appearance_body" formatted="false">• **सिस्टम** (डिफ़ॉल्ट): आपके फ़ोन की लाइट या डार्क सेटिंग का पालन करता है।\n• **लाइट** या **डार्क**: हमेशा वही रूप।\n\nगाइड और पॉलिसी पेज भी इसी सेटिंग का पालन करते हैं।\n\n## फ़ॉन्ट\n\n• **ऐप का** (डिफ़ॉल्ट): ऐप अपनी ही फ़ॉन्ट में टेक्स्ट दिखाता है, जिससे हर फ़ोन पर एक जैसा दिखे।\n• **फ़ोन का:** फ़ोन की अपनी फ़ॉन्ट स्टाइल इस्तेमाल करता है।\n\nटेक्स्ट का साइज़ दोनों ही स्थिति में फ़ोन की सेटिंग का पालन करता है।</string>
     <string name="help_settings_mobile_data_title" formatted="false">मोबाइल डेटा इस्तेमाल करें</string>
     <string name="help_settings_mobile_data_body" formatted="false">• **Off** (डिफ़ॉल्ट): **सिर्फ़ Wi-Fi.**\n• **On:** **Wi-Fi और मोबाइल डेटा, दोनों पर सिंक करता है।**\n\nअपने-आप होने वाले बैकअप और **Sync now** पर लागू होता है। जब तक आपका डेटा प्लान अनलिमिटेड न हो, इसे बंद रखें।</string>
     <string name="help_settings_section_backup_title" formatted="false">Backup</string>

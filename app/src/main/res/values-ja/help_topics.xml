@@ -57,11 +57,11 @@
     <string name="help_dialog_exit_warning_title" formatted="false">Files ready to Archive（終了時のリマインダー）</string>
     <string name="help_dialog_exit_warning_body" formatted="false">確認済みでアーカイブ待ちのファイルがある状態で、Back を押して離れようとすると表示されます。\n\n• **Archive now**：Archive タブを開きます。\n• **Leave**：アプリを閉じます。何も削除されません。\n\nOneDrive のファイルだけを数えます。事前に確認されるのは、OneDrive のコピーだけだからです。ほかの Cloud は、**Check these files** を押したときに確認されます。ホームを押した場合や、アプリをスワイプして終了した場合、このリマインダーは表示されません。</string>
     <string name="help_settings_section_general_title" formatted="false">全般</string>
-    <string name="help_settings_section_general_body" formatted="false">**使い方ガイド**、**表示**、**モバイルデータを使用**。**言語** は、ページの最後の行です。</string>
+    <string name="help_settings_section_general_body" formatted="false">**使い方ガイド**、**表示**、**フォント**、**モバイルデータを使用**。**言語** は、ページの最後の行です。</string>
     <string name="help_settings_language_title" formatted="false">言語</string>
     <string name="help_settings_language_body" formatted="false">ウェルカム画面で選んだ言語です。タップして変更します。How To Guide はこの選択に従います。アプリの画面は、今のところ英語です。</string>
     <string name="help_settings_appearance_title" formatted="false">表示</string>
-    <string name="help_settings_appearance_body" formatted="false">• **システム**（既定）：スマートフォンのライト/ダークの設定に従います。\n• **ライト** または **ダーク**：常にその表示になります。\n\nガイドとポリシーのページもこの設定に従います。</string>
+    <string name="help_settings_appearance_body" formatted="false">• **システム**（既定）:スマートフォンのライト/ダークの設定に従います。\n• **ライト** または **ダーク**:常にその表示になります。\n\nガイドとポリシーのページもこの設定に従います。\n\n## フォント\n\n• **アプリ**（既定）:アプリ独自のフォントで文字を表示するため、どの端末でも同じ見た目になります。\n• **端末:** 端末自身のフォントスタイルを使用します。\n\n文字のサイズはどちらの場合も端末の設定に従います。</string>
     <string name="help_settings_mobile_data_title" formatted="false">モバイルデータを使用</string>
     <string name="help_settings_mobile_data_body" formatted="false">• **Off**（既定）：**Wi-Fi のみ。**\n• **On**：**Wi-Fi とモバイルデータで同期します。**\n\n自動バックアップと **Sync now** に適用されます。データ通信量が無制限でない限り、オフのままにしておいてください。</string>
     <string name="help_settings_section_backup_title" formatted="false">Backup</string>

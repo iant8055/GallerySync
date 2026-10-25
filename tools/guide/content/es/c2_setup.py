@@ -26,12 +26,12 @@ TRANSLATIONS = {
 
     "setup-welcome-tour": {
         "title": "Bienvenida, el recorrido y lo que se va a configurar",
-        "body": """• **Bienvenida:** elige tu idioma para continuar. Puedes cambiarlo más tarde en Settings.
+        "body": """• **Bienvenida:** toca la imagen (**Toca para continuar**), elige tu idioma en la ventana emergente y pulsa **Aceptar**. Puedes cambiarlo más tarde en Settings.
 • **El recorrido:** cinco pantallas, una por cada pestaña y una para Ayuda.
 • **Lo que vamos a configurar:** inicia sesión en tu Nube, permite el acceso a las fotos, elige carpetas y permite cambios en esas carpetas.
 
 El enlace de la parte inferior de esa pantalla abre esta guía de configuración. Es la única parte de la guía disponible durante la configuración.""",
-        "en_hash": "db32458beedb19eb",
+        "en_hash": "17ccaeacdf9f0d32",
     },
 
     "setup-cloud": {

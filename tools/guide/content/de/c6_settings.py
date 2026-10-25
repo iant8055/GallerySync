@@ -13,8 +13,8 @@ TRANSLATIONS = {
     },
     "settings-section-general": {
         "title": "Allgemein",
-        "body": """Die **Anleitung**, **Darstellung** und **Mobile Daten verwenden**. **Sprache** ist die letzte Zeile der Seite.""",
-        "en_hash": "b8038bbcadfcd8b3",
+        "body": """Die **Anleitung**, **Darstellung**, **Schriftart** und **Mobile Daten verwenden**. **Sprache** ist die letzte Zeile der Seite.""",
+        "en_hash": "7c55bf50b318edb4",
     },
     "settings-how-to-guide-card": {
         "title": "Die Karte „Anleitung“",
@@ -31,8 +31,14 @@ TRANSLATIONS = {
         "body": """• **System** (Standard): folgt der Hell- oder Dunkel-Einstellung deines Telefons.
 • **Hell** oder **Dunkel**: immer dieses Aussehen.
 
-Die Anleitung und die Richtlinienseiten folgen ebenfalls dieser Einstellung.""",
-        "en_hash": "373e3bf77ff126af",
+Die Anleitung und die Richtlinienseiten folgen ebenfalls dieser Einstellung.
+
+## Schriftart
+• **App** (Standard): die App stellt Text in ihrer eigenen Schriftart dar, sodass sie auf jedem Telefon gleich aussieht.
+• **Telefon:** nutzt den eigenen Schriftstil des Telefons.
+
+Die Schriftgröße folgt in beiden Fällen der Einstellung des Telefons.""",
+        "en_hash": "a616649556d751e6",
     },
     "settings-mobile-data": {
         "title": "Mobile Daten verwenden",

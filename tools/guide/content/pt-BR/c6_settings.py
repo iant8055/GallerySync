@@ -13,8 +13,8 @@ TRANSLATIONS = {
     },
     'settings-section-general': {
         "title": 'Geral',
-        "body": """O **Guia de uso**, **Aparência** e **Usar dados móveis**. **Idioma** é a última linha da página.""",
-        "en_hash": "b8038bbcadfcd8b3",
+        "body": """O **Guia de uso**, **Aparência**, **Fonte** e **Usar dados móveis**. **Idioma** é a última linha da página.""",
+        "en_hash": "7c55bf50b318edb4",
     },
     'settings-how-to-guide-card': {
         "title": 'O cartão Guia de uso',
@@ -31,8 +31,14 @@ TRANSLATIONS = {
         "body": """• **Sistema** (padrão): segue a configuração clara ou escura do seu telefone.
 • **Claro** ou **Escuro**: sempre essa aparência.
 
-O guia e as páginas de política também seguem esta configuração.""",
-        "en_hash": "373e3bf77ff126af",
+O guia e as páginas de política também seguem esta configuração.
+
+## Fonte
+• **Do app** (padrão): o app exibe o texto com sua própria fonte, para que fique igual em todos os telefones.
+• **Do telefone:** usa o estilo de fonte do próprio telefone.
+
+O tamanho do texto segue a configuração do telefone nos dois casos.""",
+        "en_hash": "a616649556d751e6",
     },
     'settings-mobile-data': {
         "title": 'Usar dados móveis',

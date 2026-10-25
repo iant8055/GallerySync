@@ -14,8 +14,8 @@ TRANSLATIONS = {
 
     "settings-section-general": {
         "title": "General",
-        "body": """La **Guía de uso**, **Apariencia** y **Usar datos móviles**. **Idioma** es la última línea de la página.""",
-        "en_hash": "b8038bbcadfcd8b3",
+        "body": """La **Guía de uso**, **Apariencia**, **Fuente** y **Usar datos móviles**. **Idioma** es la última línea de la página.""",
+        "en_hash": "7c55bf50b318edb4",
     },
 
     "settings-how-to-guide-card": {
@@ -35,8 +35,14 @@ TRANSLATIONS = {
         "body": """• **Sistema** (predeterminado): sigue el ajuste claro u oscuro de tu teléfono.
 • **Claro** u **Oscuro**: siempre ese aspecto.
 
-La guía y las páginas de política también siguen este ajuste.""",
-        "en_hash": "373e3bf77ff126af",
+La guía y las páginas de política también siguen este ajuste.
+
+## Fuente
+• **De la app** (predeterminado): la app muestra el texto con su propia fuente para que se vea igual en todos los teléfonos.
+• **Del teléfono:** usa el estilo de fuente propio del teléfono.
+
+El tamaño del texto sigue el ajuste del teléfono en ambos casos.""",
+        "en_hash": "a616649556d751e6",
     },
 
     "settings-mobile-data": {

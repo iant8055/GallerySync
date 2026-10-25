@@ -25,12 +25,12 @@ TRANSLATIONS = {
     },
     "setup-welcome-tour": {
         "title": "Willkommen, die Tour und was eingerichtet wird",
-        "body": """• **Willkommen bei GallerySync:** wähle deine Sprache, um fortzufahren. Du kannst sie später in Settings ändern.
+        "body": """• **Willkommen bei GallerySync:** tippe auf das Bild (**Zum Fortfahren tippen**), wähle deine Sprache aus dem Pop-up und drücke **OK**. Du kannst sie später in Settings ändern.
 • **Die Tour:** fünf Bildschirme, einer für jeden Tab und einer für die Hilfe.
 • **Was wir einrichten:** bei deiner Cloud anmelden, den Zugriff auf Fotos erlauben, Ordner wählen und Änderungen an diesen Ordnern erlauben.
 
 Der Link unten auf diesem Bildschirm öffnet diese Einrichtungsanleitung. Sie ist der einzige Teil der Anleitung, der während der Einrichtung verfügbar ist.""",
-        "en_hash": "db32458beedb19eb",
+        "en_hash": "17ccaeacdf9f0d32",
     },
     "setup-cloud": {
         "title": "Cloud-Speicher: Dienste wählen, anmelden und festlegen, wohin Backups gehen",

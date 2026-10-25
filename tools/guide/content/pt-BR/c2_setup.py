@@ -25,12 +25,12 @@ TRANSLATIONS = {
     },
     'setup-welcome-tour': {
         "title": 'Boas-vindas, o tour e o que será configurado',
-        "body": """• **Boas-vindas:** escolha seu idioma para continuar. Você pode mudar depois em Settings.
+        "body": """• **Boas-vindas:** toque na imagem (**Toque para continuar**), escolha seu idioma no pop-up e pressione **OK**. Você pode mudar depois em Settings.
 • **O tour:** cinco telas, uma para cada aba e uma para Ajuda.
 • **O que vamos configurar:** entrar na sua Nuvem, permitir o acesso às fotos, escolher as pastas e permitir alterações nessas pastas.
 
 O link na parte de baixo dessa tela abre este guia de configuração. É a única parte do guia disponível durante a configuração.""",
-        "en_hash": "db32458beedb19eb",
+        "en_hash": "17ccaeacdf9f0d32",
     },
     'setup-cloud': {
         "title": 'Armazenamento na Nuvem: escolher serviços, entrar e escolher para onde vão os backups',

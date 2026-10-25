@@ -13,8 +13,8 @@ TRANSLATIONS = {
     },
     "settings-section-general": {
         "title": "Général",
-        "body": """Le **Mode d'emploi**, **Apparence** et **Utiliser les données mobiles**. **Langue** est la dernière ligne de la page.""",
-        "en_hash": "b8038bbcadfcd8b3",
+        "body": """Le **Mode d'emploi**, **Apparence**, **Police** et **Utiliser les données mobiles**. **Langue** est la dernière ligne de la page.""",
+        "en_hash": "7c55bf50b318edb4",
     },
     "settings-how-to-guide-card": {
         "title": "La carte Mode d'emploi",
@@ -31,8 +31,14 @@ TRANSLATIONS = {
         "body": """• **Système** (par défaut) : suit le réglage clair ou sombre de votre téléphone.
 • **Clair** ou **Sombre** : toujours cet aspect.
 
-Le guide et les pages de politique suivent aussi ce réglage.""",
-        "en_hash": "373e3bf77ff126af",
+Le guide et les pages de politique suivent aussi ce réglage.
+
+## Police
+• **De l'appli** (par défaut) : l'appli affiche le texte dans sa propre police pour qu'elle paraisse identique sur tous les téléphones.
+• **Du téléphone :** utilise le style de police du téléphone.
+
+La taille du texte suit le réglage du téléphone dans les deux cas.""",
+        "en_hash": "a616649556d751e6",
     },
     "settings-mobile-data": {
         "title": "Utiliser les données mobiles",

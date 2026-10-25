@@ -57,11 +57,11 @@
     <string name="help_dialog_exit_warning_title" formatted="false">Files ready to Archive (the leaving reminder)</string>
     <string name="help_dialog_exit_warning_body" formatted="false">Appears if you press Back to leave while files are confirmed and waiting to be archived.\n\n• **Archive now:** opens the Archive tab.\n• **Leave:** closes the app. Nothing is removed.\n\nCounts OneDrive files only: only OneDrive copies are confirmed ahead of time. Other Clouds are checked when you press **Check these files**. The reminder does not appear if you press Home or swipe the app away.</string>
     <string name="help_settings_section_general_title" formatted="false">General</string>
-    <string name="help_settings_section_general_body" formatted="false">The **How To Guide**, **Appearance** and **Use mobile data**. **Language** is the last line on the page.</string>
+    <string name="help_settings_section_general_body" formatted="false">The **How To Guide**, **Appearance**, **Font** and **Use mobile data**. **Language** is the last line on the page.</string>
     <string name="help_settings_language_title" formatted="false">Language</string>
     <string name="help_settings_language_body" formatted="false">The language you chose on the Welcome screen. Tap it to change. The How To Guide follows this choice; the app\'s screens are in English for now.</string>
     <string name="help_settings_appearance_title" formatted="false">Appearance</string>
-    <string name="help_settings_appearance_body" formatted="false">• **System** (default): follows your phone\'s light or dark setting.\n• **Light** or **Dark**: always that look.\n\nThe guide and policy pages follow this setting too.</string>
+    <string name="help_settings_appearance_body" formatted="false">• **System** (default): follows your phone\'s light or dark setting.\n• **Light** or **Dark**: always that look.\n\nThe guide and policy pages follow this setting too.\n\n## Font\n\n• **App font** (default): draws text in the app\'s own font so it looks the same on every phone.\n• **Phone\'s font:** uses the phone\'s own font style.\n\nText size follows the phone\'s setting either way.</string>
     <string name="help_settings_mobile_data_title" formatted="false">Use mobile data</string>
     <string name="help_settings_mobile_data_body" formatted="false">• **Off** (default): **Wi-Fi only.**\n• **On:** **Syncs on Wi-Fi and mobile data.**\n\nCovers automatic backups and **Sync now**. Leave it off unless your data plan is unlimited.</string>
     <string name="help_settings_section_backup_title" formatted="false">Backup</string>

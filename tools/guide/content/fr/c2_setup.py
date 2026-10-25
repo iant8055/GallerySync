@@ -25,12 +25,12 @@ TRANSLATIONS = {
     },
     "setup-welcome-tour": {
         "title": "Bienvenue, la visite, et ce que nous allons configurer",
-        "body": """• **Bienvenue :** choisissez votre langue pour continuer. Vous pourrez la changer plus tard dans Settings.
+        "body": """• **Bienvenue :** touchez l'image (**Touchez pour continuer**), choisissez votre langue dans la fenêtre contextuelle et appuyez sur **OK**. Vous pourrez la changer plus tard dans Settings.
 • **La visite :** cinq écrans, un pour chaque onglet et un pour l'Aide.
 • **Ce que nous allons configurer :** connectez-vous à votre Cloud, autorisez l'accès aux photos, choisissez des dossiers, et autorisez les modifications dans ces dossiers.
 
 Le lien en bas de cet écran ouvre ce guide de configuration. C'est la seule partie du guide disponible pendant la configuration.""",
-        "en_hash": "db32458beedb19eb",
+        "en_hash": "17ccaeacdf9f0d32",
     },
     "setup-cloud": {
         "title": "Stockage Cloud : choisir les services, se connecter et choisir où vont les sauvegardes",

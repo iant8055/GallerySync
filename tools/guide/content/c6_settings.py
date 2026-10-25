@@ -13,7 +13,7 @@ CHAPTER = Chapter(
         """),
 
         topic("settings-section-general", "General", """
-            The **How To Guide**, **Appearance** and **Use mobile data**. **Language** is the last line on the page.
+            The **How To Guide**, **Appearance**, **Font** and **Use mobile data**. **Language** is the last line on the page.
         """, ui=True),
 
         topic("settings-how-to-guide-card", "The How To Guide card", """
@@ -29,6 +29,12 @@ CHAPTER = Chapter(
             • **Light** or **Dark**: always that look.
 
             The guide and policy pages follow this setting too.
+
+            ## Font
+            • **App font** (default): draws text in the app's own font so it looks the same on every phone.
+            • **Phone's font:** uses the phone's own font style.
+
+            Text size follows the phone's setting either way.
         """, ui=True),
 
         topic("settings-mobile-data", "Use mobile data", """
