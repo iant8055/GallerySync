@@ -3,7 +3,7 @@
 Every change since version 26 (0.3.25), the last build the Closed Testing group had. The short notes Play shows to users
 (500 characters per language) are in `release-notes/`; this file is the full record.
 
-## Version 31 — not yet built
+## Version 31 (0.3.30) — built 24 Oct 2026
 
 **Large text on narrow screens** (seen on the Galaxy Z Fold 8's cover screen)
 - The Archive tab's question: its Yes and No can always be scrolled into reach, and the age choice stays visible.

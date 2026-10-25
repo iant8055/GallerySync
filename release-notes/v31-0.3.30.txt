@@ -1,0 +1,42 @@
+<en-US>
+• New: the app uses its own font, the same on every phone. Prefer your phone's? Settings → Font.
+• Large text on narrow screens: buttons and labels shrink to fit instead of being cut off, and the Archive question's buttons can always be reached.
+• The coloured card at the top of each tab no longer fills the screen at the largest text sizes.
+• Sizes like "936 MB" stay on one line.
+</en-US>
+<es-ES>
+• Nuevo: la app usa su propia fuente, igual en todos los teléfonos. ¿Prefieres la del teléfono? Settings → Fuente.
+• Texto grande en pantallas estrechas: botones y etiquetas se ajustan en vez de cortarse, y los botones de la pregunta de Archive siempre se alcanzan.
+• La tarjeta de color de cada pestaña ya no llena la pantalla con el texto más grande.
+• Tamaños como «936 MB» quedan en una línea.
+</es-ES>
+<pt-BR>
+• Novo: o app usa a própria fonte, igual em todos os telefones. Prefere a do telefone? Settings → Fonte.
+• Texto grande em telas estreitas: botões e rótulos se ajustam em vez de serem cortados, e os botões da pergunta do Archive sempre ficam ao alcance.
+• O cartão colorido no topo de cada aba não ocupa mais a tela com o texto maior.
+• Tamanhos como "936 MB" ficam numa linha.
+</pt-BR>
+<fr-FR>
+• Nouveau : l'app utilise sa propre police, identique sur chaque téléphone. Vous préférez celle du téléphone ? Settings → Police.
+• Grand texte sur écran étroit : boutons et libellés se réduisent au lieu d'être coupés, et les boutons de la question d'Archive restent accessibles.
+• La carte colorée en haut de chaque onglet ne remplit plus l'écran en très grand texte.
+• Les tailles comme « 936 Mo » restent sur une ligne.
+</fr-FR>
+<de-DE>
+• Neu: Die App nutzt ihre eigene Schriftart, auf jedem Telefon gleich. Lieber die des Telefons? Settings → Schriftart.
+• Große Schrift auf schmalen Bildschirmen: Schaltflächen und Beschriftungen passen sich an statt abgeschnitten zu werden; die Archive-Frage bleibt erreichbar.
+• Die farbige Karte oben in jedem Tab füllt bei größter Schrift nicht mehr den Bildschirm.
+• Größen wie „936 MB" bleiben in einer Zeile.
+</de-DE>
+<ja-JP>
+• 新機能：アプリ独自のフォントで、どのスマートフォンでも同じ表示に。端末のフォントを使うには Settings → フォント。
+• 狭い画面で文字を大きくしても、ボタンやラベルが切れずに収まり、Archive の確認ボタンにも必ず届きます。
+• 文字が最大でも、各タブ上部の色付きカードが画面を埋めなくなりました。
+• 「936 MB」などのサイズが1行に収まります。
+</ja-JP>
+<hi-IN>
+• नया: ऐप अब अपना फ़ॉन्ट इस्तेमाल करता है, हर फ़ोन पर एक जैसा। फ़ोन का फ़ॉन्ट चाहिए? Settings → फ़ॉन्ट।
+• संकरी स्क्रीन पर बड़ा टेक्स्ट: बटन और लेबल कटने के बजाय फ़िट हो जाते हैं, और Archive के सवाल के बटन हमेशा पहुँच में रहते हैं।
+• सबसे बड़े टेक्स्ट पर हर टैब के ऊपर का रंगीन कार्ड अब पूरी स्क्रीन नहीं घेरता।
+• "936 MB" जैसे साइज़ एक लाइन में रहते हैं।
+</hi-IN>
