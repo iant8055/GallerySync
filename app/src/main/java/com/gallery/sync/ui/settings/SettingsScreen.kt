@@ -1,5 +1,6 @@
 package com.gallery.sync.ui.settings
 
+import androidx.compose.ui.layout.Layout
 import android.provider.DocumentsContract
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -769,6 +770,34 @@ private fun LabelWithHelp(label: String, help: HelpTopic?, modifier: Modifier = 
     }
 }
 
+/**
+ * [label] and [control] on one line when the label's longest word fits beside the whole control, the control
+ * right-aligned; otherwise the label takes the full width and the control sits under it, still right-aligned.
+ */
+@Composable
+private fun LabelBesideOrAbove(label: @Composable () -> Unit, control: @Composable () -> Unit) {
+    Layout(contents = listOf(label, control), modifier = Modifier.fillMaxWidth()) { (labelM, controlM), c ->
+        val width = c.maxWidth
+        val gap = 8.dp.roundToPx()
+        val control = controlM.first().measure(c.copy(minWidth = 0, minHeight = 0))
+        val labelMin = labelM.first().minIntrinsicWidth(c.maxHeight)
+        if (labelMin + gap + control.width <= width) {
+            val lbl = labelM.first().measure(c.copy(minWidth = 0, minHeight = 0, maxWidth = width - gap - control.width))
+            val h = maxOf(lbl.height, control.height)
+            layout(width, h) {
+                lbl.placeRelative(0, (h - lbl.height) / 2)
+                control.placeRelative(width - control.width, (h - control.height) / 2)
+            }
+        } else {
+            val lbl = labelM.first().measure(c.copy(minWidth = 0, minHeight = 0))
+            layout(width, lbl.height + gap + control.height) {
+                lbl.placeRelative(0, 0)
+                control.placeRelative(width - control.width, lbl.height + gap)
+            }
+        }
+    }
+}
+
 @Composable
 private fun <T> SettingDropdown(
     label: String,
@@ -792,12 +821,12 @@ private fun <T> SettingDropdown(
     var expanded by remember { mutableStateOf(false) }
 
     Column {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+    // Side by side only while the label's longest word still fits beside the whole button; otherwise the button
+    // drops to its own line under the label (Ian, 25 Oct 2026, Fold 8 and Moto). Squeezed side by side, a long value
+    // ("High compression — 480p") left the label one letter per line and the button cut its own text short.
+    LabelBesideOrAbove(
+        label = { LabelWithHelp(label, help) },
     ) {
-        LabelWithHelp(label, help, modifier = Modifier.weight(1f))
         Box {
             if (alarmLabel != null) {
                 Button(
@@ -808,11 +837,11 @@ private fun <T> SettingDropdown(
                         contentColor = MaterialTheme.colorScheme.onError
                     )
                 ) {
-                    Text(alarmLabel, maxLines = 1)
+                    Text(alarmLabel)
                 }
             } else {
                 OutlinedButton(onClick = { expanded = true }, enabled = enabled) {
-                    Text(optionLabel(selected), maxLines = 1)
+                    Text(optionLabel(selected))
                 }
             }
             DropdownMenu(
