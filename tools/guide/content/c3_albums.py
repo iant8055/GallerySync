@@ -78,7 +78,7 @@ CHAPTER = Chapter(
             ## Header
             • Tap **Backup**, **Sync**, **Archive** or **Off** to show only the albums in that mode. Tap **All Albums** to show them all again.
             • The line under the buttons gives the total for each mode.
-            • **▲ Hide Details ▲** at the bottom of the card folds it to its title, number and main button; **▼ Show Details ▼** brings the mode buttons and the mode total back. The tab remembers your choice.
+            • **▲ Hide Details ▲** at the bottom of the card hides the mode total line; **▼ Show Details ▼** brings it back. **All Albums**, the four mode buttons and **Sync now** / **Rescan** stay. The tab remembers your choice.
 
             ## Album cards
             • **Name, file count and size** of the album on your phone.

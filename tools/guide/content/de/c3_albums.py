@@ -86,7 +86,7 @@ Hier wird nichts entfernt. Das Entfernen geschieht im Archive-Tab. Siehe [[archi
         "body": """## Kopfzeile
 • Tippe auf **Backup**, **Sync**, **Archive** oder **Off**, um nur die Alben in diesem Modus zu zeigen. Tippe auf **All Albums**, um wieder alle zu zeigen.
 • Die Zeile unter den Schaltflächen nennt die Summe für jeden Modus.
-• **▲ Hide Details ▲** am unteren Rand der Karte klappt sie auf Titel, Zahl und Hauptschaltfläche zusammen; **▼ Show Details ▼** holt die Modus-Schaltflächen und die Modus-Summe zurück. Der Tab merkt sich deine Wahl.
+• **▲ Hide Details ▲** am unteren Rand der Karte blendet die Zeile mit der Modus-Summe aus; **▼ Show Details ▼** holt sie zurück. **All Albums**, die vier Modus-Schaltflächen sowie **Sync now** / **Rescan** bleiben. Der Tab merkt sich deine Wahl.
 
 ## Albumkarten
 • **Name, Dateizahl und Größe** des Albums auf deinem Telefon.
@@ -94,7 +94,7 @@ Hier wird nichts entfernt. Das Entfernen geschieht im Archive-Tab. Siehe [[archi
 • **Cloud-Zeile:** **verified in OneDrive** bedeutet, dass OneDrive die Dateien in der richtigen Größe bestätigt hat. Das wird bei jedem Öffnen des Tabs geprüft. Andere Clouds zeigen **sent to** und die jeweilige Cloud.
 • **Modus-Schaltfläche** (rechte Seite): tippen, um den Modus des Albums zu ändern. Archive fragt zuerst nach Bestätigung. Wenn die Cloud des Albums diesen Modus nicht kann, sagt die Karte das.
 • **Tippe auf die Karte**, um die Dateien des Albums zu sehen. Siehe [[album-detail]].""",
-        "en_hash": "2c21822c4f81d271",
+        "en_hash": "6f8771afe616ceed",
     },
     "album-detail": {
         "title": "Die Dateiliste eines Albums",

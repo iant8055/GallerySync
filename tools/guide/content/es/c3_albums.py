@@ -95,7 +95,7 @@ Aquí no se quita nada. La eliminación ocurre en la pestaña Archive. Consulta 
         "body": """## Cabecera
 • Pulsa **Backup**, **Sync**, **Archive** u **Off** para ver solo los álbumes en ese modo. Pulsa **All Albums** para volver a verlos todos.
 • La línea bajo los botones da el total de cada modo.
-• **▲ Hide Details ▲** al pie de la tarjeta la pliega hasta su título, número y botón principal; **▼ Show Details ▼** devuelve los botones de modo y el total de modo. La pestaña recuerda tu elección.
+• **▲ Hide Details ▲** al pie de la tarjeta oculta la línea del total de modo; **▼ Show Details ▼** la devuelve. **All Albums**, los cuatro botones de modo y **Sync now** / **Rescan** quedan. La pestaña recuerda tu elección.
 
 ## Tarjetas de álbum
 • **Nombre, número de archivos y tamaño** del álbum en tu teléfono.
@@ -103,7 +103,7 @@ Aquí no se quita nada. La eliminación ocurre en la pestaña Archive. Consulta 
 • **Línea de la Cloud:** **verified in OneDrive** significa que OneDrive confirmó los archivos con el tamaño correcto. Se comprueba cada vez que abres la pestaña. Las demás Clouds muestran **sent to** esa Cloud.
 • **Botón de modo** (a la derecha): púlsalo para cambiar el modo del álbum. Archive te pide confirmar antes. Si la Cloud del álbum no puede hacer ese modo, la tarjeta lo indica.
 • **Pulsa la tarjeta** para ver los archivos del álbum. Consulta [[album-detail]].""",
-        "en_hash": "2c21822c4f81d271",
+        "en_hash": "6f8771afe616ceed",
     },
 
     "album-detail": {

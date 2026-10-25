@@ -86,7 +86,7 @@ Nada é removido aqui. A remoção acontece na aba Archive. Veja [[archive-overv
         "body": """## Cabeçalho
 • Toque em **Backup**, **Sync**, **Archive** ou **Off** para mostrar só os álbuns nesse modo. Toque em **All Albums** para mostrar todos de novo.
 • A linha embaixo dos botões dá o total de cada modo.
-• **▲ Hide Details ▲** no rodapé do cartão o dobra para o título, o número e o botão principal; **▼ Show Details ▼** traz de volta os botões de modo e o total de modo. A aba lembra sua escolha.
+• **▲ Hide Details ▲** no rodapé do cartão esconde a linha do total de modo; **▼ Show Details ▼** a traz de volta. **All Albums**, os quatro botões de modo e **Sync now** / **Rescan** permanecem. A aba lembra sua escolha.
 
 ## Cartões de álbum
 • **Nome, número de arquivos e tamanho** do álbum no seu telefone.
@@ -94,7 +94,7 @@ Nada é removido aqui. A remoção acontece na aba Archive. Veja [[archive-overv
 • **Linha da Cloud:** **verified in OneDrive** significa que o OneDrive confirmou os arquivos no tamanho certo. Isso é verificado toda vez que você abre a aba. As outras Clouds mostram **sent to** essa Cloud.
 • **Botão de modo** (no lado direito): toque para mudar o modo do álbum. O Archive pede que você confirme antes. Se a Cloud do álbum não consegue fazer esse modo, o cartão avisa.
 • **Toque no cartão** para ver os arquivos do álbum. Veja [[album-detail]].""",
-        "en_hash": "2c21822c4f81d271",
+        "en_hash": "6f8771afe616ceed",
     },
     'album-detail': {
         "title": 'A lista de arquivos de um álbum',

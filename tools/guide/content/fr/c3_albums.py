@@ -86,7 +86,7 @@ Rien n'est retiré ici. Le retrait se fait dans l'onglet Archive. Voir [[archive
         "body": """## En-tête
 • Touchez **Backup**, **Sync**, **Archive** ou **Off** pour n'afficher que les albums de ce mode. Touchez **All Albums** pour tous les afficher à nouveau.
 • La ligne sous les boutons donne le total pour chaque mode.
-• **▲ Hide Details ▲** en bas de la carte la replie sur son titre, son nombre et son bouton principal ; **▼ Show Details ▼** ramène les boutons de mode et le total de mode. L'onglet retient votre choix.
+• **▲ Hide Details ▲** en bas de la carte masque la ligne du total de mode ; **▼ Show Details ▼** la ramène. **All Albums**, les quatre boutons de mode ainsi que **Sync now** / **Rescan** restent. L'onglet retient votre choix.
 
 ## Cartes d'album
 • **Nom, nombre de fichiers et taille** de l'album sur votre téléphone.
@@ -94,7 +94,7 @@ Rien n'est retiré ici. Le retrait se fait dans l'onglet Archive. Voir [[archive
 • **Ligne Cloud :** **verified in OneDrive** signifie qu'OneDrive a confirmé les fichiers à la bonne taille. C'est vérifié à chaque ouverture de l'onglet. Les autres Clouds affichent **sent to** ce Cloud.
 • **Bouton de mode** (à droite) : touchez-le pour changer le mode de l'album. Archive demande d'abord une confirmation. Si le Cloud de l'album ne peut pas faire ce mode, la carte le dit.
 • **Touchez la carte** pour voir les fichiers de l'album. Voir [[album-detail]].""",
-        "en_hash": "2c21822c4f81d271",
+        "en_hash": "6f8771afe616ceed",
     },
     "album-detail": {
         "title": "La liste des fichiers d'un album",
