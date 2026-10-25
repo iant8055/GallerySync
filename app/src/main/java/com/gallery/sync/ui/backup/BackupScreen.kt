@@ -333,8 +333,8 @@ private fun AlbumList(
             actionsAtBottom = true,
             detailsKey = HeaderKey.ALBUMS,
             figureContent = {
+                // The four mode buttons stay when the details are hidden (Ian, 25 Oct 2026); only the count line folds.
                 ModeFilterGrid(
-                    showModes = detailsOn,
                     selected = modeFilter,
                     onSelect = { tapped ->
                         // Tapping the active mode again clears it, so every button is its own way
@@ -580,8 +580,6 @@ private fun AlbumList(
  */
 @Composable
 private fun ModeFilterGrid(
-    /** False folds the four mode buttons away with the rest of the header's details. */
-    showModes: Boolean = true,
     selected: AlbumMode?,
     onSelect: (AlbumMode?) -> Unit
 ) {
@@ -626,28 +624,23 @@ private fun ModeFilterGrid(
         }
         // One line of four, each half the width it was as two rows of two. Ian, 18 Sept 2026: the
         // header was taking too much of the screen.
-        HeaderDetailsSection(showModes) {
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                ModeFilterChip(
-                    AlbumMode.BACKUP, selected, onSelect, Modifier.weight(1f)
-                )
-                ModeFilterChip(
-                    AlbumMode.SYNC, selected, onSelect, Modifier.weight(1f)
-                )
-                ModeFilterChip(
-                    AlbumMode.ARCHIVE, selected, onSelect, Modifier.weight(1f)
-                )
-                ModeFilterChip(
-                    AlbumMode.OFF, selected, onSelect, Modifier.weight(1f)
-                )
-            }
-
-            // These read as status until you know they are controls — a count beside a word looks like
-            // a summary, which is exactly what they were an hour ago. One quiet line rather than an
-            // affordance on each button, which would make five loud things out of five calm ones. It has
-            // no (?) of its own (Ian, 18 Sept 2026): the guide's "albums-filter" topic covers it.
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            ModeFilterChip(
+                AlbumMode.BACKUP, selected, onSelect, Modifier.weight(1f)
+            )
+            ModeFilterChip(
+                AlbumMode.SYNC, selected, onSelect, Modifier.weight(1f)
+            )
+            ModeFilterChip(
+                AlbumMode.ARCHIVE, selected, onSelect, Modifier.weight(1f)
+            )
+            ModeFilterChip(
+                AlbumMode.OFF, selected, onSelect, Modifier.weight(1f)
+            )
         }
-        // "Tap to filter by mode" is gone (Ian, 25 Oct 2026): the (?) beside All Albums says it.
+
+        // No "Tap to filter by mode" line under the buttons any more (Ian, 25 Oct 2026): the (?) beside All Albums
+        // and the guide's "albums-filter" topic say it.
     }
 }
 

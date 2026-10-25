@@ -16,6 +16,7 @@ Every change since version 26 (0.3.25), the last build the Closed Testing group 
 - The coloured card at the top of Albums, Restore and Archive has a **▲ Hide Details ▲** line. Tapped, the card folds down
   to its title, number and main button, and the line becomes **▼ Show Details ▼**. Each tab remembers its choice.
 - Results, progress and anything that needs an answer stay in view when folded.
+- Albums keeps its four mode buttons when folded; only the mode count folds.
 - Albums: "Tap to filter by mode" removed; its (?) explains it.
 
 **Settings**
