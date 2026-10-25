@@ -30,8 +30,12 @@ OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 e Backblaze B2. Não o Google
         "title": 'Files to Archive',
         "body": """**Files to Archive**, com o número de arquivos que serão arquivados: em todos os álbuns Archive da lista de álbuns, ou no álbum que você abriu. Os arquivos que você manteve no telefone não são contados.
 
-Embaixo: seus álbuns Archive e um lembrete de que os arquivos arquivados podem ser trazidos de volta na aba **Restore**.""",
-        "en_hash": "1b24c615ac7e7cb7",
+Embaixo: seus álbuns Archive e um lembrete de que os arquivos arquivados podem ser trazidos de volta na aba **Restore**.
+
+Todo arquivo é conferido com sua Cloud antes de qualquer coisa sair do telefone. Um arquivo que ainda não esteja na sua Cloud é enviado primeiro e verificado antes de ser contado.
+
+**▲ Hide Details ▲** no rodapé do cartão o dobra para o título, o número e o botão principal; **▼ Show Details ▼** traz de volta os nomes dos álbuns, a opção **Only show files older than**, a explicação e o aviso de **Restore**. **Check these files**, seus resultados e a pergunta Yes/No continuam visíveis. A aba lembra sua escolha.""",
+        "en_hash": "487804f5f7434e77",
     },
     'archive-folder-list': {
         "title": 'Os álbuns Archive',

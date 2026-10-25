@@ -31,8 +31,12 @@ OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 y Backblaze B2. Google Photos
         "title": "Files to Archive",
         "body": """**Files to Archive**, con el número de archivos que se archivarán: en todos los álbumes Archive de la lista de álbumes, o en el álbum que abriste. Los archivos que conservaste en el teléfono no se cuentan.
 
-Debajo: tus álbumes Archive, y un recordatorio de que los archivos archivados se pueden recuperar en la pestaña **Restore**.""",
-        "en_hash": "1b24c615ac7e7cb7",
+Debajo: tus álbumes Archive, y un recordatorio de que los archivos archivados se pueden recuperar en la pestaña **Restore**.
+
+Cada archivo se comprueba con tu Cloud antes de que algo salga del teléfono. Un archivo que todavía no esté en tu Cloud se envía primero y se verifica antes de contarse.
+
+**▲ Hide Details ▲** al pie de la tarjeta la pliega hasta su título, número y botón principal; **▼ Show Details ▼** devuelve los nombres de álbum, la elección **Only show files older than**, la explicación y el aviso de **Restore**. **Check these files**, sus resultados y la pregunta Yes/No quedan visibles. La pestaña recuerda tu elección.""",
+        "en_hash": "487804f5f7434e77",
     },
 
     "archive-folder-list": {

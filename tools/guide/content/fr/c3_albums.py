@@ -86,25 +86,27 @@ Rien n'est retiré ici. Le retrait se fait dans l'onglet Archive. Voir [[archive
         "body": """## En-tête
 • Touchez **Backup**, **Sync**, **Archive** ou **Off** pour n'afficher que les albums de ce mode. Touchez **All Albums** pour tous les afficher à nouveau.
 • La ligne sous les boutons donne le total pour chaque mode.
+• **▲ Hide Details ▲** en bas de la carte la replie sur son titre, son nombre et son bouton principal ; **▼ Show Details ▼** ramène les boutons de mode et le total de mode. L'onglet retient votre choix.
 
 ## Cartes d'album
 • **Nom, nombre de fichiers et taille** de l'album sur votre téléphone.
-• **Deuxième ligne** (seulement si nécessaire) : combien de fichiers sont optimisés, gardés en taille réelle, en attente ou en échec.
-• **Ligne Cloud :** **verified in OneDrive** signifie qu'OneDrive a confirmé les fichiers à la bonne taille. C'est vérifié à chaque ouverture de l'onglet. Les autres Clouds affichent **sent to** ce Cloud.
-• **Bouton de mode** (à droite) : touchez-le pour changer le mode de l'album. Archive demande d'abord une confirmation. Si le Cloud de l'album ne peut pas faire ce mode, la carte le dit.
+• **Deuxième ligne** (seulement si nécessaire) : combien de fichiers sont optimisés, gardés en taille réelle, en attente ou en échec.
+• **Ligne Cloud :** **verified in OneDrive** signifie qu'OneDrive a confirmé les fichiers à la bonne taille. C'est vérifié à chaque ouverture de l'onglet. Les autres Clouds affichent **sent to** ce Cloud.
+• **Bouton de mode** (à droite) : touchez-le pour changer le mode de l'album. Archive demande d'abord une confirmation. Si le Cloud de l'album ne peut pas faire ce mode, la carte le dit.
 • **Touchez la carte** pour voir les fichiers de l'album. Voir [[album-detail]].""",
-        "en_hash": "52297f12afc2a7eb",
+        "en_hash": "2c21822c4f81d271",
     },
     "album-detail": {
         "title": "La liste des fichiers d'un album",
         "body": """S'ouvre quand vous touchez une carte d'album.
 
-• **En-tête :** flèche de retour, nom de l'album, mode et nombre de fichiers, **Backs up to** (le Cloud et le dossier où vont les nouveaux fichiers, plus tout autre Cloud qui en détient déjà), les compteurs ([[album-file-status]]), **Sort by** ([[album-file-sort]]) et **Keep at full size** ([[album-file-pin]]).
-• **Fichiers :** une carte par fichier avec sa taille, sa date et ses marques. Un fichier optimisé affiche sa taille réduite sur le téléphone.
-• **Camera folder** (si choisi dans Settings) : commandes d'optimisation supplémentaires. Voir [[album-camera-optimise]].
+• **En-tête :** flèche de retour, nom de l'album, mode et nombre de fichiers, **Backs up to** (le Cloud et le dossier où vont les nouveaux fichiers, plus tout autre Cloud qui en détient déjà), les compteurs ([[album-file-status]]), **Sort by** ([[album-file-sort]]) et **Keep at full size** ([[album-file-pin]]).
+• **▲ Hide Details ▲** en bas de l'en-tête le replie sur le nom de l'album, son mode et le nombre de fichiers ; **▼ Show Details ▼** ramène le reste. La page retient votre choix.
+• **Fichiers :** une carte par fichier avec sa taille, sa date et ses marques. Un fichier optimisé affiche sa taille réduite sur le téléphone.
+• **Camera folder** (si choisi dans Settings) : commandes d'optimisation supplémentaires. Voir [[album-camera-optimise]].
 
 Pas de miniatures ni d'aperçus. Utilisez votre application de galerie pour regarder les photos.""",
-        "en_hash": "c5a7c5d01cd7947b",
+        "en_hash": "47ed510631cea71a",
     },
     "album-file-status": {
         "title": "Marques et compteurs des fichiers d'un album",

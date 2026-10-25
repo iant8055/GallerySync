@@ -86,6 +86,7 @@ Hier wird nichts entfernt. Das Entfernen geschieht im Archive-Tab. Siehe [[archi
         "body": """## Kopfzeile
 • Tippe auf **Backup**, **Sync**, **Archive** oder **Off**, um nur die Alben in diesem Modus zu zeigen. Tippe auf **All Albums**, um wieder alle zu zeigen.
 • Die Zeile unter den Schaltflächen nennt die Summe für jeden Modus.
+• **▲ Hide Details ▲** am unteren Rand der Karte klappt sie auf Titel, Zahl und Hauptschaltfläche zusammen; **▼ Show Details ▼** holt die Modus-Schaltflächen und die Modus-Summe zurück. Der Tab merkt sich deine Wahl.
 
 ## Albumkarten
 • **Name, Dateizahl und Größe** des Albums auf deinem Telefon.
@@ -93,18 +94,19 @@ Hier wird nichts entfernt. Das Entfernen geschieht im Archive-Tab. Siehe [[archi
 • **Cloud-Zeile:** **verified in OneDrive** bedeutet, dass OneDrive die Dateien in der richtigen Größe bestätigt hat. Das wird bei jedem Öffnen des Tabs geprüft. Andere Clouds zeigen **sent to** und die jeweilige Cloud.
 • **Modus-Schaltfläche** (rechte Seite): tippen, um den Modus des Albums zu ändern. Archive fragt zuerst nach Bestätigung. Wenn die Cloud des Albums diesen Modus nicht kann, sagt die Karte das.
 • **Tippe auf die Karte**, um die Dateien des Albums zu sehen. Siehe [[album-detail]].""",
-        "en_hash": "52297f12afc2a7eb",
+        "en_hash": "2c21822c4f81d271",
     },
     "album-detail": {
         "title": "Die Dateiliste eines Albums",
         "body": """Öffnet sich, wenn du auf eine Albumkarte tippst.
 
 • **Kopfzeile:** Zurück-Pfeil, Albumname, Modus und Dateizahl, **Backs up to** (die Cloud und der Ordner, in die neue Dateien gehen, plus jede andere Cloud, die schon einige hält), die Zahlen ([[album-file-status]]), **Sort by** ([[album-file-sort]]) und **Keep at full size** ([[album-file-pin]]).
+• **▲ Hide Details ▲** am unteren Rand der Kopfzeile klappt sie auf Albumname, Modus und Dateizahl zusammen; **▼ Show Details ▼** holt den Rest zurück. Die Seite merkt sich deine Wahl.
 • **Dateien:** eine Karte pro Datei mit Größe, Datum und Markierungen. Eine optimierte Datei zeigt ihre kleinere Größe auf dem Telefon.
 • **Kameraordner** (falls in Settings gewählt): zusätzliche Optimise-Steuerung. Siehe [[album-camera-optimise]].
 
 Keine Miniaturansichten oder Vorschauen. Nutze deine Galerie-App, um Fotos anzusehen.""",
-        "en_hash": "c5a7c5d01cd7947b",
+        "en_hash": "47ed510631cea71a",
     },
     "album-file-status": {
         "title": "Dateimarkierungen und Zahlen in einem Album",

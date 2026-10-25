@@ -28,11 +28,13 @@ Un archivo se sustituye solo después de que la descarga llegue completa y su ta
         "title": "Albums to Restore y Files in this album",
         "body": """• **Lista de álbumes:** **Albums to Restore**, con cuántos álbumes tienen algo que recuperar.
 • **Dentro de un álbum:** flecha atrás, nombre del álbum y **Files in this album** con el recuento y lo que has seleccionado.
+• Desliza una tarjeta a la derecha para seleccionar, a la izquierda para deseleccionar; pulsa para abrir. Funciona tanto si la cabecera está visible como oculta.
+• **▲ Hide Details ▲** al pie de la tarjeta la pliega hasta su título, número y botón principal; **▼ Show Details ▼** devuelve la instrucción de deslizar, **Refresh** / **Clear** y la línea de **Sort** / búsqueda de la carpeta. Los resultados y lo que has seleccionado quedan visibles. La pestaña recuerda tu elección.
 
 Un guion significa que la lista aún se está cargando. **Checking your Cloud for more...** significa que se está leyendo OneDrive. Un mensaje en rojo significa que no se pudo acceder a una carpeta de la Cloud.
 
 La lista de OneDrive se recuerda, y se vuelve a leer pasados diez minutos o cuando pulsas **Refresh**.""",
-        "en_hash": "c073ea612bd19780",
+        "en_hash": "1099ec37091c62a1",
     },
 
     "restore-message-line": {

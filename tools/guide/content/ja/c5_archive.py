@@ -30,8 +30,12 @@ OneDrive、Google Drive、Dropbox、pCloud、IDrive e2、Backblaze B2。Google P
         "title": "Files to Archive",
         "body": """**Files to Archive** と、アーカイブされるファイルの数：アルバム一覧ではすべての Archive アルバム分、アルバムを開いている場合はそのアルバム分です。スマートフォンに残すことにしたファイルは、数えません。
 
-その下に、Archive アルバムと、アーカイブされたファイルは **Restore** タブで戻せるという注意書きがあります。""",
-        "en_hash": "1b24c615ac7e7cb7",
+その下に、Archive アルバムと、アーカイブされたファイルは **Restore** タブで戻せるという注意書きがあります。
+
+何かがスマートフォンから出る前に、各ファイルは Cloud と照合されます。まだ Cloud にないファイルは先に送信され、確認されてから数えられます。
+
+カード下部の **▲ Hide Details ▲** をタップすると、カードはタイトル、数、メインボタンだけに折りたたまれます。**▼ Show Details ▼** でアルバム名、**Only show files older than** の選択、説明、**Restore** への案内が戻ります。**Check these files**、その結果、Yes/No の質問は残ります。タブはこの選択を記憶します。""",
+        "en_hash": "487804f5f7434e77",
     },
     "archive-folder-list": {
         "title": "Archive アルバム",

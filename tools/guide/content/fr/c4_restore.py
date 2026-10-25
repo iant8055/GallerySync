@@ -25,13 +25,15 @@ Un fichier n'est remplacé qu'après l'arrivée complète du téléchargement et
     },
     "restore-hero": {
         "title": "Albums to Restore et Files in this album",
-        "body": """• **Liste d'albums :** **Albums to Restore**, avec le nombre d'albums qui ont quelque chose à ramener.
-• **Dans un album :** flèche de retour, nom de l'album, et **Files in this album** avec le compte et ce que vous avez sélectionné.
+        "body": """• **Liste d'albums :** **Albums to Restore**, avec le nombre d'albums qui ont quelque chose à ramener.
+• **Dans un album :** flèche de retour, nom de l'album, et **Files in this album** avec le compte et ce que vous avez sélectionné.
+• Faites glisser une carte vers la droite pour la sélectionner, vers la gauche pour la désélectionner ; touchez pour ouvrir. Cela fonctionne avec l'en-tête affiché ou masqué.
+• **▲ Hide Details ▲** en bas de la carte la replie sur son titre, son nombre et son bouton principal ; **▼ Show Details ▼** ramène l'indication de balayage, **Refresh** / **Clear** et la ligne **Sort** / recherche du dossier. Les résultats et votre sélection restent visibles. L'onglet retient votre choix.
 
 Un tiret signifie que la liste est encore en cours de chargement. **Checking your Cloud for more...** signifie qu'OneDrive est en cours de lecture. Un message rouge signifie qu'un dossier du Cloud n'a pas pu être joint.
 
 La liste OneDrive est mémorisée, puis relue après dix minutes ou quand vous appuyez sur **Refresh**.""",
-        "en_hash": "c073ea612bd19780",
+        "en_hash": "1099ec37091c62a1",
     },
     "restore-message-line": {
         "title": "Le message sous le nombre",

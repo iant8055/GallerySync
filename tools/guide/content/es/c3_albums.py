@@ -95,6 +95,7 @@ Aquí no se quita nada. La eliminación ocurre en la pestaña Archive. Consulta 
         "body": """## Cabecera
 • Pulsa **Backup**, **Sync**, **Archive** u **Off** para ver solo los álbumes en ese modo. Pulsa **All Albums** para volver a verlos todos.
 • La línea bajo los botones da el total de cada modo.
+• **▲ Hide Details ▲** al pie de la tarjeta la pliega hasta su título, número y botón principal; **▼ Show Details ▼** devuelve los botones de modo y el total de modo. La pestaña recuerda tu elección.
 
 ## Tarjetas de álbum
 • **Nombre, número de archivos y tamaño** del álbum en tu teléfono.
@@ -102,7 +103,7 @@ Aquí no se quita nada. La eliminación ocurre en la pestaña Archive. Consulta 
 • **Línea de la Cloud:** **verified in OneDrive** significa que OneDrive confirmó los archivos con el tamaño correcto. Se comprueba cada vez que abres la pestaña. Las demás Clouds muestran **sent to** esa Cloud.
 • **Botón de modo** (a la derecha): púlsalo para cambiar el modo del álbum. Archive te pide confirmar antes. Si la Cloud del álbum no puede hacer ese modo, la tarjeta lo indica.
 • **Pulsa la tarjeta** para ver los archivos del álbum. Consulta [[album-detail]].""",
-        "en_hash": "52297f12afc2a7eb",
+        "en_hash": "2c21822c4f81d271",
     },
 
     "album-detail": {
@@ -110,11 +111,12 @@ Aquí no se quita nada. La eliminación ocurre en la pestaña Archive. Consulta 
         "body": """Se abre al pulsar una tarjeta de álbum.
 
 • **Cabecera:** flecha atrás, nombre del álbum, modo y número de archivos, **Backs up to** (la Cloud y la carpeta a las que van los archivos nuevos, más cualquier otra Cloud que ya tenga algunos), los recuentos ([[album-file-status]]), **Sort by** ([[album-file-sort]]) y **Keep at full size** ([[album-file-pin]]).
+• **▲ Hide Details ▲** al pie de la cabecera la pliega hasta el nombre del álbum, el modo y el número de archivos; **▼ Show Details ▼** devuelve el resto. La página recuerda tu elección.
 • **Archivos:** una tarjeta por archivo con su tamaño, fecha y marcas. Un archivo optimizado muestra en el teléfono su tamaño menor.
 • **Carpeta de la cámara** (si se eligió en Settings): controles de optimización adicionales. Consulta [[album-camera-optimise]].
 
 Sin miniaturas ni vistas previas. Usa tu app de galería para ver las fotos.""",
-        "en_hash": "c5a7c5d01cd7947b",
+        "en_hash": "47ed510631cea71a",
     },
 
     "album-file-status": {

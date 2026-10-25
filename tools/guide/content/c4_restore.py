@@ -26,6 +26,8 @@ CHAPTER = Chapter(
         topic("restore-hero", "Albums to Restore and Files in this album", """
             • **Album list:** **Albums to Restore**, with how many albums have something to bring back.
             • **Inside an album:** back arrow, album name, and **Files in this album** with the count and what you have selected.
+            • Swipe a card right to select, left to deselect; tap to open. These work whether the header is shown or hidden.
+            • **▲ Hide Details ▲** at the bottom of the card folds it to its title, number and main button; **▼ Show Details ▼** brings the swipe instruction, **Refresh** / **Clear** and the folder's **Sort** / search line back. Results and what you have selected stay visible. The tab remembers your choice.
 
             A dash means the list is still loading. **Checking your Cloud for more...** means OneDrive is being read. A red message means a Cloud folder could not be reached.
 

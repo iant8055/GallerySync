@@ -27,11 +27,13 @@ TRANSLATIONS = {
         "title": "Albums to Restore and Files in this album",
         "body": """• **アルバム一覧**：**Albums to Restore** と、戻せるものがあるアルバムの数。
 • **アルバムの中**：戻る矢印、アルバム名、**Files in this album**（件数と、選択した数）。
+• カードを右にスワイプで選択、左にスワイプで選択解除。タップで開きます。これらはヘッダーが表示されているかに関わらず動作します。
+• カード下部の **▲ Hide Details ▲** をタップすると、カードはタイトル、数、メインボタンだけに折りたたまれます。**▼ Show Details ▼** でスワイプの説明、**Refresh** / **Clear**、フォルダの **Sort** / 検索の行が戻ります。結果と選択内容は残ります。タブはこの選択を記憶します。
 
 ダッシュは、一覧がまだ読み込み中であることを示します。**Checking your Cloud for more...** は、OneDrive を読み込み中という意味です。赤いメッセージは、Cloud のフォルダに到達できなかったことを示します。
 
 OneDrive の一覧は記憶され、10 分後または **Refresh** を押したときに、もう一度読み込まれます。""",
-        "en_hash": "c073ea612bd19780",
+        "en_hash": "1099ec37091c62a1",
     },
     "restore-message-line": {
         "title": "数字の下のメッセージ",

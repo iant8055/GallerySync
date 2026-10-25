@@ -27,11 +27,13 @@ Eine Datei wird erst ersetzt, nachdem der vollständige Download angekommen ist 
         "title": "Albums to Restore and Files in this album",
         "body": """• **Albumliste:** **Albums to Restore**, mit der Zahl der Alben, bei denen etwas zurückzuholen ist.
 • **In einem Album:** Zurück-Pfeil, Albumname und **Files in this album** mit der Zahl und dem, was du ausgewählt hast.
+• Wische eine Karte nach rechts, um sie auszuwählen, nach links, um die Auswahl aufzuheben; tippe, um sie zu öffnen. Das geht, egal ob die Kopfzeile sichtbar oder ausgeblendet ist.
+• **▲ Hide Details ▲** am unteren Rand der Karte klappt sie auf Titel, Zahl und Hauptschaltfläche zusammen; **▼ Show Details ▼** holt den Wischhinweis, **Refresh** / **Clear** und die **Sort**- / Suchzeile des Ordners zurück. Ergebnisse und deine Auswahl bleiben sichtbar. Der Tab merkt sich deine Wahl.
 
 Ein Strich bedeutet, dass die Liste noch lädt. **Checking your Cloud for more...** bedeutet, dass OneDrive gelesen wird. Eine rote Meldung bedeutet, dass ein Cloud-Ordner nicht erreicht werden konnte.
 
 Die OneDrive-Liste wird gemerkt und nach zehn Minuten oder beim Drücken von **Refresh** erneut gelesen.""",
-        "en_hash": "c073ea612bd19780",
+        "en_hash": "1099ec37091c62a1",
     },
     "restore-message-line": {
         "title": "Die Meldung unter der Zahl",

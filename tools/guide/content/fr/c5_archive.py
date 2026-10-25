@@ -28,10 +28,14 @@ OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 et Backblaze B2. Pas Google P
     },
     "archive-hero": {
         "title": "Files to Archive",
-        "body": """**Files to Archive**, avec le nombre de fichiers qui seront archivés : dans chaque album Archive de la liste d'albums, ou dans l'album que vous avez ouvert. Les fichiers que vous avez gardés sur le téléphone ne sont pas comptés.
+        "body": """**Files to Archive**, avec le nombre de fichiers qui seront archivés : dans chaque album Archive de la liste d'albums, ou dans l'album que vous avez ouvert. Les fichiers que vous avez gardés sur le téléphone ne sont pas comptés.
 
-En dessous : vos albums Archive, et un rappel que les fichiers archivés peuvent être ramenés dans l'onglet **Restore**.""",
-        "en_hash": "1b24c615ac7e7cb7",
+En dessous : vos albums Archive, et un rappel que les fichiers archivés peuvent être ramenés dans l'onglet **Restore**.
+
+Chaque fichier est vérifié avec votre Cloud avant que quoi que ce soit ne quitte le téléphone. Un fichier qui n'est pas encore dans votre Cloud est envoyé d'abord et vérifié avant d'être compté.
+
+**▲ Hide Details ▲** en bas de la carte la replie sur son titre, son nombre et son bouton principal ; **▼ Show Details ▼** ramène les noms d'album, le choix **Only show files older than**, l'explication et le renvoi vers **Restore**. **Check these files**, ses résultats et la question Yes/No restent visibles. L'onglet retient votre choix.""",
+        "en_hash": "487804f5f7434e77",
     },
     "archive-folder-list": {
         "title": "Les albums Archive",

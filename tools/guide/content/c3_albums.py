@@ -78,6 +78,7 @@ CHAPTER = Chapter(
             ## Header
             • Tap **Backup**, **Sync**, **Archive** or **Off** to show only the albums in that mode. Tap **All Albums** to show them all again.
             • The line under the buttons gives the total for each mode.
+            • **▲ Hide Details ▲** at the bottom of the card folds it to its title, number and main button; **▼ Show Details ▼** brings the mode buttons and the mode total back. The tab remembers your choice.
 
             ## Album cards
             • **Name, file count and size** of the album on your phone.
@@ -91,6 +92,7 @@ CHAPTER = Chapter(
             Opens when you tap an album card.
 
             • **Header:** back arrow, album name, mode and file count, **Backs up to** (the Cloud and folder new files go to, plus any other Cloud already holding some), the counts ([[album-file-status]]), **Sort by** ([[album-file-sort]]) and **Keep at full size** ([[album-file-pin]]).
+            • **▲ Hide Details ▲** at the bottom of the header folds it to the album's name, mode and file count; **▼ Show Details ▼** brings the rest back. The page remembers your choice.
             • **Files:** one card per file with its size, date and marks. An optimised file shows its smaller size on the phone.
             • **Camera folder** (if chosen in Settings): extra optimise controls. See [[album-camera-optimise]].
 

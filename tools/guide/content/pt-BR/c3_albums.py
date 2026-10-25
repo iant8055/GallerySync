@@ -86,6 +86,7 @@ Nada é removido aqui. A remoção acontece na aba Archive. Veja [[archive-overv
         "body": """## Cabeçalho
 • Toque em **Backup**, **Sync**, **Archive** ou **Off** para mostrar só os álbuns nesse modo. Toque em **All Albums** para mostrar todos de novo.
 • A linha embaixo dos botões dá o total de cada modo.
+• **▲ Hide Details ▲** no rodapé do cartão o dobra para o título, o número e o botão principal; **▼ Show Details ▼** traz de volta os botões de modo e o total de modo. A aba lembra sua escolha.
 
 ## Cartões de álbum
 • **Nome, número de arquivos e tamanho** do álbum no seu telefone.
@@ -93,18 +94,19 @@ Nada é removido aqui. A remoção acontece na aba Archive. Veja [[archive-overv
 • **Linha da Cloud:** **verified in OneDrive** significa que o OneDrive confirmou os arquivos no tamanho certo. Isso é verificado toda vez que você abre a aba. As outras Clouds mostram **sent to** essa Cloud.
 • **Botão de modo** (no lado direito): toque para mudar o modo do álbum. O Archive pede que você confirme antes. Se a Cloud do álbum não consegue fazer esse modo, o cartão avisa.
 • **Toque no cartão** para ver os arquivos do álbum. Veja [[album-detail]].""",
-        "en_hash": "52297f12afc2a7eb",
+        "en_hash": "2c21822c4f81d271",
     },
     'album-detail': {
         "title": 'A lista de arquivos de um álbum',
         "body": """Abre quando você toca em um cartão de álbum.
 
 • **Cabeçalho:** seta de voltar, nome do álbum, modo e número de arquivos, **Backs up to** (a Cloud e a pasta para onde vão os arquivos novos, mais qualquer outra Cloud que já guarde alguns), as contagens ([[album-file-status]]), **Sort by** ([[album-file-sort]]) e **Keep at full size** ([[album-file-pin]]).
+• **▲ Hide Details ▲** no rodapé do cabeçalho o dobra para o nome do álbum, o modo e o número de arquivos; **▼ Show Details ▼** traz o resto de volta. A página lembra sua escolha.
 • **Arquivos:** um cartão por arquivo com tamanho, data e marcas. Um arquivo otimizado mostra o tamanho menor que tem no telefone.
 • **Pasta da câmera** (se escolhida em Settings): controles extras de otimização. Veja [[album-camera-optimise]].
 
 Sem miniaturas nem pré-visualizações. Use o seu app de galeria para ver as fotos.""",
-        "en_hash": "c5a7c5d01cd7947b",
+        "en_hash": "47ed510631cea71a",
     },
     'album-file-status': {
         "title": 'Marcas e contagens de arquivos em um álbum',

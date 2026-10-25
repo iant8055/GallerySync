@@ -30,6 +30,10 @@ CHAPTER = Chapter(
             **Files to Archive**, with the number of files that will be archived: in every Archive album on the album list, or in the album you opened. Files you kept on the phone are not counted.
 
             Below it: your Archive albums, and a reminder that archived files can be brought back on the **Restore** tab.
+
+            Every file is checked against your Cloud before anything leaves. A file not yet in your Cloud is sent first and verified before it is counted.
+
+            **▲ Hide Details ▲** at the bottom of the card folds it to its title, number and main button; **▼ Show Details ▼** brings the album names, the **Only show files older than** choice, the explanation and the **Restore** pointer back. **Check these files**, its results and the Yes/No question stay visible. The tab remembers your choice.
         """, ui=True),
 
         topic("archive-folder-list", "The Archive albums", """

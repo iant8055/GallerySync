@@ -30,8 +30,12 @@ OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 und Backblaze B2. Nicht Googl
         "title": "Files to Archive",
         "body": """**Files to Archive**, mit der Zahl der Dateien, die archiviert werden: in jedem Archive-Album der Albumliste oder im geöffneten Album. Dateien, die du auf dem Telefon behalten hast, werden nicht gezählt.
 
-Darunter: deine Archive-Alben und ein Hinweis, dass archivierte Dateien im Tab **Restore** zurückgeholt werden können.""",
-        "en_hash": "1b24c615ac7e7cb7",
+Darunter: deine Archive-Alben und ein Hinweis, dass archivierte Dateien im Tab **Restore** zurückgeholt werden können.
+
+Jede Datei wird mit deiner Cloud abgeglichen, bevor etwas das Telefon verlässt. Eine Datei, die noch nicht in deiner Cloud ist, wird zuerst gesendet und bestätigt, erst dann wird sie gezählt.
+
+**▲ Hide Details ▲** am unteren Rand der Karte klappt sie auf Titel, Zahl und Hauptschaltfläche zusammen; **▼ Show Details ▼** holt die Albumnamen, die Auswahl **Only show files older than**, die Erklärung und den Hinweis auf **Restore** zurück. **Check these files**, die Ergebnisse und die Yes/No-Frage bleiben sichtbar. Der Tab merkt sich deine Wahl.""",
+        "en_hash": "487804f5f7434e77",
     },
     "archive-folder-list": {
         "title": "Die Archive-Alben",
