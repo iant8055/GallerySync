@@ -3,7 +3,11 @@
 Every change since version 26 (0.3.25), the last build the Closed Testing group had. The short notes Play shows to users
 (500 characters per language) are in `release-notes/`; this file is the full record.
 
-## Version 31 (0.3.30) — built 25 Oct 2026 (rebuilt with the folding headers and the Settings fix)
+## Version 32 (0.3.31) — built 25 Oct 2026
+
+The same code as the final version 31 build. Version 31 (0.3.30) was uploaded but Play's automatic app-string translation
+failed for French, so it was not released; Ian turned automatic translation off (the app carries its own translations, and
+the Albums, Restore and Archive tabs stay English on purpose), and Play needs a new version number.
 
 **Large text on narrow screens** (seen on the Galaxy Z Fold 8's cover screen)
 - The Archive tab's question: its Yes and No can always be scrolled into reach, and the age choice stays visible.
