@@ -12,6 +12,16 @@ Every change since version 26 (0.3.25), the last build the Closed Testing group 
 - The coloured card at the top of each tab lets its text grow only up to 1.3 times. Everything else still follows the
   phone's text size in full.
 
+**Smaller headers**
+- The coloured card at the top of Albums, Restore and Archive has a **▲ Hide Details ▲** line. Tapped, the card folds down
+  to its title, number and main button, and the line becomes **▼ Show Details ▼**. Each tab remembers its choice.
+- Results, progress and anything that needs an answer stay in view when folded.
+- Albums: "Tap to filter by mode" removed; its (?) explains it.
+
+**Settings**
+- A setting whose value is long (Compression, "High compression — 480p") puts its button under the label when both do not
+  fit, instead of squeezing the label to one letter per line.
+
 **Font**
 - The app draws its text in its own font, Roboto (the standard Android font), so it looks the same on every phone
   whatever the phone's font style. (Noto Sans was tried first and looked too large and too heavy with bold text.)

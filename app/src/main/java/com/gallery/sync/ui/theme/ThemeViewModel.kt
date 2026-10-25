@@ -44,6 +44,17 @@ class ThemeViewModel @Inject constructor(
         viewModelScope.launch { appearance.setFontChoice(choice) }
     }
 
+    /** The tab headers whose details are hidden; see `HeaderDetails`. */
+    val hiddenHeaderDetails: StateFlow<Set<String>> = appearance.hiddenHeaderDetails.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
+        initialValue = emptySet()
+    )
+
+    fun setHeaderDetailsShown(key: String, shown: Boolean) {
+        viewModelScope.launch { appearance.setHeaderDetailsShown(key, shown) }
+    }
+
     private companion object {
         const val STOP_TIMEOUT_MILLIS = 5_000L
     }

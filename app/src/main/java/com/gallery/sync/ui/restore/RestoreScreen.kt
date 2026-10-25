@@ -67,6 +67,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
+import com.gallery.sync.ui.common.detailsShown
+import com.gallery.sync.ui.common.HeaderKey
+import com.gallery.sync.ui.common.HeaderDetailsToggle
+import com.gallery.sync.ui.common.HeaderDetailsSection
 import com.gallery.sync.ui.common.CappedTextSize
 import com.gallery.sync.ui.common.HeroCard
 import com.gallery.sync.ui.help.HelpButton
@@ -293,6 +297,9 @@ private fun ListHeader(
     ListHeaderCard(
         figure = figure,
         message = message,
+        // A result, or the empty-list answer, stays in view when the details are hidden; the swipe instruction does not.
+        messageIsNews = state.summary != null || (state.rows.isEmpty() && !state.loading && !state.checkingCloud),
+        detailsKey = HeaderKey.RESTORE,
         state = state,
         // Forced: the button is how the user says "read OneDrive again".
         onRefresh = { viewModel.refresh(force = true) },
@@ -307,6 +314,9 @@ private fun ListHeaderCard(
     figure: String,
     message: String,
     state: RestoreUiState,
+    messageIsNews: Boolean = false,
+    /** The Hide / Show Details line, on the real tab; the setup tour's picture passes none. */
+    detailsKey: String? = null,
     onRefresh: () -> Unit,
     onClear: () -> Unit,
     context: android.content.Context
@@ -348,10 +358,13 @@ private fun ListHeaderCard(
                     state = state,
                     context = context,
                     message = message,
+                    messageIsNews = messageIsNews,
+                    detailsOn = detailsKey == null || detailsShown(detailsKey),
                     firstLabel = stringResource(R.string.retrieve_refresh),
                     onFirst = onRefresh,
                     onClear = onClear
                 )
+                if (detailsKey != null) HeaderDetailsToggle(detailsKey)
             }
         }
     }
@@ -369,6 +382,10 @@ private fun HeaderLower(
     state: RestoreUiState,
     context: android.content.Context,
     message: String,
+    /** A result or an answer rather than an instruction: shown even with the details hidden. */
+    messageIsNews: Boolean,
+    /** False folds the instruction and the two buttons away (see `HeaderDetails`). */
+    detailsOn: Boolean,
     firstLabel: String,
     onFirst: () -> Unit,
     onClear: () -> Unit,
@@ -396,42 +413,47 @@ private fun HeaderLower(
             }
         }
 
-        if (compact) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text(
-                    text = message,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.weight(1f, fill = false)
-                )
-                HelpButton(HelpTopic.RESTORE_MESSAGE_LINE)
-            }
-        } else {
-            WithHelp(HelpTopic.RESTORE_MESSAGE_LINE) {
-                Text(text = message, style = MaterialTheme.typography.bodyMedium)
+        val showMessage: @Composable () -> Unit = {
+            if (compact) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = message,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.weight(1f, fill = false)
+                    )
+                    HelpButton(HelpTopic.RESTORE_MESSAGE_LINE)
+                }
+            } else {
+                WithHelp(HelpTopic.RESTORE_MESSAGE_LINE) {
+                    Text(text = message, style = MaterialTheme.typography.bodyMedium)
+                }
             }
         }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            HeroOutlinedButton(
-                onClick = onFirst,
-                label = firstLabel,
-                modifier = Modifier.weight(1f),
-                enabled = !state.running
-            )
-            HeroOutlinedButton(
-                onClick = onClear,
-                label = stringResource(R.string.retrieve_clear_selection),
-                modifier = Modifier.weight(1f),
-                enabled = state.hasSelection && !state.running
-            )
-            if (!compact) HelpButton(HelpTopic.RESTORE_BUTTONS)
+        if (messageIsNews) showMessage()
+        HeaderDetailsSection(detailsOn) {
+            if (!messageIsNews) showMessage()
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                HeroOutlinedButton(
+                    onClick = onFirst,
+                    label = firstLabel,
+                    modifier = Modifier.weight(1f),
+                    enabled = !state.running
+                )
+                HeroOutlinedButton(
+                    onClick = onClear,
+                    label = stringResource(R.string.retrieve_clear_selection),
+                    modifier = Modifier.weight(1f),
+                    enabled = state.hasSelection && !state.running
+                )
+                if (!compact) HelpButton(HelpTopic.RESTORE_BUTTONS)
+            }
         }
     }
 }
@@ -452,6 +474,7 @@ private fun FolderHeader(
 ) {
     val signal = LocalGallerySyncColors.current
     val folder = state.openFolder ?: return
+    val detailsOn = detailsShown(HeaderKey.RESTORE)
     val figure = if (state.loading) "—" else state.visibleRows.count { it.isActionable }.toString()
 
     Surface(
@@ -539,35 +562,38 @@ private fun FolderHeader(
                     }
                 }
 
-                // Sort and search get a line of their own. They shared the label's line on the first
-                // build and the three would not fit at 360dp: *Files in this folder* wrapped to two lines
-                // and the controls were squeezed against it (seen on the Moto, version 20). The search
-                // box still opens directly under this, where Ian asked for it.
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.restore_sort_by),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    SortControl(current = state.sort, onPick = viewModel::setSort)
-                    Spacer(modifier = Modifier.weight(1f))
-                    IconButton(onClick = viewModel::toggleSearch) {
-                        Icon(
-                            imageVector = SignalIcons.Search,
-                            contentDescription = stringResource(R.string.restore_search),
-                            tint = LocalContentColor.current
+                HeaderDetailsSection(detailsOn) {
+                    // Sort and search get a line of their own. They shared the label's line on the first
+                    // build and the three would not fit at 360dp: *Files in this folder* wrapped to two lines
+                    // and the controls were squeezed against it (seen on the Moto, version 20). The search
+                    // box still opens directly under this, where Ian asked for it.
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.restore_sort_by),
+                            style = MaterialTheme.typography.bodyMedium
                         )
+                        SortControl(current = state.sort, onPick = viewModel::setSort)
+                        Spacer(modifier = Modifier.weight(1f))
+                        IconButton(onClick = viewModel::toggleSearch) {
+                            Icon(
+                                imageVector = SignalIcons.Search,
+                                contentDescription = stringResource(R.string.restore_search),
+                                tint = LocalContentColor.current
+                            )
+                        }
                     }
+
+                    // The search box takes the whole width when it is open, under the name and the number and
+                    // above the swipe instruction — the place the label was in, which is where the person was
+                    // already looking. Closing it clears the query, so the list cannot stay filtered invisibly.
                 }
 
-                // The search box takes the whole width when it is open, under the name and the number and
-                // above the swipe instruction — the place the label was in, which is where the person was
-                // already looking. Closing it clears the query, so the list cannot stay filtered invisibly.
                 if (state.searchOpen) {
                     val ink = LocalContentColor.current
                     OutlinedTextField(
@@ -614,11 +640,14 @@ private fun FolderHeader(
                     message = state.summary ?: stringResource(
                         if (state.hasSelection) R.string.restore_intro_files_selected else R.string.restore_intro_files
                     ),
+                    messageIsNews = state.summary != null,
+                    detailsOn = detailsOn,
                     firstLabel = stringResource(R.string.retrieve_select_all),
                     onFirst = viewModel::selectAllHere,
                     onClear = viewModel::clearSelection,
                     compact = true
                 )
+                HeaderDetailsToggle(HeaderKey.RESTORE)
             }
         }
     }

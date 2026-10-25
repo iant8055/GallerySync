@@ -64,6 +64,10 @@ import com.gallery.sync.ui.help.HelpButton
 import com.gallery.sync.ui.help.HelpTopic
 import com.gallery.sync.ui.help.TitleWithHelp
 import com.gallery.sync.ui.help.WithHelp
+import com.gallery.sync.ui.common.detailsShown
+import com.gallery.sync.ui.common.HeaderKey
+import com.gallery.sync.ui.common.HeaderDetailsToggle
+import com.gallery.sync.ui.common.HeaderDetailsSection
 import com.gallery.sync.ui.common.CappedTextSize
 import com.gallery.sync.ui.common.HeroOutlinedButton
 import com.gallery.sync.ui.common.SignalIcons
@@ -174,7 +178,8 @@ fun ArchiveScreen(
                 state = state,
                 onValidate = viewModel::validate,
                 onSetAgeFilter = viewModel::setAgeFilter,
-                onCloseAlbum = viewModel::closeAlbum
+                onCloseAlbum = viewModel::closeAlbum,
+                detailsKey = HeaderKey.ARCHIVE
             )
         }
 
@@ -340,10 +345,13 @@ private fun ArchiveHeader(
     state: ArchiveUiState,
     onValidate: () -> Unit,
     onSetAgeFilter: (ArchiveAge) -> Unit,
-    onCloseAlbum: () -> Unit
+    onCloseAlbum: () -> Unit,
+    /** The Hide / Show Details line, on the real tab; previews pass none. */
+    detailsKey: String? = null
 ) {
     val signal = LocalGallerySyncColors.current
     val open = state.openAlbum
+    val detailsOn = detailsKey == null || detailsShown(detailsKey)
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -468,30 +476,37 @@ private fun ArchiveHeader(
                         // explanation belongs in Help (TASK-017), not here. Ian, 27 Aug 2026.
                         state.plan.isEmpty -> Unit
 
-                        else -> ArchiveHeroDetail(state)
+                        else -> Unit
                     }
 
-                    // Shown whenever an Archive album exists, even if the filter currently hides every
-                    // file in it — otherwise there would be no way back from a filter that empties the
-                    // list. Ian, 22 Sept 2026.
-                    if (state.isSupported && state.archiveAlbums.isNotEmpty()) {
-                        ArchiveAgeSection(
-                            age = state.ageFilter,
-                            hiddenCount = state.hiddenByAge.size,
-                            // Not while a check or a removal is running, or the question is up: each
-                            // describes a list already fixed. Mirrors Camera's own `enabled = !running`.
-                            enabled = state.phase == ArchivePhase.IDLE || state.phase == ArchivePhase.DONE,
-                            onSetAge = onSetAgeFilter
+                    // The albums, the explanation, the age choice and the Restore pointer fold away with the details
+                    // (Ian, 25 Oct 2026). Check these files, its progress and its results stay in view, and the
+                    // question with Yes / No is drawn below this card, so hiding the details never hides a question.
+                    HeaderDetailsSection(detailsOn) {
+                        if (!state.plan.isEmpty && state.isSupported) ArchiveHeroDetail(state)
+
+                        // Shown whenever an Archive album exists, even if the filter currently hides every
+                        // file in it — otherwise there would be no way back from a filter that empties the
+                        // list. Ian, 22 Sept 2026.
+                        if (state.isSupported && state.archiveAlbums.isNotEmpty()) {
+                            ArchiveAgeSection(
+                                age = state.ageFilter,
+                                hiddenCount = state.hiddenByAge.size,
+                                // Not while a check or a removal is running, or the question is up: each
+                                // describes a list already fixed. Mirrors Camera's own `enabled = !running`.
+                                enabled = state.phase == ArchivePhase.IDLE || state.phase == ArchivePhase.DONE,
+                                onSetAge = onSetAgeFilter
+                            )
+                        }
+
+                        // Where an archived album goes to be brought back. Moved here from the Albums header
+                        // (Ian, 18 Sept 2026): it is about Archive, so it belongs on this tab.
+                        Text(
+                            text = stringResource(R.string.archive_restore_pointer),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = LocalContentColor.current.copy(alpha = 0.7f)
                         )
                     }
-
-                    // Where an archived album goes to be brought back. Moved here from the Albums header
-                    // (Ian, 18 Sept 2026): it is about Archive, so it belongs on this tab.
-                    Text(
-                        text = stringResource(R.string.archive_restore_pointer),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = LocalContentColor.current.copy(alpha = 0.7f)
-                    )
 
                     if (state.isSupported && state.scopedEntries.isNotEmpty()) {
                         WithHelp(HelpTopic.ARCHIVE_CHECK_BUTTON) {
@@ -499,6 +514,7 @@ private fun ArchiveHeader(
                         }
                     }
                 }
+                if (detailsKey != null) HeaderDetailsToggle(detailsKey)
             }
         }
     }

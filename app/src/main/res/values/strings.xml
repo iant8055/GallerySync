@@ -322,6 +322,9 @@
     <string name="backup_hero_label">All Albums</string>
 
     <!-- "Tap" rather than "click": the Android convention, on a device with no pointer. -->
+    <!-- The line across the bottom of each tab's coloured card (Ian, 25 Oct 2026). English: the tabs are. -->
+    <string name="header_hide_details">▲ Hide Details ▲</string>
+    <string name="header_show_details">▼ Show Details ▼</string>
     <string name="albums_filter_hint">Tap to filter by mode</string>
     <string name="archive_restore_pointer">To restore archived files or albums, check the Restore tab.</string>
     <!-- Shown when a mode button is tapped and no album is in that mode. -->

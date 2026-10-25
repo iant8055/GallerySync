@@ -73,6 +73,10 @@ import com.gallery.sync.domain.backup.CameraSelection
 import com.gallery.sync.domain.backup.FilePin
 import com.gallery.sync.domain.backup.FileSort
 import com.gallery.sync.domain.backup.RetryFailed
+import com.gallery.sync.ui.common.detailsShown
+import com.gallery.sync.ui.common.HeaderKey
+import com.gallery.sync.ui.common.HeaderDetailsToggle
+import com.gallery.sync.ui.common.HeaderDetailsSection
 import com.gallery.sync.ui.common.CappedTextSize
 import com.gallery.sync.ui.common.HeroOutlinedButton
 import com.gallery.sync.ui.common.SignalIcons
@@ -366,6 +370,7 @@ private fun DetailHeader(
 ) {
     val signal = LocalGallerySyncColors.current
     var sortMenuOpen by remember { mutableStateOf(false) }
+    val detailsOn = detailsShown(HeaderKey.ALBUM_PAGE)
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -428,26 +433,30 @@ private fun DetailHeader(
 
                     // Where this album's files go: the Cloud and the folder in it (Ian, 12 Oct 2026). New files follow
                     // the folder's pairing and the folder chosen in that Cloud; files already sent elsewhere are named too.
-                    if (backsUpTo != null) {
-                        Text(
-                            text = if (backsUpTo == BackupLocation.GOOGLE_PHOTOS || backupFolder == null) {
-                                stringResource(R.string.album_backs_up_library)
-                            } else {
-                                stringResource(R.string.album_backs_up_to, stringResource(backsUpTo.labelRes()), "$backupFolder/$albumName")
-                            },
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        val elsewhere = entries.asSequence()
-                            .filter { it.state == BackupState.UPLOADED && it.location != backsUpTo }
-                            .map { it.location }.distinct().toList()
-                        if (elsewhere.isNotEmpty()) {
+                    // Where the files go folds away with the details (Ian, 25 Oct 2026); the counts, Retry and the
+                    // camera folder's Sync now stay, and so does the Sort / Keep line, which labels the boxes below.
+                    HeaderDetailsSection(detailsOn) {
+                        if (backsUpTo != null) {
                             Text(
-                                text = stringResource(
-                                    R.string.album_also_in,
-                                    elsewhere.map { stringResource(it.labelRes()) }.joinToString(", ")
-                                ),
-                                style = MaterialTheme.typography.bodySmall
+                                text = if (backsUpTo == BackupLocation.GOOGLE_PHOTOS || backupFolder == null) {
+                                    stringResource(R.string.album_backs_up_library)
+                                } else {
+                                    stringResource(R.string.album_backs_up_to, stringResource(backsUpTo.labelRes()), "$backupFolder/$albumName")
+                                },
+                                style = MaterialTheme.typography.bodyMedium
                             )
+                            val elsewhere = entries.asSequence()
+                                .filter { it.state == BackupState.UPLOADED && it.location != backsUpTo }
+                                .map { it.location }.distinct().toList()
+                            if (elsewhere.isNotEmpty()) {
+                                Text(
+                                    text = stringResource(
+                                        R.string.album_also_in,
+                                        elsewhere.map { stringResource(it.labelRes()) }.joinToString(", ")
+                                    ),
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
                         }
                     }
 
@@ -533,6 +542,8 @@ private fun DetailHeader(
                         }
                     }
                 }
+                // Only when there is something to fold away.
+                if (backsUpTo != null) HeaderDetailsToggle(HeaderKey.ALBUM_PAGE)
             }
         }
     }

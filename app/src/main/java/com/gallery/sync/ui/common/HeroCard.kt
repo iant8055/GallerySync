@@ -91,6 +91,8 @@ fun HeroCard(
      * third thing in the middle of it. Ian, 27 Aug 2026.
      */
     actionsAtBottom: Boolean = false,
+    /** Draws the Hide Details / Show Details line across the bottom, for this tab's key (see `HeaderDetails`). */
+    detailsKey: String? = null,
     detail: @Composable ColumnScope.() -> Unit = {},
     actions: @Composable ColumnScope.() -> Unit = {}
 ) {
@@ -103,7 +105,8 @@ fun HeroCard(
         contentColor = signal.onHero
     ) {
         CappedTextSize {
-            BoxWithConstraints(modifier = Modifier.padding(20.dp)) {
+          Column(Modifier.padding(start = 20.dp, top = 20.dp, end = 20.dp, bottom = if (detailsKey != null) 8.dp else 20.dp)) {
+            BoxWithConstraints {
                 if (maxWidth >= HeroWideBreakpoint) {
                     Row(
                         // IntrinsicSize.Min, so the fillMaxHeight below resolves against the taller
@@ -156,6 +159,8 @@ fun HeroCard(
                     }
                 }
             }
+            if (detailsKey != null) HeaderDetailsToggle(detailsKey, Modifier.padding(top = 12.dp))
+          }
         }
     }
 }

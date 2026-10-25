@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -80,8 +81,19 @@ class AppearanceSettings @Inject constructor(
         context.appearanceDataStore.edit { it[KEY_FONT] = choice.name }
     }
 
+    /** The tab headers whose details the user has hidden (`HeaderDetails`); every other header shows them. */
+    val hiddenHeaderDetails: Flow<Set<String>> = context.appearanceDataStore.data.map { it[KEY_HIDDEN_DETAILS] ?: emptySet() }
+
+    suspend fun setHeaderDetailsShown(key: String, shown: Boolean) {
+        context.appearanceDataStore.edit {
+            val now = it[KEY_HIDDEN_DETAILS] ?: emptySet()
+            it[KEY_HIDDEN_DETAILS] = if (shown) now - key else now + key
+        }
+    }
+
     private companion object {
         val KEY_THEME_MODE = stringPreferencesKey("theme_mode")
         val KEY_FONT = stringPreferencesKey("font_choice")
+        val KEY_HIDDEN_DETAILS = stringSetPreferencesKey("hidden_header_details")
     }
 }

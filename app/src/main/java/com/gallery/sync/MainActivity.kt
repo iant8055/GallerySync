@@ -127,6 +127,7 @@ class MainActivity : ComponentActivity() {
             val themeViewModel: ThemeViewModel = hiltViewModel()
             val themeMode by themeViewModel.themeMode.collectAsStateWithLifecycle()
             val fontChoice by themeViewModel.fontChoice.collectAsStateWithLifecycle()
+            val hiddenDetails by themeViewModel.hiddenHeaderDetails.collectAsStateWithLifecycle()
             // The language chosen on the Welcome screen or in Settings decides which How To Guide pages open.
             val languageViewModel: com.gallery.sync.ui.settings.LanguageViewModel = hiltViewModel()
             val language by languageViewModel.language.collectAsStateWithLifecycle()
@@ -140,7 +141,11 @@ class MainActivity : ComponentActivity() {
                 appFont = fontChoice == com.gallery.sync.data.local.settings.FontChoice.APP
             ) {
                 androidx.compose.runtime.CompositionLocalProvider(
-                    com.gallery.sync.ui.settings.LocalGuideLanguage provides language.code
+                    com.gallery.sync.ui.settings.LocalGuideLanguage provides language.code,
+                    com.gallery.sync.ui.common.LocalHeaderDetails provides com.gallery.sync.ui.common.HeaderDetails(
+                        hiddenDetails,
+                        themeViewModel::setHeaderDetailsShown
+                    )
                 ) {
                     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                         GallerySyncApp(modifier = Modifier.padding(innerPadding), initialTab = if (openArchive) ArchiveTab else 0)

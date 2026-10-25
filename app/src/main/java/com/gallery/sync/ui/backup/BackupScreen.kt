@@ -66,6 +66,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
+import com.gallery.sync.ui.common.detailsShown
+import com.gallery.sync.ui.common.HeaderKey
+import com.gallery.sync.ui.common.HeaderDetailsSection
 import com.gallery.sync.ui.common.labelRes
 import com.gallery.sync.domain.backup.CloudFeature
 import com.gallery.sync.ui.common.FeatureUnavailableDialog
@@ -314,6 +317,8 @@ private fun AlbumList(
     // the new ones. This leaves the mode filter and the summary alone.
     var showNewOnly by rememberSaveable { mutableStateOf(false) }
 
+    val detailsOn = detailsShown(HeaderKey.ALBUMS)
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -326,8 +331,10 @@ private fun AlbumList(
             label = stringResource(R.string.backup_hero_label),
             figure = "",
             actionsAtBottom = true,
+            detailsKey = HeaderKey.ALBUMS,
             figureContent = {
                 ModeFilterGrid(
+                    showModes = detailsOn,
                     selected = modeFilter,
                     onSelect = { tapped ->
                         // Tapping the active mode again clears it, so every button is its own way
@@ -337,7 +344,7 @@ private fun AlbumList(
                     }
                 )
             },
-            detail = { HeroDetail(state = state, context = context, modeFilter = modeFilter) },
+            detail = { HeaderDetailsSection(detailsOn) { HeroDetail(state = state, context = context, modeFilter = modeFilter) } },
             actions = {
                 HeroActions(
                     state = state,
@@ -573,6 +580,8 @@ private fun AlbumList(
  */
 @Composable
 private fun ModeFilterGrid(
+    /** False folds the four mode buttons away with the rest of the header's details. */
+    showModes: Boolean = true,
     selected: AlbumMode?,
     onSelect: (AlbumMode?) -> Unit
 ) {
@@ -617,32 +626,28 @@ private fun ModeFilterGrid(
         }
         // One line of four, each half the width it was as two rows of two. Ian, 18 Sept 2026: the
         // header was taking too much of the screen.
-        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            ModeFilterChip(
-                AlbumMode.BACKUP, selected, onSelect, Modifier.weight(1f)
-            )
-            ModeFilterChip(
-                AlbumMode.SYNC, selected, onSelect, Modifier.weight(1f)
-            )
-            ModeFilterChip(
-                AlbumMode.ARCHIVE, selected, onSelect, Modifier.weight(1f)
-            )
-            ModeFilterChip(
-                AlbumMode.OFF, selected, onSelect, Modifier.weight(1f)
-            )
-        }
+        HeaderDetailsSection(showModes) {
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                ModeFilterChip(
+                    AlbumMode.BACKUP, selected, onSelect, Modifier.weight(1f)
+                )
+                ModeFilterChip(
+                    AlbumMode.SYNC, selected, onSelect, Modifier.weight(1f)
+                )
+                ModeFilterChip(
+                    AlbumMode.ARCHIVE, selected, onSelect, Modifier.weight(1f)
+                )
+                ModeFilterChip(
+                    AlbumMode.OFF, selected, onSelect, Modifier.weight(1f)
+                )
+            }
 
-        // These read as status until you know they are controls — a count beside a word looks like
-        // a summary, which is exactly what they were an hour ago. One quiet line rather than an
-        // affordance on each button, which would make five loud things out of five calm ones. It has
-        // no (?) of its own (Ian, 18 Sept 2026): the guide's "albums-filter" topic covers it.
-        Text(
-            text = stringResource(R.string.albums_filter_hint),
-            style = MaterialTheme.typography.bodySmall,
-            textAlign = TextAlign.Center,
-            color = LocalContentColor.current.copy(alpha = 0.7f),
-            modifier = Modifier.fillMaxWidth()
-        )
+            // These read as status until you know they are controls — a count beside a word looks like
+            // a summary, which is exactly what they were an hour ago. One quiet line rather than an
+            // affordance on each button, which would make five loud things out of five calm ones. It has
+            // no (?) of its own (Ian, 18 Sept 2026): the guide's "albums-filter" topic covers it.
+        }
+        // "Tap to filter by mode" is gone (Ian, 25 Oct 2026): the (?) beside All Albums says it.
     }
 }
 
