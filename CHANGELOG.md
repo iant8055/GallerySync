@@ -3,7 +3,7 @@
 Every change since version 26 (0.3.25), the last build the Closed Testing group had. The short notes Play shows to users
 (500 characters per language) are in `release-notes/`; this file is the full record.
 
-## Version 32 (0.3.31) — built 25 Oct 2026
+## Version 32 (0.3.31) — 25 Oct 2026, Production
 
 The same code as the final version 31 build. Version 31 (0.3.30) was uploaded but Play's automatic app-string translation
 failed for French, so it was not released; Ian turned automatic translation off (the app carries its own translations, and
