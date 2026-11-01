@@ -3,6 +3,14 @@
 Every change since version 26 (0.3.25), the last build the Closed Testing group had. The short notes Play shows to users
 (500 characters per language) are in `release-notes/`; this file is the full record.
 
+## Version 33 — not yet built
+
+**Settings → Clouds**
+- A light line between each Cloud.
+- A Cloud that is not connected has its Connect or Enter keys button on the same line as its name, at any text size.
+- A connected Cloud shows two columns under the headings **Clouds** and **Backup folder**: its name, account and Sign out on
+  the left, its folder and Change on the right.
+
 ## Version 32 (0.3.31) — 25 Oct 2026, Production
 
 The same code as the final version 31 build. Version 31 (0.3.30) was uploaded but Play's automatic app-string translation

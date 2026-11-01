@@ -4,12 +4,17 @@ import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -21,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -34,9 +40,11 @@ import com.gallery.sync.data.remote.cloud.ConnectionKind
 import com.gallery.sync.domain.backup.BackupLocation
 import com.gallery.sync.domain.backup.RemoteRoots
 import com.gallery.sync.domain.billing.MultiCloudTrial
+import com.gallery.sync.ui.common.FitText
 import com.gallery.sync.ui.common.LabelWithAction
 import com.gallery.sync.ui.common.formatBytes
 import com.gallery.sync.ui.common.labelRes
+import com.gallery.sync.ui.help.HelpButton
 import com.gallery.sync.ui.help.HelpTopic
 import com.gallery.sync.ui.help.WithHelp
 
@@ -75,45 +83,78 @@ fun CloudProvidersSection(
     }
 
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        val shown = state.providers.filter { only == null || it.location in only }
+
         if (showTitle) {
             // The (?) is the old Account topic: what signing in and out does. The Account row it belonged to
             // is gone, since every cloud's account is named on its own row here.
-            WithHelp(HelpTopic.SETTINGS_ACCOUNT) {
-                Text(
-                    text = stringResource(R.string.cloud_providers_section_title),
-                    style = MaterialTheme.typography.titleMedium
-                )
-            }
-        }
-
-        state.providers.filter { only == null || it.location in only }.forEach { provider ->
-            LabelWithAction(
-                action = {
-                    // The spinner goes on the one cloud being connected; every other button stays in place,
-                    // greyed, so one sign-in at a time is still enforced without six rows looking busy.
-                    when {
-                        state.busyWith == provider.location -> BusyIndicator()
-                        provider.isConnected -> OutlinedButton(
-                            onClick = { viewModel.requestSignOut(provider.location) },
-                            enabled = !state.isBusy
-                        ) {
-                            Text(stringResource(R.string.sign_out_action))
-                        }
-                        provider.kind == ConnectionKind.ACCESS_KEYS -> Button(
-                            onClick = { keysFor = provider },
-                            enabled = !state.isBusy
-                        ) {
-                            Text(stringResource(R.string.cloud_enter_keys_action))
-                        }
-                        else -> Button(
-                            onClick = { activity?.let { viewModel.connect(provider.location, it) } },
-                            enabled = activity != null && !state.isBusy
-                        ) {
-                            Text(stringResource(R.string.google_photos_connect_action))
-                        }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(CloudColumnGap)
+            ) {
+                Row(modifier = Modifier.weight(CloudColumnWeight), verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = stringResource(R.string.cloud_providers_section_title),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    HelpButton(HelpTopic.SETTINGS_ACCOUNT)
+                }
+                if (shown.any { it.isConnected && state.folders[it.location] != null }) {
+                    // One word (German's Backup-Ordner) shrinks to fit instead of breaking mid-word at large text;
+                    // two words (French's Dossier de sauvegarde) wrap between them as usual.
+                    val heading = stringResource(R.string.cloud_backup_folder)
+                    if (heading.contains(' ')) {
+                        Text(
+                            text = heading,
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.weight(FolderColumnWeight)
+                        )
+                    } else {
+                        FitText(
+                            text = heading,
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.weight(FolderColumnWeight)
+                        )
                     }
                 }
-            ) {
+            }
+            HorizontalDivider()
+        }
+
+        shown.forEachIndexed { index, provider ->
+            // A light line between one Cloud and the next (Ian, 31 Oct 2026).
+            if (index > 0) HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+
+            val connectionControl: @Composable () -> Unit = {
+                // The spinner goes on the one cloud being connected; every other button stays in place,
+                // greyed, so one sign-in at a time is still enforced without six rows looking busy.
+                when {
+                    state.busyWith == provider.location -> BusyIndicator()
+                    provider.isConnected -> OutlinedButton(
+                        onClick = { viewModel.requestSignOut(provider.location) },
+                        enabled = !state.isBusy
+                    ) {
+                        // In the Settings column it shrinks rather than breaking mid-word at large text
+                        // ("Se déconnecte / r"); the wizard's card has the full width.
+                        if (showTitle) FitText(stringResource(R.string.sign_out_action))
+                        else Text(stringResource(R.string.sign_out_action))
+                    }
+                    provider.kind == ConnectionKind.ACCESS_KEYS -> Button(
+                        onClick = { keysFor = provider },
+                        enabled = !state.isBusy
+                    ) {
+                        Text(stringResource(R.string.cloud_enter_keys_action))
+                    }
+                    else -> Button(
+                        onClick = { activity?.let { viewModel.connect(provider.location, it) } },
+                        enabled = activity != null && !state.isBusy
+                    ) {
+                        Text(stringResource(R.string.google_photos_connect_action))
+                    }
+                }
+            }
+            val description: @Composable () -> Unit = {
                 Column {
                     Text(
                         text = stringResource(provider.location.labelRes()) +
@@ -133,23 +174,64 @@ fun CloudProvidersSection(
                     )
                 }
             }
+            val changeFolder: @Composable () -> Unit = {
+                OutlinedButton(onClick = { viewModel.chooseFolder(provider.location) }, enabled = !state.isBusy) {
+                    Text(stringResource(R.string.destination_change), maxLines = 1)
+                }
+            }
             // Where in this Cloud the backups go, once it is connected. Every Cloud with folders (Ian, 12 Oct 2026).
             val folder = state.folders[provider.location]
-            if (provider.isConnected && folder != null) {
-                LabelWithAction(
-                    action = {
-                        OutlinedButton(onClick = { viewModel.chooseFolder(provider.location) }, enabled = !state.isBusy) {
-                            Text(stringResource(R.string.destination_change), maxLines = 1)
+
+            when {
+                // The wizard's Connect card, one Cloud at a time, keeps its own stacked rows.
+                !showTitle -> {
+                    LabelWithAction(action = { connectionControl() }) { description() }
+                    if (provider.isConnected && folder != null) {
+                        LabelWithAction(action = { changeFolder() }) {
+                            Column {
+                                Text(
+                                    text = stringResource(R.string.cloud_backup_folder),
+                                    style = MaterialTheme.typography.labelMedium
+                                )
+                                Text(text = folder, style = MaterialTheme.typography.bodyMedium)
+                            }
                         }
                     }
+                }
+
+                // Settings, connected: the Cloud and Sign out on the left, its folder and Change on the right,
+                // under the Backup folder heading, with the two buttons level (Ian, 31 Oct 2026).
+                provider.isConnected -> Row(
+                    modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+                    horizontalArrangement = Arrangement.spacedBy(CloudColumnGap)
                 ) {
-                    Column {
-                        Text(
-                            text = stringResource(R.string.cloud_backup_folder),
-                            style = MaterialTheme.typography.labelMedium
-                        )
-                        Text(text = folder, style = MaterialTheme.typography.bodyMedium)
+                    Column(
+                        modifier = Modifier.weight(CloudColumnWeight).fillMaxHeight(),
+                        verticalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        description()
+                        connectionControl()
                     }
+                    if (folder != null) {
+                        Column(
+                            modifier = Modifier.weight(FolderColumnWeight).fillMaxHeight(),
+                            verticalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(text = folder, style = MaterialTheme.typography.bodyLarge)
+                            changeFolder()
+                        }
+                    }
+                }
+
+                // Settings, not connected: the Cloud and its Connect button on one line, at any text size
+                // (Ian, 31 Oct 2026).
+                else -> Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(CloudColumnGap)
+                ) {
+                    Column(modifier = Modifier.weight(1f)) { description() }
+                    connectionControl()
                 }
             }
         }
@@ -418,3 +500,9 @@ private fun keysGuideAnchor(location: BackupLocation): String? = when (location)
 private fun BusyIndicator() {
     CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
 }
+
+private val CloudColumnGap = 12.dp
+
+/** A little more for the Cloud's side than the folder's: it holds the account's email address. */
+private const val CloudColumnWeight = 1.15f
+private const val FolderColumnWeight = 1f
