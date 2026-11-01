@@ -7,6 +7,7 @@ Every change since version 26 (0.3.25), the last build the Closed Testing group 
 
 **Settings**
 - **Pro unlocked. You can use every Cloud.** moved from under the Clouds heading into the green Backup band.
+- The Backup, Albums, Sync, Restore and Archive section titles are now translated. The tabs named Albums, Restore and Archive stay English.
 
 ## Version 33 (0.3.32) — 1 Nov 2026, Production
 

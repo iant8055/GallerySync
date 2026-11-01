@@ -681,6 +681,31 @@
   "en": "Font"
  },
  {
+  "key": "settings_albums",
+  "type": "string",
+  "en": "Albums"
+ },
+ {
+  "key": "settings_archive",
+  "type": "string",
+  "en": "Archive"
+ },
+ {
+  "key": "settings_backup",
+  "type": "string",
+  "en": "Backup"
+ },
+ {
+  "key": "settings_restore",
+  "type": "string",
+  "en": "Restore"
+ },
+ {
+  "key": "settings_sync",
+  "type": "string",
+  "en": "Sync"
+ },
+ {
   "key": "settings_general",
   "type": "string",
   "en": "General"

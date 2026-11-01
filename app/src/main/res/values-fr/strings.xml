@@ -128,9 +128,12 @@
     <string name="reoptimise_title">Optimiser de nouveau les vidéos existantes ?</string>
     <string name="reoptimise_yes">Oui</string>
     <string name="restore_edited_keep">Garder mes modifications</string>
+    <string name="settings_albums">Albums</string>
     <string name="settings_appearance">Apparence</string>
+    <string name="settings_archive">Archivage</string>
     <string name="settings_archive_notify">Prévenir quand des fichiers sont prêts pour Archive</string>
     <string name="settings_archive_notify_blocked">Les notifications de GallerySync sont désactivées dans les réglages du téléphone : rien n\'arrivera tant que vous ne les aurez pas réactivées.</string>
+    <string name="settings_backup">Sauvegarde</string>
     <string name="settings_bug_report">Signaler un bug</string>
     <string name="settings_bug_report_detail">Quelque chose ne marche pas ? Dites-nous ce qui s\'est passé.</string>
     <string name="settings_camera">Sync de l\'appareil photo</string>
@@ -166,7 +169,9 @@
     <string name="settings_quality">Compression</string>
     <string name="settings_rate">Notez-nous sur le Play Store</string>
     <string name="settings_rate_detail">Ouvre la fiche de GallerySync sur Google Play.</string>
+    <string name="settings_restore">Restauration</string>
     <string name="settings_show_empty_folders">Afficher les dossiers vides</string>
+    <string name="settings_sync">Synchronisation</string>
     <string name="sign_out_action">Se déconnecter</string>
     <string name="sources_add">Ajouter un dossier</string>
     <string name="sources_empty">Aucun dossier choisi pour l\'instant. Rien n\'est sauvegardé, analysé ni modifié tant que vous n\'en choisissez pas un.</string>

@@ -126,9 +126,12 @@
     <string name="reoptimise_title">Vorhandene Videos neu optimieren?</string>
     <string name="reoptimise_yes">Ja</string>
     <string name="restore_edited_keep">Meine Bearbeitungen behalten</string>
+    <string name="settings_albums">Alben</string>
     <string name="settings_appearance">Darstellung</string>
+    <string name="settings_archive">Archiv</string>
     <string name="settings_archive_notify">Benachrichtigen, wenn Dateien für Archive bereit sind</string>
     <string name="settings_archive_notify_blocked">Benachrichtigungen für GallerySync sind in den Telefoneinstellungen ausgeschaltet, also kommt nichts an, bis du sie dort wieder einschaltest.</string>
+    <string name="settings_backup">Backup</string>
     <string name="settings_bug_report">Fehler melden</string>
     <string name="settings_bug_report_detail">Funktioniert etwas nicht? Schreib uns, was passiert ist.</string>
     <string name="settings_camera">Kamera-Sync</string>
@@ -164,7 +167,9 @@
     <string name="settings_quality">Kompression</string>
     <string name="settings_rate">Im Play Store bewerten</string>
     <string name="settings_rate_detail">Öffnet die Seite von GallerySync bei Google Play.</string>
+    <string name="settings_restore">Wiederherstellen</string>
     <string name="settings_show_empty_folders">Leere Ordner anzeigen</string>
+    <string name="settings_sync">Synchronisierung</string>
     <string name="sign_out_action">Abmelden</string>
     <string name="sources_add">Ordner hinzufügen</string>
     <string name="sources_empty">Noch keine Ordner gewählt. Nichts wird gesichert, durchsucht oder geändert, bis du einen wählst.</string>

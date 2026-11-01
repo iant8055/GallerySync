@@ -124,9 +124,12 @@
     <string name="reoptimise_title">既存の動画を再び最適化しますか？</string>
     <string name="reoptimise_yes">はい</string>
     <string name="restore_edited_keep">編集を残す</string>
+    <string name="settings_albums">アルバム</string>
     <string name="settings_appearance">表示</string>
+    <string name="settings_archive">アーカイブ</string>
     <string name="settings_archive_notify">Archive できるファイルがあれば通知する</string>
     <string name="settings_archive_notify_blocked">スマートフォンの設定で GallerySync の通知がオフになっているため、そこでオンに戻すまで通知は届きません。</string>
+    <string name="settings_backup">バックアップ</string>
     <string name="settings_bug_report">バグを報告</string>
     <string name="settings_bug_report_detail">うまく動かないことがありますか？何が起きたかを送ってください。</string>
     <string name="settings_camera">カメラの Sync</string>
@@ -162,7 +165,9 @@
     <string name="settings_quality">圧縮</string>
     <string name="settings_rate">Play ストアで評価</string>
     <string name="settings_rate_detail">Google Play の GallerySync のページを開きます。</string>
+    <string name="settings_restore">復元</string>
     <string name="settings_show_empty_folders">空のフォルダを表示</string>
+    <string name="settings_sync">同期</string>
     <string name="sign_out_action">ログアウト</string>
     <string name="sources_add">フォルダを追加</string>
     <string name="sources_empty">まだフォルダが選ばれていません。選ぶまでは、何もバックアップ・スキャン・変更されません。</string>

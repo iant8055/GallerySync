@@ -8,6 +8,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -46,7 +48,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -681,6 +682,7 @@ private val SettingsGutter = 16.dp
  * and help icon are never a colour picked for one theme only. It is deliberately **not** `accent`,
  * the bright green of the selected tab in the nav bar.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SectionHeader(title: String, help: HelpTopic? = null, note: String? = null) {
     val signal = LocalGallerySyncColors.current
@@ -690,25 +692,28 @@ private fun SectionHeader(title: String, help: HelpTopic? = null, note: String? 
         color = signal.heroContainer,
         contentColor = signal.onHero
     ) {
-        Row(
+        // A note sits beside the title when it fits and on its own line below when it does not, so a long
+        // title in another language or large text never squeezes it into a sliver.
+        FlowRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .heightIn(min = 56.dp)
-                .padding(horizontal = SettingsGutter),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                .padding(horizontal = SettingsGutter, vertical = if (note != null) 8.dp else 0.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalArrangement = Arrangement.Center,
+            itemVerticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = title, style = MaterialTheme.typography.headlineSmall)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(text = title, style = MaterialTheme.typography.headlineSmall)
 
-            if (help != null) HelpButton(help)
+                if (help != null) HelpButton(help)
+            }
 
             if (note != null) {
-                Text(
-                    text = note,
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier.weight(1f)
-                )
+                Text(text = note, style = MaterialTheme.typography.bodyMedium)
             }
         }
     }

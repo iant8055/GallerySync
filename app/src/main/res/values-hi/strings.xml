@@ -126,9 +126,12 @@
     <string name="reoptimise_title">मौजूदा वीडियो फिर से ऑप्टिमाइज़ करें?</string>
     <string name="reoptimise_yes">हाँ</string>
     <string name="restore_edited_keep">मेरे बदलाव रखें</string>
+    <string name="settings_albums">एल्बम</string>
     <string name="settings_appearance">रूप</string>
+    <string name="settings_archive">आर्काइव</string>
     <string name="settings_archive_notify">जब फ़ाइलें Archive के लिए तैयार हों, तब सूचना दें</string>
     <string name="settings_archive_notify_blocked">आपके फ़ोन की सेटिंग में GallerySync की सूचनाएँ बंद हैं, इसलिए जब तक आप उन्हें वहाँ फिर से चालू नहीं करते, कुछ नहीं आएगा।</string>
+    <string name="settings_backup">बैकअप</string>
     <string name="settings_bug_report">बग रिपोर्ट</string>
     <string name="settings_bug_report_detail">कुछ काम नहीं कर रहा? हमें बताएँ क्या हुआ।</string>
     <string name="settings_camera">कैमरा Sync</string>
@@ -164,7 +167,9 @@
     <string name="settings_quality">कंप्रेशन</string>
     <string name="settings_rate">Play Store पर रेटिंग दें</string>
     <string name="settings_rate_detail">Google Play पर GallerySync का पेज खोलता है।</string>
+    <string name="settings_restore">वापस लाएँ</string>
     <string name="settings_show_empty_folders">खाली फ़ोल्डर दिखाएँ</string>
+    <string name="settings_sync">सिंक</string>
     <string name="sign_out_action">साइन आउट करें</string>
     <string name="sources_add">फ़ोल्डर जोड़ें</string>
     <string name="sources_empty">अभी कोई फ़ोल्डर नहीं चुना गया। जब तक आप कोई नहीं चुनते, किसी का बैकअप, स्कैन या बदलाव नहीं होता।</string>
