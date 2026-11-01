@@ -474,7 +474,7 @@
 <p>OneDrive のファイルだけを数えます。事前に確認されるのは、OneDrive のコピーだけだからです。ほかの Cloud は、<strong>Check these files</strong> を押したときに確認されます。ホームを押した場合や、アプリをスワイプして終了した場合、このリマインダーは表示されません。</p>
   </div></details>
   <h2 id="ch-settings">Settings タブ</h2>
-  <p class="chapter-intro">緑の帯で区切られた 1 ページのスクロール画面：全般、Backup、Albums、Sync、カメラの Sync、Restore、Archive、ヘルプとフィードバック。各帯に (?) があります。</p>
+  <p class="chapter-intro">緑の帯で区切られた 1 ページのスクロール画面：全般、Backup、各フォルダの保存先、Albums、Sync、カメラの Sync、Restore、Archive、ヘルプとフィードバック。各帯に (?) があります。</p>
   <details class="topic"><summary>Settings タブの構成</summary>
   <div class="topic-body" id="settings-overview">
 <ul><li>変更はすぐに反映されます。Save ボタンはありません。</li><li>ここにあるものでスマートフォンからファイルが削除されることはありません。削除するのは Archive だけです。</li><li>Settings と初回セットアップは別々です。<a class="xref" href="#setup-and-settings">“セットアップと Settings は別々です”</a>を参照してください。</li></ul>
@@ -506,14 +506,19 @@
   </div></details>
   <details class="topic"><summary>Backup</summary>
   <div class="topic-body" id="settings-section-backup">
-<ul><li><strong>クラウド</strong>：各 Cloud に接続、またはログアウトします。<a class="xref" href="#settings-account">“クラウドとログアウト”</a>を参照してください。</li><li><strong>各フォルダの保存先</strong>：各フォルダの送信先 Cloud。<a class="xref" href="#settings-destination">“各フォルダの保存先”</a>を参照してください。</li></ul>
-<p>1 つの Cloud には <strong>メイン（無料）</strong> が付きます。最初に選んだ Cloud で、常に無料です。ほかの Cloud には <strong>Pro</strong> が必要です：30 日間は無料（<strong>30 日間の無料試用を開始</strong>）で、その後は 1 回限りの購入（<strong>Pro のロックを解除</strong>）です。自動的に請求されることはありません。</p>
+<p><strong>クラウド</strong>：各 Cloud に接続、またはログアウトします。<a class="xref" href="#settings-account">“クラウドとログアウト”</a>を参照してください。</p>
+<p>1 つの Cloud には <strong>メイン（無料）</strong> が付きます。最初に選んだ Cloud で、常に無料です。ほかの Cloud には <strong>Pro</strong> が必要です：30 日間は無料（<strong>30 日間の無料試用を開始</strong>）で、その後は 1 回限りの購入（<strong>Pro のロックを解除</strong>）です。自動的に請求されることはありません。Pro を所有すると、<strong>Pro のロックを解除済み。すべてのクラウドを使えます。</strong> がこれらの行に置き換わります。</p>
   </div></details>
   <details class="topic"><summary>クラウドとログアウト</summary>
   <div class="topic-body" id="settings-account">
-<p>各 Cloud には、アカウント（または <strong>未接続</strong>）と、<strong>ログアウト</strong>、<strong>接続</strong>、<strong>キーを入力</strong> のいずれかが表示されます。</p>
-<h4>バックアップフォルダ</h4>
-<p>接続済みの各 Cloud の下（Google Photos を除く）に、バックアップの送信先フォルダと <strong>変更</strong> が表示されます。<a class="xref" href="#dialog-destination">“新しいバックアップの保存先（「変更」ダイアログ）”</a>を参照してください。</p>
+<h4>ヘッダー</h4>
+<p>左に <strong>クラウド</strong>、右に <strong>バックアップフォルダ</strong>。その下では、各 Cloud の間を薄い線が区切ります。</p>
+<h4>未接続</h4>
+<p>Cloud の名前と <strong>接続</strong> または <strong>キーを入力</strong> が同じ行に表示されます。</p>
+<h4>接続済み</h4>
+<p>2 列構成：</p>
+<ul><li><strong>左</strong>：Cloud の名前、アカウント、<strong>ログアウト</strong>。</li><li><strong>右</strong>：バックアップの送信先フォルダと <strong>変更</strong>。Google Photos はここにフォルダがありません。<a class="xref" href="#dialog-destination">“新しいバックアップの保存先（「変更」ダイアログ）”</a>を参照してください。</li></ul>
+<p>2 列は Settings 専用です。アシスタント（ウィザード）の Cloud カードは積み重なったままです。</p>
 <h4>ログアウト</h4>
 <p>最初に警告が表示されます：その Cloud へのバックアップは停止しますが、何も削除されません。その Cloud に、スマートフォン上でフルサイズでないファイル（最適化またはアーカイブ済み）がある場合は、次を尋ねられます：</p>
 <ul><li><strong>先にスマートフォンへ復元する</strong>：すべて戻してから、ログアウトします。</li><li><strong>そのまま残す</strong>：ログアウトします。</li><li><strong>キャンセル</strong>：ログインしたままにします。</li></ul>
@@ -521,8 +526,9 @@
   </div></details>
   <details class="topic"><summary>各フォルダの保存先</summary>
   <div class="topic-body" id="settings-destination">
-<p>最上位の各フォルダ（DCIM、Pictures、Movies）、その送信先 Cloud、およびその Cloud 内の場所。</p>
-<ul><li>Cloud をタップして変更します。変更できるのは、Cloud が複数あり、Pro または試用中の場合だけです。</li><li>変更の対象になるのは、新しいファイルだけです。送信済みのファイルは、そのまま残ります。</li><li>Pro なしで追加の Cloud に割り当てたフォルダは、何も送らず、その旨が表示されます。</li></ul>
+<p>Settings タブの独立した帯で、<strong>Backup</strong> と <strong>Albums</strong> の間にあります。<strong>バックアップするフォルダ</strong> で追加したすべてのフォルダに 1 行ずつ、空のフォルダでも（<strong>Documents · 0 ファイル</strong> のように）表示します。</p>
+<ul><li>各行には、送信先 Cloud と、その Cloud 内の場所が表示されます。</li><li>Cloud をタップして変更します。変更できるのは、Cloud が複数あり、Pro または試用中の場合だけです。</li><li>変更の対象になるのは、新しいファイルだけです。送信済みのファイルは、そのまま残ります。</li><li>Pro なしで追加の Cloud に割り当てたフォルダは、何も送らず、その旨が表示されます。</li><li><strong>バックアップするフォルダ</strong> でフォルダを削除すると、ここの行もすぐに消えます。</li></ul>
+<p>行はファイルの送信先候補を示すだけです。アルバムにモードが設定されるまで、何もアップロードされません。<a class="xref" href="#settings-folders">“バックアップするフォルダ”</a>を参照してください。</p>
   </div></details>
   <details class="topic"><summary>新しいバックアップの保存先（「変更」ダイアログ）</summary>
   <div class="topic-body" id="dialog-destination">
@@ -534,6 +540,12 @@
   <div class="topic-body" id="dialog-folder-picker">
 <p>OneDrive の <strong>参照…</strong> から開きます。OneDrive のフォルダを一覧表示します：タップして開き、<strong>1 つ上のフォルダ</strong> で戻り、<strong>このフォルダを使う</strong> で選択し、<strong>新しいフォルダ</strong> で新規作成します。</p>
   </div></details>
+  <details class="topic"><summary>このフォルダのバックアップ先を選んでください（フォルダ追加後）</summary>
+  <div class="topic-body" id="dialog-new-folder-cloud">
+<p><strong>バックアップするフォルダ</strong> の <strong>フォルダを追加</strong> が新しいフォルダのスキャンを終えたあとに表示されます。</p>
+<ul><li>上部に <strong>&lt;フォルダ&gt; のバックアップ先を選んでください</strong>。</li><li>接続済みの各 Cloud ごとに 1 行、Cloud の名前と、その下に <strong>保存先：&lt;Cloud&gt; / &lt;パス&gt;</strong>。Google Photos は代わりに <strong>保存先：Google Photos のライブラリ</strong> と表示し、<strong>変更</strong> はありません。</li><li><strong>変更</strong> でその Cloud の送信先ダイアログが開きます。<a class="xref" href="#dialog-destination">“新しいバックアップの保存先（「変更」ダイアログ）”</a>を参照してください。</li><li><strong>クラウドに送るフォルダーはすべて、そのクラウド内の同じ場所に入ります。変更すると、新しいファイルだけがそこに入ります。</strong> — Cloud 内の場所は Cloud ごとに 1 つの値であり、フォルダごとではありません。ここで変更すると、その Cloud にすでに送信済みのすべてに影響します。</li><li><strong>OK</strong> で Cloud が設定されます。<strong>後で決める</strong> と、ダイアログを閉じる操作は何も変えません。フォルダはメインの Cloud のままで、<a class="xref" href="#settings-destination">“各フォルダの保存先”</a> の行であとから送信先を変更できます。</li></ul>
+<p>Settings 専用です。アシスタント（ウィザード）は、独自のステップで同じことを尋ねます。</p>
+  </div></details>
   <details class="topic"><summary>Albums</summary>
   <div class="topic-body" id="settings-section-albums">
 <p>GallerySync が監視するフォルダと、スマートフォンから削除したときの Cloud 上のコピーの扱い。新しいアルバムは、必ず <strong>Off</strong> から始まります。</p>
@@ -541,7 +553,7 @@
   <details class="topic"><summary>バックアップするフォルダ</summary>
   <div class="topic-body" id="settings-folders">
 <p>GallerySync が調べてよいフォルダです。</p>
-<ul><li><strong>フォルダを追加</strong>：Android のフォルダピッカーを開きます。</li><li><strong>削除</strong>：フォルダを選択し、<strong>削除</strong> を押して、確認します。</li></ul>
+<ul><li><strong>フォルダを追加</strong>：Android のフォルダピッカーを開きます。GallerySync は新しいフォルダをスキャンしてから、どこへバックアップするかを尋ねます。<a class="xref" href="#dialog-new-folder-cloud">“このフォルダのバックアップ先を選んでください（フォルダ追加後）”</a>を参照してください。</li><li><strong>削除</strong>：フォルダを選択し、<strong>削除</strong> を押して、確認します。</li></ul>
 <p>これらのフォルダの外にあるものは、スキャンも変更もされません。フォルダを削除しても、何も失われません。追加し直せば、すべて戻ります。</p>
   </div></details>
   <details class="topic"><summary>このフォルダの確認をやめますか？</summary>

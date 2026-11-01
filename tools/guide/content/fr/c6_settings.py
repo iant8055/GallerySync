@@ -1,8 +1,8 @@
 TRANSLATIONS = {
     "_chapter": {
         "title": "L'onglet Settings",
-        "intro": "Une page défilante en bandes vertes : Général, Backup, Albums, Sync, Sync de l'appareil photo, Restore, Archive et Aide et commentaires. Chaque bande a un (?).",
-        "en_hash": "fdc210cbde6172d8",
+        "intro": "Une page défilante en bandes vertes : Général, Backup, Où va chaque dossier, Albums, Sync, Sync de l'appareil photo, Restore, Archive et Aide et commentaires. Chaque bande a un (?).",
+        "en_hash": "0295c3a8f1702248",
     },
     "settings-overview": {
         "title": "Comment est organisé l'onglet Settings",
@@ -50,18 +50,25 @@ Concerne les sauvegardes automatiques et **Sync now**. Laissez-le désactivé sa
     },
     "settings-section-backup": {
         "title": "Backup",
-        "body": """• **Clouds :** connectez ou déconnectez chaque Cloud. Voir [[settings-account]].
-• **Où va chaque dossier :** quel Cloud reçoit chaque dossier. Voir [[settings-destination]].
+        "body": """**Clouds :** connectez ou déconnectez chaque Cloud. Voir [[settings-account]].
 
-Un Cloud est marqué **principal (gratuit)** : le premier Cloud que vous avez sélectionné. Il est toujours gratuit. Les autres Clouds demandent **Pro** : gratuit pendant 30 jours (**Commencer l'essai gratuit de 30 jours**), puis un achat unique (**Débloquer Pro**). Rien n'est facturé automatiquement.""",
-        "en_hash": "0db12d3ebcb633de",
+Un Cloud est marqué **principal (gratuit)** : le premier Cloud que vous avez sélectionné. Il est toujours gratuit. Les autres Clouds demandent **Pro** : gratuit pendant 30 jours (**Commencer l'essai gratuit de 30 jours**), puis un achat unique (**Débloquer Pro**). Rien n'est facturé automatiquement. Une fois que vous possédez Pro, **Pro débloqué. Vous pouvez utiliser tous les Clouds.** remplace ces lignes.""",
+        "en_hash": "2f9d7ac28a5a9891",
     },
     "settings-account": {
         "title": "Vos Clouds et Se déconnecter",
-        "body": """Chaque Cloud affiche son compte (ou **Non connecté**) avec **Se déconnecter**, **Connecter** ou **Saisir les clés**.
+        "body": """## L'en-tête
+À gauche **Clouds**, à droite **Dossier de sauvegarde**. En dessous, une ligne claire sépare chaque Cloud.
 
-## Dossier de sauvegarde
-Sous chaque Cloud connecté (sauf Google Photos) : le dossier où vont ses sauvegardes, avec **Modifier**. Voir [[dialog-destination]].
+## Non connecté
+Le nom du Cloud et **Connecter** ou **Saisir les clés** sont sur la même ligne.
+
+## Connecté
+Deux colonnes :
+• **À gauche :** le nom du Cloud, son compte et **Se déconnecter**.
+• **À droite :** le dossier où vont ses sauvegardes et **Modifier**. Google Photos n'a pas de dossier ici. Voir [[dialog-destination]].
+
+Les deux colonnes sont réservées à Settings. Les cartes Cloud de l'assistant restent empilées.
 
 ## Se déconnecter
 Un avertissement d'abord : les sauvegardes vers ce Cloud s'arrêtent, rien n'est supprimé. Si ce Cloud détient des fichiers qui ne sont pas en taille réelle sur le téléphone (optimisés ou archivés), il demande :
@@ -70,16 +77,20 @@ Un avertissement d'abord : les sauvegardes vers ce Cloud s'arrêtent, rien n'es
 • **Annuler :** reste connecté.
 
 Les dossiers restent associés à ce Cloud et attendent que vous vous reconnectiez. Pour les envoyer ailleurs, changez **Où va chaque dossier**.""",
-        "en_hash": "788b2237bf1a173f",
+        "en_hash": "37be6bd6eea0ccf2",
     },
     "settings-destination": {
         "title": "Où va chaque dossier",
-        "body": """Chaque dossier de premier niveau (DCIM, Pictures, Movies), le Cloud où il va, et l'endroit dans ce Cloud.
+        "body": """Sa propre bande dans l'onglet Settings, entre **Backup** et **Albums**. Une ligne pour chaque dossier que vous avez ajouté dans **Dossiers à sauvegarder**, même s'il est vide (affiché comme **Documents · 0 fichier**).
 
+• Chaque ligne indique le Cloud où il va, et l'endroit dans ce Cloud.
 • Touchez le Cloud pour le changer. C'est possible seulement avec plus d'un Cloud et avec Pro ou l'essai.
 • Seuls les nouveaux fichiers suivent un changement. Les fichiers déjà envoyés restent où ils sont.
-• Un dossier associé à un Cloud supplémentaire sans Pro n'envoie rien, et le dit.""",
-        "en_hash": "22adac22e50fbdf0",
+• Un dossier associé à un Cloud supplémentaire sans Pro n'envoie rien, et le dit.
+• Retirer un dossier dans **Dossiers à sauvegarder** retire sa ligne ici aussitôt.
+
+Une ligne dit seulement où les fichiers iraient. Rien n'est envoyé tant que l'album n'a pas de mode. Voir [[settings-folders]].""",
+        "en_hash": "4ffe9112ae1b0294",
     },
     "dialog-destination": {
         "title": "Où vont les nouvelles sauvegardes (la boîte de dialogue Modifier)",
@@ -97,6 +108,19 @@ Seuls les nouveaux fichiers vont dans le nouveau dossier. Les fichiers déjà sa
         "body": """Ouvert par **Parcourir…** pour OneDrive. Liste vos dossiers OneDrive : touchez pour ouvrir, **Dossier parent** pour remonter, **Utiliser ce dossier** pour choisir, **Nouveau dossier** pour en créer un.""",
         "en_hash": "f45e3349352eea44",
     },
+    "dialog-new-folder-cloud": {
+        "title": "Où ce dossier doit-il être sauvegardé ? (après Ajouter un dossier)",
+        "body": """Apparaît après que **Ajouter un dossier** dans **Dossiers à sauvegarder** a fini d'analyser le nouveau dossier.
+
+• **Où sauvegarder <dossier> ?** en haut.
+• Une ligne par Cloud connecté, avec le nom du Cloud et, en dessous, **Va vers <Cloud> / <chemin>**. Google Photos dit **Va vers votre bibliothèque Google Photos** et n'a pas de **Modifier**.
+• **Modifier** ouvre la boîte de dialogue de destination de ce Cloud. Voir [[dialog-destination]].
+• **Tous les dossiers envoyés vers un Cloud vont au même endroit. Si vous le changez, seuls les nouveaux fichiers iront là.** — l'endroit dans un Cloud est une valeur par Cloud, pas par dossier, donc un changement ici affecte tout ce qui a déjà été envoyé à ce Cloud.
+• **OK** définit le Cloud. **Décider plus tard** et le fait d'ignorer la boîte ne changent rien : le dossier reste sur le Cloud principal et peut être redirigé plus tard sur sa ligne dans [[settings-destination]].
+
+Settings seulement. L'assistant pose la même question dans son propre pas.""",
+        "en_hash": "f02a19ba994df3da",
+    },
     "settings-section-albums": {
         "title": "Albums",
         "body": """Quels dossiers GallerySync surveille, et ce qui arrive aux copies Cloud quand vous supprimez depuis le téléphone. Les nouveaux albums commencent toujours sur **Off**.""",
@@ -106,11 +130,11 @@ Seuls les nouveaux fichiers vont dans le nouveau dossier. Les fichiers déjà sa
         "title": "Dossiers à sauvegarder",
         "body": """Les dossiers dans lesquels GallerySync peut regarder.
 
-• **Ajouter un dossier :** ouvre le sélecteur de dossier d'Android.
+• **Ajouter un dossier :** ouvre le sélecteur de dossier d'Android. GallerySync analyse ensuite le nouveau dossier et vous demande vers quel Cloud il doit aller. Voir [[dialog-new-folder-cloud]].
 • **Retirer :** sélectionnez des dossiers, appuyez sur **Retirer**, et confirmez.
 
 Rien en dehors de ces dossiers n'est analysé ni modifié. Retirer un dossier ne fait rien perdre : remettez-le et tout revient.""",
-        "en_hash": "3789c04bb52baef5",
+        "en_hash": "32d6ed14d5bc023a",
     },
     "dialog-remove-folder": {
         "title": "Ne plus surveiller ce dossier ?",

@@ -1,8 +1,8 @@
 TRANSLATIONS = {
     "_chapter": {
         "title": 'A aba Settings',
-        "intro": 'Uma página rolável em faixas verdes: Geral, Backup, Albums, Sync, Sync da câmera, Restore, Archive e Ajuda e feedback. Cada faixa tem um (?).',
-        "en_hash": "fdc210cbde6172d8",
+        "intro": 'Uma página rolável em faixas verdes: Geral, Backup, Para onde vai cada pasta, Albums, Sync, Sync da câmera, Restore, Archive e Ajuda e feedback. Cada faixa tem um (?).',
+        "en_hash": "0295c3a8f1702248",
     },
     'settings-overview': {
         "title": 'Como a aba Settings está organizada',
@@ -50,18 +50,25 @@ Vale para os backups automáticos e para o **Sync now**. Deixe desligado, a meno
     },
     'settings-section-backup': {
         "title": 'Backup',
-        "body": """• **Nuvens:** conecte ou saia de cada Cloud. Veja [[settings-account]].
-• **Para onde vai cada pasta:** para qual Cloud cada pasta envia. Veja [[settings-destination]].
+        "body": """**Nuvens:** conecte ou saia de cada Cloud. Veja [[settings-account]].
 
-Uma Cloud é marcada como **principal (grátis)**: a primeira Cloud que você selecionou. Ela é sempre grátis. As outras Clouds exigem o **Pro**: grátis por 30 dias (**Começar o teste grátis de 30 dias**), depois uma compra única (**Desbloquear o Pro**). Nada é cobrado automaticamente.""",
-        "en_hash": "0db12d3ebcb633de",
+Uma Cloud é marcada como **principal (grátis)**: a primeira Cloud que você selecionou. Ela é sempre grátis. As outras Clouds exigem o **Pro**: grátis por 30 dias (**Começar o teste grátis de 30 dias**), depois uma compra única (**Desbloquear o Pro**). Nada é cobrado automaticamente. Quando você tiver o Pro, **Pro desbloqueado. Você pode usar todas as nuvens.** substitui essas linhas.""",
+        "en_hash": "2f9d7ac28a5a9891",
     },
     'settings-account': {
         "title": 'Suas Clouds e Sair',
-        "body": """Cada Cloud mostra a conta dela (ou **Não conectado**) com **Sair**, **Conectar** ou **Inserir chaves**.
+        "body": """## O cabeçalho
+À esquerda **Nuvens**, à direita **Pasta de backup**. Abaixo, uma linha clara separa cada Cloud.
 
-## Pasta de backup
-Embaixo de cada Cloud conectada (exceto o Google Photos): a pasta para onde vão os backups dela, com **Alterar**. Veja [[dialog-destination]].
+## Não conectado
+O nome da Cloud e **Conectar** ou **Inserir chaves** ficam na mesma linha.
+
+## Conectado
+Duas colunas:
+• **Esquerda:** o nome da Cloud, a conta e **Sair**.
+• **Direita:** a pasta para onde vão os backups e **Alterar**. O Google Photos não tem pasta aqui. Veja [[dialog-destination]].
+
+As duas colunas são só do Settings. Os cartões Cloud do assistente continuam empilhados.
 
 ## Sair
 Primeiro vem um aviso: os backups para essa Cloud param, nada é apagado. Se essa Cloud guarda arquivos que não estão em tamanho real no telefone (otimizados ou arquivados), o app pergunta:
@@ -70,16 +77,20 @@ Primeiro vem um aviso: os backups para essa Cloud param, nada é apagado. Se ess
 • **Cancelar:** continua conectado.
 
 As pastas continuam vinculadas a essa Cloud e esperam até você entrar de novo. Para enviá-las para outro lugar, mude **Para onde vai cada pasta**.""",
-        "en_hash": "788b2237bf1a173f",
+        "en_hash": "37be6bd6eea0ccf2",
     },
     'settings-destination': {
         "title": 'Para onde vai cada pasta',
-        "body": """Cada pasta de nível superior (DCIM, Pictures, Movies), a Cloud para onde ela vai e o lugar dentro dessa Cloud.
+        "body": """É sua própria faixa na aba Settings, entre **Backup** e **Albums**. Uma linha para cada pasta que você adicionou em **Pastas para backup**, mesmo que esteja vazia (mostrada como **Documents · 0 arquivos**).
 
+• Cada linha mostra a Cloud para onde ela vai e o lugar dentro dessa Cloud.
 • Toque na Cloud para mudá-la. Só é possível mudar com mais de uma Cloud e com o Pro ou o teste.
 • Só os arquivos novos seguem uma mudança. Os arquivos já enviados ficam onde estão.
-• Uma pasta vinculada a uma Cloud extra sem o Pro não envia nada, e avisa isso.""",
-        "en_hash": "22adac22e50fbdf0",
+• Uma pasta vinculada a uma Cloud extra sem o Pro não envia nada, e avisa isso.
+• Remover uma pasta em **Pastas para backup** tira a linha dela daqui imediatamente.
+
+A linha só diz para onde os arquivos iriam. Nada sobe até o álbum ter um modo. Veja [[settings-folders]].""",
+        "en_hash": "4ffe9112ae1b0294",
     },
     'dialog-destination': {
         "title": 'Para onde vão os novos backups (a caixa de diálogo Alterar)',
@@ -97,6 +108,19 @@ Só os arquivos novos vão para a pasta nova. Os arquivos que já têm backup fi
         "body": """Aberto por **Procurar…** no OneDrive. Lista as suas pastas do OneDrive: toque para abrir, **Subir uma pasta** para voltar, **Usar esta pasta** para escolher, **Nova pasta** para criar uma.""",
         "en_hash": "f45e3349352eea44",
     },
+    'dialog-new-folder-cloud': {
+        "title": "Para onde fazer o backup desta pasta? (depois de Adicionar uma pasta)",
+        "body": """Aparece depois que **Adicionar uma pasta** em **Pastas para backup** termina de reescanear a nova pasta.
+
+• **Onde fazer o backup de <pasta>?** no topo.
+• Uma linha para cada Cloud conectada, com o nome da Cloud e, abaixo, **Vai para <Cloud> / <caminho>**. O Google Photos diz **Vai para sua biblioteca do Google Photos** e não tem **Alterar**.
+• **Alterar** abre o diálogo de destino dessa Cloud. Veja [[dialog-destination]].
+• **Todas as pastas enviadas a uma nuvem vão para o mesmo lugar nela. Se você mudar, só os arquivos novos irão para lá.** — o lugar em uma Cloud é um valor por Cloud, não por pasta, então uma mudança aqui afeta tudo o que já foi enviado a essa Cloud.
+• **OK** define a Cloud. **Decidir depois** e descartar não mudam nada: a pasta fica na Cloud principal e pode ser redirecionada depois na linha dela em [[settings-destination]].
+
+Só em Settings. O assistente faz a mesma pergunta no passo dele.""",
+        "en_hash": "f02a19ba994df3da",
+    },
     'settings-section-albums': {
         "title": 'Albums',
         "body": """Quais pastas o GallerySync observa e o que acontece com as cópias na Cloud quando você apaga algo do telefone. Os álbuns novos sempre começam em **Off**.""",
@@ -106,11 +130,11 @@ Só os arquivos novos vão para a pasta nova. Os arquivos que já têm backup fi
         "title": 'Pastas para backup',
         "body": """As pastas em que o GallerySync pode olhar.
 
-• **Adicionar uma pasta:** abre o seletor de pastas do Android.
+• **Adicionar uma pasta:** abre o seletor de pastas do Android. O GallerySync então rescaneia a nova pasta e pergunta para onde ela deve ir. Veja [[dialog-new-folder-cloud]].
 • **Remover:** selecione as pastas, pressione **Remover** e confirme.
 
 Nada fora dessas pastas é analisado ou alterado. Remover uma pasta não perde nada: adicione-a de volta e tudo retorna.""",
-        "en_hash": "3789c04bb52baef5",
+        "en_hash": "32d6ed14d5bc023a",
     },
     'dialog-remove-folder': {
         "title": 'Parar de observar esta pasta?',

@@ -3,8 +3,8 @@ from model import Chapter, topic
 CHAPTER = Chapter(
     id="settings",
     title="The Settings tab",
-    intro="One scrolling page in green bands: General, Backup, Albums, Sync, Camera Sync, Restore, Archive and "
-          "Help & Feedback. Each band has a (?).",
+    intro="One scrolling page in green bands: General, Backup, Where each folder goes, Albums, Sync, Camera Sync, Restore, "
+          "Archive and Help & Feedback. Each band has a (?).",
     topics=[
         topic("settings-overview", "How the Settings tab is laid out", """
             • Changes take effect straight away. There is no Save button.
@@ -45,17 +45,24 @@ CHAPTER = Chapter(
         """, ui=True),
 
         topic("settings-section-backup", "Backup", """
-            • **Clouds:** connect or sign out of each Cloud. See [[settings-account]].
-            • **Where each folder goes:** which Cloud each folder sends to. See [[settings-destination]].
+            **Clouds:** connect or sign out of each Cloud. See [[settings-account]].
 
-            One Cloud is marked **main (free)**: the first Cloud you selected. It is always free. Other Clouds need **Pro**: free for 30 days (**Start 30-day free trial**), then a one-time purchase (**Unlock Pro**). Nothing is charged automatically.
+            One Cloud is marked **main (free)**: the first Cloud you selected. It is always free. Other Clouds need **Pro**: free for 30 days (**Start 30-day free trial**), then a one-time purchase (**Unlock Pro**). Nothing is charged automatically. Once you own Pro, **Pro unlocked. You can use every Cloud.** replaces those lines.
         """, ui=True),
 
         topic("settings-account", "Your Clouds and Sign out", """
-            Each Cloud shows its account (or **Not connected**) with **Sign out**, **Connect** or **Enter keys**.
+            ## The heading
+            **Clouds** on the left, **Backup folder** on the right. A light line separates each Cloud below.
 
-            ## Backup folder
-            Under each connected Cloud (except Google Photos): the folder its backups go to, with **Change**. See [[dialog-destination]].
+            ## Not connected
+            The Cloud's name and **Connect** or **Enter keys** sit on the same line.
+
+            ## Connected
+            Two columns:
+            • **Left:** the Cloud's name, its account, and **Sign out**.
+            • **Right:** the folder its backups go to and **Change**. Google Photos has no folder here. See [[dialog-destination]].
+
+            The two columns are Settings only. The wizard's Cloud cards stay stacked.
 
             ## Sign out
             A warning first: backups to that Cloud stop, nothing is deleted. If that Cloud holds files that are not full size on the phone (optimised or archived), it asks:
@@ -67,11 +74,15 @@ CHAPTER = Chapter(
         """, ui=True),
 
         topic("settings-destination", "Where each folder goes", """
-            Each top-level folder (DCIM, Pictures, Movies), the Cloud it goes to, and where in that Cloud.
+            Its own band on the Settings tab, between **Backup** and **Albums**. One row for every folder you added under **Folders to back up**, including empty ones (shown as **Documents · 0 files**).
 
+            • Each row says the Cloud it goes to and where in that Cloud.
             • Tap the Cloud to change it. It can only be changed with more than one Cloud and Pro or the trial.
             • Only new files follow a change. Files already sent stay where they are.
             • A folder paired with an extra Cloud without Pro sends nothing, and says so.
+            • Removing a folder in **Folders to back up** removes its row here straight away.
+
+            A row only says where files would go. Nothing uploads until the album has a mode. See [[settings-folders]].
         """, ui=True),
 
         topic("dialog-destination", "Where new backups go (the Change dialog)", """
@@ -88,6 +99,18 @@ CHAPTER = Chapter(
             Opened by **Browse...** for OneDrive. Lists your OneDrive folders: tap to open, **Up one folder** to go back, **Use this folder** to choose, **New folder** to create one.
         """, ui=True),
 
+        topic("dialog-new-folder-cloud", "Where should this folder back up to? (after Add a folder)", """
+            Appears after **Add a folder** in **Folders to back up** has finished rescanning the new folder.
+
+            • **Where should <folder> back up to?** at the top.
+            • One row per connected Cloud, with the Cloud's name and, below it, **Goes to <Cloud> / <path>**. Google Photos says **Goes to your Google Photos library** instead and has no **Change**.
+            • **Change** opens the destination dialog for that Cloud. See [[dialog-destination]].
+            • **Every folder sent to a Cloud goes to the same place in it. If you change it, only new files go there.** — the place in a Cloud is one value per Cloud, not per folder, so a change here affects everything already sent to that Cloud.
+            • **OK** sets the Cloud. **Decide later** and dismissing change nothing, so the folder stays on the main Cloud and can be re-routed later on its row in [[settings-destination]].
+
+            Settings only. The wizard asks the same question in its own step.
+        """, ui=True),
+
         topic("settings-section-albums", "Albums", """
             Which folders GallerySync watches, and what happens to Cloud copies when you delete from the phone. New albums always start at **Off**.
         """, ui=True),
@@ -95,7 +118,7 @@ CHAPTER = Chapter(
         topic("settings-folders", "Folders to back up", """
             The folders GallerySync may look in.
 
-            • **Add a folder:** opens Android's folder picker.
+            • **Add a folder:** opens Android's folder picker. GallerySync then rescans the new folder and asks where it should back up to. See [[dialog-new-folder-cloud]].
             • **Remove:** select folders, press **Remove**, and confirm.
 
             Nothing outside these folders is scanned or changed. Removing a folder loses nothing: add it back and everything returns.

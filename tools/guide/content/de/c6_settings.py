@@ -1,8 +1,8 @@
 TRANSLATIONS = {
     "_chapter": {
         "title": "Der Settings-Tab",
-        "intro": "Eine scrollende Seite in grünen Bändern: Allgemein, Backup, Albums, Sync, Kamera-Sync, Restore, Archive und Hilfe und Feedback. Jedes Band hat ein (?).",
-        "en_hash": "fdc210cbde6172d8",
+        "intro": "Eine scrollende Seite in grünen Bändern: Allgemein, Backup, Wohin jeder Ordner geht, Albums, Sync, Kamera-Sync, Restore, Archive und Hilfe und Feedback. Jedes Band hat ein (?).",
+        "en_hash": "0295c3a8f1702248",
     },
     "settings-overview": {
         "title": "So ist der Settings-Tab aufgebaut",
@@ -50,18 +50,25 @@ Gilt für automatische Backups und **Sync now**. Lass es aus, es sei denn, dein 
     },
     "settings-section-backup": {
         "title": "Backup",
-        "body": """• **Clouds:** verbinde jede Cloud oder melde dich bei ihr ab. Siehe [[settings-account]].
-• **Wohin jeder Ordner geht:** zu welcher Cloud jeder Ordner sendet. Siehe [[settings-destination]].
+        "body": """**Clouds:** verbinde jede Cloud oder melde dich bei ihr ab. Siehe [[settings-account]].
 
-Eine Cloud ist als **Haupt-Cloud (kostenlos)** markiert: die erste Cloud, die du gewählt hast. Sie ist immer kostenlos. Andere Clouds brauchen **Pro**: 30 Tage kostenlos (**30 Tage kostenlos testen**), danach ein einmaliger Kauf (**Pro freischalten**). Es wird nichts automatisch berechnet.""",
-        "en_hash": "0db12d3ebcb633de",
+Eine Cloud ist als **Haupt-Cloud (kostenlos)** markiert: die erste Cloud, die du gewählt hast. Sie ist immer kostenlos. Andere Clouds brauchen **Pro**: 30 Tage kostenlos (**30 Tage kostenlos testen**), danach ein einmaliger Kauf (**Pro freischalten**). Es wird nichts automatisch berechnet. Sobald du Pro besitzt, ersetzt **Pro freigeschaltet. Du kannst jede Cloud nutzen.** diese Zeilen.""",
+        "en_hash": "2f9d7ac28a5a9891",
     },
     "settings-account": {
         "title": "Deine Clouds und Abmelden",
-        "body": """Jede Cloud zeigt ihr Konto (oder **Nicht verbunden**) mit **Abmelden**, **Verbinden** oder **Schlüssel eingeben**.
+        "body": """## Die Kopfzeile
+Links **Clouds**, rechts **Backup-Ordner**. Darunter trennt eine helle Linie jede Cloud.
 
-## Backup-Ordner
-Unter jeder verbundenen Cloud (außer Google Photos): der Ordner, in den ihre Backups gehen, mit **Ändern**. Siehe [[dialog-destination]].
+## Nicht verbunden
+Name der Cloud und **Verbinden** oder **Schlüssel eingeben** stehen in derselben Zeile.
+
+## Verbunden
+Zwei Spalten:
+• **Links:** Name der Cloud, Konto und **Abmelden**.
+• **Rechts:** der Ordner, in den die Backups gehen, und **Ändern**. Google Photos hat hier keinen Ordner. Siehe [[dialog-destination]].
+
+Die zwei Spalten gibt es nur in Settings. Die Cloud-Karten des Assistenten bleiben gestapelt.
 
 ## Abmelden
 Zuerst eine Warnung: Backups in diese Cloud stoppen, nichts wird gelöscht. Wenn diese Cloud Dateien hält, die auf dem Telefon nicht in voller Größe sind (optimiert oder archiviert), fragt die App:
@@ -70,16 +77,20 @@ Zuerst eine Warnung: Backups in diese Cloud stoppen, nichts wird gelöscht. Wenn
 • **Abbrechen:** du bleibst angemeldet.
 
 Ordner bleiben dieser Cloud zugeordnet und warten, bis du dich wieder anmeldest. Um sie anderswohin zu senden, ändere **Wohin jeder Ordner geht**.""",
-        "en_hash": "788b2237bf1a173f",
+        "en_hash": "37be6bd6eea0ccf2",
     },
     "settings-destination": {
         "title": "Wohin jeder Ordner geht",
-        "body": """Jeder Hauptordner (DCIM, Pictures, Movies), die Cloud, zu der er geht, und wo in dieser Cloud.
+        "body": """Ein eigenes Band im Settings-Tab, zwischen **Backup** und **Albums**. Eine Zeile für jeden Ordner, den du unter **Ordner zum Sichern** hinzugefügt hast, auch wenn er leer ist (angezeigt als **Documents · 0 Dateien**).
 
+• Jede Zeile nennt die Cloud, zu der er geht, und wo in dieser Cloud.
 • Tippe auf die Cloud, um sie zu ändern. Das geht nur mit mehr als einer Cloud und mit Pro oder dem Test.
 • Nur neue Dateien folgen einer Änderung. Bereits gesendete Dateien bleiben, wo sie sind.
-• Ein Ordner, der ohne Pro einer zusätzlichen Cloud zugeordnet ist, sendet nichts und sagt das.""",
-        "en_hash": "22adac22e50fbdf0",
+• Ein Ordner, der ohne Pro einer zusätzlichen Cloud zugeordnet ist, sendet nichts und sagt das.
+• Entfernst du einen Ordner unter **Ordner zum Sichern**, verschwindet seine Zeile hier sofort.
+
+Eine Zeile sagt nur, wohin Dateien gehen würden. Es wird nichts hochgeladen, bevor das Album einen Modus hat. Siehe [[settings-folders]].""",
+        "en_hash": "4ffe9112ae1b0294",
     },
     "dialog-destination": {
         "title": "Wohin neue Backups gehen (der Ändern-Dialog)",
@@ -97,6 +108,19 @@ Nur neue Dateien gehen in den neuen Ordner. Bereits gesicherte Dateien bleiben, 
         "body": """Geöffnet durch **Durchsuchen…** bei OneDrive. Listet deine OneDrive-Ordner auf: Tippe zum Öffnen, **Einen Ordner höher** zum Zurückgehen, **Diesen Ordner verwenden** zum Wählen, **Neuer Ordner** zum Anlegen eines Ordners.""",
         "en_hash": "f45e3349352eea44",
     },
+    "dialog-new-folder-cloud": {
+        "title": "Wohin soll dieser Ordner gesichert werden? (nach Ordner hinzufügen)",
+        "body": """Erscheint, nachdem **Ordner hinzufügen** unter **Ordner zum Sichern** den neuen Ordner neu eingelesen hat.
+
+• **Wohin soll <Ordner> gesichert werden?** oben.
+• Eine Zeile pro verbundener Cloud mit dem Namen der Cloud und darunter **Geht nach <Cloud> / <Pfad>**. Google Photos zeigt stattdessen **Geht in deine Google Photos-Mediathek** und hat kein **Ändern**.
+• **Ändern** öffnet den Zieldialog für diese Cloud. Siehe [[dialog-destination]].
+• **Alle Ordner, die an eine Cloud gehen, landen dort am selben Ort. Änderst du ihn, gehen nur neue Dateien dorthin.** — der Ort in einer Cloud ist ein Wert pro Cloud, nicht pro Ordner, eine Änderung hier wirkt sich also auf alles aus, was bereits an diese Cloud gesendet wurde.
+• **OK** setzt die Cloud. **Später entscheiden** und das Wegtippen ändern nichts, der Ordner bleibt bei der Haupt-Cloud und kann später auf seiner Zeile in [[settings-destination]] umgeleitet werden.
+
+Nur in Settings. Der Assistent fragt dasselbe in seinem eigenen Schritt.""",
+        "en_hash": "f02a19ba994df3da",
+    },
     "settings-section-albums": {
         "title": "Albums",
         "body": """Welche Ordner GallerySync beobachtet und was mit Cloud-Kopien geschieht, wenn du vom Telefon löschst. Neue Alben beginnen immer bei **Off**.""",
@@ -106,11 +130,11 @@ Nur neue Dateien gehen in den neuen Ordner. Bereits gesicherte Dateien bleiben, 
         "title": "Ordner zum Sichern",
         "body": """Die Ordner, in denen GallerySync nachsehen darf.
 
-• **Ordner hinzufügen:** öffnet die Ordnerauswahl von Android.
+• **Ordner hinzufügen:** öffnet die Ordnerauswahl von Android. Danach durchsucht GallerySync den neuen Ordner und fragt, wohin er gesichert werden soll. Siehe [[dialog-new-folder-cloud]].
 • **Entfernen:** wähle Ordner aus, drücke **Entfernen** und bestätige.
 
 Nichts außerhalb dieser Ordner wird durchsucht oder verändert. Das Entfernen eines Ordners verliert nichts: Füge ihn wieder hinzu, und alles kommt zurück.""",
-        "en_hash": "3789c04bb52baef5",
+        "en_hash": "32d6ed14d5bc023a",
     },
     "dialog-remove-folder": {
         "title": "Diesen Ordner nicht mehr beobachten?",

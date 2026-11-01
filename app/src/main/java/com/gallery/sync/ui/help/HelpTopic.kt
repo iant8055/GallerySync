@@ -51,6 +51,7 @@ enum class HelpTopic(
     SETTINGS_DESTINATION("settings-destination", R.string.help_settings_destination_title, R.string.help_settings_destination_body),
     DIALOG_DESTINATION("dialog-destination", R.string.help_dialog_destination_title, R.string.help_dialog_destination_body),
     DIALOG_FOLDER_PICKER("dialog-folder-picker", R.string.help_dialog_folder_picker_title, R.string.help_dialog_folder_picker_body),
+    DIALOG_NEW_FOLDER_CLOUD("dialog-new-folder-cloud", R.string.help_dialog_new_folder_cloud_title, R.string.help_dialog_new_folder_cloud_body),
     SETTINGS_SECTION_ALBUMS("settings-section-albums", R.string.help_settings_section_albums_title, R.string.help_settings_section_albums_body),
     SETTINGS_FOLDERS("settings-folders", R.string.help_settings_folders_title, R.string.help_settings_folders_body),
     DIALOG_REMOVE_FOLDER("dialog-remove-folder", R.string.help_dialog_remove_folder_title, R.string.help_dialog_remove_folder_body),

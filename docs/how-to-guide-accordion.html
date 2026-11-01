@@ -476,7 +476,7 @@
 <p>Counts OneDrive files only: only OneDrive copies are confirmed ahead of time. Other Clouds are checked when you press <strong>Check these files</strong>. The reminder does not appear if you press Home or swipe the app away.</p>
   </div></details>
   <h2 id="ch-settings">The Settings tab</h2>
-  <p class="chapter-intro">One scrolling page in green bands: General, Backup, Albums, Sync, Camera Sync, Restore, Archive and Help &amp; Feedback. Each band has a (?).</p>
+  <p class="chapter-intro">One scrolling page in green bands: General, Backup, Where each folder goes, Albums, Sync, Camera Sync, Restore, Archive and Help &amp; Feedback. Each band has a (?).</p>
   <details class="topic"><summary>How the Settings tab is laid out</summary>
   <div class="topic-body" id="settings-overview">
 <ul><li>Changes take effect straight away. There is no Save button.</li><li>Nothing here removes a file from your phone. Only Archive does that.</li><li>Settings and first-time setup are separate. See <a class="xref" href="#setup-and-settings">“Setup and Settings are separate”</a>.</li></ul>
@@ -508,14 +508,19 @@
   </div></details>
   <details class="topic"><summary>Backup</summary>
   <div class="topic-body" id="settings-section-backup">
-<ul><li><strong>Clouds:</strong> connect or sign out of each Cloud. See <a class="xref" href="#settings-account">“Your Clouds and Sign out”</a>.</li><li><strong>Where each folder goes:</strong> which Cloud each folder sends to. See <a class="xref" href="#settings-destination">“Where each folder goes”</a>.</li></ul>
-<p>One Cloud is marked <strong>main (free)</strong>: the first Cloud you selected. It is always free. Other Clouds need <strong>Pro</strong>: free for 30 days (<strong>Start 30-day free trial</strong>), then a one-time purchase (<strong>Unlock Pro</strong>). Nothing is charged automatically.</p>
+<p><strong>Clouds:</strong> connect or sign out of each Cloud. See <a class="xref" href="#settings-account">“Your Clouds and Sign out”</a>.</p>
+<p>One Cloud is marked <strong>main (free)</strong>: the first Cloud you selected. It is always free. Other Clouds need <strong>Pro</strong>: free for 30 days (<strong>Start 30-day free trial</strong>), then a one-time purchase (<strong>Unlock Pro</strong>). Nothing is charged automatically. Once you own Pro, <strong>Pro unlocked. You can use every Cloud.</strong> replaces those lines.</p>
   </div></details>
   <details class="topic"><summary>Your Clouds and Sign out</summary>
   <div class="topic-body" id="settings-account">
-<p>Each Cloud shows its account (or <strong>Not connected</strong>) with <strong>Sign out</strong>, <strong>Connect</strong> or <strong>Enter keys</strong>.</p>
-<h4>Backup folder</h4>
-<p>Under each connected Cloud (except Google Photos): the folder its backups go to, with <strong>Change</strong>. See <a class="xref" href="#dialog-destination">“Where new backups go (the Change dialog)”</a>.</p>
+<h4>The heading</h4>
+<p><strong>Clouds</strong> on the left, <strong>Backup folder</strong> on the right. A light line separates each Cloud below.</p>
+<h4>Not connected</h4>
+<p>The Cloud's name and <strong>Connect</strong> or <strong>Enter keys</strong> sit on the same line.</p>
+<h4>Connected</h4>
+<p>Two columns:</p>
+<ul><li><strong>Left:</strong> the Cloud's name, its account, and <strong>Sign out</strong>.</li><li><strong>Right:</strong> the folder its backups go to and <strong>Change</strong>. Google Photos has no folder here. See <a class="xref" href="#dialog-destination">“Where new backups go (the Change dialog)”</a>.</li></ul>
+<p>The two columns are Settings only. The wizard's Cloud cards stay stacked.</p>
 <h4>Sign out</h4>
 <p>A warning first: backups to that Cloud stop, nothing is deleted. If that Cloud holds files that are not full size on the phone (optimised or archived), it asks:</p>
 <ul><li><strong>Restore them to the phone first:</strong> brings them all back, then signs out.</li><li><strong>Leave them there:</strong> signs out.</li><li><strong>Cancel:</strong> stays signed in.</li></ul>
@@ -523,8 +528,9 @@
   </div></details>
   <details class="topic"><summary>Where each folder goes</summary>
   <div class="topic-body" id="settings-destination">
-<p>Each top-level folder (DCIM, Pictures, Movies), the Cloud it goes to, and where in that Cloud.</p>
-<ul><li>Tap the Cloud to change it. It can only be changed with more than one Cloud and Pro or the trial.</li><li>Only new files follow a change. Files already sent stay where they are.</li><li>A folder paired with an extra Cloud without Pro sends nothing, and says so.</li></ul>
+<p>Its own band on the Settings tab, between <strong>Backup</strong> and <strong>Albums</strong>. One row for every folder you added under <strong>Folders to back up</strong>, including empty ones (shown as <strong>Documents · 0 files</strong>).</p>
+<ul><li>Each row says the Cloud it goes to and where in that Cloud.</li><li>Tap the Cloud to change it. It can only be changed with more than one Cloud and Pro or the trial.</li><li>Only new files follow a change. Files already sent stay where they are.</li><li>A folder paired with an extra Cloud without Pro sends nothing, and says so.</li><li>Removing a folder in <strong>Folders to back up</strong> removes its row here straight away.</li></ul>
+<p>A row only says where files would go. Nothing uploads until the album has a mode. See <a class="xref" href="#settings-folders">“Folders to back up”</a>.</p>
   </div></details>
   <details class="topic"><summary>Where new backups go (the Change dialog)</summary>
   <div class="topic-body" id="dialog-destination">
@@ -536,6 +542,12 @@
   <div class="topic-body" id="dialog-folder-picker">
 <p>Opened by <strong>Browse...</strong> for OneDrive. Lists your OneDrive folders: tap to open, <strong>Up one folder</strong> to go back, <strong>Use this folder</strong> to choose, <strong>New folder</strong> to create one.</p>
   </div></details>
+  <details class="topic"><summary>Where should this folder back up to? (after Add a folder)</summary>
+  <div class="topic-body" id="dialog-new-folder-cloud">
+<p>Appears after <strong>Add a folder</strong> in <strong>Folders to back up</strong> has finished rescanning the new folder.</p>
+<ul><li><strong>Where should &lt;folder&gt; back up to?</strong> at the top.</li><li>One row per connected Cloud, with the Cloud's name and, below it, <strong>Goes to &lt;Cloud&gt; / &lt;path&gt;</strong>. Google Photos says <strong>Goes to your Google Photos library</strong> instead and has no <strong>Change</strong>.</li><li><strong>Change</strong> opens the destination dialog for that Cloud. See <a class="xref" href="#dialog-destination">“Where new backups go (the Change dialog)”</a>.</li><li><strong>Every folder sent to a Cloud goes to the same place in it. If you change it, only new files go there.</strong> — the place in a Cloud is one value per Cloud, not per folder, so a change here affects everything already sent to that Cloud.</li><li><strong>OK</strong> sets the Cloud. <strong>Decide later</strong> and dismissing change nothing, so the folder stays on the main Cloud and can be re-routed later on its row in <a class="xref" href="#settings-destination">“Where each folder goes”</a>.</li></ul>
+<p>Settings only. The wizard asks the same question in its own step.</p>
+  </div></details>
   <details class="topic"><summary>Albums</summary>
   <div class="topic-body" id="settings-section-albums">
 <p>Which folders GallerySync watches, and what happens to Cloud copies when you delete from the phone. New albums always start at <strong>Off</strong>.</p>
@@ -543,7 +555,7 @@
   <details class="topic"><summary>Folders to back up</summary>
   <div class="topic-body" id="settings-folders">
 <p>The folders GallerySync may look in.</p>
-<ul><li><strong>Add a folder:</strong> opens Android's folder picker.</li><li><strong>Remove:</strong> select folders, press <strong>Remove</strong>, and confirm.</li></ul>
+<ul><li><strong>Add a folder:</strong> opens Android's folder picker. GallerySync then rescans the new folder and asks where it should back up to. See <a class="xref" href="#dialog-new-folder-cloud">“Where should this folder back up to? (after Add a folder)”</a>.</li><li><strong>Remove:</strong> select folders, press <strong>Remove</strong>, and confirm.</li></ul>
 <p>Nothing outside these folders is scanned or changed. Removing a folder loses nothing: add it back and everything returns.</p>
   </div></details>
   <details class="topic"><summary>Stop watching this folder?</summary>

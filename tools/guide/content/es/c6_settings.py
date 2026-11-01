@@ -1,8 +1,8 @@
 TRANSLATIONS = {
     "_chapter": {
         "title": "La pestaña Settings",
-        "intro": "Una página con desplazamiento en bandas verdes: General, Backup, Albums, Sync, Sync de la cámara, Restore, Archive y Ayuda y comentarios. Cada banda tiene un (?).",
-        "en_hash": "fdc210cbde6172d8",
+        "intro": "Una página con desplazamiento en bandas verdes: General, Backup, Adónde va cada carpeta, Albums, Sync, Sync de la cámara, Restore, Archive y Ayuda y comentarios. Cada banda tiene un (?).",
+        "en_hash": "0295c3a8f1702248",
     },
     "settings-overview": {
         "title": "Cómo está organizada la pestaña Settings",
@@ -56,19 +56,26 @@ Afecta a las copias automáticas y a **Sync now**. Déjalo desactivado salvo que
 
     "settings-section-backup": {
         "title": "Backup",
-        "body": """• **Nubes:** conecta o cierra sesión en cada Cloud. Consulta [[settings-account]].
-• **Adónde va cada carpeta:** a qué Cloud envía cada carpeta. Consulta [[settings-destination]].
+        "body": """**Nubes:** conecta o cierra sesión en cada Cloud. Consulta [[settings-account]].
 
-Una Cloud está marcada como **principal (gratis)**: la primera que seleccionaste. Siempre es gratis. Las demás Clouds necesitan **Pro**: gratis durante 30 días (**Empezar prueba gratuita de 30 días**) y después una compra única (**Desbloquear Pro**). No se cobra nada automáticamente.""",
-        "en_hash": "0db12d3ebcb633de",
+Una Cloud está marcada como **principal (gratis)**: la primera que seleccionaste. Siempre es gratis. Las demás Clouds necesitan **Pro**: gratis durante 30 días (**Empezar prueba gratuita de 30 días**) y después una compra única (**Desbloquear Pro**). No se cobra nada automáticamente. Cuando tengas Pro, **Pro desbloqueado. Puedes usar todas las nubes.** reemplaza esas líneas.""",
+        "en_hash": "2f9d7ac28a5a9891",
     },
 
     "settings-account": {
         "title": "Tus Clouds y Cerrar sesión",
-        "body": """Cada Cloud muestra su cuenta (o **No conectado**) con **Cerrar sesión**, **Conectar** o **Introducir claves**.
+        "body": """## El encabezado
+A la izquierda **Nubes**, a la derecha **Carpeta de copia**. Debajo, una línea tenue separa cada Cloud.
 
-## Carpeta de copia
-Bajo cada Cloud conectada (excepto Google Photos): la carpeta a la que van sus copias, con **Cambiar**. Consulta [[dialog-destination]].
+## No conectado
+El nombre de la Cloud y **Conectar** o **Introducir claves** van en la misma línea.
+
+## Conectado
+Dos columnas:
+• **Izquierda:** el nombre de la Cloud, su cuenta y **Cerrar sesión**.
+• **Derecha:** la carpeta a la que van sus copias y **Cambiar**. Google Photos no tiene carpeta aquí. Consulta [[dialog-destination]].
+
+Las dos columnas son solo de Settings. Las tarjetas Cloud del asistente siguen apiladas.
 
 ## Cerrar sesión
 Primero aparece un aviso: las copias a esa Cloud se detienen, no se elimina nada. Si esa Cloud tiene archivos que no están a tamaño completo en el teléfono (optimizados o archivados), pregunta:
@@ -77,17 +84,21 @@ Primero aparece un aviso: las copias a esa Cloud se detienen, no se elimina nada
 • **Cancelar:** mantiene la sesión iniciada.
 
 Las carpetas siguen emparejadas con esa Cloud y esperan hasta que vuelvas a iniciar sesión. Para enviarlas a otro sitio, cambia **Adónde va cada carpeta**.""",
-        "en_hash": "788b2237bf1a173f",
+        "en_hash": "37be6bd6eea0ccf2",
     },
 
     "settings-destination": {
         "title": "Adónde va cada carpeta",
-        "body": """Cada carpeta de primer nivel (DCIM, Pictures, Movies), la Cloud a la que va y en qué lugar de esa Cloud.
+        "body": """Su propia banda en la pestaña Settings, entre **Backup** y **Albums**. Una fila por cada carpeta que añadiste en **Carpetas para copiar**, incluso si está vacía (se muestra como **Documents · 0 archivos**).
 
+• Cada fila indica la Cloud a la que va y en qué lugar de esa Cloud.
 • Pulsa la Cloud para cambiarla. Solo se puede cambiar con más de una Cloud y con Pro o la prueba.
 • Solo los archivos nuevos siguen un cambio. Los archivos ya enviados se quedan donde están.
-• Una carpeta emparejada con una Cloud adicional sin Pro no envía nada, y lo indica.""",
-        "en_hash": "22adac22e50fbdf0",
+• Una carpeta emparejada con una Cloud adicional sin Pro no envía nada, y lo indica.
+• Quitar una carpeta en **Carpetas para copiar** quita su fila aquí al instante.
+
+Una fila solo indica adónde irían los archivos. No se sube nada hasta que el álbum tenga un modo. Consulta [[settings-folders]].""",
+        "en_hash": "4ffe9112ae1b0294",
     },
 
     "dialog-destination": {
@@ -108,6 +119,19 @@ Solo los archivos nuevos van a la carpeta nueva. Los archivos que ya tienen copi
         "en_hash": "f45e3349352eea44",
     },
 
+    "dialog-new-folder-cloud": {
+        "title": "¿Dónde se debe guardar esta carpeta? (tras Añadir una carpeta)",
+        "body": """Aparece después de que **Añadir una carpeta** en **Carpetas para copiar** termina de volver a analizar la nueva carpeta.
+
+• **¿Dónde se debe guardar <carpeta>?** arriba.
+• Una fila por cada Cloud conectada, con el nombre de la Cloud y, debajo, **Va a <Cloud> / <ruta>**. Google Photos dice **Va a tu biblioteca de Google Photos** y no tiene **Cambiar**.
+• **Cambiar** abre el diálogo de destino de esa Cloud. Consulta [[dialog-destination]].
+• **Todas las carpetas enviadas a una nube van al mismo lugar en ella. Si lo cambias, solo los archivos nuevos irán allí.** — el lugar en una Cloud es un valor por Cloud, no por carpeta, así que un cambio aquí afecta a todo lo que ya se envió a esa Cloud.
+• **Aceptar** fija la Cloud. **Decidir más tarde** y descartar no cambian nada: la carpeta se queda en la Cloud principal y puedes redirigirla luego en su fila en [[settings-destination]].
+
+Solo en Settings. El asistente hace la misma pregunta en su propio paso.""",
+        "en_hash": "f02a19ba994df3da",
+    },
     "settings-section-albums": {
         "title": "Albums",
         "body": """Qué carpetas vigila GallerySync, y qué ocurre con las copias de la Cloud cuando borras en el teléfono. Los álbumes nuevos siempre empiezan en **Off**.""",
@@ -118,11 +142,11 @@ Solo los archivos nuevos van a la carpeta nueva. Los archivos que ya tienen copi
         "title": "Carpetas para copiar",
         "body": """Las carpetas en las que GallerySync puede mirar.
 
-• **Añadir una carpeta:** abre el selector de carpetas de Android.
+• **Añadir una carpeta:** abre el selector de carpetas de Android. GallerySync vuelve a analizar la nueva carpeta y luego te pregunta a qué Cloud debe ir. Consulta [[dialog-new-folder-cloud]].
 • **Quitar:** selecciona carpetas, pulsa **Quitar** y confirma.
 
 Nada fuera de estas carpetas se analiza ni se modifica. Quitar una carpeta no pierde nada: vuelve a añadirla y todo regresa.""",
-        "en_hash": "3789c04bb52baef5",
+        "en_hash": "32d6ed14d5bc023a",
     },
 
     "dialog-remove-folder": {
