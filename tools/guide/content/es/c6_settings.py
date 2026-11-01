@@ -1,7 +1,7 @@
 TRANSLATIONS = {
     "_chapter": {
         "title": "La pestaña Settings",
-        "intro": "Una página con desplazamiento en bandas verdes: General, Backup, Adónde va cada carpeta, Albums, Sync, Sync de la cámara, Restore, Archive y Ayuda y comentarios. Cada banda tiene un (?).",
+        "intro": "Una página con desplazamiento en bandas verdes: General, Copia de seguridad, Adónde va cada carpeta, Álbumes, Sincronización, Sync de la cámara, Restaurar, Archivar y Ayuda y comentarios. Cada banda tiene un (?).",
         "en_hash": "0295c3a8f1702248",
     },
     "settings-overview": {
@@ -55,10 +55,10 @@ Afecta a las copias automáticas y a **Sync now**. Déjalo desactivado salvo que
     },
 
     "settings-section-backup": {
-        "title": "Backup",
+        "title": "Copia de seguridad",
         "body": """**Nubes:** conecta o cierra sesión en cada Cloud. Consulta [[settings-account]].
 
-Una Cloud está marcada como **principal (gratis)**: la primera que seleccionaste. Siempre es gratis. Las demás Clouds necesitan **Pro**: gratis durante 30 días (**Empezar prueba gratuita de 30 días**) y después una compra única (**Desbloquear Pro**). No se cobra nada automáticamente. Cuando tengas Pro, esas líneas desaparecen y **Pro desbloqueado. Puedes usar todas las nubes.** aparece en el encabezado verde **Backup**.""",
+Una Cloud está marcada como **principal (gratis)**: la primera que seleccionaste. Siempre es gratis. Las demás Clouds necesitan **Pro**: gratis durante 30 días (**Empezar prueba gratuita de 30 días**) y después una compra única (**Desbloquear Pro**). No se cobra nada automáticamente. Cuando tengas Pro, esas líneas desaparecen y **Pro desbloqueado. Puedes usar todas las nubes.** aparece en el encabezado verde **Copia de seguridad**.""",
         "en_hash": "457d0ce467900c35",
     },
 
@@ -89,7 +89,7 @@ Las carpetas siguen emparejadas con esa Cloud y esperan hasta que vuelvas a inic
 
     "settings-destination": {
         "title": "Adónde va cada carpeta",
-        "body": """Su propia banda en la pestaña Settings, entre **Backup** y **Albums**. Una fila por cada carpeta que añadiste en **Carpetas para copiar**, incluso si está vacía (se muestra como **Documents · 0 archivos**).
+        "body": """Su propia banda en la pestaña Settings, entre **Copia de seguridad** y **Álbumes**. Una fila por cada carpeta que añadiste en **Carpetas para copiar**, incluso si está vacía (se muestra como **Documents · 0 archivos**).
 
 • Cada fila indica la Cloud a la que va y en qué lugar de esa Cloud.
 • Pulsa la Cloud para cambiarla. Solo se puede cambiar con más de una Cloud y con Pro o la prueba.
@@ -133,7 +133,7 @@ Solo en Settings. El asistente hace la misma pregunta en su propio paso.""",
         "en_hash": "0034d417c7621eb5",
     },
     "settings-section-albums": {
-        "title": "Albums",
+        "title": "Álbumes",
         "body": """Qué carpetas vigila GallerySync, y qué ocurre con las copias de la Cloud cuando borras en el teléfono. Los álbumes nuevos siempre empiezan en **Off**.""",
         "en_hash": "dad7459947f2d8e1",
     },
@@ -199,7 +199,7 @@ Estos archivos siguen en la papelera de tu teléfono.
     },
 
     "settings-section-sync": {
-        "title": "Sync",
+        "title": "Sincronización",
         "body": """Cómo se optimizan las fotos y los vídeos de los álbumes **Sync**. Los archivos cambian solo después de que la Cloud los haya verificado. Funciona con OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 y Backblaze B2.""",
         "en_hash": "1147f4e959ac06bc",
     },
@@ -258,7 +258,7 @@ La app pregunta **¿Volver a optimizar los vídeos existentes?** **Sí** permite
     },
 
     "settings-section-restore": {
-        "title": "Restore (Settings)",
+        "title": "Restaurar (Settings)",
         "body": """Un interruptor para la pestaña Restore: **Mostrar carpetas vacías**.""",
         "en_hash": "58571cb29a96c3ed",
     },
@@ -281,7 +281,7 @@ La carpeta de la cámara no tiene modo **Sync**, y no se optimiza nada hasta que
     },
 
     "settings-section-archive": {
-        "title": "Archive (Settings)",
+        "title": "Archivar (Settings)",
         "body": """• **Only show files older than:** dónde empieza el filtro de la pestaña Archive. Consulta [[settings-archive-default-age]].
 • **Avisar cuando haya archivos listos para Archive:** desactivado de forma predeterminada. Consulta [[settings-archive-notify]].""",
         "en_hash": "7b4561ddc010537d",

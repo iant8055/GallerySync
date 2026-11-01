@@ -1,7 +1,7 @@
 TRANSLATIONS = {
     "_chapter": {
         "title": "L'onglet Settings",
-        "intro": "Une page défilante en bandes vertes : Général, Backup, Où va chaque dossier, Albums, Sync, Sync de l'appareil photo, Restore, Archive et Aide et commentaires. Chaque bande a un (?).",
+        "intro": "Une page défilante en bandes vertes : Général, Sauvegarde, Où va chaque dossier, Albums, Synchronisation, Sync de l'appareil photo, Restauration, Archivage et Aide et commentaires. Chaque bande a un (?).",
         "en_hash": "0295c3a8f1702248",
     },
     "settings-overview": {
@@ -49,10 +49,10 @@ Concerne les sauvegardes automatiques et **Sync now**. Laissez-le désactivé sa
         "en_hash": "e8860c60b1961fee",
     },
     "settings-section-backup": {
-        "title": "Backup",
+        "title": "Sauvegarde",
         "body": """**Clouds :** connectez ou déconnectez chaque Cloud. Voir [[settings-account]].
 
-Un Cloud est marqué **principal (gratuit)** : le premier Cloud que vous avez sélectionné. Il est toujours gratuit. Les autres Clouds demandent **Pro** : gratuit pendant 30 jours (**Commencer l'essai gratuit de 30 jours**), puis un achat unique (**Débloquer Pro**). Rien n'est facturé automatiquement. Une fois que vous possédez Pro, ces lignes disparaissent et **Pro débloqué. Vous pouvez utiliser tous les Clouds.** apparaît dans l'en-tête vert **Backup**.""",
+Un Cloud est marqué **principal (gratuit)** : le premier Cloud que vous avez sélectionné. Il est toujours gratuit. Les autres Clouds demandent **Pro** : gratuit pendant 30 jours (**Commencer l'essai gratuit de 30 jours**), puis un achat unique (**Débloquer Pro**). Rien n'est facturé automatiquement. Une fois que vous possédez Pro, ces lignes disparaissent et **Pro débloqué. Vous pouvez utiliser tous les Clouds.** apparaît dans l'en-tête vert **Sauvegarde**.""",
         "en_hash": "457d0ce467900c35",
     },
     "settings-account": {
@@ -81,7 +81,7 @@ Les dossiers restent associés à ce Cloud et attendent que vous vous reconnecti
     },
     "settings-destination": {
         "title": "Où va chaque dossier",
-        "body": """Sa propre bande dans l'onglet Settings, entre **Backup** et **Albums**. Une ligne pour chaque dossier que vous avez ajouté dans **Dossiers à sauvegarder**, même s'il est vide (affiché comme **Documents · 0 fichier**).
+        "body": """Sa propre bande dans l'onglet Settings, entre **Sauvegarde** et **Albums**. Une ligne pour chaque dossier que vous avez ajouté dans **Dossiers à sauvegarder**, même s'il est vide (affiché comme **Documents · 0 fichier**).
 
 • Chaque ligne indique le Cloud où il va, et l'endroit dans ce Cloud.
 • Touchez le Cloud pour le changer. C'est possible seulement avec plus d'un Cloud et avec Pro ou l'essai.
@@ -182,7 +182,7 @@ Ces fichiers sont encore dans la corbeille de votre téléphone.
         "en_hash": "a5707f1ea8aad403",
     },
     "settings-section-sync": {
-        "title": "Sync",
+        "title": "Synchronisation",
         "body": """Comment les photos et vidéos des albums **Sync** sont optimisées. Les fichiers ne changent qu'après vérification par le Cloud. Fonctionne avec OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 et Backblaze B2.""",
         "en_hash": "1147f4e959ac06bc",
     },
@@ -235,7 +235,7 @@ L'application demande **Optimiser de nouveau les vidéos existantes ?** **Oui**
         "en_hash": "b68338f9be222883",
     },
     "settings-section-restore": {
-        "title": "Restore (Settings)",
+        "title": "Restauration (Settings)",
         "body": """Un interrupteur pour l'onglet Restore : **Afficher les dossiers vides**.""",
         "en_hash": "58571cb29a96c3ed",
     },
@@ -255,7 +255,7 @@ Le dossier de l'appareil photo n'a pas de mode **Sync**, et rien n'y est optimis
         "en_hash": "d596a9c99a8de79d",
     },
     "settings-section-archive": {
-        "title": "Archive (Settings)",
+        "title": "Archivage (Settings)",
         "body": """• **Only show files older than :** là où commence le filtre de l'onglet Archive. Voir [[settings-archive-default-age]].
 • **Prévenir quand des fichiers sont prêts pour Archive :** désactivé par défaut. Voir [[settings-archive-notify]].""",
         "en_hash": "7b4561ddc010537d",

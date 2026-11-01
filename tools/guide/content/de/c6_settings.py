@@ -1,7 +1,7 @@
 TRANSLATIONS = {
     "_chapter": {
         "title": "Der Settings-Tab",
-        "intro": "Eine scrollende Seite in grünen Bändern: Allgemein, Backup, Wohin jeder Ordner geht, Albums, Sync, Kamera-Sync, Restore, Archive und Hilfe und Feedback. Jedes Band hat ein (?).",
+        "intro": "Eine scrollende Seite in grünen Bändern: Allgemein, Backup, Wohin jeder Ordner geht, Alben, Synchronisierung, Kamera-Sync, Wiederherstellen, Archiv und Hilfe und Feedback. Jedes Band hat ein (?).",
         "en_hash": "0295c3a8f1702248",
     },
     "settings-overview": {
@@ -81,7 +81,7 @@ Ordner bleiben dieser Cloud zugeordnet und warten, bis du dich wieder anmeldest.
     },
     "settings-destination": {
         "title": "Wohin jeder Ordner geht",
-        "body": """Ein eigenes Band im Settings-Tab, zwischen **Backup** und **Albums**. Eine Zeile für jeden Ordner, den du unter **Ordner zum Sichern** hinzugefügt hast, auch wenn er leer ist (angezeigt als **Documents · 0 Dateien**).
+        "body": """Ein eigenes Band im Settings-Tab, zwischen **Backup** und **Alben**. Eine Zeile für jeden Ordner, den du unter **Ordner zum Sichern** hinzugefügt hast, auch wenn er leer ist (angezeigt als **Documents · 0 Dateien**).
 
 • Jede Zeile nennt die Cloud, zu der er geht, und wo in dieser Cloud.
 • Tippe auf die Cloud, um sie zu ändern. Das geht nur mit mehr als einer Cloud und mit Pro oder dem Test.
@@ -122,7 +122,7 @@ Nur in Settings. Der Assistent fragt dasselbe in seinem eigenen Schritt.""",
         "en_hash": "0034d417c7621eb5",
     },
     "settings-section-albums": {
-        "title": "Albums",
+        "title": "Alben",
         "body": """Welche Ordner GallerySync beobachtet und was mit Cloud-Kopien geschieht, wenn du vom Telefon löschst. Neue Alben beginnen immer bei **Off**.""",
         "en_hash": "dad7459947f2d8e1",
     },
@@ -182,7 +182,7 @@ Diese Dateien liegen noch im Papierkorb deines Telefons.
         "en_hash": "a5707f1ea8aad403",
     },
     "settings-section-sync": {
-        "title": "Sync",
+        "title": "Synchronisierung",
         "body": """Wie Fotos und Videos in **Sync**-Alben optimiert werden. Dateien ändern sich erst, nachdem die Cloud sie überprüft hat. Funktioniert mit OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 und Backblaze B2.""",
         "en_hash": "1147f4e959ac06bc",
     },
@@ -235,7 +235,7 @@ Die App fragt **Vorhandene Videos neu optimieren?** **Ja** lässt Videos, die zu
         "en_hash": "b68338f9be222883",
     },
     "settings-section-restore": {
-        "title": "Restore (Settings)",
+        "title": "Wiederherstellen (Settings)",
         "body": """Ein Schalter für den Restore-Tab: **Leere Ordner anzeigen**.""",
         "en_hash": "58571cb29a96c3ed",
     },
@@ -255,7 +255,7 @@ Der Kameraordner hat keinen **Sync**-Modus, und nichts wird optimiert, bis du da
         "en_hash": "d596a9c99a8de79d",
     },
     "settings-section-archive": {
-        "title": "Archive (Settings)",
+        "title": "Archiv (Settings)",
         "body": """• **Only show files older than:** wo der Filter des Archive-Tabs beginnt. Siehe [[settings-archive-default-age]].
 • **Benachrichtigen, wenn Dateien für Archive bereit sind:** standardmäßig aus. Siehe [[settings-archive-notify]].""",
         "en_hash": "7b4561ddc010537d",

@@ -1,7 +1,7 @@
 TRANSLATIONS = {
     "_chapter": {
         "title": "Settings タブ",
-        "intro": "緑の帯で区切られた 1 ページのスクロール画面：全般、Backup、各フォルダの保存先、Albums、Sync、カメラの Sync、Restore、Archive、ヘルプとフィードバック。各帯に (?) があります。",
+        "intro": "緑の帯で区切られた 1 ページのスクロール画面：全般、バックアップ、各フォルダの保存先、アルバム、同期、カメラの Sync、復元、アーカイブ、ヘルプとフィードバック。各帯に (?) があります。",
         "en_hash": "0295c3a8f1702248",
     },
     "settings-overview": {
@@ -49,10 +49,10 @@ TRANSLATIONS = {
         "en_hash": "e8860c60b1961fee",
     },
     "settings-section-backup": {
-        "title": "Backup",
+        "title": "バックアップ",
         "body": """**クラウド**：各 Cloud に接続、またはログアウトします。[[settings-account]]を参照してください。
 
-1 つの Cloud には **メイン（無料）** が付きます。最初に選んだ Cloud で、常に無料です。ほかの Cloud には **Pro** が必要です：30 日間は無料（**30 日間の無料試用を開始**）で、その後は 1 回限りの購入（**Pro のロックを解除**）です。自動的に請求されることはありません。Pro を所有すると、これらの行は消え、**Pro のロックを解除済み。すべてのクラウドを使えます。** が緑の **Backup** セクション見出しに表示されます。""",
+1 つの Cloud には **メイン（無料）** が付きます。最初に選んだ Cloud で、常に無料です。ほかの Cloud には **Pro** が必要です：30 日間は無料（**30 日間の無料試用を開始**）で、その後は 1 回限りの購入（**Pro のロックを解除**）です。自動的に請求されることはありません。Pro を所有すると、これらの行は消え、**Pro のロックを解除済み。すべてのクラウドを使えます。** が緑の **バックアップ** セクション見出しに表示されます。""",
         "en_hash": "457d0ce467900c35",
     },
     "settings-account": {
@@ -81,7 +81,7 @@ Cloud の名前と **接続** または **キーを入力** が同じ行に表�
     },
     "settings-destination": {
         "title": "各フォルダの保存先",
-        "body": """Settings タブの独立した帯で、**Backup** と **Albums** の間にあります。**バックアップするフォルダ** で追加したすべてのフォルダに 1 行ずつ、空のフォルダでも（**Documents · 0 ファイル** のように）表示します。
+        "body": """Settings タブの独立した帯で、**バックアップ** と **アルバム** の間にあります。**バックアップするフォルダ** で追加したすべてのフォルダに 1 行ずつ、空のフォルダでも（**Documents · 0 ファイル** のように）表示します。
 
 • 各行には、送信先 Cloud と、その Cloud 内の場所が表示されます。
 • Cloud をタップして変更します。変更できるのは、Cloud が複数あり、Pro または試用中の場合だけです。
@@ -122,7 +122,7 @@ Settings 専用です。アシスタント（ウィザード）は、独自の�
         "en_hash": "0034d417c7621eb5",
     },
     "settings-section-albums": {
-        "title": "Albums",
+        "title": "アルバム",
         "body": """GallerySync が監視するフォルダと、スマートフォンから削除したときの Cloud 上のコピーの扱い。新しいアルバムは、必ず **Off** から始まります。""",
         "en_hash": "dad7459947f2d8e1",
     },
@@ -182,7 +182,7 @@ Settings 専用です。アシスタント（ウィザード）は、独自の�
         "en_hash": "a5707f1ea8aad403",
     },
     "settings-section-sync": {
-        "title": "Sync",
+        "title": "同期",
         "body": """**Sync** アルバムの写真と動画を、どのように最適化するか。ファイルが変更されるのは、Cloud が確認した後だけです。OneDrive、Google Drive、Dropbox、pCloud、IDrive e2、Backblaze B2 で使えます。""",
         "en_hash": "1147f4e959ac06bc",
     },
@@ -235,7 +235,7 @@ Sync アルバム内にあり、verified in the Cloud で、設定より古く�
         "en_hash": "b68338f9be222883",
     },
     "settings-section-restore": {
-        "title": "Restore (Settings)",
+        "title": "復元 (Settings)",
         "body": """Restore タブ用のスイッチが 1 つあります：**空のフォルダを表示**。""",
         "en_hash": "58571cb29a96c3ed",
     },
@@ -255,7 +255,7 @@ Sync アルバム内にあり、verified in the Cloud で、設定より古く�
         "en_hash": "d596a9c99a8de79d",
     },
     "settings-section-archive": {
-        "title": "Archive (Settings)",
+        "title": "アーカイブ (Settings)",
         "body": """• **Only show files older than**：Archive タブのフィルターの開始値。[[settings-archive-default-age]]を参照してください。
 • **Archive できるファイルがあれば通知する**：既定ではオフ。[[settings-archive-notify]]を参照してください。""",
         "en_hash": "7b4561ddc010537d",

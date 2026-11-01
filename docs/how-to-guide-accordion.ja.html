@@ -474,7 +474,7 @@
 <p>OneDrive のファイルだけを数えます。事前に確認されるのは、OneDrive のコピーだけだからです。ほかの Cloud は、<strong>Check these files</strong> を押したときに確認されます。ホームを押した場合や、アプリをスワイプして終了した場合、このリマインダーは表示されません。</p>
   </div></details>
   <h2 id="ch-settings">Settings タブ</h2>
-  <p class="chapter-intro">緑の帯で区切られた 1 ページのスクロール画面：全般、Backup、各フォルダの保存先、Albums、Sync、カメラの Sync、Restore、Archive、ヘルプとフィードバック。各帯に (?) があります。</p>
+  <p class="chapter-intro">緑の帯で区切られた 1 ページのスクロール画面：全般、バックアップ、各フォルダの保存先、アルバム、同期、カメラの Sync、復元、アーカイブ、ヘルプとフィードバック。各帯に (?) があります。</p>
   <details class="topic"><summary>Settings タブの構成</summary>
   <div class="topic-body" id="settings-overview">
 <ul><li>変更はすぐに反映されます。Save ボタンはありません。</li><li>ここにあるものでスマートフォンからファイルが削除されることはありません。削除するのは Archive だけです。</li><li>Settings と初回セットアップは別々です。<a class="xref" href="#setup-and-settings">“セットアップと Settings は別々です”</a>を参照してください。</li></ul>
@@ -504,10 +504,10 @@
 <ul><li><strong>Off</strong>（既定）：<strong>Wi-Fi のみ。</strong></li><li><strong>On</strong>：<strong>Wi-Fi とモバイルデータで同期します。</strong></li></ul>
 <p>自動バックアップと <strong>Sync now</strong> に適用されます。データ通信量が無制限でない限り、オフのままにしておいてください。</p>
   </div></details>
-  <details class="topic"><summary>Backup</summary>
+  <details class="topic"><summary>バックアップ</summary>
   <div class="topic-body" id="settings-section-backup">
 <p><strong>クラウド</strong>：各 Cloud に接続、またはログアウトします。<a class="xref" href="#settings-account">“クラウドとログアウト”</a>を参照してください。</p>
-<p>1 つの Cloud には <strong>メイン（無料）</strong> が付きます。最初に選んだ Cloud で、常に無料です。ほかの Cloud には <strong>Pro</strong> が必要です：30 日間は無料（<strong>30 日間の無料試用を開始</strong>）で、その後は 1 回限りの購入（<strong>Pro のロックを解除</strong>）です。自動的に請求されることはありません。Pro を所有すると、これらの行は消え、<strong>Pro のロックを解除済み。すべてのクラウドを使えます。</strong> が緑の <strong>Backup</strong> セクション見出しに表示されます。</p>
+<p>1 つの Cloud には <strong>メイン（無料）</strong> が付きます。最初に選んだ Cloud で、常に無料です。ほかの Cloud には <strong>Pro</strong> が必要です：30 日間は無料（<strong>30 日間の無料試用を開始</strong>）で、その後は 1 回限りの購入（<strong>Pro のロックを解除</strong>）です。自動的に請求されることはありません。Pro を所有すると、これらの行は消え、<strong>Pro のロックを解除済み。すべてのクラウドを使えます。</strong> が緑の <strong>バックアップ</strong> セクション見出しに表示されます。</p>
   </div></details>
   <details class="topic"><summary>クラウドとログアウト</summary>
   <div class="topic-body" id="settings-account">
@@ -526,7 +526,7 @@
   </div></details>
   <details class="topic"><summary>各フォルダの保存先</summary>
   <div class="topic-body" id="settings-destination">
-<p>Settings タブの独立した帯で、<strong>Backup</strong> と <strong>Albums</strong> の間にあります。<strong>バックアップするフォルダ</strong> で追加したすべてのフォルダに 1 行ずつ、空のフォルダでも（<strong>Documents · 0 ファイル</strong> のように）表示します。</p>
+<p>Settings タブの独立した帯で、<strong>バックアップ</strong> と <strong>アルバム</strong> の間にあります。<strong>バックアップするフォルダ</strong> で追加したすべてのフォルダに 1 行ずつ、空のフォルダでも（<strong>Documents · 0 ファイル</strong> のように）表示します。</p>
 <ul><li>各行には、送信先 Cloud と、その Cloud 内の場所が表示されます。</li><li>Cloud をタップして変更します。変更できるのは、Cloud が複数あり、Pro または試用中の場合だけです。</li><li>変更の対象になるのは、新しいファイルだけです。送信済みのファイルは、そのまま残ります。</li><li>Pro なしで追加の Cloud に割り当てたフォルダは、何も送らず、その旨が表示されます。</li><li><strong>バックアップするフォルダ</strong> でフォルダを削除すると、ここの行もすぐに消えます。</li></ul>
 <p>行はファイルの送信先候補を示すだけです。アルバムにモードが設定されるまで、何もアップロードされません。<a class="xref" href="#settings-folders">“バックアップするフォルダ”</a>を参照してください。</p>
   </div></details>
@@ -546,7 +546,7 @@
 <ul><li>上部に <strong>&lt;フォルダ&gt; のバックアップ先を選んでください</strong>。</li><li>接続済みの各 Cloud ごとに 1 行。その下の <strong>保存先：&lt;Cloud&gt; / &lt;パス&gt;</strong> は、選択中の Cloud のファイルが行く先を示します。Google Photos は代わりに <strong>保存先：Google Photos のライブラリ</strong> と表示し、<strong>変更</strong> はありません。</li><li><strong>変更</strong> でその Cloud の送信先ダイアログが開きます。<a class="xref" href="#dialog-destination">“新しいバックアップの保存先（「変更」ダイアログ）”</a>を参照してください。</li><li><strong>クラウドに送るフォルダーはすべて、そのクラウド内の同じ場所に入ります。変更すると、新しいファイルだけがそこに入ります。</strong> 送信済みのファイルは、そのまま残ります。</li><li><strong>OK</strong> で Cloud が設定されます。<strong>後で決める</strong> と、ダイアログを閉じる操作は何も変えません。フォルダはメインの Cloud のままで、<a class="xref" href="#settings-destination">“各フォルダの保存先”</a> の行であとから送信先を変更できます。</li></ul>
 <p>Settings 専用です。アシスタント（ウィザード）は、独自のステップで同じことを尋ねます。</p>
   </div></details>
-  <details class="topic"><summary>Albums</summary>
+  <details class="topic"><summary>アルバム</summary>
   <div class="topic-body" id="settings-section-albums">
 <p>GallerySync が監視するフォルダと、スマートフォンから削除したときの Cloud 上のコピーの扱い。新しいアルバムは、必ず <strong>Off</strong> から始まります。</p>
   </div></details>
@@ -583,7 +583,7 @@
 <p>ファイル数とそのサイズが表示されます。それらは OneDrive のゴミ箱に移動し、GallerySync がそれを空にすることはありません。</p>
 <p><strong>Remove from OneDrive</strong> で実行し、<strong>Cancel</strong> では何も決まりません。スマートフォンに戻ってきたファイルには、手を付けません。</p>
   </div></details>
-  <details class="topic"><summary>Sync</summary>
+  <details class="topic"><summary>同期</summary>
   <div class="topic-body" id="settings-section-sync">
 <p><strong>Sync</strong> アルバムの写真と動画を、どのように最適化するか。ファイルが変更されるのは、Cloud が確認した後だけです。OneDrive、Google Drive、Dropbox、pCloud、IDrive e2、Backblaze B2 で使えます。</p>
   </div></details>
@@ -618,7 +618,7 @@
 <h4>圧縮を強くした後</h4>
 <p>アプリが <strong>既存の動画を再び最適化しますか？</strong> と尋ねます。<strong>はい</strong> にすると、以前は小さすぎて縮小できなかった動画を、もう一度試します。<strong>いいえ</strong> では、そのままです。すでに最適化された動画には、手を付けません。</p>
   </div></details>
-  <details class="topic"><summary>Restore (Settings)</summary>
+  <details class="topic"><summary>復元 (Settings)</summary>
   <div class="topic-body" id="settings-section-restore">
 <p>Restore タブ用のスイッチが 1 つあります：<strong>空のフォルダを表示</strong>。</p>
   </div></details>
@@ -632,7 +632,7 @@
 <ul><li><strong>カメラのフォルダ</strong>：カメラが保存先にするフォルダ。一覧から選ぶか、<strong>その他…</strong> を選びます。</li><li><strong>Select Photos/Videos older than</strong>、<strong>Photos</strong>、<strong>Videos</strong>：そのフォルダの最適化コントロールの既定値（<a class="xref" href="#album-camera-optimise">“カメラのフォルダの古い写真と動画を最適化する”</a>）。</li><li><strong>動画の圧縮</strong>：そこで最適化される動画用。</li></ul>
 <p>カメラのフォルダには <strong>Sync</strong> モードがなく、その中で <strong>Sync now</strong> を押すまで、何も最適化されません。上の最適化スイッチは影響しません。</p>
   </div></details>
-  <details class="topic"><summary>Archive (Settings)</summary>
+  <details class="topic"><summary>アーカイブ (Settings)</summary>
   <div class="topic-body" id="settings-section-archive">
 <ul><li><strong>Only show files older than</strong>：Archive タブのフィルターの開始値。<a class="xref" href="#settings-archive-default-age">“Only show files older than (Settings)”</a>を参照してください。</li><li><strong>Archive できるファイルがあれば通知する</strong>：既定ではオフ。<a class="xref" href="#settings-archive-notify">“Archive できるファイルがあれば通知する”</a>を参照してください。</li></ul>
   </div></details>

@@ -1,7 +1,7 @@
 TRANSLATIONS = {
     "_chapter": {
         "title": 'A aba Settings',
-        "intro": 'Uma página rolável em faixas verdes: Geral, Backup, Para onde vai cada pasta, Albums, Sync, Sync da câmera, Restore, Archive e Ajuda e feedback. Cada faixa tem um (?).',
+        "intro": 'Uma página rolável em faixas verdes: Geral, Backup, Para onde vai cada pasta, Álbuns, Sincronização, Sync da câmera, Restaurar, Arquivar e Ajuda e feedback. Cada faixa tem um (?).',
         "en_hash": "0295c3a8f1702248",
     },
     'settings-overview': {
@@ -81,7 +81,7 @@ As pastas continuam vinculadas a essa Cloud e esperam até você entrar de novo.
     },
     'settings-destination': {
         "title": 'Para onde vai cada pasta',
-        "body": """É sua própria faixa na aba Settings, entre **Backup** e **Albums**. Uma linha para cada pasta que você adicionou em **Pastas para backup**, mesmo que esteja vazia (mostrada como **Documents · 0 arquivos**).
+        "body": """É sua própria faixa na aba Settings, entre **Backup** e **Álbuns**. Uma linha para cada pasta que você adicionou em **Pastas para backup**, mesmo que esteja vazia (mostrada como **Documents · 0 arquivos**).
 
 • Cada linha mostra a Cloud para onde ela vai e o lugar dentro dessa Cloud.
 • Toque na Cloud para mudá-la. Só é possível mudar com mais de uma Cloud e com o Pro ou o teste.
@@ -122,7 +122,7 @@ Só em Settings. O assistente faz a mesma pergunta no passo dele.""",
         "en_hash": "0034d417c7621eb5",
     },
     'settings-section-albums': {
-        "title": 'Albums',
+        "title": 'Álbuns',
         "body": """Quais pastas o GallerySync observa e o que acontece com as cópias na Cloud quando você apaga algo do telefone. Os álbuns novos sempre começam em **Off**.""",
         "en_hash": "dad7459947f2d8e1",
     },
@@ -182,7 +182,7 @@ Esses arquivos ainda estão na lixeira do seu telefone.
         "en_hash": "a5707f1ea8aad403",
     },
     'settings-section-sync': {
-        "title": 'Sync',
+        "title": 'Sincronização',
         "body": """Como as fotos e os vídeos em álbuns **Sync** são otimizados. Os arquivos só mudam depois que a Cloud os verificou. Funciona com OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 e Backblaze B2.""",
         "en_hash": "1147f4e959ac06bc",
     },
@@ -235,7 +235,7 @@ O app pergunta **Otimizar de novo os vídeos existentes?** **Sim** permite que v
         "en_hash": "b68338f9be222883",
     },
     'settings-section-restore': {
-        "title": 'Restore (Settings)',
+        "title": 'Restaurar (Settings)',
         "body": """Um botão para a aba Restore: **Mostrar pastas vazias**.""",
         "en_hash": "58571cb29a96c3ed",
     },
@@ -255,7 +255,7 @@ A Pasta da câmera não tem o modo **Sync**, e nada é otimizado até você pres
         "en_hash": "d596a9c99a8de79d",
     },
     'settings-section-archive': {
-        "title": 'Archive (Settings)',
+        "title": 'Arquivar (Settings)',
         "body": """• **Only show files older than:** onde o filtro da aba Archive começa. Veja [[settings-archive-default-age]].
 • **Avisar quando houver arquivos prontos para Archive:** desligado por padrão. Veja [[settings-archive-notify]].""",
         "en_hash": "7b4561ddc010537d",
