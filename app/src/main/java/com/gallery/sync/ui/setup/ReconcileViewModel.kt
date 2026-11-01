@@ -3,6 +3,7 @@ package com.gallery.sync.ui.setup
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.gallery.sync.data.local.media.MediaScanRules
 import com.gallery.sync.data.local.media.DiscoveredDirectory
 import com.gallery.sync.data.local.media.MediaScanner
 import com.gallery.sync.domain.backup.BackupEngine
@@ -1001,7 +1002,7 @@ class ReconcileViewModel @Inject constructor(
     }
 
     /** Records a folder the user picked. The re-check follows from the grant list changing. */
-    fun addSource(treeUri: Uri) {
+    fun addSource(treeUri: Uri, onAdded: (topLevelFolder: String) -> Unit = {}) {
         viewModelScope.launch {
             // The suspending call must complete *before* the state read, not inside it. Written as
             // `_state.value = _state.value.copy(refused = !sources.add(uri))`, Kotlin evaluates the
@@ -1011,6 +1012,11 @@ class ReconcileViewModel @Inject constructor(
             // Observed on hardware 25 Aug 2026: the folder appeared only after a restart.
             val added = sources.add(treeUri)
             _state.value = _state.value.copy(directoryRefused = !added)
+            if (added) {
+                MediaScanRules.topLevelFolderOf(
+                    TreeScope.pathFromTreeDocumentId(DocumentsContract.getTreeDocumentId(treeUri))
+                )?.let(onAdded)
+            }
         }
     }
 

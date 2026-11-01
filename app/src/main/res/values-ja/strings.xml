@@ -97,6 +97,9 @@
     <string name="media_age_one_hour">1 時間</string>
     <string name="media_age_one_week">1 週間</string>
     <string name="media_age_twelve_hours">12 時間</string>
+    <string name="new_folder_cloud_later">後で決める</string>
+    <string name="new_folder_cloud_shared">クラウドに送るフォルダーはすべて、そのクラウド内の同じ場所に入ります。変更すると、新しいファイルだけがそこに入ります。</string>
+    <string name="new_folder_cloud_title">%1$s のバックアップ先を選んでください</string>
     <string name="pairing_needs_pro">Pro が必要です：ロックを解除するまで %1$s には何も送信されません。または、このフォルダを無料のクラウドに割り当ててください。</string>
     <string name="pairing_no_cloud">クラウドなし</string>
     <string name="pairing_not_connected">%1$s は接続されていません。このフォルダは何もバックアップされていません。上で接続するか、別のクラウドを選んでください。</string>

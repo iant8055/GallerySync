@@ -278,7 +278,17 @@ fun SettingsScreen(
             help = HelpTopic.SETTINGS_SECTION_ALBUMS
         )
 
-        SourcesSection()
+        SourcesSection(onFolderAdded = viewModel::rescanThenAskWhereFolderGoes)
+
+        state.folderToPlace?.let { folder ->
+            NewFolderCloudDialog(
+                folder = folder,
+                current = state.folders.firstOrNull { it.name == folder }?.location,
+                cloudState = cloudState,
+                onChangeCloudFolder = cloudViewModel::chooseFolder,
+                onAnswer = viewModel::answerWhereFolderGoes
+            )
+        }
 
         SettingDivider()
 

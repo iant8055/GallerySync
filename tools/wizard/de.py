@@ -284,4 +284,7 @@ T = {
 "font_app": "App",
 "font_phone": "Telefon",
 "cloud_pro_unlocked": "Pro freigeschaltet. Du kannst jede Cloud nutzen.",
+"new_folder_cloud_title": "Wohin soll %1$s gesichert werden?",
+"new_folder_cloud_shared": "Alle Ordner, die an eine Cloud gehen, landen dort am selben Ort. Änderst du ihn, gehen nur neue Dateien dorthin.",
+"new_folder_cloud_later": "Später entscheiden",
 }

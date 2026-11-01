@@ -461,6 +461,21 @@
   "en": "12 hours"
  },
  {
+  "key": "new_folder_cloud_later",
+  "type": "string",
+  "en": "Decide later"
+ },
+ {
+  "key": "new_folder_cloud_shared",
+  "type": "string",
+  "en": "Every folder sent to a Cloud goes to the same place in it. If you change it, only new files go there."
+ },
+ {
+  "key": "new_folder_cloud_title",
+  "type": "string",
+  "en": "Where should %1$s back up to?"
+ },
+ {
   "key": "pairing_needs_pro",
   "type": "string",
   "en": "Needs Pro: nothing is being sent to %1$s until you unlock it, or pair this folder with your free Cloud."

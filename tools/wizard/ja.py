@@ -283,4 +283,7 @@ T = {
 "font_app": "アプリ",
 "font_phone": "端末",
 "cloud_pro_unlocked": "Pro のロックを解除済み。すべてのクラウドを使えます。",
+"new_folder_cloud_title": "%1$s のバックアップ先を選んでください",
+"new_folder_cloud_shared": "クラウドに送るフォルダーはすべて、そのクラウド内の同じ場所に入ります。変更すると、新しいファイルだけがそこに入ります。",
+"new_folder_cloud_later": "後で決める",
 }

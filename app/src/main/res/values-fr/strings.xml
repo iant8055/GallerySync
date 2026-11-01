@@ -101,6 +101,9 @@
     <string name="media_age_one_hour">1 heure</string>
     <string name="media_age_one_week">1 semaine</string>
     <string name="media_age_twelve_hours">12 heures</string>
+    <string name="new_folder_cloud_later">Décider plus tard</string>
+    <string name="new_folder_cloud_shared">Tous les dossiers envoyés vers un Cloud vont au même endroit. Si vous le changez, seuls les nouveaux fichiers iront là.</string>
+    <string name="new_folder_cloud_title">Où sauvegarder %1$s ?</string>
     <string name="pairing_needs_pro">Nécessite Pro : rien n\'est envoyé vers %1$s tant que vous ne l\'avez pas débloqué, ou associez ce dossier à votre Cloud gratuit.</string>
     <string name="pairing_no_cloud">Aucun Cloud</string>
     <string name="pairing_not_connected">%1$s n\'est pas connecté. Rien dans ce dossier n\'est sauvegardé. Connectez-le plus haut ou choisissez un autre Cloud.</string>

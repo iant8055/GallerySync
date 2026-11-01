@@ -37,7 +37,9 @@ import com.gallery.sync.ui.setup.ReconcileViewModel
 @Composable
 fun SourcesSection(
     modifier: Modifier = Modifier,
-    viewModel: ReconcileViewModel = hiltViewModel()
+    viewModel: ReconcileViewModel = hiltViewModel(),
+    /** A folder was added: its top-level folder, the level a Cloud is chosen at. */
+    onFolderAdded: (String) -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -48,7 +50,7 @@ fun SourcesSection(
 
     val pickFolder = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocumentTree()
-    ) { uri -> uri?.let(viewModel::addSource) }
+    ) { uri -> uri?.let { viewModel.addSource(it, onFolderAdded) } }
 
     Column(
         modifier = modifier.fillMaxWidth(),

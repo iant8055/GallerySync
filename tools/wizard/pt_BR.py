@@ -284,4 +284,7 @@ T = {
 "font_app": "Do app",
 "font_phone": "Do telefone",
 "cloud_pro_unlocked": "Pro desbloqueado. Você pode usar todas as nuvens.",
+"new_folder_cloud_title": "Onde fazer o backup de %1$s?",
+"new_folder_cloud_shared": "Todas as pastas enviadas a uma nuvem vão para o mesmo lugar nela. Se você mudar, só os arquivos novos irão para lá.",
+"new_folder_cloud_later": "Decidir depois",
 }

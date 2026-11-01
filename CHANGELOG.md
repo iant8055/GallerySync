@@ -12,6 +12,10 @@ Every change since version 26 (0.3.25), the last build the Closed Testing group 
 - A connected Cloud shows two columns under the headings **Clouds** and **Backup folder**: its name, account and Sign out on
   the left, its folder and Change on the right.
 
+**Adding a folder**
+- Add a folder in Settings now rescans by itself, then asks which Cloud the folder should go to, and shows where in that Cloud,
+  with **Change**. **Decide later** changes nothing. Nothing is uploaded until an album has a mode.
+
 ## Version 32 (0.3.31) — 25 Oct 2026, Production
 
 The same code as the final version 31 build. Version 31 (0.3.30) was uploaded but Play's automatic app-string translation

@@ -101,6 +101,9 @@
     <string name="media_age_one_hour">1 hora</string>
     <string name="media_age_one_week">1 semana</string>
     <string name="media_age_twelve_hours">12 horas</string>
+    <string name="new_folder_cloud_later">Decidir depois</string>
+    <string name="new_folder_cloud_shared">Todas as pastas enviadas a uma nuvem vão para o mesmo lugar nela. Se você mudar, só os arquivos novos irão para lá.</string>
+    <string name="new_folder_cloud_title">Onde fazer o backup de %1$s?</string>
     <string name="pairing_needs_pro">Requer Pro: nada está sendo enviado para %1$s até você desbloquear, ou ligue esta pasta à sua Nuvem grátis.</string>
     <string name="pairing_no_cloud">Sem Nuvem</string>
     <string name="pairing_not_connected">%1$s não está conectado. Nada desta pasta está tendo backup. Conecte acima ou escolha outra Nuvem.</string>

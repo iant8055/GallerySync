@@ -99,6 +99,9 @@
     <string name="media_age_one_hour">1 घंटा</string>
     <string name="media_age_one_week">1 हफ़्ता</string>
     <string name="media_age_twelve_hours">12 घंटे</string>
+    <string name="new_folder_cloud_later">बाद में तय करें</string>
+    <string name="new_folder_cloud_shared">किसी क्लाउड में भेजे गए सभी फ़ोल्डर उसमें एक ही जगह जाते हैं। इसे बदलने पर सिर्फ़ नई फ़ाइलें वहाँ जाएँगी।</string>
+    <string name="new_folder_cloud_title">%1$s का बैकअप कहाँ हो?</string>
     <string name="pairing_needs_pro">Pro चाहिए: जब तक आप इसे अनलॉक नहीं करते, %1$s में कुछ नहीं भेजा जा रहा है, या इस फ़ोल्डर को अपने मुफ़्त क्लाउड से जोड़ें।</string>
     <string name="pairing_no_cloud">कोई क्लाउड नहीं</string>
     <string name="pairing_not_connected">%1$s कनेक्ट नहीं है। इस फ़ोल्डर की किसी फ़ाइल का बैकअप नहीं हो रहा है। ऊपर इसे कनेक्ट करें, या कोई दूसरा क्लाउड चुनें।</string>

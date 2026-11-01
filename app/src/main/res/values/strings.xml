@@ -151,6 +151,9 @@
     <string name="cloud_field_access_key">Access key ID</string>
     <string name="cloud_field_secret_key">Secret access key</string>
     <string name="backup_folders_heading">Where each folder goes</string>
+    <string name="new_folder_cloud_title">Where should %1$s back up to?</string>
+    <string name="new_folder_cloud_shared">Every folder sent to a Cloud goes to the same place in it. If you change it, only new files go there.</string>
+    <string name="new_folder_cloud_later">Decide later</string>
     <string name="pairing_path">Goes to %1$s / %2$s</string>
     <string name="pairing_path_library">Goes to your Google Photos library</string>
     <string name="pairing_needs_pro">Needs Pro: nothing is being sent to %1$s until you unlock it, or pair this folder with your free Cloud.</string>

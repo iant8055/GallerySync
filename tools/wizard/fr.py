@@ -284,6 +284,9 @@ T = {
 "font_app": "De l'appli",
 "font_phone": "Du téléphone",
 "cloud_pro_unlocked": "Pro débloqué. Vous pouvez utiliser tous les Clouds.",
+"new_folder_cloud_title": "Où sauvegarder %1$s ?",
+"new_folder_cloud_shared": "Tous les dossiers envoyés vers un Cloud vont au même endroit. Si vous le changez, seuls les nouveaux fichiers iront là.",
+"new_folder_cloud_later": "Décider plus tard",
 }
 
 # French spacing: a no-break space before ? and :, so the mark never wraps onto a line of its own.

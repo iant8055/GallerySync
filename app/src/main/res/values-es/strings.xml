@@ -101,6 +101,9 @@
     <string name="media_age_one_hour">1 hora</string>
     <string name="media_age_one_week">1 semana</string>
     <string name="media_age_twelve_hours">12 horas</string>
+    <string name="new_folder_cloud_later">Decidir más tarde</string>
+    <string name="new_folder_cloud_shared">Todas las carpetas enviadas a una nube van al mismo lugar en ella. Si lo cambias, solo los archivos nuevos irán allí.</string>
+    <string name="new_folder_cloud_title">¿Dónde se debe guardar %1$s?</string>
     <string name="pairing_needs_pro">Requiere Pro: no se envía nada a %1$s hasta que lo desbloquees, o empareja esta carpeta con tu Nube gratuita.</string>
     <string name="pairing_no_cloud">Sin Nube</string>
     <string name="pairing_not_connected">%1$s no está conectado. No se está haciendo copia de nada de esta carpeta. Conéctalo arriba o elige otra Nube.</string>

@@ -53,6 +53,7 @@ import com.gallery.sync.domain.backup.StopReason
 import com.gallery.sync.domain.backup.VideoQuality
 import com.gallery.sync.util.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -328,6 +329,8 @@ data class BackupUiState(
     val backupLocation: BackupLocation = BackupLocation.DEFAULT,
     /** Top-level folders found on the device, each with its own destination. */
     val folders: List<FolderRow> = emptyList(),
+    /** A folder just added in Settings and now scanned: the pop-up asking where it goes is up for it. */
+    val folderToPlace: String? = null,
     /** The Camera album's manual optimise is queued or running. Drives its button and its list. */
     val cameraOptimising: Boolean = false,
     /** *Special settings for Camera*, off out of the box. See `BackupPreferences.cameraSpecialEnabled`. */
@@ -777,7 +780,31 @@ class BackupViewModel @Inject constructor(
      */
     fun rescan() {
         refresh()
+        checkCloud()
+    }
 
+    /**
+     * A folder was just added in Settings: rescan, and once the scan has finished ask where it goes (Ian, 31 Oct
+     * 2026). Waits for the scan so the answer lands on a folder row that exists and a late scan cannot overwrite it.
+     * Asking sets nothing, and the new albums stay Off, so nothing is sent until the user sets a mode.
+     */
+    fun rescanThenAskWhereFolderGoes(folder: String) {
+        val scan = refresh()
+        checkCloud()
+        viewModelScope.launch {
+            scan.join()
+            _state.update { it.copy(folderToPlace = folder) }
+        }
+    }
+
+    /** The pop-up is answered: [location] is the Cloud chosen, or null for Decide later, which changes nothing. */
+    fun answerWhereFolderGoes(location: BackupLocation?) {
+        val folder = _state.value.folderToPlace ?: return
+        _state.update { it.copy(folderToPlace = null) }
+        if (location != null) setFolderLocation(folder, location)
+    }
+
+    private fun checkCloud() {
         // One walk at a time. This runs on entry to the tab as well as from the button, so without
         // the guard a few tab switches would stack several full drive walks on top of each other.
         if (_state.value.isCheckingCloud) return
@@ -794,7 +821,7 @@ class BackupViewModel @Inject constructor(
         }
     }
 
-    fun refresh() {
+    fun refresh(): Job =
         viewModelScope.launch {
             val access = scanner.access()
             _state.value = _state.value.copy(access = access)
@@ -935,7 +962,6 @@ class BackupViewModel @Inject constructor(
                 )
             }
         }
-    }
 
     suspend fun albumEntries(album: String) = entryDao.entriesForAlbum(album)
 
