@@ -41,6 +41,7 @@
     <string name="cloud_keys_hide">Masquer</string>
     <string name="cloud_keys_show">Afficher</string>
     <string name="cloud_main_tag">principal (gratuit)</string>
+    <string name="cloud_pro_unlocked">Pro débloqué. Vous pouvez utiliser tous les Clouds.</string>
     <string name="cloud_providers_section_title">Clouds</string>
     <string name="cloud_signout_anyway">Se déconnecter quand même</string>
     <string name="cloud_signout_body">%1$d fichiers (%2$s) ne sont pas en taille réelle sur ce téléphone. Que voulez-vous en faire ?</string>

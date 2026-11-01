@@ -121,6 +121,7 @@
         price and currency for the user's own region, and repeating a hardcoded $9.99 risks reading
         wrong somewhere Play would have shown a correct, converted figure.
     -->
+    <string name="cloud_pro_unlocked">Pro unlocked. You can use every Cloud.</string>
     <string name="google_photos_unlock_pro_action">Unlock Pro</string>
     <string name="google_photos_trial_start_action">Start 30-day free trial</string>
     <!-- Plain and upfront, and a hard gate rather than an auto-charge — Ian, 24 Sept 2026. Play cannot

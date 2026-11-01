@@ -178,6 +178,11 @@
   "en": "main (free)"
  },
  {
+  "key": "cloud_pro_unlocked",
+  "type": "string",
+  "en": "Pro unlocked. You can use every Cloud."
+ },
+ {
   "key": "cloud_providers_section_title",
   "type": "string",
   "en": "Clouds"

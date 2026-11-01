@@ -283,6 +283,7 @@ T = {
 "settings_font": "Police",
 "font_app": "De l'appli",
 "font_phone": "Du téléphone",
+"cloud_pro_unlocked": "Pro débloqué. Vous pouvez utiliser tous les Clouds.",
 }
 
 # French spacing: a no-break space before ? and :, so the mark never wraps onto a line of its own.

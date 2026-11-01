@@ -39,6 +39,7 @@
     <string name="cloud_keys_hide">隠す</string>
     <string name="cloud_keys_show">表示</string>
     <string name="cloud_main_tag">メイン（無料）</string>
+    <string name="cloud_pro_unlocked">Pro のロックを解除済み。すべてのクラウドを使えます。</string>
     <string name="cloud_providers_section_title">クラウド</string>
     <string name="cloud_signout_anyway">それでもログアウト</string>
     <string name="cloud_signout_body">このスマートフォンには、フルサイズでないファイルが %1$d 件（%2$s）あります。どうしますか？</string>

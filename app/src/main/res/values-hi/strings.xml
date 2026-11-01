@@ -40,6 +40,7 @@
     <string name="cloud_keys_hide">छिपाएँ</string>
     <string name="cloud_keys_show">दिखाएँ</string>
     <string name="cloud_main_tag">मुख्य (मुफ़्त)</string>
+    <string name="cloud_pro_unlocked">Pro अनलॉक है। आप सभी क्लाउड इस्तेमाल कर सकते हैं।</string>
     <string name="cloud_providers_section_title">क्लाउड</string>
     <string name="cloud_signout_anyway">फिर भी साइन आउट करें</string>
     <string name="cloud_signout_body">इस फ़ोन पर %1$d फ़ाइलें (%2$s) पूरे साइज़ में नहीं हैं। आप उनके साथ क्या करना चाहते हैं?</string>

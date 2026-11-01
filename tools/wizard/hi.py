@@ -283,4 +283,5 @@ T = {
 "settings_font": "फ़ॉन्ट",
 "font_app": "ऐप का",
 "font_phone": "फ़ोन का",
+"cloud_pro_unlocked": "Pro अनलॉक है। आप सभी क्लाउड इस्तेमाल कर सकते हैं।",
 }

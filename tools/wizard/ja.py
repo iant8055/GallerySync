@@ -282,4 +282,5 @@ T = {
 "settings_font": "フォント",
 "font_app": "アプリ",
 "font_phone": "端末",
+"cloud_pro_unlocked": "Pro のロックを解除済み。すべてのクラウドを使えます。",
 }

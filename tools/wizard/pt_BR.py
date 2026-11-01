@@ -283,4 +283,5 @@ T = {
 "settings_font": "Fonte",
 "font_app": "Do app",
 "font_phone": "Do telefone",
+"cloud_pro_unlocked": "Pro desbloqueado. Você pode usar todas as nuvens.",
 }
