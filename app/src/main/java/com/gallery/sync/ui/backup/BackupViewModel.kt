@@ -30,7 +30,9 @@ import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.entity.AlbumPreferenceEntity
 import com.gallery.sync.data.local.entity.BackupState
 import com.gallery.sync.data.local.media.MediaAccess
+import com.gallery.sync.data.local.media.MediaScanRules
 import com.gallery.sync.data.local.media.MediaScanner
+import com.gallery.sync.data.local.media.ScopedDirectories
 import com.gallery.sync.domain.backup.AlbumCloudClaim
 import com.gallery.sync.domain.backup.ArchiveAge
 import com.gallery.sync.domain.backup.BackupEngine
@@ -117,6 +119,25 @@ data class FolderRow(
     val totalBytes: Long,
     val location: BackupLocation
 )
+
+/**
+ * The rows for *Where each folder goes*: what the scan found, plus every folder the user added that it found nothing
+ * in (Ian, 1 Nov 2026). The scan only sees media, so a folder with none had no row and looked as if adding it had not
+ * worked. A folder is matched ignoring case, because MediaStore keeps each writer's spelling.
+ */
+internal fun withGrantedFolders(
+    scanned: List<FolderRow>,
+    grantedPaths: List<String>,
+    locationOf: (String) -> BackupLocation
+): List<FolderRow> {
+    val empty = grantedPaths
+        .mapNotNull(MediaScanRules::topLevelFolderOf)
+        .distinctBy { it.lowercase() }
+        .filter { name -> scanned.none { it.name.equals(name, ignoreCase = true) } }
+        .sortedBy { it.lowercase() }
+        .map { FolderRow(name = it, albumCount = 0, fileCount = 0, totalBytes = 0L, location = locationOf(it)) }
+    return scanned + empty
+}
 
 data class AlbumRow(
     val name: String,
@@ -490,6 +511,7 @@ data class BackupUiState(
 @HiltViewModel
 class BackupViewModel @Inject constructor(
     private val scanner: MediaScanner,
+    private val sources: ScopedDirectories,
     private val albumDao: AlbumPreferenceDao,
     private val folderDao: FolderPreferenceDao,
     private val setFolderDestination: SetFolderDestination,
@@ -793,7 +815,13 @@ class BackupViewModel @Inject constructor(
         checkCloud()
         viewModelScope.launch {
             scan.join()
-            _state.update { it.copy(folderToPlace = folder) }
+            // The row's own spelling, so the answer lands on that row.
+            _state.update { current ->
+                current.copy(
+                    folderToPlace = current.folders.firstOrNull { it.name.equals(folder, ignoreCase = true) }?.name
+                        ?: folder
+                )
+            }
         }
     }
 
@@ -891,7 +919,7 @@ class BackupViewModel @Inject constructor(
                 )
             }
 
-            val folders = scannedAlbums
+            val scannedFolders = scannedAlbums
                 .flatMap { album -> album.sharesByFolder().map { (folder, share) -> Triple(folder, album, share) } }
                 .groupBy({ it.first }, { it.second to it.third })
                 .map { (name, inFolder) ->
@@ -904,6 +932,9 @@ class BackupViewModel @Inject constructor(
                     )
                 }
                 .sortedByDescending { it.fileCount }
+            val folders = withGrantedFolders(scannedFolders, sources.current().map { it.relativePath }) { name ->
+                FolderDestination.resolve(name, folderLocations, prefs.backupLocation)
+            }
 
             // Archive albums the scan can no longer see, listed anyway at zero files.
             //

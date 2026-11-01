@@ -15,6 +15,11 @@ Every change since version 26 (0.3.25), the last build the Closed Testing group 
 **Adding a folder**
 - Add a folder in Settings now rescans by itself, then asks which Cloud the folder should go to, and shows where in that Cloud,
   with **Change**. **Decide later** changes nothing. Nothing is uploaded until an album has a mode.
+- A folder you add is always listed under **Where each folder goes**, even with no photos or videos in it yet, and leaves
+  the list as soon as you remove it.
+
+**Settings layout**
+- **Where each folder goes** is now a main title of its own, like Backup and Albums.
 
 ## Version 32 (0.3.31) — 25 Oct 2026, Production
 

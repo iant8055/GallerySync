@@ -194,83 +194,69 @@ fun SettingsScreen(
         // where in its cloud the folder goes. The folder itself is chosen on each Cloud's row (Backup folder).
         CloudProvidersSection(viewModel = cloudViewModel)
 
-        // A clear boundary between connecting Clouds and routing folders to them (Ian, 5 Oct 2026). They ran
-        // together on the Fold 8, where the extra width lets both breathe and the join is harder to read: the
-        // last Cloud row and the "Where each folder goes" heading looked like one list. A rule with space either
-        // side, not a band — the green section headings mark the sections of Settings, and these two are halves
-        // of Backup rather than sections of their own.
-        Spacer(modifier = Modifier.size(8.dp))
-        SettingDivider()
-        Spacer(modifier = Modifier.size(8.dp))
+        // ── Where each folder goes ───────────────────────────────────────────
+        // A section of its own (Ian, 1 Nov 2026), so it no longer needs the rule that split it from the Clouds.
+        SectionHeader(
+            stringResource(R.string.backup_folders_heading),
+            help = HelpTopic.SETTINGS_DESTINATION
+        )
+        Text(
+            text = stringResource(R.string.backup_folders_explainer),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
 
         // Which local folder goes to which cloud — one row each, always shown (Ian, 24 Sept 2026: clean
         // pairing between a local folder and a cloud). Top-level folders only (DCIM, Pictures...), never
         // per album. The menu opens only where there is a real choice: with one cloud, or without Pro or
         // the trial, the pairing is shown and cannot be changed. A folder still paired with a cloud that has
         // lapsed or been disconnected keeps it on the menu, so it reads truthfully and can be moved back.
-        if (state.folders.isNotEmpty()) {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                WithHelp(HelpTopic.SETTINGS_DESTINATION) {
-                    Text(
-                        text = stringResource(R.string.backup_folders_heading),
-                        style = MaterialTheme.typography.titleSmall
+        state.folders.forEach { folder ->
+            val options = buildList {
+                addAll(cloudState.destinations)
+                if (folder.location !in this) add(folder.location)
+            }
+            // Paired with a Cloud that is signed out: the pill turns red and says so (Ian, 29 Sept 2026).
+            // The pairing itself is kept, since moving the folder elsewhere would be the app choosing where
+            // files go; it backs up again as soon as that Cloud is reconnected.
+            val cloudMissing = cloudState.connected.none { it.location == folder.location }
+            SettingDropdown(
+                label = pluralStringResource(
+                    R.plurals.backup_folder_label, folder.fileCount, folder.name, folder.fileCount
+                ),
+                options = options,
+                selected = folder.location,
+                onSelected = { viewModel.setFolderLocation(folder.name, it) },
+                optionLabel = { location ->
+                    if (cloudState.connected.none { it.location == location }) {
+                        stringResource(R.string.pairing_option_not_connected, stringResource(location.labelRes()))
+                    } else {
+                        stringResource(location.labelRes())
+                    }
+                },
+                // A red pill must open, so the folder can be moved to a Cloud that is connected.
+                enabled = options.size > 1 || cloudMissing,
+                alarmLabel = if (cloudMissing) stringResource(R.string.pairing_no_cloud) else null,
+                // Where in that cloud the folder's files go, so a row reads as one pairing:
+                // local folder, cloud, place in the cloud.
+                noteIsWarning = cloudMissing || (folder.location != cloudState.main && !cloudState.isEntitled),
+                note = if (cloudMissing) {
+                    stringResource(R.string.pairing_not_connected, stringResource(folder.location.labelRes()))
+                } else if (folder.location != cloudState.main && !cloudState.isEntitled) {
+                    // Paired with a cloud that is not the free one, with no Pro and no trial: nothing is
+                    // sent there. Say so on the row rather than let it sit silent.
+                    stringResource(R.string.pairing_needs_pro, stringResource(folder.location.labelRes()))
+                } else when (folder.location) {
+                    BackupLocation.GOOGLE_PHOTOS -> stringResource(R.string.pairing_path_library)
+                    // The folder chosen for that Cloud (Ian, 12 Oct 2026), changed on its row under Clouds.
+                    else -> stringResource(
+                        R.string.pairing_path,
+                        stringResource(folder.location.labelRes()),
+                        cloudState.folders[folder.location] ?: RemoteRoots.defaultFor(folder.location)
                     )
                 }
-                Text(
-                    text = stringResource(R.string.backup_folders_explainer),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            state.folders.forEach { folder ->
-                val options = buildList {
-                    addAll(cloudState.destinations)
-                    if (folder.location !in this) add(folder.location)
-                }
-                // Paired with a Cloud that is signed out: the pill turns red and says so (Ian, 29 Sept 2026).
-                // The pairing itself is kept, since moving the folder elsewhere would be the app choosing where
-                // files go; it backs up again as soon as that Cloud is reconnected.
-                val cloudMissing = cloudState.connected.none { it.location == folder.location }
-                SettingDropdown(
-                    label = pluralStringResource(
-                        R.plurals.backup_folder_label, folder.fileCount, folder.name, folder.fileCount
-                    ),
-                    options = options,
-                    selected = folder.location,
-                    onSelected = { viewModel.setFolderLocation(folder.name, it) },
-                    optionLabel = { location ->
-                        if (cloudState.connected.none { it.location == location }) {
-                            stringResource(R.string.pairing_option_not_connected, stringResource(location.labelRes()))
-                        } else {
-                            stringResource(location.labelRes())
-                        }
-                    },
-                    // A red pill must open, so the folder can be moved to a Cloud that is connected.
-                    enabled = options.size > 1 || cloudMissing,
-                    alarmLabel = if (cloudMissing) stringResource(R.string.pairing_no_cloud) else null,
-                    // Where in that cloud the folder's files go, so a row reads as one pairing:
-                    // local folder, cloud, place in the cloud.
-                    noteIsWarning = cloudMissing || (folder.location != cloudState.main && !cloudState.isEntitled),
-                    note = if (cloudMissing) {
-                        stringResource(R.string.pairing_not_connected, stringResource(folder.location.labelRes()))
-                    } else if (folder.location != cloudState.main && !cloudState.isEntitled) {
-                        // Paired with a cloud that is not the free one, with no Pro and no trial: nothing is
-                        // sent there. Say so on the row rather than let it sit silent.
-                        stringResource(R.string.pairing_needs_pro, stringResource(folder.location.labelRes()))
-                    } else when (folder.location) {
-                        BackupLocation.GOOGLE_PHOTOS -> stringResource(R.string.pairing_path_library)
-                        // The folder chosen for that Cloud (Ian, 12 Oct 2026), changed on its row under Clouds.
-                        else -> stringResource(
-                            R.string.pairing_path,
-                            stringResource(folder.location.labelRes()),
-                            cloudState.folders[folder.location] ?: RemoteRoots.defaultFor(folder.location)
-                        )
-                    }
-                )
-            }
-            SettingDivider()
+            )
         }
-
 
         // ── Albums ───────────────────────────────────────────────────────────
         SectionHeader(
@@ -278,7 +264,10 @@ fun SettingsScreen(
             help = HelpTopic.SETTINGS_SECTION_ALBUMS
         )
 
-        SourcesSection(onFolderAdded = viewModel::rescanThenAskWhereFolderGoes)
+        SourcesSection(
+            onFolderAdded = viewModel::rescanThenAskWhereFolderGoes,
+            onFoldersRemoved = { viewModel.refresh() }
+        )
 
         state.folderToPlace?.let { folder ->
             NewFolderCloudDialog(
@@ -978,20 +967,12 @@ fun SettingsTabPreview(onGuideCardPositioned: ((androidx.compose.ui.geometry.Rec
             )
             OutlinedButton(onClick = {}) { Text(stringResource(R.string.sign_out_action)) }
         }
-        SettingDivider()
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            WithHelp(HelpTopic.SETTINGS_DESTINATION) {
-                Text(
-                    text = stringResource(R.string.backup_folders_heading),
-                    style = MaterialTheme.typography.titleSmall
-                )
-            }
-            Text(
-                text = stringResource(R.string.backup_folders_explainer),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+        SectionHeader(stringResource(R.string.backup_folders_heading), help = HelpTopic.SETTINGS_DESTINATION)
+        Text(
+            text = stringResource(R.string.backup_folders_explainer),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
         listOf("DCIM" to 61, "Pictures" to 25).forEach { (name, files) ->
             SettingDropdown(
                 label = pluralStringResource(R.plurals.backup_folder_label, files, name, files),
@@ -1007,7 +988,6 @@ fun SettingsTabPreview(onGuideCardPositioned: ((androidx.compose.ui.geometry.Rec
                 )
             )
         }
-        SettingDivider()
 
         SectionHeader(stringResource(R.string.settings_albums), help = HelpTopic.SETTINGS_SECTION_ALBUMS)
         Text(text = stringResource(R.string.sources_title), style = MaterialTheme.typography.bodyLarge)

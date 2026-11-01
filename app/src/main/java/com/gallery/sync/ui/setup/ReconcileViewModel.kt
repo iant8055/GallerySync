@@ -1222,8 +1222,12 @@ class ReconcileViewModel @Inject constructor(
         )
     }
 
-    fun removeSource(treeUri: String) {
-        viewModelScope.launch { sources.remove(treeUri) }
+    /** Removes several in turn, and reports once they are all gone, so a rescan cannot still see one of them. */
+    fun removeSources(treeUris: List<String>, onRemoved: () -> Unit) {
+        viewModelScope.launch {
+            treeUris.forEach { sources.remove(it) }
+            onRemoved()
+        }
     }
 
     /**

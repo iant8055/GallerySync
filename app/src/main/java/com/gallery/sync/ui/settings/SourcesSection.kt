@@ -39,7 +39,9 @@ fun SourcesSection(
     modifier: Modifier = Modifier,
     viewModel: ReconcileViewModel = hiltViewModel(),
     /** A folder was added: its top-level folder, the level a Cloud is chosen at. */
-    onFolderAdded: (String) -> Unit = {}
+    onFolderAdded: (String) -> Unit = {},
+    /** Folders were removed, so whatever lists them needs looking at again. */
+    onFoldersRemoved: () -> Unit = {}
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -144,9 +146,10 @@ fun SourcesSection(
             },
             confirmButton = {
                 TextButton(onClick = {
-                    state.directories
-                        .filter { it.treeUri in tickedForRemoval }
-                        .forEach { viewModel.removeSource(it.treeUri) }
+                    viewModel.removeSources(
+                        state.directories.filter { it.treeUri in tickedForRemoval }.map { it.treeUri },
+                        onFoldersRemoved
+                    )
                     tickedForRemoval = emptySet()
                     confirmingRemoval = false
                 }) {
