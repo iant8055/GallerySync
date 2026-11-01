@@ -46,6 +46,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -183,7 +184,10 @@ fun SettingsScreen(
         // ── Backup ───────────────────────────────────────────────────────────
         SectionHeader(
             stringResource(R.string.settings_backup),
-            help = HelpTopic.SETTINGS_SECTION_BACKUP
+            help = HelpTopic.SETTINGS_SECTION_BACKUP,
+            // Once bought, the trial and Unlock Pro lines are gone, and without this nothing said so (Ian, 31 Oct 2026).
+            // In this band rather than under the Clouds heading (Ian, 1 Nov 2026).
+            note = if (cloudState.isProUnlocked) stringResource(R.string.cloud_pro_unlocked) else null
         )
 
         // The free tier is ONE cloud, the user's own (Ian, 24 Sept 2026), so there is no locked-on OneDrive
@@ -678,7 +682,7 @@ private val SettingsGutter = 16.dp
  * the bright green of the selected tab in the nav bar.
  */
 @Composable
-private fun SectionHeader(title: String, help: HelpTopic? = null) {
+private fun SectionHeader(title: String, help: HelpTopic? = null, note: String? = null) {
     val signal = LocalGallerySyncColors.current
 
     Surface(
@@ -697,6 +701,15 @@ private fun SectionHeader(title: String, help: HelpTopic? = null) {
             Text(text = title, style = MaterialTheme.typography.headlineSmall)
 
             if (help != null) HelpButton(help)
+
+            if (note != null) {
+                Text(
+                    text = note,
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.weight(1f)
+                )
+            }
         }
     }
 }

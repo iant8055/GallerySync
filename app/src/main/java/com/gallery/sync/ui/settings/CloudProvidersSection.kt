@@ -120,14 +120,6 @@ fun CloudProvidersSection(
                 }
             }
             HorizontalDivider()
-            // Once bought, the trial and Unlock Pro lines below are gone, and without this nothing said so (Ian, 31 Oct 2026).
-            if (state.isProUnlocked) {
-                Text(
-                    text = stringResource(R.string.cloud_pro_unlocked),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
         }
 
         shown.forEachIndexed { index, provider ->
