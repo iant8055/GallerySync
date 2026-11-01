@@ -8,6 +8,7 @@ Every change since version 26 (0.3.25), the last build the Closed Testing group 
 **Settings → Clouds**
 - A light line between each Cloud.
 - A Cloud that is not connected has its Connect or Enter keys button on the same line as its name, at any text size.
+- With Pro bought, the section now says **Pro unlocked. You can use every Cloud.** Before, nothing said so.
 - A connected Cloud shows two columns under the headings **Clouds** and **Backup folder**: its name, account and Sign out on
   the left, its folder and Change on the right.
 
