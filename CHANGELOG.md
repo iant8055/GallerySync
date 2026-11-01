@@ -3,7 +3,7 @@
 Every change since version 26 (0.3.25), the last build the Closed Testing group had. The short notes Play shows to users
 (500 characters per language) are in `release-notes/`; this file is the full record.
 
-## Version 33 (0.3.32) — built 1 Nov 2026, not yet uploaded
+## Version 33 (0.3.32) — 1 Nov 2026, Production
 
 **Settings → Clouds**
 - A light line between each Cloud.
