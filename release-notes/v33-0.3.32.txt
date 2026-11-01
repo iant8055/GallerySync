@@ -1,0 +1,42 @@
+<en-US>
+• Adding a folder in Settings now rescans by itself, then asks which Cloud the folder goes to.
+• "Where each folder goes" is now its own section in Settings, and lists every folder you add, even an empty one.
+• Clouds are easier to read: a line between each, Connect beside the name, and two columns once connected.
+• With Pro bought, Settings now says "Pro unlocked".
+</en-US>
+<es-ES>
+• Al añadir una carpeta en Settings, la app vuelve a buscar sola y pregunta a qué nube va.
+• "Adónde va cada carpeta" es ahora una sección propia en Settings y muestra cada carpeta que añades, incluso vacía.
+• Las nubes se leen mejor: una línea entre cada una, Conectar junto al nombre y dos columnas al conectarse.
+• Con Pro comprado, Settings ahora indica "Pro desbloqueado".
+</es-ES>
+<pt-BR>
+• Ao adicionar uma pasta em Settings, o app verifica de novo sozinho e pergunta para qual nuvem ela vai.
+• "Para onde vai cada pasta" agora é uma seção própria em Settings e lista cada pasta adicionada, mesmo vazia.
+• As nuvens ficaram mais fáceis de ler: uma linha entre cada uma, Conectar ao lado do nome e duas colunas depois de conectar.
+• Com o Pro comprado, Settings agora mostra "Pro desbloqueado".
+</pt-BR>
+<fr-FR>
+• Quand vous ajoutez un dossier dans Settings, l'app relance l'analyse seule et demande vers quel Cloud il va.
+• « Où va chaque dossier » est désormais une section à part dans Settings et liste chaque dossier ajouté, même vide.
+• Les Clouds sont plus lisibles : une ligne entre chacun, Connecter à côté du nom et deux colonnes une fois connecté.
+• Avec Pro acheté, Settings affiche maintenant « Pro débloqué ».
+</fr-FR>
+<de-DE>
+• Wenn du in Settings einen Ordner hinzufügst, sucht die App selbst neu und fragt, in welche Cloud er geht.
+• „Wohin jeder Ordner geht" ist jetzt ein eigener Abschnitt in Settings und zeigt jeden hinzugefügten Ordner, auch leere.
+• Clouds sind besser lesbar: eine Linie zwischen jeder, Verbinden neben dem Namen und zwei Spalten nach dem Verbinden.
+• Mit gekauftem Pro zeigt Settings jetzt „Pro freigeschaltet".
+</de-DE>
+<ja-JP>
+• Settings でフォルダを追加すると、自動で再スキャンし、どのクラウドに送るかを確認します。
+• 「各フォルダの保存先」が Settings の独立したセクションになり、追加したフォルダは空でもすべて表示されます。
+• クラウドの一覧が見やすくなりました。項目ごとの区切り線、名前の横の接続ボタン、接続後は 2 列表示です。
+• Pro を購入済みの場合、Settings に「Pro のロックを解除済み」と表示されます。
+</ja-JP>
+<hi-IN>
+• Settings में फ़ोल्डर जोड़ने पर ऐप अपने आप फिर से स्कैन करता है और पूछता है कि वह किस क्लाउड में जाए।
+• "हर फ़ोल्डर कहाँ जाता है" अब Settings में अलग सेक्शन है और हर जोड़ा गया फ़ोल्डर दिखाता है, खाली होने पर भी।
+• क्लाउड पढ़ना आसान हुआ: हर एक के बीच रेखा, नाम के पास कनेक्ट बटन और कनेक्ट होने पर दो कॉलम।
+• Pro खरीदने पर Settings में अब "Pro अनलॉक है" दिखता है।
+</hi-IN>
