@@ -3,7 +3,7 @@
 Every change since version 26 (0.3.25), the last build the Closed Testing group had. The short notes Play shows to users
 (500 characters per language) are in `release-notes/`; this file is the full record.
 
-## Version 34 — not yet built
+## Version 34 (0.3.33) — built 1 Nov 2026, not yet uploaded
 
 **Settings**
 - **Pro unlocked. You can use every Cloud.** moved from under the Clouds heading into the green Backup band.
