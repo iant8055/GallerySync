@@ -113,13 +113,13 @@ Nur neue Dateien gehen in den neuen Ordner. Bereits gesicherte Dateien bleiben, 
         "body": """Erscheint, nachdem **Ordner hinzufügen** unter **Ordner zum Sichern** den neuen Ordner neu eingelesen hat.
 
 • **Wohin soll <Ordner> gesichert werden?** oben.
-• Eine Zeile pro verbundener Cloud mit dem Namen der Cloud und darunter **Geht nach <Cloud> / <Pfad>**. Google Photos zeigt stattdessen **Geht in deine Google Photos-Mediathek** und hat kein **Ändern**.
+• Eine Zeile pro verbundener Cloud. Darunter zeigt **Geht nach <Cloud> / <Pfad>**, wohin die Dateien der ausgewählten Cloud gehen. Google Photos zeigt stattdessen **Geht in deine Google Photos-Mediathek** und hat kein **Ändern**.
 • **Ändern** öffnet den Zieldialog für diese Cloud. Siehe [[dialog-destination]].
-• **Alle Ordner, die an eine Cloud gehen, landen dort am selben Ort. Änderst du ihn, gehen nur neue Dateien dorthin.** — der Ort in einer Cloud ist ein Wert pro Cloud, nicht pro Ordner, eine Änderung hier wirkt sich also auf alles aus, was bereits an diese Cloud gesendet wurde.
+• **Alle Ordner, die an eine Cloud gehen, landen dort am selben Ort. Änderst du ihn, gehen nur neue Dateien dorthin.** Bereits gesendete Dateien bleiben, wo sie sind.
 • **OK** setzt die Cloud. **Später entscheiden** und das Wegtippen ändern nichts, der Ordner bleibt bei der Haupt-Cloud und kann später auf seiner Zeile in [[settings-destination]] umgeleitet werden.
 
 Nur in Settings. Der Assistent fragt dasselbe in seinem eigenen Schritt.""",
-        "en_hash": "f02a19ba994df3da",
+        "en_hash": "0034d417c7621eb5",
     },
     "settings-section-albums": {
         "title": "Albums",

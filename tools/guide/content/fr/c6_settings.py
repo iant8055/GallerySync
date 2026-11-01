@@ -113,13 +113,13 @@ Seuls les nouveaux fichiers vont dans le nouveau dossier. Les fichiers déjà sa
         "body": """Apparaît après que **Ajouter un dossier** dans **Dossiers à sauvegarder** a fini d'analyser le nouveau dossier.
 
 • **Où sauvegarder <dossier> ?** en haut.
-• Une ligne par Cloud connecté, avec le nom du Cloud et, en dessous, **Va vers <Cloud> / <chemin>**. Google Photos dit **Va vers votre bibliothèque Google Photos** et n'a pas de **Modifier**.
+• Une ligne par Cloud connecté. En dessous, **Va vers <Cloud> / <chemin>** indique où vont les fichiers du Cloud sélectionné. Google Photos dit **Va vers votre bibliothèque Google Photos** et n'a pas de **Modifier**.
 • **Modifier** ouvre la boîte de dialogue de destination de ce Cloud. Voir [[dialog-destination]].
-• **Tous les dossiers envoyés vers un Cloud vont au même endroit. Si vous le changez, seuls les nouveaux fichiers iront là.** — l'endroit dans un Cloud est une valeur par Cloud, pas par dossier, donc un changement ici affecte tout ce qui a déjà été envoyé à ce Cloud.
+• **Tous les dossiers envoyés vers un Cloud vont au même endroit. Si vous le changez, seuls les nouveaux fichiers iront là.** Les fichiers déjà envoyés restent où ils sont.
 • **OK** définit le Cloud. **Décider plus tard** et le fait d'ignorer la boîte ne changent rien : le dossier reste sur le Cloud principal et peut être redirigé plus tard sur sa ligne dans [[settings-destination]].
 
 Settings seulement. L'assistant pose la même question dans son propre pas.""",
-        "en_hash": "f02a19ba994df3da",
+        "en_hash": "0034d417c7621eb5",
     },
     "settings-section-albums": {
         "title": "Albums",

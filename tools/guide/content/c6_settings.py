@@ -103,9 +103,9 @@ CHAPTER = Chapter(
             Appears after **Add a folder** in **Folders to back up** has finished rescanning the new folder.
 
             • **Where should <folder> back up to?** at the top.
-            • One row per connected Cloud, with the Cloud's name and, below it, **Goes to <Cloud> / <path>**. Google Photos says **Goes to your Google Photos library** instead and has no **Change**.
+            • One row per connected Cloud. Below them, **Goes to <Cloud> / <path>** shows where the selected Cloud's files go. Google Photos says **Goes to your Google Photos library** instead and has no **Change**.
             • **Change** opens the destination dialog for that Cloud. See [[dialog-destination]].
-            • **Every folder sent to a Cloud goes to the same place in it. If you change it, only new files go there.** — the place in a Cloud is one value per Cloud, not per folder, so a change here affects everything already sent to that Cloud.
+            • **Every folder sent to a Cloud goes to the same place in it. If you change it, only new files go there.** Files already sent stay where they are.
             • **OK** sets the Cloud. **Decide later** and dismissing change nothing, so the folder stays on the main Cloud and can be re-routed later on its row in [[settings-destination]].
 
             Settings only. The wizard asks the same question in its own step.

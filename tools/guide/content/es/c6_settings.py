@@ -124,13 +124,13 @@ Solo los archivos nuevos van a la carpeta nueva. Los archivos que ya tienen copi
         "body": """Aparece después de que **Añadir una carpeta** en **Carpetas para copiar** termina de volver a analizar la nueva carpeta.
 
 • **¿Dónde se debe guardar <carpeta>?** arriba.
-• Una fila por cada Cloud conectada, con el nombre de la Cloud y, debajo, **Va a <Cloud> / <ruta>**. Google Photos dice **Va a tu biblioteca de Google Photos** y no tiene **Cambiar**.
+• Una fila por cada Cloud conectada. Debajo, **Va a <Cloud> / <ruta>** indica adónde van los archivos de la Cloud seleccionada. Google Photos dice **Va a tu biblioteca de Google Photos** y no tiene **Cambiar**.
 • **Cambiar** abre el diálogo de destino de esa Cloud. Consulta [[dialog-destination]].
-• **Todas las carpetas enviadas a una nube van al mismo lugar en ella. Si lo cambias, solo los archivos nuevos irán allí.** — el lugar en una Cloud es un valor por Cloud, no por carpeta, así que un cambio aquí afecta a todo lo que ya se envió a esa Cloud.
+• **Todas las carpetas enviadas a una nube van al mismo lugar en ella. Si lo cambias, solo los archivos nuevos irán allí.** Los archivos ya enviados se quedan donde están.
 • **Aceptar** fija la Cloud. **Decidir más tarde** y descartar no cambian nada: la carpeta se queda en la Cloud principal y puedes redirigirla luego en su fila en [[settings-destination]].
 
 Solo en Settings. El asistente hace la misma pregunta en su propio paso.""",
-        "en_hash": "f02a19ba994df3da",
+        "en_hash": "0034d417c7621eb5",
     },
     "settings-section-albums": {
         "title": "Albums",

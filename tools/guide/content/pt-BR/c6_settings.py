@@ -113,13 +113,13 @@ Só os arquivos novos vão para a pasta nova. Os arquivos que já têm backup fi
         "body": """Aparece depois que **Adicionar uma pasta** em **Pastas para backup** termina de reescanear a nova pasta.
 
 • **Onde fazer o backup de <pasta>?** no topo.
-• Uma linha para cada Cloud conectada, com o nome da Cloud e, abaixo, **Vai para <Cloud> / <caminho>**. O Google Photos diz **Vai para sua biblioteca do Google Photos** e não tem **Alterar**.
+• Uma linha para cada Cloud conectada. Abaixo delas, **Vai para <Cloud> / <caminho>** mostra para onde vão os arquivos da Cloud selecionada. O Google Photos diz **Vai para sua biblioteca do Google Photos** e não tem **Alterar**.
 • **Alterar** abre o diálogo de destino dessa Cloud. Veja [[dialog-destination]].
-• **Todas as pastas enviadas a uma nuvem vão para o mesmo lugar nela. Se você mudar, só os arquivos novos irão para lá.** — o lugar em uma Cloud é um valor por Cloud, não por pasta, então uma mudança aqui afeta tudo o que já foi enviado a essa Cloud.
+• **Todas as pastas enviadas a uma nuvem vão para o mesmo lugar nela. Se você mudar, só os arquivos novos irão para lá.** Os arquivos já enviados ficam onde estão.
 • **OK** define a Cloud. **Decidir depois** e descartar não mudam nada: a pasta fica na Cloud principal e pode ser redirecionada depois na linha dela em [[settings-destination]].
 
 Só em Settings. O assistente faz a mesma pergunta no passo dele.""",
-        "en_hash": "f02a19ba994df3da",
+        "en_hash": "0034d417c7621eb5",
     },
     'settings-section-albums': {
         "title": 'Albums',
