@@ -52,8 +52,8 @@ Gilt für automatische Backups und **Sync now**. Lass es aus, es sei denn, dein 
         "title": "Backup",
         "body": """**Clouds:** verbinde jede Cloud oder melde dich bei ihr ab. Siehe [[settings-account]].
 
-Eine Cloud ist als **Haupt-Cloud (kostenlos)** markiert: die erste Cloud, die du gewählt hast. Sie ist immer kostenlos. Andere Clouds brauchen **Pro**: 30 Tage kostenlos (**30 Tage kostenlos testen**), danach ein einmaliger Kauf (**Pro freischalten**). Es wird nichts automatisch berechnet. Sobald du Pro besitzt, ersetzt **Pro freigeschaltet. Du kannst jede Cloud nutzen.** diese Zeilen.""",
-        "en_hash": "2f9d7ac28a5a9891",
+Eine Cloud ist als **Haupt-Cloud (kostenlos)** markiert: die erste Cloud, die du gewählt hast. Sie ist immer kostenlos. Andere Clouds brauchen **Pro**: 30 Tage kostenlos (**30 Tage kostenlos testen**), danach ein einmaliger Kauf (**Pro freischalten**). Es wird nichts automatisch berechnet. Sobald du Pro besitzt, verschwinden diese Zeilen, und **Pro freigeschaltet. Du kannst jede Cloud nutzen.** erscheint in der grünen **Backup**-Überschrift.""",
+        "en_hash": "457d0ce467900c35",
     },
     "settings-account": {
         "title": "Deine Clouds und Abmelden",

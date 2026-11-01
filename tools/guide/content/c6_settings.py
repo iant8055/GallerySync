@@ -47,7 +47,7 @@ CHAPTER = Chapter(
         topic("settings-section-backup", "Backup", """
             **Clouds:** connect or sign out of each Cloud. See [[settings-account]].
 
-            One Cloud is marked **main (free)**: the first Cloud you selected. It is always free. Other Clouds need **Pro**: free for 30 days (**Start 30-day free trial**), then a one-time purchase (**Unlock Pro**). Nothing is charged automatically. Once you own Pro, **Pro unlocked. You can use every Cloud.** replaces those lines.
+            One Cloud is marked **main (free)**: the first Cloud you selected. It is always free. Other Clouds need **Pro**: free for 30 days (**Start 30-day free trial**), then a one-time purchase (**Unlock Pro**). Nothing is charged automatically. Once you own Pro, those lines go, and **Pro unlocked. You can use every Cloud.** appears in the green **Backup** section header.
         """, ui=True),
 
         topic("settings-account", "Your Clouds and Sign out", """

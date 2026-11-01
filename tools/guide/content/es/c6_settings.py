@@ -58,8 +58,8 @@ Afecta a las copias automáticas y a **Sync now**. Déjalo desactivado salvo que
         "title": "Backup",
         "body": """**Nubes:** conecta o cierra sesión en cada Cloud. Consulta [[settings-account]].
 
-Una Cloud está marcada como **principal (gratis)**: la primera que seleccionaste. Siempre es gratis. Las demás Clouds necesitan **Pro**: gratis durante 30 días (**Empezar prueba gratuita de 30 días**) y después una compra única (**Desbloquear Pro**). No se cobra nada automáticamente. Cuando tengas Pro, **Pro desbloqueado. Puedes usar todas las nubes.** reemplaza esas líneas.""",
-        "en_hash": "2f9d7ac28a5a9891",
+Una Cloud está marcada como **principal (gratis)**: la primera que seleccionaste. Siempre es gratis. Las demás Clouds necesitan **Pro**: gratis durante 30 días (**Empezar prueba gratuita de 30 días**) y después una compra única (**Desbloquear Pro**). No se cobra nada automáticamente. Cuando tengas Pro, esas líneas desaparecen y **Pro desbloqueado. Puedes usar todas las nubes.** aparece en el encabezado verde **Backup**.""",
+        "en_hash": "457d0ce467900c35",
     },
 
     "settings-account": {
