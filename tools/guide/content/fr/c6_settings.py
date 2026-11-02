@@ -262,8 +262,8 @@ Le dossier de l'appareil photo n'a pas de mode **Sync**, et rien n'y est optimis
     },
     "settings-archive-default-age": {
         "title": "Only show files older than (Settings)",
-        "body": """Là où commence le filtre d'ancienneté de l'onglet Archive : **1 hour**, **1 day**, **1 week**, **1 month**, **1 year** ou **All** (par défaut). Le modifier dans l'onglet Archive ne vaut que pour cette visite. Voir [[archive-age-filter]].""",
-        "en_hash": "215ff23fa51a5fca",
+        "body": """Là où commence le filtre d'ancienneté de l'onglet Archive : un nombre de **1** à **9** et une unité — **hour**, **day**, **week**, **month**, **year** ou **All** (par défaut). Le modifier dans l'onglet Archive ne vaut que pour cette visite. Voir [[archive-age-filter]].""",
+        "en_hash": "fef50a67d4e7ea34",
     },
     "settings-archive-notify": {
         "title": "Prévenir quand des fichiers sont prêts pour Archive",

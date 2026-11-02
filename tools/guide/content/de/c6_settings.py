@@ -262,8 +262,8 @@ Der Kameraordner hat keinen **Sync**-Modus, und nichts wird optimiert, bis du da
     },
     "settings-archive-default-age": {
         "title": "Only show files older than (Settings)",
-        "body": """Wo der Altersfilter des Archive-Tabs beginnt: **1 hour**, **1 day**, **1 week**, **1 month**, **1 year** oder **All** (Standard). Eine Änderung im Archive-Tab gilt nur für diesen Besuch. Siehe [[archive-age-filter]].""",
-        "en_hash": "215ff23fa51a5fca",
+        "body": """Wo der Altersfilter des Archive-Tabs beginnt: eine Zahl von **1** bis **9** und eine Einheit — **hour**, **day**, **week**, **month**, **year** oder **All** (Standard). Eine Änderung im Archive-Tab gilt nur für diesen Besuch. Siehe [[archive-age-filter]].""",
+        "en_hash": "fef50a67d4e7ea34",
     },
     "settings-archive-notify": {
         "title": "Benachrichtigen, wenn Dateien für Archive bereit sind",

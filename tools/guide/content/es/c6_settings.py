@@ -289,8 +289,8 @@ La carpeta de la cámara no tiene modo **Sync**, y no se optimiza nada hasta que
 
     "settings-archive-default-age": {
         "title": "Only show files older than (Settings)",
-        "body": """Dónde empieza el filtro de antigüedad de la pestaña Archive: **1 hour**, **1 day**, **1 week**, **1 month**, **1 year** o **All** (predeterminado). Cambiarlo en la pestaña Archive dura solo esa visita. Consulta [[archive-age-filter]].""",
-        "en_hash": "215ff23fa51a5fca",
+        "body": """Dónde empieza el filtro de antigüedad de la pestaña Archive: un número del **1** al **9** y una unidad — **hour**, **day**, **week**, **month**, **year** o **All** (predeterminado). Cambiarlo en la pestaña Archive dura solo esa visita. Consulta [[archive-age-filter]].""",
+        "en_hash": "fef50a67d4e7ea34",
     },
 
     "settings-archive-notify": {

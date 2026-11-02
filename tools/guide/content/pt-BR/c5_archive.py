@@ -61,10 +61,10 @@ O OneDrive é conferido listando a pasta de cada álbum no OneDrive (nome e tama
     },
     'archive-age-filter': {
         "title": 'Only show files older than…',
-        "body": """Limita esta conferência a arquivos com pelo menos essa idade: de **1 hour** a **1 year**, ou **All**. Os arquivos mais novos ficam em cinza e são deixados para uma conferência futura.
+        "body": """Limita esta conferência a arquivos com pelo menos essa idade. Escolha um número de **1** a **9** e uma unidade — **hour**, **day**, **week**, **month**, **year** ou **All**. Os arquivos mais novos ficam em cinza e são deixados para uma conferência futura.
 
 Ele começa no seu padrão de Settings. Mudá-lo aqui vale só para esta visita.""",
-        "en_hash": "3d5d116005b80474",
+        "en_hash": "dea79aa93345b86c",
     },
     'archive-empty': {
         "title": 'Quando não há nada para arquivar',

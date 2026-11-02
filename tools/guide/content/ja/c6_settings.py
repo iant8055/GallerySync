@@ -262,8 +262,8 @@ Sync アルバム内にあり、verified in the Cloud で、設定より古く�
     },
     "settings-archive-default-age": {
         "title": "Only show files older than (Settings)",
-        "body": """Archive タブの期間フィルターの開始値：**1 hour**、**1 day**、**1 week**、**1 month**、**1 year**、または **All**（既定）。Archive タブで変更しても、その表示中のみ有効です。[[archive-age-filter]]を参照してください。""",
-        "en_hash": "215ff23fa51a5fca",
+        "body": """Archive タブの期間フィルターの開始値：**1** から **9** までの数字と、**hour**、**day**、**week**、**month**、**year**、または **All**（既定）のいずれかの単位。Archive タブで変更しても、その表示中のみ有効です。[[archive-age-filter]]を参照してください。""",
+        "en_hash": "fef50a67d4e7ea34",
     },
     "settings-archive-notify": {
         "title": "Archive できるファイルがあれば通知する",

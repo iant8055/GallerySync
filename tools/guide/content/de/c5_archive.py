@@ -61,10 +61,10 @@ OneDrive wird geprüft, indem der Ordner jedes Albums in OneDrive aufgelistet wi
     },
     "archive-age-filter": {
         "title": "Only show files older than…",
-        "body": """Begrenzt diese Prüfung auf Dateien, die mindestens so alt sind: **1 hour** bis **1 year**, oder **All**. Neuere Dateien sind ausgegraut und bleiben für eine spätere Prüfung.
+        "body": """Begrenzt diese Prüfung auf Dateien, die mindestens so alt sind. Wähle eine Zahl von **1** bis **9** und eine Einheit — **hour**, **day**, **week**, **month**, **year** oder **All**. Neuere Dateien sind ausgegraut und bleiben für eine spätere Prüfung.
 
 Er beginnt bei deinem Standard aus Settings. Eine Änderung hier gilt nur für diesen Besuch.""",
-        "en_hash": "3d5d116005b80474",
+        "en_hash": "dea79aa93345b86c",
     },
     "archive-empty": {
         "title": "Wenn nichts zu archivieren ist",

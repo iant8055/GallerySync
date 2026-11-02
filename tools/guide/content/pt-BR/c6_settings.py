@@ -262,8 +262,8 @@ A Pasta da câmera não tem o modo **Sync**, e nada é otimizado até você pres
     },
     'settings-archive-default-age': {
         "title": 'Only show files older than (Settings)',
-        "body": """Onde o filtro de idade da aba Archive começa: **1 hour**, **1 day**, **1 week**, **1 month**, **1 year** ou **All** (padrão). Mudá-lo na aba Archive vale só para aquela visita. Veja [[archive-age-filter]].""",
-        "en_hash": "215ff23fa51a5fca",
+        "body": """Onde o filtro de idade da aba Archive começa: um número de **1** a **9** e uma unidade — **hour**, **day**, **week**, **month**, **year** ou **All** (padrão). Mudá-lo na aba Archive vale só para aquela visita. Veja [[archive-age-filter]].""",
+        "en_hash": "fef50a67d4e7ea34",
     },
     'settings-archive-notify': {
         "title": 'Avisar quando houver arquivos prontos para Archive',

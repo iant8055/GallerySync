@@ -61,10 +61,10 @@ OneDrive est vérifié en listant le dossier de chaque album dans OneDrive (nom 
     },
     "archive-age-filter": {
         "title": "Only show files older than…",
-        "body": """Limite cette vérification aux fichiers au moins aussi anciens : de **1 hour** à **1 year**, ou **All**. Les fichiers plus récents sont grisés et laissés pour une vérification ultérieure.
+        "body": """Limite cette vérification aux fichiers au moins aussi anciens. Choisissez un nombre de **1** à **9** et une unité — **hour**, **day**, **week**, **month**, **year** ou **All**. Les fichiers plus récents sont grisés et laissés pour une vérification ultérieure.
 
 Il commence à votre valeur par défaut de Settings. Le modifier ici ne vaut que pour cette visite.""",
-        "en_hash": "3d5d116005b80474",
+        "en_hash": "dea79aa93345b86c",
     },
     "archive-empty": {
         "title": "Quand il n'y a rien à archiver",

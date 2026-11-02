@@ -47,7 +47,7 @@
     <string name="help_archive_check_button_title" formatted="false">Check these files と、報告される内容</string>
     <string name="help_archive_check_button_body" formatted="false">• **Check these files**（または **Check all albums**）：確認を開始します。\n• Cloud に問い合わせている間は、**Checking with your Cloud...** と表示されます。\n• ファイルを削除している間は、**Batch** の進行状況が表示されます。\n• 削除されたファイルの数と解放された容量、または **Nothing was removed.**\n\nOneDrive は、OneDrive 内の各アルバムのフォルダを一覧して（名前とサイズ）確認します。Dropbox、Google Drive、pCloud、Backblaze B2、IDrive e2 は、ファイルごとに問い合わせます。\n\n「解放」とは、ゴミ箱を空にした後のことです。</string>
     <string name="help_archive_age_filter_title" formatted="false">Only show files older than…</string>
-    <string name="help_archive_age_filter_body" formatted="false">この確認の対象を、その期間以上前のファイルに限定します：**1 hour** から **1 year**、または **All**。それより新しいファイルはグレー表示になり、次回以降の確認に回されます。\n\nSettings の既定値から始まります。ここで変更しても、その表示中のみ有効です。</string>
+    <string name="help_archive_age_filter_body" formatted="false">この確認の対象を、その期間以上前のファイルに限定します。**1** から **9** までの数字と、**hour**、**day**、**week**、**month**、**year**、または **All** のいずれかの単位を選びます。それより新しいファイルはグレー表示になり、次回以降の確認に回されます。\n\nSettings の既定値から始まります。ここで変更しても、その表示中のみ有効です。</string>
     <string name="help_archive_empty_title" formatted="false">アーカイブするものがないとき</string>
     <string name="help_archive_empty_body" formatted="false">• **Archive に設定されたアルバムがない**：Albums タブで設定します。\n• **0 件**：Archive アルバム内のすべてが、すでにスマートフォンから移されています。\n• **この Android バージョンにはメディアのゴミ箱がない**：Archive には Android 11 以降が必要です。</string>
     <string name="help_archive_file_list_title" formatted="false">ファイル一覧とマーク</string>
@@ -109,7 +109,7 @@
     <string name="help_settings_section_archive_title" formatted="false">アーカイブ (Settings)</string>
     <string name="help_settings_section_archive_body" formatted="false">• **Only show files older than**：Archive タブのフィルターの開始値。“Only show files older than (Settings)”を参照してください。\n• **Archive できるファイルがあれば通知する**：既定ではオフ。“Archive できるファイルがあれば通知する”を参照してください。</string>
     <string name="help_settings_archive_default_age_title" formatted="false">Only show files older than (Settings)</string>
-    <string name="help_settings_archive_default_age_body" formatted="false">Archive タブの期間フィルターの開始値：**1 hour**、**1 day**、**1 week**、**1 month**、**1 year**、または **All**（既定）。Archive タブで変更しても、その表示中のみ有効です。“Only show files older than…”を参照してください。</string>
+    <string name="help_settings_archive_default_age_body" formatted="false">Archive タブの期間フィルターの開始値：**1** から **9** までの数字と、**hour**、**day**、**week**、**month**、**year**、または **All**（既定）のいずれかの単位。Archive タブで変更しても、その表示中のみ有効です。“Only show files older than…”を参照してください。</string>
     <string name="help_settings_archive_notify_title" formatted="false">Archive できるファイルがあれば通知する</string>
     <string name="help_settings_archive_notify_body" formatted="false">既定では **Off** です。オンにすると、アーカイブ準備ができたファイルの新しいバッチごとに、1 回通知されます。OneDrive のファイルのみ。\n\nAlbums タブと終了時のリマインダーにも同じ内容が表示されるため、通知だけに頼る必要はありません。通知がブロックされている場合は、スイッチにその旨が表示されます。</string>
     <string name="help_albums_permission_title" formatted="false">GallerySync が写真を見られない</string>

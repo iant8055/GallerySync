@@ -57,7 +57,7 @@ CHAPTER = Chapter(
         """, ui=True),
 
         topic("archive-age-filter", "Only show files older than…", """
-            Limits this check to files at least that old: **1 hour** to **1 year**, or **All**. Newer files are greyed and left for a later check.
+            Limits this check to files at least that old. Choose a number from **1** to **9** and a unit — **hour**, **day**, **week**, **month**, **year** or **All**. Newer files are greyed and left for a later check.
 
             It starts at your default from Settings. Changing it here lasts for this visit only.
         """, ui=True),

@@ -235,7 +235,7 @@ CHAPTER = Chapter(
         """, ui=True),
 
         topic("settings-archive-default-age", "Only show files older than (Settings)", """
-            Where the Archive tab's age filter starts: **1 hour**, **1 day**, **1 week**, **1 month**, **1 year** or **All** (default). Changing it on the Archive tab lasts for that visit only. See [[archive-age-filter]].
+            Where the Archive tab's age filter starts: a number from **1** to **9** and a unit — **hour**, **day**, **week**, **month**, **year** or **All** (default). Changing it on the Archive tab lasts for that visit only. See [[archive-age-filter]].
         """, ui=True),
 
         topic("settings-archive-notify", "Notify when files are ready to archive", """

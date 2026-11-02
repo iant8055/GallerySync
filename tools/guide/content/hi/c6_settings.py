@@ -284,8 +284,8 @@ Restore टैब के लिए एक स्विच: **खाली फ़
     "settings-archive-default-age": {
         "title": "Only show files older than (Settings)",
         "body": """\
-जहाँ से Archive टैब का उम्र वाला फ़िल्टर शुरू होता है: **1 hour**, **1 day**, **1 week**, **1 month**, **1 year** या **All** (डिफ़ॉल्ट)। Archive टैब पर इसे बदलना सिर्फ़ उसी बार के लिए रहता है। देखें [[archive-age-filter]]।""",
-        "en_hash": "215ff23fa51a5fca",
+जहाँ से Archive टैब का उम्र वाला फ़िल्टर शुरू होता है: **1** से **9** तक की संख्या और एक इकाई — **hour**, **day**, **week**, **month**, **year** या **All** (डिफ़ॉल्ट)। Archive टैब पर इसे बदलना सिर्फ़ उसी बार के लिए रहता है। देखें [[archive-age-filter]]।""",
+        "en_hash": "fef50a67d4e7ea34",
     },
     "settings-archive-notify": {
         "title": "जब फ़ाइलें Archive के लिए तैयार हों, तब सूचना दें",
