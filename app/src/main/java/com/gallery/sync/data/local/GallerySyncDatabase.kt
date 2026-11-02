@@ -44,7 +44,7 @@ import com.gallery.sync.data.local.entity.UnsentDepartureEntity
         UnsentDepartureEntity::class,
         FolderPreferenceEntity::class
     ],
-    version = 16,
+    version = 17,
     exportSchema = true
 )
 @TypeConverters(

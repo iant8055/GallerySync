@@ -185,7 +185,7 @@ data class RestoreUiState(
                         compareBy<RestoreRow> { !it.isActionable }.then(
                             when (sort) {
                                 RestoreSort.NAME -> compareBy(String.CASE_INSENSITIVE_ORDER) { it.displayName }
-                                RestoreSort.NEWEST -> compareByDescending { it.entry.dateModifiedEpochSeconds }
+                                RestoreSort.NEWEST -> compareByDescending { it.entry.dateForSorting }
                                 RestoreSort.LARGEST -> compareByDescending { it.fullBytes }
                             }
                         )

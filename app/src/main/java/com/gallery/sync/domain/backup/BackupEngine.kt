@@ -4,6 +4,7 @@ import android.content.Context
 import com.gallery.sync.data.local.dao.AlbumPreferenceDao
 import com.gallery.sync.data.local.dao.FolderPreferenceDao
 import com.gallery.sync.data.local.dao.BackupEntryDao
+import com.gallery.sync.data.local.dao.DateTakenFill
 import com.gallery.sync.data.local.dao.UnsentDepartureDao
 import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.entity.AlbumPreferenceEntity
@@ -39,6 +40,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 import java.util.concurrent.ConcurrentHashMap
@@ -299,13 +301,15 @@ class BackupEngine @Inject constructor(
                 isVideo = item.isVideo,
                 state = BackupState.PENDING,
                 location = FolderDestination.resolve(folder, folderLocations, defaultLocation),
-                relativePath = item.relativePath
+                relativePath = item.relativePath,
+                dateTakenEpochSeconds = item.dateTakenEpochSeconds
             )
         }
 
         // IGNORE on conflict, so a rescan never resets an uploaded row back to pending.
         entryDao.insertIfNew(entries)
 
+        fillDatesTaken(scanned)
 
         // Give every discovered folder a row too, same reasoning and same IGNORE-only-if-absent
         // shape as seeding album_preferences below — a folder already chosen is never touched, and
@@ -1395,7 +1399,7 @@ class BackupEngine @Inject constructor(
         // and the Archive tab pins a file the user swipes out of Archive.
         val pinned = entryDao.pinnedKeys()
         val (notPinned, optedOut) = FilePin.split(
-            items = scanner.scanAll().filter { it.album in archived },
+            items = withLedgerDatesTaken(scanner.scanAll().filter { it.album in archived }),
             pinnedIds = pinned.mapTo(HashSet()) { it.id },
             pinnedMediaStoreIds = pinned.mapTo(HashSet()) { it.mediaStoreId },
             idOf = { backupKeyOf(it.album, it.displayName, it.sizeBytes, it.dateModifiedEpochSeconds) },
@@ -1408,6 +1412,46 @@ class BackupEngine @Inject constructor(
                 TAG,
                 "archiveFiles: ${it.toArchive.size} to archive, ${it.optedOut.size} opted out, " +
                     "in ${archived.size} albums"
+            )
+        }
+    }
+
+    /**
+     * Gives a scanned file with no MediaStore date the one the ledger worked out, so the age filter does not fall
+     * back to a modified date that optimising rewrote. A file with neither stays on its modified date, which can
+     * only read as newer and so hold it back.
+     */
+    private suspend fun withLedgerDatesTaken(items: List<LocalMediaItem>): List<LocalMediaItem> {
+        if (items.none { it.dateTakenEpochSeconds == null }) return items
+        val known = entryDao.knownDatesTaken().orEmpty().associate { (it.mediaStoreId to it.displayName) to it.dateTakenEpochSeconds }
+        return items.map { item ->
+            if (item.dateTakenEpochSeconds != null) item
+            else item.copy(dateTakenEpochSeconds = known[item.mediaStoreId to item.displayName])
+        }
+    }
+
+    /**
+     * Works out the date taken for ledger rows that have none, once per file. Bookkeeping only: no state, key or
+     * file changes. A row whose file is not on the phone waits (its modified date stands in), and so does a file
+     * that could not be read this time.
+     */
+    private suspend fun fillDatesTaken(scanned: List<LocalMediaItem>) {
+        val missing = entryDao.rowsMissingDateTaken().orEmpty()
+        if (missing.isEmpty()) return
+        val byFile = scanned.associateBy { it.mediaStoreId to it.displayName }
+        missing.chunked(DATE_TAKEN_BATCH).forEach { rows ->
+            entryDao.setDatesTaken(
+                rows.mapNotNull { row ->
+                    val item = byFile[row.mediaStoreId to row.displayName] ?: return@mapNotNull null
+                    val taken = item.dateTakenEpochSeconds ?: if (item.isVideo) null else try {
+                        scanner.exifDateTakenEpochSeconds(item.contentUri)
+                    } catch (_: IOException) {
+                        return@mapNotNull null
+                    } catch (_: SecurityException) {
+                        return@mapNotNull null
+                    }
+                    DateTakenFill(row.id, taken ?: row.dateModifiedEpochSeconds)
+                }
             )
         }
     }
@@ -2219,6 +2263,9 @@ class BackupEngine @Inject constructor(
 
         /** SQLite binds one variable per id and stops at 999, so lists of ids are written in chunks. */
         const val DECISION_CHUNK = 500
+
+        /** Saved a batch at a time, so a run cut short keeps what it already read. */
+        const val DATE_TAKEN_BATCH = 500
         const val CONFIRM_CHUNK = 500
 
         const val SQL_BATCH = 500

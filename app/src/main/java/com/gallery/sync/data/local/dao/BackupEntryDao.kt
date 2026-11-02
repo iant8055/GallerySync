@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.entity.CloudCopyDecision
@@ -54,6 +55,24 @@ data class ProxiedSizes(
 )
 
 /** One proxied file's name and the size OneDrive should still be holding for it. */
+/** A ledger row whose date taken has not been worked out yet. */
+data class RowMissingDateTaken(
+    val id: String,
+    val mediaStoreId: Long,
+    val displayName: String,
+    val dateModifiedEpochSeconds: Long
+)
+
+/** The date taken the ledger holds for one file. */
+data class KnownDateTaken(
+    val mediaStoreId: Long,
+    val displayName: String,
+    val dateTakenEpochSeconds: Long
+)
+
+/** One date taken to write. */
+data class DateTakenFill(val id: String, val dateTakenEpochSeconds: Long)
+
 data class ProxiedOriginal(
     val displayName: String,
     val sizeBytes: Long
@@ -815,6 +834,21 @@ interface BackupEntryDao {
 
     @Query("SELECT mediaStoreId FROM backup_entries WHERE isProxied = 1")
     suspend fun proxiedMediaStoreIds(): List<Long>
+
+    @Query("SELECT id, mediaStoreId, displayName, dateModifiedEpochSeconds FROM backup_entries WHERE dateTakenEpochSeconds IS NULL")
+    suspend fun rowsMissingDateTaken(): List<RowMissingDateTaken>
+
+    @Query("SELECT mediaStoreId, displayName, dateTakenEpochSeconds FROM backup_entries WHERE dateTakenEpochSeconds IS NOT NULL")
+    suspend fun knownDatesTaken(): List<KnownDateTaken>
+
+    @Query("UPDATE backup_entries SET dateTakenEpochSeconds = :dateTakenEpochSeconds WHERE id = :id")
+    suspend fun setDateTaken(id: String, dateTakenEpochSeconds: Long)
+
+    /** Together, so a library's worth of dates costs one commit a batch rather than one per file. */
+    @Transaction
+    suspend fun setDatesTaken(fills: List<DateTakenFill>) {
+        fills.forEach { setDateTaken(it.id, it.dateTakenEpochSeconds) }
+    }
 
     /**
      * Every proxied row's MediaStore id with its original size and the size of the copy the app wrote. The ledger scan

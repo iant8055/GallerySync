@@ -9,12 +9,15 @@ import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
 import androidx.core.content.ContextCompat
+import androidx.exifinterface.media.ExifInterface
 import com.gallery.sync.di.IoDispatcher
 import com.gallery.sync.domain.backup.TreeScope
 import com.gallery.sync.util.Logger
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import java.io.IOException
+import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -214,6 +217,8 @@ class MediaScanner @Inject constructor(
             add(MediaStore.MediaColumns.DISPLAY_NAME)
             add(MediaStore.MediaColumns.SIZE)
             add(MediaStore.MediaColumns.DATE_MODIFIED)
+            // The same "datetaken" column in both; MediaColumns only names it from API 29.
+            add(MediaStore.Images.ImageColumns.DATE_TAKEN)
             add(MediaStore.MediaColumns.MIME_TYPE)
             add(MediaStore.MediaColumns.BUCKET_DISPLAY_NAME)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -242,6 +247,7 @@ class MediaScanner @Inject constructor(
         val nameCol = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME)
         val sizeCol = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.SIZE)
         val modifiedCol = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_MODIFIED)
+        val takenCol = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATE_TAKEN)
         val mimeCol = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.MIME_TYPE)
         val bucketCol = cursor.getColumnIndex(MediaStore.MediaColumns.BUCKET_DISPLAY_NAME)
         val pathCol = cursor.getColumnIndex(MediaStore.MediaColumns.RELATIVE_PATH)
@@ -267,10 +273,29 @@ class MediaScanner @Inject constructor(
                 dateModifiedEpochSeconds = cursor.getLong(modifiedCol),
                 mimeType = cursor.getString(mimeCol).orEmpty(),
                 isVideo = isVideo,
-                relativePath = relativePath
+                relativePath = relativePath,
+                dateTakenEpochSeconds = takenCol.takeIf { it >= 0 && !cursor.isNull(it) }
+                    ?.let { MediaScanRules.dateTakenSeconds(cursor.getLong(it)) }
             )
         }
         return items
+    }
+
+    /**
+     * The date inside a photo's own EXIF, for when MediaStore's `datetaken` is empty.
+     *
+     * MediaStore leaves it empty for many photos that do carry a date: on the Moto G, 1 Nov 2026, 38 of a sample of
+     * 40 such photos had `DateTimeOriginal`, and none of the 38 had a time-zone offset or a GPS date. It is read at
+     * most once per file, by [com.gallery.sync.domain.backup.BackupEngine.refreshLedger], which keeps the answer.
+     * Null means the file was read and has no date; a file that could not be read throws, so it can be tried again.
+     */
+    @Throws(IOException::class)
+    fun exifDateTakenEpochSeconds(uri: Uri): Long? {
+        val exif = resolver.openInputStream(uri)?.use { ExifInterface(it) }
+            ?: throw IOException("could not open $uri")
+        val value = exif.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL)
+            ?: exif.getAttribute(ExifInterface.TAG_DATETIME_DIGITIZED)
+        return MediaScanRules.exifDateToEpochSeconds(value, ZoneId.systemDefault())
     }
 
     private fun imagesCollection(): Uri =

@@ -105,7 +105,7 @@ object AlbumFileSort {
         return when (sort) {
             FileSort.NAME -> entries.sortedWith(byName)
             FileSort.DATE -> entries.sortedWith(
-                compareByDescending<BackupEntryEntity> { it.dateModifiedEpochSeconds }.then(byName)
+                compareByDescending<BackupEntryEntity> { it.dateForSorting }.then(byName)
             )
             FileSort.STATUS -> entries.sortedWith(compareBy<BackupEntryEntity> { statusRank(it) }.then(byName))
         }

@@ -30,10 +30,10 @@ enum class ArchiveAge(val duration: Duration) {
     OneMonth(Duration.ofDays(30)),
     OneYear(Duration.ofDays(365)),
 
-    /** No wait at all: a file modified this very minute qualifies. The Settings default. */
+    /** No wait at all: a file taken this very minute qualifies. The Settings default. */
     All(Duration.ZERO);
 
-    /** The newest modification time, in seconds, a file may have and still be old enough. */
+    /** The newest date, in seconds, a file may have been taken and still be old enough. */
     fun thresholdEpochSeconds(now: Instant = Instant.now()): Long = now.minus(duration).epochSecond
 
     companion object {
@@ -57,13 +57,14 @@ data class ArchiveAgeSplit(
 )
 
 /**
- * Splits files in Archive albums by [age], measured against each file's own modification time —
- * the same field [CameraOptimiseAge] reads, needing no schema change.
+ * Splits files in Archive albums by [age], measured against when each file was taken, as
+ * [CameraOptimiseAge] is. Not its modified date, which optimising rewrites: every file in a Sync album
+ * would read as new (Ian, 1 Nov 2026).
  *
  * A file exactly on the line is old enough; the test is `<=`, matching `CameraSelection.matches`.
  */
 fun ArchiveAge.split(items: List<LocalMediaItem>, now: Instant = Instant.now()): ArchiveAgeSplit {
     val threshold = thresholdEpochSeconds(now)
-    val (eligible, hidden) = items.partition { it.dateModifiedEpochSeconds <= threshold }
+    val (eligible, hidden) = items.partition { it.dateForSorting <= threshold }
     return ArchiveAgeSplit(eligible = eligible, hiddenByAge = hidden)
 }

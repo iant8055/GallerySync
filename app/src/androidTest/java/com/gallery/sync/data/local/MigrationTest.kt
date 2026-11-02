@@ -485,6 +485,34 @@ class MigrationTest {
         db.close()
     }
 
+    @Test
+    fun migrate16To17_addsTheDateTakenAndKeepsTheLedger() {
+        helper.createDatabase(TEST_DB, 16).apply {
+            execSQL(
+                """
+                INSERT INTO backup_entries
+                    (id, mediaStoreId, contentUri, displayName, album, sizeBytes,
+                     dateModifiedEpochSeconds, mimeType, isVideo, state, attemptCount,
+                     isProxied, isProxySkipped, location, relativePath)
+                VALUES
+                    ('k1', 42, 'content://media/external/images/media/42', 'IMG_1.jpg',
+                     'Camera', 1024, 1700000000, 'image/jpeg', 0, 'UPLOADED', 0, 0, 0, 'ONEDRIVE', 'DCIM/Camera/')
+                """.trimIndent()
+            )
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(TEST_DB, 17, true, Migrations.MIGRATION_16_17)
+
+        db.query("SELECT state, dateModifiedEpochSeconds, dateTakenEpochSeconds FROM backup_entries WHERE id = 'k1'").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals("UPLOADED", cursor.getString(0))
+            assertEquals(1700000000L, cursor.getLong(1))
+            assertTrue(cursor.isNull(2))
+        }
+        db.close()
+    }
+
     private companion object {
         const val TEST_DB = "migration-test.db"
     }

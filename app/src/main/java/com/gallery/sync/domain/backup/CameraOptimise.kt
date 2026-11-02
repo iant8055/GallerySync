@@ -97,20 +97,20 @@ object CameraSelection {
             !entry.isProxySkipped &&
             entry.localMissingSinceEpochMillis == null
 
-    /** Whether the header's [choice], with its age turned into [modifiedBeforeEpochSeconds], selects [entry]. */
-    fun matches(entry: BackupEntryEntity, choice: CameraOptimiseChoice, modifiedBeforeEpochSeconds: Long): Boolean =
+    /** Whether the header's [choice], with its age turned into [takenBeforeEpochSeconds], selects [entry]. */
+    fun matches(entry: BackupEntryEntity, choice: CameraOptimiseChoice, takenBeforeEpochSeconds: Long): Boolean =
         isSelectable(entry) &&
             !FilePin.isPinned(entry.modeOverride) &&
             (if (entry.isVideo) choice.videos else choice.photos) &&
-            entry.dateModifiedEpochSeconds <= modifiedBeforeEpochSeconds
+            entry.dateForSorting <= takenBeforeEpochSeconds
 
     /** What the header selects: the starting selection, and the one a changed choice replaces it with. */
     fun byChoice(
         entries: List<BackupEntryEntity>,
         choice: CameraOptimiseChoice,
-        modifiedBeforeEpochSeconds: Long
+        takenBeforeEpochSeconds: Long
     ): Set<String> =
-        entries.filter { matches(it, choice, modifiedBeforeEpochSeconds) }.mapTo(LinkedHashSet()) { it.id }
+        entries.filter { matches(it, choice, takenBeforeEpochSeconds) }.mapTo(LinkedHashSet()) { it.id }
 
     /**
      * The files a run will optimise: those in [selectedIds] that can still be optimised, largest first. The only

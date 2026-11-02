@@ -202,4 +202,25 @@ class MediaScanRulesTest {
         assertEquals("Camera", names["dcim/camera"])
         assertEquals("Camera (1)", names["dcim/camera (1)"])
     }
+
+    @Test
+    fun `an EXIF date is read as local time`() {
+        val zone = java.time.ZoneId.of("America/Chicago")
+        assertEquals(1_489_339_433L, MediaScanRules.exifDateToEpochSeconds("2017:03:12 12:23:53", zone))
+        assertEquals(1_489_339_433L, MediaScanRules.exifDateToEpochSeconds("2017:03:12 12:23:53\u0000 ", zone))
+    }
+
+    @Test
+    fun `an EXIF date that is missing or not a date is no date`() {
+        val zone = java.time.ZoneOffset.UTC
+        listOf(null, "", "   ", "0000:00:00 00:00:00", "not a date").forEach {
+            assertEquals(null, MediaScanRules.exifDateToEpochSeconds(it, zone))
+        }
+    }
+
+    @Test
+    fun `a MediaStore date taken of zero is no date`() {
+        assertEquals(null, MediaScanRules.dateTakenSeconds(0L))
+        assertEquals(1_530_492_773L, MediaScanRules.dateTakenSeconds(1_530_492_773_000L))
+    }
 }

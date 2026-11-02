@@ -93,6 +93,20 @@ class ArchiveAgeTest {
     }
 
     @Test
+    fun `an old photo optimised today is judged by when it was taken`() {
+        val optimised = item("old.jpg", ageSeconds = 0).copy(dateTakenEpochSeconds = now.epochSecond - 400 * day)
+        val taken = ArchiveAge.OneYear.split(listOf(optimised), now)
+        assertEquals(listOf("old.jpg"), names(taken.eligible))
+    }
+
+    @Test
+    fun `a new photo with an old modified date is held back by when it was taken`() {
+        val fresh = item("new.jpg", ageSeconds = 400 * day).copy(dateTakenEpochSeconds = now.epochSecond - day)
+        val taken = ArchiveAge.OneYear.split(listOf(fresh), now)
+        assertEquals(listOf("new.jpg"), names(taken.hiddenByAge))
+    }
+
+    @Test
     fun `an empty list splits into two empty lists`() {
         val result = ArchiveAge.OneMonth.split(emptyList(), now)
         assertTrue(result.eligible.isEmpty())

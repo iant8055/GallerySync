@@ -28,8 +28,17 @@ data class LocalMediaItem(
      * Kept rather than discarded after resolving the album name, because it is the only thing
      * comparable to a SAF tree grant — the album name alone cannot say which folder a file lives in.
      */
-    val relativePath: String?
-)
+    val relativePath: String?,
+    /**
+     * When the photo or video was taken, or null when MediaStore does not say. Sorting and age go by this and not
+     * by [dateModifiedEpochSeconds], because optimising a file rewrites its modified date (Ian, 1 Nov 2026). Never
+     * part of a file's identity: see [com.gallery.sync.data.local.entity.backupKeyOf].
+     */
+    val dateTakenEpochSeconds: Long? = null
+) {
+    /** The date to sort and judge age by. */
+    val dateForSorting: Long get() = dateTakenEpochSeconds ?: dateModifiedEpochSeconds
+}
 
 /** An album on the device, as the user would recognise it in Gallery. */
 data class MediaAlbum(

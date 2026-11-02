@@ -2,6 +2,10 @@ package com.gallery.sync.data.local.media
 
 import android.Manifest
 import android.os.Build
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 import java.util.Locale
 
 /**
@@ -12,6 +16,25 @@ import java.util.Locale
  * takes for the ContentProvider.
  */
 internal object MediaScanRules {
+
+    private val EXIF_DATE = DateTimeFormatter.ofPattern("yyyy:MM:dd HH:mm:ss", Locale.ROOT)
+
+    /** MediaStore's `datetaken`, which is in milliseconds, in seconds. Zero or below is no date at all. */
+    fun dateTakenSeconds(millis: Long): Long? = (millis / 1000).takeIf { it > 0 }
+
+    /**
+     * An EXIF date such as `2017:03:12 12:23:53`, or null when it is missing or not a real date (cameras write
+     * `0000:00:00 00:00:00`). EXIF holds the local time with no zone, so [zone] is the best reading of it.
+     */
+    fun exifDateToEpochSeconds(value: String?, zone: ZoneId): Long? {
+        val text = value?.trim(' ', '\u0000').orEmpty()
+        if (text.isEmpty()) return null
+        return try {
+            LocalDateTime.parse(text, EXIF_DATE).atZone(zone).toEpochSecond().takeIf { it > 0 }
+        } catch (_: DateTimeParseException) {
+            null
+        }
+    }
 
     /** Album shown when MediaStore has no bucket name for an item. */
     const val UNKNOWN_ALBUM = "Other"

@@ -353,10 +353,21 @@ object Migrations {
         }
     }
 
+    /**
+     * 16 → 17: each ledger row records when its file was taken, for sorting and age (Ian, 1 Nov 2026). A nullable
+     * column, so every existing row stays as it is; the next scan fills it for files still on the phone. See
+     * [com.gallery.sync.data.local.entity.BackupEntryEntity.dateTakenEpochSeconds].
+     */
+    val MIGRATION_16_17 = object : Migration(16, 17) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE `backup_entries` ADD COLUMN `dateTakenEpochSeconds` INTEGER")
+        }
+    }
+
     /** Every migration, in order, for the database builder. */
     val ALL = arrayOf(
         MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7,
         MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12,
-        MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16
+        MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17
     )
 }

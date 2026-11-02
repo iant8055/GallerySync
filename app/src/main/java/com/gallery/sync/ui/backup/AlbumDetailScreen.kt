@@ -616,12 +616,12 @@ private fun FileCard(
                 }
                 // Date, marks and Cloud on the lower line, each mark in its own colour. The date is
                 // beside the status and not instead of it (Ian, 27 Sept 2026): Sort by Date and the
-                // Camera age both go by it, so it has to be on screen. The phone's modified date.
+                // Camera age both go by it, so it has to be on screen. The date taken (Ian, 1 Nov 2026).
                 // An optimised file's size is what is on the phone now, not the original's (Ian, 27 Sept 2026): the
                 // original size made a file just optimised look as if nothing had shrunk — the size now sits on the
                 // line above, and the optimised mark here says the full-size original is in the Cloud.
                 val date = FileDateFormat.format(
-                    Instant.ofEpochSecond(entry.dateModifiedEpochSeconds).atZone(ZoneId.systemDefault())
+                    Instant.ofEpochSecond(entry.dateForSorting).atZone(ZoneId.systemDefault())
                 )
                 val marks = entry.statusLines()
                 // Which Cloud it went to, named only once it is actually there (Ian, 4 Oct 2026: "or
