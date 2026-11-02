@@ -8,7 +8,7 @@ Every change since version 26 (0.3.25), the last build the Closed Testing group 
 **Dates**
 - Files now sort and age by the date they were taken, not the date they were last modified. Optimising a file rewrites its modified date, so an optimised album read as all new and Archive's *older than* held all of it back. Covers Archive's *older than*, the Camera folder's age, *Sort by Date* in an album, *Newest first* on Restore, and the date shown on each file.
 
-## Version 34 (0.3.33) — built 1 Nov 2026, not yet uploaded
+## Version 34 (0.3.33) — built 1 Nov 2026, never uploaded; these changes first reach users in version 35
 
 **Settings**
 - **Pro unlocked. You can use every Cloud.** moved from under the Clouds heading into the green Backup band.

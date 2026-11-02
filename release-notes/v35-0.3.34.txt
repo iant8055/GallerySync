@@ -1,28 +1,42 @@
 <en-US>
 • Files now sort by the date they were taken, not the date they were last changed.
 • "Older than" filters use the date taken too, so an optimized photo no longer counts as new.
+• "Pro unlocked" now appears in the green Backup header in Settings.
+• The Backup, Albums, Sync, Restore and Archive titles in Settings are now translated.
 </en-US>
 <es-ES>
 • Los archivos ahora se ordenan por la fecha en que se tomaron, no por la de su último cambio.
 • Los filtros «más antiguos que» también usan la fecha de captura, así que una foto optimizada ya no cuenta como nueva.
+• "Pro desbloqueado" aparece ahora en el encabezado verde de Copia de seguridad en Settings.
+• Los títulos Copia de seguridad, Álbumes, Sincronización, Restaurar y Archivar de Settings ya están traducidos.
 </es-ES>
 <pt-BR>
 • Os arquivos agora são ordenados pela data em que foram feitos, não pela última alteração.
 • Os filtros "mais antigos que" também usam a data de captura, então uma foto otimizada não conta mais como nova.
+• "Pro desbloqueado" agora aparece no cabeçalho verde de Backup em Settings.
+• Os títulos Backup, Álbuns, Sincronização, Restaurar e Arquivar em Settings agora estão traduzidos.
 </pt-BR>
 <fr-FR>
 • Les fichiers sont maintenant triés par date de prise de vue, et non par date de dernière modification.
 • Les filtres « plus ancien que » utilisent aussi la date de prise de vue : une photo optimisée ne compte plus comme récente.
+• « Pro débloqué » apparaît maintenant dans l'en-tête vert Sauvegarde de Settings.
+• Les titres Sauvegarde, Albums, Synchronisation, Restauration et Archivage de Settings sont maintenant traduits.
 </fr-FR>
 <de-DE>
 • Dateien werden jetzt nach dem Aufnahmedatum sortiert, nicht nach der letzten Änderung.
 • Auch die Filter „Älter als" nutzen das Aufnahmedatum, sodass ein optimiertes Foto nicht mehr als neu gilt.
+• „Pro freigeschaltet" steht jetzt in der grünen Backup-Kopfzeile in Settings.
+• Die Titel Backup, Alben, Synchronisierung, Wiederherstellen und Archiv in Settings sind jetzt übersetzt.
 </de-DE>
 <ja-JP>
 • ファイルは、最終更新日ではなく撮影日で並べ替えられるようになりました。
 • 「より古い」フィルターも撮影日を使うため、最適化した写真が新しいファイルとして扱われなくなりました。
+• 「Pro のロックを解除済み」が Settings の緑色のバックアップ見出しに表示されるようになりました。
+• Settings のバックアップ、アルバム、同期、復元、アーカイブの見出しが翻訳されました。
 </ja-JP>
 <hi-IN>
 • फ़ाइलें अब पिछले बदलाव की तारीख से नहीं, बल्कि ली गई तारीख से क्रम में लगती हैं।
 • "इससे पुरानी" फ़िल्टर भी ली गई तारीख देखते हैं, इसलिए ऑप्टिमाइज़ की गई फ़ोटो अब नई नहीं मानी जाती।
+• "Pro अनलॉक है" अब Settings में हरे बैकअप शीर्षक में दिखता है।
+• Settings में बैकअप, एल्बम, सिंक, वापस लाएँ और आर्काइव शीर्षकों का अब अनुवाद हो गया है।
 </hi-IN>
