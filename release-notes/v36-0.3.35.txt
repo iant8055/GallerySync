@@ -1,0 +1,21 @@
+<en-US>
+• Archive's "Only show files older than" is now two menus: a number from 1 to 9 and a unit (hour, day, week, month, year or All), on the Archive tab and in Settings.
+</en-US>
+<es-ES>
+• «Only show files older than» de Archive ahora son dos menús: un número del 1 al 9 y una unidad (hour, day, week, month, year o All), en la pestaña Archive y en Settings.
+</es-ES>
+<pt-BR>
+• "Only show files older than" do Archive agora são dois menus: um número de 1 a 9 e uma unidade (hour, day, week, month, year ou All), na aba Archive e em Settings.
+</pt-BR>
+<fr-FR>
+• « Only show files older than » dans Archive devient deux menus : un nombre de 1 à 9 et une unité (hour, day, week, month, year ou All), dans l'onglet Archive et dans Settings.
+</fr-FR>
+<de-DE>
+• „Only show files older than" in Archive besteht jetzt aus zwei Menüs: einer Zahl von 1 bis 9 und einer Einheit (hour, day, week, month, year oder All), im Tab Archive und in Settings.
+</de-DE>
+<ja-JP>
+• Archive の「Only show files older than」が 2 つのメニューになりました。1〜9 の数字と単位（hour、day、week、month、year、All）を選べます。Archive タブと Settings の両方で使えます。
+</ja-JP>
+<hi-IN>
+• Archive का "Only show files older than" अब दो मेनू है: 1 से 9 तक की संख्या और एक इकाई (hour, day, week, month, year या All), Archive टैब और Settings दोनों में।
+</hi-IN>
