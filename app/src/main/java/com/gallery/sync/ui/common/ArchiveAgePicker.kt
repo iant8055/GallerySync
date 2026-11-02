@@ -21,30 +21,31 @@ import com.gallery.sync.domain.backup.ArchiveAgeUnit
 
 /**
  * *Only show files older than*: a number from 1 to 9 and a unit, on the Archive tab and in Settings
- * (Ian, 2 Nov 2026). All is the unit's last entry and has no number, so the number's menu is not drawn
- * for it. [button] draws each menu's button, because the two screens draw theirs differently.
+ * (Ian, 2 Nov 2026). All is the unit's last entry and has no number, so the number's menu is greyed for
+ * it, never hidden (Ian, the same day: hidden, it read as missing). [button] draws each menu's button,
+ * because the two screens draw theirs differently; its last argument is false when that menu is greyed.
  */
 @Composable
 fun ArchiveAgePicker(
     age: ArchiveAge,
     onSetAge: (ArchiveAge) -> Unit,
-    button: @Composable (label: String, onClick: () -> Unit) -> Unit
+    button: @Composable (label: String, enabled: Boolean, onClick: () -> Unit) -> Unit
 ) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        if (age.unit != ArchiveAgeUnit.All) {
-            PickerMenu(
-                selected = age.count,
-                options = ArchiveAge.COUNTS.toList(),
-                optionLabel = { it.toString() },
-                onSelected = { onSetAge(age.copy(count = it)) },
-                button = button
-            )
-        }
+        PickerMenu(
+            selected = age.count,
+            options = ArchiveAge.COUNTS.toList(),
+            optionLabel = { it.toString() },
+            onSelected = { onSetAge(age.copy(count = it)) },
+            enabled = age.unit != ArchiveAgeUnit.All,
+            button = button
+        )
         PickerMenu(
             selected = age.unit,
             options = ArchiveAgeUnit.entries,
             optionLabel = { it.label(age.count) },
             onSelected = { onSetAge(age.copy(unit = it)) },
+            enabled = true,
             button = button
         )
     }
@@ -56,11 +57,12 @@ private fun <T> PickerMenu(
     options: List<T>,
     optionLabel: @Composable (T) -> String,
     onSelected: (T) -> Unit,
-    button: @Composable (label: String, onClick: () -> Unit) -> Unit
+    enabled: Boolean,
+    button: @Composable (label: String, enabled: Boolean, onClick: () -> Unit) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
     Box {
-        button(optionLabel(selected)) { expanded = true }
+        button(optionLabel(selected), enabled) { expanded = true }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             options.forEach { option ->
                 DropdownMenuItem(

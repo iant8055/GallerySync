@@ -551,8 +551,8 @@ private fun ArchiveAgeSection(age: ArchiveAge, hiddenCount: Int, enabled: Boolea
                 HelpButton(HelpTopic.ARCHIVE_AGE_FILTER)
             }
             Box(modifier = Modifier.align(Alignment.CenterVertically)) {
-                ArchiveAgePicker(age = age, onSetAge = onSetAge) { label, onClick ->
-                    HeroOutlinedButton(onClick = onClick, label = label, enabled = enabled)
+                ArchiveAgePicker(age = age, onSetAge = onSetAge) { label, menuEnabled, onClick ->
+                    HeroOutlinedButton(onClick = onClick, label = label, enabled = enabled && menuEnabled)
                 }
             }
         }

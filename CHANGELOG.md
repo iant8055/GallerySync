@@ -6,7 +6,7 @@ Every change since version 26 (0.3.25), the last build the Closed Testing group 
 ## Version 36 — not yet built
 
 **Archive**
-- *Only show files older than* is now two menus, on the Archive tab and in Settings: a number from 1 to 9, and hour, day, week, month, year or All. All has no number. A default saved earlier keeps its meaning.
+- *Only show files older than* is now two menus, on the Archive tab and in Settings: a number from 1 to 9, and hour, day, week, month, year or All. The number is greyed while All is chosen. A default saved earlier keeps its meaning.
 
 ## Version 35 (0.3.34) — 1 Nov 2026, uploaded
 

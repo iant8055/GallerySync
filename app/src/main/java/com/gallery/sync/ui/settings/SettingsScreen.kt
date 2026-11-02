@@ -913,8 +913,8 @@ private fun SettingArchiveAge(age: ArchiveAge, onSetAge: (ArchiveAge) -> Unit) {
     LabelBesideOrAbove(
         label = { LabelWithHelp(stringResource(R.string.archive_age_label), HelpTopic.SETTINGS_ARCHIVE_DEFAULT_AGE) }
     ) {
-        ArchiveAgePicker(age = age, onSetAge = onSetAge) { label, onClick ->
-            OutlinedButton(onClick = onClick) {
+        ArchiveAgePicker(age = age, onSetAge = onSetAge) { label, enabled, onClick ->
+            OutlinedButton(onClick = onClick, enabled = enabled) {
                 Text(label)
             }
         }
