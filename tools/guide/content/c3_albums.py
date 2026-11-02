@@ -111,7 +111,7 @@ CHAPTER = Chapter(
 
         topic("album-file-sort", "Sorting an album's files", """
             • **Name:** A to Z.
-            • **Date:** newest first. A restored file has the date it was restored.
+            • **Date:** newest first.
             • **Status:** failed, then pending, then optimised, then backed up.
 
             The list opens in name order each time. Sorting changes nothing about the files.

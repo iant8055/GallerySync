@@ -122,11 +122,11 @@ Sem miniaturas nem pré-visualizações. Use o seu app de galeria para ver as fo
     'album-file-sort': {
         "title": 'Ordenar os arquivos de um álbum',
         "body": """• **Name:** de A a Z.
-• **Date:** do mais novo para o mais antigo. Um arquivo restaurado tem a data em que foi restaurado.
+• **Date:** do mais novo para o mais antigo.
 • **Status:** com falha, depois pendente, depois otimizado, depois com backup.
 
 A lista sempre abre em ordem de nome. Ordenar não muda nada nos arquivos.""",
-        "en_hash": "030835fb143a638a",
+        "en_hash": "8de134098638b3d8",
     },
     'album-file-pin': {
         "title": 'Keep at full size',

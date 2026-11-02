@@ -122,11 +122,11 @@ Keine Miniaturansichten oder Vorschauen. Nutze deine Galerie-App, um Fotos anzus
     "album-file-sort": {
         "title": "Die Dateien eines Albums sortieren",
         "body": """• **Name:** A bis Z.
-• **Date:** neueste zuerst. Eine wiederhergestellte Datei trägt das Datum ihrer Wiederherstellung.
+• **Date:** neueste zuerst.
 • **Status:** fehlgeschlagen, dann ausstehend, dann optimiert, dann gesichert.
 
 Die Liste öffnet sich jedes Mal in Namensreihenfolge. Sortieren ändert nichts an den Dateien.""",
-        "en_hash": "030835fb143a638a",
+        "en_hash": "8de134098638b3d8",
     },
     "album-file-pin": {
         "title": "Keep at full size",

@@ -122,11 +122,11 @@ Pas de miniatures ni d'aperçus. Utilisez votre application de galerie pour rega
     "album-file-sort": {
         "title": "Trier les fichiers d'un album",
         "body": """• **Name :** de A à Z.
-• **Date :** les plus récents d'abord. Un fichier restauré a la date de sa restauration.
+• **Date :** les plus récents d'abord.
 • **Status :** failed, puis pending, puis optimised, puis backed up.
 
 La liste s'ouvre à chaque fois dans l'ordre des noms. Trier ne change rien aux fichiers.""",
-        "en_hash": "030835fb143a638a",
+        "en_hash": "8de134098638b3d8",
     },
     "album-file-pin": {
         "title": "Keep at full size",

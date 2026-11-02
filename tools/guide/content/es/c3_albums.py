@@ -134,11 +134,11 @@ Sin miniaturas ni vistas previas. Usa tu app de galería para ver las fotos.""",
     "album-file-sort": {
         "title": "Ordenar los archivos de un álbum",
         "body": """• **Name:** de la A a la Z.
-• **Date:** primero los más nuevos. Un archivo restaurado tiene la fecha en que se restauró.
+• **Date:** primero los más nuevos.
 • **Status:** fallidos, luego pendientes, luego optimizados, luego con copia.
 
 La lista se abre cada vez ordenada por nombre. Ordenar no cambia nada de los archivos.""",
-        "en_hash": "030835fb143a638a",
+        "en_hash": "8de134098638b3d8",
     },
 
     "album-file-pin": {

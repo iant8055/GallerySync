@@ -122,11 +122,11 @@ TRANSLATIONS = {
     "album-file-sort": {
         "title": "アルバムのファイルを並べ替える",
         "body": """• **Name**：A から Z の順。
-• **Date**：新しい順。復元したファイルの日付は、復元した日です。
+• **Date**：新しい順。
 • **Status**：failed、pending、optimised、backed up の順。
 
 一覧は、開くたびに名前順になります。並べ替えてもファイルは変わりません。""",
-        "en_hash": "030835fb143a638a",
+        "en_hash": "8de134098638b3d8",
     },
     "album-file-pin": {
         "title": "Keep at full size",
