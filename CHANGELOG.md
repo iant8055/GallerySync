@@ -3,7 +3,7 @@
 Every change since version 26 (0.3.25), the last build the Closed Testing group had. The short notes Play shows to users
 (500 characters per language) are in `release-notes/`; this file is the full record.
 
-## Version 35 — not yet built
+## Version 35 (0.3.34) — built 1 Nov 2026, not yet uploaded
 
 **Dates**
 - Files now sort and age by the date they were taken, not the date they were last modified. Optimising a file rewrites its modified date, so an optimised album read as all new and Archive's *older than* held all of it back. Covers Archive's *older than*, the Camera folder's age, *Sort by Date* in an album, *Newest first* on Restore, and the date shown on each file.

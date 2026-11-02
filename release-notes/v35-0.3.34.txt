@@ -1,0 +1,28 @@
+<en-US>
+• Files now sort by the date they were taken, not the date they were last changed.
+• "Older than" filters use the date taken too, so an optimized photo no longer counts as new.
+</en-US>
+<es-ES>
+• Los archivos ahora se ordenan por la fecha en que se tomaron, no por la de su último cambio.
+• Los filtros «más antiguos que» también usan la fecha de captura, así que una foto optimizada ya no cuenta como nueva.
+</es-ES>
+<pt-BR>
+• Os arquivos agora são ordenados pela data em que foram feitos, não pela última alteração.
+• Os filtros "mais antigos que" também usam a data de captura, então uma foto otimizada não conta mais como nova.
+</pt-BR>
+<fr-FR>
+• Les fichiers sont maintenant triés par date de prise de vue, et non par date de dernière modification.
+• Les filtres « plus ancien que » utilisent aussi la date de prise de vue : une photo optimisée ne compte plus comme récente.
+</fr-FR>
+<de-DE>
+• Dateien werden jetzt nach dem Aufnahmedatum sortiert, nicht nach der letzten Änderung.
+• Auch die Filter „Älter als" nutzen das Aufnahmedatum, sodass ein optimiertes Foto nicht mehr als neu gilt.
+</de-DE>
+<ja-JP>
+• ファイルは、最終更新日ではなく撮影日で並べ替えられるようになりました。
+• 「より古い」フィルターも撮影日を使うため、最適化した写真が新しいファイルとして扱われなくなりました。
+</ja-JP>
+<hi-IN>
+• फ़ाइलें अब पिछले बदलाव की तारीख से नहीं, बल्कि ली गई तारीख से क्रम में लगती हैं।
+• "इससे पुरानी" फ़िल्टर भी ली गई तारीख देखते हैं, इसलिए ऑप्टिमाइज़ की गई फ़ोटो अब नई नहीं मानी जाती।
+</hi-IN>
