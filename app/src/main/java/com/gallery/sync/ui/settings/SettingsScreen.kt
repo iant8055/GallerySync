@@ -56,6 +56,7 @@ import com.gallery.sync.R
 import com.gallery.sync.ui.common.labelRes
 import com.gallery.sync.data.local.settings.ThemeMode
 import com.gallery.sync.domain.backup.ArchiveAge
+import com.gallery.sync.ui.common.ArchiveAgePicker
 import com.gallery.sync.domain.backup.BackupLocation
 import com.gallery.sync.domain.backup.RemoteRoots
 import com.gallery.sync.domain.backup.CameraAlbum
@@ -560,14 +561,7 @@ fun SettingsScreen(
             help = HelpTopic.SETTINGS_SECTION_ARCHIVE
         )
 
-        SettingDropdown(
-            label = stringResource(R.string.archive_age_label),
-            help = HelpTopic.SETTINGS_ARCHIVE_DEFAULT_AGE,
-            options = ArchiveAge.entries,
-            selected = state.archiveDefaultAge,
-            onSelected = viewModel::setArchiveDefaultAge,
-            optionLabel = { age -> age.label() }
-        )
+        SettingArchiveAge(age = state.archiveDefaultAge, onSetAge = viewModel::setArchiveDefaultAge)
 
         // Whether the OS actually has the permission right now — checked fresh on every
         // recomposition rather than trusted from the stored preference, so the switch never claims
@@ -913,15 +907,18 @@ private fun CameraOptimiseAge.label(): String = when (this) {
     CameraOptimiseAge.All -> stringResource(R.string.camera_age_all)
 }
 
-/** The same wording as the Archive tab's own filter — one vocabulary, one setting. */
+/** The same two menus as the Archive tab's own filter — one vocabulary, one setting. */
 @Composable
-private fun ArchiveAge.label(): String = when (this) {
-    ArchiveAge.OneHour -> stringResource(R.string.archive_age_hour)
-    ArchiveAge.OneDay -> stringResource(R.string.archive_age_day)
-    ArchiveAge.OneWeek -> stringResource(R.string.archive_age_week)
-    ArchiveAge.OneMonth -> stringResource(R.string.archive_age_month)
-    ArchiveAge.OneYear -> stringResource(R.string.archive_age_year)
-    ArchiveAge.All -> stringResource(R.string.archive_age_all)
+private fun SettingArchiveAge(age: ArchiveAge, onSetAge: (ArchiveAge) -> Unit) {
+    LabelBesideOrAbove(
+        label = { LabelWithHelp(stringResource(R.string.archive_age_label), HelpTopic.SETTINGS_ARCHIVE_DEFAULT_AGE) }
+    ) {
+        ArchiveAgePicker(age = age, onSetAge = onSetAge) { label, onClick ->
+            OutlinedButton(onClick = onClick) {
+                Text(label)
+            }
+        }
+    }
 }
 
 /**
@@ -1048,14 +1045,7 @@ fun SettingsTabPreview(onGuideCardPositioned: ((androidx.compose.ui.geometry.Rec
         )
 
         SectionHeader(stringResource(R.string.settings_archive), help = HelpTopic.SETTINGS_SECTION_ARCHIVE)
-        SettingDropdown(
-            label = stringResource(R.string.archive_age_label),
-            help = HelpTopic.SETTINGS_ARCHIVE_DEFAULT_AGE,
-            options = listOf(ArchiveAge.DEFAULT),
-            selected = ArchiveAge.DEFAULT,
-            onSelected = {},
-            optionLabel = { age -> age.label() }
-        )
+        SettingArchiveAge(age = ArchiveAge.DEFAULT, onSetAge = {})
         SettingSwitch(
             label = stringResource(R.string.settings_archive_notify),
             help = HelpTopic.SETTINGS_ARCHIVE_NOTIFY,

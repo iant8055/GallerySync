@@ -36,12 +36,48 @@ class ArchiveAgeTest {
     private fun names(list: List<LocalMediaItem>) = list.map { it.displayName }
 
     @Test
-    fun `the ages are Ian's list in order, with All last`() {
+    fun `the units are in order with All last, and the number multiplies them`() {
         assertEquals(
             listOf(1L, 24L, 168L, 720L, 8_760L, 0L),
-            ArchiveAge.entries.map { it.duration.toHours() }
+            ArchiveAgeUnit.entries.map { it.duration.toHours() }
         )
-        assertEquals(ArchiveAge.All, ArchiveAge.entries.last())
+        assertEquals(ArchiveAgeUnit.All, ArchiveAgeUnit.entries.last())
+        assertEquals(1..9, ArchiveAge.COUNTS)
+        assertEquals(9 * 8_760L, ArchiveAge(9, ArchiveAgeUnit.Year).duration.toHours())
+        assertEquals(3 * 720L, ArchiveAge(3, ArchiveAgeUnit.Month).duration.toHours())
+    }
+
+    @Test
+    fun `All waits for nothing whatever number was showing before it`() {
+        assertEquals(0L, ArchiveAge(7, ArchiveAgeUnit.All).duration.toHours())
+    }
+
+    @Test
+    fun `a stored age reads back as itself`() {
+        ArchiveAgeUnit.entries.filter { it != ArchiveAgeUnit.All }.forEach { unit ->
+            ArchiveAge.COUNTS.forEach { count ->
+                val age = ArchiveAge(count, unit)
+                assertEquals(age, ArchiveAge.fromNameOrDefault(age.storedName))
+            }
+        }
+        assertEquals(ArchiveAge.All, ArchiveAge.fromNameOrDefault(ArchiveAge(7, ArchiveAgeUnit.All).storedName))
+    }
+
+    @Test
+    fun `a default saved by the old fixed list reads as what it was`() {
+        assertEquals(ArchiveAge(1, ArchiveAgeUnit.Hour), ArchiveAge.fromNameOrDefault("OneHour"))
+        assertEquals(ArchiveAge(1, ArchiveAgeUnit.Day), ArchiveAge.fromNameOrDefault("OneDay"))
+        assertEquals(ArchiveAge(1, ArchiveAgeUnit.Week), ArchiveAge.fromNameOrDefault("OneWeek"))
+        assertEquals(ArchiveAge(1, ArchiveAgeUnit.Month), ArchiveAge.fromNameOrDefault("OneMonth"))
+        assertEquals(ArchiveAge(1, ArchiveAgeUnit.Year), ArchiveAge.fromNameOrDefault("OneYear"))
+        assertEquals(ArchiveAge.All, ArchiveAge.fromNameOrDefault("All"))
+    }
+
+    @Test
+    fun `a stored number outside one to nine falls back to the default`() {
+        assertEquals(ArchiveAge.All, ArchiveAge.fromNameOrDefault("0 Day"))
+        assertEquals(ArchiveAge.All, ArchiveAge.fromNameOrDefault("10 Day"))
+        assertEquals(ArchiveAge.All, ArchiveAge.fromNameOrDefault("3 Decade"))
     }
 
     @Test
@@ -62,11 +98,11 @@ class ArchiveAgeTest {
 
     @Test
     fun `a file exactly on the line is old enough and one second newer is not`() {
-        val threshold = ArchiveAge.OneDay.thresholdEpochSeconds(now)
+        val threshold = ArchiveAge(1, ArchiveAgeUnit.Day).thresholdEpochSeconds(now)
         assertEquals(now.epochSecond - day, threshold)
         val onTheLine = item("on.jpg", ageSeconds = day)
         val justNewer = item("newer.jpg", ageSeconds = day - 1)
-        val result = ArchiveAge.OneDay.split(listOf(onTheLine, justNewer), now)
+        val result = ArchiveAge(1, ArchiveAgeUnit.Day).split(listOf(onTheLine, justNewer), now)
         assertEquals(listOf("on.jpg"), names(result.eligible))
         assertEquals(listOf("newer.jpg"), names(result.hiddenByAge))
     }
@@ -76,18 +112,18 @@ class ArchiveAgeTest {
         val recent = item("recent.jpg", ageSeconds = 3 * hour)
         val old = item("old.jpg", ageSeconds = 400 * day)
 
-        assertEquals(listOf("old.jpg"), names(ArchiveAge.OneDay.split(listOf(recent, old), now).eligible))
+        assertEquals(listOf("old.jpg"), names(ArchiveAge(1, ArchiveAgeUnit.Day).split(listOf(recent, old), now).eligible))
         assertEquals(
             setOf("recent.jpg", "old.jpg"),
-            names(ArchiveAge.OneHour.split(listOf(recent, old), now).eligible).toSet()
+            names(ArchiveAge(1, ArchiveAgeUnit.Hour).split(listOf(recent, old), now).eligible).toSet()
         )
-        assertEquals(listOf("old.jpg"), names(ArchiveAge.OneYear.split(listOf(recent, old), now).eligible))
+        assertEquals(listOf("old.jpg"), names(ArchiveAge(1, ArchiveAgeUnit.Year).split(listOf(recent, old), now).eligible))
     }
 
     @Test
     fun `a file held back by age is neither eligible nor lost — it is in the other list`() {
         val young = item("young.jpg", ageSeconds = hour)
-        val result = ArchiveAge.OneWeek.split(listOf(young), now)
+        val result = ArchiveAge(1, ArchiveAgeUnit.Week).split(listOf(young), now)
         assertTrue(result.eligible.isEmpty())
         assertEquals(listOf("young.jpg"), names(result.hiddenByAge))
     }
@@ -95,20 +131,20 @@ class ArchiveAgeTest {
     @Test
     fun `an old photo optimised today is judged by when it was taken`() {
         val optimised = item("old.jpg", ageSeconds = 0).copy(dateTakenEpochSeconds = now.epochSecond - 400 * day)
-        val taken = ArchiveAge.OneYear.split(listOf(optimised), now)
+        val taken = ArchiveAge(1, ArchiveAgeUnit.Year).split(listOf(optimised), now)
         assertEquals(listOf("old.jpg"), names(taken.eligible))
     }
 
     @Test
     fun `a new photo with an old modified date is held back by when it was taken`() {
         val fresh = item("new.jpg", ageSeconds = 400 * day).copy(dateTakenEpochSeconds = now.epochSecond - day)
-        val taken = ArchiveAge.OneYear.split(listOf(fresh), now)
+        val taken = ArchiveAge(1, ArchiveAgeUnit.Year).split(listOf(fresh), now)
         assertEquals(listOf("new.jpg"), names(taken.hiddenByAge))
     }
 
     @Test
     fun `an empty list splits into two empty lists`() {
-        val result = ArchiveAge.OneMonth.split(emptyList(), now)
+        val result = ArchiveAge(1, ArchiveAgeUnit.Month).split(emptyList(), now)
         assertTrue(result.eligible.isEmpty())
         assertTrue(result.hiddenByAge.isEmpty())
     }

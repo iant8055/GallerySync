@@ -3,6 +3,11 @@
 Every change since version 26 (0.3.25), the last build the Closed Testing group had. The short notes Play shows to users
 (500 characters per language) are in `release-notes/`; this file is the full record.
 
+## Version 36 — not yet built
+
+**Archive**
+- *Only show files older than* is now two menus, on the Archive tab and in Settings: a number from 1 to 9, and hour, day, week, month, year or All. All has no number. A default saved earlier keeps its meaning.
+
 ## Version 35 (0.3.34) — 1 Nov 2026, uploaded
 
 **Dates**

@@ -8,7 +8,9 @@ import java.time.Instant
  * How old a file must be before the Archive tab's *Only show files older than* control will offer
  * it for checking.
  *
- * Ian's list, 22 Sept 2026: 1 hour, 1 day, 1 week, 1 month, 1 year, All. A separate scale from
+ * A number from 1 to 9 and a unit, or All (Ian, 2 Nov 2026; until then a fixed list of 1 hour, 1 day,
+ * 1 week, 1 month, 1 year and All, which are still what a value saved back then reads as). A month is
+ * 30 days and a year 365, as they always were here. A separate scale from
  * [CameraOptimiseAge] on purpose — that one is picked once, by hand, for a folder full of recent
  * shots; this one starts from a Settings default and governs every Archive album, and Archive
  * removes a file outright rather than shrinking it, so the shortest step is tighter (an hour, not a
@@ -23,15 +25,12 @@ import java.time.Instant
  * temporary view of the moment. Widening the filter, or waiting, brings it back into the set on its
  * own; nothing here forgets a file the way an opt-out does.
  */
-enum class ArchiveAge(val duration: Duration) {
-    OneHour(Duration.ofHours(1)),
-    OneDay(Duration.ofDays(1)),
-    OneWeek(Duration.ofDays(7)),
-    OneMonth(Duration.ofDays(30)),
-    OneYear(Duration.ofDays(365)),
+data class ArchiveAge(val count: Int, val unit: ArchiveAgeUnit) {
 
-    /** No wait at all: a file taken this very minute qualifies. The Settings default. */
-    All(Duration.ZERO);
+    val duration: Duration get() = unit.duration.multipliedBy(count.toLong())
+
+    /** What Settings stores. Read back by [fromNameOrDefault]. */
+    val storedName: String get() = if (unit == ArchiveAgeUnit.All) unit.name else "$count ${unit.name}"
 
     /** The newest date, in seconds, a file may have been taken and still be old enough. */
     fun thresholdEpochSeconds(now: Instant = Instant.now()): Long = now.minus(duration).epochSecond
@@ -43,11 +42,46 @@ enum class ArchiveAge(val duration: Duration) {
          * before this control existed. Matches the app's rule that no default narrows what already
          * happens — see `project_defaults_contract`.
          */
+        val All = ArchiveAge(1, ArchiveAgeUnit.All)
         val DEFAULT = All
 
-        fun fromNameOrDefault(name: String?): ArchiveAge =
-            entries.firstOrNull { it.name == name } ?: DEFAULT
+        /** What the number's menu offers. */
+        val COUNTS = 1..9
+
+        /** The names the fixed list saved, so a default chosen before 2 Nov 2026 reads as what it was. */
+        private val OLD_NAMES = mapOf(
+            "OneHour" to ArchiveAge(1, ArchiveAgeUnit.Hour),
+            "OneDay" to ArchiveAge(1, ArchiveAgeUnit.Day),
+            "OneWeek" to ArchiveAge(1, ArchiveAgeUnit.Week),
+            "OneMonth" to ArchiveAge(1, ArchiveAgeUnit.Month),
+            "OneYear" to ArchiveAge(1, ArchiveAgeUnit.Year)
+        )
+
+        fun fromNameOrDefault(name: String?): ArchiveAge {
+            if (name == null) return DEFAULT
+            OLD_NAMES[name]?.let { return it }
+            val parts = name.split(' ')
+            val count = parts.getOrNull(0)?.toIntOrNull()
+            val unit = ArchiveAgeUnit.entries.firstOrNull { it.name == parts.getOrNull(1) }
+            return if (count != null && count in COUNTS && unit != null && unit != ArchiveAgeUnit.All) {
+                ArchiveAge(count, unit)
+            } else {
+                DEFAULT
+            }
+        }
     }
+}
+
+/** The unit's menu, in order. */
+enum class ArchiveAgeUnit(val duration: Duration) {
+    Hour(Duration.ofHours(1)),
+    Day(Duration.ofDays(1)),
+    Week(Duration.ofDays(7)),
+    Month(Duration.ofDays(30)),
+    Year(Duration.ofDays(365)),
+
+    /** No wait at all: a file taken this very minute qualifies. The Settings default. */
+    All(Duration.ZERO)
 }
 
 /** What [ArchiveAge.split] returns: the files old enough to offer, and the ones held back by age. */

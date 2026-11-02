@@ -693,7 +693,7 @@ class BackupSettings @Inject constructor(
 
     /** What the Archive tab's age filter starts at. See [ArchiveAge]. */
     suspend fun setArchiveDefaultAge(age: ArchiveAge) {
-        context.dataStore.edit { it[KEY_ARCHIVE_DEFAULT_AGE] = age.name }
+        context.dataStore.edit { it[KEY_ARCHIVE_DEFAULT_AGE] = age.storedName }
     }
 
     /** *Special settings for Camera*. See [BackupPreferences.cameraSpecialEnabled]. */

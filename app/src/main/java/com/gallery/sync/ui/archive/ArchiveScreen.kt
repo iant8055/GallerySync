@@ -10,6 +10,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,8 +26,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -38,10 +38,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -56,6 +54,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
 import com.gallery.sync.data.local.media.LocalMediaItem
 import com.gallery.sync.domain.backup.ArchiveAge
+import com.gallery.sync.ui.common.ArchiveAgePicker
 import com.gallery.sync.domain.backup.ArchiveEntry
 import com.gallery.sync.domain.backup.ArchivePlan
 import com.gallery.sync.domain.backup.ArchiveFailure
@@ -531,36 +530,29 @@ private val WideBreakpoint = 600.dp
  * wider view. The dropdown always shows a value; unlike Camera's one-shot picker there is no unset
  * state, so there is no separate cancel control — choosing **All** is how you see everything.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ArchiveAgeSection(age: ArchiveAge, hiddenCount: Int, enabled: Boolean, onSetAge: (ArchiveAge) -> Unit) {
-    var menuOpen by remember { mutableStateOf(false) }
-
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            // Wraps rather than taking the whole row, so the choice beside it stays visible on a narrow screen with
-            // large text (the Fold 8's cover screen, 23 Oct 2026, where the button was squeezed out).
-            Text(
-                text = stringResource(R.string.archive_age_label),
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.weight(1f, fill = false)
-            )
-            HelpButton(HelpTopic.ARCHIVE_AGE_FILTER)
-            Box {
-                HeroOutlinedButton(
-                    onClick = { menuOpen = true },
-                    label = stringResource(age.label()),
-                    enabled = enabled
+        // The menus drop under the label when they do not fit beside it, so neither is squeezed on a narrow screen with
+        // large text (the Fold 8's cover screen, 23 Oct 2026, where the button was squeezed out; with two menus, the
+        // Moto at 288dp and font scale 1.5, 2 Nov 2026, where the label broke mid-word).
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(
+                modifier = Modifier.align(Alignment.CenterVertically),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.archive_age_label),
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.weight(1f, fill = false)
                 )
-                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                    ArchiveAge.entries.forEach { option ->
-                        DropdownMenuItem(
-                            text = { Text(stringResource(option.label())) },
-                            onClick = {
-                                onSetAge(option)
-                                menuOpen = false
-                            }
-                        )
-                    }
+                HelpButton(HelpTopic.ARCHIVE_AGE_FILTER)
+            }
+            Box(modifier = Modifier.align(Alignment.CenterVertically)) {
+                ArchiveAgePicker(age = age, onSetAge = onSetAge) { label, onClick ->
+                    HeroOutlinedButton(onClick = onClick, label = label, enabled = enabled)
                 }
             }
         }
@@ -571,15 +563,6 @@ private fun ArchiveAgeSection(age: ArchiveAge, hiddenCount: Int, enabled: Boolea
             )
         }
     }
-}
-
-private fun ArchiveAge.label(): Int = when (this) {
-    ArchiveAge.OneHour -> R.string.archive_age_hour
-    ArchiveAge.OneDay -> R.string.archive_age_day
-    ArchiveAge.OneWeek -> R.string.archive_age_week
-    ArchiveAge.OneMonth -> R.string.archive_age_month
-    ArchiveAge.OneYear -> R.string.archive_age_year
-    ArchiveAge.All -> R.string.archive_age_all
 }
 
 /** The album names and the one-line explanation of what this tab does before it does it. */

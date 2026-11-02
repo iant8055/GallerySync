@@ -566,11 +566,26 @@ full size</string>
 
     <!-- The Archive tab's age filter and the "come of age" notification. Ian, 22 Sept 2026. -->
     <string name="archive_age_label">Only show files older than</string>
-    <string name="archive_age_hour">1 hour</string>
-    <string name="archive_age_day">1 day</string>
-    <string name="archive_age_week">1 week</string>
-    <string name="archive_age_month">1 month</string>
-    <string name="archive_age_year">1 year</string>
+    <plurals name="archive_age_hour">
+        <item quantity="one">hour</item>
+        <item quantity="other">hours</item>
+    </plurals>
+    <plurals name="archive_age_day">
+        <item quantity="one">day</item>
+        <item quantity="other">days</item>
+    </plurals>
+    <plurals name="archive_age_week">
+        <item quantity="one">week</item>
+        <item quantity="other">weeks</item>
+    </plurals>
+    <plurals name="archive_age_month">
+        <item quantity="one">month</item>
+        <item quantity="other">months</item>
+    </plurals>
+    <plurals name="archive_age_year">
+        <item quantity="one">year</item>
+        <item quantity="other">years</item>
+    </plurals>
     <string name="archive_age_all">All</string>
     <plurals name="archive_age_hidden_hint">
         <item quantity="one">%1$d file is younger than your filter and is not shown or checked right now.</item>
