@@ -23,10 +23,11 @@ preview, no thumbnail of the file in a new place.** If the build starts to need 
 | 1 | Gesture | **Long-press opens**, the same on the Albums (album file list), Restore and Archive tabs. Tap and swipe keep exactly what they do today: on Restore a tap still selects (Ian, 20 Sept 2026). |
 | 2 | File on the phone | Opens in the **phone's default** photo/video app. Android's chooser appears only if no default is set. No forced chooser. |
 | 3 | Optimised (Sync) file | It is on the phone, so it opens the **optimised copy on the phone**. The setting below does not apply to it. |
-| 4 | File not on the phone | A new setting, **Settings → General**, two values: **Open in the Cloud** (default) / **Download temporarily**. |
-| 5 | Open in the Cloud, but the Cloud has no link | Fall back to the temporary download. Applies to Backblaze B2 and IDrive e2 always, and to any other Cloud where the link cannot be had. |
+| 4 | File not on the phone | A new setting, **Settings → General, below *Use mobile data***, two values: **Open in the Cloud** (default) / **Download temporarily**. |
+| 5 | Open in the Cloud, but the Cloud has no link | Fall back to the temporary download. Backblaze B2 and IDrive e2, which have no link at all. A Cloud that has links but could not give one this time is row 8, not this. |
 | 6 | Temporary download and mobile data | **Obeys the existing mobile-data switch** (`allowMeteredNetwork`). Off and on mobile data: no download; say why (Wi-Fi needed, and where the switch is). |
 | 7 | Size warning | Only **on mobile data** (so only when the switch allows it), and only for files **over 750 MB**: ask first, stating the size. On Wi-Fi never ask. |
+| 8 | Link could not be fetched | Tell the user and offer **Cancel** or **Download**. |
 
 ## Which files are "not on the phone"
 
@@ -81,9 +82,10 @@ Returns a URL or "no link". Network calls go through the repository layer (CLAUD
 | `IDRIVE_E2`, `BACKBLAZE_B2` | None | No consumer app; the consoles need a login. Always the temporary download (decision 5). **Do not use a presigned URL**: it hands a working credential to another app (a CLAUDE.md escalation: data exposure). |
 | `USB_DRIVE` | None | Not a Cloud; leave out. |
 
-Open the URL with `ACTION_VIEW`. If the link request fails (no network, 404, token), say so; do not silently download
-instead, because the user chose the Cloud. **Exception: no link exists for that Cloud at all** → temporary download.
-Whether a failed *link request* should fall back to the download is **open for Ian**.
+Open the URL with `ACTION_VIEW`. **No link exists for that Cloud at all** → temporary download, with no question.
+**The link could not be fetched** (no network, 404, token): tell the user and offer **Cancel** or **Download** (Ian,
+11 Nov 2026). Cancel does nothing. Download takes the temporary download, under the same mobile-data and 750 MB rules.
+Never download without that answer, because the user chose the Cloud.
 
 ### 3. Temporary download — reuse `CloudDownloaders.of(location).openStream(remoteItemId)`
 
@@ -104,9 +106,8 @@ Whether a failed *link request* should fall back to the download is **open for I
 ### 4. The setting — Settings → General
 
 - `BackupPreferences`: `openNotOnPhone` (`CLOUD` default, `DOWNLOAD`), a new DataStore key. **No Room change.**
-- `SettingDropdown` in General with a (?) (`HelpTopic`). **Placement inside General is open for Ian**: he said *"in the
-  top under general settings"*, and on 18 Sept 2026 he made the How To Guide the first item. Ask whether it goes above
-  the Guide or directly below it.
+- `SettingDropdown` in General with a (?) (`HelpTopic`), **directly below the *Use mobile data* switch**
+  (`backup_allow_metered`, `SettingsScreen.kt` ~line 176), which is the last item in General (Ian, 11 Nov 2026).
 - Mirror it in the Settings mock the setup tour draws (`SettingsScreen.kt`, around line 939: *the Settings mockup mirrors
   the Settings tab*). The wizard does not ask it and does not write it.
 - `.claude/DEFAULTS.md`: add the setting and what its default does.
@@ -130,6 +131,7 @@ New topics for the long-press on each tab and for the setting, in all seven lang
   network, mobile-data switch, size) → open local / open link / download / ask / refuse with reason. Every row of the
   decisions table above is a case. Include: B2 with *Open in the Cloud* downloads; optimised opens local whatever the
   setting; mobile data with the switch off refuses; 750 MB exactly does not ask, one byte more does.
+- Unit: a failed link request asks Cancel/Download and never downloads unanswered; Cancel does nothing.
 - Unit: the cache path never leaves `cacheDir/open/`.
 
 ## On the Moto G (`ZT422CTZQV`), test account, so uploads and downloads cost nothing
@@ -144,5 +146,4 @@ New topics for the long-press on each tab and for the setting, in all seven lang
 
 ## Open for Ian
 
-1. The setting's place in General: above or below the How To Guide.
-2. A failed link request (no network, 404): say so, or fall back to the temporary download.
+Nothing. Both points were answered on 11 Nov 2026 (rows 4 and 8 above).
