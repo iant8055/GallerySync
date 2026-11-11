@@ -1,6 +1,7 @@
 package com.gallery.sync.data.remote.onedrive
 
 import com.gallery.sync.data.remote.onedrive.dto.GraphChildrenResponseDto
+import com.gallery.sync.data.remote.onedrive.dto.GraphWebUrlDto
 import retrofit2.Response
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -76,6 +77,16 @@ interface GraphApiService {
      * Callers must have an explicit, per-batch confirmation naming the files. Nothing here may run
      * on a timer, on a scan result, or as a side effect of any other operation.
      */
+    /**
+     * One item's `webUrl`, for a long-press to open it in OneDrive (TASK-028). Microsoft documents these URLs as
+     * opaque, so this is asked at the moment of the press and never built from parts.
+     */
+    @GET("me/drive/items/{itemId}")
+    suspend fun getItemWebUrl(
+        @Path("itemId") itemId: String,
+        @Query("\$select") select: String = "id,webUrl"
+    ): Response<GraphWebUrlDto>
+
     @DELETE("me/drive/items/{itemId}")
     suspend fun deleteItem(@Path("itemId") itemId: String): Response<Unit>
 

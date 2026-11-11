@@ -2,6 +2,10 @@ package com.gallery.sync.ui.restore
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.ui.draw.clip
+import com.gallery.sync.ui.common.FileOpenerHost
+import com.gallery.sync.ui.common.OpenFileViewModel
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
@@ -111,9 +115,11 @@ private val SwipeReturnSpring = spring<Float>(dampingRatio = Spring.DampingRatio
 @Composable
 fun RestoreScreen(
     modifier: Modifier = Modifier,
-    viewModel: RestoreViewModel = hiltViewModel()
+    viewModel: RestoreViewModel = hiltViewModel(),
+    opener: OpenFileViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    FileOpenerHost(opener)
     val context = LocalContext.current
 
     // Re-read on entering the tab: an optimise or archive run since the app started changes this
@@ -253,6 +259,7 @@ fun RestoreScreen(
                                                 selected = selectedNow,
                                                 enabled = !state.running,
                                                 onToggle = { viewModel.toggle(row) },
+                                                onOpen = { opener.open(row.entry) },
                                                 modifier = drawn
                                             )
                                         }
@@ -889,6 +896,8 @@ private fun FileCard(
     selected: Boolean,
     enabled: Boolean,
     onToggle: () -> Unit,
+    /** Long-press: open the file in another app (TASK-028). A tap still selects (Ian, 20 Sept 2026). */
+    onOpen: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -908,15 +917,22 @@ private fun FileCard(
     Surface(
         // Greyed out by fading the whole card, so it reads as unavailable in both themes without a
         // colour of its own being chosen.
+        // A full-size file already here (`Here`) cannot be selected, but a long-press still opens it, so the card
+        // always takes the press and the tap only selects when selecting is allowed.
         modifier = modifier
             .fillMaxWidth()
-            .alpha(if (row.isActionable) 1f else 0.5f),
+            .alpha(if (row.isActionable) 1f else 0.5f)
+            .clip(RoundedCornerShape(22.dp))
+            .combinedClickable(
+                onClickLabel = stringResource(R.string.select_action_select),
+                onLongClickLabel = stringResource(R.string.open_file_action),
+                onLongClick = onOpen,
+                onClick = { if (enabled && row.isActionable) onToggle() }
+            ),
         shape = RoundedCornerShape(22.dp),
         color = container,
         contentColor = content,
-        border = BorderStroke(borderWidth, borderColor),
-        enabled = enabled && row.isActionable,
-        onClick = onToggle
+        border = BorderStroke(borderWidth, borderColor)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),

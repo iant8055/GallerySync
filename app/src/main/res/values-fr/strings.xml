@@ -155,6 +155,9 @@
     <string name="settings_language">Langue</string>
     <string name="settings_language_detail">Cet onglet, les écrans de configuration, les cartes (?) et le Mode d\'emploi suivent ce choix. Les autres onglets sont en anglais.</string>
     <string name="settings_older_than">Plus de</string>
+    <string name="settings_open_cloud">Ouvrir dans le Cloud</string>
+    <string name="settings_open_download">Télécharger temporairement</string>
+    <string name="settings_open_not_on_phone">Fichiers absents du téléphone</string>
     <string name="settings_optimise_mode">Mode</string>
     <string name="settings_optimise_mode_auto">Automatique</string>
     <string name="settings_optimise_mode_manual">Manuel</string>

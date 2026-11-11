@@ -30,6 +30,7 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 import com.gallery.sync.util.Logger
+import com.gallery.sync.domain.open.OpenNotOnPhone
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "backup_settings")
 
@@ -37,6 +38,11 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 data class BackupPreferences(
     val isAutomaticEnabled: Boolean = true,
     val allowMeteredNetwork: Boolean = false,
+    /**
+     * What a long-press does with a file that is not on the phone (TASK-028, Ian, 11 Nov 2026): open it in its
+     * Cloud (the default) or download a temporary copy. A file on the phone always opens there.
+     */
+    val openNotOnPhone: OpenNotOnPhone = OpenNotOnPhone.DEFAULT,
     /**
      * The master switch: may this app make smaller local copies at all?
      *
@@ -396,6 +402,7 @@ class BackupSettings @Inject constructor(
         BackupPreferences(
             isAutomaticEnabled = stored[KEY_AUTOMATIC] ?: true,
             allowMeteredNetwork = stored[KEY_ALLOW_METERED] ?: false,
+            openNotOnPhone = OpenNotOnPhone.fromNameOrDefault(stored[KEY_OPEN_NOT_ON_PHONE]),
             isOptimiseEnabled = stored[KEY_OPTIMISE_ENABLED] ?: false,
             optimisePhotos = stored[KEY_OPTIMISE_PHOTOS] ?: false,
             photoOptimiseMode = OptimiseMode.fromNameOrDefault(stored[KEY_PHOTO_OPTIMISE_MODE]),
@@ -647,6 +654,11 @@ class BackupSettings @Inject constructor(
         context.dataStore.edit { it[KEY_ALLOW_METERED] = allowed }
     }
 
+    /** See [BackupPreferences.openNotOnPhone]. */
+    suspend fun setOpenNotOnPhone(choice: OpenNotOnPhone) {
+        context.dataStore.edit { it[KEY_OPEN_NOT_ON_PHONE] = choice.name }
+    }
+
     /**
      * Albums merged from two spellings of one folder and set Off, kept until the user presses Dismiss.
      * TASK-023.
@@ -879,6 +891,7 @@ class BackupSettings @Inject constructor(
         const val TAG = "BackupSettings"
         val KEY_AUTOMATIC = booleanPreferencesKey("automatic_backup_enabled")
         val KEY_ALLOW_METERED = booleanPreferencesKey("allow_metered_network")
+        val KEY_OPEN_NOT_ON_PHONE = stringPreferencesKey("open_not_on_phone")
         // New key rather than reusing auto_optimise_enabled. That one meant "optimise photos
         // without asking", and this means "optimise at all" - a stored true would silently answer a
         // broader question than the user was asked, and now covers video as well.

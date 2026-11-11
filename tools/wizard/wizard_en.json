@@ -1472,5 +1472,20 @@
   "key": "wizard_next",
   "type": "string",
   "en": "Next"
+ },
+ {
+  "key": "settings_open_not_on_phone",
+  "type": "string",
+  "en": "Files not on the phone"
+ },
+ {
+  "key": "settings_open_cloud",
+  "type": "string",
+  "en": "Open in the Cloud"
+ },
+ {
+  "key": "settings_open_download",
+  "type": "string",
+  "en": "Download temporarily"
  }
 ]

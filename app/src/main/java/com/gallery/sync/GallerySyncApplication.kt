@@ -44,7 +44,19 @@ class GallerySyncApplication : Application(), Configuration.Provider {
         ArchiveReadyNotifier.createChannel(this)
         com.gallery.sync.worker.DeletedFilesNotifier.createChannel(this)
         com.gallery.sync.worker.TrialEndingNotifier.createChannel(this)
+        clearOldTemporaryOpens()
         armAutomaticSync()
+    }
+
+    /**
+     * Temporary copies a long-press downloaded to open a file (TASK-028), once they are a day old. By age rather
+     * than all of them, because this also runs when a background job starts the process, possibly while another
+     * app is still showing the copy. Only `cacheDir/open/`, which nothing else uses.
+     */
+    private fun clearOldTemporaryOpens() {
+        val cutoff = System.currentTimeMillis() - TEMPORARY_OPEN_MAX_AGE_MILLIS
+        java.io.File(cacheDir, com.gallery.sync.data.repository.OpenFileRepository.OPEN_DIR).listFiles()
+            ?.forEach { if (it.isFile && it.lastModified() < cutoff) it.delete() }
     }
 
     /**
@@ -102,5 +114,6 @@ class GallerySyncApplication : Application(), Configuration.Provider {
 
     private companion object {
         const val TAG = "GallerySyncApplication"
+        const val TEMPORARY_OPEN_MAX_AGE_MILLIS = 24L * 60 * 60 * 1000
     }
 }

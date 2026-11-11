@@ -292,4 +292,7 @@ T = {
 "new_folder_cloud_title": "%1$s का बैकअप कहाँ हो?",
 "new_folder_cloud_shared": "किसी क्लाउड में भेजे गए सभी फ़ोल्डर उसमें एक ही जगह जाते हैं। इसे बदलने पर सिर्फ़ नई फ़ाइलें वहाँ जाएँगी।",
 "new_folder_cloud_later": "बाद में तय करें",
+"settings_open_not_on_phone": "फ़ोन पर न मौजूद फ़ाइलें",
+"settings_open_cloud": "क्लाउड में खोलें",
+"settings_open_download": "अस्थायी रूप से डाउनलोड करें",
 }

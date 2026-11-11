@@ -55,6 +55,9 @@ import com.gallery.sync.R
 import com.gallery.sync.data.local.media.LocalMediaItem
 import com.gallery.sync.domain.backup.ArchiveAge
 import com.gallery.sync.ui.common.ArchiveAgePicker
+import com.gallery.sync.ui.common.FileOpenerHost
+import com.gallery.sync.ui.common.OpenFileViewModel
+import com.gallery.sync.ui.common.longPressToOpen
 import com.gallery.sync.domain.backup.ArchiveEntry
 import com.gallery.sync.domain.backup.ArchivePlan
 import com.gallery.sync.domain.backup.ArchiveFailure
@@ -99,9 +102,11 @@ import kotlinx.coroutines.launch
 @Composable
 fun ArchiveScreen(
     modifier: Modifier = Modifier,
-    viewModel: ArchiveViewModel = hiltViewModel()
+    viewModel: ArchiveViewModel = hiltViewModel(),
+    opener: OpenFileViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    FileOpenerHost(opener)
     val scope = rememberCoroutineScope()
 
     val removalLauncher = rememberLauncherForActivityResult(
@@ -275,7 +280,8 @@ fun ArchiveScreen(
                                         ArchiveListItem(
                                             row = row,
                                             canSwipe = canSwipe,
-                                            onSetOptedOut = viewModel::setOptedOut
+                                            onSetOptedOut = viewModel::setOptedOut,
+                                            onOpen = { opener.openOnPhone(it.contentUri, it.mimeType) }
                                         )
                                     }
                                 }
@@ -307,7 +313,9 @@ private data class ArchiveListRow(val item: LocalMediaItem, val entry: ArchiveEn
 private fun ArchiveListItem(
     row: ArchiveListRow,
     canSwipe: Boolean,
-    onSetOptedOut: (LocalMediaItem, Boolean) -> Unit
+    onSetOptedOut: (LocalMediaItem, Boolean) -> Unit,
+    /** Long-press: every file here is on the phone, so it opens in the phone's own app (TASK-028). */
+    onOpen: (LocalMediaItem) -> Unit
 ) {
     // A file held back by age is not pinned, so it reads as "not opted out" for the swipe state —
     // swiping it left pins it (a stronger, permanent choice); swiping right does nothing, the same
@@ -323,10 +331,11 @@ private fun ArchiveListItem(
         ),
         onAccessibilityAction = { onSetOptedOut(row.item, !optedOut) }
     ) { drawn ->
+        val card = drawn.longPressToOpen { onOpen(row.item) }
         when {
-            row.entry != null -> ArchiveRow(row.entry, drawn)
-            row.hiddenByAge -> HiddenByAgeRow(row.item, drawn)
-            else -> OptedOutRow(row.item, drawn)
+            row.entry != null -> ArchiveRow(row.entry, card)
+            row.hiddenByAge -> HiddenByAgeRow(row.item, card)
+            else -> OptedOutRow(row.item, card)
         }
     }
 }

@@ -53,6 +53,15 @@ into.
 **Cost of leaving it off:** photos taken away from Wi-Fi are not backed up until the phone is back on
 one. On a phone rarely connected to Wi-Fi, that is indefinite.
 
+### Files not on the phone — **Open in the Cloud**
+`openNotOnPhone = CLOUD` (TASK-028, Ian, 11 Nov 2026)
+
+**If untouched:** a long-press on a file that is not on the phone opens it in its Cloud's app or page. Nothing is
+downloaded. A Cloud with no link (Backblaze B2, IDrive e2, pCloud) downloads a temporary copy instead, under the
+mobile-data switch above. A file on the phone always opens in the phone's own app, whatever this says.
+
+**Why this default:** it moves no data. **Download temporarily** fetches the whole file into the app's cache.
+
 ---
 
 > **Checked 18 Sept 2026.** The "automatic" entry below uses the pre-28-Aug name. The real master switch
@@ -265,6 +274,7 @@ out-of-range value falls back to the *cautious* option, not the permissive one:
 | `cloudDeletionPolicy` | `LEAVE` | A corrupt preference must not be able to arm the feature that removes a last copy. |
 | `destinationRoot` | `Samsung Gallery/DCIM` | An unusable path would fail every upload forever. |
 | `firstBackupStartHour` | `1` | An out-of-range hour would make the window unopenable. |
+| `openNotOnPhone` | `CLOUD` | Opening a link moves no data; a download can. |
 
 ---
 

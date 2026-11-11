@@ -155,6 +155,9 @@
     <string name="settings_language">Idioma</string>
     <string name="settings_language_detail">Esta aba, as telas de configuração, os cartões (?) e o Guia de uso seguem esta escolha. As outras abas estão em inglês.</string>
     <string name="settings_older_than">Com mais de</string>
+    <string name="settings_open_cloud">Abrir na nuvem</string>
+    <string name="settings_open_download">Baixar temporariamente</string>
+    <string name="settings_open_not_on_phone">Arquivos que não estão no telefone</string>
     <string name="settings_optimise_mode">Modo</string>
     <string name="settings_optimise_mode_auto">Automático</string>
     <string name="settings_optimise_mode_manual">Manual</string>

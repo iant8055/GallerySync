@@ -10,6 +10,7 @@ import com.gallery.sync.domain.model.DataResult
 import com.gallery.sync.domain.model.RemoteError
 import com.gallery.sync.domain.model.UploadedItem
 import com.gallery.sync.domain.repository.CloudDownloader
+import com.gallery.sync.domain.repository.CloudFileLink
 import com.gallery.sync.domain.repository.CloudUploader
 import com.gallery.sync.domain.repository.CloudVerifier
 import com.gallery.sync.domain.repository.RemoteCheck
@@ -47,7 +48,7 @@ class GoogleDriveCloud @Inject constructor(
     private val tokens: AppAuthCloudTokens,
     @param:CloudUploadClient private val client: OkHttpClient,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
-) : CloudConnection, CloudUploader, CloudDownloader, CloudVerifier {
+) : CloudConnection, CloudUploader, CloudDownloader, CloudVerifier, CloudFileLink {
 
     override val location = BackupLocation.GOOGLE_DRIVE
 
@@ -76,6 +77,14 @@ class GoogleDriveCloud @Inject constructor(
      * scope covers reading what this app created, so no new permission is asked for. A file deleted from Drive
      * answers 404, which Restore reports as gone from the cloud.
      */
+    /**
+     * The file's page in Google Drive (TASK-028), built from its id with no request: Drive's documented `webViewLink`
+     * has this shape. That it opens the Drive app rather than the browser is a forum claim, not documented, and
+     * which Google account it opens under is not answered; record what the Moto does.
+     */
+    override suspend fun linkFor(remoteItemId: String): DataResult<String> =
+        DataResult.Success("https://drive.google.com/file/d/${android.net.Uri.encode(remoteItemId)}/view")
+
     override suspend fun openStream(remoteItemId: String): DataResult<InputStream> = withContext(dispatcher) {
         val token = tokens.accessToken(location) ?: return@withContext DataResult.Failure(RemoteError.NoToken)
         val url = "$apiBase/drive/v3/files".toHttpUrl().newBuilder()

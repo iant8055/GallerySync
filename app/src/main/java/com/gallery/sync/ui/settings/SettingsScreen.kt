@@ -56,6 +56,7 @@ import com.gallery.sync.R
 import com.gallery.sync.ui.common.labelRes
 import com.gallery.sync.data.local.settings.ThemeMode
 import com.gallery.sync.domain.backup.ArchiveAge
+import com.gallery.sync.domain.open.OpenNotOnPhone
 import com.gallery.sync.ui.common.ArchiveAgePicker
 import com.gallery.sync.domain.backup.BackupLocation
 import com.gallery.sync.domain.backup.RemoteRoots
@@ -181,6 +182,16 @@ fun SettingsScreen(
             ),
             checked = state.allowMeteredNetwork,
             onCheckedChange = viewModel::setAllowMeteredNetwork
+        )
+
+        // Directly below Use mobile data, the last item in General (Ian, 11 Nov 2026, TASK-028).
+        SettingDivider()
+        SettingDropdown(
+            label = stringResource(R.string.settings_open_not_on_phone),
+            options = OpenNotOnPhone.entries,
+            selected = state.openNotOnPhone,
+            onSelected = viewModel::setOpenNotOnPhone,
+            optionLabel = { it.label() }
         )
 
         // ── Backup ───────────────────────────────────────────────────────────
@@ -907,6 +918,12 @@ private fun CameraOptimiseAge.label(): String = when (this) {
     CameraOptimiseAge.All -> stringResource(R.string.camera_age_all)
 }
 
+@Composable
+private fun OpenNotOnPhone.label(): String = when (this) {
+    OpenNotOnPhone.CLOUD -> stringResource(R.string.settings_open_cloud)
+    OpenNotOnPhone.DOWNLOAD -> stringResource(R.string.settings_open_download)
+}
+
 /** The same two menus as the Archive tab's own filter — one vocabulary, one setting. */
 @Composable
 private fun SettingArchiveAge(age: ArchiveAge, onSetAge: (ArchiveAge) -> Unit) {
@@ -963,6 +980,14 @@ fun SettingsTabPreview(onGuideCardPositioned: ((androidx.compose.ui.geometry.Rec
             detail = stringResource(R.string.backup_allow_metered_off),
             checked = false,
             onCheckedChange = {}
+        )
+        SettingDivider()
+        SettingDropdown(
+            label = stringResource(R.string.settings_open_not_on_phone),
+            options = listOf(OpenNotOnPhone.DEFAULT),
+            selected = OpenNotOnPhone.DEFAULT,
+            onSelected = {},
+            optionLabel = { it.label() }
         )
 
         SectionHeader(stringResource(R.string.settings_backup), help = HelpTopic.SETTINGS_SECTION_BACKUP)

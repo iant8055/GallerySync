@@ -292,4 +292,7 @@ T = {
 "new_folder_cloud_title": "Wohin soll %1$s gesichert werden?",
 "new_folder_cloud_shared": "Alle Ordner, die an eine Cloud gehen, landen dort am selben Ort. Änderst du ihn, gehen nur neue Dateien dorthin.",
 "new_folder_cloud_later": "Später entscheiden",
+"settings_open_not_on_phone": "Dateien nicht auf dem Telefon",
+"settings_open_cloud": "In der Cloud öffnen",
+"settings_open_download": "Vorübergehend herunterladen",
 }

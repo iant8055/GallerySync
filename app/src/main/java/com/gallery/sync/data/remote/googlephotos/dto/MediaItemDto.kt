@@ -7,6 +7,8 @@ import kotlinx.serialization.Serializable
 data class MediaItemDto(
     val id: String? = null,
     val filename: String? = null,
+    /** Google Photos' own page for the item, for a long-press to open (TASK-028). Needs the user's sign-in. */
+    val productUrl: String? = null,
     val mediaMetadata: MediaMetadataDto? = null
 )
 

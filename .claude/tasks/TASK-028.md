@@ -1,7 +1,26 @@
 # TASK-028 — Long-press a file to open it in the phone's app or the Cloud's
 
-Status: **SPEC, not started.** Decided by Ian, 11 Nov 2026, in a cloud session with no Android SDK or adb, so nothing
-here has been built, compiled or seen on a device. To be built on Ian's machine.
+Status: **BUILT, not yet seen on a device** (11 Nov 2026, on Ian's machine; compiles, unit tests pass). Specced
+by Ian the same day in a cloud session. Still to do: the Moto checks below, the (?) and the How To Guide topics
+(section 6), and recording where each Cloud's link lands.
+
+**What was built, and where it differs from the spec:**
+- `domain/open/OpenFilePlan.kt`: every decision, pure, with `OpenFilePlanTest` covering each row.
+- `data/repository/OpenFileRepository.kt`: on the phone (asked of MediaStore; a trashed file is not), the link,
+  the temporary copy (`cacheDir/open/`, `FileProvider` `${applicationId}.openfiles`, free-space check with a 100 MB
+  margin, size check, cancel deletes the partial). The cache is emptied before each copy, and at app start only of
+  copies over a day old, because a background job also starts the process and another app may still be showing one.
+- `CloudFileLink` for OneDrive (`webUrl`), Google Photos (`productUrl`), Google Drive (built from the id) and
+  **Dropbox: `https://www.dropbox.com/home/<folder>?preview=<name>`**, from `path_display` in the same one-byte
+  download `sizeOf` uses, because `get_metadata` needs `files.metadata.read`, which this app's sign-in does not ask
+  for. **pCloud has no link**: its only file link API (`getfilelink`) is a direct download, which this spec forbids.
+- **Google Photos cannot be downloaded** (no `CloudDownloader` exists for it), so *Download temporarily*, or
+  *Download* after its link fails, says it cannot send the file back rather than offering a download.
+- `ui/common/FileOpener.kt`: `OpenFileViewModel`, `FileOpenerHost` (dialogs, starts the other app),
+  `Modifier.longPressToOpen`. On Restore the card is `combinedClickable`, so a long-press never also selects, and a
+  `Here` card takes the long-press while its tap still selects nothing.
+- Settings → General, below *Use mobile data*: *Files not on the phone*, translated in all seven languages. No (?)
+  yet: it needs a How To Guide topic first. Mirrored in the setup tour's Settings picture.
 
 ## What Ian asked for
 

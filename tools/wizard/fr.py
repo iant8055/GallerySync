@@ -292,6 +292,9 @@ T = {
 "new_folder_cloud_title": "Où sauvegarder %1$s ?",
 "new_folder_cloud_shared": "Tous les dossiers envoyés vers un Cloud vont au même endroit. Si vous le changez, seuls les nouveaux fichiers iront là.",
 "new_folder_cloud_later": "Décider plus tard",
+"settings_open_not_on_phone": "Fichiers absents du téléphone",
+"settings_open_cloud": "Ouvrir dans le Cloud",
+"settings_open_download": "Télécharger temporairement",
 }
 
 # French spacing: a no-break space before ? and :, so the mark never wraps onto a line of its own.

@@ -35,6 +35,7 @@ import com.gallery.sync.data.local.media.MediaScanner
 import com.gallery.sync.data.local.media.ScopedDirectories
 import com.gallery.sync.domain.backup.AlbumCloudClaim
 import com.gallery.sync.domain.backup.ArchiveAge
+import com.gallery.sync.domain.open.OpenNotOnPhone
 import com.gallery.sync.domain.backup.BackupEngine
 import com.gallery.sync.domain.backup.BackupLocation
 import com.gallery.sync.domain.backup.RemoteRoots
@@ -300,6 +301,8 @@ data class BackupUiState(
     val isAutoOptimiseEnabled: Boolean = false,
     /** Allow automatic runs on mobile data, not just Wi-Fi. */
     val allowMeteredNetwork: Boolean = false,
+    /** Settings → General: what a long-press does with a file not on the phone (TASK-028). */
+    val openNotOnPhone: OpenNotOnPhone = OpenNotOnPhone.DEFAULT,
     val isOptimiseEnabled: Boolean = false,
     val optimisePhotos: Boolean = false,
     val photoOptimiseMode: OptimiseMode = OptimiseMode.DEFAULT,
@@ -558,6 +561,7 @@ class BackupViewModel @Inject constructor(
                     isAutoOptimiseEnabled = prefs.isOptimiseEnabled &&
                         prefs.photoOptimiseMode == OptimiseMode.Auto,
                     allowMeteredNetwork = prefs.allowMeteredNetwork,
+                    openNotOnPhone = prefs.openNotOnPhone,
                     showEmptyCloudFolders = prefs.showEmptyCloudFolders,
                     archiveDefaultAge = prefs.archiveDefaultAge,
                     archiveNotifyEnabled = prefs.archiveNotifyEnabled,
@@ -771,6 +775,11 @@ class BackupViewModel @Inject constructor(
     fun dismissWaitingAlbums() {
         val names = _state.value.waitingAlbums.map { it.name }
         viewModelScope.launch { settings.acknowledgeAlbums(names) }
+    }
+
+    /** See [BackupUiState.openNotOnPhone]. */
+    fun setOpenNotOnPhone(choice: OpenNotOnPhone) {
+        viewModelScope.launch { settings.setOpenNotOnPhone(choice) }
     }
 
     fun setAllowMeteredNetwork(allowed: Boolean) {

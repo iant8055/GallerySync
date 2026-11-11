@@ -2,6 +2,7 @@ package com.gallery.sync.data.remote.googlephotos
 
 import com.gallery.sync.data.remote.googlephotos.dto.BatchCreateRequestDto
 import com.gallery.sync.data.remote.googlephotos.dto.BatchCreateResponseDto
+import com.gallery.sync.data.remote.googlephotos.dto.MediaItemDto
 import com.gallery.sync.data.remote.googlephotos.dto.MediaItemsListResponseDto
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
@@ -10,6 +11,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 /**
@@ -55,6 +57,10 @@ interface GooglePhotosApiService {
         @Query("pageSize") pageSize: Int = DEFAULT_PAGE_SIZE,
         @Query("pageToken") pageToken: String? = null
     ): Response<MediaItemsListResponseDto>
+
+    /** One item this app created, for its `productUrl` (TASK-028). Any other item answers 404 or 403. */
+    @GET("v1/mediaItems/{id}")
+    suspend fun getMediaItem(@Path("id") id: String): Response<MediaItemDto>
 
     companion object {
         /** Google's documented default and recommendation; 100 is the API's maximum. */

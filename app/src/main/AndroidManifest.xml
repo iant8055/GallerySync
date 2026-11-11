@@ -77,6 +77,22 @@
         </activity>
 
         <!--
+            A long-press that downloads a temporary copy of a file (TASK-028) hands it to the phone's own app
+            through this provider. Not exported: only the app that is given the URI, for that one file, can
+            read it. It serves cacheDir/open/ and nothing else (res/xml/open_files.xml). Not a permission,
+            and nothing about it reaches the Play listing.
+        -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.openfiles"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/open_files" />
+        </provider>
+
+        <!--
             WorkManager initialises itself through App Startup by default, which happens before
             Hilt is ready and leaves it holding the default worker factory. BackupWorker takes
             constructor-injected dependencies, so it would fail to construct at the moment it runs.

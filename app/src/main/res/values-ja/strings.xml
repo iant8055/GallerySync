@@ -151,6 +151,9 @@
     <string name="settings_language">言語</string>
     <string name="settings_language_detail">このタブ、セットアップ画面、(?) カード、使い方ガイドはこの選択に従います。ほかのタブは英語です。</string>
     <string name="settings_older_than">経過期間</string>
+    <string name="settings_open_cloud">クラウドで開く</string>
+    <string name="settings_open_download">一時的にダウンロード</string>
+    <string name="settings_open_not_on_phone">スマホにないファイル</string>
     <string name="settings_optimise_mode">モード</string>
     <string name="settings_optimise_mode_auto">自動</string>
     <string name="settings_optimise_mode_manual">手動</string>

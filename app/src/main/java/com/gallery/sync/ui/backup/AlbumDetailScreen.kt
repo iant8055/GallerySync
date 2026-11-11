@@ -1,5 +1,9 @@
 package com.gallery.sync.ui.backup
 
+import com.gallery.sync.ui.common.FileOpenerHost
+import com.gallery.sync.ui.common.OpenFileViewModel
+import com.gallery.sync.ui.common.longPressToOpen
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -148,9 +152,11 @@ fun AlbumDetailScreen(
     onRetryFailed: () -> Unit,
     modifier: Modifier = Modifier,
     /** Only the Camera album passes this. See [CameraOptimiseControls]. */
-    camera: CameraOptimiseControls? = null
+    camera: CameraOptimiseControls? = null,
+    opener: OpenFileViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
+    FileOpenerHost(opener)
     var sort by rememberSaveable { mutableStateOf(FileSort.NAME) }
 
     // The camera folder's three choices. They start at the Camera defaults in Settings and change here for this
@@ -324,7 +330,7 @@ fun AlbumDetailScreen(
                                                     context = context,
                                                     showKeepBox = false,
                                                     onSetPinned = {},
-                                                    modifier = drawn,
+                                                    modifier = drawn.longPressToOpen { opener.open(entry) },
                                                     cameraSelected = isSelected
                                                 )
                                             }
@@ -333,7 +339,8 @@ fun AlbumDetailScreen(
                                                 entry = entry,
                                                 context = context,
                                                 showKeepBox = entry.id in restoredIds,
-                                                onSetPinned = { pinned -> onSetPinned(entry, pinned) }
+                                                onSetPinned = { pinned -> onSetPinned(entry, pinned) },
+                                                modifier = Modifier.longPressToOpen { opener.open(entry) }
                                             )
                                         }
                                     }

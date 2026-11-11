@@ -153,6 +153,9 @@
     <string name="settings_language">Sprache</string>
     <string name="settings_language_detail">Dieser Tab, die Einrichtung, die (?)-Karten und die Anleitung folgen dieser Wahl. Die anderen Tabs sind auf Englisch.</string>
     <string name="settings_older_than">Älter als</string>
+    <string name="settings_open_cloud">In der Cloud öffnen</string>
+    <string name="settings_open_download">Vorübergehend herunterladen</string>
+    <string name="settings_open_not_on_phone">Dateien nicht auf dem Telefon</string>
     <string name="settings_optimise_mode">Modus</string>
     <string name="settings_optimise_mode_auto">Automatisch</string>
     <string name="settings_optimise_mode_manual">Manuell</string>

@@ -13,6 +13,10 @@ import com.gallery.sync.data.remote.s3.IDriveE2Cloud
 import com.gallery.sync.data.repository.GooglePhotosCloudUploader
 import com.gallery.sync.domain.repository.CloudDownloader
 import com.gallery.sync.domain.repository.CloudDownloaders
+import com.gallery.sync.domain.repository.CloudFileLink
+import com.gallery.sync.domain.repository.CloudFileLinks
+import com.gallery.sync.data.repository.GooglePhotosFileLink
+import com.gallery.sync.data.repository.OneDriveFileLink
 import com.gallery.sync.domain.repository.CloudUploader
 import com.gallery.sync.domain.repository.CloudVerifier
 import com.gallery.sync.domain.repository.CloudVerifiers
@@ -104,6 +108,19 @@ abstract class CloudModule {
     @Binds @IntoSet
     abstract fun bindBackblazeConnection(impl: BackblazeB2Cloud): CloudConnection
 
+    // Links for a long-press to open a file in its Cloud (TASK-028). B2, IDrive e2 and pCloud have none, on purpose.
+    @Binds @IntoSet
+    abstract fun bindOneDriveLink(impl: OneDriveFileLink): CloudFileLink
+
+    @Binds @IntoSet
+    abstract fun bindGooglePhotosLink(impl: GooglePhotosFileLink): CloudFileLink
+
+    @Binds @IntoSet
+    abstract fun bindGoogleDriveLink(impl: GoogleDriveCloud): CloudFileLink
+
+    @Binds @IntoSet
+    abstract fun bindDropboxLink(impl: DropboxCloud): CloudFileLink
+
     companion object {
         @Provides
         @Singleton
@@ -119,6 +136,11 @@ abstract class CloudModule {
         @Singleton
         fun provideCloudDownloaders(all: @JvmSuppressWildcards Set<CloudDownloader>): CloudDownloaders =
             CloudDownloaders(all)
+
+        @Provides
+        @Singleton
+        fun provideCloudFileLinks(all: @JvmSuppressWildcards Set<CloudFileLink>): CloudFileLinks =
+            CloudFileLinks(all)
 
         @Provides
         @Singleton

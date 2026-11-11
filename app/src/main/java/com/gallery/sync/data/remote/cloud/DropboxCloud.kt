@@ -11,6 +11,7 @@ import com.gallery.sync.domain.model.RemoteError
 import com.gallery.sync.domain.model.UploadedItem
 import java.io.InputStream
 import com.gallery.sync.domain.repository.CloudDownloader
+import com.gallery.sync.domain.repository.CloudFileLink
 import com.gallery.sync.domain.repository.CloudUploader
 import com.gallery.sync.domain.repository.CloudVerifier
 import com.gallery.sync.domain.repository.RemoteCheck
@@ -47,7 +48,7 @@ class DropboxCloud @Inject constructor(
     private val tokens: AppAuthCloudTokens,
     @param:CloudUploadClient private val client: OkHttpClient,
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
-) : CloudConnection, CloudUploader, CloudDownloader, CloudVerifier {
+) : CloudConnection, CloudUploader, CloudDownloader, CloudVerifier, CloudFileLink {
 
     override val location = BackupLocation.DROPBOX
 
@@ -196,6 +197,50 @@ class DropboxCloud @Inject constructor(
         }
     }
 
+    /**
+     * The file's place on dropbox.com, opened with it previewed (TASK-028): `/home/<folder>?preview=<name>`, from the
+     * path Dropbox reports now, so a file moved or renamed in Dropbox is still found. The path comes from the same
+     * one-byte ranged download [sizeOf] uses, so no scope beyond the read one Restore needs is asked for (Dropbox's
+     * `get_metadata` would need `files.metadata.read`, which this app's sign-in does not request).
+     *
+     * Whether the Dropbox app takes this link rather than the browser was not tried before this was written.
+     */
+    override suspend fun linkFor(remoteItemId: String): DataResult<String> = withContext(dispatcher) {
+        val token = tokens.accessToken(location) ?: return@withContext DataResult.Failure(RemoteError.NoToken)
+        val request = Request.Builder()
+            .url("$contentBase/2/files/download")
+            .header("Authorization", "Bearer $token")
+            .header("Dropbox-API-Arg", """{"path":${CloudHttp.asciiJsonString(remoteItemId)}}""")
+            .header("Range", "bytes=0-0")
+            .post(ByteArray(0).toRequestBody(null))
+            .build()
+        try {
+            client.newCall(request).execute().use { response ->
+                when {
+                    response.isSuccessful -> {
+                        val path = CloudHttp.objectOf(response.header("Dropbox-API-Result"))?.stringOrNull("path_display")
+                        if (path.isNullOrBlank() || !path.startsWith("/")) {
+                            DataResult.Failure(RemoteError.Unknown(IOException("Dropbox sent no path")))
+                        } else {
+                            DataResult.Success(previewLink(path))
+                        }
+                    }
+                    response.code == 409 && response.body?.string()?.contains("not_found") == true ->
+                        DataResult.Failure(RemoteError.Http(404, null))
+                    else -> {
+                        if (response.code == 401) tokens.invalidate(location)
+                        DataResult.Failure(RemoteError.Http(response.code, null))
+                    }
+                }
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: IOException) {
+            Logger.w(TAG, "link: network failure: ${e.message}")
+            DataResult.Failure(RemoteError.Network)
+        }
+    }
+
     private fun commitArg(path: String) =
         """{"path":${CloudHttp.asciiJsonString(path)},"mode":"overwrite","autorename":false,"mute":true}"""
 
@@ -301,4 +346,12 @@ class DropboxCloud @Inject constructor(
         const val CHUNK_BYTES = 8 * 1024 * 1024
         private val OCTET = "application/octet-stream".toMediaType()
     }
+}
+
+/** `/Camera/IMG 1.jpg` → `https://www.dropbox.com/home/Camera?preview=IMG+1.jpg`, each folder name escaped. */
+internal fun previewLink(pathDisplay: String): String {
+    val folder = pathDisplay.substringBeforeLast('/')
+    val name = pathDisplay.substringAfterLast('/')
+    val folderPart = folder.split('/').filter { it.isNotEmpty() }.joinToString("") { "/" + java.net.URLEncoder.encode(it, "UTF-8").replace("+", "%20") }
+    return "https://www.dropbox.com/home$folderPart?preview=${java.net.URLEncoder.encode(name, "UTF-8")}"
 }
