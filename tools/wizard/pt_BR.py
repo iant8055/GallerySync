@@ -293,6 +293,6 @@ T = {
 "new_folder_cloud_shared": "Todas as pastas enviadas a uma nuvem vão para o mesmo lugar nela. Se você mudar, só os arquivos novos irão para lá.",
 "new_folder_cloud_later": "Decidir depois",
 "settings_open_not_on_phone": "Arquivos que não estão no telefone",
-"settings_open_cloud": "Abrir na nuvem",
+"settings_open_cloud": "Abre no app da nuvem ou no navegador",
 "settings_open_download": "Baixar temporariamente",
 }

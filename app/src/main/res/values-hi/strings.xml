@@ -153,7 +153,7 @@
     <string name="settings_language">भाषा</string>
     <string name="settings_language_detail">यह टैब, सेटअप स्क्रीन, (?) कार्ड और How To Guide इस चुनाव के हिसाब से चलते हैं। बाकी टैब अंग्रेज़ी में हैं।</string>
     <string name="settings_older_than">इससे पुराने</string>
-    <string name="settings_open_cloud">क्लाउड में खोलें</string>
+    <string name="settings_open_cloud">क्लाउड ऐप या ब्राउज़र में खुलता है</string>
     <string name="settings_open_download">अस्थायी रूप से डाउनलोड करें</string>
     <string name="settings_open_not_on_phone">फ़ोन पर न मौजूद फ़ाइलें</string>
     <string name="settings_optimise_mode">मोड</string>

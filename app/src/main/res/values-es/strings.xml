@@ -155,7 +155,7 @@
     <string name="settings_language">Idioma</string>
     <string name="settings_language_detail">Esta pestaña, las pantallas de configuración, las tarjetas (?) y la Guía de uso siguen esta elección. Las demás pestañas están en inglés.</string>
     <string name="settings_older_than">Con más de</string>
-    <string name="settings_open_cloud">Abrir en la nube</string>
+    <string name="settings_open_cloud">Se abre en la app de la nube o en el navegador</string>
     <string name="settings_open_download">Descargar temporalmente</string>
     <string name="settings_open_not_on_phone">Archivos que no están en el teléfono</string>
     <string name="settings_optimise_mode">Modo</string>

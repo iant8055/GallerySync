@@ -1481,7 +1481,7 @@
  {
   "key": "settings_open_cloud",
   "type": "string",
-  "en": "Open in the Cloud"
+  "en": "Opens in Cloud App or Browser"
  },
  {
   "key": "settings_open_download",

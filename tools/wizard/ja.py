@@ -292,6 +292,6 @@ T = {
 "new_folder_cloud_shared": "クラウドに送るフォルダーはすべて、そのクラウド内の同じ場所に入ります。変更すると、新しいファイルだけがそこに入ります。",
 "new_folder_cloud_later": "後で決める",
 "settings_open_not_on_phone": "スマホにないファイル",
-"settings_open_cloud": "クラウドで開く",
+"settings_open_cloud": "クラウドのアプリまたはブラウザで開く",
 "settings_open_download": "一時的にダウンロード",
 }

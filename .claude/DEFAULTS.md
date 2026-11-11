@@ -53,10 +53,10 @@ into.
 **Cost of leaving it off:** photos taken away from Wi-Fi are not backed up until the phone is back on
 one. On a phone rarely connected to Wi-Fi, that is indefinite.
 
-### Files not on the phone — **Open in the Cloud**
+### Files not on the phone — **Opens in Cloud App or Browser**
 `openNotOnPhone = CLOUD` (TASK-028, Ian, 11 Nov 2026)
 
-**If untouched:** a long-press on a file that is not on the phone opens it in its Cloud's app or page. Nothing is
+**If untouched:** a long-press on a file that is not on the phone opens it in its Cloud's app or page (OneDrive's ends in the browser: no link opens a file in its app). Nothing is
 downloaded. A Cloud with no link (Backblaze B2, IDrive e2, pCloud) downloads a temporary copy instead, under the
 mobile-data switch above. A file on the phone always opens in the phone's own app, whatever this says.
 

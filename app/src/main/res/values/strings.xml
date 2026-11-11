@@ -1201,7 +1201,7 @@ full size</string>
     <string name="open_large_body">This file is %1$s. A temporary copy is downloaded to open it.</string>
     <string name="open_refused_no_network">This file is not on the phone, and there is no connection to fetch it.</string>
     <string name="open_refused_mobile_data">This file is not on the phone. Connect to Wi-Fi, or turn on Use mobile data in Settings.</string>
-    <string name="open_refused_cannot_download">%1$s cannot send this file back to the phone. Choose Open in the Cloud in Settings.</string>
+    <string name="open_refused_cannot_download">%1$s cannot send this file back to the phone. Choose Opens in Cloud App or Browser in Settings.</string>
     <string name="open_gone">This file is no longer in %1$s.</string>
     <string name="open_no_space">There is not enough free space on the phone to download this file.</string>
     <string name="open_download_failed">The file could not be downloaded. Try again later.</string>
@@ -1209,6 +1209,6 @@ full size</string>
 
     <!-- Settings, General: what a long-press does with a file not on the phone. Translated (tools/wizard). -->
     <string name="settings_open_not_on_phone">Files not on the phone</string>
-    <string name="settings_open_cloud">Open in the Cloud</string>
+    <string name="settings_open_cloud">Opens in Cloud App or Browser</string>
     <string name="settings_open_download">Download temporarily</string>
 </resources>
