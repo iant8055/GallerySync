@@ -1,5 +1,6 @@
 package com.gallery.sync.data.repository
 
+import android.content.ContentUris
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
@@ -56,12 +57,44 @@ class OpenFileRepository @Inject constructor(
      * trashed rows out of a plain query.
      */
     suspend fun uriIfOnPhone(entry: BackupEntryEntity): Uri? = withContext(dispatcher) {
-        val uri = runCatching { Uri.parse(entry.contentUri) }.getOrNull() ?: return@withContext null
-        runCatching {
-            context.contentResolver.query(uri, arrayOf(MediaStore.MediaColumns._ID), null, null, null)
+        val recorded = entry.contentUri.takeIf { it.isNotBlank() }?.let { runCatching { Uri.parse(it) }.getOrNull() }
+        val present = recorded != null && runCatching {
+            context.contentResolver.query(recorded, arrayOf(MediaStore.MediaColumns._ID), null, null, null)
                 ?.use { it.moveToFirst() } == true
-        }.getOrDefault(false).let { present -> if (present) uri else null }
+        }.getOrDefault(false)
+        if (present) recorded else findByNameAndSize(entry)
     }
+
+    /**
+     * The same file found by name and size in its album's folder, for a row with no usable MediaStore address:
+     * Restore's *Already on this phone* rows are built from the Cloud's listing and carry none, and a ledger id can
+     * go stale. Name and size in the album is the test Restore itself uses to call a file already here
+     * (`RestoreScope`), so the two never disagree. Seen on the Moto, 11 Nov 2026: without this, such a row went to
+     * the Cloud.
+     */
+    private fun findByNameAndSize(entry: BackupEntryEntity): Uri? = runCatching {
+        val collection = if (entry.isVideo) {
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI
+        } else {
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+        }
+        val projection = arrayOf(MediaStore.MediaColumns._ID, MediaStore.MediaColumns.RELATIVE_PATH)
+        val selection = "${MediaStore.MediaColumns.DISPLAY_NAME} = ? AND ${MediaStore.MediaColumns.SIZE} = ?"
+        val args = arrayOf(entry.displayName, entry.sizeBytes.toString())
+        context.contentResolver.query(collection, projection, selection, args, null)?.use { cursor ->
+            val album = entry.album.lowercase()
+            var fallback: Long? = null
+            while (cursor.moveToNext()) {
+                val id = cursor.getLong(0)
+                val folder = cursor.getString(1).orEmpty().trimEnd('/').substringAfterLast('/').lowercase()
+                if (folder == album) return@runCatching ContentUris.withAppendedId(collection, id)
+                if (fallback == null) fallback = id
+            }
+            // Only when the album's own folder has no match and exactly this name and size exist elsewhere: the
+            // same bytes under the same name, so opening them shows the user the file they pressed.
+            fallback?.let { ContentUris.withAppendedId(collection, it) }
+        }
+    }.getOrNull()
 
     fun cloudHasLinks(location: BackupLocation): Boolean = links.of(location) != null
 
