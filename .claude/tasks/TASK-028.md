@@ -95,7 +95,7 @@ Never download without that answer, because the user chose the Cloud.
 - **This is a cache, not a file of the user's.** Never written to MediaStore, never in a gallery, never in an album. Clear
   it on the next open and on app start (or by age). CLAUDE.md: on-device file operations are cache management. Not a
   deletion under the deletion rules, but keep it confined to `cacheDir/open/` so nothing else can be reached by it.
-- Check free space first (the app already does this for restores).
+- Check free space on the phone first. **New code: the app has no such check today** (read 11 Nov 2026: the only space checks are for a full Cloud, `RemoteError.InsufficientStorage`; restores do not check the phone). The cloud session's note that restores already do this was wrong.
 - Mobile data: obey `allowMeteredNetwork` (decision 6). Over 750 MB on mobile data: ask, with the size (decision 7).
   `750 MB` as one named constant, decimal or binary to match how `Formatting.kt` prints sizes, so the dialog's number and
   the threshold agree.
