@@ -70,20 +70,20 @@ Grisés pendant qu'une restauration est en cours.""",
     },
     "restore-files-list": {
         "title": "La liste de fichiers dans un album",
-        "body": """Glissez vers la droite (ou touchez) pour sélectionner, vers la gauche pour désélectionner. Chaque fichier affiche l'une de ces mentions :
+        "body": """Glissez vers la droite (ou touchez) pour sélectionner, vers la gauche pour désélectionner. **Appuyez longuement** sur un fichier pour l'ouvrir dans l'application de votre téléphone, ou dans son Cloud quand il n'est pas sur le téléphone. Voir [[settings-open-not-on-phone]]. Chaque fichier affiche l'une de ces mentions :
 • **now · full size :** une copie optimisée, avec sa taille réduite sur le téléphone et la taille réelle dans le Cloud.
 • **Available for download :** pas sur le téléphone.
 • **Already on this phone :** grisé ; rien à faire.
 
 Pendant le travail : **Working...** avec un pourcentage. Puis **Restored to full size**, **Back on this phone**, ou **Could not restore, your file is unchanged** avec la raison.""",
-        "en_hash": "486e3275bedd2609",
+        "en_hash": "995fafe0c00691e4",
     },
     "restore-greyed-files": {
         "title": "Pourquoi certains fichiers sont-ils grisés ?",
-        "body": """Ils sont déjà sur le téléphone en taille réelle (même album, même nom, même taille), il n'y a donc rien à restaurer. Ils sont affichés pour que l'album corresponde à votre Cloud.
+        "body": """Ils sont déjà sur le téléphone en taille réelle (même album, même nom, même taille), il n'y a donc rien à restaurer. Ils sont affichés pour que l'album corresponde à votre Cloud. **Un appui long** ouvre quand même le fichier sur votre téléphone.
 
 Un fichier de même nom mais de taille différente n'est pas proposé : ce peut être une modification, et Restore n'écrase jamais une modification.""",
-        "en_hash": "02372472f6d53985",
+        "en_hash": "92854b977a90bb56",
     },
     "restore-action-bar": {
         "title": "Restore et Stop restoring",

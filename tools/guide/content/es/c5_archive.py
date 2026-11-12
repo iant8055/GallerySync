@@ -81,7 +81,7 @@ Empieza con tu valor predeterminado de Settings. Cambiarlo aquí dura solo esta 
 
     "archive-file-list": {
         "title": "La lista de archivos y sus marcas",
-        "body": """Una tarjeta por cada archivo de tus álbumes Archive.
+        "body": """Una tarjeta por cada archivo de tus álbumes Archive. **Mantén pulsado un archivo** para abrirlo en la app de fotos o vídeos de tu teléfono, o en su Cloud una vez que se haya eliminado. Consulta [[settings-open-not-on-phone]].
 
 ## Conservar un archivo en el teléfono
 Úsalo para un archivo que quieres conservar en el teléfono mientras el resto del álbum se archiva. Desliza hacia la **izquierda** para conservarlo: se pone en gris y dice **Not archiving**, y se recuerda. Desliza hacia la **derecha** para incluirlo de nuevo. Un archivo en gris como **too recent for your filter** está retenido por el filtro de antigüedad.
@@ -93,7 +93,7 @@ Empieza con tu valor predeterminado de Settings. Cambiarlo aquí dura solo esta 
 
 ## Mensajes
 **Backing up...**, **Moving to Trash/Recycle Bin...**, **Removed from this phone.**, o en rojo el motivo por el que un archivo se queda: **Could not check your Cloud**, **Not in your Cloud** o **In your Cloud but the wrong size**.""",
-        "en_hash": "4ef90825cb796912",
+        "en_hash": "2aff6afb02606681",
     },
 
     "archive-prompt": {

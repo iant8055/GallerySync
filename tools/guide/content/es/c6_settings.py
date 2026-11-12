@@ -14,8 +14,8 @@ TRANSLATIONS = {
 
     "settings-section-general": {
         "title": "General",
-        "body": """La **Guía de uso**, **Apariencia**, **Fuente** y **Usar datos móviles**. **Idioma** es la última línea de la página.""",
-        "en_hash": "7c55bf50b318edb4",
+        "body": """La **Guía de uso**, **Apariencia**, **Fuente**, **Usar datos móviles** y **Archivos que no están en el teléfono**. **Idioma** es la última línea de la página.""",
+        "en_hash": "72502f5b1cbd1b1f",
     },
 
     "settings-how-to-guide-card": {
@@ -52,6 +52,17 @@ El tamaño del texto sigue el ajuste del teléfono en ambos casos.""",
 
 Afecta a las copias automáticas y a **Sync now**. Déjalo desactivado salvo que tu plan de datos sea ilimitado.""",
         "en_hash": "e8860c60b1961fee",
+    },
+
+    "settings-open-not-on-phone": {
+        "title": "Archivos que no están en el teléfono",
+        "body": """Lo que hace una **pulsación larga** sobre un archivo que ya no está en tu teléfono. Un archivo que sí está en el teléfono, incluida una copia optimizada, siempre se abre desde el teléfono.
+
+• **Se abre en la app de la nube o en el navegador** (predeterminado): abre el archivo en la app de su Cloud, o en el navegador si la app no admite el enlace. Una Cloud sin enlace usa la siguiente opción.
+• **Descargar temporalmente:** copia el archivo en la caché de la app y lo abre. La copia se guarda solo en la caché, nunca se añade a tu galería y se borra más adelante.
+
+La descarga temporal respeta **Usar datos móviles** ([[settings-mobile-data]]). Con datos móviles, un archivo de más de 750 MB avisa antes; con Wi-Fi nunca pregunta. Google Photos no se puede descargar, así que ninguna de las dos opciones trae uno de sus archivos.""",
+        "en_hash": "ad5011929bac28dd",
     },
 
     "settings-section-backup": {

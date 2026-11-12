@@ -70,20 +70,20 @@ Ausgegraut, solange eine Wiederherstellung läuft.""",
     },
     "restore-files-list": {
         "title": "Die Dateiliste in einem Album",
-        "body": """Nach rechts wischen (oder tippen) zum Auswählen, nach links zum Abwählen. Jede Datei zeigt eines davon:
+        "body": """Nach rechts wischen (oder tippen) zum Auswählen, nach links zum Abwählen. **Lang drücken**, um eine Datei zu öffnen — in der App deines Telefons oder in ihrer Cloud, wenn sie nicht auf dem Telefon ist. Siehe [[settings-open-not-on-phone]]. Jede Datei zeigt eines davon:
 • **now · full size:** eine optimierte Kopie, die ihre kleinere Dateigröße auf dem Telefon und die volle Dateigröße in der Cloud zeigt.
 • **Available for download:** nicht auf dem Telefon.
 • **Already on this phone:** ausgegraut; nichts zu tun.
 
 Während der Arbeit: **Working...** mit einem Prozentwert. Danach **Restored to full size**, **Back on this phone** oder **Could not restore, your file is unchanged** mit dem Grund.""",
-        "en_hash": "486e3275bedd2609",
+        "en_hash": "995fafe0c00691e4",
     },
     "restore-greyed-files": {
         "title": "Warum sind manche Dateien ausgegraut?",
-        "body": """Sie sind schon in voller Größe auf dem Telefon (gleiches Album, gleicher Name, gleiche Größe), also gibt es nichts wiederherzustellen. Sie werden angezeigt, damit das Album zu deiner Cloud passt.
+        "body": """Sie sind schon in voller Größe auf dem Telefon (gleiches Album, gleicher Name, gleiche Größe), also gibt es nichts wiederherzustellen. Sie werden angezeigt, damit das Album zu deiner Cloud passt. **Langes Drücken** öffnet die Datei weiterhin auf deinem Telefon.
 
 Eine Datei mit demselben Namen, aber anderer Größe wird nicht angeboten: Es kann eine Bearbeitung sein, und Restore überschreibt nie eine Bearbeitung.""",
-        "en_hash": "02372472f6d53985",
+        "en_hash": "92854b977a90bb56",
     },
     "restore-action-bar": {
         "title": "Restore and Stop restoring",

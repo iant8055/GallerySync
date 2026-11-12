@@ -75,7 +75,7 @@ Il commence à votre valeur par défaut de Settings. Le modifier ici ne vaut que
     },
     "archive-file-list": {
         "title": "La liste de fichiers et ses marques",
-        "body": """Une carte par fichier de vos albums Archive.
+        "body": """Une carte par fichier de vos albums Archive. **Appuyez longuement sur un fichier** pour l'ouvrir dans l'application photo ou vidéo de votre téléphone, ou dans son Cloud une fois qu'il a été retiré. Voir [[settings-open-not-on-phone]].
 
 ## Garder un fichier sur le téléphone
 À utiliser pour un fichier que vous voulez garder sur le téléphone pendant que le reste de l'album est archivé. Glissez **vers la gauche** pour le garder : il se grise et affiche **Not archiving**, et c'est mémorisé. Glissez **vers la droite** pour le réinclure. Un fichier grisé avec **too recent for your filter** est retenu par le filtre d'ancienneté.
@@ -87,7 +87,7 @@ Il commence à votre valeur par défaut de Settings. Le modifier ici ne vaut que
 
 ## Messages
 **Backing up...**, **Moving to Trash/Recycle Bin...**, **Removed from this phone.**, ou, en rouge, pourquoi un fichier reste : **Could not check your Cloud**, **Not in your Cloud**, ou **In your Cloud but the wrong size**.""",
-        "en_hash": "4ef90825cb796912",
+        "en_hash": "2aff6afb02606681",
     },
     "archive-prompt": {
         "title": "La question : All files validated, ou seulement certains fichiers",

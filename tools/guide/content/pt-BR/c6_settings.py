@@ -13,8 +13,8 @@ TRANSLATIONS = {
     },
     'settings-section-general': {
         "title": 'Geral',
-        "body": """O **Guia de uso**, **Aparência**, **Fonte** e **Usar dados móveis**. **Idioma** é a última linha da página.""",
-        "en_hash": "7c55bf50b318edb4",
+        "body": """O **Guia de uso**, **Aparência**, **Fonte**, **Usar dados móveis** e **Arquivos que não estão no telefone**. **Idioma** é a última linha da página.""",
+        "en_hash": "72502f5b1cbd1b1f",
     },
     'settings-how-to-guide-card': {
         "title": 'O cartão Guia de uso',
@@ -47,6 +47,17 @@ O tamanho do texto segue a configuração do telefone nos dois casos.""",
 
 Vale para os backups automáticos e para o **Sync now**. Deixe desligado, a menos que seu plano de dados seja ilimitado.""",
         "en_hash": "e8860c60b1961fee",
+    },
+
+    'settings-open-not-on-phone': {
+        "title": 'Arquivos que não estão no telefone',
+        "body": """O que um **toque longo** faz em um arquivo que não está mais no seu telefone. Um arquivo que está no telefone, inclusive uma cópia otimizada, sempre abre do telefone.
+
+• **Abre no app da nuvem ou no navegador** (padrão): abre o arquivo no app da sua Cloud, ou no navegador se o app não aceitar o link. Uma Cloud sem link usa a próxima opção.
+• **Baixar temporariamente:** copia o arquivo para o cache do app e o abre. A cópia fica só no cache, nunca é adicionada à sua galeria e é apagada depois.
+
+O download temporário segue **Usar dados móveis** ([[settings-mobile-data]]). Em dados móveis, um arquivo acima de 750 MB pergunta antes; no Wi-Fi nunca pergunta. O Google Photos não pode ser baixado, então nenhuma das opções traz de volta um arquivo dele.""",
+        "en_hash": "ad5011929bac28dd",
     },
     'settings-section-backup': {
         "title": 'Backup',

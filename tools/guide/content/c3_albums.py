@@ -96,7 +96,7 @@ CHAPTER = Chapter(
             • **Files:** one card per file with its size, date and marks. An optimised file shows its smaller size on the phone.
             • **Camera folder** (if chosen in Settings): extra optimise controls. See [[album-camera-optimise]].
 
-            No thumbnails or previews. Use your gallery app to look at photos.
+            No thumbnails or previews. **Long-press a file** to open it in your phone's photo or video app, or in its Cloud if it is no longer on the phone. See [[settings-open-not-on-phone]].
         """, ui=True),
 
         topic("album-file-status", "File marks and counts in an album", """

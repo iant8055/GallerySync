@@ -75,7 +75,7 @@ Ele começa no seu padrão de Settings. Mudá-lo aqui vale só para esta visita.
     },
     'archive-file-list': {
         "title": 'A lista de arquivos e as marcas',
-        "body": """Um cartão por arquivo nos seus álbuns Archive.
+        "body": """Um cartão por arquivo nos seus álbuns Archive. **Toque e segure um arquivo** para abri-lo no app de fotos ou vídeos do seu telefone, ou na sua Cloud depois de ele ter sido removido. Veja [[settings-open-not-on-phone]].
 
 ## Manter um arquivo no telefone
 Use para um arquivo que você quer manter no telefone enquanto o resto do álbum é arquivado. Deslize para a **esquerda** para mantê-lo: ele fica em cinza e mostra **Not archiving**, e isso fica guardado. Deslize para a **direita** para incluí-lo de novo. Um arquivo em cinza com **too recent for your filter** está retido pelo filtro de idade.
@@ -87,7 +87,7 @@ Use para um arquivo que você quer manter no telefone enquanto o resto do álbum
 
 ## Mensagens
 **Backing up...**, **Moving to Trash/Recycle Bin...**, **Removed from this phone.**, ou, em vermelho, por que um arquivo fica: **Could not check your Cloud**, **Not in your Cloud** ou **In your Cloud but the wrong size**.""",
-        "en_hash": "4ef90825cb796912",
+        "en_hash": "2aff6afb02606681",
     },
     'archive-prompt': {
         "title": 'A pergunta: All files validated, ou só alguns validados',

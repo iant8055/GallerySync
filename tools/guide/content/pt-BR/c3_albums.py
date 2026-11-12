@@ -105,8 +105,8 @@ Nada é removido aqui. A remoção acontece na aba Archive. Veja [[archive-overv
 • **Arquivos:** um cartão por arquivo com tamanho, data e marcas. Um arquivo otimizado mostra o tamanho menor que tem no telefone.
 • **Pasta da câmera** (se escolhida em Settings): controles extras de otimização. Veja [[album-camera-optimise]].
 
-Sem miniaturas nem pré-visualizações. Use o seu app de galeria para ver as fotos.""",
-        "en_hash": "47ed510631cea71a",
+Sem miniaturas nem pré-visualizações. **Toque e segure um arquivo** para abri-lo no app de fotos ou vídeos do seu telefone, ou na sua Cloud se não estiver mais no telefone. Veja [[settings-open-not-on-phone]].""",
+        "en_hash": "98ee587b80210c15",
     },
     'album-file-status': {
         "title": 'Marcas e contagens de arquivos em um álbum',

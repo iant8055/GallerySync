@@ -13,8 +13,8 @@ TRANSLATIONS = {
     },
     "settings-section-general": {
         "title": "Allgemein",
-        "body": """Die **Anleitung**, **Darstellung**, **Schriftart** und **Mobile Daten verwenden**. **Sprache** ist die letzte Zeile der Seite.""",
-        "en_hash": "7c55bf50b318edb4",
+        "body": """Die **Anleitung**, **Darstellung**, **Schriftart**, **Mobile Daten verwenden** und **Dateien nicht auf dem Telefon**. **Sprache** ist die letzte Zeile der Seite.""",
+        "en_hash": "72502f5b1cbd1b1f",
     },
     "settings-how-to-guide-card": {
         "title": "Die Karte „Anleitung“",
@@ -47,6 +47,17 @@ Die Schriftgröße folgt in beiden Fällen der Einstellung des Telefons.""",
 
 Gilt für automatische Backups und **Sync now**. Lass es aus, es sei denn, dein Datentarif ist unbegrenzt.""",
         "en_hash": "e8860c60b1961fee",
+    },
+
+    "settings-open-not-on-phone": {
+        "title": "Dateien nicht auf dem Telefon",
+        "body": """Was ein **langes Drücken** mit einer Datei macht, die nicht mehr auf deinem Telefon ist. Eine Datei, die auf dem Telefon ist, auch eine optimierte Kopie, wird immer vom Telefon aus geöffnet.
+
+• **Öffnet in der Cloud-App oder im Browser** (Standard): öffnet die Datei in der App ihrer Cloud oder im Browser, wenn die App den Link nicht annimmt. Eine Cloud ohne Link verwendet die nächste Wahl.
+• **Vorübergehend herunterladen:** kopiert die Datei in den Cache der App und öffnet sie. Die Kopie bleibt nur im Cache, kommt nie in deine Galerie und wird später gelöscht.
+
+Der vorübergehende Download folgt **Mobile Daten verwenden** ([[settings-mobile-data]]). Bei Mobildaten fragt eine Datei über 750 MB vorher nach; im WLAN fragt sie nie. Google Photos kann nicht heruntergeladen werden, daher bringt keine der beiden Wahlen eine seiner Dateien zurück.""",
+        "en_hash": "ad5011929bac28dd",
     },
     "settings-section-backup": {
         "title": "Backup",

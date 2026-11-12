@@ -105,8 +105,8 @@ Rien n'est retiré ici. Le retrait se fait dans l'onglet Archive. Voir [[archive
 • **Fichiers :** une carte par fichier avec sa taille, sa date et ses marques. Un fichier optimisé affiche sa taille réduite sur le téléphone.
 • **Camera folder** (si choisi dans Settings) : commandes d'optimisation supplémentaires. Voir [[album-camera-optimise]].
 
-Pas de miniatures ni d'aperçus. Utilisez votre application de galerie pour regarder les photos.""",
-        "en_hash": "47ed510631cea71a",
+Pas de miniatures ni d'aperçus. **Appuyez longuement sur un fichier** pour l'ouvrir dans l'application photo ou vidéo de votre téléphone, ou dans son Cloud lorsqu'il n'est plus sur le téléphone. Voir [[settings-open-not-on-phone]].""",
+        "en_hash": "98ee587b80210c15",
     },
     "album-file-status": {
         "title": "Marques et compteurs des fichiers d'un album",

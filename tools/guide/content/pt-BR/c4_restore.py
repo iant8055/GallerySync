@@ -70,20 +70,20 @@ Ficam em cinza enquanto uma restauração está rodando.""",
     },
     'restore-files-list': {
         "title": 'A lista de arquivos dentro de um álbum',
-        "body": """Deslize para a direita (ou toque) para selecionar e para a esquerda para desmarcar. Cada arquivo mostra um destes:
+        "body": """Deslize para a direita (ou toque) para selecionar e para a esquerda para desmarcar. **Toque e segure** um arquivo para abri-lo no app do seu telefone, ou na sua Cloud quando não estiver no telefone. Veja [[settings-open-not-on-phone]]. Cada arquivo mostra um destes:
 • **now · full size:** uma cópia otimizada, mostrando o tamanho menor que ela tem no telefone e o tamanho completo do arquivo na Cloud.
 • **Available for download:** não está no telefone.
 • **Already on this phone:** em cinza; nada a fazer.
 
 Enquanto trabalha: **Working...** com uma porcentagem. Depois **Restored to full size**, **Back on this phone** ou **Could not restore, your file is unchanged** com o motivo.""",
-        "en_hash": "486e3275bedd2609",
+        "en_hash": "995fafe0c00691e4",
     },
     'restore-greyed-files': {
         "title": 'Por que alguns arquivos estão em cinza?',
-        "body": """Eles já estão no telefone em tamanho real (mesmo álbum, nome e tamanho), então não há nada a restaurar. São mostrados para que o álbum corresponda à sua Cloud.
+        "body": """Eles já estão no telefone em tamanho real (mesmo álbum, nome e tamanho), então não há nada a restaurar. São mostrados para que o álbum corresponda à sua Cloud. **Tocar e segurar** continua abrindo o arquivo no seu telefone.
 
 Um arquivo com o mesmo nome, mas tamanho diferente, não é oferecido: pode ser uma edição, e o Restore nunca sobrescreve uma edição.""",
-        "en_hash": "02372472f6d53985",
+        "en_hash": "92854b977a90bb56",
     },
     'restore-action-bar': {
         "title": 'Restore e Stop restoring',

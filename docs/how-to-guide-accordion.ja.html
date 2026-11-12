@@ -90,7 +90,7 @@
 <main>
 
   <h1>使い方ガイド</h1>
-  <p class="sub">GallerySync — 最終更新日 2026年11月2日</p>
+  <p class="sub">GallerySync — 最終更新日 2026年11月12日</p>
 
   <div class="note">
     <p><strong>すべての画面、すべての行。</strong> このガイドでは、GallerySync の各部分を、わかりやすい言葉で説明します。何が表示されているのか、その情報がどこから来るのかです。アプリ内の <strong>(?)</strong> ボタンを押すと、同じ説明がポップアップで開きます。</p>
@@ -296,7 +296,7 @@
   <div class="topic-body" id="album-detail">
 <p>アルバムカードをタップすると開きます。</p>
 <ul><li><strong>ヘッダー</strong>：戻る矢印、アルバム名、モードとファイル数、<strong>Backs up to</strong>（新しいファイルの送信先の Cloud とフォルダ、およびすでにファイルを保持しているほかの Cloud）、件数（<a class="xref" href="#album-file-status">“アルバム内のファイルのマークと件数”</a>）、<strong>Sort by</strong>（<a class="xref" href="#album-file-sort">“アルバムのファイルを並べ替える”</a>）、<strong>Keep at full size</strong>（<a class="xref" href="#album-file-pin">“Keep at full size”</a>）。</li><li>ヘッダー下部の <strong>▲ Hide Details ▲</strong> をタップすると、ヘッダーはアルバム名、モード、ファイル数だけに折りたたまれます。<strong>▼ Show Details ▼</strong> で残りが戻ります。ページはこの選択を記憶します。</li><li><strong>ファイル</strong>：ファイルごとに 1 枚のカードで、サイズ、日付、マークが表示されます。最適化されたファイルには、スマートフォン上の小さいサイズが表示されます。</li><li><strong>カメラのフォルダ</strong>（Settings で選んだ場合）：追加の最適化コントロール。<a class="xref" href="#album-camera-optimise">“カメラのフォルダの古い写真と動画を最適化する”</a>を参照してください。</li></ul>
-<p>サムネイルやプレビューはありません。写真を見るには、ギャラリーアプリを使ってください。</p>
+<p>サムネイルやプレビューはありません。ファイルを<strong>長押し</strong>すると、スマートフォンの写真・動画アプリで開きます。スマートフォンにない場合は、その Cloud で開きます。<a class="xref" href="#settings-open-not-on-phone">“スマホにないファイル”</a>を参照してください。</p>
   </div></details>
   <details class="topic"><summary>アルバム内のファイルのマークと件数</summary>
   <div class="topic-body" id="album-file-status">
@@ -384,13 +384,13 @@
   </div></details>
   <details class="topic"><summary>アルバム内のファイル一覧</summary>
   <div class="topic-body" id="restore-files-list">
-<p>右にスワイプ（またはタップ）すると選択、左にスワイプすると選択解除です。各ファイルには、次のいずれかが表示されます：</p>
+<p>右にスワイプ（またはタップ）すると選択、左にスワイプすると選択解除です。ファイルを<strong>長押し</strong>すると、スマートフォンのアプリで開きます。スマートフォンにない場合は、その Cloud で開きます。<a class="xref" href="#settings-open-not-on-phone">“スマホにないファイル”</a>を参照してください。各ファイルには、次のいずれかが表示されます：</p>
 <ul><li><strong>now · full size</strong>：最適化されたコピー。スマートフォン上の小さいファイルサイズと、Cloud 上のフルサイズのファイルサイズが表示されます。</li><li><strong>Available for download</strong>：スマートフォンにありません。</li><li><strong>Already on this phone</strong>：グレー表示。何もする必要はありません。</li></ul>
 <p>処理中は、パーセンテージ付きの <strong>Working...</strong> が表示されます。その後、理由とともに <strong>Restored to full size</strong>、<strong>Back on this phone</strong>、または <strong>Could not restore, your file is unchanged</strong> が表示されます。</p>
   </div></details>
   <details class="topic"><summary>グレー表示のファイルがあるのはなぜですか？</summary>
   <div class="topic-body" id="restore-greyed-files">
-<p>それらはすでにスマートフォンにフルサイズであり（同じアルバム、名前、サイズ）、復元するものがありません。アルバムが Cloud と一致して見えるように、表示されています。</p>
+<p>それらはすでにスマートフォンにフルサイズであり（同じアルバム、名前、サイズ）、復元するものがありません。アルバムが Cloud と一致して見えるように、表示されています。<strong>長押し</strong>すれば、ファイルはスマートフォン上で開きます。</p>
 <p>同じ名前でサイズが異なるファイルは、表示されません。編集されたものかもしれず、Restore が編集内容を上書きすることはないからです。</p>
   </div></details>
   <details class="topic"><summary>Restore and Stop restoring</summary>
@@ -448,7 +448,7 @@
   </div></details>
   <details class="topic"><summary>ファイル一覧とマーク</summary>
   <div class="topic-body" id="archive-file-list">
-<p>Archive アルバム内のファイルごとに、1 枚のカードがあります。</p>
+<p>Archive アルバム内のファイルごとに、1 枚のカードがあります。ファイルを<strong>長押し</strong>すると、スマートフォンの写真・動画アプリで開きます。削除された後は、その Cloud で開きます。<a class="xref" href="#settings-open-not-on-phone">“スマホにないファイル”</a>を参照してください。</p>
 <h4>ファイルをスマートフォンに残す</h4>
 <p>アルバムの残りがアーカイブされても、特定のファイルをスマートフォンに残したいときに使います。ファイルを<strong>左</strong>にスワイプして残します。グレーになり <strong>Not archiving</strong> と表示され、その選択は記憶されます。<strong>右</strong>にスワイプすると、再び対象に含まれます。<strong>too recent for your filter</strong> とグレー表示されたファイルは、期間フィルターで除外されています。</p>
 <h4>マーク</h4>
@@ -481,7 +481,7 @@
   </div></details>
   <details class="topic"><summary>全般</summary>
   <div class="topic-body" id="settings-section-general">
-<p><strong>使い方ガイド</strong>、<strong>表示</strong>、<strong>フォント</strong>、<strong>モバイルデータを使用</strong>。<strong>言語</strong> は、ページの最後の行です。</p>
+<p><strong>使い方ガイド</strong>、<strong>表示</strong>、<strong>フォント</strong>、<strong>モバイルデータを使用</strong>、<strong>スマホにないファイル</strong>。<strong>言語</strong> は、ページの最後の行です。</p>
   </div></details>
   <details class="topic"><summary>使い方ガイドのカード</summary>
   <div class="topic-body" id="settings-how-to-guide-card">
@@ -503,6 +503,12 @@
   <div class="topic-body" id="settings-mobile-data">
 <ul><li><strong>Off</strong>（既定）：<strong>Wi-Fi のみ。</strong></li><li><strong>On</strong>：<strong>Wi-Fi とモバイルデータで同期します。</strong></li></ul>
 <p>自動バックアップと <strong>Sync now</strong> に適用されます。データ通信量が無制限でない限り、オフのままにしておいてください。</p>
+  </div></details>
+  <details class="topic"><summary>スマホにないファイル</summary>
+  <div class="topic-body" id="settings-open-not-on-phone">
+<p>スマートフォンに残っていないファイルを<strong>長押し</strong>したときの動作です。スマートフォンにあるファイル（最適化されたコピーを含む）は、常にスマートフォンから開かれます。</p>
+<ul><li><strong>クラウドのアプリまたはブラウザで開く</strong>（既定）：その Cloud のアプリでファイルを開きます。アプリがリンクを受け取れない場合はブラウザで開きます。リンクを持たない Cloud は次の選択肢を使います。</li><li><strong>一時的にダウンロード：</strong> アプリのキャッシュにファイルをコピーして開きます。コピーはキャッシュにのみ保持され、ギャラリーには追加されず、後で削除されます。</li></ul>
+<p>一時ダウンロードは <strong>モバイルデータを使用</strong>（<a class="xref" href="#settings-mobile-data">“モバイルデータを使用”</a>）に従います。モバイルデータでは 750 MB を超えるファイルで事前に確認します。Wi-Fi では確認しません。Google Photos はダウンロードできないため、どちらを選んでも Google Photos のファイルは戻せません。</p>
   </div></details>
   <details class="topic"><summary>バックアップ</summary>
   <div class="topic-body" id="settings-section-backup">
@@ -790,7 +796,7 @@
   </div></details>
 
   <footer>
-    GallerySync — 使い方ガイド。最終更新日 2026年11月2日。
+    GallerySync — 使い方ガイド。最終更新日 2026年11月12日。
   </footer>
 
 </main>

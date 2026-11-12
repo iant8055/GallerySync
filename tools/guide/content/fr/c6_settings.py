@@ -13,8 +13,8 @@ TRANSLATIONS = {
     },
     "settings-section-general": {
         "title": "Général",
-        "body": """Le **Mode d'emploi**, **Apparence**, **Police** et **Utiliser les données mobiles**. **Langue** est la dernière ligne de la page.""",
-        "en_hash": "7c55bf50b318edb4",
+        "body": """Le **Mode d'emploi**, **Apparence**, **Police**, **Utiliser les données mobiles** et **Fichiers absents du téléphone**. **Langue** est la dernière ligne de la page.""",
+        "en_hash": "72502f5b1cbd1b1f",
     },
     "settings-how-to-guide-card": {
         "title": "La carte Mode d'emploi",
@@ -47,6 +47,17 @@ La taille du texte suit le réglage du téléphone dans les deux cas.""",
 
 Concerne les sauvegardes automatiques et **Sync now**. Laissez-le désactivé sauf si votre forfait de données est illimité.""",
         "en_hash": "e8860c60b1961fee",
+    },
+
+    "settings-open-not-on-phone": {
+        "title": "Fichiers absents du téléphone",
+        "body": """Ce que fait un **appui long** sur un fichier qui n'est plus sur votre téléphone. Un fichier présent sur le téléphone, y compris une copie optimisée, s'ouvre toujours depuis le téléphone.
+
+• **S'ouvre dans l'app du Cloud ou le navigateur** (par défaut) : ouvre le fichier dans l'application de son Cloud, ou dans le navigateur si l'application n'accepte pas le lien. Un Cloud sans lien utilise l'option suivante.
+• **Télécharger temporairement :** copie le fichier dans le cache de l'app et l'ouvre. La copie reste uniquement dans le cache, n'est jamais ajoutée à votre galerie et est effacée par la suite.
+
+Le téléchargement temporaire suit **Utiliser les données mobiles** ([[settings-mobile-data]]). En données mobiles, un fichier de plus de 750 Mo demande d'abord ; en Wi-Fi il ne demande jamais. Google Photos ne peut pas être téléchargé, donc aucune des deux options ne ramène l'un de ses fichiers.""",
+        "en_hash": "ad5011929bac28dd",
     },
     "settings-section-backup": {
         "title": "Sauvegarde",

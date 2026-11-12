@@ -90,7 +90,7 @@
 <main>
 
   <h1>How To Guide</h1>
-  <p class="sub">GallerySync — last updated 2 November 2026</p>
+  <p class="sub">GallerySync — last updated 12 November 2026</p>
 
   <div class="note">
     <p><strong>Every screen, every line.</strong> This guide explains each part of GallerySync in plain
@@ -298,7 +298,7 @@
   <div class="topic-body" id="album-detail">
 <p>Opens when you tap an album card.</p>
 <ul><li><strong>Header:</strong> back arrow, album name, mode and file count, <strong>Backs up to</strong> (the Cloud and folder new files go to, plus any other Cloud already holding some), the counts (<a class="xref" href="#album-file-status">“File marks and counts in an album”</a>), <strong>Sort by</strong> (<a class="xref" href="#album-file-sort">“Sorting an album's files”</a>) and <strong>Keep at full size</strong> (<a class="xref" href="#album-file-pin">“Keep at full size”</a>).</li><li><strong>▲ Hide Details ▲</strong> at the bottom of the header folds it to the album's name, mode and file count; <strong>▼ Show Details ▼</strong> brings the rest back. The page remembers your choice.</li><li><strong>Files:</strong> one card per file with its size, date and marks. An optimised file shows its smaller size on the phone.</li><li><strong>Camera folder</strong> (if chosen in Settings): extra optimise controls. See <a class="xref" href="#album-camera-optimise">“Optimise older photos and videos in your Camera folder”</a>.</li></ul>
-<p>No thumbnails or previews. Use your gallery app to look at photos.</p>
+<p>No thumbnails or previews. <strong>Long-press a file</strong> to open it in your phone's photo or video app, or in its Cloud if it is no longer on the phone. See <a class="xref" href="#settings-open-not-on-phone">“Files not on the phone”</a>.</p>
   </div></details>
   <details class="topic"><summary>File marks and counts in an album</summary>
   <div class="topic-body" id="album-file-status">
@@ -386,13 +386,13 @@
   </div></details>
   <details class="topic"><summary>The file list inside an album</summary>
   <div class="topic-body" id="restore-files-list">
-<p>Swipe right (or tap) to select, left to deselect. Each file shows one of:</p>
+<p>Swipe right (or tap) to select, left to deselect. <strong>Long-press</strong> a file to open it in your phone's app, or in its Cloud when it is not on the phone. See <a class="xref" href="#settings-open-not-on-phone">“Files not on the phone”</a>. Each file shows one of:</p>
 <ul><li><strong>now · full size:</strong> an optimised copy, showing its smaller file size on the phone and the full file size in the Cloud.</li><li><strong>Available for download:</strong> not on the phone.</li><li><strong>Already on this phone:</strong> greyed; nothing to do.</li></ul>
 <p>While working: <strong>Working...</strong> with a percentage. Then <strong>Restored to full size</strong>, <strong>Back on this phone</strong>, or <strong>Could not restore, your file is unchanged</strong> with the reason.</p>
   </div></details>
   <details class="topic"><summary>Why are some files greyed out?</summary>
   <div class="topic-body" id="restore-greyed-files">
-<p>They are already on the phone at full size (same album, name and size), so there is nothing to restore. They are shown so the album matches your Cloud.</p>
+<p>They are already on the phone at full size (same album, name and size), so there is nothing to restore. They are shown so the album matches your Cloud. <strong>Long-press</strong> still opens the file on your phone.</p>
 <p>A file with the same name but a different size is not offered: it may be an edit, and Restore never overwrites an edit.</p>
   </div></details>
   <details class="topic"><summary>Restore and Stop restoring</summary>
@@ -450,7 +450,7 @@
   </div></details>
   <details class="topic"><summary>The file list and its marks</summary>
   <div class="topic-body" id="archive-file-list">
-<p>One card per file in your Archive albums.</p>
+<p>One card per file in your Archive albums. <strong>Long-press a file</strong> to open it in your phone's photo or video app, or in its Cloud once it has been removed. See <a class="xref" href="#settings-open-not-on-phone">“Files not on the phone”</a>.</p>
 <h4>Keeping a file on the phone</h4>
 <p>Use it for a file you want to keep on the phone while the rest of the album is archived. Swipe <strong>left</strong> to keep it: it greys out and reads <strong>Not archiving</strong>, and is remembered. Swipe <strong>right</strong> to include it again. A file greyed as <strong>too recent for your filter</strong> is held back by the age filter.</p>
 <h4>Marks</h4>
@@ -483,7 +483,7 @@
   </div></details>
   <details class="topic"><summary>General</summary>
   <div class="topic-body" id="settings-section-general">
-<p>The <strong>How To Guide</strong>, <strong>Appearance</strong>, <strong>Font</strong> and <strong>Use mobile data</strong>. <strong>Language</strong> is the last line on the page.</p>
+<p>The <strong>How To Guide</strong>, <strong>Appearance</strong>, <strong>Font</strong>, <strong>Use mobile data</strong> and <strong>Files not on the phone</strong>. <strong>Language</strong> is the last line on the page.</p>
   </div></details>
   <details class="topic"><summary>The How To Guide card</summary>
   <div class="topic-body" id="settings-how-to-guide-card">
@@ -505,6 +505,12 @@
   <div class="topic-body" id="settings-mobile-data">
 <ul><li><strong>Off</strong> (default): <strong>Wi-Fi only.</strong></li><li><strong>On:</strong> <strong>Syncs on Wi-Fi and mobile data.</strong></li></ul>
 <p>Covers automatic backups and <strong>Sync now</strong>. Leave it off unless your data plan is unlimited.</p>
+  </div></details>
+  <details class="topic"><summary>Files not on the phone</summary>
+  <div class="topic-body" id="settings-open-not-on-phone">
+<p>What a <strong>long-press</strong> does to a file that is no longer on your phone. A file on your phone, including an optimised copy, always opens from the phone.</p>
+<ul><li><strong>Opens in Cloud App or Browser</strong> (default): opens the file in its Cloud's app, or in the browser if the app cannot take the link. A Cloud with no link uses the next choice.</li><li><strong>Download temporarily:</strong> copies the file into the app's cache and opens it. The copy is kept only in the cache, never added to your gallery, and cleared later.</li></ul>
+<p>The temporary download follows <strong>Use mobile data</strong> (<a class="xref" href="#settings-mobile-data">“Use mobile data”</a>). On mobile data, a file over 750 MB asks first; on Wi-Fi it never asks. Google Photos cannot be downloaded, so neither choice brings one of its files back.</p>
   </div></details>
   <details class="topic"><summary>Backup</summary>
   <div class="topic-body" id="settings-section-backup">
@@ -792,7 +798,7 @@
   </div></details>
 
   <footer>
-    GallerySync — How To Guide. Last updated 2 November 2026.
+    GallerySync — How To Guide. Last updated 12 November 2026.
   </footer>
 
 </main>

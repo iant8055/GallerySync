@@ -76,21 +76,21 @@ En gris mientras se ejecuta una restauración.""",
 
     "restore-files-list": {
         "title": "La lista de archivos dentro de un álbum",
-        "body": """Desliza hacia la derecha (o pulsa) para seleccionar, hacia la izquierda para deseleccionar. Cada archivo muestra una de estas indicaciones:
+        "body": """Desliza hacia la derecha (o pulsa) para seleccionar, hacia la izquierda para deseleccionar. **Mantén pulsado** un archivo para abrirlo en la app de tu teléfono, o en su Cloud cuando no esté en el teléfono. Consulta [[settings-open-not-on-phone]]. Cada archivo muestra una de estas indicaciones:
 • **now · full size:** una copia optimizada, con su tamaño menor en el teléfono y el tamaño completo en la Cloud.
 • **Available for download:** no está en el teléfono.
 • **Already on this phone:** en gris; no hay nada que hacer.
 
 Mientras trabaja: **Working...** con un porcentaje. Después, **Restored to full size**, **Back on this phone** o **Could not restore, your file is unchanged** con el motivo.""",
-        "en_hash": "486e3275bedd2609",
+        "en_hash": "995fafe0c00691e4",
     },
 
     "restore-greyed-files": {
         "title": "¿Por qué algunos archivos están en gris?",
-        "body": """Ya están en el teléfono a tamaño completo (mismo álbum, nombre y tamaño), así que no hay nada que restaurar. Se muestran para que el álbum coincida con tu Cloud.
+        "body": """Ya están en el teléfono a tamaño completo (mismo álbum, nombre y tamaño), así que no hay nada que restaurar. Se muestran para que el álbum coincida con tu Cloud. **Mantener pulsado** sigue abriendo el archivo en tu teléfono.
 
 Un archivo con el mismo nombre pero distinto tamaño no se ofrece: puede ser una edición, y Restore nunca sobrescribe una edición.""",
-        "en_hash": "02372472f6d53985",
+        "en_hash": "92854b977a90bb56",
     },
 
     "restore-action-bar": {

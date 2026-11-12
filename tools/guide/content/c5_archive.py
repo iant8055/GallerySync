@@ -69,7 +69,7 @@ CHAPTER = Chapter(
         """, ui=True),
 
         topic("archive-file-list", "The file list and its marks", """
-            One card per file in your Archive albums.
+            One card per file in your Archive albums. **Long-press a file** to open it in your phone's photo or video app, or in its Cloud once it has been removed. See [[settings-open-not-on-phone]].
 
             ## Keeping a file on the phone
             Use it for a file you want to keep on the phone while the rest of the album is archived. Swipe **left** to keep it: it greys out and reads **Not archiving**, and is remembered. Swipe **right** to include it again. A file greyed as **too recent for your filter** is held back by the age filter.

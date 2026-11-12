@@ -64,7 +64,7 @@ CHAPTER = Chapter(
         """),
 
         topic("restore-files-list", "The file list inside an album", """
-            Swipe right (or tap) to select, left to deselect. Each file shows one of:
+            Swipe right (or tap) to select, left to deselect. **Long-press** a file to open it in your phone's app, or in its Cloud when it is not on the phone. See [[settings-open-not-on-phone]]. Each file shows one of:
             • **now · full size:** an optimised copy, showing its smaller file size on the phone and the full file size in the Cloud.
             • **Available for download:** not on the phone.
             • **Already on this phone:** greyed; nothing to do.
@@ -73,7 +73,7 @@ CHAPTER = Chapter(
         """),
 
         topic("restore-greyed-files", "Why are some files greyed out?", """
-            They are already on the phone at full size (same album, name and size), so there is nothing to restore. They are shown so the album matches your Cloud.
+            They are already on the phone at full size (same album, name and size), so there is nothing to restore. They are shown so the album matches your Cloud. **Long-press** still opens the file on your phone.
 
             A file with the same name but a different size is not offered: it may be an edit, and Restore never overwrites an edit.
         """, ui=True),

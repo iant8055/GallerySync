@@ -115,8 +115,8 @@ Aquí no se quita nada. La eliminación ocurre en la pestaña Archive. Consulta 
 • **Archivos:** una tarjeta por archivo con su tamaño, fecha y marcas. Un archivo optimizado muestra en el teléfono su tamaño menor.
 • **Carpeta de la cámara** (si se eligió en Settings): controles de optimización adicionales. Consulta [[album-camera-optimise]].
 
-Sin miniaturas ni vistas previas. Usa tu app de galería para ver las fotos.""",
-        "en_hash": "47ed510631cea71a",
+Sin miniaturas ni vistas previas. **Mantén pulsado un archivo** para abrirlo en la app de fotos o vídeos de tu teléfono, o en su Cloud si ya no está en el teléfono. Consulta [[settings-open-not-on-phone]].""",
+        "en_hash": "98ee587b80210c15",
     },
 
     "album-file-status": {

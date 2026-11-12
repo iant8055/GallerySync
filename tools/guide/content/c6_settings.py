@@ -13,7 +13,7 @@ CHAPTER = Chapter(
         """),
 
         topic("settings-section-general", "General", """
-            The **How To Guide**, **Appearance**, **Font** and **Use mobile data**. **Language** is the last line on the page.
+            The **How To Guide**, **Appearance**, **Font**, **Use mobile data** and **Files not on the phone**. **Language** is the last line on the page.
         """, ui=True),
 
         topic("settings-how-to-guide-card", "The How To Guide card", """
@@ -43,6 +43,15 @@ CHAPTER = Chapter(
 
             Covers automatic backups and **Sync now**. Leave it off unless your data plan is unlimited.
         """, ui=True),
+
+        topic("settings-open-not-on-phone", "Files not on the phone", """
+            What a **long-press** does to a file that is no longer on your phone. A file on your phone, including an optimised copy, always opens from the phone.
+
+            • **Opens in Cloud App or Browser** (default): opens the file in its Cloud's app, or in the browser if the app cannot take the link. A Cloud with no link uses the next choice.
+            • **Download temporarily:** copies the file into the app's cache and opens it. The copy is kept only in the cache, never added to your gallery, and cleared later.
+
+            The temporary download follows **Use mobile data** ([[settings-mobile-data]]). On mobile data, a file over 750 MB asks first; on Wi-Fi it never asks. Google Photos cannot be downloaded, so neither choice brings one of its files back.
+        """),
 
         topic("settings-section-backup", "Backup", """
             **Clouds:** connect or sign out of each Cloud. See [[settings-account]].

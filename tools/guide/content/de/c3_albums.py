@@ -105,8 +105,8 @@ Hier wird nichts entfernt. Das Entfernen geschieht im Archive-Tab. Siehe [[archi
 • **Dateien:** eine Karte pro Datei mit Größe, Datum und Markierungen. Eine optimierte Datei zeigt ihre kleinere Größe auf dem Telefon.
 • **Kameraordner** (falls in Settings gewählt): zusätzliche Optimise-Steuerung. Siehe [[album-camera-optimise]].
 
-Keine Miniaturansichten oder Vorschauen. Nutze deine Galerie-App, um Fotos anzusehen.""",
-        "en_hash": "47ed510631cea71a",
+Keine Miniaturansichten oder Vorschauen. **Drücke lange auf eine Datei**, um sie in der Foto- oder Video-App deines Telefons zu öffnen, oder in ihrer Cloud, wenn sie nicht mehr auf dem Telefon ist. Siehe [[settings-open-not-on-phone]].""",
+        "en_hash": "98ee587b80210c15",
     },
     "album-file-status": {
         "title": "Dateimarkierungen und Zahlen in einem Album",
