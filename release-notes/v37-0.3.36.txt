@@ -1,0 +1,28 @@
+<en-US>
+• Long-press a file on the Albums, Restore or Archive tab to open it in your phone's photo or video app.
+• A file that is not on the phone opens in its Cloud's app or the browser, or downloads a temporary copy. Choose which in Settings, under Files not on the phone.
+</en-US>
+<es-ES>
+• Mantén pulsado un archivo en las pestañas Albums, Restore o Archive para abrirlo en la app de fotos o vídeos del teléfono.
+• Un archivo que no está en el teléfono se abre en la app de su nube o en el navegador, o se descarga una copia temporal. Elígelo en Settings, en Archivos que no están en el teléfono.
+</es-ES>
+<pt-BR>
+• Toque e segure um arquivo nas abas Albums, Restore ou Archive para abri-lo no app de fotos ou vídeos do telefone.
+• Um arquivo que não está no telefone abre no app da nuvem dele ou no navegador, ou baixa uma cópia temporária. Escolha em Settings, em Arquivos que não estão no telefone.
+</pt-BR>
+<fr-FR>
+• Appuyez longuement sur un fichier dans les onglets Albums, Restore ou Archive pour l'ouvrir dans l'app photo ou vidéo du téléphone.
+• Un fichier absent du téléphone s'ouvre dans l'app de son Cloud ou le navigateur, ou une copie temporaire est téléchargée. Choisissez dans Settings, sous Fichiers absents du téléphone.
+</fr-FR>
+<de-DE>
+• Halte eine Datei in den Tabs Albums, Restore oder Archive gedrückt, um sie in der Foto- oder Video-App des Telefons zu öffnen.
+• Eine Datei, die nicht auf dem Telefon ist, öffnet sich in der App ihrer Cloud oder im Browser, oder eine vorübergehende Kopie wird geladen. Auswahl in Settings unter Dateien nicht auf dem Telefon.
+</de-DE>
+<ja-JP>
+• Albums、Restore、Archive タブでファイルを長押しすると、スマホの写真・動画アプリで開けます。
+• スマホにないファイルは、クラウドのアプリまたはブラウザで開くか、一時コピーをダウンロードします。Settings の「スマホにないファイル」で選べます。
+</ja-JP>
+<hi-IN>
+• Albums, Restore या Archive टैब में किसी फ़ाइल को देर तक दबाएँ, तो वह फ़ोन के फ़ोटो या वीडियो ऐप में खुलती है।
+• जो फ़ाइल फ़ोन पर नहीं है, वह अपने क्लाउड ऐप या ब्राउज़र में खुलती है, या उसकी अस्थायी कॉपी डाउनलोड होती है। इसे Settings में "फ़ोन पर न मौजूद फ़ाइलें" में चुनें।
+</hi-IN>

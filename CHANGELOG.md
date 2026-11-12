@@ -3,6 +3,14 @@
 Every change since version 26 (0.3.25), the last build the Closed Testing group had. The short notes Play shows to users
 (500 characters per language) are in `release-notes/`; this file is the full record.
 
+## Version 37 (0.3.36) — built 12 Nov 2026, not yet uploaded
+
+**Opening a file (TASK-028)**
+- Long-press a file on the Albums, Restore or Archive tab to open it in the phone's own photo or video app. Tap and swipe are unchanged; on Restore a long-press never selects, and a greyed-out file already on the phone can be opened.
+- A file that is not on the phone follows Settings → General → *Files not on the phone*: **Opens in Cloud App or Browser** (default) or **Download temporarily**. OneDrive's link ends in the browser (no link opens a file in the OneDrive app). Backblaze B2, IDrive e2 and pCloud have no link, so they always download. Google Photos cannot be downloaded.
+- A temporary copy lives only in the app's cache, never in the gallery, follows *Use mobile data*, and on mobile data asks first above 750 MB.
+- New (?) on the setting, and How To Guide topics, in all seven languages.
+
 ## Version 36 (0.3.35) — 2 Nov 2026, uploaded
 
 **Archive**
