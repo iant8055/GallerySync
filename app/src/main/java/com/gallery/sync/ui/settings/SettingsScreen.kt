@@ -188,6 +188,7 @@ fun SettingsScreen(
         SettingDivider()
         SettingDropdown(
             label = stringResource(R.string.settings_open_not_on_phone),
+            help = HelpTopic.SETTINGS_OPEN_NOT_ON_PHONE,
             options = OpenNotOnPhone.entries,
             selected = state.openNotOnPhone,
             onSelected = viewModel::setOpenNotOnPhone,
@@ -984,6 +985,7 @@ fun SettingsTabPreview(onGuideCardPositioned: ((androidx.compose.ui.geometry.Rec
         SettingDivider()
         SettingDropdown(
             label = stringResource(R.string.settings_open_not_on_phone),
+            help = HelpTopic.SETTINGS_OPEN_NOT_ON_PHONE,
             options = listOf(OpenNotOnPhone.DEFAULT),
             selected = OpenNotOnPhone.DEFAULT,
             onSelected = {},

@@ -46,6 +46,7 @@ enum class HelpTopic(
     SETTINGS_LANGUAGE("settings-language", R.string.help_settings_language_title, R.string.help_settings_language_body),
     SETTINGS_APPEARANCE("settings-appearance", R.string.help_settings_appearance_title, R.string.help_settings_appearance_body),
     SETTINGS_MOBILE_DATA("settings-mobile-data", R.string.help_settings_mobile_data_title, R.string.help_settings_mobile_data_body),
+    SETTINGS_OPEN_NOT_ON_PHONE("settings-open-not-on-phone", R.string.help_settings_open_not_on_phone_title, R.string.help_settings_open_not_on_phone_body),
     SETTINGS_SECTION_BACKUP("settings-section-backup", R.string.help_settings_section_backup_title, R.string.help_settings_section_backup_body),
     SETTINGS_ACCOUNT("settings-account", R.string.help_settings_account_title, R.string.help_settings_account_body),
     SETTINGS_DESTINATION("settings-destination", R.string.help_settings_destination_title, R.string.help_settings_destination_body),
