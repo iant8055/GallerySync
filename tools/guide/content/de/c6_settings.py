@@ -56,8 +56,8 @@ Gilt für automatische Backups und **Sync now**. Lass es aus, es sei denn, dein 
 • **Öffnet in der Cloud-App oder im Browser** (Standard): öffnet die Datei in der App ihrer Cloud oder im Browser, wenn die App den Link nicht annimmt. Eine Cloud ohne Link verwendet die nächste Wahl.
 • **Vorübergehend herunterladen:** kopiert die Datei in den Cache der App und öffnet sie. Die Kopie bleibt nur im Cache, kommt nie in deine Galerie und wird später gelöscht.
 
-Der vorübergehende Download folgt **Mobile Daten verwenden** ([[settings-mobile-data]]). Bei Mobildaten fragt eine Datei über 750 MB vorher nach; im WLAN fragt sie nie. Google Photos kann nicht heruntergeladen werden, daher bringt keine der beiden Wahlen eine seiner Dateien zurück.""",
-        "en_hash": "ad5011929bac28dd",
+Der vorübergehende Download folgt **Mobile Daten verwenden** ([[settings-mobile-data]]). Bei Mobildaten fragt eine Datei über 750 MB vorher nach; im WLAN fragt sie nie. Dateien von Google Photos können nicht heruntergeladen werden: sie werden immer in Google Photos oder im Browser geöffnet.""",
+        "en_hash": "1ac210a7b703cc21",
     },
     "settings-section-backup": {
         "title": "Backup",

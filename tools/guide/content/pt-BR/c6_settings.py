@@ -56,8 +56,8 @@ Vale para os backups automáticos e para o **Sync now**. Deixe desligado, a meno
 • **Abre no app da nuvem ou no navegador** (padrão): abre o arquivo no app da sua Cloud, ou no navegador se o app não aceitar o link. Uma Cloud sem link usa a próxima opção.
 • **Baixar temporariamente:** copia o arquivo para o cache do app e o abre. A cópia fica só no cache, nunca é adicionada à sua galeria e é apagada depois.
 
-O download temporário segue **Usar dados móveis** ([[settings-mobile-data]]). Em dados móveis, um arquivo acima de 750 MB pergunta antes; no Wi-Fi nunca pergunta. O Google Photos não pode ser baixado, então nenhuma das opções traz de volta um arquivo dele.""",
-        "en_hash": "ad5011929bac28dd",
+O download temporário segue **Usar dados móveis** ([[settings-mobile-data]]). Em dados móveis, um arquivo acima de 750 MB pergunta antes; no Wi-Fi nunca pergunta. Arquivos do Google Photos não podem ser baixados: eles sempre abrem no Google Photos ou no navegador.""",
+        "en_hash": "1ac210a7b703cc21",
     },
     'settings-section-backup': {
         "title": 'Backup',

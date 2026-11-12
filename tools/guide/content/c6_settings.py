@@ -50,7 +50,7 @@ CHAPTER = Chapter(
             • **Opens in Cloud App or Browser** (default): opens the file in its Cloud's app, or in the browser if the app cannot take the link. A Cloud with no link uses the next choice.
             • **Download temporarily:** copies the file into the app's cache and opens it. The copy is kept only in the cache, never added to your gallery, and cleared later.
 
-            The temporary download follows **Use mobile data** ([[settings-mobile-data]]). On mobile data, a file over 750 MB asks first; on Wi-Fi it never asks. Google Photos cannot be downloaded, so neither choice brings one of its files back.
+            The temporary download follows **Use mobile data** ([[settings-mobile-data]]). On mobile data, a file over 750 MB asks first; on Wi-Fi it never asks. Google Photos files cannot be downloaded: they always open in Google Photos or the browser.
         """),
 
         topic("settings-section-backup", "Backup", """

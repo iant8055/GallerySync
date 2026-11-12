@@ -56,8 +56,8 @@ Concerne les sauvegardes automatiques et **Sync now**. Laissez-le désactivé sa
 • **S'ouvre dans l'app du Cloud ou le navigateur** (par défaut) : ouvre le fichier dans l'application de son Cloud, ou dans le navigateur si l'application n'accepte pas le lien. Un Cloud sans lien utilise l'option suivante.
 • **Télécharger temporairement :** copie le fichier dans le cache de l'app et l'ouvre. La copie reste uniquement dans le cache, n'est jamais ajoutée à votre galerie et est effacée par la suite.
 
-Le téléchargement temporaire suit **Utiliser les données mobiles** ([[settings-mobile-data]]). En données mobiles, un fichier de plus de 750 Mo demande d'abord ; en Wi-Fi il ne demande jamais. Google Photos ne peut pas être téléchargé, donc aucune des deux options ne ramène l'un de ses fichiers.""",
-        "en_hash": "ad5011929bac28dd",
+Le téléchargement temporaire suit **Utiliser les données mobiles** ([[settings-mobile-data]]). En données mobiles, un fichier de plus de 750 Mo demande d'abord ; en Wi-Fi il ne demande jamais. Les fichiers Google Photos ne peuvent pas être téléchargés : ils s'ouvrent toujours dans Google Photos ou dans le navigateur.""",
+        "en_hash": "1ac210a7b703cc21",
     },
     "settings-section-backup": {
         "title": "Sauvegarde",

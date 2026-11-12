@@ -75,7 +75,7 @@ Er beginnt bei deinem Standard aus Settings. Eine Änderung hier gilt nur für d
     },
     "archive-file-list": {
         "title": "Die Dateiliste und ihre Markierungen",
-        "body": """Eine Karte pro Datei in deinen Archive-Alben. **Drücke lange auf eine Datei**, um sie in der Foto- oder Video-App deines Telefons zu öffnen, oder in ihrer Cloud, sobald sie entfernt wurde. Siehe [[settings-open-not-on-phone]].
+        "body": """Eine Karte pro Datei in deinen Archive-Alben. **Drücke lange auf eine Datei**, um sie in der Foto- oder Video-App deines Telefons zu öffnen.
 
 ## Eine Datei auf dem Telefon behalten
 Nutze das für eine Datei, die du auf dem Telefon behalten willst, während der Rest des Albums archiviert wird. Wische **nach links**, um sie zu behalten: Sie wird grau, zeigt **Not archiving** und wird gemerkt. Wische **nach rechts**, um sie wieder einzubeziehen. Eine Datei, die als **too recent for your filter** ausgegraut ist, wird vom Altersfilter zurückgehalten.
@@ -87,7 +87,7 @@ Nutze das für eine Datei, die du auf dem Telefon behalten willst, während der 
 
 ## Meldungen
 **Backing up...**, **Moving to Trash/Recycle Bin...**, **Removed from this phone.**, oder in Rot, warum eine Datei bleibt: **Could not check your Cloud**, **Not in your Cloud** oder **In your Cloud but the wrong size**.""",
-        "en_hash": "2aff6afb02606681",
+        "en_hash": "999939e9ae51a873",
     },
     "archive-prompt": {
         "title": "Die Frage: All files validated oder nur einige validated",

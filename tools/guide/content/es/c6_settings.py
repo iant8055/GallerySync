@@ -61,8 +61,8 @@ Afecta a las copias automáticas y a **Sync now**. Déjalo desactivado salvo que
 • **Se abre en la app de la nube o en el navegador** (predeterminado): abre el archivo en la app de su Cloud, o en el navegador si la app no admite el enlace. Una Cloud sin enlace usa la siguiente opción.
 • **Descargar temporalmente:** copia el archivo en la caché de la app y lo abre. La copia se guarda solo en la caché, nunca se añade a tu galería y se borra más adelante.
 
-La descarga temporal respeta **Usar datos móviles** ([[settings-mobile-data]]). Con datos móviles, un archivo de más de 750 MB avisa antes; con Wi-Fi nunca pregunta. Google Photos no se puede descargar, así que ninguna de las dos opciones trae uno de sus archivos.""",
-        "en_hash": "ad5011929bac28dd",
+La descarga temporal respeta **Usar datos móviles** ([[settings-mobile-data]]). Con datos móviles, un archivo de más de 750 MB avisa antes; con Wi-Fi nunca pregunta. Los archivos de Google Photos no se pueden descargar: siempre se abren en Google Photos o en el navegador.""",
+        "en_hash": "1ac210a7b703cc21",
     },
 
     "settings-section-backup": {

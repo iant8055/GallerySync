@@ -75,7 +75,7 @@ Settings の既定値から始まります。ここで変更しても、その�
     },
     "archive-file-list": {
         "title": "ファイル一覧とマーク",
-        "body": """Archive アルバム内のファイルごとに、1 枚のカードがあります。ファイルを**長押し**すると、スマートフォンの写真・動画アプリで開きます。削除された後は、その Cloud で開きます。[[settings-open-not-on-phone]]を参照してください。
+        "body": """Archive アルバム内のファイルごとに、1 枚のカードがあります。ファイルを**長押し**すると、スマートフォンの写真・動画アプリで開きます。
 
 ## ファイルをスマートフォンに残す
 アルバムの残りがアーカイブされても、特定のファイルをスマートフォンに残したいときに使います。ファイルを**左**にスワイプして残します。グレーになり **Not archiving** と表示され、その選択は記憶されます。**右**にスワイプすると、再び対象に含まれます。**too recent for your filter** とグレー表示されたファイルは、期間フィルターで除外されています。
@@ -87,7 +87,7 @@ Settings の既定値から始まります。ここで変更しても、その�
 
 ## メッセージ
 **Backing up...**、**Moving to Trash/Recycle Bin...**、**Removed from this phone.**、またはファイルが残る理由が赤で表示されます：**Could not check your Cloud**、**Not in your Cloud**、**In your Cloud but the wrong size**。""",
-        "en_hash": "2aff6afb02606681",
+        "en_hash": "999939e9ae51a873",
     },
     "archive-prompt": {
         "title": "質問：All files validated、または一部が validated",
