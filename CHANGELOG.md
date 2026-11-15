@@ -3,7 +3,7 @@
 Every change since version 26 (0.3.25), the last build the Closed Testing group had. The short notes Play shows to users
 (500 characters per language) are in `release-notes/`; this file is the full record.
 
-## Version 37 (0.3.36) — built 12 Nov 2026, not yet uploaded
+## Version 37 (0.3.36) — 14 Nov 2026, uploaded
 
 **Opening a file (TASK-028)**
 - Long-press a file on the Albums, Restore or Archive tab to open it in the phone's own photo or video app. Tap and swipe are unchanged; on Restore a long-press never selects, and a greyed-out file already on the phone can be opened.
