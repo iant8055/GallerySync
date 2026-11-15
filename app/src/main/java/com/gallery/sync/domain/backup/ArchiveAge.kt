@@ -57,16 +57,19 @@ data class ArchiveAge(val count: Int, val unit: ArchiveAgeUnit) {
             "OneYear" to ArchiveAge(1, ArchiveAgeUnit.Year)
         )
 
-        fun fromNameOrDefault(name: String?): ArchiveAge {
-            if (name == null) return DEFAULT
-            OLD_NAMES[name]?.let { return it }
+        fun fromNameOrDefault(name: String?): ArchiveAge =
+            name?.let { OLD_NAMES[it] ?: parse(it) } ?: DEFAULT
+
+        /** Reads a [storedName] back, or null when [name] is not one. Shared with [MediaAge]. */
+        fun parse(name: String): ArchiveAge? {
+            if (name == ArchiveAgeUnit.All.name) return All
             val parts = name.split(' ')
             val count = parts.getOrNull(0)?.toIntOrNull()
             val unit = ArchiveAgeUnit.entries.firstOrNull { it.name == parts.getOrNull(1) }
             return if (count != null && count in COUNTS && unit != null && unit != ArchiveAgeUnit.All) {
                 ArchiveAge(count, unit)
             } else {
-                DEFAULT
+                null
             }
         }
     }

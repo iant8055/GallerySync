@@ -24,11 +24,13 @@ import com.gallery.sync.domain.backup.ArchiveAgeUnit
  * (Ian, 2 Nov 2026). All is the unit's last entry and has no number, so the number's menu is greyed for
  * it, never hidden (Ian, the same day: hidden, it read as missing). [button] draws each menu's button,
  * because the two screens draw theirs differently; its last argument is false when that menu is greyed.
+ * Also Sync's video *Older than* (Ian, 14 Nov 2026), whose zero entry reads *Straight away* ([zeroLabel]).
  */
 @Composable
 fun ArchiveAgePicker(
     age: ArchiveAge,
     onSetAge: (ArchiveAge) -> Unit,
+    zeroLabel: @Composable () -> String = { stringResource(R.string.archive_age_all) },
     button: @Composable (label: String, enabled: Boolean, onClick: () -> Unit) -> Unit
 ) {
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -43,7 +45,7 @@ fun ArchiveAgePicker(
         PickerMenu(
             selected = age.unit,
             options = ArchiveAgeUnit.entries,
-            optionLabel = { it.label(age.count) },
+            optionLabel = { if (it == ArchiveAgeUnit.All) zeroLabel() else it.label(age.count) },
             onSelected = { onSetAge(age.copy(unit = it)) },
             enabled = true,
             button = button

@@ -308,7 +308,7 @@ data class BackupUiState(
     val photoOptimiseMode: OptimiseMode = OptimiseMode.DEFAULT,
     val optimiseVideo: Boolean = false,
     val videoOptimiseMode: OptimiseMode = OptimiseMode.DEFAULT,
-    val videoOptimiseAge: MediaAge = MediaAge.DEFAULT,
+    val videoOptimiseAge: ArchiveAge = MediaAge.DEFAULT,
     val videoQuality: VideoQuality = VideoQuality.DEFAULT,
     val hasCompletedFirstBackup: Boolean = false,
     /** Paired with [hasCompletedFirstBackup] to ask `WizardGate.finished` whether the wizard is over. */
@@ -1266,7 +1266,7 @@ class BackupViewModel @Inject constructor(
         }
     }
 
-    fun setVideoOptimiseAge(age: MediaAge) {
+    fun setVideoOptimiseAge(age: ArchiveAge) {
         viewModelScope.launch {
             settings.setVideoOptimiseAge(age)
             startVideoIfDue()

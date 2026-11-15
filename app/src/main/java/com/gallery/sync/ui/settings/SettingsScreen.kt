@@ -385,13 +385,12 @@ fun SettingsScreen(
                     }
                 )
 
-                SettingDropdown(
+                SettingAge(
                     label = stringResource(R.string.settings_older_than),
                     help = HelpTopic.SETTINGS_VIDEO_AGE,
-                    options = MediaAge.entries,
-                    selected = state.videoOptimiseAge,
-                    onSelected = viewModel::setVideoOptimiseAge,
-                    optionLabel = { age -> age.label() }
+                    age = state.videoOptimiseAge,
+                    onSetAge = viewModel::setVideoOptimiseAge,
+                    zeroLabel = { stringResource(R.string.media_age_immediately) }
                 )
 
                 // Said where the choice is made. Until video optimising ran on its own this option
@@ -893,15 +892,6 @@ private fun <T> SettingDropdown(
     }
 }
 
-@Composable
-private fun MediaAge.label(): String = when (this) {
-    MediaAge.Immediately -> stringResource(R.string.media_age_immediately)
-    MediaAge.OneHour -> stringResource(R.string.media_age_one_hour)
-    MediaAge.TwelveHours -> stringResource(R.string.media_age_twelve_hours)
-    MediaAge.OneDay -> stringResource(R.string.media_age_one_day)
-    MediaAge.OneWeek -> stringResource(R.string.media_age_one_week)
-}
-
 /**
  * The Camera folder list's last entry, which opens the folder picker. A value no album name can be, so it can never
  * be mistaken for one or stored.
@@ -928,10 +918,22 @@ private fun OpenNotOnPhone.label(): String = when (this) {
 /** The same two menus as the Archive tab's own filter — one vocabulary, one setting. */
 @Composable
 private fun SettingArchiveAge(age: ArchiveAge, onSetAge: (ArchiveAge) -> Unit) {
+    SettingAge(stringResource(R.string.archive_age_label), HelpTopic.SETTINGS_ARCHIVE_DEFAULT_AGE, age, onSetAge)
+}
+
+/** A number and a unit, as on the Archive tab. Also Sync's video *Older than* (Ian, 14 Nov 2026). */
+@Composable
+private fun SettingAge(
+    label: String,
+    help: HelpTopic,
+    age: ArchiveAge,
+    onSetAge: (ArchiveAge) -> Unit,
+    zeroLabel: @Composable () -> String = { stringResource(R.string.archive_age_all) }
+) {
     LabelBesideOrAbove(
-        label = { LabelWithHelp(stringResource(R.string.archive_age_label), HelpTopic.SETTINGS_ARCHIVE_DEFAULT_AGE) }
+        label = { LabelWithHelp(label, help) }
     ) {
-        ArchiveAgePicker(age = age, onSetAge = onSetAge) { label, enabled, onClick ->
+        ArchiveAgePicker(age = age, onSetAge = onSetAge, zeroLabel = zeroLabel) { label, enabled, onClick ->
             OutlinedButton(onClick = onClick, enabled = enabled) {
                 Text(label)
             }

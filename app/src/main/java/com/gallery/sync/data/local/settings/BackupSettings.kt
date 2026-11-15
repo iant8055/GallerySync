@@ -293,12 +293,12 @@ data class BackupPreferences(
     /**
      * How old a clip must be before it may be optimised. See [MediaAge].
      *
-     * Defaults to a year, the cautious end. Gates the local optimise and **never** the upload - a
+     * Defaults to a day. Gates the local optimise and **never** the upload - a
      * clip is sent to OneDrive the moment it qualifies whatever its age, because a threshold that
      * held new video out of the cloud would rebuild the founding failure while wearing the name of
      * the fix.
      */
-    val videoOptimiseAge: MediaAge = MediaAge.DEFAULT,
+    val videoOptimiseAge: ArchiveAge = MediaAge.DEFAULT,
     /**
      * The wizard step the user was on when the app last closed, or 0 if no wizard is in progress.
      *
@@ -561,8 +561,8 @@ class BackupSettings @Inject constructor(
     }
 
     /** How old a clip must be before it may be optimised. See [MediaAge]. */
-    suspend fun setVideoOptimiseAge(age: MediaAge) {
-        context.dataStore.edit { it[KEY_VIDEO_OPTIMISE_AGE] = age.name }
+    suspend fun setVideoOptimiseAge(age: ArchiveAge) {
+        context.dataStore.edit { it[KEY_VIDEO_OPTIMISE_AGE] = age.storedName }
     }
 
     /** Files backed up before this are left alone. See [OptimiseCutoff]. */

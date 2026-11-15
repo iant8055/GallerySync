@@ -9,6 +9,7 @@ import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.di.IoDispatcher
 import com.gallery.sync.domain.backup.AlbumIdentityReconciler
+import com.gallery.sync.domain.backup.ArchiveAge
 import com.gallery.sync.domain.backup.MediaAge
 import com.gallery.sync.domain.backup.OptimiseCutoff
 import com.gallery.sync.util.Logger
@@ -261,7 +262,7 @@ class VideoOptimiser @Inject constructor(
      * the granted folders — they stay candidates for ever, and the biggest sort first — leaving every
      * clip behind them unreachable.
      */
-    private suspend fun eligible(age: MediaAge, exclude: Set<String>): Eligible {
+    private suspend fun eligible(age: ArchiveAge, exclude: Set<String>): Eligible {
         // Chosen by Sync mode, so one folder's spellings are merged first. TASK-023.
         albumIdentity.reconcile()
 
@@ -408,7 +409,7 @@ class VideoOptimiser @Inject constructor(
      * yields "now", which lets everything through — including a clip shot this morning, which is
      * the documented cost of that option.
      */
-    private fun cutoffSecondsFor(age: MediaAge): Long = age.thresholdEpochSeconds()
+    private fun cutoffSecondsFor(age: ArchiveAge): Long = age.thresholdEpochSeconds()
 
     private companion object {
         const val TAG = "VideoOptimiser"

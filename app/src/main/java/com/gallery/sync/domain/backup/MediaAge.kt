@@ -4,7 +4,13 @@ import java.time.Duration
 import java.time.Instant
 
 /**
- * How old a file must be before something is allowed to happen to it.
+ * How old a clip must be before Sync's video optimising may reach it: Settings → Sync → *Older than*.
+ *
+ * **The same two menus as Archive's *Only show files older than*** (Ian, 14 Nov 2026: a number from
+ * 1 to 9 and hour, day, week, month or year, with the zero entry reading *Straight away*). The value is
+ * an [ArchiveAge]; this object holds only what differs, the default and the names the old fixed list
+ * (Straight away, 1 hour, 12 hours, 1 day, 1 week) saved. 12 hours has no place on a 1-9 scale and reads
+ * as 1 day, the side that waits longer, so a saved choice can only ever optimise less than it did.
  *
  * **One vocabulary, every setting.** Ian has held to this through two revisions: on 19 Aug 2026 the
  * values were Immediately / 1 week / 1 month / 1 year, and on 28 Aug he replaced them with hours
@@ -63,49 +69,24 @@ import java.time.Instant
  * errs toward leaving files alone: a clip that has been edited looks recent again, and recent means
  * untouched.
  */
-enum class MediaAge(val duration: Duration) {
+object MediaAge {
 
     /**
-     * No wait at all.
-     *
-     * Honest about what it costs, and the cost is real: **it reaches a clip shot this morning.** That
-     * sits in tension with "recent video is never touched", which is the requirement rather than a
-     * compromise — the clip stays in the gallery and stays playable, but an edit from it starts from
-     * the smaller copy until the original is fetched back. MILESTONES flags this rather than
-     * pretending the tension is resolved, and any UI offering it has to say so.
+     * A day, the cautious end of the old short scale, and still the default.
      */
-    Immediately(Duration.ZERO),
+    val DEFAULT = ArchiveAge(1, ArchiveAgeUnit.Day)
 
-    OneHour(Duration.ofHours(1)),
+    /** The zero entry, *Straight away*: a clip shot this morning qualifies. */
+    val Immediately = ArchiveAge.All
 
-    TwelveHours(Duration.ofHours(12)),
+    private val OLD_NAMES = mapOf(
+        "Immediately" to Immediately,
+        "OneHour" to ArchiveAge(1, ArchiveAgeUnit.Hour),
+        "TwelveHours" to ArchiveAge(1, ArchiveAgeUnit.Day),
+        "OneDay" to ArchiveAge(1, ArchiveAgeUnit.Day),
+        "OneWeek" to ArchiveAge(1, ArchiveAgeUnit.Week)
+    )
 
-    OneDay(Duration.ofDays(1)),
-
-    OneWeek(Duration.ofDays(7));
-
-    companion object {
-
-        /**
-         * A day — the longest wait on offer, and the cautious end of a short scale.
-         *
-         * Chosen here rather than by Ian, who specified the four values and not which one leads.
-         * Worth changing if he disagrees: it is one constant.
-         */
-        val DEFAULT = OneDay
-
-        fun fromNameOrDefault(name: String?): MediaAge =
-            entries.firstOrNull { it.name == name } ?: DEFAULT
-    }
-
-    /**
-     * The `dateModified` a file must be at or below to have waited out this age.
-     *
-     * Video is the only caller, and that is by decision: photos have no age (TASK-011, 19 Aug 2026).
-     * It replaced a private copy of the same arithmetic in `VideoOptimiser`. A `photoOptimiseAge`
-     * control once sat on the Settings screen changing nothing, and was removed in TASK-022 Part B
-     * rather than wired up — see the 6 Sept 2026 entry in MILESTONES.
-     */
-    fun thresholdEpochSeconds(now: Instant = Instant.now()): Long =
-        now.minus(duration).epochSecond
+    fun fromNameOrDefault(name: String?): ArchiveAge =
+        name?.let { OLD_NAMES[it] ?: ArchiveAge.parse(it) } ?: DEFAULT
 }
