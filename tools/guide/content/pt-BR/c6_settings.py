@@ -56,8 +56,8 @@ Vale para os backups automáticos e para o **Sync now**. Deixe desligado, a meno
 • **Abre no app da nuvem ou no navegador** (padrão): abre o arquivo no app da sua Cloud, ou no navegador se o app não aceitar o link. Uma Cloud sem link usa a próxima opção.
 • **Baixar temporariamente:** copia o arquivo para o cache do app e o abre. A cópia fica só no cache, nunca é adicionada à sua galeria e é apagada depois.
 
-O download temporário segue **Usar dados móveis** ([[settings-mobile-data]]). Em dados móveis, um arquivo acima de 750 MB pergunta antes; no Wi-Fi nunca pergunta. Arquivos do Google Photos não podem ser baixados: eles sempre abrem no Google Photos ou no navegador.""",
-        "en_hash": "1ac210a7b703cc21",
+O download temporário segue **Usar dados móveis**. Em dados móveis, um arquivo acima de 750 MB pergunta antes; no Wi-Fi nunca pergunta. Arquivos do Google Photos não podem ser baixados: eles sempre abrem no Google Photos ou no navegador.""",
+        "en_hash": "ea4a196fdc3cb392",
     },
     'settings-section-backup': {
         "title": 'Backup',
@@ -228,10 +228,10 @@ Fotos fora das pastas às quais você deu acesso precisam da confirmação do An
     },
     'settings-video-age': {
         "title": 'Com mais de (vídeo)',
-        "body": """Quão antigo um vídeo precisa ser antes de ser otimizado: **Na hora**, **1 hora**, **12 horas**, **1 dia** ou **1 semana**. O backup não é atrasado.
+        "body": """Quão antigo um vídeo precisa ser antes de ser otimizado. Escolha um número de **½** a **9** e uma unidade — **hour**, **day**, **week**, **month**, **year** ou **Na hora**. O backup não é atrasado.
 
 **Na hora** inclui os clipes gravados hoje; editar um deles começa a partir da cópia menor, até você restaurá-lo.""",
-        "en_hash": "b69444389e56afe8",
+        "en_hash": "e807e16faa3aadc9",
     },
     'settings-video-quality': {
         "title": 'Compressão (vídeo)',
@@ -273,8 +273,8 @@ A Pasta da câmera não tem o modo **Sync**, e nada é otimizado até você pres
     },
     'settings-archive-default-age': {
         "title": 'Only show files older than (Settings)',
-        "body": """Onde o filtro de idade da aba Archive começa: um número de **1** a **9** e uma unidade — **hour**, **day**, **week**, **month**, **year** ou **All** (padrão). Mudá-lo na aba Archive vale só para aquela visita. Veja [[archive-age-filter]].""",
-        "en_hash": "fef50a67d4e7ea34",
+        "body": """Onde o filtro de idade da aba Archive começa: um número de **½** a **9** e uma unidade — **hour**, **day**, **week**, **month**, **year** ou **All** (padrão). Mudá-lo na aba Archive vale só para aquela visita. Veja [[archive-age-filter]].""",
+        "en_hash": "8268c49665fa0c86",
     },
     'settings-archive-notify': {
         "title": 'Avisar quando houver arquivos prontos para Archive',

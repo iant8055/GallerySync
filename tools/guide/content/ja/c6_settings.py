@@ -56,8 +56,8 @@ TRANSLATIONS = {
 • **クラウドのアプリまたはブラウザで開く**（既定）：その Cloud のアプリでファイルを開きます。アプリがリンクを受け取れない場合はブラウザで開きます。リンクを持たない Cloud は次の選択肢を使います。
 • **一時的にダウンロード：** アプリのキャッシュにファイルをコピーして開きます。コピーはキャッシュにのみ保持され、ギャラリーには追加されず、後で削除されます。
 
-一時ダウンロードは **モバイルデータを使用**（[[settings-mobile-data]]）に従います。モバイルデータでは 750 MB を超えるファイルで事前に確認します。Wi-Fi では確認しません。Google Photos のファイルはダウンロードできません。常に Google Photos またはブラウザで開きます。""",
-        "en_hash": "1ac210a7b703cc21",
+一時ダウンロードは **モバイルデータを使用** に従います。モバイルデータでは 750 MB を超えるファイルで事前に確認します。Wi-Fi では確認しません。Google Photos のファイルはダウンロードできません。常に Google Photos またはブラウザで開きます。""",
+        "en_hash": "ea4a196fdc3cb392",
     },
     "settings-section-backup": {
         "title": "バックアップ",
@@ -228,10 +228,10 @@ Sync アルバム内にあり、verified in the Cloud で、設定より古く�
     },
     "settings-video-age": {
         "title": "経過期間（動画）",
-        "body": """動画を最適化するまでに必要な経過時間：**すぐに**、**1 時間**、**12 時間**、**1 日**、または **1 週間**。Backup の実行は遅れません。
+        "body": """動画を最適化するまでに必要な経過時間。**½** から **9** までの数字と、**hour**、**day**、**week**、**month**、**year**、または **すぐに** のいずれかの単位を選びます。Backup の実行は遅れません。
 
 **すぐに** には、今日撮影したクリップも含まれます。編集すると、復元するまでは小さい方のコピーが元になります。""",
-        "en_hash": "b69444389e56afe8",
+        "en_hash": "e807e16faa3aadc9",
     },
     "settings-video-quality": {
         "title": "圧縮（動画）",
@@ -273,8 +273,8 @@ Sync アルバム内にあり、verified in the Cloud で、設定より古く�
     },
     "settings-archive-default-age": {
         "title": "Only show files older than (Settings)",
-        "body": """Archive タブの期間フィルターの開始値：**1** から **9** までの数字と、**hour**、**day**、**week**、**month**、**year**、または **All**（既定）のいずれかの単位。Archive タブで変更しても、その表示中のみ有効です。[[archive-age-filter]]を参照してください。""",
-        "en_hash": "fef50a67d4e7ea34",
+        "body": """Archive タブの期間フィルターの開始値：**½** から **9** までの数字と、**hour**、**day**、**week**、**month**、**year**、または **All**（既定）のいずれかの単位。Archive タブで変更しても、その表示中のみ有効です。[[archive-age-filter]]を参照してください。""",
+        "en_hash": "8268c49665fa0c86",
     },
     "settings-archive-notify": {
         "title": "Archive できるファイルがあれば通知する",

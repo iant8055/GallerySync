@@ -143,7 +143,7 @@ Restore wählt es automatisch aus. Hebe die Auswahl auf, damit die Datei wieder 
         "body": """Nur der **Kameraordner**, den du in Settings unter **Kamera-Sync** gewählt hast ([[settings-section-camera]]), hat diese Steuerung.
 
 ## Dateien auswählen
-• **Select Photos/Videos older than:** **1 day** bis **1 year**, oder **All**.
+• **Select Photos/Videos older than:** eine Zahl von **½** bis **9** und eine Einheit — **hour**, **day**, **week**, **month**, **year** oder **All**.
 • **Photos** und **Videos:** welche Arten ausgewählt werden.
 • Wische eine Datei nach rechts, um sie auszuwählen, nach links, um die Auswahl aufzuheben. Die Karte zeigt, wie viele ausgewählt sind und die geschätzte Ersparnis.
 
@@ -156,7 +156,7 @@ Restore wählt es automatisch aus. Hebe die Auswahl auf, damit die Datei wieder 
 • Nichts wird optimiert, bis du **Sync now** drückst. Neue Fotos bleiben, wie sie sind.
 • Der Kameraordner hat keinen **Sync**-Modus, und die Optimierungsschalter in Settings wirken sich nicht auf ihn aus.
 • Wenn du mit geänderten Auswahlen gehst, wirst du gefragt, ob sie deine Standardeinstellungen werden sollen.""",
-        "en_hash": "f06a5a7ce89e99c4",
+        "en_hash": "2af285e1cc476243",
     },
     "album-camera-select": {
         "title": "Dateien in deinem Kameraordner auswählen",

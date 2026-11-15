@@ -157,7 +157,7 @@ Restore la selecciona automáticamente. Deselecciónala para que el archivo vuel
         "body": """Solo la **Carpeta de la cámara** que elegiste en Settings, en **Sync de la cámara** ([[settings-section-camera]]), tiene estos controles.
 
 ## Seleccionar archivos
-• **Select Photos/Videos older than:** de **1 day** a **1 year**, o **All**.
+• **Select Photos/Videos older than:** un número del **½** al **9** y una unidad — **hour**, **day**, **week**, **month**, **year** o **All**.
 • **Photos** y **Videos:** qué tipos seleccionar.
 • Desliza un archivo hacia la derecha para seleccionarlo, hacia la izquierda para deseleccionarlo. La tarjeta muestra cuántos hay seleccionados y el ahorro estimado.
 
@@ -170,7 +170,7 @@ Restore la selecciona automáticamente. Deselecciónala para que el archivo vuel
 • No se optimiza nada hasta que pulsas **Sync now**. Las fotos nuevas se quedan como están.
 • La carpeta de la cámara no tiene modo **Sync**, y los interruptores de optimización de Settings no la afectan.
 • Si sales con las opciones cambiadas, se pregunta si quieres convertirlas en tus valores predeterminados.""",
-        "en_hash": "f06a5a7ce89e99c4",
+        "en_hash": "2af285e1cc476243",
     },
 
     "album-camera-select": {

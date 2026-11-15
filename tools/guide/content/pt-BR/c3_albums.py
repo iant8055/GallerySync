@@ -143,7 +143,7 @@ O Restore a seleciona automaticamente. Desmarque para que o arquivo volte a segu
         "body": """Só a **Pasta da câmera** que você escolheu em Settings, em **Sync da câmera** ([[settings-section-camera]]), tem estes controles.
 
 ## Selecionar arquivos
-• **Select Photos/Videos older than:** de **1 day** a **1 year**, ou **All**.
+• **Select Photos/Videos older than:** um número de **½** a **9** e uma unidade — **hour**, **day**, **week**, **month**, **year** ou **All**.
 • **Photos** e **Videos:** quais tipos selecionar.
 • Deslize um arquivo para a direita para selecionar e para a esquerda para desmarcar. O cartão mostra quantos estão selecionados e a economia estimada.
 
@@ -156,7 +156,7 @@ O Restore a seleciona automaticamente. Desmarque para que o arquivo volte a segu
 • Nada é otimizado até você pressionar **Sync now**. As fotos novas ficam como estão.
 • A Pasta da câmera não tem o modo **Sync**, e os botões Optimise em Settings não afetam essa pasta.
 • Sair com escolhas alteradas pergunta se você quer torná-las seus padrões.""",
-        "en_hash": "f06a5a7ce89e99c4",
+        "en_hash": "2af285e1cc476243",
     },
     'album-camera-select': {
         "title": 'Selecionar arquivos na sua Pasta da câmera',

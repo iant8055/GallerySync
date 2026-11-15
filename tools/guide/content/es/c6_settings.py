@@ -61,8 +61,8 @@ Afecta a las copias automáticas y a **Sync now**. Déjalo desactivado salvo que
 • **Se abre en la app de la nube o en el navegador** (predeterminado): abre el archivo en la app de su Cloud, o en el navegador si la app no admite el enlace. Una Cloud sin enlace usa la siguiente opción.
 • **Descargar temporalmente:** copia el archivo en la caché de la app y lo abre. La copia se guarda solo en la caché, nunca se añade a tu galería y se borra más adelante.
 
-La descarga temporal respeta **Usar datos móviles** ([[settings-mobile-data]]). Con datos móviles, un archivo de más de 750 MB avisa antes; con Wi-Fi nunca pregunta. Los archivos de Google Photos no se pueden descargar: siempre se abren en Google Photos o en el navegador.""",
-        "en_hash": "1ac210a7b703cc21",
+La descarga temporal respeta **Usar datos móviles**. Con datos móviles, un archivo de más de 750 MB avisa antes; con Wi-Fi nunca pregunta. Los archivos de Google Photos no se pueden descargar: siempre se abren en Google Photos o en el navegador.""",
+        "en_hash": "ea4a196fdc3cb392",
     },
 
     "settings-section-backup": {
@@ -249,10 +249,10 @@ Las fotos fuera de las carpetas a las que diste acceso necesitan la confirmació
 
     "settings-video-age": {
         "title": "Con más de (vídeo)",
-        "body": """Qué antigüedad debe tener un vídeo antes de optimizarse: **En seguida**, **1 hora**, **12 horas**, **1 día** o **1 semana**. La copia no se retrasa.
+        "body": """Qué antigüedad debe tener un vídeo antes de optimizarse. Elige un número del **½** al **9** y una unidad — **hour**, **day**, **week**, **month**, **year** o **En seguida**. La copia no se retrasa.
 
 **En seguida** incluye los clips grabados hoy; si editas uno, la edición parte de la copia más pequeña hasta que lo restaures.""",
-        "en_hash": "b69444389e56afe8",
+        "en_hash": "e807e16faa3aadc9",
     },
 
     "settings-video-quality": {
@@ -300,8 +300,8 @@ La carpeta de la cámara no tiene modo **Sync**, y no se optimiza nada hasta que
 
     "settings-archive-default-age": {
         "title": "Only show files older than (Settings)",
-        "body": """Dónde empieza el filtro de antigüedad de la pestaña Archive: un número del **1** al **9** y una unidad — **hour**, **day**, **week**, **month**, **year** o **All** (predeterminado). Cambiarlo en la pestaña Archive dura solo esa visita. Consulta [[archive-age-filter]].""",
-        "en_hash": "fef50a67d4e7ea34",
+        "body": """Dónde empieza el filtro de antigüedad de la pestaña Archive: un número del **½** al **9** y una unidad — **hour**, **day**, **week**, **month**, **year** o **All** (predeterminado). Cambiarlo en la pestaña Archive dura solo esa visita. Consulta [[archive-age-filter]].""",
+        "en_hash": "8268c49665fa0c86",
     },
 
     "settings-archive-notify": {

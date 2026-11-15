@@ -56,8 +56,8 @@ Gilt für automatische Backups und **Sync now**. Lass es aus, es sei denn, dein 
 • **Öffnet in der Cloud-App oder im Browser** (Standard): öffnet die Datei in der App ihrer Cloud oder im Browser, wenn die App den Link nicht annimmt. Eine Cloud ohne Link verwendet die nächste Wahl.
 • **Vorübergehend herunterladen:** kopiert die Datei in den Cache der App und öffnet sie. Die Kopie bleibt nur im Cache, kommt nie in deine Galerie und wird später gelöscht.
 
-Der vorübergehende Download folgt **Mobile Daten verwenden** ([[settings-mobile-data]]). Bei Mobildaten fragt eine Datei über 750 MB vorher nach; im WLAN fragt sie nie. Dateien von Google Photos können nicht heruntergeladen werden: sie werden immer in Google Photos oder im Browser geöffnet.""",
-        "en_hash": "1ac210a7b703cc21",
+Der vorübergehende Download folgt **Mobile Daten verwenden**. Bei Mobildaten fragt eine Datei über 750 MB vorher nach; im WLAN fragt sie nie. Dateien von Google Photos können nicht heruntergeladen werden: sie werden immer in Google Photos oder im Browser geöffnet.""",
+        "en_hash": "ea4a196fdc3cb392",
     },
     "settings-section-backup": {
         "title": "Backup",
@@ -228,10 +228,10 @@ Fotos außerhalb der Ordner, auf die du Zugriff gegeben hast, brauchen die Best�
     },
     "settings-video-age": {
         "title": "Älter als (Video)",
-        "body": """Wie alt ein Video sein muss, bevor es optimiert wird: **Sofort**, **1 Stunde**, **12 Stunden**, **1 Tag** oder **1 Woche**. Das Backup wird nicht verzögert.
+        "body": """Wie alt ein Video sein muss, bevor es optimiert wird. Wähle eine Zahl von **½** bis **9** und eine Einheit — **hour**, **day**, **week**, **month**, **year** oder **Sofort**. Das Backup wird nicht verzögert.
 
 **Sofort** schließt Clips ein, die heute gedreht wurden; wenn du einen davon bearbeitest, beginnst du mit der kleineren Kopie, bis du sie wiederherstellst.""",
-        "en_hash": "b69444389e56afe8",
+        "en_hash": "e807e16faa3aadc9",
     },
     "settings-video-quality": {
         "title": "Kompression (Video)",
@@ -273,8 +273,8 @@ Der Kameraordner hat keinen **Sync**-Modus, und nichts wird optimiert, bis du da
     },
     "settings-archive-default-age": {
         "title": "Only show files older than (Settings)",
-        "body": """Wo der Altersfilter des Archive-Tabs beginnt: eine Zahl von **1** bis **9** und eine Einheit — **hour**, **day**, **week**, **month**, **year** oder **All** (Standard). Eine Änderung im Archive-Tab gilt nur für diesen Besuch. Siehe [[archive-age-filter]].""",
-        "en_hash": "fef50a67d4e7ea34",
+        "body": """Wo der Altersfilter des Archive-Tabs beginnt: eine Zahl von **½** bis **9** und eine Einheit — **hour**, **day**, **week**, **month**, **year** oder **All** (Standard). Eine Änderung im Archive-Tab gilt nur für diesen Besuch. Siehe [[archive-age-filter]].""",
+        "en_hash": "8268c49665fa0c86",
     },
     "settings-archive-notify": {
         "title": "Benachrichtigen, wenn Dateien für Archive bereit sind",

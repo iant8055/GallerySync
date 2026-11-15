@@ -65,10 +65,10 @@ OneDrive se comprueba listando la carpeta de cada álbum en OneDrive (nombre y t
 
     "archive-age-filter": {
         "title": "Only show files older than…",
-        "body": """Limita esta comprobación a los archivos que tengan al menos esa antigüedad. Elige un número del **1** al **9** y una unidad — **hour**, **day**, **week**, **month**, **year** o **All**. Los archivos más nuevos aparecen en gris y se dejan para una comprobación posterior.
+        "body": """Limita esta comprobación a los archivos que tengan al menos esa antigüedad. Elige un número del **½** al **9** y una unidad — **hour**, **day**, **week**, **month**, **year** o **All**. Los archivos más nuevos aparecen en gris y se dejan para una comprobación posterior.
 
 Empieza con tu valor predeterminado de Settings. Cambiarlo aquí dura solo esta visita.""",
-        "en_hash": "dea79aa93345b86c",
+        "en_hash": "69fd5a5c90b0d3b5",
     },
 
     "archive-empty": {

@@ -50,7 +50,7 @@ CHAPTER = Chapter(
             • **Opens in Cloud App or Browser** (default): opens the file in its Cloud's app, or in the browser if the app cannot take the link. A Cloud with no link uses the next choice.
             • **Download temporarily:** copies the file into the app's cache and opens it. The copy is kept only in the cache, never added to your gallery, and cleared later.
 
-            The temporary download follows **Use mobile data** ([[settings-mobile-data]]). On mobile data, a file over 750 MB asks first; on Wi-Fi it never asks. Google Photos files cannot be downloaded: they always open in Google Photos or the browser.
+            The temporary download follows **Use mobile data**. On mobile data, a file over 750 MB asks first; on Wi-Fi it never asks. Google Photos files cannot be downloaded: they always open in Google Photos or the browser.
         """, ui=True),
 
         topic("settings-section-backup", "Backup", """
@@ -205,7 +205,7 @@ CHAPTER = Chapter(
         """, ui=True),
 
         topic("settings-video-age", "Older than (video)", """
-            How old a video must be before it is optimised: **Straight away**, **1 hour**, **12 hours**, **1 day** or **1 week**. Backup is not delayed.
+            How old a video must be before it is optimised. Choose a number from **½** to **9** and a unit — **hour**, **day**, **week**, **month**, **year** or **Straight away**. Backup is not delayed.
 
             **Straight away** includes clips shot today; editing one starts from the smaller copy until you restore it.
         """, ui=True),
@@ -244,7 +244,7 @@ CHAPTER = Chapter(
         """, ui=True),
 
         topic("settings-archive-default-age", "Only show files older than (Settings)", """
-            Where the Archive tab's age filter starts: a number from **1** to **9** and a unit — **hour**, **day**, **week**, **month**, **year** or **All** (default). Changing it on the Archive tab lasts for that visit only. See [[archive-age-filter]].
+            Where the Archive tab's age filter starts: a number from **½** to **9** and a unit — **hour**, **day**, **week**, **month**, **year** or **All** (default). Changing it on the Archive tab lasts for that visit only. See [[archive-age-filter]].
         """, ui=True),
 
         topic("settings-archive-notify", "Notify when files are ready to archive", """

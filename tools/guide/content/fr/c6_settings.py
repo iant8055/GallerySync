@@ -56,8 +56,8 @@ Concerne les sauvegardes automatiques et **Sync now**. Laissez-le désactivé sa
 • **S'ouvre dans l'app du Cloud ou le navigateur** (par défaut) : ouvre le fichier dans l'application de son Cloud, ou dans le navigateur si l'application n'accepte pas le lien. Un Cloud sans lien utilise l'option suivante.
 • **Télécharger temporairement :** copie le fichier dans le cache de l'app et l'ouvre. La copie reste uniquement dans le cache, n'est jamais ajoutée à votre galerie et est effacée par la suite.
 
-Le téléchargement temporaire suit **Utiliser les données mobiles** ([[settings-mobile-data]]). En données mobiles, un fichier de plus de 750 Mo demande d'abord ; en Wi-Fi il ne demande jamais. Les fichiers Google Photos ne peuvent pas être téléchargés : ils s'ouvrent toujours dans Google Photos ou dans le navigateur.""",
-        "en_hash": "1ac210a7b703cc21",
+Le téléchargement temporaire suit **Utiliser les données mobiles**. En données mobiles, un fichier de plus de 750 Mo demande d'abord ; en Wi-Fi il ne demande jamais. Les fichiers Google Photos ne peuvent pas être téléchargés : ils s'ouvrent toujours dans Google Photos ou dans le navigateur.""",
+        "en_hash": "ea4a196fdc3cb392",
     },
     "settings-section-backup": {
         "title": "Sauvegarde",
@@ -228,10 +228,10 @@ Les photos en dehors des dossiers auxquels vous avez donné accès demandent la 
     },
     "settings-video-age": {
         "title": "Plus de (vidéo)",
-        "body": """Quel âge une vidéo doit avoir avant d'être optimisée : **Tout de suite**, **1 heure**, **12 heures**, **1 jour** ou **1 semaine**. La sauvegarde n'est pas retardée.
+        "body": """Quel âge une vidéo doit avoir avant d'être optimisée. Choisissez un nombre de **½** à **9** et une unité — **hour**, **day**, **week**, **month**, **year** ou **Tout de suite**. La sauvegarde n'est pas retardée.
 
 **Tout de suite** inclut les clips filmés aujourd'hui ; en modifier un repart de la copie plus petite jusqu'à ce que vous la restauriez.""",
-        "en_hash": "b69444389e56afe8",
+        "en_hash": "e807e16faa3aadc9",
     },
     "settings-video-quality": {
         "title": "Compression (vidéo)",
@@ -273,8 +273,8 @@ Le dossier de l'appareil photo n'a pas de mode **Sync**, et rien n'y est optimis
     },
     "settings-archive-default-age": {
         "title": "Only show files older than (Settings)",
-        "body": """Là où commence le filtre d'ancienneté de l'onglet Archive : un nombre de **1** à **9** et une unité — **hour**, **day**, **week**, **month**, **year** ou **All** (par défaut). Le modifier dans l'onglet Archive ne vaut que pour cette visite. Voir [[archive-age-filter]].""",
-        "en_hash": "fef50a67d4e7ea34",
+        "body": """Là où commence le filtre d'ancienneté de l'onglet Archive : un nombre de **½** à **9** et une unité — **hour**, **day**, **week**, **month**, **year** ou **All** (par défaut). Le modifier dans l'onglet Archive ne vaut que pour cette visite. Voir [[archive-age-filter]].""",
+        "en_hash": "8268c49665fa0c86",
     },
     "settings-archive-notify": {
         "title": "Prévenir quand des fichiers sont prêts pour Archive",

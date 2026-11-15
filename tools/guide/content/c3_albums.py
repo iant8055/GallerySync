@@ -130,7 +130,7 @@ CHAPTER = Chapter(
             Only the **Camera folder** you chose in Settings under **Camera Sync** ([[settings-section-camera]]) has these controls.
 
             ## Selecting files
-            • **Select Photos/Videos older than:** **1 day** to **1 year**, or **All**.
+            • **Select Photos/Videos older than:** a number from **½** to **9** and a unit — **hour**, **day**, **week**, **month**, **year** or **All**.
             • **Photos** and **Videos:** which kinds to select.
             • Swipe a file right to select, left to deselect. The card shows how many are selected and the estimated saving.
 

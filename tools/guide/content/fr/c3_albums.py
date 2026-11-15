@@ -143,7 +143,7 @@ Restore la sélectionne automatiquement. Désélectionnez-la pour que le fichier
         "body": """Seul le **Dossier de l'appareil photo** que vous avez choisi dans Settings sous **Sync de l'appareil photo** ([[settings-section-camera]]) a ces commandes.
 
 ## Sélectionner des fichiers
-• **Select Photos/Videos older than :** de **1 day** à **1 year**, ou **All**.
+• **Select Photos/Videos older than :** un nombre de **½** à **9** et une unité — **hour**, **day**, **week**, **month**, **year** ou **All**.
 • **Photos** et **Videos :** quels types sélectionner.
 • Glissez un fichier vers la droite pour le sélectionner, vers la gauche pour le désélectionner. La carte indique combien sont sélectionnés et l'économie estimée.
 
@@ -156,7 +156,7 @@ Restore la sélectionne automatiquement. Désélectionnez-la pour que le fichier
 • Rien n'est optimisé avant que vous appuyiez sur **Sync now**. Les nouvelles photos restent telles quelles.
 • Le Camera folder n'a pas de mode **Sync**, et les interrupteurs d'optimisation de Settings ne l'affectent pas.
 • Quitter avec des choix modifiés demande si vous voulez en faire vos valeurs par défaut.""",
-        "en_hash": "f06a5a7ce89e99c4",
+        "en_hash": "2af285e1cc476243",
     },
     "album-camera-select": {
         "title": "Sélectionner des fichiers dans votre Camera folder",
