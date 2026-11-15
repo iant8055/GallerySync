@@ -1,0 +1,28 @@
+<en-US>
+• Every "older than" setting is now a number (½ to 9) and a unit: Archive, video optimising, and the Camera folder.
+• The Camera folder's age and Settings → Sync → Older than use the same two menus as Archive.
+</en-US>
+<es-ES>
+• Cada ajuste de antigüedad es ahora un número (½ a 9) y una unidad: Archive, la optimización de vídeo y la carpeta de la cámara.
+• La antigüedad de la carpeta de la cámara y Settings → Sync → Con más de usan los mismos dos menús que Archive.
+</es-ES>
+<pt-BR>
+• Cada ajuste de idade agora é um número (½ a 9) e uma unidade: Archive, otimização de vídeo e a pasta da câmera.
+• A idade da pasta da câmera e Settings → Sync → Com mais de usam os mesmos dois menus do Archive.
+</pt-BR>
+<fr-FR>
+• Chaque réglage d'ancienneté est désormais un nombre (½ à 9) et une unité : Archive, l'optimisation vidéo et le dossier de l'appareil photo.
+• L'ancienneté du dossier de l'appareil photo et Settings → Sync → Plus de utilisent les deux mêmes menus qu'Archive.
+</fr-FR>
+<de-DE>
+• Jede Altersangabe ist jetzt eine Zahl (½ bis 9) und eine Einheit: Archive, Videooptimierung und der Kameraordner.
+• Das Alter im Kameraordner und Settings → Sync → Älter als nutzen dieselben zwei Menüs wie Archive.
+</de-DE>
+<ja-JP>
+• 経過期間の設定はすべて、数字（½〜9）と単位で選べるようになりました：Archive、動画の最適化、カメラフォルダー。
+• カメラフォルダーの経過期間と Settings → Sync → 経過期間 は、Archive と同じ 2 つのメニューになりました。
+</ja-JP>
+<hi-IN>
+• अब हर "इससे पुराने" सेटिंग एक संख्या (½ से 9) और एक इकाई है: Archive, वीडियो ऑप्टिमाइज़ेशन और कैमरा फ़ोल्डर।
+• कैमरा फ़ोल्डर की अवधि और Settings → Sync → इससे पुराने अब Archive जैसे ही दो मेनू इस्तेमाल करते हैं।
+</hi-IN>
