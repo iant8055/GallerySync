@@ -7,6 +7,8 @@ Every change since version 26 (0.3.25), the last build the Closed Testing group 
 
 **Sync**
 - Settings → Sync → *Optimise video* → *Older than* is now the same two menus as Archive's: a number from 1 to 9, and hour, day, week, month, year or Straight away. The number is greyed while Straight away is chosen. A choice saved earlier keeps its meaning, except 12 hours, which now reads as 1 day.
+- **Every age in the app now has ½.** The number menu reads ½, 1 to 9, on the Archive tab, Settings → Archive, Settings → Sync → *Older than*, and the Camera folder.
+- **The Camera folder's age is now the same two menus**, on its screen and in Settings → Camera Sync. A choice saved earlier keeps its meaning; 6 months is now 6 × 30 days (180, was 182).
 
 ## Version 37 (0.3.36) — 14 Nov 2026, uploaded
 

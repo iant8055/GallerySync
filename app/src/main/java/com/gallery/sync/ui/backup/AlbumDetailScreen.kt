@@ -71,7 +71,10 @@ import com.gallery.sync.data.local.entity.AlbumMode
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.entity.BackupState
 import com.gallery.sync.domain.backup.AlbumFileSort
+import com.gallery.sync.domain.backup.ArchiveAge
 import com.gallery.sync.domain.backup.CameraOptimiseAge
+import com.gallery.sync.ui.common.ArchiveAgePicker
+import com.gallery.sync.ui.common.label
 import com.gallery.sync.domain.backup.CameraOptimiseChoice
 import com.gallery.sync.domain.backup.CameraSelection
 import com.gallery.sync.domain.backup.FilePin
@@ -162,11 +165,11 @@ fun AlbumDetailScreen(
     // The camera folder's three choices. They start at the Camera defaults in Settings and change here for this
     // visit only; leaving with different ones asks whether to make them the defaults (Ian, 27 Sept 2026).
     val defaults = camera?.defaults ?: CameraOptimiseChoice.DEFAULT
-    var ageName by rememberSaveable(albumName) { mutableStateOf(defaults.age.name) }
+    var ageName by rememberSaveable(albumName) { mutableStateOf(defaults.age.storedName) }
     var photos by rememberSaveable(albumName) { mutableStateOf(defaults.photos) }
     var videos by rememberSaveable(albumName) { mutableStateOf(defaults.videos) }
     val choice = CameraOptimiseChoice(
-        CameraOptimiseAge.entries.firstOrNull { it.name == ageName } ?: defaults.age, photos, videos
+        ArchiveAge.parse(ageName) ?: defaults.age, photos, videos
     )
 
     // What Sync now will optimise, highlighted as on the Restore tab. Set by the header's choices, then changed a
@@ -260,7 +263,7 @@ fun AlbumDetailScreen(
                             CameraSelection.byChoice(entries, choice, choice.age.thresholdEpochSeconds(Instant.now())).isEmpty(),
                         hasPending = entries.any { entry -> entry.state == BackupState.PENDING },
                         onAge = { picked ->
-                            ageName = picked.name
+                            ageName = picked.storedName
                             selectByChoice(choice.copy(age = picked))
                         },
                         onPhotos = { on ->
@@ -687,7 +690,7 @@ private data class CameraHeader(
     val hasPending: Boolean,
     /** The chosen kinds have files ready, but none is as old as the chosen age. */
     val tooYoung: Boolean,
-    val onAge: (CameraOptimiseAge) -> Unit,
+    val onAge: (ArchiveAge) -> Unit,
     val onPhotos: (Boolean) -> Unit,
     val onVideos: (Boolean) -> Unit,
     val onSyncNow: () -> Unit
@@ -706,7 +709,6 @@ private fun CameraOptimiseSection(camera: CameraHeader) {
     val controls = camera.controls
     val context = LocalContext.current
     val signal = LocalGallerySyncColors.current
-    var menuOpen by remember { mutableStateOf(false) }
     val busy = controls.running
 
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -717,28 +719,16 @@ private fun CameraOptimiseSection(camera: CameraHeader) {
             )
             HelpButton(HelpTopic.ALBUM_CAMERA_OPTIMISE)
         }
-        // The age and the two kinds on one line (Ian, 27 Sept 2026). The kinds are toggles: a check mark and full
-        // ink when on, the word alone and faded when off.
+        // The age's two menus, as every age in the app has them (Ian, 14 Nov 2026), then the two kinds. The kinds
+        // are toggles: a check mark and full ink when on, the word alone and faded when off.
+        ArchiveAgePicker(
+            age = camera.choice.age,
+            onSetAge = camera.onAge,
+            zeroLabel = { stringResource(R.string.camera_age_all) }
+        ) { label, menuEnabled, onClick ->
+            HeroOutlinedButton(onClick = onClick, label = label, enabled = !busy && menuEnabled)
+        }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Box(modifier = Modifier.weight(1f)) {
-                HeroOutlinedButton(
-                    onClick = { menuOpen = true },
-                    label = stringResource(camera.choice.age.label()),
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = !busy
-                )
-                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                    CameraOptimiseAge.entries.forEach { option ->
-                        DropdownMenuItem(
-                            text = { Text(stringResource(option.label())) },
-                            onClick = {
-                                camera.onAge(option)
-                                menuOpen = false
-                            }
-                        )
-                    }
-                }
-            }
             KindToggle(
                 label = stringResource(R.string.camera_kind_photos),
                 on = camera.choice.photos,
@@ -762,7 +752,8 @@ private fun CameraOptimiseSection(camera: CameraHeader) {
                 text = when {
                     busy -> stringResource(R.string.camera_optimise_working, count)
                     count == 0 && camera.tooYoung -> stringResource(
-                        R.string.camera_optimise_none_old_enough, stringResource(camera.choice.age.label())
+                        R.string.camera_optimise_none_old_enough,
+                        camera.choice.age.label { stringResource(R.string.camera_age_all) }
                     )
                     count == 0 -> stringResource(R.string.camera_optimise_none_selected)
                     else -> pluralStringResource(
@@ -836,15 +827,6 @@ private fun KindToggle(
             .alpha(if (on) 1f else 0.6f)
             .semantics { contentDescription = description }
     )
-}
-
-private fun CameraOptimiseAge.label(): Int = when (this) {
-    CameraOptimiseAge.OneDay -> R.string.camera_age_day
-    CameraOptimiseAge.OneWeek -> R.string.camera_age_week
-    CameraOptimiseAge.OneMonth -> R.string.camera_age_month
-    CameraOptimiseAge.SixMonths -> R.string.camera_age_six_months
-    CameraOptimiseAge.OneYear -> R.string.camera_age_year
-    CameraOptimiseAge.All -> R.string.camera_age_all
 }
 
 private fun FileSort.label(): Int = when (this) {

@@ -1120,7 +1120,7 @@ class BackupViewModel @Inject constructor(
     }
 
     /** The Camera screen's starting choices, set in Settings. */
-    fun setCameraDefaultAge(age: CameraOptimiseAge) {
+    fun setCameraDefaultAge(age: ArchiveAge) {
         viewModelScope.launch { settings.setCameraDefaultAge(age) }
     }
 

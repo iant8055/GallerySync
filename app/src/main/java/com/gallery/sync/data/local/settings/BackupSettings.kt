@@ -370,7 +370,7 @@ data class BackupPreferences(
      * album set to Backup (Ian, 27 Sept 2026). Changing the choices on the Camera screen is for that visit; they
      * are written here only when the person answers Yes to *make these your default settings*.
      */
-    val cameraDefaultAge: CameraOptimiseAge = CameraOptimiseAge.DEFAULT,
+    val cameraDefaultAge: ArchiveAge = CameraOptimiseAge.DEFAULT,
     val cameraOptimisePhotos: Boolean = false,
     val cameraOptimiseVideo: Boolean = false,
     val cameraVideoQuality: VideoQuality = VideoQuality.DEFAULT,
@@ -724,8 +724,8 @@ class BackupSettings @Inject constructor(
     }
 
     /** The Camera screen's starting choices. See [BackupPreferences.cameraDefaultAge]. */
-    suspend fun setCameraDefaultAge(age: CameraOptimiseAge) {
-        context.dataStore.edit { it[KEY_CAMERA_DEFAULT_AGE] = age.name }
+    suspend fun setCameraDefaultAge(age: ArchiveAge) {
+        context.dataStore.edit { it[KEY_CAMERA_DEFAULT_AGE] = age.storedName }
     }
 
     suspend fun setCameraOptimisePhotos(enabled: Boolean) {
@@ -741,9 +741,9 @@ class BackupSettings @Inject constructor(
     }
 
     /** The answer Yes to *make these your default settings* on the Camera screen: all three in one write. */
-    suspend fun setCameraDefaults(age: CameraOptimiseAge, photos: Boolean, videos: Boolean) {
+    suspend fun setCameraDefaults(age: ArchiveAge, photos: Boolean, videos: Boolean) {
         context.dataStore.edit {
-            it[KEY_CAMERA_DEFAULT_AGE] = age.name
+            it[KEY_CAMERA_DEFAULT_AGE] = age.storedName
             it[KEY_CAMERA_OPTIMISE_PHOTOS] = photos
             it[KEY_CAMERA_OPTIMISE_VIDEO] = videos
         }

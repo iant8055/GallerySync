@@ -20,11 +20,12 @@ import com.gallery.sync.domain.backup.ArchiveAge
 import com.gallery.sync.domain.backup.ArchiveAgeUnit
 
 /**
- * *Only show files older than*: a number from 1 to 9 and a unit, on the Archive tab and in Settings
+ * *Only show files older than*: a number from ½ to 9 and a unit, on the Archive tab and in Settings
  * (Ian, 2 Nov 2026). All is the unit's last entry and has no number, so the number's menu is greyed for
  * it, never hidden (Ian, the same day: hidden, it read as missing). [button] draws each menu's button,
  * because the two screens draw theirs differently; its last argument is false when that menu is greyed.
- * Also Sync's video *Older than* (Ian, 14 Nov 2026), whose zero entry reads *Straight away* ([zeroLabel]).
+ * Also Sync's video *Older than* (Ian, 14 Nov 2026), whose zero entry reads *Straight away* ([zeroLabel]),
+ * and the Camera folder's age, on its screen and in Settings: every place a time limit is set (Ian, same day).
  */
 @Composable
 fun ArchiveAgePicker(
@@ -36,8 +37,8 @@ fun ArchiveAgePicker(
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         PickerMenu(
             selected = age.count,
-            options = ArchiveAge.COUNTS.toList(),
-            optionLabel = { it.toString() },
+            options = ArchiveAge.COUNTS,
+            optionLabel = { countLabel(it) },
             onSelected = { onSetAge(age.copy(count = it)) },
             enabled = age.unit != ArchiveAgeUnit.All,
             button = button
@@ -79,8 +80,22 @@ private fun <T> PickerMenu(
     }
 }
 
+/** ½, or the whole number. */
+fun countLabel(count: Double): String = if (count < 1.0) "\u00BD" else count.toInt().toString()
+
+/**
+ * The age in words, "3 weeks" or "½ day", for a sentence that names it. [zeroLabel] for the zero entry.
+ * ½ takes the singular, as "½ hour" does.
+ */
 @Composable
-private fun ArchiveAgeUnit.label(count: Int): String = when (this) {
+fun ArchiveAge.label(zeroLabel: @Composable () -> String = { stringResource(R.string.archive_age_all) }): String =
+    if (unit == ArchiveAgeUnit.All) zeroLabel() else countLabel(count) + " " + unit.label(count)
+
+@Composable
+private fun ArchiveAgeUnit.label(count: Double): String = labelFor(if (count < 1.0) 1 else count.toInt())
+
+@Composable
+private fun ArchiveAgeUnit.labelFor(count: Int): String = when (this) {
     ArchiveAgeUnit.Hour -> pluralStringResource(R.plurals.archive_age_hour, count)
     ArchiveAgeUnit.Day -> pluralStringResource(R.plurals.archive_age_day, count)
     ArchiveAgeUnit.Week -> pluralStringResource(R.plurals.archive_age_week, count)

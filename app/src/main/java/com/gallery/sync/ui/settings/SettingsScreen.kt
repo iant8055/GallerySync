@@ -61,7 +61,6 @@ import com.gallery.sync.ui.common.ArchiveAgePicker
 import com.gallery.sync.domain.backup.BackupLocation
 import com.gallery.sync.domain.backup.RemoteRoots
 import com.gallery.sync.domain.backup.CameraAlbum
-import com.gallery.sync.domain.backup.CameraOptimiseAge
 import com.gallery.sync.domain.backup.MediaAge
 import com.gallery.sync.domain.backup.OptimiseMode
 import com.gallery.sync.domain.backup.VideoQuality
@@ -514,12 +513,12 @@ fun SettingsScreen(
                     } else null
                 )
 
-                SettingDropdown(
+                SettingAge(
                     label = stringResource(R.string.camera_optimise_heading),
-                    options = CameraOptimiseAge.entries,
-                    selected = state.cameraDefaults.age,
-                    onSelected = viewModel::setCameraDefaultAge,
-                    optionLabel = { age -> age.label() }
+                    help = null,
+                    age = state.cameraDefaults.age,
+                    onSetAge = viewModel::setCameraDefaultAge,
+                    zeroLabel = { stringResource(R.string.camera_age_all) }
                 )
 
                 SettingSwitch(
@@ -898,17 +897,6 @@ private fun <T> SettingDropdown(
  */
 private const val CameraFolderOther = "\u0000other"
 
-/** The same wording as the Camera folder's own age button. */
-@Composable
-private fun CameraOptimiseAge.label(): String = when (this) {
-    CameraOptimiseAge.OneDay -> stringResource(R.string.camera_age_day)
-    CameraOptimiseAge.OneWeek -> stringResource(R.string.camera_age_week)
-    CameraOptimiseAge.OneMonth -> stringResource(R.string.camera_age_month)
-    CameraOptimiseAge.SixMonths -> stringResource(R.string.camera_age_six_months)
-    CameraOptimiseAge.OneYear -> stringResource(R.string.camera_age_year)
-    CameraOptimiseAge.All -> stringResource(R.string.camera_age_all)
-}
-
 @Composable
 private fun OpenNotOnPhone.label(): String = when (this) {
     OpenNotOnPhone.CLOUD -> stringResource(R.string.settings_open_cloud)
@@ -925,7 +913,7 @@ private fun SettingArchiveAge(age: ArchiveAge, onSetAge: (ArchiveAge) -> Unit) {
 @Composable
 private fun SettingAge(
     label: String,
-    help: HelpTopic,
+    help: HelpTopic?,
     age: ArchiveAge,
     onSetAge: (ArchiveAge) -> Unit,
     zeroLabel: @Composable () -> String = { stringResource(R.string.archive_age_all) }

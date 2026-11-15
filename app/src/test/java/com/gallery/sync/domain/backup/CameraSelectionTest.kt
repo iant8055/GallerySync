@@ -23,7 +23,7 @@ class CameraSelectionTest {
     private val now: Instant = Instant.parse("2026-09-15T12:00:00Z")
     private val day = 86_400L
 
-    private val both = CameraOptimiseChoice(CameraOptimiseAge.OneWeek, photos = true, videos = true)
+    private val both = CameraOptimiseChoice(ArchiveAge(1, ArchiveAgeUnit.Week), photos = true, videos = true)
 
     private fun entry(
         name: String,
@@ -61,12 +61,13 @@ class CameraSelectionTest {
     // ── The ages and the defaults ───────────────────────────────────────────
 
     @Test
-    fun `the ages are Ian's list in order, with All last`() {
-        assertEquals(
-            listOf(1L, 7L, 30L, 182L, 365L, 0L),
-            CameraOptimiseAge.entries.map { it.duration.toDays() }
-        )
-        assertEquals(CameraOptimiseAge.All, CameraOptimiseAge.entries.last())
+    fun `a Camera age saved by the old fixed list keeps its meaning`() {
+        assertEquals(ArchiveAge(1, ArchiveAgeUnit.Day), CameraOptimiseAge.fromNameOrDefault("OneDay"))
+        assertEquals(ArchiveAge(1, ArchiveAgeUnit.Week), CameraOptimiseAge.fromNameOrDefault("OneWeek"))
+        assertEquals(ArchiveAge(1, ArchiveAgeUnit.Month), CameraOptimiseAge.fromNameOrDefault("OneMonth"))
+        assertEquals(ArchiveAge(6, ArchiveAgeUnit.Month), CameraOptimiseAge.fromNameOrDefault("SixMonths"))
+        assertEquals(ArchiveAge(1, ArchiveAgeUnit.Year), CameraOptimiseAge.fromNameOrDefault("OneYear"))
+        assertEquals(ArchiveAge.All, CameraOptimiseAge.fromNameOrDefault("All"))
     }
 
     /** Ian, 27 Sept 2026: the defaults in Settings are Off for optimising and All for age. */
@@ -82,14 +83,17 @@ class CameraSelectionTest {
     fun `an unknown stored age falls back to the default`() {
         assertEquals(CameraOptimiseAge.DEFAULT, CameraOptimiseAge.fromNameOrDefault(null))
         assertEquals(CameraOptimiseAge.DEFAULT, CameraOptimiseAge.fromNameOrDefault("Fortnight"))
-        CameraOptimiseAge.entries.forEach { assertEquals(it, CameraOptimiseAge.fromNameOrDefault(it.name)) }
+        ArchiveAge.COUNTS.forEach { n ->
+            val age = ArchiveAge(n, ArchiveAgeUnit.Week)
+            assertEquals(age, CameraOptimiseAge.fromNameOrDefault(age.storedName))
+        }
     }
 
     @Test
     fun `a choice differs from the defaults when any one of its three parts does`() {
         val defaults = CameraOptimiseChoice.DEFAULT
         assertEquals(defaults, defaults.copy())
-        assertTrue(defaults != defaults.copy(age = CameraOptimiseAge.OneYear))
+        assertTrue(defaults != defaults.copy(age = ArchiveAge(1, ArchiveAgeUnit.Year)))
         assertTrue(defaults != defaults.copy(photos = true))
         assertTrue(defaults != defaults.copy(videos = true))
     }
@@ -104,7 +108,7 @@ class CameraSelectionTest {
 
     @Test
     fun `a file exactly on the line is old enough and one second newer is not`() {
-        val cutoff = CameraOptimiseAge.OneWeek.thresholdEpochSeconds(now)
+        val cutoff = ArchiveAge(1, ArchiveAgeUnit.Week).thresholdEpochSeconds(now)
         val onLine = entry("on.jpg").copy(dateModifiedEpochSeconds = cutoff)
         val newer = entry("newer.jpg").copy(dateModifiedEpochSeconds = cutoff + 1)
         assertEquals(setOf("on.jpg"), selectedBy(both, onLine, newer))
@@ -114,7 +118,7 @@ class CameraSelectionTest {
     fun `a longer age selects fewer files`() {
         val files = arrayOf(entry("a.jpg", ageDays = 3), entry("b.jpg", ageDays = 40), entry("c.jpg", ageDays = 400))
         assertEquals(setOf("b.jpg", "c.jpg"), selectedBy(both, *files))
-        assertEquals(setOf("c.jpg"), selectedBy(both.copy(age = CameraOptimiseAge.OneYear), *files))
+        assertEquals(setOf("c.jpg"), selectedBy(both.copy(age = ArchiveAge(1, ArchiveAgeUnit.Year)), *files))
     }
 
     @Test

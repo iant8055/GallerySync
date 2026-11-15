@@ -3,12 +3,13 @@ package com.gallery.sync.domain.backup
 import com.gallery.sync.data.local.media.LocalMediaItem
 import java.time.Duration
 import java.time.Instant
+import kotlin.math.roundToLong
 
 /**
  * How old a file must be before the Archive tab's *Only show files older than* control will offer
  * it for checking.
  *
- * A number from 1 to 9 and a unit, or All (Ian, 2 Nov 2026; until then a fixed list of 1 hour, 1 day,
+ * A number from ½ to 9 and a unit, or All (Ian, 2 Nov 2026, with ½ added 14 Nov 2026; until then a fixed list of 1 hour, 1 day,
  * 1 week, 1 month, 1 year and All, which are still what a value saved back then reads as). A month is
  * 30 days and a year 365, as they always were here. A separate scale from
  * [CameraOptimiseAge] on purpose — that one is picked once, by hand, for a folder full of recent
@@ -25,12 +26,24 @@ import java.time.Instant
  * temporary view of the moment. Widening the filter, or waiting, brings it back into the set on its
  * own; nothing here forgets a file the way an opt-out does.
  */
-data class ArchiveAge(val count: Int, val unit: ArchiveAgeUnit) {
+data class ArchiveAge(val count: Double, val unit: ArchiveAgeUnit) {
 
-    val duration: Duration get() = unit.duration.multipliedBy(count.toLong())
+    constructor(count: Int, unit: ArchiveAgeUnit) : this(count.toDouble(), unit)
 
-    /** What Settings stores. Read back by [fromNameOrDefault]. */
-    val storedName: String get() = if (unit == ArchiveAgeUnit.All) unit.name else "$count ${unit.name}"
+    val duration: Duration get() = Duration.ofSeconds((unit.duration.seconds * count).roundToLong())
+
+    /** True for the ½ step. */
+    val isHalf: Boolean get() = count < 1.0
+
+    /**
+     * What Settings stores. Read back by [fromNameOrDefault]. A whole number is written without a decimal
+     * ("3 Day"), as it was before ½ existed, so a value saved then still reads; ½ is "0.5 Day".
+     */
+    val storedName: String get() = when {
+        unit == ArchiveAgeUnit.All -> unit.name
+        isHalf -> "0.5 ${unit.name}"
+        else -> "${count.toInt()} ${unit.name}"
+    }
 
     /** The newest date, in seconds, a file may have been taken and still be old enough. */
     fun thresholdEpochSeconds(now: Instant = Instant.now()): Long = now.minus(duration).epochSecond
@@ -45,8 +58,8 @@ data class ArchiveAge(val count: Int, val unit: ArchiveAgeUnit) {
         val All = ArchiveAge(1, ArchiveAgeUnit.All)
         val DEFAULT = All
 
-        /** What the number's menu offers. */
-        val COUNTS = 1..9
+        /** What the number's menu offers: ½, then 1 to 9 (Ian, 14 Nov 2026 added the ½). */
+        val COUNTS: List<Double> = listOf(0.5) + (1..9).map { it.toDouble() }
 
         /** The names the fixed list saved, so a default chosen before 2 Nov 2026 reads as what it was. */
         private val OLD_NAMES = mapOf(
@@ -64,7 +77,7 @@ data class ArchiveAge(val count: Int, val unit: ArchiveAgeUnit) {
         fun parse(name: String): ArchiveAge? {
             if (name == ArchiveAgeUnit.All.name) return All
             val parts = name.split(' ')
-            val count = parts.getOrNull(0)?.toIntOrNull()
+            val count = parts.getOrNull(0)?.toDoubleOrNull()
             val unit = ArchiveAgeUnit.entries.firstOrNull { it.name == parts.getOrNull(1) }
             return if (count != null && count in COUNTS && unit != null && unit != ArchiveAgeUnit.All) {
                 ArchiveAge(count, unit)

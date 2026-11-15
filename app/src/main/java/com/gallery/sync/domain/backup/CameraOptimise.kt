@@ -2,45 +2,35 @@ package com.gallery.sync.domain.backup
 
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.entity.BackupState
-import java.time.Duration
 import java.time.Instant
 
 /**
  * How old a Camera file must be for the header's age to select it.
  *
- * Ian's list, 20 Sept 2026: 1 day, 1 week, 1 month, 6 months, 1 year. It is a separate scale from
- * [MediaAge] on purpose. That one gates the ongoing video setting and is measured in hours to a week;
- * this one is picked by hand for a folder full of recent shots, and wants to reach months.
- *
- * Months are fixed lengths (30, 182 and 365 days) rather than calendar arithmetic: nothing here is
- * worth a time-zone question, and a file a day either side of the line is the user's own boundary
- * case, visible in the list before anything is done to it.
+ * Since 14 Nov 2026 the same two menus as every other age in the app ([ArchiveAge]: ½ to 9 and hour to year,
+ * or All), on the Camera screen and in Settings (Ian: "anywhere where a time limit can be set should get the
+ * same functionality"). Until then Ian's list of 20 Sept 2026: 1 day, 1 week, 1 month, 6 months, 1 year, All.
+ * This object keeps only the default and the names that list saved. 6 months was 182 days and reads as
+ * 6 months of 30, 180: two days younger, on a choice made with the list in view before anything is done.
  */
-enum class CameraOptimiseAge(val duration: Duration) {
-    OneDay(Duration.ofDays(1)),
-    OneWeek(Duration.ofDays(7)),
-    OneMonth(Duration.ofDays(30)),
-    SixMonths(Duration.ofDays(182)),
-    OneYear(Duration.ofDays(365)),
+object CameraOptimiseAge {
 
-    /**
-     * Every file, whatever its age (Ian, 20 Sept 2026). Zero wait, so a file modified a moment ago is
-     * in. It is the user's own choice made on this screen, with the list in front of them and a swipe to
-     * leave any file out, which is what keeps it from being the "optimised the moment I took it" that
-     * Sync would be.
-     */
-    All(Duration.ZERO);
+    /** Every file, whatever its age (Ian, 20 Sept 2026). The user's own choice on this screen. */
+    val All = ArchiveAge.All
 
-    /** The newest modification time, in seconds, a file may have and still be old enough. */
-    fun thresholdEpochSeconds(now: Instant): Long = now.minus(duration).epochSecond
+    /** All, out of the box (Ian, 27 Sept 2026). With Photos and Videos both off it still selects nothing. */
+    val DEFAULT = All
 
-    companion object {
-        /** All, out of the box (Ian, 27 Sept 2026). With Photos and Videos both off it still selects nothing. */
-        val DEFAULT = All
+    private val OLD_NAMES = mapOf(
+        "OneDay" to ArchiveAge(1, ArchiveAgeUnit.Day),
+        "OneWeek" to ArchiveAge(1, ArchiveAgeUnit.Week),
+        "OneMonth" to ArchiveAge(1, ArchiveAgeUnit.Month),
+        "SixMonths" to ArchiveAge(6, ArchiveAgeUnit.Month),
+        "OneYear" to ArchiveAge(1, ArchiveAgeUnit.Year)
+    )
 
-        fun fromNameOrDefault(name: String?): CameraOptimiseAge =
-            entries.firstOrNull { it.name == name } ?: DEFAULT
-    }
+    fun fromNameOrDefault(name: String?): ArchiveAge =
+        name?.let { OLD_NAMES[it] ?: ArchiveAge.parse(it) } ?: DEFAULT
 }
 
 /**
@@ -51,7 +41,7 @@ enum class CameraOptimiseAge(val duration: Duration) {
  * else writes them back.
  */
 data class CameraOptimiseChoice(
-    val age: CameraOptimiseAge,
+    val age: ArchiveAge,
     val photos: Boolean,
     val videos: Boolean
 ) {

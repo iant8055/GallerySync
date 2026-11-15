@@ -42,9 +42,19 @@ class ArchiveAgeTest {
             ArchiveAgeUnit.entries.map { it.duration.toHours() }
         )
         assertEquals(ArchiveAgeUnit.All, ArchiveAgeUnit.entries.last())
-        assertEquals(1..9, ArchiveAge.COUNTS)
+        assertEquals(listOf(0.5, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0), ArchiveAge.COUNTS)
+        assertEquals(12L, ArchiveAge(0.5, ArchiveAgeUnit.Day).duration.toHours())
+        assertEquals(30L, ArchiveAge(0.5, ArchiveAgeUnit.Hour).duration.toMinutes())
         assertEquals(9 * 8_760L, ArchiveAge(9, ArchiveAgeUnit.Year).duration.toHours())
         assertEquals(3 * 720L, ArchiveAge(3, ArchiveAgeUnit.Month).duration.toHours())
+    }
+
+    @Test
+    fun `a half reads back as a half and a whole number is stored as before`() {
+        assertEquals("0.5 Week", ArchiveAge(0.5, ArchiveAgeUnit.Week).storedName)
+        assertEquals("3 Week", ArchiveAge(3, ArchiveAgeUnit.Week).storedName)
+        assertEquals(ArchiveAge(0.5, ArchiveAgeUnit.Week), ArchiveAge.fromNameOrDefault("0.5 Week"))
+        assertEquals(ArchiveAge(3, ArchiveAgeUnit.Week), ArchiveAge.fromNameOrDefault("3 Week"))
     }
 
     @Test
@@ -74,8 +84,9 @@ class ArchiveAgeTest {
     }
 
     @Test
-    fun `a stored number outside one to nine falls back to the default`() {
+    fun `a stored number outside the menu falls back to the default`() {
         assertEquals(ArchiveAge.All, ArchiveAge.fromNameOrDefault("0 Day"))
+        assertEquals(ArchiveAge.All, ArchiveAge.fromNameOrDefault("1.5 Day"))
         assertEquals(ArchiveAge.All, ArchiveAge.fromNameOrDefault("10 Day"))
         assertEquals(ArchiveAge.All, ArchiveAge.fromNameOrDefault("3 Decade"))
     }
