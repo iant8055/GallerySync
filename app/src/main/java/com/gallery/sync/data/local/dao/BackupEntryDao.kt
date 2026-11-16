@@ -148,6 +148,14 @@ data class AlbumBackupCount(
 /** How many of one album's files went to one non-OneDrive location. Counted only while on the phone. */
 data class AlbumLocationCount(val album: String, val location: BackupLocation, val sent: Int)
 
+/** One file sent to a Cloud other than OneDrive: what that Cloud called it at upload, and its local size. */
+data class SentElsewhereRow(
+    val album: String,
+    val location: BackupLocation,
+    val remoteItemId: String,
+    val sizeBytes: Long
+)
+
 /** A count per cloud, for the wizard's progress card. */
 data class LocationCount(val location: BackupLocation, val n: Int)
 
@@ -1360,6 +1368,23 @@ interface BackupEntryDao {
         uploaded: BackupState = BackupState.UPLOADED,
         oneDrive: BackupLocation = BackupLocation.ONEDRIVE
     ): List<AlbumLocationCount>
+
+    /**
+     * The files behind [sentByLocation], one by one, for checking each Cloud's folder (Ian, 16 Nov 2026). The same
+     * filter, so the check's total is the "sent to" count it replaces.
+     */
+    @Query(
+        """
+        SELECT album AS album, location AS location, remoteItemId AS remoteItemId, sizeBytes AS sizeBytes
+        FROM backup_entries
+        WHERE state = :uploaded AND location != :oneDrive AND localMissingSinceEpochMillis IS NULL
+            AND remoteItemId IS NOT NULL
+        """
+    )
+    suspend fun sentElsewhere(
+        uploaded: BackupState = BackupState.UPLOADED,
+        oneDrive: BackupLocation = BackupLocation.ONEDRIVE
+    ): List<SentElsewhereRow>
 
     /**
      * Sets or clears one file's own mode. `null` returns it to following its album.

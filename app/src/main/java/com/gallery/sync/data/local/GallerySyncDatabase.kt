@@ -8,11 +8,13 @@ import com.gallery.sync.data.local.converter.BackupLocationConverter
 import com.gallery.sync.data.local.converter.CloudCopyDecisionConverter
 import com.gallery.sync.data.local.converter.BackupStateConverter
 import com.gallery.sync.data.local.dao.AlbumCloudStatusDao
+import com.gallery.sync.data.local.dao.AlbumElsewhereStatusDao
 import com.gallery.sync.data.local.dao.AlbumPreferenceDao
 import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.dao.FolderPreferenceDao
 import com.gallery.sync.data.local.dao.UnsentDepartureDao
 import com.gallery.sync.data.local.entity.AlbumCloudStatusEntity
+import com.gallery.sync.data.local.entity.AlbumElsewhereStatusEntity
 import com.gallery.sync.data.local.entity.AlbumPreferenceEntity
 import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.entity.FolderPreferenceEntity
@@ -42,9 +44,10 @@ import com.gallery.sync.data.local.entity.UnsentDepartureEntity
         AlbumPreferenceEntity::class,
         AlbumCloudStatusEntity::class,
         UnsentDepartureEntity::class,
-        FolderPreferenceEntity::class
+        FolderPreferenceEntity::class,
+        AlbumElsewhereStatusEntity::class
     ],
-    version = 17,
+    version = 18,
     exportSchema = true
 )
 @TypeConverters(
@@ -62,6 +65,8 @@ abstract class GallerySyncDatabase : RoomDatabase() {
     abstract fun albumPreferenceDao(): AlbumPreferenceDao
 
     abstract fun albumCloudStatusDao(): AlbumCloudStatusDao
+
+    abstract fun albumElsewhereStatusDao(): AlbumElsewhereStatusDao
 
     abstract fun unsentDepartureDao(): UnsentDepartureDao
 

@@ -182,6 +182,10 @@ data class AlbumRow(
     /** Per cloud, how many of this album's files were sent somewhere other than OneDrive. */
     val sentTo: Map<BackupLocation, Int> = emptyMap(),
 
+    /** What each of those Clouds last said about this album, where it can be asked. None means never checked. */
+    val checkedElsewhere: Map<BackupLocation, com.gallery.sync.data.local.entity.AlbumElsewhereStatusEntity> =
+        emptyMap(),
+
     /**
      * Where this album's *new* uploads currently go — resolved from its top-level folder
      * (`MediaAlbum.topLevelFolder`) against the folder-destination map, falling back to the app-wide
@@ -523,7 +527,9 @@ class BackupViewModel @Inject constructor(
     private val setFolderDestination: SetFolderDestination,
     private val entryDao: BackupEntryDao,
     private val cloudStatusDao: AlbumCloudStatusDao,
+    private val elsewhereStatusDao: com.gallery.sync.data.local.dao.AlbumElsewhereStatusDao,
     private val reconcile: ReconcileWithCloud,
+    private val checkOtherClouds: com.gallery.sync.domain.backup.CheckOtherClouds,
     private val engine: BackupEngine,
     private val localCopyRemover: LocalCopyRemover,
     private val proxyApplier: ProxyApplier,
@@ -621,6 +627,18 @@ class BackupViewModel @Inject constructor(
      * refresh, keeps this cheap enough to fire per album.
      */
     private fun observeCloudStatus() {
+        viewModelScope.launch {
+            elsewhereStatusDao.observeAll().collect { statuses ->
+                val byAlbum = statuses.groupBy({ it.albumName }, { it.location to it }).mapValues { it.value.toMap() }
+                _state.update { current ->
+                    current.copy(
+                        albums = current.albums.map { album ->
+                            album.copy(checkedElsewhere = byAlbum[album.name].orEmpty())
+                        }
+                    )
+                }
+            }
+        }
         viewModelScope.launch {
             cloudStatusDao.observeAll().collect { statuses ->
                 val byAlbum = statuses.associateBy { it.albumName }
@@ -856,6 +874,9 @@ class BackupViewModel @Inject constructor(
             _state.update { it.copy(isCheckingCloud = true) }
             try {
                 reconcile.run()
+                // Then every other Cloud that can be asked, album by album (Ian, 16 Nov 2026). Its own step, after
+                // OneDrive's, so the wizard's reconcile stays exactly as it was.
+                checkOtherClouds.run()
             } finally {
                 // In a finally: a walk abandoned half way still has to clear the flag, or the
                 // button stays busy for the life of the process.
@@ -895,6 +916,9 @@ class BackupViewModel @Inject constructor(
             val sentToByAlbum = entryDao.sentByLocation().orEmpty()
                 .groupBy({ it.album }, { it.location to it.sent })
                 .mapValues { it.value.toMap() }
+            val elsewhereByAlbum = elsewhereStatusDao.all()
+                .groupBy({ it.albumName }, { it.location to it })
+                .mapValues { it.value.toMap() }
             val prefs = settings.current()
             // Read after refreshLedger, which seeds a row for every newly found folder.
             val folderLocations = folderDao.all().orEmpty().associate { it.folderName to it.backupLocation }
@@ -927,6 +951,7 @@ class BackupViewModel @Inject constructor(
                     goneFromPhoneBytes = counts?.goneFromPhoneBytes ?: 0L,
                     sentElsewhereCount = counts?.sentElsewhere ?: 0,
                     sentTo = sentToByAlbum[album.name].orEmpty(),
+                    checkedElsewhere = elsewhereByAlbum[album.name].orEmpty(),
                     backupLocation = FolderDestination.resolve(
                         album.topLevelFolder, folderLocations, prefs.backupLocation
                     ),

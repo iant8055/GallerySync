@@ -100,6 +100,41 @@ class S3Client @Inject constructor(
     }
 
     /**
+     * `GET /bucket?list-type=2&prefix=...` (ListObjectsV2), every page: key -> size for each object under [prefix].
+     * Null when any page is refused or unreadable, so a partial listing is never mistaken for a whole one.
+     */
+    fun listObjects(config: S3Config, prefix: String): Map<String, Long>? {
+        val found = HashMap<String, Long>()
+        var token: String? = null
+        do {
+            val query = canonicalListQuery(prefix, token)
+            val url = urlFor(config, key = null).newBuilder().encodedQuery(query).build()
+            val headers = SigV4.sign(
+                method = "GET",
+                host = hostOf(url),
+                path = "/${config.bucket}",
+                query = query,
+                payloadSha256Hex = EMPTY_SHA256,
+                region = config.region,
+                accessKey = config.accessKey,
+                secretKey = config.secretKey,
+                now = Date()
+            ).headers
+            val request = Request.Builder().url(url).get().apply { headers.forEach { (k, v) -> header(k, v) } }.build()
+            val page = client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    Logger.w(TAG, "list: refused (${response.code})")
+                    return null
+                }
+                parseListObjects(response.body?.string() ?: return null) ?: return null
+            }
+            found.putAll(page.sizes)
+            token = page.nextToken
+        } while (token != null)
+        return found
+    }
+
+    /**
      * Asks why a request was refused. A HEAD comes back with no body, so a refused key check cannot say
      * whether the key ID, the secret or the region was wrong; a one-item listing answers with S3's own
      * error document. Returns its `Code` (for example `SignatureDoesNotMatch`), or null if it says none.
@@ -202,3 +237,45 @@ class S3Client @Inject constructor(
 /** The `Code` in an S3 error document, e.g. `InvalidAccessKeyId`, or null when there is none. */
 internal fun s3ErrorCode(body: String): String? =
     Regex("<Code>([^<]+)</Code>").find(body)?.groupValues?.get(1)?.trim()?.takeIf { it.isNotEmpty() }
+
+/** The canonical ListObjectsV2 query: names sorted, every value fully encoded ('/' included). */
+internal fun canonicalListQuery(prefix: String, continuationToken: String?): String = buildList {
+    continuationToken?.let { add("continuation-token=${encodeQueryValue(it)}") }
+    add("list-type=2")
+    add("prefix=${encodeQueryValue(prefix)}")
+}.joinToString("&")
+
+/** One page of a ListObjectsV2 answer: key -> size, and the token for the next page when the answer was cut short. */
+internal data class ListPage(val sizes: Map<String, Long>, val nextToken: String?)
+
+/** Reads a ListObjectsV2 body, or null when it is not one (or is cut short without saying where to go on). */
+internal fun parseListObjects(xml: String): ListPage? {
+    if (!xml.contains("<ListBucketResult")) return null
+    val sizes = Regex("<Contents>(.*?)</Contents>", RegexOption.DOT_MATCHES_ALL).findAll(xml).mapNotNull { m ->
+        val block = m.groupValues[1]
+        val key = Regex("<Key>(.*?)</Key>", RegexOption.DOT_MATCHES_ALL).find(block)?.groupValues?.get(1)
+        val size = Regex("<Size>(\\d+)</Size>").find(block)?.groupValues?.get(1)?.toLongOrNull()
+        if (key == null || size == null) null else xmlUnescape(key) to size
+    }.toMap()
+    val truncated = Regex("<IsTruncated>\\s*true\\s*</IsTruncated>").containsMatchIn(xml)
+    val next = Regex("<NextContinuationToken>(.*?)</NextContinuationToken>", RegexOption.DOT_MATCHES_ALL)
+        .find(xml)?.groupValues?.get(1)?.let(::xmlUnescape)
+    if (truncated && next.isNullOrEmpty()) return null
+    return ListPage(sizes, if (truncated) next else null)
+}
+
+private fun xmlUnescape(s: String): String =
+    Regex("&(#x[0-9a-fA-F]+|#[0-9]+|amp|lt|gt|quot|apos);").replace(s) { m ->
+        when (val e = m.groupValues[1]) {
+            "amp" -> "&"
+            "lt" -> "<"
+            "gt" -> ">"
+            "quot" -> "\""
+            "apos" -> "'"
+            else -> if (e.startsWith("#x")) String(Character.toChars(e.drop(2).toInt(16)))
+            else String(Character.toChars(e.drop(1).toInt()))
+        }
+    }
+
+/** A query value encoded for a SigV4 canonical query: every byte outside RFC 3986's unreserved set, '/' included. */
+internal fun encodeQueryValue(value: String): String = SigV4.encodePath(value).replace("/", "%2F")

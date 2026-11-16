@@ -23,6 +23,7 @@ class CloudOriginalCheckTest {
             asked++
             return answer
         }
+        override suspend fun listAlbum(album: String, root: String): Map<String, Long>? = null
     }
 
     private var now = 1_000L

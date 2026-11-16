@@ -59,6 +59,9 @@ class DropboxCloud @Inject constructor(
     /** Overridden in tests to point at a local server. */
     internal var contentBase = "https://content.dropboxapi.com"
 
+    /** Overridden in tests to point at a local server. */
+    internal var apiBase = "https://api.dropboxapi.com"
+
     /** Lowered in tests so the session path can be exercised with a small file. */
     internal var singleRequestLimit = SINGLE_REQUEST_LIMIT_BYTES
     internal var chunkBytes = CHUNK_BYTES
@@ -69,7 +72,10 @@ class DropboxCloud @Inject constructor(
         tokenEndpoint = "https://api.dropboxapi.com/oauth2/token",
         // Read as well as write: Restore downloads what was uploaded. A sign-in made before the read scope was
         // requested has to be repeated (Settings, sign out, connect) before Restore works.
-        scopes = listOf("files.content.write", "files.content.read"),
+        // files.metadata.read lists an album's folder for the Albums tab's "verified" line (Ian, 16 Nov 2026).
+        // The Dropbox app already holds it (granted with files.content.read); asking for it by name makes sure
+        // the token carries it.
+        scopes = listOf("files.content.write", "files.content.read", "files.metadata.read"),
         // Without offline access Dropbox hands out a token that dies in hours and no refresh token.
         extraParams = mapOf("token_access_type" to "offline")
     )
@@ -241,6 +247,59 @@ class DropboxCloud @Inject constructor(
         }
     }
 
+    /**
+     * `list_folder` on `/<root>/<album>`, page by page. A folder that is not there answers 409 `path/not_found`, which
+     * is a definite empty answer. A sign-in from before `files.metadata.read` was asked for is refused (400, "required
+     * scope") and reads as could-not-ask; signing out and connecting again fixes it.
+     */
+    override suspend fun listAlbum(album: String, root: String): Map<String, Long>? = withContext(dispatcher) {
+        val token = tokens.accessToken(location) ?: return@withContext null
+        val path = "/${root.trim('/')}/${album.trim('/')}"
+        val found = HashMap<String, Long>()
+        var url = "$apiBase/2/files/list_folder"
+        var arg = """{"path":${CloudHttp.asciiJsonString(path)},"recursive":false,"limit":2000}"""
+        try {
+            while (true) {
+                val request = Request.Builder()
+                    .url(url)
+                    .header("Authorization", "Bearer $token")
+                    .post(arg.toRequestBody(LIST_JSON))
+                    .build()
+                val page = client.newCall(request).execute().use { response ->
+                    val body = response.body?.string()
+                    when {
+                        response.isSuccessful -> CloudHttp.objectOf(body)
+                        response.code == 409 && body?.contains("not_found") == true -> return@withContext emptyMap()
+                        else -> {
+                            if (response.code == 401) tokens.invalidate(location)
+                            Logger.w(TAG, "list: refused (${response.code})")
+                            return@withContext null
+                        }
+                    }
+                } ?: return@withContext null
+                val entries = page["entries"] as? kotlinx.serialization.json.JsonArray ?: return@withContext null
+                for (e in entries) {
+                    val o = e as? kotlinx.serialization.json.JsonObject ?: continue
+                    if (o.stringOrNull(".tag") != "file") continue
+                    val id = o.stringOrNull("id") ?: continue
+                    val size = o.longOrNull("size") ?: continue
+                    found[id] = size
+                }
+                if (page.stringOrNull("has_more") != "true") return@withContext found
+                val cursor = page.stringOrNull("cursor") ?: return@withContext null
+                url = "$apiBase/2/files/list_folder/continue"
+                arg = """{"cursor":${CloudHttp.asciiJsonString(cursor)}}"""
+            }
+            @Suppress("UNREACHABLE_CODE")
+            null
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: IOException) {
+            Logger.w(TAG, "list: network failure: ${e.message}")
+            null
+        }
+    }
+
     private fun commitArg(path: String) =
         """{"path":${CloudHttp.asciiJsonString(path)},"mode":"overwrite","autorename":false,"mute":true}"""
 
@@ -345,6 +404,7 @@ class DropboxCloud @Inject constructor(
         const val SINGLE_REQUEST_LIMIT_BYTES = 100L * 1024 * 1024
         const val CHUNK_BYTES = 8 * 1024 * 1024
         private val OCTET = "application/octet-stream".toMediaType()
+        private val LIST_JSON = "application/json".toMediaType()
     }
 }
 

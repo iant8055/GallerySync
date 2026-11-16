@@ -383,6 +383,9 @@
         the way it does for OneDrive; "sent" is the honest word for what is actually known. TASK-026.
     -->
     <string name="album_cloud_sent_to">%1$d sent to %2$s</string>
+    <string name="album_cloud_elsewhere_all_present">%1$d verified in %2$s</string>
+    <string name="album_cloud_elsewhere_some_missing">%1$d of %2$d verified in %3$s</string>
+    <string name="album_cloud_elsewhere_unreachable">Could not reach %1$s when this was last checked</string>
     <string name="album_status_optimized">%1$d optimised</string>
     <!-- Files kept at full size (FilePin): ticked by the user, or put back by Restore. -->
     <string name="album_status_kept">%1$d kept at full size</string>

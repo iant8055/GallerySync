@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.gallery.sync.data.local.GallerySyncDatabase
 import com.gallery.sync.data.local.Migrations
 import com.gallery.sync.data.local.dao.AlbumCloudStatusDao
+import com.gallery.sync.data.local.dao.AlbumElsewhereStatusDao
 import com.gallery.sync.data.local.dao.AlbumPreferenceDao
 import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.dao.FolderPreferenceDao
@@ -52,6 +53,11 @@ object DatabaseModule {
     @Singleton
     fun provideAlbumCloudStatusDao(database: GallerySyncDatabase): AlbumCloudStatusDao =
         database.albumCloudStatusDao()
+
+    @Provides
+    @Singleton
+    fun provideAlbumElsewhereStatusDao(database: GallerySyncDatabase): AlbumElsewhereStatusDao =
+        database.albumElsewhereStatusDao()
 
     @Provides
     @Singleton

@@ -8,6 +8,7 @@ Every change since version 26 (0.3.25), the last build the Closed Testing group 
 **Albums tab**
 - The upload line now names the album after the count, and shows the file's size sent of its total ("Uploading 3 of 40 · Camera · clip.mp4 · 94 MB of 249 MB") instead of a percentage. The two sizes never split across lines.
 - The upload line and its bar moved inside the header card, so **Hide Details** folds them away too. *Syncing…*, Pause and Stop stay; a finished run's result stays below the card.
+- Albums backed up to Dropbox, Google Drive, pCloud, Backblaze B2 or IDrive e2 now say "N verified in Dropbox" (or "N of M verified"), like OneDrive: the Albums tab's check asks that Cloud about each album's folder and counts a file only when the Cloud holds it at the same size. Google Photos cannot be asked and still says "sent to". Nothing is changed by the check.
 
 ## Version 38 (0.3.37) — 15 Nov 2026, uploaded
 

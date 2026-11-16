@@ -253,6 +253,45 @@ class PCloudCloud @Inject constructor(
         }
     }
 
+    /**
+     * `listfolder` on `/<root>/<album>`: every file there, by the file id recorded at upload. A folder that does not
+     * exist (result 2005) is a definite empty answer; any other refusal is could-not-ask.
+     */
+    override suspend fun listAlbum(album: String, root: String): Map<String, Long>? = withContext(dispatcher) {
+        val token = secrets.read(KEY_TOKEN) ?: return@withContext null
+        val base = baseOverride ?: "https://${secrets.read(KEY_HOST) ?: DEFAULT_HOST}"
+        val url = "$base/listfolder".toHttpUrl().newBuilder()
+            .addQueryParameter("path", "/${root.trim('/')}/${album.trim('/')}")
+            .addQueryParameter("access_token", token)
+            .build()
+        try {
+            client.newCall(Request.Builder().url(url).build()).execute().use { response ->
+                if (!response.isSuccessful) return@use null
+                val json = CloudHttp.objectOf(response.body?.string())
+                when (json?.get("result")?.toString()?.toIntOrNull()) {
+                    0 -> {
+                        val meta = json["metadata"] as? kotlinx.serialization.json.JsonObject ?: return@use null
+                        val contents = meta["contents"] as? kotlinx.serialization.json.JsonArray ?: return@use emptyMap()
+                        contents.mapNotNull { item ->
+                            val o = item as? kotlinx.serialization.json.JsonObject ?: return@mapNotNull null
+                            if (o.stringOrNull("isfolder") == "true") return@mapNotNull null
+                            val id = o.stringOrNull("fileid") ?: return@mapNotNull null
+                            val size = o.longOrNull("size") ?: return@mapNotNull null
+                            id to size
+                        }.toMap()
+                    }
+                    FOLDER_MISSING -> emptyMap()
+                    else -> null
+                }
+            }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: IOException) {
+            Logger.w(TAG, "list: network failure: ${e.message}")
+            null
+        }
+    }
+
     /** One simple GET. Null means it worked; otherwise the failure to return. */
     private fun call(base: String, method: String, token: String, vararg params: Pair<String, String>): DataResult.Failure? {
         val url = "$base/$method".toHttpUrl().newBuilder().apply {
@@ -290,6 +329,9 @@ class PCloudCloud @Inject constructor(
 
         /** 2009: "File not found." The only answer that means the file is not there. */
         val GONE_CODES = setOf(2009)
+
+        /** `listfolder`: "Directory does not exist." */
+        const val FOLDER_MISSING = 2005
 
         /** Parses `a=b&c=d` (a redirect's fragment or query) into a map, percent-decoded. */
         fun parseParams(raw: String?): Map<String, String> =

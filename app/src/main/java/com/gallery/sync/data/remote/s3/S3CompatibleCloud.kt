@@ -131,6 +131,22 @@ abstract class S3CompatibleCloud(
     }
 
     /**
+     * Every object under `<root>/<album>/`, keyed by object key (the id recorded at upload). Nothing under the prefix is
+     * a definite empty answer; a refused or unreachable listing is could-not-ask.
+     */
+    override suspend fun listAlbum(album: String, root: String): Map<String, Long>? = withContext(dispatcher) {
+        val config = loadConfig() ?: return@withContext null
+        try {
+            s3.listObjects(config, "${root.trim('/')}/${album.trim('/')}/")
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: IOException) {
+            Logger.w(TAG, "list: could not reach the endpoint")
+            null
+        }
+    }
+
+    /**
      * Opens a file for Restore. `remoteItemId` is the object key recorded at upload
      * (`GallerySync/<album>/<name>`). A key that is gone answers 404; a key without read access answers 403,
      * reported as Unauthorized so Restore can tell the user the keys must allow reading.

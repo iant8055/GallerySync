@@ -513,6 +513,38 @@ class MigrationTest {
         db.close()
     }
 
+    /** 17 -> 18 adds an empty table for the per-Cloud "verified" line; the ledger is untouched. */
+    @Test
+    fun migrate17To18_addsElsewhereStatusAndKeepsTheLedger() {
+        helper.createDatabase(TEST_DB, 17).apply {
+            execSQL(
+                """
+                INSERT INTO backup_entries
+                    (id, mediaStoreId, contentUri, displayName, album, sizeBytes,
+                     dateModifiedEpochSeconds, mimeType, isVideo, state, attemptCount,
+                     isProxied, isProxySkipped, location, relativePath)
+                VALUES
+                    ('k1', 42, 'content://media/external/images/media/42', 'IMG_1.jpg',
+                     'Camera', 1024, 1700000000, 'image/jpeg', 0, 'UPLOADED', 0, 0, 0, 'DROPBOX', 'DCIM/Camera/')
+                """.trimIndent()
+            )
+            close()
+        }
+
+        val db = helper.runMigrationsAndValidate(TEST_DB, 18, true, Migrations.MIGRATION_17_18)
+
+        db.query("SELECT state, location FROM backup_entries WHERE id = 'k1'").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals("UPLOADED", cursor.getString(0))
+            assertEquals("DROPBOX", cursor.getString(1))
+        }
+        db.query("SELECT COUNT(*) FROM album_elsewhere_status").use { cursor ->
+            cursor.moveToFirst()
+            assertEquals(0, cursor.getInt(0))
+        }
+        db.close()
+    }
+
     private companion object {
         const val TEST_DB = "migration-test.db"
     }

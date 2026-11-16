@@ -364,10 +364,26 @@ object Migrations {
         }
     }
 
+    /**
+     * 17 -> 18: a new table, `album_elsewhere_status`, holding what each Cloud other than OneDrive last said about each
+     * album, for the Albums tab's per-Cloud "verified" line (Ian, 16 Nov 2026). Additive: nothing existing changes, and
+     * the table starts empty, which the screen reads as "not checked yet".
+     */
+    val MIGRATION_17_18 = object : Migration(17, 18) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "CREATE TABLE IF NOT EXISTS `album_elsewhere_status` (`albumName` TEXT NOT NULL, `location` TEXT NOT NULL, " +
+                    "`checkedAtEpochMillis` INTEGER NOT NULL, `verifiedFiles` INTEGER NOT NULL, `missingFiles` INTEGER NOT NULL, " +
+                    "`uncheckedFiles` INTEGER NOT NULL, `couldNotCheck` INTEGER NOT NULL, PRIMARY KEY(`albumName`, `location`))"
+            )
+        }
+    }
+
     /** Every migration, in order, for the database builder. */
     val ALL = arrayOf(
         MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7,
         MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12,
-        MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17
+        MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17,
+        MIGRATION_17_18
     )
 }

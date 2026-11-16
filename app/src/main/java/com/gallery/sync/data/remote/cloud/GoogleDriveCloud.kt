@@ -204,6 +204,80 @@ class GoogleDriveCloud @Inject constructor(
         return DataResult.Failure(RemoteError.Unauthorized)
     }
 
+    /**
+     * The files in `<root>/<album>`, found by walking the same folder chain [upload] makes, but never creating one: a
+     * folder that is not there is a definite empty answer. `drive.file` lets the app see what it created, which is
+     * every file and folder here. Trashed files are left out.
+     */
+    override suspend fun listAlbum(album: String, root: String): Map<String, Long>? = withContext(dispatcher) {
+        val token = tokens.accessToken(location) ?: return@withContext null
+        try {
+            var parent = "root"
+            for (segment in root.trim('/').split('/') + album.trim('/')) {
+                parent = when (val found = findFolder(token, segment, parent)) {
+                    null -> return@withContext null
+                    "" -> return@withContext emptyMap()
+                    else -> found
+                }
+            }
+            val files = HashMap<String, Long>()
+            var pageToken: String? = null
+            do {
+                val url = "$apiBase/drive/v3/files".toHttpUrl().newBuilder()
+                    .addQueryParameter("q", "'$parent' in parents and trashed=false and mimeType!='$FOLDER_MIME'")
+                    .addQueryParameter("fields", "nextPageToken,files(id,size)")
+                    .addQueryParameter("pageSize", "1000")
+                    .apply { pageToken?.let { addQueryParameter("pageToken", it) } }
+                    .build()
+                val page = client.newCall(Request.Builder().url(url).header("Authorization", "Bearer $token").build())
+                    .execute().use { response ->
+                        val body = response.body?.string()
+                        if (!response.isSuccessful) {
+                            if (response.code == 401) tokens.invalidate(location)
+                            Logger.w(TAG, "list: refused (${response.code})")
+                            return@withContext null
+                        }
+                        CloudHttp.objectOf(body)
+                    } ?: return@withContext null
+                val list = page["files"] as? kotlinx.serialization.json.JsonArray ?: return@withContext null
+                for (f in list) {
+                    val o = f as? kotlinx.serialization.json.JsonObject ?: continue
+                    val id = o.stringOrNull("id") ?: continue
+                    val size = o.longOrNull("size") ?: continue
+                    files[id] = size
+                }
+                pageToken = page.stringOrNull("nextPageToken")
+            } while (pageToken != null)
+            files
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: IOException) {
+            Logger.w(TAG, "list: network failure: ${e.message}")
+            null
+        }
+    }
+
+    /** The id of the folder [name] under [parentId]; "" when there is none; null when Drive could not be asked. */
+    private fun findFolder(token: String, name: String, parentId: String): String? {
+        folderIds["$parentId/$name"]?.let { return it }
+        val q = "name='${escapeQuery(name)}' and mimeType='$FOLDER_MIME' and '$parentId' in parents and trashed=false"
+        val url = "$apiBase/drive/v3/files".toHttpUrl().newBuilder()
+            .addQueryParameter("q", q)
+            .addQueryParameter("fields", "files(id)")
+            .addQueryParameter("pageSize", "1")
+            .build()
+        client.newCall(Request.Builder().url(url).header("Authorization", "Bearer $token").build())
+            .execute().use { response ->
+                val body = response.body?.string()
+                if (!response.isSuccessful) {
+                    if (response.code == 401) tokens.invalidate(location)
+                    return null
+                }
+                val files = CloudHttp.objectOf(body)?.get("files") as? kotlinx.serialization.json.JsonArray ?: return null
+                return (files.firstOrNull() as? kotlinx.serialization.json.JsonObject)?.stringOrNull("id") ?: ""
+            }
+    }
+
     /** The id of the folder [name] under [parentId], creating it if it is not there. Null on failure. */
     private fun ensureFolder(token: String, name: String, parentId: String): String? {
         val cacheKey = "$parentId/$name"

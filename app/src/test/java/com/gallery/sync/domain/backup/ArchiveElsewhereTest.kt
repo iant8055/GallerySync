@@ -48,6 +48,7 @@ class ArchiveElsewhereTest {
             asked += remoteItemId
             return answers[remoteItemId] ?: RemoteCheck.Unknown
         }
+        override suspend fun listAlbum(album: String, root: String): Map<String, Long>? = null
     }
 
     private fun engine(verifiers: Set<CloudVerifier> = setOf(dropbox)) = BackupEngine(

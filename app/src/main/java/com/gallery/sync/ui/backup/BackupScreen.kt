@@ -809,7 +809,7 @@ private fun AlbumModeRow(
                 Text(
                     text = album.cloudSummary(),
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (album.cloudClaim is AlbumCloudClaim.AllPresent && album.sentElsewhereCount == 0)
+                    color = if (album.everyCloudVerified())
                         MaterialTheme.colorScheme.primary
                     else
                         MaterialTheme.colorScheme.onSurfaceVariant
@@ -1275,12 +1275,39 @@ private fun AlbumRow.cloudSummary(): String {
     } else {
         cloudClaim.sentence()
     }
-    // One clause per cloud this album has sent to, in a stable order. "sent", never "verified": none of
-    // these can prove a stored file's size, so the honest word is the weaker one.
+    // One clause per cloud this album has sent to, in a stable order. Where that Cloud has been asked about this
+    // album's folder (Ian, 16 Nov 2026, CheckOtherClouds) the clause says what it answered, like OneDrive's; until then,
+    // and always for Google Photos, which cannot be asked, it says "sent", the weaker word.
     val sentClauses = sentTo.entries.sortedBy { it.key.ordinal }.map { (location, count) ->
-        stringResource(R.string.album_cloud_sent_to, count, stringResource(location.labelRes()))
+        val label = stringResource(location.labelRes())
+        val checked = checkedElsewhere[location]
+        when {
+            checked == null -> stringResource(R.string.album_cloud_sent_to, count, label)
+            checked.couldNotCheck -> stringResource(R.string.album_cloud_elsewhere_unreachable, label)
+            checked.missingFiles == 0 && checked.uncheckedFiles == 0 ->
+                stringResource(R.string.album_cloud_elsewhere_all_present, checked.verifiedFiles, label)
+            else -> stringResource(
+                R.string.album_cloud_elsewhere_some_missing,
+                checked.verifiedFiles,
+                checked.verifiedFiles + checked.missingFiles + checked.uncheckedFiles,
+                label
+            )
+        }
     }
     return (listOfNotNull(oneDriveClause) + sentClauses).joinToString(" · ")
+}
+
+/**
+ * Green when every Cloud the line names has confirmed everything sent to it: OneDrive's own check, and each other
+ * Cloud's (16 Nov 2026). A Cloud never checked, or one that cannot be (Google Photos), keeps the line grey.
+ */
+private fun AlbumRow.everyCloudVerified(): Boolean {
+    val oneDriveShown = showsOneDriveClause && !(cloudClaim is AlbumCloudClaim.NeverChecked && sentElsewhereCount > 0)
+    val oneDriveOk = if (oneDriveShown) cloudClaim is AlbumCloudClaim.AllPresent else true
+    val othersOk = sentTo.keys.all { location ->
+        checkedElsewhere[location]?.let { !it.couldNotCheck && it.missingFiles == 0 && it.uncheckedFiles == 0 } == true
+    }
+    return (oneDriveShown || sentTo.isNotEmpty()) && oneDriveOk && othersOk
 }
 
 /**
