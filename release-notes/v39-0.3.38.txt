@@ -1,0 +1,28 @@
+<en-US>
+• Albums backed up to Dropbox, Google Drive, pCloud, Backblaze B2 or IDrive e2 now say "verified", like OneDrive, once the Cloud confirms each file at the right size.
+• The upload line names the album and shows the size sent of the file's total, and Hide Details now hides it too.
+</en-US>
+<es-ES>
+• Los álbumes con copia en Dropbox, Google Drive, pCloud, Backblaze B2 o IDrive e2 ahora dicen "verified", como OneDrive, cuando la nube confirma cada archivo con el tamaño correcto.
+• La línea de subida indica el álbum y el tamaño enviado del total del archivo, y Hide Details ahora también la oculta.
+</es-ES>
+<pt-BR>
+• Álbuns com backup no Dropbox, Google Drive, pCloud, Backblaze B2 ou IDrive e2 agora dizem "verified", como o OneDrive, quando a nuvem confirma cada arquivo no tamanho certo.
+• A linha de envio mostra o álbum e o tamanho enviado do total do arquivo, e Hide Details agora também a oculta.
+</pt-BR>
+<fr-FR>
+• Les albums sauvegardés sur Dropbox, Google Drive, pCloud, Backblaze B2 ou IDrive e2 affichent désormais « verified », comme OneDrive, quand le cloud confirme chaque fichier à la bonne taille.
+• La ligne d'envoi indique l'album et la taille envoyée sur le total du fichier, et Hide Details la masque aussi.
+</fr-FR>
+<de-DE>
+• Alben, die in Dropbox, Google Drive, pCloud, Backblaze B2 oder IDrive e2 gesichert sind, zeigen jetzt wie OneDrive „verified“, sobald die Cloud jede Datei in der richtigen Größe bestätigt.
+• Die Upload-Zeile nennt das Album und die gesendete Größe von der Gesamtgröße der Datei, und Hide Details blendet sie jetzt ebenfalls aus.
+</de-DE>
+<ja-JP>
+• Dropbox、Google Drive、pCloud、Backblaze B2、IDrive e2 にバックアップしたアルバムも、クラウドが各ファイルを正しいサイズで確認すると、OneDrive と同じく「verified」と表示されます。
+• アップロードの行にアルバム名と、ファイル全体のうち送信済みのサイズが表示され、Hide Details で非表示にもなります。
+</ja-JP>
+<hi-IN>
+• Dropbox, Google Drive, pCloud, Backblaze B2 या IDrive e2 में बैकअप किए गए एल्बम अब OneDrive की तरह "verified" दिखाते हैं, जब क्लाउड हर फ़ाइल को सही आकार में पुष्टि कर देता है।
+• अपलोड पंक्ति अब एल्बम का नाम और फ़ाइल के कुल आकार में से भेजा गया आकार दिखाती है, और Hide Details इसे भी छिपा देता है।
+</hi-IN>
