@@ -250,7 +250,10 @@ sealed interface BackupStatus {
         val completed: Int,
         val total: Int,
         val currentFile: String,
-        val percentOfCurrent: Int
+        val percentOfCurrent: Int,
+        val album: String = "",
+        val bytesSent: Long = 0L,
+        val bytesTotal: Long = 0L
     ) : BackupStatus
 
     data object NoPermission : BackupStatus
@@ -740,7 +743,10 @@ class BackupViewModel @Inject constructor(
                                     completed = data.getInt(BackupWorker.PROGRESS_COMPLETED, 0),
                                     total = total,
                                     currentFile = data.getString(BackupWorker.PROGRESS_FILE) ?: "",
-                                    percentOfCurrent = data.getInt(BackupWorker.PROGRESS_PERCENT, 0)
+                                    percentOfCurrent = data.getInt(BackupWorker.PROGRESS_PERCENT, 0),
+                                    album = data.getString(BackupWorker.PROGRESS_ALBUM).orEmpty(),
+                                    bytesSent = data.getLong(BackupWorker.PROGRESS_CURRENT_SENT, 0L),
+                                    bytesTotal = data.getLong(BackupWorker.PROGRESS_CURRENT_TOTAL, 0L)
                                 )
                             )
                         }
@@ -1655,7 +1661,10 @@ class BackupViewModel @Inject constructor(
                                     ).orEmpty(),
                                     percentOfCurrent = info.progress.getInt(
                                         BackupWorker.PROGRESS_PERCENT, 0
-                                    )
+                                    ),
+                                    album = info.progress.getString(BackupWorker.PROGRESS_ALBUM).orEmpty(),
+                                    bytesSent = info.progress.getLong(BackupWorker.PROGRESS_CURRENT_SENT, 0L),
+                                    bytesTotal = info.progress.getLong(BackupWorker.PROGRESS_CURRENT_TOTAL, 0L)
                                 )
                             } else {
                                 BackupStatus.Scanning

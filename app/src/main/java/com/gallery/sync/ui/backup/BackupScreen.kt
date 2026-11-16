@@ -344,7 +344,14 @@ private fun AlbumList(
                     }
                 )
             },
-            detail = { HeaderDetailsSection(detailsOn) { HeroDetail(state = state, context = context, modeFilter = modeFilter) } },
+            detail = {
+                HeaderDetailsSection(detailsOn) {
+                    HeroDetail(state = state, context = context, modeFilter = modeFilter)
+                    // The upload line and its bar sit inside the header so Hide Details folds them too (Ian,
+                    // 16 Nov 2026). The header's own "Syncing N%" and Pause/Stop stay visible either way.
+                    (state.status as? BackupStatus.Uploading)?.let { UploadingDetail(it) }
+                }
+            },
             actions = {
                 HeroActions(
                     state = state,
@@ -366,18 +373,11 @@ private fun AlbumList(
         // after the scan, with the count and the consequence stated. This was the same action with
         // the explanation removed and left on the main screen for good.
 
-        state.status?.let {
+        // Every other status (a finished run's result, a missing permission) stays here, below the header, where
+        // Hide Details cannot fold it away. Uploading is drawn inside the header by UploadingDetail.
+        state.status?.takeIf { it !is BackupStatus.Uploading }?.let {
             WithHelp(HelpTopic.ALBUMS_STATUS_LINE) {
                 Text(it.readable(), style = MaterialTheme.typography.bodyMedium)
-            }
-
-            // Under the line that names the file and the percentage, the same order as Restore.
-            // The text says which file and how far in; the bar is that number, drawn.
-            if (it is BackupStatus.Uploading) {
-                LinearProgressIndicator(
-                    progress = { it.percentOfCurrent / 100f },
-                    modifier = Modifier.fillMaxWidth()
-                )
             }
         }
 
@@ -1170,18 +1170,50 @@ private fun MergeTableRow(
     }
 }
 
+/**
+ * The file being sent, inside the Albums header: "Uploading 3 of 40 · Camera · clip.mp4 · 12 MB of 461 MB", and
+ * under it a bar for that file. Colours follow the header's content colour so it reads on the hero card in both themes.
+ */
+@Composable
+private fun UploadingDetail(status: BackupStatus.Uploading) {
+    WithHelp(HelpTopic.ALBUMS_STATUS_LINE) {
+        Text(status.readable(), style = MaterialTheme.typography.bodyMedium)
+    }
+    val content = LocalContentColor.current
+    LinearProgressIndicator(
+        progress = { status.percentOfCurrent / 100f },
+        modifier = Modifier.fillMaxWidth(),
+        color = content,
+        trackColor = content.copy(alpha = 0.25f)
+    )
+}
+
 /** Turns the typed run status into words. */
 @Composable
 private fun BackupStatus.readable(): String = when (this) {
     BackupStatus.Scanning -> stringResource(R.string.backup_status_scanning)
-    is BackupStatus.Uploading -> stringResource(
-        R.string.backup_status_uploading_progress,
+    // Ian, 16 Nov 2026: the album after the count, and the bytes sent of the file's size rather than a
+    // percentage, which said nothing without the size. A run from before the album was reported, or a
+    // file whose size is not known yet, keeps the percentage.
+    is BackupStatus.Uploading -> {
+        val context = LocalContext.current
         // One-based: the file being sent is the (completed + 1)th of the run.
-        (completed + 1).coerceAtMost(total),
-        total,
-        currentFile,
-        percentOfCurrent
-    )
+        val position = (completed + 1).coerceAtMost(total)
+        if (bytesTotal > 0 && album.isNotEmpty()) {
+            stringResource(
+                R.string.backup_status_uploading_album,
+                position,
+                total,
+                album.substringAfterLast('/'),
+                currentFile,
+                // Non-breaking spaces here and in the string, so "94 MB of 249 MB" never splits across lines (Ian).
+                formatBytes(context, bytesSent).replace(' ', ' '),
+                formatBytes(context, bytesTotal).replace(' ', ' ')
+            )
+        } else {
+            stringResource(R.string.backup_status_uploading_progress, position, total, currentFile, percentOfCurrent)
+        }
+    }
     BackupStatus.NoPermission -> stringResource(R.string.backup_status_no_permission)
 
     is BackupStatus.Finished -> {

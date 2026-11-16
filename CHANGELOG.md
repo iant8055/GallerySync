@@ -3,6 +3,12 @@
 Every change since version 26 (0.3.25), the last build the Closed Testing group had. The short notes Play shows to users
 (500 characters per language) are in `release-notes/`; this file is the full record.
 
+## Next version — not yet built
+
+**Albums tab**
+- The upload line now names the album after the count, and shows the file's size sent of its total ("Uploading 3 of 40 · Camera · clip.mp4 · 94 MB of 249 MB") instead of a percentage. The two sizes never split across lines.
+- The upload line and its bar moved inside the header card, so **Hide Details** folds them away too. *Syncing…*, Pause and Stop stay; a finished run's result stays below the card.
+
 ## Version 38 (0.3.37) — 15 Nov 2026, uploaded
 
 **Sync**

@@ -227,6 +227,8 @@ class BackupWorker @AssistedInject constructor(
                     .putInt(PROGRESS_TOTAL, progress.total)
                     .putString(PROGRESS_FILE, progress.currentFile)
                     .putLong(PROGRESS_CURRENT_SENT, progress.currentBytesSent)
+                    .putLong(PROGRESS_CURRENT_TOTAL, progress.currentBytesTotal)
+                    .putString(PROGRESS_ALBUM, progress.currentAlbum)
                     .putInt(PROGRESS_PERCENT, if (progress.currentBytesTotal > 0) {
                         ((progress.currentBytesSent * 100) / progress.currentBytesTotal)
                             .toInt().coerceIn(0, 100)
@@ -413,6 +415,8 @@ class BackupWorker @AssistedInject constructor(
         const val PROGRESS_TOTAL = "total"
         const val PROGRESS_FILE = "file"
         const val PROGRESS_PERCENT = "percent"
+        const val PROGRESS_CURRENT_TOTAL = "currentTotal"
+        const val PROGRESS_ALBUM = "album"
 
         /**
          * Bytes of the **current file** already sent.

@@ -76,7 +76,9 @@ data class BackupProgress(
     val total: Int,
     val currentFile: String,
     val currentBytesSent: Long,
-    val currentBytesTotal: Long
+    val currentBytesTotal: Long,
+    /** The album the file is from, shown after the count on the Albums tab (Ian, 16 Nov 2026). */
+    val currentAlbum: String = ""
 )
 
 data class BackupRunResult(
@@ -908,7 +910,8 @@ class BackupEngine @Inject constructor(
                         total = pending.size,
                         currentFile = remoteName,
                         currentBytesSent = 0,
-                        currentBytesTotal = entry.sizeBytes
+                        currentBytesTotal = entry.sizeBytes,
+                        currentAlbum = entry.album
                     )
                 )
 
@@ -922,7 +925,8 @@ class BackupEngine @Inject constructor(
                                 total = pending.size,
                                 currentFile = entry.displayName,
                                 currentBytesSent = sent,
-                                currentBytesTotal = total
+                                currentBytesTotal = total,
+                                currentAlbum = entry.album
                             )
                         )
                     },
@@ -1052,7 +1056,8 @@ class BackupEngine @Inject constructor(
                             total = pending.size,
                             currentFile = entry.displayName,
                             currentBytesSent = 0,
-                            currentBytesTotal = entry.sizeBytes
+                            currentBytesTotal = entry.sizeBytes,
+                            currentAlbum = entry.album
                         )
                     )
 
@@ -1074,7 +1079,8 @@ class BackupEngine @Inject constructor(
                                     total = pending.size,
                                     currentFile = entry.displayName,
                                     currentBytesSent = sent,
-                                    currentBytesTotal = total
+                                    currentBytesTotal = total,
+                                    currentAlbum = entry.album
                                 )
                             )
                         }
