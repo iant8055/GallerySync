@@ -75,18 +75,18 @@ Hier wird nichts entfernt. Das Entfernen geschieht im Archive-Tab. Siehe [[archi
         "en_hash": "846b4240970f2d4a",
     },
     "albums-status-line": {
-        "title": "Die Statuszeile unter der Karte",
-        "body": """• **Beim Hochladen:** die Dateizahl, die gerade gesendete Datei und ihr Fortschritt.
-• **Bei der Vorbereitung:** **Scanning...** oder **No permission to read media.**
-• **Nach einem Durchlauf:** eine Zusammenfassung dessen, was zutrifft: **uploaded**, **already in the Cloud**, **no longer on this phone**, **failed**, **waiting on the Cloud** (später erneut versucht), **still to go** oder **stopped:** mit dem Grund.""",
-        "en_hash": "78b2b8f3d6801853",
+        "title": "Fortschritt und Statusmeldungen",
+        "body": """• **Beim Hochladen** (in der Karte): die Dateizahl, das Album, die gerade gesendete Datei und die gesendeten Bytes von der Gesamtgröße der Datei. Solange die Dateigröße noch nicht bekannt ist, erscheint stattdessen eine Prozentangabe. Der Fortschrittsbalken sitzt darunter. **▲ Hide Details ▲** blendet beides aus.
+• **Bei der Vorbereitung** (unter der Karte): **Scanning...** oder **No permission to read media.**
+• **Nach einem Durchlauf** (unter der Karte): eine Zusammenfassung dessen, was zutrifft: **uploaded**, **already in the Cloud**, **no longer on this phone**, **failed**, **waiting on the Cloud** (später erneut versucht), **still to go** oder **stopped:** mit dem Grund.""",
+        "en_hash": "5e5b683e646d7541",
     },
     "albums-list": {
         "title": "Der Albums-Tab",
         "body": """## Kopfzeile
 • Tippe auf **Backup**, **Sync**, **Archive** oder **Off**, um nur die Alben in diesem Modus zu zeigen. Tippe auf **All Albums**, um wieder alle zu zeigen.
 • Die Zeile unter den Schaltflächen nennt die Summe für jeden Modus.
-• **▲ Hide Details ▲** am unteren Rand der Karte blendet die Zeile mit der Modus-Summe aus; **▼ Show Details ▼** holt sie zurück. **All Albums**, die vier Modus-Schaltflächen sowie **Sync now** / **Rescan** bleiben. Der Tab merkt sich deine Wahl.
+• **▲ Hide Details ▲** am unteren Rand der Karte blendet die Zeile mit der Modus-Summe aus und, während ein Durchlauf läuft, auch die Upload-Zeile mit ihrem Balken; **▼ Show Details ▼** holt sie zurück. **All Albums**, die vier Modus-Schaltflächen sowie **Sync now** / **Rescan** bleiben, und während ein Durchlauf läuft bleiben auch **Syncing…**, **Pause** und **Stop**. Der Tab merkt sich deine Wahl.
 
 ## Albumkarten
 • **Name, Dateizahl und Größe** des Albums auf deinem Telefon.
@@ -94,7 +94,7 @@ Hier wird nichts entfernt. Das Entfernen geschieht im Archive-Tab. Siehe [[archi
 • **Cloud-Zeile:** **verified in OneDrive** bedeutet, dass OneDrive die Dateien in der richtigen Größe bestätigt hat. Das wird bei jedem Öffnen des Tabs geprüft. Andere Clouds zeigen **sent to** und die jeweilige Cloud.
 • **Modus-Schaltfläche** (rechte Seite): tippen, um den Modus des Albums zu ändern. Archive fragt zuerst nach Bestätigung. Wenn die Cloud des Albums diesen Modus nicht kann, sagt die Karte das.
 • **Tippe auf die Karte**, um die Dateien des Albums zu sehen. Siehe [[album-detail]].""",
-        "en_hash": "6f8771afe616ceed",
+        "en_hash": "fe76bda5cd9722eb",
     },
     "album-detail": {
         "title": "Die Dateiliste eines Albums",

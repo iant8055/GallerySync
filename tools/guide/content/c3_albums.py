@@ -68,17 +68,17 @@ CHAPTER = Chapter(
             • It backs up every album set to **Backup**, **Sync** or **Archive**, but only ever optimises files in **Sync** albums.
         """, ui=True),
 
-        topic("albums-status-line", "The status line under the card", """
-            • **While uploading:** the file count, the file being sent, and its progress.
-            • **While preparing:** **Scanning...** or **No permission to read media.**
-            • **After a run:** a summary of what applies: **uploaded**, **already in the Cloud**, **no longer on this phone**, **failed**, **waiting on the Cloud** (tried again later), **still to go**, or **stopped:** with the reason.
+        topic("albums-status-line", "Upload progress and status messages", """
+            • **While uploading** (inside the card): the file count, the album, the file being sent and the bytes sent of its total size. A percentage shows in place of the bytes when the file's size isn't known yet. The progress bar sits under the line. **▲ Hide Details ▲** hides them both.
+            • **While preparing** (below the card): **Scanning...** or **No permission to read media.**
+            • **After a run** (below the card): a summary of what applies: **uploaded**, **already in the Cloud**, **no longer on this phone**, **failed**, **waiting on the Cloud** (tried again later), **still to go**, or **stopped:** with the reason.
         """, ui=True),
 
         topic("albums-list", "The Albums Tab", """
             ## Header
             • Tap **Backup**, **Sync**, **Archive** or **Off** to show only the albums in that mode. Tap **All Albums** to show them all again.
             • The line under the buttons gives the total for each mode.
-            • **▲ Hide Details ▲** at the bottom of the card hides the mode total line; **▼ Show Details ▼** brings it back. **All Albums**, the four mode buttons and **Sync now** / **Rescan** stay. The tab remembers your choice.
+            • **▲ Hide Details ▲** at the bottom of the card hides the mode total line and, while a run is going, the upload line and its bar; **▼ Show Details ▼** brings them back. **All Albums**, the four mode buttons and **Sync now** / **Rescan** stay, and while a run is going **Syncing…**, **Pause** and **Stop** stay too. The tab remembers your choice.
 
             ## Album cards
             • **Name, file count and size** of the album on your phone.

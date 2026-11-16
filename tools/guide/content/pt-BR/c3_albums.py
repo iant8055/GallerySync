@@ -75,18 +75,18 @@ Nada é removido aqui. A remoção acontece na aba Archive. Veja [[archive-overv
         "en_hash": "846b4240970f2d4a",
     },
     'albums-status-line': {
-        "title": 'A linha de status embaixo do cartão',
-        "body": """• **Durante o envio:** o número de arquivos, o arquivo que está sendo enviado e o andamento dele.
-• **Durante a preparação:** **Scanning...** ou **No permission to read media.**
-• **Depois de uma execução:** um resumo do que se aplica: **uploaded**, **already in the Cloud**, **no longer on this phone**, **failed**, **waiting on the Cloud** (nova tentativa mais tarde), **still to go** ou **stopped:** com o motivo.""",
-        "en_hash": "78b2b8f3d6801853",
+        "title": 'Andamento do envio e mensagens de status',
+        "body": """• **Durante o envio** (dentro do cartão): o número de arquivos, o álbum, o arquivo que está sendo enviado e os bytes enviados em relação ao tamanho total do arquivo. Enquanto o tamanho do arquivo ainda não é conhecido, aparece um percentual no lugar. A barra de progresso fica embaixo da linha. **▲ Hide Details ▲** esconde as duas.
+• **Durante a preparação** (embaixo do cartão): **Scanning...** ou **No permission to read media.**
+• **Depois de uma execução** (embaixo do cartão): um resumo do que se aplica: **uploaded**, **already in the Cloud**, **no longer on this phone**, **failed**, **waiting on the Cloud** (nova tentativa mais tarde), **still to go** ou **stopped:** com o motivo.""",
+        "en_hash": "5e5b683e646d7541",
     },
     'albums-list': {
         "title": 'A aba Albums',
         "body": """## Cabeçalho
 • Toque em **Backup**, **Sync**, **Archive** ou **Off** para mostrar só os álbuns nesse modo. Toque em **All Albums** para mostrar todos de novo.
 • A linha embaixo dos botões dá o total de cada modo.
-• **▲ Hide Details ▲** no rodapé do cartão esconde a linha do total de modo; **▼ Show Details ▼** a traz de volta. **All Albums**, os quatro botões de modo e **Sync now** / **Rescan** permanecem. A aba lembra sua escolha.
+• **▲ Hide Details ▲** no rodapé do cartão esconde a linha do total de modo e, enquanto uma execução está em curso, a linha de envio e a barra dela; **▼ Show Details ▼** as traz de volta. **All Albums**, os quatro botões de modo e **Sync now** / **Rescan** permanecem, e enquanto uma execução está em curso também permanecem **Syncing…**, **Pause** e **Stop**. A aba lembra sua escolha.
 
 ## Cartões de álbum
 • **Nome, número de arquivos e tamanho** do álbum no seu telefone.
@@ -94,7 +94,7 @@ Nada é removido aqui. A remoção acontece na aba Archive. Veja [[archive-overv
 • **Linha da Cloud:** **verified in OneDrive** significa que o OneDrive confirmou os arquivos no tamanho certo. Isso é verificado toda vez que você abre a aba. As outras Clouds mostram **sent to** essa Cloud.
 • **Botão de modo** (no lado direito): toque para mudar o modo do álbum. O Archive pede que você confirme antes. Se a Cloud do álbum não consegue fazer esse modo, o cartão avisa.
 • **Toque no cartão** para ver os arquivos do álbum. Veja [[album-detail]].""",
-        "en_hash": "6f8771afe616ceed",
+        "en_hash": "fe76bda5cd9722eb",
     },
     'album-detail': {
         "title": 'A lista de arquivos de um álbum',

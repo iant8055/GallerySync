@@ -75,18 +75,18 @@ TRANSLATIONS = {
         "en_hash": "846b4240970f2d4a",
     },
     "albums-status-line": {
-        "title": "カードの下のステータス行",
-        "body": """• **アップロード中**：ファイル数、送信中のファイル、その進行状況。
-• **準備中**：**Scanning...** または **No permission to read media.**
-• **実行後**：該当する内容の概要：**uploaded**、**already in the Cloud**、**no longer on this phone**、**failed**、**waiting on the Cloud**（後で再試行）、**still to go**、または理由付きの **stopped:**。""",
-        "en_hash": "78b2b8f3d6801853",
+        "title": "アップロードの進行状況とステータスメッセージ",
+        "body": """• **アップロード中**（カード内）：ファイル数、アルバム、送信中のファイル、そしてそのファイルの合計サイズに対する送信済みバイト数。ファイルサイズがまだわからないあいだは、代わりにパーセンテージが表示されます。その下に進行状況バーが並びます。**▲ Hide Details ▲** で両方を隠せます。
+• **準備中**（カードの下）：**Scanning...** または **No permission to read media.**
+• **実行後**（カードの下）：該当する内容の概要：**uploaded**、**already in the Cloud**、**no longer on this phone**、**failed**、**waiting on the Cloud**（後で再試行）、**still to go**、または理由付きの **stopped:**。""",
+        "en_hash": "5e5b683e646d7541",
     },
     "albums-list": {
         "title": "Albums タブ",
         "body": """## ヘッダー
 • **Backup**、**Sync**、**Archive**、**Off** をタップすると、そのモードのアルバムだけが表示されます。**All Albums** をタップすると、再びすべて表示されます。
 • ボタンの下の行に、各モードの合計が表示されます。
-• カード下部の **▲ Hide Details ▲** でモード合計の行が隠れます。**▼ Show Details ▼** で戻ります。**All Albums**、4 つのモードボタン、**Sync now** / **Rescan** はそのまま残ります。タブはこの選択を記憶します。
+• カード下部の **▲ Hide Details ▲** でモード合計の行が隠れ、実行中はアップロード行とその進行状況バーも一緒に隠れます。**▼ Show Details ▼** で戻ります。**All Albums**、4 つのモードボタン、**Sync now** / **Rescan** はそのまま残り、実行中は **Syncing…**、**Pause**、**Stop** も残ります。タブはこの選択を記憶します。
 
 ## アルバムカード
 • **名前、ファイル数、サイズ**：スマートフォン上のアルバムのもの。
@@ -94,7 +94,7 @@ TRANSLATIONS = {
 • **Cloud 行**：**verified in OneDrive** は、OneDrive が正しいサイズでファイルを確認したことを意味します。タブを開くたびに確認されます。ほかの Cloud では、その Cloud について **sent to** と表示されます。
 • **モードボタン**（右側）：タップするとアルバムのモードを変更できます。Archive では、先に確認を求められます。アルバムの Cloud がそのモードに対応していない場合は、カードにその旨が表示されます。
 • **カードをタップ**すると、アルバムのファイルが表示されます。[[album-detail]]を参照してください。""",
-        "en_hash": "6f8771afe616ceed",
+        "en_hash": "fe76bda5cd9722eb",
     },
     "album-detail": {
         "title": "アルバムのファイル一覧",

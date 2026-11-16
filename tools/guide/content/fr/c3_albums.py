@@ -75,18 +75,18 @@ Rien n'est retiré ici. Le retrait se fait dans l'onglet Archive. Voir [[archive
         "en_hash": "846b4240970f2d4a",
     },
     "albums-status-line": {
-        "title": "La ligne d'état sous la carte",
-        "body": """• **Pendant l'envoi :** le nombre de fichiers, le fichier en cours d'envoi et sa progression.
-• **Pendant la préparation :** **Scanning...** ou **No permission to read media.**
-• **Après une exécution :** un résumé de ce qui s'applique : **uploaded**, **already in the Cloud**, **no longer on this phone**, **failed**, **waiting on the Cloud** (nouvel essai plus tard), **still to go**, ou **stopped:** avec la raison.""",
-        "en_hash": "78b2b8f3d6801853",
+        "title": "Progression de l'envoi et messages d'état",
+        "body": """• **Pendant l'envoi** (dans la carte) : le nombre de fichiers, l'album, le fichier en cours d'envoi et les octets envoyés sur la taille totale du fichier. Tant que la taille du fichier n'est pas connue, un pourcentage s'affiche à la place. La barre de progression se trouve en dessous. **▲ Hide Details ▲** masque les deux.
+• **Pendant la préparation** (sous la carte) : **Scanning...** ou **No permission to read media.**
+• **Après une exécution** (sous la carte) : un résumé de ce qui s'applique : **uploaded**, **already in the Cloud**, **no longer on this phone**, **failed**, **waiting on the Cloud** (nouvel essai plus tard), **still to go**, ou **stopped:** avec la raison.""",
+        "en_hash": "5e5b683e646d7541",
     },
     "albums-list": {
         "title": "L'onglet Albums",
         "body": """## En-tête
 • Touchez **Backup**, **Sync**, **Archive** ou **Off** pour n'afficher que les albums de ce mode. Touchez **All Albums** pour tous les afficher à nouveau.
 • La ligne sous les boutons donne le total pour chaque mode.
-• **▲ Hide Details ▲** en bas de la carte masque la ligne du total de mode ; **▼ Show Details ▼** la ramène. **All Albums**, les quatre boutons de mode ainsi que **Sync now** / **Rescan** restent. L'onglet retient votre choix.
+• **▲ Hide Details ▲** en bas de la carte masque la ligne du total de mode et, pendant une exécution, la ligne d'envoi et sa barre ; **▼ Show Details ▼** les ramène. **All Albums**, les quatre boutons de mode ainsi que **Sync now** / **Rescan** restent, et pendant une exécution **Syncing…**, **Pause** et **Stop** restent aussi. L'onglet retient votre choix.
 
 ## Cartes d'album
 • **Nom, nombre de fichiers et taille** de l'album sur votre téléphone.
@@ -94,7 +94,7 @@ Rien n'est retiré ici. Le retrait se fait dans l'onglet Archive. Voir [[archive
 • **Ligne Cloud :** **verified in OneDrive** signifie qu'OneDrive a confirmé les fichiers à la bonne taille. C'est vérifié à chaque ouverture de l'onglet. Les autres Clouds affichent **sent to** ce Cloud.
 • **Bouton de mode** (à droite) : touchez-le pour changer le mode de l'album. Archive demande d'abord une confirmation. Si le Cloud de l'album ne peut pas faire ce mode, la carte le dit.
 • **Touchez la carte** pour voir les fichiers de l'album. Voir [[album-detail]].""",
-        "en_hash": "6f8771afe616ceed",
+        "en_hash": "fe76bda5cd9722eb",
     },
     "album-detail": {
         "title": "La liste des fichiers d'un album",

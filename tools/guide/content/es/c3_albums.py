@@ -83,11 +83,11 @@ Aquí no se quita nada. La eliminación ocurre en la pestaña Archive. Consulta 
     },
 
     "albums-status-line": {
-        "title": "La línea de estado bajo la tarjeta",
-        "body": """• **Mientras se sube:** el recuento de archivos, el archivo que se está enviando y su progreso.
-• **Mientras se prepara:** **Scanning...** o **No permission to read media.**
-• **Después de una ejecución:** un resumen de lo que corresponda: **uploaded**, **already in the Cloud**, **no longer on this phone**, **failed**, **waiting on the Cloud** (se reintenta más tarde), **still to go** o **stopped:** con el motivo.""",
-        "en_hash": "78b2b8f3d6801853",
+        "title": "Progreso de subida y mensajes de estado",
+        "body": """• **Mientras se sube** (dentro de la tarjeta): el recuento de archivos, el álbum, el archivo que se está enviando y los bytes enviados del tamaño total del archivo. Si aún no se sabe el tamaño del archivo, aparece un porcentaje en su lugar. La barra de progreso va debajo. **▲ Hide Details ▲** oculta las dos.
+• **Mientras se prepara** (bajo la tarjeta): **Scanning...** o **No permission to read media.**
+• **Después de una ejecución** (bajo la tarjeta): un resumen de lo que corresponda: **uploaded**, **already in the Cloud**, **no longer on this phone**, **failed**, **waiting on the Cloud** (se reintenta más tarde), **still to go** o **stopped:** con el motivo.""",
+        "en_hash": "5e5b683e646d7541",
     },
 
     "albums-list": {
@@ -95,7 +95,7 @@ Aquí no se quita nada. La eliminación ocurre en la pestaña Archive. Consulta 
         "body": """## Cabecera
 • Pulsa **Backup**, **Sync**, **Archive** u **Off** para ver solo los álbumes en ese modo. Pulsa **All Albums** para volver a verlos todos.
 • La línea bajo los botones da el total de cada modo.
-• **▲ Hide Details ▲** al pie de la tarjeta oculta la línea del total de modo; **▼ Show Details ▼** la devuelve. **All Albums**, los cuatro botones de modo y **Sync now** / **Rescan** quedan. La pestaña recuerda tu elección.
+• **▲ Hide Details ▲** al pie de la tarjeta oculta la línea del total de modo y, mientras hay una ejecución en marcha, la línea de subida y su barra; **▼ Show Details ▼** las devuelve. **All Albums**, los cuatro botones de modo y **Sync now** / **Rescan** quedan, y mientras hay una ejecución en marcha también quedan **Syncing…**, **Pause** y **Stop**. La pestaña recuerda tu elección.
 
 ## Tarjetas de álbum
 • **Nombre, número de archivos y tamaño** del álbum en tu teléfono.
@@ -103,7 +103,7 @@ Aquí no se quita nada. La eliminación ocurre en la pestaña Archive. Consulta 
 • **Línea de la Cloud:** **verified in OneDrive** significa que OneDrive confirmó los archivos con el tamaño correcto. Se comprueba cada vez que abres la pestaña. Las demás Clouds muestran **sent to** esa Cloud.
 • **Botón de modo** (a la derecha): púlsalo para cambiar el modo del álbum. Archive te pide confirmar antes. Si la Cloud del álbum no puede hacer ese modo, la tarjeta lo indica.
 • **Pulsa la tarjeta** para ver los archivos del álbum. Consulta [[album-detail]].""",
-        "en_hash": "6f8771afe616ceed",
+        "en_hash": "fe76bda5cd9722eb",
     },
 
     "album-detail": {
