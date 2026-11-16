@@ -3,7 +3,7 @@
 Every change since version 26 (0.3.25), the last build the Closed Testing group had. The short notes Play shows to users
 (500 characters per language) are in `release-notes/`; this file is the full record.
 
-## Version 39 (0.3.38) — 16 Nov 2026, uploaded
+## Version 39 (0.3.38) — 16 Nov 2026, uploaded, installed on the Fold
 
 **Albums tab**
 - The upload line now names the album after the count, and shows the file's size sent of its total ("Uploading 3 of 40 · Camera · clip.mp4 · 94 MB of 249 MB") instead of a percentage. The two sizes never split across lines.
