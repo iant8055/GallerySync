@@ -41,20 +41,20 @@ from . import (
     c8_help,
 )
 
-LAST_UPDATED = "15 November 2026"
+LAST_UPDATED = "16 November 2026"
 
 # Per-locale rendering of the same date. Used by the build when it formats the
 # page_sub and footer_text chrome strings, which both carry a {date} placeholder.
 # When LAST_UPDATED changes, every entry here needs updating too; a missing locale
 # falls back to the English string, so a new locale is never silently wrong.
 LAST_UPDATED_BY_LOCALE: dict[str, str] = {
-    "en": "15 November 2026",
-    "es": "15 de noviembre de 2026",
-    "pt-BR": "15 de novembro de 2026",
-    "fr": "15 novembre 2026",
-    "de": "15. November 2026",
-    "ja": "2026年11月15日",
-    "hi": "15 नवंबर 2026",
+    "en": "16 November 2026",
+    "es": "16 de noviembre de 2026",
+    "pt-BR": "16 de novembro de 2026",
+    "fr": "16 novembre 2026",
+    "de": "16. November 2026",
+    "ja": "2026年11月16日",
+    "hi": "16 नवंबर 2026",
 }
 
 CHAPTERS = [

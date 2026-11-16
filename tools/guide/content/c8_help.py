@@ -43,6 +43,14 @@ CHAPTER = Chapter(
             Back or Home is fine. Swiping the app away from recent apps can stop background work: open the app again and it carries on without sending anything twice.
         """),
 
+        topic("faq-secure-folder", "GallerySync is in Samsung's Secure Folder", """
+            Secure Folder's copy of GallerySync is a separate app, with its own settings, sign-ins and photos. At Samsung's default battery setting it uploads only while it is on screen — switch away and the upload pauses, resuming next time you open it.
+
+            At phone **Settings → Apps → GallerySync → Battery**, choose **Unrestricted**. This one setting covers both copies, and the Secure Folder one then uploads in the background like the main copy.
+
+            Give the Secure Folder copy its own OneDrive folder, so the two copies don't see each other's files. See [[settings-destination]].
+        """),
+
         topic("faq-wrong-account", "I signed in to a Cloud with the wrong account", """
             **Settings → Backup → Sign out** beside that Cloud, choose **Leave them there**, then sign in with the right account. Files already sent stay in the first account. See [[settings-account]].
         """),

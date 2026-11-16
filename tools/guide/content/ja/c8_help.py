@@ -51,6 +51,15 @@ TRANSLATIONS = {
         "body": """Back やホームなら問題ありません。最近使ったアプリからスワイプして消すと、バックグラウンド処理が止まることがあります。アプリをもう一度開けば、何も二重に送信することなく、続きから再開します。""",
         "en_hash": "266c98c91b9f897f",
     },
+    "faq-secure-folder": {
+        "title": "GallerySync が Samsung の Secure Folder に入っている",
+        "body": """Secure Folder 内の GallerySync は別のアプリで、設定もサインインも写真もそれぞれ独立しています。Samsung の標準のバッテリー設定では、画面に表示されている間だけアップロードが行われ、別の画面に切り替えると一時停止し、アプリを開き直すと続きから再開します。
+
+端末の **Settings → Apps → GallerySync → Battery** を開き、**Unrestricted** を選びます。この 1 つの設定が両方のコピーに適用され、Secure Folder のコピーもメインのコピーと同じようにバックグラウンドでアップロードするようになります。
+
+Secure Folder のコピーは OneDrive 上の専用フォルダーに送るとよいでしょう。そうすれば、2 つのコピーが互いのファイルを見ることはありません。[[settings-destination]] を参照してください。""",
+        "en_hash": "b20664245b085caf",
+    },
     "faq-wrong-account": {
         "title": "間違ったアカウントで Cloud にログインした",
         "body": """その Cloud の横で **Settings → Backup → ログアウト** を選び、**そのまま残す** を選んでから、正しいアカウントでログインし直します。送信済みのファイルは、最初のアカウントに残ります。[[settings-account]]を参照してください。""",

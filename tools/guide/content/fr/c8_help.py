@@ -51,6 +51,15 @@ Les albums d'autres Clouds affichent plutôt **sent to** ce Cloud. Voir [[albums
         "body": """Retour ou Accueil, ça va. Balayer l'application hors des applications récentes peut arrêter le travail en arrière-plan : rouvrez l'application et il reprend sans rien envoyer deux fois.""",
         "en_hash": "266c98c91b9f897f",
     },
+    "faq-secure-folder": {
+        "title": "GallerySync est dans le Secure Folder de Samsung",
+        "body": """La copie de GallerySync dans le Secure Folder est une application à part, avec ses propres paramètres, connexions et photos. Avec le réglage de batterie par défaut de Samsung, elle n'envoie que tant qu'elle est à l'écran : dès que vous passez ailleurs, l'envoi se met en pause et reprend à la prochaine ouverture de l'application.
+
+Sur le téléphone, ouvrez **Settings → Apps → GallerySync → Battery** et choisissez **Unrestricted**. Ce seul réglage couvre les deux copies, et celle du Secure Folder envoie alors en arrière-plan, comme la copie principale.
+
+Envoyez la copie Secure Folder dans son propre dossier OneDrive, pour que les deux copies ne voient pas les fichiers l'une de l'autre. Voir [[settings-destination]].""",
+        "en_hash": "b20664245b085caf",
+    },
     "faq-wrong-account": {
         "title": "Je me suis connecté à un Cloud avec le mauvais compte",
         "body": """**Settings → Backup → Se déconnecter** à côté de ce Cloud, choisissez **Les laisser là-bas**, puis reconnectez-vous avec le bon compte. Les fichiers déjà envoyés restent dans le premier compte. Voir [[settings-account]].""",

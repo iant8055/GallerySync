@@ -51,6 +51,15 @@ Alben in anderen Clouds zeigen stattdessen **sent to** und die jeweilige Cloud. 
         "body": """Zurück oder Home ist in Ordnung. Wenn du die App aus den zuletzt verwendeten Apps wegwischst, kann die Hintergrundarbeit stoppen: Öffne die App wieder, und sie macht weiter, ohne etwas doppelt zu senden.""",
         "en_hash": "266c98c91b9f897f",
     },
+    "faq-secure-folder": {
+        "title": "GallerySync liegt in Samsungs Secure Folder",
+        "body": """Die Kopie von GallerySync im Secure Folder ist eine eigene App, mit eigenen Einstellungen, Anmeldungen und Fotos. Bei Samsungs Standard-Akkueinstellung lädt sie nur hoch, solange sie auf dem Bildschirm ist — wechselst du weg, pausiert der Upload und wird fortgesetzt, sobald du die App wieder öffnest.
+
+Gehe am Telefon zu **Settings → Apps → GallerySync → Battery** und wähle **Unrestricted**. Diese eine Einstellung gilt für beide Kopien, und die Kopie im Secure Folder lädt dann wie die Haupt-App im Hintergrund.
+
+Lass die Secure-Folder-Kopie in einen eigenen OneDrive-Ordner senden, damit die beiden Kopien die Dateien der jeweils anderen nicht sehen. Siehe [[settings-destination]].""",
+        "en_hash": "b20664245b085caf",
+    },
     "faq-wrong-account": {
         "title": "Ich habe mich mit dem falschen Konto bei einer Cloud angemeldet",
         "body": """**Settings → Backup → Abmelden** neben dieser Cloud, wähle **Dort lassen**, dann melde dich mit dem richtigen Konto an. Bereits gesendete Dateien bleiben im ersten Konto. Siehe [[settings-account]].""",

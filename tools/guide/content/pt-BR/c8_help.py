@@ -51,6 +51,15 @@ Os álbuns em outras Clouds mostram **sent to** essa Cloud. Veja [[albums-list]]
         "body": """Voltar ou Home não tem problema. Fechar o app deslizando-o para fora dos apps recentes pode parar o trabalho em segundo plano: abra o app de novo e ele continua sem enviar nada duas vezes.""",
         "en_hash": "266c98c91b9f897f",
     },
+    'faq-secure-folder': {
+        "title": "O GallerySync está na Secure Folder da Samsung",
+        "body": """A cópia do GallerySync dentro da Secure Folder é um app separado, com configurações, logins e fotos próprios. Com o ajuste de bateria padrão da Samsung, ele só envia enquanto está na tela — ao mudar de app, o envio pausa e continua quando você abre o app de novo.
+
+No telefone, abra **Settings → Apps → GallerySync → Battery** e escolha **Unrestricted**. Esse único ajuste vale para as duas cópias, e a da Secure Folder passa a enviar em segundo plano, como a cópia principal.
+
+Mande a cópia da Secure Folder para uma pasta própria no OneDrive, para que as duas cópias não enxerguem os arquivos uma da outra. Consulte [[settings-destination]].""",
+        "en_hash": "b20664245b085caf",
+    },
     'faq-wrong-account': {
         "title": 'Entrei em uma Cloud com a conta errada',
         "body": """**Settings → Backup → Sair** ao lado dessa Cloud, escolha **Deixar lá** e depois entre com a conta certa. Os arquivos já enviados ficam na primeira conta. Veja [[settings-account]].""",

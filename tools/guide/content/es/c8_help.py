@@ -60,6 +60,15 @@ Los álbumes de otras Clouds muestran en su lugar **sent to** esa Cloud. Consult
         "en_hash": "266c98c91b9f897f",
     },
 
+    "faq-secure-folder": {
+        "title": "GallerySync está en la Secure Folder de Samsung",
+        "body": """La copia de GallerySync dentro de Secure Folder es una app aparte, con sus propios ajustes, sesiones y fotos. Con el ajuste de batería de Samsung por defecto solo sube mientras está en pantalla: en cuanto cambias de app, la subida se pausa y continúa cuando vuelves a abrirla.
+
+En el teléfono, abre **Settings → Apps → GallerySync → Battery** y elige **Unrestricted**. Este único ajuste vale para las dos copias, y la de Secure Folder sube entonces en segundo plano como la copia principal.
+
+Envía la copia de Secure Folder a su propia carpeta en OneDrive, para que las dos copias no vean los archivos de la otra. Consulta [[settings-destination]].""",
+        "en_hash": "b20664245b085caf",
+    },
     "faq-wrong-account": {
         "title": "Inicié sesión en una Cloud con la cuenta equivocada",
         "body": """**Settings → Backup → Cerrar sesión** junto a esa Cloud, elige **Dejarlos allí** y luego inicia sesión con la cuenta correcta. Los archivos ya enviados se quedan en la primera cuenta. Consulta [[settings-account]].""",
