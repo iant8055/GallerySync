@@ -91,10 +91,10 @@ Rien n'est retiré ici. Le retrait se fait dans l'onglet Archive. Voir [[archive
 ## Cartes d'album
 • **Nom, nombre de fichiers et taille** de l'album sur votre téléphone.
 • **Deuxième ligne** (seulement si nécessaire) : combien de fichiers sont optimisés, gardés en taille réelle, en attente ou en échec.
-• **Ligne Cloud :** **verified in OneDrive** signifie qu'OneDrive a confirmé les fichiers à la bonne taille. C'est vérifié à chaque ouverture de l'onglet. Les autres Clouds affichent **sent to** ce Cloud.
+• **Ligne Cloud :** **N verified in <Cloud>** ou **N of M verified in <Cloud>** signifie que le Cloud a confirmé les fichiers à la bonne taille. OneDrive, Dropbox, Google Drive, pCloud, Backblaze B2 et IDrive e2 sont vérifiés à chaque ouverture de l'onglet et sur **Rescan**. **Could not reach <Cloud>** signifie que la dernière vérification a échoué. Avant la première vérification — et toujours pour Google Photos, qui ne peut pas être interrogé — la ligne affiche **N sent to <Cloud>**. La ligne est verte quand chaque Cloud y a tout vérifié.
 • **Bouton de mode** (à droite) : touchez-le pour changer le mode de l'album. Archive demande d'abord une confirmation. Si le Cloud de l'album ne peut pas faire ce mode, la carte le dit.
 • **Touchez la carte** pour voir les fichiers de l'album. Voir [[album-detail]].""",
-        "en_hash": "fe76bda5cd9722eb",
+        "en_hash": "a6647ec1c67a8010",
     },
     "album-detail": {
         "title": "La liste des fichiers d'un album",

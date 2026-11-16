@@ -290,7 +290,7 @@
 <h4>हेडर</h4>
 <ul><li>सिर्फ़ उस मोड के एल्बम देखने के लिए <strong>Backup</strong>, <strong>Sync</strong>, <strong>Archive</strong> या <strong>Off</strong> दबाएँ। सब फिर से देखने के लिए <strong>All Albums</strong> दबाएँ।</li><li>बटनों के नीचे की लाइन हर मोड की कुल संख्या बताती है।</li><li>कार्ड के नीचे की लाइन <strong>▲ Hide Details ▲</strong> मोड कुल वाली लाइन को छिपा देती है, और रन चलने के दौरान अपलोड लाइन और उसकी बार को भी; <strong>▼ Show Details ▼</strong> उन्हें वापस लाती है। <strong>All Albums</strong>, चार मोड बटन और <strong>Sync now</strong> / <strong>Rescan</strong> बने रहते हैं, और रन चलने के दौरान <strong>Syncing…</strong>, <strong>Pause</strong> और <strong>Stop</strong> भी बने रहते हैं। टैब आपकी पसंद याद रखता है।</li></ul>
 <h4>एल्बम कार्ड</h4>
-<ul><li>आपके फ़ोन पर एल्बम का <strong>नाम, फ़ाइलों की संख्या और साइज़</strong>।</li><li><strong>दूसरी लाइन</strong> (सिर्फ़ ज़रूरत पड़ने पर): कितनी फ़ाइलें ऑप्टिमाइज़ हैं, पूरे साइज़ में रखी गई हैं, लंबित हैं या विफल हुई हैं।</li><li><strong>क्लाउड लाइन:</strong> <strong>verified in OneDrive</strong> का मतलब है कि OneDrive ने फ़ाइलों को सही साइज़ में कन्फ़र्म किया है। यह हर बार टैब खोलने पर जाँचा जाता है। दूसरे क्लाउड उस क्लाउड के आगे <strong>sent to</strong> दिखाते हैं।</li><li><strong>मोड बटन</strong> (दाईं ओर): एल्बम का मोड बदलने के लिए दबाएँ। Archive के लिए पहले पुष्टि माँगी जाती है। अगर एल्बम का क्लाउड वह मोड नहीं कर सकता, तो कार्ड यही बताता है।</li><li><strong>कार्ड पर टैप करें</strong> एल्बम की फ़ाइलें देखने के लिए। देखें <a class="xref" href="#album-detail">“एल्बम की फ़ाइल सूची”</a>।</li></ul>
+<ul><li>आपके फ़ोन पर एल्बम का <strong>नाम, फ़ाइलों की संख्या और साइज़</strong>।</li><li><strong>दूसरी लाइन</strong> (सिर्फ़ ज़रूरत पड़ने पर): कितनी फ़ाइलें ऑप्टिमाइज़ हैं, पूरे साइज़ में रखी गई हैं, लंबित हैं या विफल हुई हैं।</li><li><strong>क्लाउड लाइन:</strong> <strong>N verified in &lt;Cloud&gt;</strong> या <strong>N of M verified in &lt;Cloud&gt;</strong> का मतलब है कि क्लाउड ने फ़ाइलों को सही साइज़ में कन्फ़र्म किया है। OneDrive, Dropbox, Google Drive, pCloud, Backblaze B2 और IDrive e2 हर बार टैब खोलने पर और <strong>Rescan</strong> पर जाँचे जाते हैं। <strong>Could not reach &lt;Cloud&gt;</strong> का मतलब है कि पिछली जाँच विफल रही। पहली जाँच से पहले — और Google Photos के लिए हमेशा, जिससे पूछा नहीं जा सकता — यह लाइन <strong>N sent to &lt;Cloud&gt;</strong> दिखाती है। जब दिखाए गए हर क्लाउड पर सब कुछ कन्फ़र्म हो गया हो, तो यह लाइन हरी हो जाती है।</li><li><strong>मोड बटन</strong> (दाईं ओर): एल्बम का मोड बदलने के लिए दबाएँ। Archive के लिए पहले पुष्टि माँगी जाती है। अगर एल्बम का क्लाउड वह मोड नहीं कर सकता, तो कार्ड यही बताता है।</li><li><strong>कार्ड पर टैप करें</strong> एल्बम की फ़ाइलें देखने के लिए। देखें <a class="xref" href="#album-detail">“एल्बम की फ़ाइल सूची”</a>।</li></ul>
   </div></details>
   <details class="topic"><summary>एल्बम की फ़ाइल सूची</summary>
   <div class="topic-body" id="album-detail">
@@ -733,10 +733,10 @@
   <div class="topic-body" id="faq-albums-off-after-backup">
 <p>यह सही है। पहला बैकअप मोड की परवाह किए बिना सब कुछ भेजता है, और सेटअप कभी मोड सेट नहीं करता। Albums टैब पर हर एल्बम के लिए एक मोड चुनें।</p>
   </div></details>
-  <details class="topic"><summary>एक एल्बम पर Not checked against OneDrive yet लिखा है</summary>
+  <details class="topic"><summary>एक एल्बम verified नहीं, बल्कि sent to अपने क्लाउड दिखा रहा है</summary>
   <div class="topic-body" id="faq-not-checked-yet">
-<p>OneDrive से अभी पूछा नहीं गया है। थोड़ा इंतज़ार करें या <strong>Rescan</strong> दबाएँ। <strong>Could not reach OneDrive</strong> का मतलब है कि कनेक्शन विफल रहा: जाँचें कि आप ऑनलाइन और साइन इन हैं, फिर <strong>Rescan</strong> करें।</p>
-<p>दूसरे क्लाउड के एल्बम इसकी जगह उस क्लाउड के लिए <strong>sent to</strong> दिखाते हैं। देखें <a class="xref" href="#albums-list">“Albums टैब”</a>।</p>
+<p>क्लाउड से अभी तक पूछा नहीं गया, या पिछली जाँच उस तक नहीं पहुँच सकी। थोड़ा इंतज़ार करें या <strong>Rescan</strong> दबाएँ। अगर लाइन <strong>Could not reach &lt;Cloud&gt;</strong> दिखा रही है, तो देखें कि आप ऑनलाइन और साइन इन हैं, फिर <strong>Rescan</strong> दबाएँ।</p>
+<p>Google Photos से पूछा नहीं जा सकता, इसलिए उसके एल्बम हमेशा <strong>N sent to Google Photos</strong> दिखाते हैं। देखें <a class="xref" href="#albums-list">“Albums टैब”</a>।</p>
   </div></details>
   <details class="topic"><summary>बैकअप इसलिए रुक गया क्योंकि मेरा क्लाउड भर गया है</summary>
   <div class="topic-body" id="faq-onedrive-full">

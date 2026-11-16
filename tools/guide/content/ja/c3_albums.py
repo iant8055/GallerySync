@@ -91,10 +91,10 @@ TRANSLATIONS = {
 ## アルバムカード
 • **名前、ファイル数、サイズ**：スマートフォン上のアルバムのもの。
 • **2 行目**（必要な場合のみ）：最適化済み、フルサイズで保持、保留中、失敗したファイルの数。
-• **Cloud 行**：**verified in OneDrive** は、OneDrive が正しいサイズでファイルを確認したことを意味します。タブを開くたびに確認されます。ほかの Cloud では、その Cloud について **sent to** と表示されます。
+• **Cloud 行**：**N verified in <Cloud>** または **N of M verified in <Cloud>** は、その Cloud が正しいサイズでファイルを確認したことを意味します。OneDrive、Dropbox、Google Drive、pCloud、Backblaze B2、IDrive e2 はそれぞれ、タブを開くたびと **Rescan** のときに確認されます。**Could not reach <Cloud>** は、前回の確認が失敗したことを意味します。最初の確認の前、および問い合わせできない Google Photos では、常に **N sent to <Cloud>** と表示されます。表示上のすべての Cloud がすべてを確認済みのとき、この行は緑色になります。
 • **モードボタン**（右側）：タップするとアルバムのモードを変更できます。Archive では、先に確認を求められます。アルバムの Cloud がそのモードに対応していない場合は、カードにその旨が表示されます。
 • **カードをタップ**すると、アルバムのファイルが表示されます。[[album-detail]]を参照してください。""",
-        "en_hash": "fe76bda5cd9722eb",
+        "en_hash": "a6647ec1c67a8010",
     },
     "album-detail": {
         "title": "アルバムのファイル一覧",

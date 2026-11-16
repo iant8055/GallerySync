@@ -13,10 +13,10 @@ CHAPTER = Chapter(
             That is correct. The first backup sends everything regardless of mode, and setup never sets modes. Choose a mode for each album on the Albums tab.
         """),
 
-        topic("faq-not-checked-yet", "An album says Not checked against OneDrive yet", """
-            OneDrive has not been asked yet. Wait a moment or press **Rescan**. **Could not reach OneDrive** means the connection failed: check you are online and signed in, then **Rescan**.
+        topic("faq-not-checked-yet", "An album says sent to its Cloud, not verified", """
+            The Cloud has not been asked yet, or the last check could not reach it. Wait a moment or press **Rescan**. If the line reads **Could not reach <Cloud>**, check you are online and signed in, then **Rescan**.
 
-            Albums on other Clouds show **sent to** that Cloud instead. See [[albums-list]].
+            Google Photos cannot be asked, so its albums always read **N sent to Google Photos**. See [[albums-list]].
         """),
 
         topic("faq-onedrive-full", "The backup stopped because my Cloud is full", """

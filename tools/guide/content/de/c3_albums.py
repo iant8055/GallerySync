@@ -91,10 +91,10 @@ Hier wird nichts entfernt. Das Entfernen geschieht im Archive-Tab. Siehe [[archi
 ## Albumkarten
 • **Name, Dateizahl und Größe** des Albums auf deinem Telefon.
 • **Zweite Zeile** (nur bei Bedarf): wie viele Dateien optimiert, in voller Größe behalten, ausstehend oder fehlgeschlagen sind.
-• **Cloud-Zeile:** **verified in OneDrive** bedeutet, dass OneDrive die Dateien in der richtigen Größe bestätigt hat. Das wird bei jedem Öffnen des Tabs geprüft. Andere Clouds zeigen **sent to** und die jeweilige Cloud.
+• **Cloud-Zeile:** **N verified in <Cloud>** oder **N of M verified in <Cloud>** bedeutet, dass die Cloud die Dateien in der richtigen Größe bestätigt hat. OneDrive, Dropbox, Google Drive, pCloud, Backblaze B2 und IDrive e2 werden jeweils bei jedem Öffnen des Tabs und bei **Rescan** geprüft. **Could not reach <Cloud>** bedeutet, dass die letzte Prüfung fehlgeschlagen ist. Vor der ersten Prüfung — und bei Google Photos immer, weil es nicht gefragt werden kann — steht dort **N sent to <Cloud>**. Die Zeile ist grün, wenn jede Cloud darauf alles bestätigt hat.
 • **Modus-Schaltfläche** (rechte Seite): tippen, um den Modus des Albums zu ändern. Archive fragt zuerst nach Bestätigung. Wenn die Cloud des Albums diesen Modus nicht kann, sagt die Karte das.
 • **Tippe auf die Karte**, um die Dateien des Albums zu sehen. Siehe [[album-detail]].""",
-        "en_hash": "fe76bda5cd9722eb",
+        "en_hash": "a6647ec1c67a8010",
     },
     "album-detail": {
         "title": "Die Dateiliste eines Albums",

@@ -15,11 +15,11 @@ TRANSLATIONS = {
         "en_hash": "39db6d0a503fb274",
     },
     "faq-not-checked-yet": {
-        "title": "Un album indique Not checked against OneDrive yet",
-        "body": """OneDrive n'a pas encore été interrogé. Attendez un instant ou appuyez sur **Rescan**. **Could not reach OneDrive** signifie que la connexion a échoué : vérifiez que vous êtes en ligne et connecté, puis faites **Rescan**.
+        "title": "Un album indique sent to son Cloud, pas verified",
+        "body": """Le Cloud n'a pas encore été interrogé, ou la dernière vérification n'a pas pu l'atteindre. Patientez un instant ou appuyez sur **Rescan**. Si la ligne indique **Could not reach <Cloud>**, vérifiez que vous êtes en ligne et connecté, puis appuyez sur **Rescan**.
 
-Les albums d'autres Clouds affichent plutôt **sent to** ce Cloud. Voir [[albums-list]].""",
-        "en_hash": "52048b6e4b7bcf97",
+Google Photos ne peut pas être interrogé, donc ses albums affichent toujours **N sent to Google Photos**. Voir [[albums-list]].""",
+        "en_hash": "4afbe8f4cd09a04f",
     },
     "faq-onedrive-full": {
         "title": "La sauvegarde s'est arrêtée parce que mon Cloud est plein",

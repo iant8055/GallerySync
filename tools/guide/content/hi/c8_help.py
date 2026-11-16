@@ -17,12 +17,12 @@ TRANSLATIONS = {
         "en_hash": "39db6d0a503fb274",
     },
     "faq-not-checked-yet": {
-        "title": "एक एल्बम पर Not checked against OneDrive yet लिखा है",
+        "title": "एक एल्बम verified नहीं, बल्कि sent to अपने क्लाउड दिखा रहा है",
         "body": """\
-OneDrive से अभी पूछा नहीं गया है। थोड़ा इंतज़ार करें या **Rescan** दबाएँ। **Could not reach OneDrive** का मतलब है कि कनेक्शन विफल रहा: जाँचें कि आप ऑनलाइन और साइन इन हैं, फिर **Rescan** करें।
+क्लाउड से अभी तक पूछा नहीं गया, या पिछली जाँच उस तक नहीं पहुँच सकी। थोड़ा इंतज़ार करें या **Rescan** दबाएँ। अगर लाइन **Could not reach <Cloud>** दिखा रही है, तो देखें कि आप ऑनलाइन और साइन इन हैं, फिर **Rescan** दबाएँ।
 
-दूसरे क्लाउड के एल्बम इसकी जगह उस क्लाउड के लिए **sent to** दिखाते हैं। देखें [[albums-list]]।""",
-        "en_hash": "52048b6e4b7bcf97",
+Google Photos से पूछा नहीं जा सकता, इसलिए उसके एल्बम हमेशा **N sent to Google Photos** दिखाते हैं। देखें [[albums-list]]।""",
+        "en_hash": "4afbe8f4cd09a04f",
     },
     "faq-onedrive-full": {
         "title": "बैकअप इसलिए रुक गया क्योंकि मेरा क्लाउड भर गया है",

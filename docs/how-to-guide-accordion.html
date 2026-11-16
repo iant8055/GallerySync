@@ -292,7 +292,7 @@
 <h4>Header</h4>
 <ul><li>Tap <strong>Backup</strong>, <strong>Sync</strong>, <strong>Archive</strong> or <strong>Off</strong> to show only the albums in that mode. Tap <strong>All Albums</strong> to show them all again.</li><li>The line under the buttons gives the total for each mode.</li><li><strong>▲ Hide Details ▲</strong> at the bottom of the card hides the mode total line and, while a run is going, the upload line and its bar; <strong>▼ Show Details ▼</strong> brings them back. <strong>All Albums</strong>, the four mode buttons and <strong>Sync now</strong> / <strong>Rescan</strong> stay, and while a run is going <strong>Syncing…</strong>, <strong>Pause</strong> and <strong>Stop</strong> stay too. The tab remembers your choice.</li></ul>
 <h4>Album cards</h4>
-<ul><li><strong>Name, file count and size</strong> of the album on your phone.</li><li><strong>Second line</strong> (only when needed): how many files are optimised, kept at full size, pending or failed.</li><li><strong>Cloud line:</strong> <strong>verified in OneDrive</strong> means OneDrive confirmed the files at the right size. It is checked each time you open the tab. Other Clouds show <strong>sent to</strong> that Cloud.</li><li><strong>Mode button</strong> (right side): tap to change the album's mode. Archive asks you to confirm first. If the album's Cloud cannot do that mode, the card says so.</li><li><strong>Tap the card</strong> to see the album's files. See <a class="xref" href="#album-detail">“An album's file list”</a>.</li></ul>
+<ul><li><strong>Name, file count and size</strong> of the album on your phone.</li><li><strong>Second line</strong> (only when needed): how many files are optimised, kept at full size, pending or failed.</li><li><strong>Cloud line:</strong> <strong>N verified in &lt;Cloud&gt;</strong>, or <strong>N of M verified in &lt;Cloud&gt;</strong>, means the Cloud confirmed the files at the right size. OneDrive, Dropbox, Google Drive, pCloud, Backblaze B2 and IDrive e2 are each checked when you open the tab and on <strong>Rescan</strong>. <strong>Could not reach &lt;Cloud&gt;</strong> means the last check failed. Before the first check — and always for Google Photos, which cannot be asked — the line reads <strong>N sent to &lt;Cloud&gt;</strong>. The line is green when every Cloud on it has verified everything.</li><li><strong>Mode button</strong> (right side): tap to change the album's mode. Archive asks you to confirm first. If the album's Cloud cannot do that mode, the card says so.</li><li><strong>Tap the card</strong> to see the album's files. See <a class="xref" href="#album-detail">“An album's file list”</a>.</li></ul>
   </div></details>
   <details class="topic"><summary>An album&#x27;s file list</summary>
   <div class="topic-body" id="album-detail">
@@ -735,10 +735,10 @@
   <div class="topic-body" id="faq-albums-off-after-backup">
 <p>That is correct. The first backup sends everything regardless of mode, and setup never sets modes. Choose a mode for each album on the Albums tab.</p>
   </div></details>
-  <details class="topic"><summary>An album says Not checked against OneDrive yet</summary>
+  <details class="topic"><summary>An album says sent to its Cloud, not verified</summary>
   <div class="topic-body" id="faq-not-checked-yet">
-<p>OneDrive has not been asked yet. Wait a moment or press <strong>Rescan</strong>. <strong>Could not reach OneDrive</strong> means the connection failed: check you are online and signed in, then <strong>Rescan</strong>.</p>
-<p>Albums on other Clouds show <strong>sent to</strong> that Cloud instead. See <a class="xref" href="#albums-list">“The Albums Tab”</a>.</p>
+<p>The Cloud has not been asked yet, or the last check could not reach it. Wait a moment or press <strong>Rescan</strong>. If the line reads <strong>Could not reach &lt;Cloud&gt;</strong>, check you are online and signed in, then <strong>Rescan</strong>.</p>
+<p>Google Photos cannot be asked, so its albums always read <strong>N sent to Google Photos</strong>. See <a class="xref" href="#albums-list">“The Albums Tab”</a>.</p>
   </div></details>
   <details class="topic"><summary>The backup stopped because my Cloud is full</summary>
   <div class="topic-body" id="faq-onedrive-full">

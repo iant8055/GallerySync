@@ -15,11 +15,11 @@ TRANSLATIONS = {
         "en_hash": "39db6d0a503fb274",
     },
     "faq-not-checked-yet": {
-        "title": "アルバムに Not checked against OneDrive yet と表示される",
-        "body": """OneDrive にまだ問い合わせていません。少し待つか、**Rescan** を押してください。**Could not reach OneDrive** は、接続に失敗したという意味です。オンラインでログインしていることを確認して、**Rescan** を押してください。
+        "title": "アルバムが verified ではなく sent to と表示される",
+        "body": """まだ Cloud に問い合わせていないか、前回の確認で Cloud に到達できませんでした。少し待つか、**Rescan** を押してください。行に **Could not reach <Cloud>** と表示される場合は、オンラインでログイン済みであることを確認してから **Rescan** を押してください。
 
-ほかの Cloud のアルバムには、代わりにその Cloud について **sent to** と表示されます。[[albums-list]]を参照してください。""",
-        "en_hash": "52048b6e4b7bcf97",
+Google Photos には問い合わせできないため、そのアルバムは常に **N sent to Google Photos** と表示されます。[[albums-list]]を参照してください。""",
+        "en_hash": "4afbe8f4cd09a04f",
     },
     "faq-onedrive-full": {
         "title": "Cloud がいっぱいで、バックアップが止まった",

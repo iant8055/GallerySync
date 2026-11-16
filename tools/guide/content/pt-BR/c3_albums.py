@@ -91,10 +91,10 @@ Nada é removido aqui. A remoção acontece na aba Archive. Veja [[archive-overv
 ## Cartões de álbum
 • **Nome, número de arquivos e tamanho** do álbum no seu telefone.
 • **Segunda linha** (só quando necessária): quantos arquivos estão otimizados, mantidos em tamanho real, pendentes ou com falha.
-• **Linha da Cloud:** **verified in OneDrive** significa que o OneDrive confirmou os arquivos no tamanho certo. Isso é verificado toda vez que você abre a aba. As outras Clouds mostram **sent to** essa Cloud.
+• **Linha da Cloud:** **N verified in <Cloud>** ou **N of M verified in <Cloud>** significa que a Cloud confirmou os arquivos no tamanho certo. OneDrive, Dropbox, Google Drive, pCloud, Backblaze B2 e IDrive e2 são verificados toda vez que você abre a aba e no **Rescan**. **Could not reach <Cloud>** significa que a última checagem falhou. Antes da primeira checagem — e sempre no Google Photos, que não pode ser consultado — a linha mostra **N sent to <Cloud>**. A linha fica verde quando todas as Clouds dela confirmaram tudo.
 • **Botão de modo** (no lado direito): toque para mudar o modo do álbum. O Archive pede que você confirme antes. Se a Cloud do álbum não consegue fazer esse modo, o cartão avisa.
 • **Toque no cartão** para ver os arquivos do álbum. Veja [[album-detail]].""",
-        "en_hash": "fe76bda5cd9722eb",
+        "en_hash": "a6647ec1c67a8010",
     },
     'album-detail': {
         "title": 'A lista de arquivos de um álbum',

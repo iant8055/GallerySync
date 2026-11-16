@@ -83,7 +83,7 @@ CHAPTER = Chapter(
             ## Album cards
             • **Name, file count and size** of the album on your phone.
             • **Second line** (only when needed): how many files are optimised, kept at full size, pending or failed.
-            • **Cloud line:** **verified in OneDrive** means OneDrive confirmed the files at the right size. It is checked each time you open the tab. Other Clouds show **sent to** that Cloud.
+            • **Cloud line:** **N verified in <Cloud>**, or **N of M verified in <Cloud>**, means the Cloud confirmed the files at the right size. OneDrive, Dropbox, Google Drive, pCloud, Backblaze B2 and IDrive e2 are each checked when you open the tab and on **Rescan**. **Could not reach <Cloud>** means the last check failed. Before the first check — and always for Google Photos, which cannot be asked — the line reads **N sent to <Cloud>**. The line is green when every Cloud on it has verified everything.
             • **Mode button** (right side): tap to change the album's mode. Archive asks you to confirm first. If the album's Cloud cannot do that mode, the card says so.
             • **Tap the card** to see the album's files. See [[album-detail]].
         """, ui=True),
