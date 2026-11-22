@@ -10,7 +10,9 @@ import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.media.LocalCopyRemover
 import com.gallery.sync.data.local.media.ProxyApplier
 import com.gallery.sync.data.local.media.ProxyGenerator
-import com.gallery.sync.data.local.media.sharesByFolder
+import com.gallery.sync.data.local.media.MediaAlbum
+import com.gallery.sync.data.local.media.mainPath
+import com.gallery.sync.data.local.media.sharesByPath
 import com.gallery.sync.data.local.media.ProxyOutcome
 import com.gallery.sync.data.local.media.VideoOptimiser
 import com.gallery.sync.data.local.media.VideoReadiness
@@ -122,6 +124,52 @@ data class FolderRow(
 )
 
 /**
+ * The scanned rows for *Where each folder goes* (Ian, 22 Nov 2026): one per top-level folder, and one per folder inside
+ * it that has a Cloud of its own ([keys] with a `/`), each counting only the files its choice governs, so `DCIM` no
+ * longer counts what `DCIM/Funny stuff` sends elsewhere. A folder with its own Cloud follows its top-level folder's
+ * row; one in [shownWhenEmpty] is listed even with nothing in it, and so is a top-level folder whose every file is in
+ * such a folder, so it can still be chosen for.
+ */
+internal fun folderRows(
+    albums: List<MediaAlbum>,
+    keys: Collection<String>,
+    shownWhenEmpty: Collection<String> = emptyList(),
+    locationOf: (String) -> BackupLocation
+): List<FolderRow> {
+    val counted = albums
+        .flatMap { album ->
+            album.sharesByPath().mapNotNull { (path, share) ->
+                FolderDestination.routeOf(path, keys)?.let { Triple(it, album.name, share) }
+            }
+        }
+        .groupBy { it.first }
+        .map { (key, inKey) ->
+            FolderRow(
+                name = key,
+                albumCount = inKey.map { it.second }.distinct().size,
+                fileCount = inKey.sumOf { it.third.itemCount },
+                totalBytes = inKey.sumOf { it.third.totalBytes },
+                location = locationOf(key)
+            )
+        }
+    val empty = shownWhenEmpty
+        .filter { FolderDestination.isSubfolder(it) && counted.none { row -> row.name.equals(it, ignoreCase = true) } }
+        .map { FolderRow(name = it, albumCount = 0, fileCount = 0, totalBytes = 0L, location = locationOf(it)) }
+    val subs = (counted + empty).filter { FolderDestination.isSubfolder(it.name) }.sortedBy { it.name.lowercase() }
+    val tops = counted.filterNot { FolderDestination.isSubfolder(it.name) }
+    val parentless = subs.mapNotNull { MediaScanRules.topLevelFolderOf(it.name) }
+        .distinctBy { it.lowercase() }
+        .filter { parent -> tops.none { it.name.equals(parent, ignoreCase = true) } }
+        .map { FolderRow(name = it, albumCount = 0, fileCount = 0, totalBytes = 0L, location = locationOf(it)) }
+    val placed = HashSet<String>()
+    return (tops + parentless).sortedByDescending { it.fileCount }.flatMap { top ->
+        listOf(top) + subs.filter {
+            MediaScanRules.topLevelFolderOf(it.name).equals(top.name, ignoreCase = true) && placed.add(it.name)
+        }
+    }
+}
+
+/**
  * The rows for *Where each folder goes*: what the scan found, plus every folder the user added that it found nothing
  * in (Ian, 1 Nov 2026). The scan only sees media, so a folder with none had no row and looked as if adding it had not
  * worked. A folder is matched ignoring case, because MediaStore keeps each writer's spelling.
@@ -187,16 +235,16 @@ data class AlbumRow(
         emptyMap(),
 
     /**
-     * Where this album's *new* uploads currently go — resolved from its top-level folder
-     * (`MediaAlbum.topLevelFolder`) against the folder-destination map, falling back to the app-wide
+     * Where this album's *new* uploads currently go — resolved from the folder holding most of its files
+     * (`MediaAlbum.mainPath`) against the folder-destination map, falling back to the app-wide
      * default exactly the way [com.gallery.sync.domain.backup.BackupEngine.refreshLedger] resolves
      * it for real. Not stored on the album itself — there is nothing per-album to store, see
      * TASK-026 — purely a display/restriction value computed fresh on every [refresh].
      */
     val backupLocation: BackupLocation = BackupLocation.DEFAULT,
 
-    /** The top-level folder this album lives under, or null if the scan could not say. */
-    val topLevelFolder: String? = null
+    /** The folder holding most of this album's files (`DCIM/Funny stuff`), or null if the scan could not say. */
+    val folderPath: String? = null
 ) {
     val isEnabled: Boolean get() = mode.uploads
 
@@ -953,26 +1001,22 @@ class BackupViewModel @Inject constructor(
                     sentTo = sentToByAlbum[album.name].orEmpty(),
                     checkedElsewhere = elsewhereByAlbum[album.name].orEmpty(),
                     backupLocation = FolderDestination.resolve(
-                        album.topLevelFolder, folderLocations, prefs.backupLocation
+                        album.mainPath(), folderLocations, prefs.backupLocation
                     ),
-                    topLevelFolder = album.topLevelFolder
+                    folderPath = album.mainPath()
                 )
             }
 
-            val scannedFolders = scannedAlbums
-                .flatMap { album -> album.sharesByFolder().map { (folder, share) -> Triple(folder, album, share) } }
-                .groupBy({ it.first }, { it.second to it.third })
-                .map { (name, inFolder) ->
-                    FolderRow(
-                        name = name,
-                        albumCount = inFolder.size,
-                        fileCount = inFolder.sumOf { it.second.itemCount },
-                        totalBytes = inFolder.sumOf { it.second.totalBytes },
-                        location = FolderDestination.resolve(name, folderLocations, prefs.backupLocation)
-                    )
+            val grantedPaths = sources.current().map { it.relativePath }
+            val scannedFolders = folderRows(
+                albums = scannedAlbums,
+                keys = folderLocations.keys,
+                // A folder with a Cloud of its own that is still in Folders to back up, even with nothing in it yet.
+                shownWhenEmpty = folderLocations.keys.filter { key ->
+                    grantedPaths.any { FolderDestination.normalise(it).equals(key, ignoreCase = true) }
                 }
-                .sortedByDescending { it.fileCount }
-            val folders = withGrantedFolders(scannedFolders, sources.current().map { it.relativePath }) { name ->
+            ) { name -> FolderDestination.resolve(name, folderLocations, prefs.backupLocation) }
+            val folders = withGrantedFolders(scannedFolders, grantedPaths) { name ->
                 FolderDestination.resolve(name, folderLocations, prefs.backupLocation)
             }
 
@@ -1352,7 +1396,7 @@ class BackupViewModel @Inject constructor(
     }
 
     /**
-     * Changes where one top-level folder's *new* uploads go. See TASK-026 and [FolderDestination].
+     * Changes where one folder's *new* uploads go: a top-level folder, or one inside it (Ian, 22 Nov 2026). See TASK-026 and [FolderDestination].
      * Nothing already uploaded moves, and nothing is re-uploaded — each file keeps the `location` it
      * was given when its row was created. Whether [location] is actually available right now (signed
      * in, Pro unlocked, for anything but OneDrive) is the caller's job to check; the Settings list
@@ -1364,11 +1408,21 @@ class BackupViewModel @Inject constructor(
     fun setFolderLocation(folder: String, location: BackupLocation) {
         viewModelScope.launch {
             setFolderDestination(folder, location)
+            // A folder inside a top-level one that has just been given a Cloud of its own has no row yet, and takes
+            // files from its parent's count: list it afresh.
+            if (_state.value.folders.none { it.name.equals(folder, ignoreCase = true) }) {
+                refresh()
+                return@launch
+            }
+            val chosen = folderDao.all().orEmpty().associate { it.folderName to it.backupLocation }
+            val fallback = settings.current().backupLocation
             _state.update { current ->
                 current.copy(
-                    folders = current.folders.map { if (it.name == folder) it.copy(location = location) else it },
+                    folders = current.folders.map {
+                        if (it.name.equals(folder, ignoreCase = true)) it.copy(location = location) else it
+                    },
                     albums = current.albums.map {
-                        if (it.topLevelFolder == folder) it.copy(backupLocation = location) else it
+                        it.copy(backupLocation = FolderDestination.resolve(it.folderPath, chosen, fallback))
                     }
                 )
             }

@@ -38,7 +38,7 @@ import com.gallery.sync.ui.setup.ReconcileViewModel
 fun SourcesSection(
     modifier: Modifier = Modifier,
     viewModel: ReconcileViewModel = hiltViewModel(),
-    /** A folder was added: its top-level folder, the level a Cloud is chosen at. */
+    /** A folder was added: its path (`DCIM/Funny stuff`), the level a Cloud is chosen at. */
     onFolderAdded: (String) -> Unit = {},
     /** Folders were removed, so whatever lists them needs looking at again. */
     onFoldersRemoved: () -> Unit = {}

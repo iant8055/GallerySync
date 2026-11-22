@@ -200,7 +200,13 @@ class MediaScanner @Inject constructor(
                     inFolders = items
                         .mapNotNull { item -> MediaScanRules.topLevelFolderOf(item.relativePath)?.let { it to item } }
                         .groupBy({ it.first }, { it.second })
-                        .mapValues { (_, inFolder) -> FolderShare(inFolder.size, inFolder.sumOf { it.sizeBytes }) }
+                        .mapValues { (_, inFolder) -> FolderShare(inFolder.size, inFolder.sumOf { it.sizeBytes }) },
+                    inPaths = items
+                        .mapNotNull { item ->
+                            com.gallery.sync.domain.backup.FolderDestination.normalise(item.relativePath)?.let { it to item }
+                        }
+                        .groupBy({ it.first }, { it.second })
+                        .mapValues { (_, inPath) -> FolderShare(inPath.size, inPath.sumOf { it.sizeBytes }) }
                 )
             }
             .sortedBy { it.name.lowercase() }

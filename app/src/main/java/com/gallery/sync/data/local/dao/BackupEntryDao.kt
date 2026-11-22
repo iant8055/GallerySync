@@ -159,6 +159,9 @@ data class SentElsewhereRow(
 /** A count per cloud, for the wizard's progress card. */
 data class LocationCount(val location: BackupLocation, val n: Int)
 
+/** A not-yet-sent row and where it is headed, for re-pointing it when a folder's Cloud changes. */
+data class UnsentRoute(val id: String, val album: String, val relativePath: String?, val location: BackupLocation)
+
 /** The two identities of a pinned file. See `FilePin.withoutPinned` for why both are carried. */
 data class PinnedKey(val id: String, val mediaStoreId: Long)
 
@@ -576,6 +579,22 @@ interface BackupEntryDao {
     )
     suspend fun retargetUnsent(
         albums: List<String>,
+        location: BackupLocation,
+        pending: BackupState = BackupState.PENDING,
+        failed: BackupState = BackupState.FAILED
+    )
+
+    /** Every row not yet sent, with its folder: `SetFolderDestination` works out which follow a change. */
+    @Query("SELECT id, album, relativePath, location FROM backup_entries WHERE state IN (:pending, :failed)")
+    suspend fun unsentRoutes(
+        pending: BackupState = BackupState.PENDING,
+        failed: BackupState = BackupState.FAILED
+    ): List<UnsentRoute>
+
+    /** Points these rows at [location], if they are still unsent: nothing uploaded is ever touched. */
+    @Query("UPDATE backup_entries SET location = :location WHERE id IN (:ids) AND state IN (:pending, :failed)")
+    suspend fun retargetUnsentRows(
+        ids: List<String>,
         location: BackupLocation,
         pending: BackupState = BackupState.PENDING,
         failed: BackupState = BackupState.FAILED

@@ -273,8 +273,8 @@ class BackupEngine @Inject constructor(
         }
         if (editedIds.isNotEmpty()) Logger.i(TAG, "refreshLedger: ${editedIds.size} shrunk file(s) edited since they were backed up")
 
-        // Where uploads go — per top-level folder (DCIM, Pictures, Movies...), not one app-wide
-        // setting; see TASK-026, 24 Sept 2026. Read once here rather than per item: a row's
+        // Where uploads go — per folder, the most specific chosen one winning (DCIM/Funny stuff over DCIM), not
+        // one app-wide setting; see TASK-026, 24 Sept 2026, and FolderDestination, 22 Nov 2026. Read once here rather than per item: a row's
         // `location` is fixed at creation and never re-read afterwards (BackupEntryEntity.location),
         // so this only ever matters for rows made in this pass. A later change to a folder's
         // destination is picked up by the next scan, not retroactively.
@@ -285,7 +285,6 @@ class BackupEngine @Inject constructor(
 
         val items = scanned.filterNot { it.mediaStoreId in proxiedSizes && it.mediaStoreId !in editedIds }
         val entries = items.map { item ->
-            val folder = MediaScanRules.topLevelFolderOf(item.relativePath)
             BackupEntryEntity(
                 id = backupKeyOf(
                     album = item.album,
@@ -302,7 +301,7 @@ class BackupEngine @Inject constructor(
                 mimeType = item.mimeType,
                 isVideo = item.isVideo,
                 state = BackupState.PENDING,
-                location = FolderDestination.resolve(folder, folderLocations, defaultLocation),
+                location = FolderDestination.resolve(item.relativePath, folderLocations, defaultLocation),
                 relativePath = item.relativePath,
                 dateTakenEpochSeconds = item.dateTakenEpochSeconds
             )

@@ -66,7 +66,14 @@ data class MediaAlbum(
      * second folder never appears (Ian, 25 Sept 2026: Movies went missing from *Where each folder goes*).
      * Empty means "not worked out": use [sharesByFolder].
      */
-    val inFolders: Map<String, FolderShare> = emptyMap()
+    val inFolders: Map<String, FolderShare> = emptyMap(),
+    /**
+     * What the album holds in each directory, by its normalised `RELATIVE_PATH` (`DCIM/Funny stuff`). A folder
+     * inside a top-level folder can choose its own Cloud (Ian, 22 Nov 2026, `FolderDestination`), so the folder
+     * list and an album's destination are worked out from these rather than from [inFolders].
+     * Empty means "not worked out": use [sharesByPath].
+     */
+    val inPaths: Map<String, FolderShare> = emptyMap()
 )
 
 /** A top-level directory on the device containing media files, discovered by scanning MediaStore. */
@@ -108,3 +115,9 @@ data class FolderShare(val itemCount: Int, val totalBytes: Long)
 /** The album's files per top-level folder; falls back to the single [MediaAlbum.topLevelFolder] when not worked out. */
 fun MediaAlbum.sharesByFolder(): Map<String, FolderShare> =
     inFolders.ifEmpty { topLevelFolder?.let { mapOf(it to FolderShare(itemCount, totalBytes)) }.orEmpty() }
+
+/** The album's files per directory; falls back to [sharesByFolder], whose top-level names are paths too. */
+fun MediaAlbum.sharesByPath(): Map<String, FolderShare> = inPaths.ifEmpty { sharesByFolder() }
+
+/** The directory holding most of the album's files: what its Albums row says it is sent to. */
+fun MediaAlbum.mainPath(): String? = sharesByPath().maxByOrNull { it.value.itemCount }?.key ?: topLevelFolder

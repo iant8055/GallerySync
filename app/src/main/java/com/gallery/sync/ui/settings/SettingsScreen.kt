@@ -1,5 +1,6 @@
 package com.gallery.sync.ui.settings
 
+import com.gallery.sync.data.local.media.MediaScanRules
 import androidx.compose.ui.layout.Layout
 import android.provider.DocumentsContract
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -239,7 +240,7 @@ fun SettingsScreen(
             val cloudMissing = cloudState.connected.none { it.location == folder.location }
             SettingDropdown(
                 label = pluralStringResource(
-                    R.plurals.backup_folder_label, folder.fileCount, folder.name, folder.fileCount
+                    R.plurals.backup_folder_label, folder.fileCount, folderLabel(folder.name), folder.fileCount
                 ),
                 options = options,
                 selected = folder.location,
@@ -289,7 +290,11 @@ fun SettingsScreen(
         state.folderToPlace?.let { folder ->
             NewFolderCloudDialog(
                 folder = folder,
-                current = state.folders.firstOrNull { it.name == folder }?.location,
+                // A folder inside a top-level one starts at what it follows now: its parent's Cloud.
+                current = (state.folders.firstOrNull { it.name.equals(folder, ignoreCase = true) }
+                    ?: state.folders.firstOrNull {
+                        it.name.equals(MediaScanRules.topLevelFolderOf(folder), ignoreCase = true)
+                    })?.location,
                 cloudState = cloudState,
                 onChangeCloudFolder = cloudViewModel::chooseFolder,
                 onAnswer = viewModel::answerWhereFolderGoes
@@ -1098,3 +1103,6 @@ private fun Modifier.reportBounds(
 } else {
     this.onGloballyPositioned { report(it.boundsInRoot()) }
 }
+
+/** `DCIM/Funny stuff` as `DCIM / Funny stuff`, the way Folders to back up writes a path. */
+internal fun folderLabel(path: String): String = path.split('/').filter { it.isNotEmpty() }.joinToString(" / ")

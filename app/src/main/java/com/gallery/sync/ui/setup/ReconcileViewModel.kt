@@ -1002,7 +1002,7 @@ class ReconcileViewModel @Inject constructor(
     }
 
     /** Records a folder the user picked. The re-check follows from the grant list changing. */
-    fun addSource(treeUri: Uri, onAdded: (topLevelFolder: String) -> Unit = {}) {
+    fun addSource(treeUri: Uri, onAdded: (folder: String) -> Unit = {}) {
         viewModelScope.launch {
             // The suspending call must complete *before* the state read, not inside it. Written as
             // `_state.value = _state.value.copy(refused = !sources.add(uri))`, Kotlin evaluates the
@@ -1013,7 +1013,9 @@ class ReconcileViewModel @Inject constructor(
             val added = sources.add(treeUri)
             _state.value = _state.value.copy(directoryRefused = !added)
             if (added) {
-                MediaScanRules.topLevelFolderOf(
+                // The folder itself, not its top-level folder (Ian, 22 Nov 2026): a folder inside DCIM is asked
+                // about, and given a Cloud, on its own. Reducing it to DCIM moved the whole of DCIM.
+                com.gallery.sync.domain.backup.FolderDestination.normalise(
                     TreeScope.pathFromTreeDocumentId(DocumentsContract.getTreeDocumentId(treeUri))
                 )?.let(onAdded)
             }

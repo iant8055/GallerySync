@@ -52,7 +52,7 @@ fun NewFolderCloudDialog(
 
     AlertDialog(
         onDismissRequest = { onAnswer(null) },
-        title = { TitleWithHelp(stringResource(R.string.new_folder_cloud_title, folder), HelpTopic.DIALOG_NEW_FOLDER_CLOUD) },
+        title = { TitleWithHelp(stringResource(R.string.new_folder_cloud_title, folderLabel(folder)), HelpTopic.DIALOG_NEW_FOLDER_CLOUD) },
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
