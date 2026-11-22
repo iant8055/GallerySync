@@ -94,7 +94,7 @@
     <string name="library_back_up_all">Revisar el almacenamiento en la Nube y hacer copia de todo lo que aún no la tenga</string>
     <string name="library_free_space">Todo lo del n.º 1, más optimizar todos los archivos del teléfono para el máximo ahorro de espacio</string>
     <string name="library_optimise_new">Todo lo del n.º 1, pero optimizar solo los archivos recién copiados, para un ahorro moderado de espacio</string>
-    <string name="library_per_album">Revisar el almacenamiento en la Nube sin copiar archivos nuevos, sin ahorro de espacio. Tú eliges a mano qué álbumes poner en Backup o Sync</string>
+    <string name="library_per_album">Revisar el almacenamiento en la Nube sin copiar archivos nuevos, sin ahorro de espacio. Tú eliges a mano qué álbumes poner en Backup o Optimise</string>
     <string name="media_age_immediately">En seguida</string>
     <string name="media_age_immediately_warning">Incluye clips grabados hoy. Siguen en tu galería y se reproducen, pero al editar uno se parte de la copia reducida hasta que recuperes el original.</string>
     <string name="media_age_one_day">1 día</string>
@@ -123,7 +123,7 @@
     <string name="picker_title">Elige una carpeta</string>
     <string name="picker_use">Usar esta carpeta</string>
     <string name="proxy_unsupported">Optimizar fotos requiere Android 11 o posterior.</string>
-    <string name="reoptimise_body">Los vídeos de álbumes en Sync que eran demasiado pequeños para reducirse con la compresión anterior pueden optimizarse de nuevo con esta. Los vídeos ya optimizados se quedan como están. Los originales a tamaño completo siguen en tu Nube.</string>
+    <string name="reoptimise_body">Los vídeos de álbumes en Optimise que eran demasiado pequeños para reducirse con la compresión anterior pueden optimizarse de nuevo con esta. Los vídeos ya optimizados se quedan como están. Los originales a tamaño completo siguen en tu Nube.</string>
     <string name="reoptimise_no">No</string>
     <string name="reoptimise_title">¿Volver a optimizar los vídeos existentes?</string>
     <string name="reoptimise_yes">Sí</string>
@@ -136,7 +136,7 @@
     <string name="settings_backup">Copia de seguridad</string>
     <string name="settings_bug_report">Informar de un error</string>
     <string name="settings_bug_report_detail">¿Algo no funciona? Cuéntanos qué pasó.</string>
-    <string name="settings_camera">Sync de la cámara</string>
+    <string name="settings_camera">Carpeta de la cámara</string>
     <string name="settings_camera_folder">Carpeta de la cámara</string>
     <string name="settings_camera_folder_choose">Elegir</string>
     <string name="settings_camera_folder_hint">Elige la carpeta donde guarda la cámara. Hasta que lo hagas, ninguna carpeta tiene estos ajustes.</string>
@@ -162,7 +162,7 @@
     <string name="settings_optimise_mode_auto">Automático</string>
     <string name="settings_optimise_mode_manual">Manual</string>
     <string name="settings_optimise_photos">Optimizar fotos</string>
-    <string name="settings_optimise_photos_on">Las fotos de los álbumes en Sync se optimizan para ahorrar espacio.</string>
+    <string name="settings_optimise_photos_on">Las fotos de los álbumes en Optimise se optimizan para ahorrar espacio.</string>
     <string name="settings_optimise_videos">Optimizar vídeo</string>
     <string name="settings_page_close">Cerrar</string>
     <string name="settings_page_load_failed">No se pudo cargar esta página. Comprueba la conexión e inténtalo de nuevo.</string>
@@ -174,7 +174,7 @@
     <string name="settings_rate_detail">Abre la ficha de GallerySync en Google Play.</string>
     <string name="settings_restore">Restaurar</string>
     <string name="settings_show_empty_folders">Mostrar carpetas vacías</string>
-    <string name="settings_sync">Sincronización</string>
+    <string name="settings_sync">Optimización</string>
     <string name="sign_out_action">Cerrar sesión</string>
     <string name="sources_add">Añadir una carpeta</string>
     <string name="sources_empty">Aún no has elegido ninguna carpeta. No se copia, analiza ni cambia nada hasta que elijas una.</string>
@@ -198,7 +198,7 @@
     <string name="tour_cloud_body">Selecciona las Nubes que usas. Una Nube es gratis. Cada Nube adicional forma parte de Pro, gratis durante 30 días. Inicias sesión en cada una en las tarjetas siguientes.</string>
     <string name="tour_cloud_connect_progress">Nube %1$d de %2$d</string>
     <string name="tour_cloud_connect_title">Conectar con %1$s</string>
-    <string name="tour_cloud_google_photos_limit_backup_only">Solo Backup: sin Archive ni Sync.</string>
+    <string name="tour_cloud_google_photos_limit_backup_only">Solo Backup: sin Archive ni Optimise.</string>
     <string name="tour_cloud_google_photos_limit_duplicates">Las fotos que ya estén en esa Nube podrían añadirse dos veces.</string>
     <string name="tour_cloud_google_photos_limit_pro">Gratis durante 30 días; después, un pago único.</string>
     <string name="tour_cloud_google_photos_limit_restore">Todavía no se puede restaurar desde ella.</string>
@@ -272,7 +272,7 @@
     <string name="tour_optimise_body">La optimización te permite liberar espacio en el teléfono sin dejar de ver todas tus fotos y vídeos en tu Galería.</string>
     <string name="tour_optimise_checking">Revisando tu Nube para calcular cuánto ahorrarías…</string>
     <string name="tour_optimise_incomplete">No se pudieron revisar %1$d de tus álbumes, así que el ahorro real probablemente sea mayor.</string>
-    <string name="tour_optimise_later_only">Esta configuración se aplica a cualquier álbum que más adelante pongas en Sync. Esta instalación no optimizará nada por sí sola.</string>
+    <string name="tour_optimise_later_only">Esta configuración se aplica a cualquier álbum que más adelante pongas en Optimise. Esta instalación no optimizará nada por sí sola.</string>
     <string name="tour_optimise_nothing">No se encontraron fotos ni vídeos en las carpetas elegidas, así que no hay nada que optimizar.</string>
     <string name="tour_optimise_photos_saving">Ahorro estimado en fotos: %1$s</string>
     <string name="tour_optimise_title">Configuración de optimización</string>
@@ -293,7 +293,7 @@
     <string name="tour_progress_plug_in">Asegúrate de que el teléfono está enchufado para que la copia empiece sola.</string>
     <string name="tour_progress_scanning">Analizando tu biblioteca…</string>
     <string name="tour_progress_starting">Empezando la subida…</string>
-    <string name="tour_progress_sync_now">SINCRONIZAR AHORA</string>
+    <string name="tour_progress_sync_now">HACER COPIA AHORA</string>
     <string name="tour_progress_title">Progreso de la copia</string>
     <string name="tour_progress_until_start">para que empiece la copia</string>
     <string name="tour_progress_uploading">Subiendo %1$d de %2$d</string>

@@ -171,10 +171,10 @@
         <item quantity="one">%1$s · %2$d file</item>
         <item quantity="other">%1$s · %2$d files</item>
     </plurals>
-    <string name="settings_sync">Sync</string>
+    <string name="settings_sync">Optimisation</string>
     <string name="settings_restore">Restore</string>
     <string name="settings_archive">Archive</string>
-    <string name="settings_camera">Camera Sync</string>
+    <string name="settings_camera">Camera Folder</string>
     <string name="no_cloud_connected">No Cloud connected. Connect one in Settings to keep backing up.</string>
     <string name="no_cloud_open_settings">Open Settings</string>
     <string name="settings_camera_special">Special settings for Camera</string>
@@ -251,7 +251,7 @@
         Removed by Ian, 15 Sept 2026, with the leftover photo-age label below it.
     -->
     <string name="settings_optimise_photos">Optimise photos</string>
-    <string name="settings_optimise_photos_on">Photos in Sync albums are optimised for storage.</string>
+    <string name="settings_optimise_photos_on">Photos in Optimise albums are optimised for storage.</string>
     <string name="settings_optimise_videos">Optimise video</string>
     <string name="settings_optimise_mode">Mode</string>
     <string name="settings_optimise_mode_auto">Automatic</string>
@@ -280,9 +280,9 @@
 
     <!-- Media permission -->
     <string name="permission_needed_title">GallerySync needs access to your photos</string>
-    <string name="permission_needed_detail">It reads the albums you choose so it can sync them to your Cloud. It never deletes anything.</string>
+    <string name="permission_needed_detail">It reads the albums you choose so it can back them up to your Cloud. It never deletes anything.</string>
     <string name="permission_partial_title">Only some photos are shared</string>
-    <string name="permission_partial_detail">GallerySync can currently see just the photos you picked, so a sync would be incomplete. Grant access to all photos to sync whole albums.</string>
+    <string name="permission_partial_detail">GallerySync can currently see just the photos you picked, so a backup would be incomplete. Grant access to all photos to back up whole albums.</string>
     <string name="permission_grant_action">Grant access</string>
 
     <!-- Backup -->
@@ -298,7 +298,7 @@
     -->
     <!-- Labels over the Albums header card figures. Ian, 16 Sept 2026. -->
     <string name="albums_mode_totals_label">Album Mode Count:</string>
-    <string name="albums_mode_totals">%1$d Backup · %2$d Sync · %3$d Archive · %4$d Off</string>
+    <string name="albums_mode_totals">%1$d Backup · %2$d Optimise · %3$d Archive · %4$d Off</string>
     <!--
         Shown when a run would transfer nothing, beside the Sync now button that has disabled
         itself. Without it a greyed-out primary action reads as a fault rather than as a finished
@@ -349,11 +349,11 @@
     -->
 
     <string name="backup_allow_metered">Use mobile data</string>
-    <string name="backup_allow_metered_on">Syncs on Wi-Fi and mobile data.</string>
+    <string name="backup_allow_metered_on">Backs up on Wi-Fi and mobile data.</string>
     <string name="backup_allow_metered_off">Wi-Fi only.</string>
 
     <string name="backup_rescan">Rescan</string>
-    <string name="backup_run_now">Sync now</string>
+    <string name="backup_run_now">Back Up Now</string>
     <!-- The same button, while a manual chain is live. It stops the chain, not just the file in
          flight; what has already been sent is kept, because the resumable session is on the row. -->
     <string name="backup_album_summary">%1$s · %2$s</string>
@@ -444,7 +444,7 @@ full size</string>
     <!-- Album mode labels — ladder order, matching the enum. -->
     <string name="mode_off">Off</string>
     <string name="mode_backup">Backup</string>
-    <string name="mode_sync">Sync</string>
+    <string name="mode_sync">Optimise</string>
     <string name="mode_archive">Archive</string>
 
     <!-- Archive confirmation dialog -->
@@ -807,7 +807,7 @@ full size</string>
     -->
 
     <!-- Gate 2: what to do with the library already on the phone. -->
-    <string name="library_per_album">Check Cloud Storage but do not back up any new files - no storage savings. You will manually select which Albums to backup/Sync</string>
+    <string name="library_per_album">Check Cloud Storage but do not back up any new files - no storage savings. You will manually select which Albums to backup/Optimise</string>
     <string name="library_back_up_all">Check Cloud Storage and back up everything that isn\'t already backed up</string>
     <!--
         Ian's middle option, 28 Aug 2026: "we back them up first and leave an opt file behind."
@@ -878,7 +878,7 @@ full size</string>
     <string name="first_backup_waiting_charging">Waiting for you to plug the phone in.</string>
     <string name="first_backup_ready">Ready to start.</string>
     <string name="first_backup_done">Your first backup is done, so this no longer applies — new photos back up as they arrive.</string>
-    <string name="first_backup_manual_note">You can always press Sync now to start immediately.</string>
+    <string name="first_backup_manual_note">You can always press Back Up Now to start immediately.</string>
 
     <!-- First-run topics. One topic exists once; the bubbles, Help and the just-in-time
          prompts all read these. Changing deletion wording here changes it everywhere. -->
@@ -910,9 +910,9 @@ full size</string>
          automatic sync pick up at the next trigger. -->
     <!-- Rescan walks the whole drive, tens of seconds on a real library, so the button says so. -->
     <string name="backup_checking_cloud">Checking…</string>
-    <string name="backup_syncing">Syncing…</string>
+    <string name="backup_syncing">Backing up now…</string>
     <string name="backup_paused">Paused</string>
-    <string name="backup_syncing_at">Syncing %1$d%%</string>
+    <string name="backup_syncing_at">Backing up now %1$d%%</string>
     <string name="backup_paused_at">Paused at %1$d%%</string>
     <string name="backup_pause">Pause</string>
     <string name="backup_resume">Resume</string>
@@ -992,7 +992,7 @@ full size</string>
     <string name="tour_cloud_destination">Backup destination</string>
     <string name="tour_cloud_change">Change</string>
     <string name="tour_cloud_google_photos_limits_title">About this Cloud</string>
-    <string name="tour_cloud_google_photos_limit_backup_only">Backup only — no Archive or Sync.</string>
+    <string name="tour_cloud_google_photos_limit_backup_only">Backup only — no Archive or Optimise.</string>
     <string name="tour_cloud_google_photos_limit_duplicates">Photos already in that Cloud may be added twice.</string>
     <string name="tour_cloud_google_photos_limit_restore">Restoring from it is not available yet.</string>
     <string name="tour_cloud_google_photos_limit_pro">Free for 30 days, then a one-time purchase.</string>
@@ -1048,7 +1048,7 @@ full size</string>
         quote. The switches are still worth setting, because they govern any album the user later
         puts on Sync — saying so beats a bare "0 MB", which reads as a broken estimate.
     -->
-    <string name="tour_optimise_later_only">These settings apply to any album you later set to Sync. This install will not optimise anything on its own.</string>
+    <string name="tour_optimise_later_only">These settings apply to any album you later set to Optimise. This install will not optimise anything on its own.</string>
     <!--
         Split from video_quality_high and friends because the wizard's three side-by-side buttons
         have room for the name and nothing else. The combined "High — 480p" label is still what the
@@ -1114,7 +1114,7 @@ full size</string>
     -->
     <string name="tour_progress_plug_in">Make sure your phone is plugged in for the backup to start on its own.</string>
     <string name="tour_progress_until_start">until backup starts</string>
-    <string name="tour_progress_sync_now">SYNC NOW</string>
+    <string name="tour_progress_sync_now">BACK UP NOW</string>
     <string name="tour_progress_scanning">Scanning your library…</string>
     <string name="tour_progress_uploading">Uploading %1$d of %2$d</string>
     <string name="tour_progress_uploading_cloud">Uploading %1$s</string>
@@ -1132,7 +1132,7 @@ full size</string>
     <string name="tour_progress_verifying">Checking your Cloud</string>
     <!-- Settings → Sync → Optimise video, after a stronger compression is chosen (Ian, 9 Oct 2026). -->
     <string name="reoptimise_title">Re-optimise existing videos?</string>
-    <string name="reoptimise_body">Videos in Sync albums that were too small to shrink at the old compression can be optimised again at this one. Videos already optimised stay as they are. The full-size originals stay in your Cloud.</string>
+    <string name="reoptimise_body">Videos in Optimise albums that were too small to shrink at the old compression can be optimised again at this one. Videos already optimised stay as they are. The full-size originals stay in your Cloud.</string>
     <string name="reoptimise_yes">Yes</string>
     <string name="reoptimise_no">No</string>
     <string name="tour_progress_verifying_body">Step one: checking your Cloud for the files it already has, by name and size. Nothing is sent during this step.</string>

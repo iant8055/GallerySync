@@ -975,6 +975,6 @@ private fun BackupEntryEntity.statusLines(): List<Pair<String, Color>> {
 private fun AlbumMode.label(): String = when (this) {
     AlbumMode.OFF -> "Off"
     AlbumMode.BACKUP -> "Backup"
-    AlbumMode.SYNC -> "Sync"
+    AlbumMode.SYNC -> "Optimise"
     AlbumMode.ARCHIVE -> "Archive"
 }
