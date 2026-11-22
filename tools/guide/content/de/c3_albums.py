@@ -119,6 +119,20 @@ Keine Miniaturansichten oder Vorschauen. **Drücke lange auf eine Datei**, um si
 **Retry** stellt fehlgeschlagene Dateien wieder in die Warteschlange und startet ein Backup. Es entfernt nichts.""",
         "en_hash": "a1305dbfcdea48b5",
     },
+    "album-resend": {
+        "title": 'Dateien, die nicht mehr in der Cloud sind',
+        "body": """Dateien, die dieses Album gesendet hat und die ihre Cloud nicht mehr hat. **Rescan** im Tab Albums findet sie, und die Karte des Albums zählt sie in Rot.
+
+• Jede ist ausgegraut und mit **not in <Cloud>** markiert.
+• Nichts wird von selbst erneut gesendet. Sie wurden vielleicht absichtlich in der Cloud gelöscht.
+• Nach rechts wischen wählt aus, nach links hebt die Auswahl auf. **Select all** und **Clear** gelten für alle.
+• **Resend** sendet die ausgewählten Dateien erneut, an die Cloud, in die ihr Ordner jetzt geht. Es entfernt nichts.
+• Optimierte Dateien erscheinen nicht: Das Original in voller Größe war nur in der Cloud.
+• In einem Album auf **Off** zuerst einen Modus wählen.
+• Bei anderen Clouds als OneDrive prüft jedes Rescan höchstens 25 Dateien pro Album, die nicht im Ordner des Albums sind. Für den Rest erneut Rescan.""",
+        "en_hash": "a8f795b13b82f94e",
+    },
+
     "album-file-sort": {
         "title": "Die Dateien eines Albums sortieren",
         "body": """• **Name:** A bis Z.

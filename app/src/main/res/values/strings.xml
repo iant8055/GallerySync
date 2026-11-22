@@ -401,6 +401,15 @@ full size</string>
     <string name="album_status_failed">%1$d failed</string>
     <string name="album_retry_failed">Retry %1$d failed</string>
     <string name="album_retry_failed_hint">These files could not be sent after several tries. Retry puts them back in the queue and starts a backup.</string>
+    <!-- Albums tab: files this album sent that a Cloud no longer holds (Ian, 22 Nov 2026). Flag only; resent from the album's page. -->
+    <plurals name="album_missing_from_cloud">
+        <item quantity="one">%1$d file is no longer in the Cloud</item>
+        <item quantity="other">%1$d files are no longer in the Cloud</item>
+    </plurals>
+    <string name="album_resend">Resend %1$d</string>
+    <string name="album_status_not_in_cloud">%1$d not in the Cloud</string>
+    <!-- A file's line on the album page when the Cloud it was sent to no longer holds it. -->
+    <string name="album_file_not_in_cloud">not in %1$s</string>
     <plurals name="file_count">
         <item quantity="one">%d file</item>
         <item quantity="other">%d files</item>

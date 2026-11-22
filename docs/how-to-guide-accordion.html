@@ -90,7 +90,7 @@
 <main>
 
   <h1>How To Guide</h1>
-  <p class="sub">GallerySync — last updated 16 November 2026</p>
+  <p class="sub">GallerySync — last updated 22 November 2026</p>
 
   <div class="note">
     <p><strong>Every screen, every line.</strong> This guide explains each part of GallerySync in plain
@@ -305,6 +305,11 @@
 <ul><li><strong>✓ backed up:</strong> in the Cloud, full size on the phone.</li><li><strong>✓ backed up · optimised:</strong> in the Cloud; the phone has a smaller copy.</li><li><strong>⟳ pending:</strong> waiting to be sent.</li><li><strong>✗ failed:</strong> could not be sent after several tries.</li></ul>
 <h4>Retry failed</h4>
 <p><strong>Retry</strong> puts failed files back in the queue and starts a backup. It removes nothing.</p>
+  </div></details>
+  <details class="topic"><summary>Files no longer in the Cloud</summary>
+  <div class="topic-body" id="album-resend">
+<p>Files this album sent that their Cloud no longer has. <strong>Rescan</strong> on the Albums tab finds them, and the album's card counts them in red.</p>
+<ul><li>Each is greyed and marked <strong>not in &lt;Cloud&gt;</strong>.</li><li>Nothing is sent again on its own. They may have been deleted in the Cloud on purpose.</li><li>Swipe right to select, left to deselect. <strong>Select all</strong> and <strong>Clear</strong> do every one.</li><li><strong>Resend</strong> sends the selected files again, to the Cloud their folder goes to now. It removes nothing.</li><li>Optimised files are not listed: the full-size original was only in the Cloud.</li><li>In an <strong>Off</strong> album, set a mode first.</li><li>For Clouds other than OneDrive, each Rescan looks up at most 25 files per album that are not in the album's folder. Rescan again for the rest.</li></ul>
   </div></details>
   <details class="topic"><summary>Sorting an album&#x27;s files</summary>
   <div class="topic-body" id="album-file-sort">
@@ -804,7 +809,7 @@
   </div></details>
 
   <footer>
-    GallerySync — How To Guide. Last updated 16 November 2026.
+    GallerySync — How To Guide. Last updated 22 November 2026.
   </footer>
 
 </main>

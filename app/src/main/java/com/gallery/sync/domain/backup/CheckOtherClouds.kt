@@ -22,8 +22,9 @@ import kotlin.coroutines.coroutineContext
  * and keeps the answer for the Albums tab (Ian, 16 Nov 2026: *"every Cloud that can be checked - per folder like
  * OneDrive"*). Google Photos cannot be asked and keeps its "sent to" line.
  *
- * **Display only.** It writes [AlbumElsewhereStatusEntity] and nothing else: no ledger state, no mode, no file. Archive
- * still asks the Cloud live about each file before anything leaves the phone.
+ * It writes [AlbumElsewhereStatusEntity] and nothing else: no ledger state, no mode, no file. From Rescan it also hands
+ * each album's definitely-missing files to `onMissing` (Ian, 22 Nov 2026, `RequeueMissingFromCloud`), which can only
+ * queue them to be sent again. Archive still asks the Cloud live about each file before anything leaves the phone.
  *
  * Not part of the wizard and not part of `ReconcileWithCloud`, which the wizard shares.
  */
@@ -36,7 +37,9 @@ class CheckOtherClouds @Inject constructor(
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
 ) {
 
-    suspend fun run() = withContext(dispatcher) {
+    suspend fun run(
+        onMissing: suspend (album: String, rowIds: List<String>) -> Unit = { _, _ -> }
+    ) = withContext(dispatcher) {
         val prefs = settings.current()
         val groups = entryDao.sentElsewhere().groupBy { it.album to it.location }
         val written = HashSet<Pair<String, BackupLocation>>()
@@ -46,11 +49,13 @@ class CheckOtherClouds @Inject constructor(
             val (album, location) = key
             val verifier = verifiers.of(location) ?: continue // Google Photos: nothing to ask.
             val listing = verifier.listAlbum(album, prefs.folderFor(location))
+            var missingIds = emptyList<String>()
             val status = if (listing == null) {
                 Logger.w(TAG, "check: could not list $album in $location")
                 AlbumElsewhereStatusEntity(album, location, System.currentTimeMillis(), 0, 0, 0, couldNotCheck = true)
             } else {
-                val tally = ElsewhereTally.of(rows, listing) { verifier.sizeOf(it) }
+                val (tally, missing) = ElsewhereTally.withMissing(rows, listing) { verifier.sizeOf(it) }
+                missingIds = missing
                 AlbumElsewhereStatusEntity(
                     albumName = album,
                     location = location,
@@ -63,6 +68,7 @@ class CheckOtherClouds @Inject constructor(
             }
             statusDao.upsert(status)
             written += key
+            if (missingIds.isNotEmpty()) onMissing(album, missingIds)
         }
 
         // An answer about files no longer sent there (the album emptied, or the Cloud signed out and forgotten) says
@@ -88,32 +94,52 @@ object ElsewhereTally {
 
     data class Outcome(val verified: Int, val missing: Int, val unchecked: Int)
 
+    private enum class Answer { VERIFIED, MISSING, UNCHECKED }
+
     suspend fun of(
         rows: List<SentElsewhereRow>,
         listing: Map<String, Long>,
         lookUp: suspend (remoteItemId: String) -> RemoteCheck
-    ): Outcome {
-        var verified = 0
-        var missing = 0
-        var unchecked = 0
+    ): Outcome = outcomeOf(answer(rows, listing, lookUp).values)
+
+    /** [of], plus the ledger ids of the rows it counted missing: what Rescan may queue again. Never an unchecked one. */
+    suspend fun withMissing(
+        rows: List<SentElsewhereRow>,
+        listing: Map<String, Long>,
+        lookUp: suspend (remoteItemId: String) -> RemoteCheck
+    ): Pair<Outcome, List<String>> {
+        val answers = answer(rows, listing, lookUp)
+        return outcomeOf(answers.values) to answers.filterValues { it == Answer.MISSING }.keys.map { it.id }
+    }
+
+    private fun outcomeOf(answers: Collection<Answer>) = Outcome(
+        verified = answers.count { it == Answer.VERIFIED },
+        missing = answers.count { it == Answer.MISSING },
+        unchecked = answers.count { it == Answer.UNCHECKED }
+    )
+
+    private suspend fun answer(
+        rows: List<SentElsewhereRow>,
+        listing: Map<String, Long>,
+        lookUp: suspend (remoteItemId: String) -> RemoteCheck
+    ): Map<SentElsewhereRow, Answer> {
         var lookups = 0
+        val out = LinkedHashMap<SentElsewhereRow, Answer>()
         for (row in rows) {
             val listed = listing[row.remoteItemId]
-            if (listed != null) {
-                if (listed == row.sizeBytes) verified++ else missing++
-                continue
-            }
-            if (lookups >= MAX_LOOKUPS) {
-                unchecked++
-                continue
-            }
-            lookups++
-            when (val answer = lookUp(row.remoteItemId)) {
-                is RemoteCheck.Present -> if (answer.sizeBytes == row.sizeBytes) verified++ else missing++
-                RemoteCheck.Gone -> missing++
-                RemoteCheck.Unknown -> unchecked++
+            out[row] = when {
+                listed != null -> if (listed == row.sizeBytes) Answer.VERIFIED else Answer.MISSING
+                lookups >= MAX_LOOKUPS -> Answer.UNCHECKED
+                else -> {
+                    lookups++
+                    when (val answer = lookUp(row.remoteItemId)) {
+                        is RemoteCheck.Present -> if (answer.sizeBytes == row.sizeBytes) Answer.VERIFIED else Answer.MISSING
+                        RemoteCheck.Gone -> Answer.MISSING
+                        RemoteCheck.Unknown -> Answer.UNCHECKED
+                    }
+                }
             }
         }
-        return Outcome(verified, missing, unchecked)
+        return out
     }
 }

@@ -3,6 +3,15 @@
 Every change since version 26 (0.3.25), the last build the Closed Testing group had. The short notes Play shows to users
 (500 characters per language) are in `release-notes/`; this file is the full record.
 
+## Not yet in a build
+
+**Settings**
+- A folder inside a top-level folder can choose its own Cloud. Adding *DCIM / Funny stuff* now asks about that folder and lists it under DCIM in *Where each folder goes*; before, the answer moved the whole of DCIM. Every folder added under *Folders to back up* has its own row, following its parent's Cloud until one is chosen.
+
+**Albums tab**
+- An album whose Cloud no longer holds some of the files it sent says so in red ("25 files are no longer in the Cloud"), found by the tab's check and **Rescan**. Nothing is sent again on its own.
+- On the album's page those files are greyed and marked "not in Dropbox". Select them as on the Restore tab (swipe right, or **Select all**) and press **Resend** to send them again, to where their folder goes now. A new (?) explains it. Optimised files are never offered: their full-size original was only in the Cloud.
+
 ## Version 39 (0.3.38) — 16 Nov 2026, uploaded, installed on the Fold
 
 **Albums tab**

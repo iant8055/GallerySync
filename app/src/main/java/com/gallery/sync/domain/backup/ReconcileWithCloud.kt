@@ -57,6 +57,13 @@ class ReconcileWithCloud @Inject constructor(
      * never "40 albums are not backed up".
      */
     suspend fun run(
+        /**
+         * Each album's listing as it arrives, and whether it was complete: Rescan's hook (Ian, 22 Nov 2026,
+         * `RequeueMissingFromCloud`). Does nothing by default, so the wizard's check is exactly what it was. Before
+         * [onProgress] so the wizard's trailing lambda still means progress.
+         */
+        onAlbumListed: suspend (album: String, remoteIndex: Map<String, RemoteFileRef>?, complete: Boolean) -> Unit =
+            { _, _, _ -> },
         onProgress: (CloudReconciliation) -> Unit = {}
     ): CloudReconciliation? = withContext(dispatcher) {
         if (scanner.access() == MediaAccess.NONE) {
@@ -76,7 +83,8 @@ class ReconcileWithCloud @Inject constructor(
             val local = scanner.scanAlbum(album.name)
             // null means the listing failed. Passed through as-is: substituting an empty map here
             // is exactly the mistake that reported 8,177 safe files as missing.
-            val remoteIndex = engine.remoteIndexFor(album.name)
+            var partial = false
+            val remoteIndex = engine.remoteIndexFor(album.name) { partial = true }
 
             // A proxied file is smaller on disk than the original OneDrive holds, so without its
             // pre-proxy size the size test fails and a verified file counts as missing — the Albums
@@ -107,6 +115,7 @@ class ReconcileWithCloud @Inject constructor(
 
             total += forAlbum
             onProgress(total)
+            onAlbumListed(album.name, remoteIndex, !partial)
         }
 
         Logger.i(

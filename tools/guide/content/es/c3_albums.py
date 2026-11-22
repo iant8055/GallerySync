@@ -131,6 +131,20 @@ Sin miniaturas ni vistas previas. **Mantén pulsado un archivo** para abrirlo en
         "en_hash": "a1305dbfcdea48b5",
     },
 
+    "album-resend": {
+        "title": 'Archivos que ya no están en la Cloud',
+        "body": """Archivos que este álbum envió y que su Cloud ya no tiene. **Rescan** en la pestaña Albums los encuentra, y la tarjeta del álbum los cuenta en rojo.
+
+• Cada uno aparece atenuado y marcado **not in <Cloud>**.
+• Nada se vuelve a enviar por sí solo. Puede que se borraran en la Cloud a propósito.
+• Desliza a la derecha para seleccionar y a la izquierda para deseleccionar. **Select all** y **Clear** actúan sobre todos.
+• **Resend** vuelve a enviar los archivos seleccionados a la Cloud a la que va ahora su carpeta. No elimina nada.
+• Los archivos optimizados no aparecen: el original a tamaño completo solo estaba en la Cloud.
+• En un álbum **Off**, elige antes un modo.
+• En las Clouds distintas de OneDrive, cada Rescan consulta como máximo 25 archivos por álbum que no estén en la carpeta del álbum. Vuelve a pulsar Rescan para el resto.""",
+        "en_hash": "a8f795b13b82f94e",
+    },
+
     "album-file-sort": {
         "title": "Ordenar los archivos de un álbum",
         "body": """• **Name:** de la A a la Z.

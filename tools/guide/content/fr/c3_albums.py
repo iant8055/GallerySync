@@ -119,6 +119,20 @@ Pas de miniatures ni d'aperçus. **Appuyez longuement sur un fichier** pour l'ou
 **Retry** remet les fichiers en échec dans la file et lance une sauvegarde. Cela ne retire rien.""",
         "en_hash": "a1305dbfcdea48b5",
     },
+    "album-resend": {
+        "title": 'Fichiers qui ne sont plus dans le Cloud',
+        "body": """Fichiers que cet album a envoyés et que leur Cloud n'a plus. **Rescan** dans l'onglet Albums les trouve, et la carte de l'album les compte en rouge.
+
+• Chacun est grisé et marqué **not in <Cloud>**.
+• Rien n'est renvoyé tout seul. Ils ont peut-être été supprimés exprès dans le Cloud.
+• Balayez vers la droite pour sélectionner, vers la gauche pour désélectionner. **Select all** et **Clear** agissent sur tous.
+• **Resend** renvoie les fichiers sélectionnés, vers le Cloud où va désormais leur dossier. Cela ne retire rien.
+• Les fichiers optimisés n'apparaissent pas : l'original en taille réelle n'était que dans le Cloud.
+• Dans un album **Off**, choisissez d'abord un mode.
+• Pour les Clouds autres que OneDrive, chaque Rescan vérifie au plus 25 fichiers par album absents du dossier de l'album. Relancez Rescan pour le reste.""",
+        "en_hash": "a8f795b13b82f94e",
+    },
+
     "album-file-sort": {
         "title": "Trier les fichiers d'un album",
         "body": """• **Name :** de A à Z.

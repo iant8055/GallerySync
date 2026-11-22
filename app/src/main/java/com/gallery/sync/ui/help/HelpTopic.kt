@@ -24,6 +24,7 @@ enum class HelpTopic(
     ALBUMS_LIST("albums-list", R.string.help_albums_list_title, R.string.help_albums_list_body),
     ALBUM_DETAIL("album-detail", R.string.help_album_detail_title, R.string.help_album_detail_body),
     ALBUM_FILE_STATUS("album-file-status", R.string.help_album_file_status_title, R.string.help_album_file_status_body),
+    ALBUM_RESEND("album-resend", R.string.help_album_resend_title, R.string.help_album_resend_body),
     ALBUM_FILE_PIN("album-file-pin", R.string.help_album_file_pin_title, R.string.help_album_file_pin_body),
     ALBUM_CAMERA_OPTIMISE("album-camera-optimise", R.string.help_album_camera_optimise_title, R.string.help_album_camera_optimise_body),
     ALBUM_CAMERA_SELECT("album-camera-select", R.string.help_album_camera_select_title, R.string.help_album_camera_select_body),

@@ -109,6 +109,18 @@ CHAPTER = Chapter(
             **Retry** puts failed files back in the queue and starts a backup. It removes nothing.
         """, ui=True),
 
+        topic("album-resend", "Files no longer in the Cloud", """
+            Files this album sent that their Cloud no longer has. **Rescan** on the Albums tab finds them, and the album's card counts them in red.
+
+            • Each is greyed and marked **not in <Cloud>**.
+            • Nothing is sent again on its own. They may have been deleted in the Cloud on purpose.
+            • Swipe right to select, left to deselect. **Select all** and **Clear** do every one.
+            • **Resend** sends the selected files again, to the Cloud their folder goes to now. It removes nothing.
+            • Optimised files are not listed: the full-size original was only in the Cloud.
+            • In an **Off** album, set a mode first.
+            • For Clouds other than OneDrive, each Rescan looks up at most 25 files per album that are not in the album's folder. Rescan again for the rest.
+        """, ui=True),
+
         topic("album-file-sort", "Sorting an album's files", """
             • **Name:** A to Z.
             • **Date:** newest first.

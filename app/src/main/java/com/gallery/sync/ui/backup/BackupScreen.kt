@@ -179,6 +179,13 @@ fun BackupScreen(
                     detailEntries = viewModel.albumEntries(album.name)
                 }
             },
+            missingFromCloud = state.missingFromCloud[album.name].orEmpty(),
+            onResend = { selected ->
+                scope.launch {
+                    viewModel.resendMissing(album.name, selected)
+                    detailEntries = viewModel.albumEntries(album.name)
+                }
+            },
             modifier = modifier,
             camera = if (isCamera) {
                 CameraOptimiseControls(
@@ -814,6 +821,17 @@ private fun AlbumModeRow(
                     else
                         MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                // Sent, and gone from the Cloud since (Ian, 22 Nov 2026). Only said, never acted on: the user may have
+                // deleted them there on purpose, and Resend on the album's page is where they choose.
+                if (album.missingFromCloud > 0) {
+                    Text(
+                        text = pluralStringResource(
+                            R.plurals.album_missing_from_cloud, album.missingFromCloud, album.missingFromCloud
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
                 // A mode chosen earlier that this album's cloud cannot do — the folder was moved to
                 // another cloud afterwards. The user's choice is never rewritten, so say plainly that it is
                 // doing nothing rather than let the pill look active.

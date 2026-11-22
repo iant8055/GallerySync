@@ -153,7 +153,19 @@ data class SentElsewhereRow(
     val album: String,
     val location: BackupLocation,
     val remoteItemId: String,
-    val sizeBytes: Long
+    val sizeBytes: Long,
+    /** The ledger row, so a file the Cloud no longer holds can be queued again from Rescan. */
+    val id: String = ""
+)
+
+/** A sent file still on the phone and never optimised: what Rescan may queue again. See `RequeueMissingFromCloud`. */
+data class ReverifyRow(
+    val id: String,
+    val displayName: String,
+    val sizeBytes: Long,
+    val location: BackupLocation,
+    val remoteItemId: String?,
+    val relativePath: String?
 )
 
 /** A count per cloud, for the wizard's progress card. */
@@ -583,6 +595,36 @@ interface BackupEntryDao {
         pending: BackupState = BackupState.PENDING,
         failed: BackupState = BackupState.FAILED
     )
+
+    /** This album's sent files that are still on the phone at full size. Rescan's candidates; see `RequeueMissingFromCloud`. */
+    @Query(
+        """
+        SELECT id, displayName, sizeBytes, location, remoteItemId, relativePath FROM backup_entries
+        WHERE album = :album AND state = :uploaded AND localMissingSinceEpochMillis IS NULL AND isProxied = 0
+        """
+    )
+    suspend fun uploadedOnPhone(album: String, uploaded: BackupState = BackupState.UPLOADED): List<ReverifyRow>
+
+    /**
+     * Puts files the Cloud no longer holds back in the queue, to [location]: what was recorded about the copy that is
+     * gone is cleared, so nothing later trusts it. Re-checks the same limits as [uploadedOnPhone], so an optimised file
+     * or one that has left the phone can never be put back however it was chosen. Adds work only; removes nothing.
+     */
+    @Query(
+        """
+        UPDATE backup_entries
+        SET state = :pending, location = :location, remoteItemId = NULL, remoteSizeBytes = NULL,
+            uploadedAtEpochMillis = NULL, attemptCount = 0, lastError = NULL,
+            uploadSessionUrl = NULL, uploadSessionExpiresAtEpochMillis = NULL
+        WHERE id IN (:ids) AND state = :uploaded AND localMissingSinceEpochMillis IS NULL AND isProxied = 0
+        """
+    )
+    suspend fun requeueMissingFromCloud(
+        ids: List<String>,
+        location: BackupLocation,
+        uploaded: BackupState = BackupState.UPLOADED,
+        pending: BackupState = BackupState.PENDING
+    ): Int
 
     /** Every row not yet sent, with its folder: `SetFolderDestination` works out which follow a change. */
     @Query("SELECT id, album, relativePath, location FROM backup_entries WHERE state IN (:pending, :failed)")
@@ -1394,7 +1436,7 @@ interface BackupEntryDao {
      */
     @Query(
         """
-        SELECT album AS album, location AS location, remoteItemId AS remoteItemId, sizeBytes AS sizeBytes
+        SELECT album AS album, location AS location, remoteItemId AS remoteItemId, sizeBytes AS sizeBytes, id AS id
         FROM backup_entries
         WHERE state = :uploaded AND location != :oneDrive AND localMissingSinceEpochMillis IS NULL
             AND remoteItemId IS NOT NULL

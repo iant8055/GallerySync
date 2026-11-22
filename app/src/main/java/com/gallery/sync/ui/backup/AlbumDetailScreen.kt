@@ -154,6 +154,12 @@ fun AlbumDetailScreen(
     /** *Retry failed*: put the failed files back in the queue and start a backup. See `RetryFailed`. */
     onRetryFailed: () -> Unit,
     modifier: Modifier = Modifier,
+    /**
+     * Files sent that a Cloud no longer holds, as the last check found (row ids). Selected and resent like the Restore
+     * tab's files (Ian, 22 Nov 2026). See `RequeueMissingFromCloud`.
+     */
+    missingFromCloud: Set<String> = emptySet(),
+    onResend: (Set<String>) -> Unit = {},
     /** Only the Camera album passes this. See [CameraOptimiseControls]. */
     camera: CameraOptimiseControls? = null,
     opener: OpenFileViewModel = hiltViewModel()
@@ -188,6 +194,12 @@ fun AlbumDetailScreen(
         }
     }
     val selected = remember(selection) { selection.toHashSet() }
+
+    // Which of the files gone from the Cloud to send again. Nothing is selected to start with (Ian, 22 Nov 2026: they
+    // may have been deleted there on purpose); right selects, left deselects, as on the Restore tab.
+    var resendSelection by rememberSaveable(albumName) { mutableStateOf(ArrayList<String>()) }
+    val resendable = if (mode.uploads) missingFromCloud else emptySet()
+    val toResend = remember(resendSelection, resendable) { resendSelection.filter { it in resendable }.toSet() }
     val toOptimise = remember(entries, selected) { CameraSelection.toOptimise(entries, selected) }
 
     // Every file, in the camera folder as everywhere else. Nothing on the header hides one.
@@ -278,6 +290,17 @@ fun AlbumDetailScreen(
                     )
                 },
                 onRetryFailed = onRetryFailed,
+                resend = ResendHeader(
+                    missing = missingFromCloud.size,
+                    canResend = mode.uploads,
+                    selected = toResend.size,
+                    onSelectAll = { resendSelection = ArrayList(resendable) },
+                    onClear = { resendSelection = ArrayList() },
+                    onResend = {
+                        onResend(toResend)
+                        resendSelection = ArrayList()
+                    }
+                ),
                 onBack = leave,
                 backsUpTo = backsUpTo,
                 backupFolder = backupFolder
@@ -337,13 +360,43 @@ fun AlbumDetailScreen(
                                                     cameraSelected = isSelected
                                                 )
                                             }
+                                        } else if (entry.id in resendable) {
+                                            // Gone from the Cloud since it was sent: greyed until selected, highlighted
+                                            // once selected, as on the Restore tab (Ian, 22 Nov 2026).
+                                            val isSelected = entry.id in toResend
+                                            val toggle = {
+                                                resendSelection = ArrayList(
+                                                    if (isSelected) resendSelection - entry.id else resendSelection + entry.id
+                                                )
+                                            }
+                                            SwipeChoiceBox(
+                                                enabled = true,
+                                                stateKey = isSelected,
+                                                onSwipeRight = { if (!isSelected) toggle() },
+                                                onSwipeLeft = { if (isSelected) toggle() },
+                                                accessibilityLabel = stringResource(
+                                                    if (isSelected) R.string.select_action_deselect else R.string.select_action_select
+                                                ),
+                                                onAccessibilityAction = toggle
+                                            ) { drawn ->
+                                                FileCard(
+                                                    entry = entry,
+                                                    context = context,
+                                                    showKeepBox = false,
+                                                    onSetPinned = {},
+                                                    modifier = drawn.longPressToOpen { opener.open(entry) },
+                                                    cameraSelected = isSelected,
+                                                    goneFromCloud = true
+                                                )
+                                            }
                                         } else {
                                             FileCard(
                                                 entry = entry,
                                                 context = context,
                                                 showKeepBox = entry.id in restoredIds,
                                                 onSetPinned = { pinned -> onSetPinned(entry, pinned) },
-                                                modifier = Modifier.longPressToOpen { opener.open(entry) }
+                                                modifier = Modifier.longPressToOpen { opener.open(entry) },
+                                                goneFromCloud = entry.id in missingFromCloud
                                             )
                                         }
                                     }
@@ -374,6 +427,7 @@ private fun DetailHeader(
     showKeepColumn: Boolean,
     camera: CameraHeader?,
     onRetryFailed: () -> Unit,
+    resend: ResendHeader,
     onBack: () -> Unit,
     backsUpTo: BackupLocation? = null,
     backupFolder: String? = null
@@ -474,13 +528,16 @@ private fun DetailHeader(
                         // Plain text in the card's own ink: the coloured counts this line used to have
                         // were the theme's primary and tertiary, which are not made to sit on green.
                         val keptText = stringResource(R.string.album_status_kept, entries.count { FilePin.isPinned(it.modeOverride) })
+                        val notInCloudText = stringResource(R.string.album_status_not_in_cloud, resend.missing)
                         val counts = buildList {
-                            val backed = entries.count { it.state == BackupState.UPLOADED }
+                            // A file gone from the Cloud since is not counted as backed up (Ian, 22 Nov 2026).
+                            val backed = entries.count { it.state == BackupState.UPLOADED } - resend.missing
                             val proxied = entries.count { it.isProxied }
                             val kept = entries.count { FilePin.isPinned(it.modeOverride) }
                             val pending = entries.count { it.state == BackupState.PENDING }
                             val failed = entries.count { it.state == BackupState.FAILED }
                             if (backed > 0) add("$backed backed up")
+                            if (resend.missing > 0) add(notInCloudText)
                             if (proxied > 0) add("$proxied optimised")
                             if (kept > 0) add(keptText)
                             if (pending > 0) add("$pending pending")
@@ -504,6 +561,31 @@ private fun DetailHeader(
                                 onClick = onRetryFailed,
                                 label = stringResource(R.string.album_retry_failed, failedFiles)
                             )
+                        }
+
+                        // Sent, and gone from the Cloud since: the user's choice whether they go again (Ian, 22 Nov 2026).
+                        // Offered only where the album uploads, as Retry failed is; an Off album says so instead.
+                        // No words here (Ian, 22 Nov 2026): the counts line says how many, and the (?) says the rest.
+                        // An Off album gets no buttons; its count stays on the counts line.
+                        if (resend.missing > 0 && resend.canResend) {
+                            WithHelp(HelpTopic.ALBUM_RESEND) {
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    HeroOutlinedButton(
+                                        onClick = if (resend.selected == resend.missing) resend.onClear else resend.onSelectAll,
+                                        label = stringResource(
+                                            if (resend.selected == resend.missing) R.string.retrieve_clear_selection
+                                            else R.string.retrieve_select_all
+                                        ),
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                    HeroOutlinedButton(
+                                        onClick = resend.onResend,
+                                        label = stringResource(R.string.album_resend, resend.selected),
+                                        enabled = resend.selected > 0,
+                                        modifier = Modifier.weight(1f)
+                                    )
+                                }
+                            }
                         }
 
                         if (camera != null) CameraOptimiseSection(camera)
@@ -574,7 +656,9 @@ private fun FileCard(
      * In the camera folder only: whether Sync now will optimise this file. Selected is highlighted as on the
      * Restore tab; not selected is greyed (Ian, 27 Sept 2026). Null everywhere else, which draws the plain card.
      */
-    cameraSelected: Boolean? = null
+    cameraSelected: Boolean? = null,
+    /** Sent, and no longer in its Cloud at the last check: the line says so rather than naming the Cloud as its place. */
+    goneFromCloud: Boolean = false
 ) {
     val scheme = MaterialTheme.colorScheme
     val selected = cameraSelected == true
@@ -633,7 +717,8 @@ private fun FileCard(
                 val date = FileDateFormat.format(
                     Instant.ofEpochSecond(entry.dateForSorting).atZone(ZoneId.systemDefault())
                 )
-                val marks = entry.statusLines()
+                // Gone from the Cloud since: it is not backed up any more, whatever the record says.
+                val marks = entry.statusLines().filterNot { goneFromCloud && it.first == "✓ backed up" }
                 // Which Cloud it went to, named only once it is actually there (Ian, 4 Oct 2026: "or
                 // where it was backed up to" — past tense). A pending or failed row has a *destination*
                 // rather than a place, and naming one would read as a claim the app has not earned.
@@ -641,6 +726,9 @@ private fun FileCard(
                 // every file went to then.
                 val placed = entry.state == BackupState.UPLOADED
                 val cloud = if (placed) stringResource(entry.location.labelRes()) else null
+                val notInCloud = if (placed && goneFromCloud) {
+                    stringResource(R.string.album_file_not_in_cloud, stringResource(entry.location.labelRes()))
+                } else null
                 Text(
                     text = buildAnnotatedString {
                         append(date)
@@ -648,7 +736,10 @@ private fun FileCard(
                             append(" · ")
                             withStyle(SpanStyle(color = color)) { append(text) }
                         }
-                        if (cloud != null) {
+                        if (notInCloud != null) {
+                            append(" · ")
+                            withStyle(SpanStyle(color = scheme.error)) { append(notInCloud) }
+                        } else if (cloud != null) {
                             append(" · ")
                             append(cloud)
                         }
@@ -679,6 +770,16 @@ private fun FileCard(
         }
     }
 }
+
+/** What the header needs for **Resend**: how many files are gone from the Cloud, how many are selected, and the actions. */
+private class ResendHeader(
+    val missing: Int,
+    val canResend: Boolean,
+    val selected: Int,
+    val onSelectAll: () -> Unit,
+    val onClear: () -> Unit,
+    val onResend: () -> Unit
+)
 
 /** What the header needs to draw the camera folder's controls: the choices, what they select, and what to do. */
 private data class CameraHeader(

@@ -119,6 +119,20 @@ Sem miniaturas nem pré-visualizações. **Toque e segure um arquivo** para abri
 **Retry** coloca os arquivos com falha de volta na fila e inicia um backup. Não remove nada.""",
         "en_hash": "a1305dbfcdea48b5",
     },
+    "album-resend": {
+        "title": 'Arquivos que não estão mais na Cloud',
+        "body": """Arquivos que este álbum enviou e que a Cloud deles não tem mais. **Rescan** na aba Albums os encontra, e o cartão do álbum os conta em vermelho.
+
+• Cada um aparece esmaecido e marcado **not in <Cloud>**.
+• Nada é reenviado sozinho. Eles podem ter sido apagados na Cloud de propósito.
+• Deslize para a direita para selecionar e para a esquerda para desmarcar. **Select all** e **Clear** valem para todos.
+• **Resend** envia de novo os arquivos selecionados, para a Cloud para onde a pasta deles vai agora. Não remove nada.
+• Arquivos otimizados não aparecem: o original em tamanho total só estava na Cloud.
+• Em um álbum **Off**, escolha um modo primeiro.
+• Nas Clouds que não são o OneDrive, cada Rescan consulta no máximo 25 arquivos por álbum que não estão na pasta do álbum. Use Rescan de novo para o resto.""",
+        "en_hash": "a8f795b13b82f94e",
+    },
+
     'album-file-sort': {
         "title": 'Ordenar os arquivos de um álbum',
         "body": """• **Name:** de A a Z.

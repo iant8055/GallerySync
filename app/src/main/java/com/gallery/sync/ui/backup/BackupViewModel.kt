@@ -244,7 +244,14 @@ data class AlbumRow(
     val backupLocation: BackupLocation = BackupLocation.DEFAULT,
 
     /** The folder holding most of this album's files (`DCIM/Funny stuff`), or null if the scan could not say. */
-    val folderPath: String? = null
+    val folderPath: String? = null,
+
+    /**
+     * Files this album sent that a Cloud, at the last check, definitely no longer holds — still on the phone and never
+     * optimised, so they could be sent again. Flagged on the Albums tab; resent only from the album's page (Ian,
+     * 22 Nov 2026). See `RequeueMissingFromCloud`.
+     */
+    val missingFromCloud: Int = 0
 ) {
     val isEnabled: Boolean get() = mode.uploads
 
@@ -410,6 +417,8 @@ data class BackupUiState(
     val folders: List<FolderRow> = emptyList(),
     /** A folder just added in Settings and now scanned: the pop-up asking where it goes is up for it. */
     val folderToPlace: String? = null,
+    /** Per album, what the last check found sent but no longer in a Cloud. See [AlbumRow.missingFromCloud]. */
+    val missingFromCloud: Map<String, Set<String>> = emptyMap(),
     /** The Camera album's manual optimise is queued or running. Drives its button and its list. */
     val cameraOptimising: Boolean = false,
     /** *Special settings for Camera*, off out of the box. See `BackupPreferences.cameraSpecialEnabled`. */
@@ -578,6 +587,7 @@ class BackupViewModel @Inject constructor(
     private val elsewhereStatusDao: com.gallery.sync.data.local.dao.AlbumElsewhereStatusDao,
     private val reconcile: ReconcileWithCloud,
     private val checkOtherClouds: com.gallery.sync.domain.backup.CheckOtherClouds,
+    private val requeueMissing: com.gallery.sync.domain.backup.RequeueMissingFromCloud,
     private val engine: BackupEngine,
     private val localCopyRemover: LocalCopyRemover,
     private val proxyApplier: ProxyApplier,
@@ -887,6 +897,26 @@ class BackupViewModel @Inject constructor(
     }
 
     /**
+     * **Resend** on an album's page (Ian, 22 Nov 2026): the files this album sent that a Cloud no longer holds go back in
+     * the queue and a backup starts. Asks the Clouds afresh; the flag that offered it is only what the last check found.
+     * The user's choice, never automatic: they may have deleted those files in the Cloud on purpose.
+     */
+    suspend fun resendMissing(album: String, selected: Set<String>): Int {
+        val n = requeueMissing.resend(album, selected)
+        // What was chosen leaves the flag: sent again, or found to be in the Cloud after all.
+        _state.update { current ->
+            val left = current.missingFromCloud[album].orEmpty() - selected
+            current.copy(
+                missingFromCloud = if (left.isEmpty()) current.missingFromCloud - album else current.missingFromCloud + (album to left),
+                albums = current.albums.map { if (it.name == album) it.copy(missingFromCloud = left.size) else it }
+            )
+        }
+        refreshCounts()
+        if (n > 0) runBackupNow()
+        return n
+    }
+
+    /**
      * A folder was just added in Settings: rescan, and once the scan has finished ask where it goes (Ian, 31 Oct
      * 2026). Waits for the scan so the answer lands on a folder row that exists and a late scan cannot overwrite it.
      * Asking sets nothing, and the new albums stay Off, so nothing is sent until the user sets a mode.
@@ -920,11 +950,26 @@ class BackupViewModel @Inject constructor(
 
         viewModelScope.launch {
             _state.update { it.copy(isCheckingCloud = true) }
+            // Files this phone sent that a Cloud no longer holds, per album: flagged, never re-sent from here (Ian,
+            // 22 Nov 2026). Counted from the same listings, so the check asks nothing more of the Clouds.
+            val missing = HashMap<String, MutableSet<String>>()
             try {
-                reconcile.run()
+                reconcile.run(onAlbumListed = { album, index, complete ->
+                    val rows = requeueMissing.missingFromOneDrive(album, index, complete)
+                    if (rows.isNotEmpty()) missing.getOrPut(album) { HashSet() } += rows.map { it.id }
+                })
                 // Then every other Cloud that can be asked, album by album (Ian, 16 Nov 2026). Its own step, after
                 // OneDrive's, so the wizard's reconcile stays exactly as it was.
-                checkOtherClouds.run()
+                checkOtherClouds.run(onMissing = { album, ids ->
+                    val rows = requeueMissing.missingElsewhere(album, ids)
+                    if (rows.isNotEmpty()) missing.getOrPut(album) { HashSet() } += rows.map { it.id }
+                })
+                _state.update { current ->
+                    current.copy(
+                        missingFromCloud = missing,
+                        albums = current.albums.map { it.copy(missingFromCloud = missing[it.name]?.size ?: 0) }
+                    )
+                }
             } finally {
                 // In a finally: a walk abandoned half way still has to clear the flag, or the
                 // button stays busy for the life of the process.
@@ -1003,7 +1048,8 @@ class BackupViewModel @Inject constructor(
                     backupLocation = FolderDestination.resolve(
                         album.mainPath(), folderLocations, prefs.backupLocation
                     ),
-                    folderPath = album.mainPath()
+                    folderPath = album.mainPath(),
+                    missingFromCloud = _state.value.missingFromCloud[album.name]?.size ?: 0
                 )
             }
 
