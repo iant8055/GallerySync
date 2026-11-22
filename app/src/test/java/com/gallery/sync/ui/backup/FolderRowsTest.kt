@@ -70,6 +70,19 @@ class FolderRowsTest {
     }
 
     @Test
+    fun `an added folder with no Cloud of its own yet has its own row and shows its parent's Cloud`() {
+        // Listed by being added (the view model passes it as a key for counting), routed by the stored choices alone.
+        val stored = chosen - "DCIM/Funny stuff" + ("DCIM" to BackupLocation.PCLOUD)
+        val result = folderRows(albums, stored.keys + "DCIM/Funny stuff", listOf("DCIM/Funny stuff")) {
+            FolderDestination.resolve(it, stored, BackupLocation.ONEDRIVE)
+        }
+
+        assertEquals(listOf("DCIM", "DCIM/Funny stuff", "Pictures"), result.map { it.name })
+        assertEquals(listOf(40, 10, 20), result.map { it.fileCount })
+        assertEquals(BackupLocation.PCLOUD, result[1].location)
+    }
+
+    @Test
     fun `a chosen folder with nothing in it and no longer added is not listed`() {
         val keys = chosen + ("DCIM/Gone" to BackupLocation.DROPBOX)
         assertEquals(listOf("DCIM", "DCIM/Funny stuff", "Pictures"), rows(keys).map { it.name })

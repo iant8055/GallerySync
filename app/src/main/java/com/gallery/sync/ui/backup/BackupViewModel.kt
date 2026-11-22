@@ -1008,13 +1008,18 @@ class BackupViewModel @Inject constructor(
             }
 
             val grantedPaths = sources.current().map { it.relativePath }
+            // Every folder added under Folders to back up gets a row, a folder inside DCIM included, even before it has a
+            // Cloud of its own: until then it shows, and follows, its parent's (Ian, 22 Nov 2026). Its files are counted
+            // on its own row either way; where they go is still decided by folderLocations alone.
+            val grantedSubfolders = grantedPaths
+                .mapNotNull(FolderDestination::normalise)
+                .filter(FolderDestination::isSubfolder)
+                .distinctBy { it.lowercase() }
             val scannedFolders = folderRows(
                 albums = scannedAlbums,
-                keys = folderLocations.keys,
-                // A folder with a Cloud of its own that is still in Folders to back up, even with nothing in it yet.
-                shownWhenEmpty = folderLocations.keys.filter { key ->
-                    grantedPaths.any { FolderDestination.normalise(it).equals(key, ignoreCase = true) }
-                }
+                keys = folderLocations.keys +
+                    grantedSubfolders.filter { g -> folderLocations.keys.none { it.equals(g, ignoreCase = true) } },
+                shownWhenEmpty = grantedSubfolders
             ) { name -> FolderDestination.resolve(name, folderLocations, prefs.backupLocation) }
             val folders = withGrantedFolders(scannedFolders, grantedPaths) { name ->
                 FolderDestination.resolve(name, folderLocations, prefs.backupLocation)
