@@ -24,9 +24,11 @@ import kotlin.coroutines.coroutineContext
  * not show asked about by id. Its cap is higher here, [MAX_LOOKUPS] per album: nothing from this check is stored, so
  * the Albums tab's 25 would ask about the same 25 files on every Refresh and never reach the rest.
  *
- * Returns ledger ids that a Cloud answered for and does not hold. A Cloud that could not be asked, a file past the cap,
- * a file with no recorded id, and Google Photos (which cannot be asked) are all kept: failing to ask is not evidence of
- * absence. Nothing is written.
+ * Returns the offered files a Cloud answered for and does not hold, and the files still on the phone that a Cloud
+ * confirmed, which the tab shows greyed as "already on this phone" the way OneDrive's listing does (Ian, 23 Nov 2026:
+ * *"there have been files backed up to pcloud, iDrive, DropBox AND BackBlaze that should have shown up"*). A Cloud that
+ * could not be asked, a file past the cap, a file with no recorded id, and Google Photos (which cannot be asked) are in
+ * neither: failing to ask is not evidence of absence. Nothing is written.
  */
 @Singleton
 class RestoreElsewhereCheck @Inject constructor(
@@ -35,10 +37,25 @@ class RestoreElsewhereCheck @Inject constructor(
     @param:IoDispatcher private val dispatcher: CoroutineDispatcher
 ) {
 
-    suspend fun gone(entries: List<BackupEntryEntity>): Set<String> = withContext(dispatcher) {
+    data class Answer(
+        /** Offered (not on the phone, or optimized) and definitely not in its Cloud. */
+        val gone: Set<String>,
+        /** On the phone at full size and confirmed in its Cloud. */
+        val here: List<BackupEntryEntity>
+    ) {
+        companion object {
+            val NONE = Answer(emptySet(), emptyList())
+        }
+    }
+
+    suspend fun check(offered: List<BackupEntryEntity>, onPhone: List<BackupEntryEntity>): Answer =
+        withContext(dispatcher) {
         val prefs = settings.current()
+        val offeredIds = offered.mapTo(HashSet()) { it.id }
+        val byId = onPhone.associateBy { it.id }
         val gone = HashSet<String>()
-        val groups = entries
+        val here = ArrayList<BackupEntryEntity>()
+        val groups = (offered + onPhone.filterNot { it.id in offeredIds })
             .filter { it.location != BackupLocation.ONEDRIVE && !it.remoteItemId.isNullOrEmpty() }
             .groupBy { it.album to it.location }
         for ((key, rows) in groups) {
@@ -51,11 +68,17 @@ class RestoreElsewhereCheck @Inject constructor(
                 continue
             }
             val sent = rows.map { SentElsewhereRow(it.album, it.location, it.remoteItemId!!, it.sizeBytes, it.id) }
-            val (_, missing) = ElsewhereTally.withMissing(sent, listing, MAX_LOOKUPS) { verifier.sizeOf(it) }
-            gone += missing
-            Logger.i(TAG, "restore check: $album in $location, ${rows.size} offered, ${missing.size} no longer there")
+            val (verified, missing) =
+                ElsewhereTally.verifiedAndMissing(sent, listing, MAX_LOOKUPS) { verifier.sizeOf(it) }
+            gone += missing.filter { it in offeredIds }
+            here += verified.mapNotNull { byId[it] }
+            Logger.i(
+                TAG,
+                "restore check: $album in $location, ${rows.size} asked, ${verified.size} confirmed, " +
+                    "${missing.size} no longer there"
+            )
         }
-        gone
+        Answer(gone, here)
     }
 
     companion object {

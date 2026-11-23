@@ -113,6 +113,21 @@ object ElsewhereTally {
         return outcomeOf(answers.values) to answers.filterValues { it == Answer.MISSING }.keys.map { it.id }
     }
 
+    /**
+     * The ledger ids the Cloud confirmed and the ids it definitely does not hold, for the Restore tab. A row in neither
+     * list was not answered for.
+     */
+    suspend fun verifiedAndMissing(
+        rows: List<SentElsewhereRow>,
+        listing: Map<String, Long>,
+        maxLookups: Int,
+        lookUp: suspend (remoteItemId: String) -> RemoteCheck
+    ): Pair<List<String>, List<String>> {
+        val answers = answer(rows, listing, maxLookups, lookUp)
+        return answers.filterValues { it == Answer.VERIFIED }.keys.map { it.id } to
+            answers.filterValues { it == Answer.MISSING }.keys.map { it.id }
+    }
+
     private fun outcomeOf(answers: Collection<Answer>) = Outcome(
         verified = answers.count { it == Answer.VERIFIED },
         missing = answers.count { it == Answer.MISSING },

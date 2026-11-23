@@ -71,6 +71,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.gallery.sync.R
+import com.gallery.sync.ui.common.labelRes
 import com.gallery.sync.ui.common.detailsShown
 import com.gallery.sync.ui.common.HeaderKey
 import com.gallery.sync.ui.common.HeaderDetailsToggle
@@ -831,8 +832,11 @@ private fun FolderCard(
                 // its detail lines in bodySmall, no gap between them. It was a headline over larger
                 // detail lines.
                 Column(modifier = Modifier.weight(1f)) {
+                    // The folder and where its files are: "Pictures · Dropbox, pCloud" (Ian, 23 Nov 2026).
+                    val clouds = folder.clouds.map { stringResource(it.labelRes()) }
                     Text(
-                        text = folder.name,
+                        text = if (clouds.isEmpty()) folder.name
+                            else stringResource(R.string.restore_folder_with_cloud, folder.name, clouds.joinToString(", ")),
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,

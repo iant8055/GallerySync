@@ -95,7 +95,9 @@ data class RestoreFolder(
     val bytesToRecover: Long,
     val selectedHere: Int,
     /** Files already on the phone at full size: shown greyed out inside the folder. */
-    val here: Int = 0
+    val here: Int = 0,
+    /** The Clouds its files come from, named after the folder on its card (Ian, 23 Nov 2026). */
+    val clouds: List<BackupLocation> = emptyList()
 ) {
     val total: Int get() = restorable + downloadable
 }
@@ -205,7 +207,8 @@ data class RestoreUiState(
                     downloadable = inAlbum.count { it.kind == RowKind.Download },
                     bytesToRecover = inAlbum.sumOf { it.fullBytes - it.localBytes },
                     selectedHere = inAlbum.count { it.id in selection },
-                    here = inAlbum.count { it.kind == RowKind.Here }
+                    here = inAlbum.count { it.kind == RowKind.Here },
+                    clouds = inAlbum.map { it.entry.location }.distinct().sorted()
                 )
             }
             // A folder with nothing to bring back is listed only when the user asked for every
@@ -260,17 +263,26 @@ class RestoreViewModel @Inject constructor(
      * Ledger ids the other Clouds (Dropbox, pCloud, ...) answered for and no longer hold, and when they were asked. Kept
      * in memory only, with the same time-to-live as the OneDrive listing. See [RestoreElsewhereCheck].
      */
-    private var goneElsewhere: Set<String> = emptySet()
+    private var elsewhereAnswer: RestoreElsewhereCheck.Answer = RestoreElsewhereCheck.Answer.NONE
     private var elsewhereCheckedAt = 0L
+    private val goneElsewhere: Set<String> get() = elsewhereAnswer.gone
 
-    /** Asks the other Clouds again when their answer has gone stale or the user pressed Refresh. */
-    private suspend fun checkElsewhere(force: Boolean) {
-        if (!force && elsewhereCheckedAt != 0L &&
-            System.currentTimeMillis() - elsewhereCheckedAt <= DRIVE_LISTING_TTL_MILLIS
-        ) return
-        goneElsewhere = runCatching { elsewhere.gone(ledgerRows().map { it.entry }) }.getOrDefault(goneElsewhere)
+    /**
+     * Asked on entry whenever the last answer is stale, independently of OneDrive's listing: tying it to that listing
+     * skipped it after every relaunch within ten minutes of one, and folders the other Clouds no longer held came back.
+     */
+    private fun elsewhereStale(): Boolean =
+        elsewhereCheckedAt == 0L || System.currentTimeMillis() - elsewhereCheckedAt > DRIVE_LISTING_TTL_MILLIS
+
+    private suspend fun checkElsewhere() {
+        elsewhereAnswer = runCatching {
+            elsewhere.check(offered = ledgerRows().map { it.entry }, onPhone = entryDao.sentElsewhereOnPhone())
+        }.getOrDefault(elsewhereAnswer)
         elsewhereCheckedAt = System.currentTimeMillis()
     }
+
+    /** Files on the phone that another Cloud confirmed: shown greyed, as OneDrive's listing shows its own. */
+    private fun hereElsewhere(): List<RestoreRow> = elsewhereAnswer.here.map { RestoreRow(it, RowKind.Here) }
 
     init {
         refresh()
@@ -297,11 +309,14 @@ class RestoreViewModel @Inject constructor(
             // Without OneDrive there is no drive to list, and asking anyway ended in a warning about OneDrive
             // for someone who does not use it (Ian, 24 Sept 2026: move away from OneDrive-centric). The
             // ledger's rows still cover every other cloud that can restore, so show those and stop.
+            val askElsewhere = force || elsewhereStale()
             if (connections.of(BackupLocation.ONEDRIVE)?.accountLabel() == null) {
                 driveListing = null
-                publishFrom(null, checkingCloud = true)
-                checkElsewhere(force)
-                publishFrom(null, checkingCloud = false)
+                publishFrom(null, checkingCloud = askElsewhere)
+                if (askElsewhere) {
+                    checkElsewhere()
+                    publishFrom(null, checkingCloud = false)
+                }
                 return@launch
             }
 
@@ -317,14 +332,20 @@ class RestoreViewModel @Inject constructor(
             }
 
             val held = driveListing
-            publishFrom(held, checkingCloud = held == null || isStale() || force)
+            val askDrive = held == null || isStale() || force
+            publishFrom(held, checkingCloud = askDrive || askElsewhere)
+
+            // The other Clouds, each asked about its own folders.
+            if (askElsewhere) {
+                checkElsewhere()
+                publishFrom(held, checkingCloud = askDrive)
+            }
 
             // Then OneDrive itself, which is the source of truth for what can be brought back
             // (Ian, 18 Sept 2026), but only when there is a reason: nothing held, what is held has
             // gone stale, or the user pressed Refresh.
-            if (held != null && !isStale() && !force) return@launch
+            if (!askDrive) return@launch
 
-            checkElsewhere(force)
             val listing = runCatching { engine.listDriveFolders() }.getOrNull()
             if (listing == null) {
                 publishFrom(held, checkingCloud = false)
@@ -350,7 +371,11 @@ class RestoreViewModel @Inject constructor(
      */
     private suspend fun publishFrom(listing: DriveListing?, checkingCloud: Boolean) {
         if (listing == null) {
-            publish(ledgerRows().filterNot { it.id in goneElsewhere }, loading = false, checkingCloud = checkingCloud)
+            publish(
+                ledgerRows().filterNot { it.id in goneElsewhere } + hereElsewhere(),
+                loading = false,
+                checkingCloud = checkingCloud
+            )
             return
         }
         val drive = engine.driveRestoreFiles(listing)
@@ -363,7 +388,7 @@ class RestoreViewModel @Inject constructor(
         val fromDrive = drive.missing.map { RestoreRow(it, RowKind.Download) } +
             drive.here.map { RestoreRow(it, RowKind.Here) }
         publish(
-            ledger + fromDrive.filterNot { (it.album.lowercase() + "/" + it.displayName) in known },
+            ledger + hereElsewhere() + fromDrive.filterNot { (it.album.lowercase() + "/" + it.displayName) in known },
             loading = false,
             checkingCloud = checkingCloud,
             cloudUnavailable = drive.couldNotList

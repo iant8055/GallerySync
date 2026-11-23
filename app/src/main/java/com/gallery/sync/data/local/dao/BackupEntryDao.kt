@@ -1520,6 +1520,22 @@ interface BackupEntryDao {
     fun observeEntriesForAlbum(album: String): Flow<List<BackupEntryEntity>>
 
     /**
+     * Files sent to a Cloud other than OneDrive and still on the phone: what the Restore tab shows greyed as "already on
+     * this phone" once that Cloud confirms them, as OneDrive's listing does for OneDrive (Ian, 23 Nov 2026).
+     */
+    @Query(
+        """
+        SELECT * FROM backup_entries
+        WHERE state = :uploaded AND location != :oneDrive AND localMissingSinceEpochMillis IS NULL
+            AND remoteItemId IS NOT NULL AND isProxied = 0
+        """
+    )
+    suspend fun sentElsewhereOnPhone(
+        uploaded: BackupState = BackupState.UPLOADED,
+        oneDrive: BackupLocation = BackupLocation.ONEDRIVE
+    ): List<BackupEntryEntity>
+
+    /**
      * Entries safe to remove the local copy of.
      *
      * Requires both that OneDrive confirmed the file **and** that the size it reported equals the
