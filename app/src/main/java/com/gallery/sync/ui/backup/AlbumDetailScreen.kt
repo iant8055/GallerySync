@@ -538,7 +538,7 @@ private fun DetailHeader(
                             val failed = entries.count { it.state == BackupState.FAILED }
                             if (backed > 0) add("$backed backed up")
                             if (resend.missing > 0) add(notInCloudText)
-                            if (proxied > 0) add("$proxied optimised")
+                            if (proxied > 0) add("$proxied optimized")
                             if (kept > 0) add(keptText)
                             if (pending > 0) add("$pending pending")
                             if (failed > 0) add("$failed failed")
@@ -962,8 +962,8 @@ private fun BackupEntryEntity.statusLines(): List<Pair<String, Color>> {
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     val error = MaterialTheme.colorScheme.error
     return when {
-        isProxied && state == BackupState.UPLOADED -> listOf("✓ backed up" to primary, "optimised" to optimised)
-        isProxied -> listOf("✓ optimised" to optimised)
+        isProxied && state == BackupState.UPLOADED -> listOf("✓ backed up" to primary, "optimized" to optimised)
+        isProxied -> listOf("✓ optimized" to optimised)
         state == BackupState.UPLOADED -> listOf("✓ backed up" to primary)
         state == BackupState.PENDING -> listOf("⟳ pending" to muted)
         state == BackupState.FAILED -> listOf("✗ failed" to error)
@@ -975,6 +975,6 @@ private fun BackupEntryEntity.statusLines(): List<Pair<String, Color>> {
 private fun AlbumMode.label(): String = when (this) {
     AlbumMode.OFF -> "Off"
     AlbumMode.BACKUP -> "Backup"
-    AlbumMode.SYNC -> "Optimise"
+    AlbumMode.SYNC -> "Optimize"
     AlbumMode.ARCHIVE -> "Archive"
 }

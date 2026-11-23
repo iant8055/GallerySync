@@ -381,7 +381,7 @@ Three areas, fully independent:
    switched to Sync; *Manual* is through **Sync now** on the Albums tab, which is enabled for it even
    with nothing to send. There is no optimise button or status line in Settings.
 3. **Album modes** (Off / Backup / Sync / Archive). Set **only** by the user, per album.
-   On screen the Sync mode is called **Optimise** since 22 Nov 2026 (Ian); the code and these notes keep `SYNC`.
+   On screen the Sync mode is called **Optimize** since 22 Nov 2026 (Ian; first spelt Optimise, US spelling the same day for every shown word); the code and these notes keep `SYNC` and British spellings in identifiers.
 
 **The camera folder has no Sync, and has its own manual optimise. Ian, 20 Sept 2026, reworked 27 Sept 2026.**
 *"I don't want a user to take a picture/video and then BAM it's optimized already."* The camera folder

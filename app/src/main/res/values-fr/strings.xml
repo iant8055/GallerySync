@@ -94,7 +94,7 @@
     <string name="library_back_up_all">Vérifier le stockage Cloud et sauvegarder tout ce qui ne l\'est pas encore</string>
     <string name="library_free_space">Tout le n° 1, plus optimiser tous les fichiers du téléphone pour un gain de place maximal</string>
     <string name="library_optimise_new">Tout le n° 1, mais optimiser seulement les fichiers nouvellement sauvegardés, pour un gain de place modéré</string>
-    <string name="library_per_album">Vérifier le stockage Cloud sans sauvegarder de nouveaux fichiers, sans gain de place. Vous choisissez vous-même les albums à passer en Backup ou Optimise</string>
+    <string name="library_per_album">Vérifier le stockage Cloud sans sauvegarder de nouveaux fichiers, sans gain de place. Vous choisissez vous-même les albums à passer en Backup ou Optimize</string>
     <string name="media_age_immediately">Tout de suite</string>
     <string name="media_age_immediately_warning">Inclut les vidéos tournées aujourd\'hui. Elles restent dans votre galerie et se lisent toujours, mais en modifier une part de la copie réduite jusqu\'à ce que vous récupériez l\'original.</string>
     <string name="media_age_one_day">1 jour</string>
@@ -123,7 +123,7 @@
     <string name="picker_title">Choisir un dossier</string>
     <string name="picker_use">Utiliser ce dossier</string>
     <string name="proxy_unsupported">L\'optimisation des photos nécessite Android 11 ou plus récent.</string>
-    <string name="reoptimise_body">Les vidéos des albums en Optimise trop petites pour être réduites avec l\'ancienne compression peuvent être optimisées de nouveau avec celle-ci. Les vidéos déjà optimisées restent telles quelles. Les originaux en taille réelle restent dans votre Cloud.</string>
+    <string name="reoptimise_body">Les vidéos des albums en Optimize trop petites pour être réduites avec l\'ancienne compression peuvent être optimisées de nouveau avec celle-ci. Les vidéos déjà optimisées restent telles quelles. Les originaux en taille réelle restent dans votre Cloud.</string>
     <string name="reoptimise_no">Non</string>
     <string name="reoptimise_title">Optimiser de nouveau les vidéos existantes ?</string>
     <string name="reoptimise_yes">Oui</string>
@@ -137,7 +137,10 @@
     <string name="settings_bug_report">Signaler un bug</string>
     <string name="settings_bug_report_detail">Quelque chose ne marche pas ? Dites-nous ce qui s\'est passé.</string>
     <string name="settings_camera">Dossier de l\'appareil photo</string>
-    <string name="settings_camera_folder">Dossier de l\'appareil photo</string>
+    <string name="settings_camera_folder">Choisir le dossier de l\'appareil photo</string>
+    <string name="settings_camera_age">N\'optimiser que les photos/vidéos de plus de</string>
+    <string name="settings_camera_photos">Optimiser les photos</string>
+    <string name="settings_camera_videos">Optimiser les vidéos</string>
     <string name="settings_camera_folder_choose">Choisir</string>
     <string name="settings_camera_folder_hint">Choisissez le dossier où l\'appareil photo enregistre. Tant que vous ne l\'avez pas fait, aucun dossier n\'a ces réglages.</string>
     <string name="settings_camera_folder_other">Autre…</string>
@@ -162,7 +165,7 @@
     <string name="settings_optimise_mode_auto">Automatique</string>
     <string name="settings_optimise_mode_manual">Manuel</string>
     <string name="settings_optimise_photos">Optimiser les photos</string>
-    <string name="settings_optimise_photos_on">Les photos des albums en Optimise sont optimisées pour gagner de la place.</string>
+    <string name="settings_optimise_photos_on">Les photos des albums en Optimize sont optimisées pour gagner de la place.</string>
     <string name="settings_optimise_videos">Optimiser les vidéos</string>
     <string name="settings_page_close">Fermer</string>
     <string name="settings_page_load_failed">Impossible de charger cette page. Vérifiez votre connexion et réessayez.</string>
@@ -198,7 +201,7 @@
     <string name="tour_cloud_body">Sélectionnez les Clouds que vous utilisez. Un Cloud est gratuit. Chaque Cloud supplémentaire fait partie de Pro, gratuit pendant 30 jours. Vous vous connectez à chacun sur les cartes suivantes.</string>
     <string name="tour_cloud_connect_progress">Cloud %1$d sur %2$d</string>
     <string name="tour_cloud_connect_title">Se connecter à %1$s</string>
-    <string name="tour_cloud_google_photos_limit_backup_only">Backup uniquement : ni Archive ni Optimise.</string>
+    <string name="tour_cloud_google_photos_limit_backup_only">Backup uniquement : ni Archive ni Optimize.</string>
     <string name="tour_cloud_google_photos_limit_duplicates">Les photos déjà présentes dans ce Cloud peuvent être ajoutées deux fois.</string>
     <string name="tour_cloud_google_photos_limit_pro">Gratuit pendant 30 jours, puis un achat unique.</string>
     <string name="tour_cloud_google_photos_limit_restore">La restauration depuis ce Cloud n\'est pas encore disponible.</string>
@@ -272,7 +275,7 @@
     <string name="tour_optimise_body">L\'optimisation libère de l\'espace sur votre téléphone tout en vous laissant voir toutes vos photos et vidéos dans votre Galerie.</string>
     <string name="tour_optimise_checking">Vérification de votre Cloud pour calculer le gain possible…</string>
     <string name="tour_optimise_incomplete">%1$d de vos albums n\'ont pas pu être vérifiés : le gain réel sera probablement plus important.</string>
-    <string name="tour_optimise_later_only">Ces réglages s\'appliquent à tout album que vous passerez plus tard en Optimise. Cette installation n\'optimisera rien d\'elle-même.</string>
+    <string name="tour_optimise_later_only">Ces réglages s\'appliquent à tout album que vous passerez plus tard en Optimize. Cette installation n\'optimisera rien d\'elle-même.</string>
     <string name="tour_optimise_nothing">Aucune photo ni vidéo n\'a été trouvée dans les dossiers choisis : il n\'y a rien à optimiser.</string>
     <string name="tour_optimise_photos_saving">Gain estimé sur les photos : %1$s</string>
     <string name="tour_optimise_title">Réglages d\'optimisation</string>

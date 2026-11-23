@@ -90,7 +90,7 @@
     <string name="library_back_up_all">クラウドストレージを確認し、まだバックアップされていないものをすべてバックアップする</string>
     <string name="library_free_space">1 番のすべてに加え、スマートフォン上の全ファイルを最適化して容量を最大限に節約する</string>
     <string name="library_optimise_new">1 番のすべてに加え、新しくバックアップしたファイルだけを最適化して容量をほどほどに節約する</string>
-    <string name="library_per_album">クラウドストレージを確認するが、新しいファイルはバックアップしない。容量の節約なし。Backup または Optimise にするアルバムは自分で選ぶ</string>
+    <string name="library_per_album">クラウドストレージを確認するが、新しいファイルはバックアップしない。容量の節約なし。Backup または Optimize にするアルバムは自分で選ぶ</string>
     <string name="media_age_immediately">すぐに</string>
     <string name="media_age_immediately_warning">今日撮った動画も対象です。ギャラリーに残って再生もできますが、元の動画を取り戻すまでは、編集は小さいコピーから始まります。</string>
     <string name="media_age_one_day">1 日</string>
@@ -119,7 +119,7 @@
     <string name="picker_title">フォルダを選択</string>
     <string name="picker_use">このフォルダを使う</string>
     <string name="proxy_unsupported">写真の最適化には Android 11 以降が必要です。</string>
-    <string name="reoptimise_body">以前の圧縮では小さすぎて縮小できなかった Optimise アルバムの動画を、この設定で再び最適化できます。最適化済みの動画はそのままです。フルサイズの元の動画はクラウドに残ります。</string>
+    <string name="reoptimise_body">以前の圧縮では小さすぎて縮小できなかった Optimize アルバムの動画を、この設定で再び最適化できます。最適化済みの動画はそのままです。フルサイズの元の動画はクラウドに残ります。</string>
     <string name="reoptimise_no">いいえ</string>
     <string name="reoptimise_title">既存の動画を再び最適化しますか？</string>
     <string name="reoptimise_yes">はい</string>
@@ -133,7 +133,10 @@
     <string name="settings_bug_report">バグを報告</string>
     <string name="settings_bug_report_detail">うまく動かないことがありますか？何が起きたかを送ってください。</string>
     <string name="settings_camera">カメラフォルダ</string>
-    <string name="settings_camera_folder">カメラのフォルダ</string>
+    <string name="settings_camera_folder">カメラのフォルダを選択</string>
+    <string name="settings_camera_age">次より古い写真/動画のみ最適化</string>
+    <string name="settings_camera_photos">写真を最適化</string>
+    <string name="settings_camera_videos">動画を最適化</string>
     <string name="settings_camera_folder_choose">選択</string>
     <string name="settings_camera_folder_hint">カメラが保存するフォルダを選んでください。選ぶまでは、どのフォルダにもこの設定は適用されません。</string>
     <string name="settings_camera_folder_other">その他…</string>
@@ -158,7 +161,7 @@
     <string name="settings_optimise_mode_auto">自動</string>
     <string name="settings_optimise_mode_manual">手動</string>
     <string name="settings_optimise_photos">写真を最適化</string>
-    <string name="settings_optimise_photos_on">Optimise アルバムの写真は容量を節約するよう最適化されます。</string>
+    <string name="settings_optimise_photos_on">Optimize アルバムの写真は容量を節約するよう最適化されます。</string>
     <string name="settings_optimise_videos">動画を最適化</string>
     <string name="settings_page_close">閉じる</string>
     <string name="settings_page_load_failed">このページを読み込めませんでした。接続を確認して、もう一度お試しください。</string>
@@ -192,7 +195,7 @@
     <string name="tour_cloud_body">使っているクラウドを選んでください。クラウド 1 つは無料です。追加のクラウドは Pro の機能で、30 日間無料です。次のカードでそれぞれにログインします。</string>
     <string name="tour_cloud_connect_progress">クラウド %1$d / %2$d</string>
     <string name="tour_cloud_connect_title">%1$s に接続</string>
-    <string name="tour_cloud_google_photos_limit_backup_only">Backup のみ — Archive と Optimise は使えません。</string>
+    <string name="tour_cloud_google_photos_limit_backup_only">Backup のみ — Archive と Optimize は使えません。</string>
     <string name="tour_cloud_google_photos_limit_duplicates">このクラウドにすでにある写真が二重に追加されることがあります。</string>
     <string name="tour_cloud_google_photos_limit_pro">30 日間無料、その後は 1 回限りの購入です。</string>
     <string name="tour_cloud_google_photos_limit_restore">このクラウドからの復元はまだ利用できません。</string>
@@ -256,7 +259,7 @@
     <string name="tour_optimise_body">最適化すると、ギャラリーですべての写真と動画を見られるまま、スマートフォンの空き容量を増やせます。</string>
     <string name="tour_optimise_checking">節約できる容量を計算するため、クラウドを確認しています…</string>
     <string name="tour_optimise_incomplete">%1$d 個のアルバムを確認できなかったため、実際の節約量はこれより大きい可能性があります。</string>
-    <string name="tour_optimise_later_only">これらの設定は、後で Optimise にしたアルバムに適用されます。このインストールが自動で最適化することはありません。</string>
+    <string name="tour_optimise_later_only">これらの設定は、後で Optimize にしたアルバムに適用されます。このインストールが自動で最適化することはありません。</string>
     <string name="tour_optimise_nothing">選んだフォルダに写真や動画がないため、最適化するものはありません。</string>
     <string name="tour_optimise_photos_saving">写真の推定節約量：%1$s</string>
     <string name="tour_optimise_title">最適化の設定</string>

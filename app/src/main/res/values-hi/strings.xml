@@ -92,7 +92,7 @@
     <string name="library_back_up_all">क्लाउड स्टोरेज जाँचें और जिस किसी का बैकअप नहीं हुआ है, उसका बैकअप लें</string>
     <string name="library_free_space">नंबर 1 का सब कुछ, साथ ही अधिकतम जगह बचाने के लिए फ़ोन की सभी फ़ाइलें ऑप्टिमाइज़ करें</string>
     <string name="library_optimise_new">नंबर 1 का सब कुछ, पर सिर्फ़ नए बैकअप हुई फ़ाइलें ऑप्टिमाइज़ करें, थोड़ी जगह बचाने के लिए</string>
-    <string name="library_per_album">क्लाउड स्टोरेज जाँचें, पर कोई नई फ़ाइल बैकअप न करें, जगह की कोई बचत नहीं। किन एल्बम को Backup या Optimise पर रखना है, यह आप खुद चुनेंगे</string>
+    <string name="library_per_album">क्लाउड स्टोरेज जाँचें, पर कोई नई फ़ाइल बैकअप न करें, जगह की कोई बचत नहीं। किन एल्बम को Backup या Optimize पर रखना है, यह आप खुद चुनेंगे</string>
     <string name="media_age_immediately">तुरंत</string>
     <string name="media_age_immediately_warning">इसमें आज शूट किए गए वीडियो भी आते हैं। वे आपकी गैलरी में रहते हैं और चलते हैं, पर जब तक आप मूल फ़ाइल वापस नहीं लाते, उन्हें एडिट करना छोटी कॉपी से शुरू होता है।</string>
     <string name="media_age_one_day">1 दिन</string>
@@ -121,7 +121,7 @@
     <string name="picker_title">फ़ोल्डर चुनें</string>
     <string name="picker_use">यह फ़ोल्डर इस्तेमाल करें</string>
     <string name="proxy_unsupported">फ़ोटो ऑप्टिमाइज़ करने के लिए Android 11 या नया वर्शन चाहिए।</string>
-    <string name="reoptimise_body">Optimise एल्बम के जो वीडियो पुराने कंप्रेशन पर छोटे करने के लिए बहुत छोटे थे, उन्हें इस कंप्रेशन पर फिर से ऑप्टिमाइज़ किया जा सकता है। जो वीडियो पहले से ऑप्टिमाइज़ हैं, वे वैसे ही रहते हैं। पूरे साइज़ की मूल फ़ाइलें आपके क्लाउड में रहती हैं।</string>
+    <string name="reoptimise_body">Optimize एल्बम के जो वीडियो पुराने कंप्रेशन पर छोटे करने के लिए बहुत छोटे थे, उन्हें इस कंप्रेशन पर फिर से ऑप्टिमाइज़ किया जा सकता है। जो वीडियो पहले से ऑप्टिमाइज़ हैं, वे वैसे ही रहते हैं। पूरे साइज़ की मूल फ़ाइलें आपके क्लाउड में रहती हैं।</string>
     <string name="reoptimise_no">नहीं</string>
     <string name="reoptimise_title">मौजूदा वीडियो फिर से ऑप्टिमाइज़ करें?</string>
     <string name="reoptimise_yes">हाँ</string>
@@ -135,7 +135,10 @@
     <string name="settings_bug_report">बग रिपोर्ट</string>
     <string name="settings_bug_report_detail">कुछ काम नहीं कर रहा? हमें बताएँ क्या हुआ।</string>
     <string name="settings_camera">कैमरा फ़ोल्डर</string>
-    <string name="settings_camera_folder">कैमरा फ़ोल्डर</string>
+    <string name="settings_camera_folder">कैमरा फ़ोल्डर चुनें</string>
+    <string name="settings_camera_age">सिर्फ़ इससे पुरानी फ़ोटो/वीडियो ऑप्टिमाइज़ करें</string>
+    <string name="settings_camera_photos">फ़ोटो ऑप्टिमाइज़ करें</string>
+    <string name="settings_camera_videos">वीडियो ऑप्टिमाइज़ करें</string>
     <string name="settings_camera_folder_choose">चुनें</string>
     <string name="settings_camera_folder_hint">वह फ़ोल्डर चुनें जिसमें आपका कैमरा सेव करता है। जब तक आप नहीं चुनते, किसी फ़ोल्डर पर ये सेटिंग लागू नहीं होतीं।</string>
     <string name="settings_camera_folder_other">अन्य…</string>
@@ -160,7 +163,7 @@
     <string name="settings_optimise_mode_auto">अपने-आप</string>
     <string name="settings_optimise_mode_manual">मैन्युअल</string>
     <string name="settings_optimise_photos">फ़ोटो ऑप्टिमाइज़ करें</string>
-    <string name="settings_optimise_photos_on">Optimise एल्बम की फ़ोटो जगह बचाने के लिए ऑप्टिमाइज़ की जाती हैं।</string>
+    <string name="settings_optimise_photos_on">Optimize एल्बम की फ़ोटो जगह बचाने के लिए ऑप्टिमाइज़ की जाती हैं।</string>
     <string name="settings_optimise_videos">वीडियो ऑप्टिमाइज़ करें</string>
     <string name="settings_page_close">बंद करें</string>
     <string name="settings_page_load_failed">यह पेज लोड नहीं हो सका। अपना कनेक्शन जाँचें और फिर से कोशिश करें।</string>
@@ -195,7 +198,7 @@
     <string name="tour_cloud_body">आप जिन क्लाउड का इस्तेमाल करते हैं, उन्हें चुनें। एक क्लाउड मुफ़्त है। हर अतिरिक्त क्लाउड Pro का हिस्सा है, 30 दिन मुफ़्त। अगले कार्ड पर आप हर एक में साइन इन करेंगे।</string>
     <string name="tour_cloud_connect_progress">क्लाउड %1$d / %2$d</string>
     <string name="tour_cloud_connect_title">%1$s से कनेक्ट करें</string>
-    <string name="tour_cloud_google_photos_limit_backup_only">सिर्फ़ Backup — Archive या Optimise नहीं।</string>
+    <string name="tour_cloud_google_photos_limit_backup_only">सिर्फ़ Backup — Archive या Optimize नहीं।</string>
     <string name="tour_cloud_google_photos_limit_duplicates">जो फ़ोटो पहले से उस क्लाउड में हैं, वे दो बार जुड़ सकती हैं।</string>
     <string name="tour_cloud_google_photos_limit_pro">30 दिन मुफ़्त, फिर एक बार की खरीदारी।</string>
     <string name="tour_cloud_google_photos_limit_restore">इससे वापस लाने की सुविधा अभी उपलब्ध नहीं है।</string>
@@ -264,7 +267,7 @@
     <string name="tour_optimise_body">ऑप्टिमाइज़ेशन से आपके फ़ोन पर जगह खाली होती है, और आप अपनी गैलरी में अपनी सभी फ़ोटो और वीडियो देख पाते हैं।</string>
     <string name="tour_optimise_checking">कितनी बचत होगी, यह जानने के लिए आपका क्लाउड जाँचा जा रहा है…</string>
     <string name="tour_optimise_incomplete">आपके %1$d एल्बम जाँचे नहीं जा सके, इसलिए असली बचत शायद इससे ज़्यादा होगी।</string>
-    <string name="tour_optimise_later_only">ये सेटिंग उन सभी एल्बम पर लागू होंगी जिन्हें आप बाद में Optimise पर रखेंगे। यह इंस्टॉल अपने-आप कुछ भी ऑप्टिमाइज़ नहीं करेगा।</string>
+    <string name="tour_optimise_later_only">ये सेटिंग उन सभी एल्बम पर लागू होंगी जिन्हें आप बाद में Optimize पर रखेंगे। यह इंस्टॉल अपने-आप कुछ भी ऑप्टिमाइज़ नहीं करेगा।</string>
     <string name="tour_optimise_nothing">चुने गए फ़ोल्डर में कोई फ़ोटो या वीडियो नहीं मिला, इसलिए ऑप्टिमाइज़ करने को कुछ नहीं है।</string>
     <string name="tour_optimise_photos_saving">फ़ोटो में अनुमानित बचत: %1$s</string>
     <string name="tour_optimise_title">ऑप्टिमाइज़ेशन सेटिंग</string>

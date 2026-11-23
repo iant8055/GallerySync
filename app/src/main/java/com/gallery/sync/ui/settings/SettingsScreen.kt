@@ -519,7 +519,7 @@ fun SettingsScreen(
                 )
 
                 SettingAge(
-                    label = stringResource(R.string.camera_optimise_heading),
+                    label = stringResource(R.string.settings_camera_age),
                     help = null,
                     age = state.cameraDefaults.age,
                     onSetAge = viewModel::setCameraDefaultAge,
@@ -527,13 +527,13 @@ fun SettingsScreen(
                 )
 
                 SettingSwitch(
-                    label = stringResource(R.string.camera_kind_photos),
+                    label = stringResource(R.string.settings_camera_photos),
                     checked = state.cameraDefaults.photos,
                     onCheckedChange = viewModel::setCameraOptimisePhotos
                 )
 
                 SettingSwitch(
-                    label = stringResource(R.string.camera_kind_videos),
+                    label = stringResource(R.string.settings_camera_videos),
                     checked = state.cameraDefaults.videos,
                     onCheckedChange = viewModel::setCameraOptimiseVideo
                 )

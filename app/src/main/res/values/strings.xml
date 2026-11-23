@@ -171,14 +171,17 @@
         <item quantity="one">%1$s · %2$d file</item>
         <item quantity="other">%1$s · %2$d files</item>
     </plurals>
-    <string name="settings_sync">Optimisation</string>
+    <string name="settings_sync">Optimization</string>
     <string name="settings_restore">Restore</string>
     <string name="settings_archive">Archive</string>
     <string name="settings_camera">Camera Folder</string>
     <string name="no_cloud_connected">No Cloud connected. Connect one in Settings to keep backing up.</string>
     <string name="no_cloud_open_settings">Open Settings</string>
     <string name="settings_camera_special">Special settings for Camera</string>
-    <string name="settings_camera_folder">Camera folder</string>
+    <string name="settings_camera_folder">Select Camera Folder</string>
+    <string name="settings_camera_age">Only Optimize Photos/Videos older than</string>
+    <string name="settings_camera_photos">Optimize Photos</string>
+    <string name="settings_camera_videos">Optimize Videos</string>
     <string name="settings_camera_folder_choose">Choose</string>
     <string name="settings_camera_folder_other">Other…</string>
     <string name="settings_camera_folder_hint">Choose the folder your camera saves to. Until you do, no folder has these settings.</string>
@@ -250,16 +253,16 @@
         by its own "Older than" control — so "and old enough" claimed a wait that photos never do.
         Removed by Ian, 15 Sept 2026, with the leftover photo-age label below it.
     -->
-    <string name="settings_optimise_photos">Optimise photos</string>
-    <string name="settings_optimise_photos_on">Photos in Optimise albums are optimised for storage.</string>
-    <string name="settings_optimise_videos">Optimise video</string>
+    <string name="settings_optimise_photos">Optimize photos</string>
+    <string name="settings_optimise_photos_on">Photos in Optimize albums are optimized for storage.</string>
+    <string name="settings_optimise_videos">Optimize video</string>
     <string name="settings_optimise_mode">Mode</string>
     <string name="settings_optimise_mode_auto">Automatic</string>
     <string name="settings_optimise_mode_manual">Manual</string>
     <string name="settings_older_than">Older than</string>
     <string name="settings_quality">Compression</string>
 
-    <string name="proxy_unsupported">Optimising photos needs Android 11 or newer.</string>
+    <string name="proxy_unsupported">Optimizing photos needs Android 11 or newer.</string>
 
     <!-- Sign in -->
     <string name="sign_in_prompt">Connect your OneDrive account to browse your photos and videos.</string>
@@ -298,14 +301,14 @@
     -->
     <!-- Labels over the Albums header card figures. Ian, 16 Sept 2026. -->
     <string name="albums_mode_totals_label">Album Mode Count:</string>
-    <string name="albums_mode_totals">%1$d Backup · %2$d Optimise · %3$d Archive · %4$d Off</string>
+    <string name="albums_mode_totals">%1$d Backup · %2$d Optimize · %3$d Archive · %4$d Off</string>
     <!--
         Shown when a run would transfer nothing, beside the Sync now button that has disabled
         itself. Without it a greyed-out primary action reads as a fault rather than as a finished
         state. Says "in your albums" because files in Off albums are deliberately not counted.
     -->
     <string name="albums_all_backed_up">Everything here is backed up</string>
-    <string name="albums_optimised_summary">%1$d Optimised · %2$s Saved</string>
+    <string name="albums_optimised_summary">%1$d Optimized · %2$s Saved</string>
     <!--
         Files in Archive albums still on the phone — every one of them is scheduled to leave.
         Replaces "waiting to be verified", which compared the ledger's row count against the
@@ -386,7 +389,7 @@
     <string name="album_cloud_elsewhere_all_present">%1$d verified in %2$s</string>
     <string name="album_cloud_elsewhere_some_missing">%1$d of %2$d verified in %3$s</string>
     <string name="album_cloud_elsewhere_unreachable">Could not reach %1$s when this was last checked</string>
-    <string name="album_status_optimized">%1$d optimised</string>
+    <string name="album_status_optimized">%1$d optimized</string>
     <!-- Files kept at full size (FilePin): ticked by the user, or put back by Restore. -->
     <string name="album_status_kept">%1$d kept at full size</string>
     <string name="album_sort_label">Sort by</string>
@@ -444,7 +447,7 @@ full size</string>
     <!-- Album mode labels — ladder order, matching the enum. -->
     <string name="mode_off">Off</string>
     <string name="mode_backup">Backup</string>
-    <string name="mode_sync">Optimise</string>
+    <string name="mode_sync">Optimize</string>
     <string name="mode_archive">Archive</string>
 
     <!-- Archive confirmation dialog -->
@@ -807,7 +810,7 @@ full size</string>
     -->
 
     <!-- Gate 2: what to do with the library already on the phone. -->
-    <string name="library_per_album">Check Cloud Storage but do not back up any new files - no storage savings. You will manually select which Albums to backup/Optimise</string>
+    <string name="library_per_album">Check Cloud Storage but do not back up any new files - no storage savings. You will manually select which Albums to backup/Optimize</string>
     <string name="library_back_up_all">Check Cloud Storage and back up everything that isn\'t already backed up</string>
     <!--
         Ian's middle option, 28 Aug 2026: "we back them up first and leave an opt file behind."
@@ -817,8 +820,8 @@ full size</string>
         outstanding, measured - so this option can touch two percent of a library while sounding
         substantial. Saying what it leaves alone is what stops the honest choice looking broken.
     -->
-    <string name="library_optimise_new">All #1 - but only Optimise newly backed up files - for moderate storage saving</string>
-    <string name="library_free_space">All #1 - plus Optimise All files on phone for maximum storage saving</string>
+    <string name="library_optimise_new">All #1 - but only Optimize newly backed up files - for moderate storage saving</string>
+    <string name="library_free_space">All #1 - plus Optimize All files on phone for maximum storage saving</string>
     <!-- Photo-heavy library: the saving is worth leading with. -->
     <!--
         Video-heavy library: leads with what stays. Only photos shrink, so on a library that is
@@ -941,7 +944,7 @@ full size</string>
     <string name="tour_description_tabs">See your albums and choose what to back up</string>
     <string name="tour_description_navigation">Browse and download files from Cloud Services</string>
     <string name="tour_description_archive">Review files verified in the Cloud and free up space</string>
-    <string name="tour_description_settings">Backup destination, optimisation, and preferences</string>
+    <string name="tour_description_settings">Backup destination, optimization, and preferences</string>
     <string name="tour_description_help">Press any (?) for a quick explanation of that line. For everything in one place, open the How To Guide at the top of Settings.</string>
     <string name="tab_help">Help</string>
 
@@ -976,7 +979,7 @@ full size</string>
         backed up, not only what can be optimised, so each message says what the choice does to the
         backup. %1$s is the ticked folder (DCIM), %2$s what was picked instead (DCIM/Camera).
     -->
-    <string name="tour_grant_cancelled">No access was given to %1$s. GallerySync needs it to back up and optimise the files in %1$s. Skipping leaves %1$s out of the backup.</string>
+    <string name="tour_grant_cancelled">No access was given to %1$s. GallerySync needs it to back up and optimize the files in %1$s. Skipping leaves %1$s out of the backup.</string>
     <string name="tour_grant_narrower">You chose %2$s, which is inside %1$s. Only %2$s would be backed up. The rest of %1$s would be left out.</string>
     <string name="tour_grant_elsewhere">%2$s isn\'t %1$s, so it wasn\'t used. GallerySync needs access to %1$s itself to back it up. Skipping leaves %1$s out of the backup.</string>
     <string name="tour_grant_unusable">That choice can\'t be used. GallerySync needs access to %1$s itself to back it up. Skipping leaves %1$s out of the backup.</string>
@@ -992,7 +995,7 @@ full size</string>
     <string name="tour_cloud_destination">Backup destination</string>
     <string name="tour_cloud_change">Change</string>
     <string name="tour_cloud_google_photos_limits_title">About this Cloud</string>
-    <string name="tour_cloud_google_photos_limit_backup_only">Backup only — no Archive or Optimise.</string>
+    <string name="tour_cloud_google_photos_limit_backup_only">Backup only — no Archive or Optimize.</string>
     <string name="tour_cloud_google_photos_limit_duplicates">Photos already in that Cloud may be added twice.</string>
     <string name="tour_cloud_google_photos_limit_restore">Restoring from it is not available yet.</string>
     <string name="tour_cloud_google_photos_limit_pro">Free for 30 days, then a one-time purchase.</string>
@@ -1018,8 +1021,8 @@ full size</string>
 
     <string name="tour_backup_title">Choose your Backup Plan</string>
 
-    <string name="tour_optimise_title">Optimisation Settings</string>
-    <string name="tour_optimise_body">Optimisation allows you to free up storage space on your phone while still being able to see all your photos and videos on your Gallery.</string>
+    <string name="tour_optimise_title">Optimization Settings</string>
+    <string name="tour_optimise_body">Optimization allows you to free up storage space on your phone while still being able to see all your photos and videos on your Gallery.</string>
     <string name="tour_optimise_photos_saving">Estimated photo savings: %1$s</string>
     <string name="tour_optimise_video_saving">Estimated video savings: %1$s</string>
     <string name="tour_optimise_total_saving">Total estimated savings: %1$s</string>
@@ -1042,13 +1045,13 @@ full size</string>
         the tallies count every photo and video in scope, so this fires only when there genuinely is
         no media in the chosen folders.
     -->
-    <string name="tour_optimise_nothing">No photos or videos were found in the folders you chose, so there is nothing to optimise.</string>
+    <string name="tour_optimise_nothing">No photos or videos were found in the folders you chose, so there is nothing to optimize.</string>
     <!--
         Gate 2's #1 and #4 do not run the install-time optimise at all, so there is no figure to
         quote. The switches are still worth setting, because they govern any album the user later
         puts on Sync — saying so beats a bare "0 MB", which reads as a broken estimate.
     -->
-    <string name="tour_optimise_later_only">These settings apply to any album you later set to Optimise. This install will not optimise anything on its own.</string>
+    <string name="tour_optimise_later_only">These settings apply to any album you later set to Optimize. This install will not optimize anything on its own.</string>
     <!--
         Split from video_quality_high and friends because the wizard's three side-by-side buttons
         have room for the name and nothing else. The combined "High — 480p" label is still what the
@@ -1131,8 +1134,8 @@ full size</string>
     <string name="tour_progress_starting">Starting upload…</string>
     <string name="tour_progress_verifying">Checking your Cloud</string>
     <!-- Settings → Sync → Optimise video, after a stronger compression is chosen (Ian, 9 Oct 2026). -->
-    <string name="reoptimise_title">Re-optimise existing videos?</string>
-    <string name="reoptimise_body">Videos in Optimise albums that were too small to shrink at the old compression can be optimised again at this one. Videos already optimised stay as they are. The full-size originals stay in your Cloud.</string>
+    <string name="reoptimise_title">Re-optimize existing videos?</string>
+    <string name="reoptimise_body">Videos in Optimize albums that were too small to shrink at the old compression can be optimized again at this one. Videos already optimized stay as they are. The full-size originals stay in your Cloud.</string>
     <string name="reoptimise_yes">Yes</string>
     <string name="reoptimise_no">No</string>
     <string name="tour_progress_verifying_body">Step one: checking your Cloud for the files it already has, by name and size. Nothing is sent during this step.</string>
@@ -1149,12 +1152,12 @@ full size</string>
         other languages and splicing "photos" into "Optimising %1$d of %2$d" would not survive
         translation.
     -->
-    <string name="tour_progress_optimising_photos_label">Optimising photos</string>
-    <string name="tour_progress_optimising_video_label">Optimising video</string>
+    <string name="tour_progress_optimising_photos_label">Optimizing photos</string>
+    <string name="tour_progress_optimising_video_label">Optimizing video</string>
     <!-- The count on its own line under the phase name. Bare, so either name can sit above it. -->
     <string name="tour_progress_count">%1$d of %2$d</string>
-    <string name="tour_progress_optimising_photos">Upload finished and verified. Now optimising your photos: they stay in your gallery and stay usable, and the full-size originals stay in your Cloud.</string>
-    <string name="tour_progress_optimising_video">Upload finished and verified. Now optimising your videos: nothing is cut, they stay in your gallery, and the full-size originals stay in your Cloud.</string>
+    <string name="tour_progress_optimising_photos">Upload finished and verified. Now optimizing your photos: they stay in your gallery and stay usable, and the full-size originals stay in your Cloud.</string>
+    <string name="tour_progress_optimising_video">Upload finished and verified. Now optimizing your videos: nothing is cut, they stay in your gallery, and the full-size originals stay in your Cloud.</string>
     <string name="tour_progress_complete">Congratulations your backup has finished successfully and has been verified. Press Finish.</string>
     <string name="tour_progress_note">You can check progress any time by opening the app.</string>
     <!--
@@ -1167,7 +1170,7 @@ full size</string>
         the run is undone.
     -->
     <string name="abort_backup_title">Stop the backup?</string>
-    <string name="abort_backup_body">Uploading stops so you can change your settings. Files already in your Cloud stay there, and starting again picks up where this left off rather than sending them twice. Nothing is deleted. Photos already optimised stay optimised, with their full-size originals in your Cloud.</string>
+    <string name="abort_backup_body">Uploading stops so you can change your settings. Files already in your Cloud stay there, and starting again picks up where this left off rather than sending them twice. Nothing is deleted. Photos already optimized stay optimized, with their full-size originals in your Cloud.</string>
     <string name="abort_backup_confirm">Stop and go back</string>
     <string name="abort_backup_keep">Keep backing up</string>
 
@@ -1195,11 +1198,11 @@ full size</string>
     <string name="select_swipe_hint">Swipe right to select / left to deselect</string>
     <string name="select_action_select">Select</string>
     <string name="select_action_deselect">Deselect</string>
-    <string name="camera_optimise_working">Optimising… %1$d left</string>
+    <string name="camera_optimise_working">Optimizing… %1$d left</string>
     <string name="camera_optimise_none_selected">Nothing selected</string>
     <string name="camera_optimise_none_old_enough">Nothing older than %1$s</string>
     <string name="camera_action_keep">Deselect (keep at full size)</string>
-    <string name="camera_action_optimise">Select (optimise this file)</string>
+    <string name="camera_action_optimise">Select (optimize this file)</string>
 
     <!-- Long-press to open a file (TASK-028, Ian, 11 Nov 2026). The Albums, Restore and Archive tabs stay English. -->
     <string name="open_file_action">Open</string>
