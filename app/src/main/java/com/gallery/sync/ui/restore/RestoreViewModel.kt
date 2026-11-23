@@ -13,6 +13,7 @@ import com.gallery.sync.domain.backup.DriveListing
 import com.gallery.sync.domain.backup.DownloadMissingFile
 import com.gallery.sync.domain.backup.RestoreInPlaceResult
 import com.gallery.sync.domain.backup.RestoreProxyInPlace
+import com.gallery.sync.domain.backup.RestoreStillInOneDrive
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -331,7 +332,11 @@ class RestoreViewModel @Inject constructor(
             return
         }
         val drive = engine.driveRestoreFiles(listing)
-        val ledger = ledgerRows()
+        // A row whose OneDrive copy the listing no longer holds is not offered: it could not be brought back.
+        val ledger = ledgerRows().let { rows ->
+            val kept = RestoreStillInOneDrive.keep(rows.map { it.entry }, listing).mapTo(HashSet()) { it.id }
+            rows.filter { it.id in kept }
+        }
         val known = ledger.mapTo(HashSet()) { it.album.lowercase() + "/" + it.displayName }
         val fromDrive = drive.missing.map { RestoreRow(it, RowKind.Download) } +
             drive.here.map { RestoreRow(it, RowKind.Here) }
