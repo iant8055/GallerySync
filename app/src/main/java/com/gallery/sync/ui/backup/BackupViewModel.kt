@@ -253,9 +253,21 @@ data class AlbumRow(
      * optimized, so they could be sent again. Flagged on the Albums tab; resent only from the album's page (Ian,
      * 22 Nov 2026). See `RequeueMissingFromCloud`.
      */
-    val missingFromCloud: Int = 0
+    val missingFromCloud: Int = 0,
+    /** Files here whose upload keeps being interrupted without getting anywhere. See `UploadStalls`. */
+    val stalledCount: Int = 0,
+    /** Files here the user chose not to back up. See `FileSkip`. */
+    val skippedCount: Int = 0
 ) {
     val isEnabled: Boolean get() = mode.uploads
+
+    /**
+     * The red line on the album card (Ian, 23 Nov 2026): files that need the user to decide something. Gone from
+     * their Cloud, given up on after five attempts, or unable to finish. New files waiting for the next run are not
+     * counted: they are normal, and counting them would turn every album red during an ordinary backup.
+     */
+    val needsDecisionCount: Int
+        get() = missingFromCloud + stalledCount + (if (mode != AlbumMode.OFF) failedCount else 0)
 
     /**
      * Whether this album's cloud line should mention OneDrive at all.
@@ -1022,6 +1034,11 @@ class BackupViewModel @Inject constructor(
             val folderLocations = folderDao.all().orEmpty().associate { it.folderName to it.backupLocation }
 
             var hasNewUploadAlbums = false
+            // Files that keep failing to finish, by album, for the card's red line. Skipped or sent ones are not stuck.
+            val stalledIds = UploadStalls.stalled(UploadStalls.decode(prefs.uploadStalls))
+            val stalledByAlbum = if (stalledIds.isEmpty()) emptyMap() else entryDao.entriesByIds(stalledIds.toList())
+                .filter { it.state != BackupState.UPLOADED && !FileSkip.isSkipped(it.modeOverride) }
+                .groupingBy { it.album }.eachCount()
             val scannedAlbums = scanner.scanAlbums()
             val albums = scannedAlbums.map { album ->
                 val counts = countsByAlbum[album.name]
@@ -1054,7 +1071,9 @@ class BackupViewModel @Inject constructor(
                         album.mainPath(), folderLocations, prefs.backupLocation
                     ),
                     folderPath = album.mainPath(),
-                    missingFromCloud = _state.value.missingFromCloud[album.name]?.size ?: 0
+                    missingFromCloud = _state.value.missingFromCloud[album.name]?.size ?: 0,
+                    stalledCount = stalledByAlbum[album.name] ?: 0,
+                    skippedCount = counts?.skipped ?: 0
                 )
             }
 
@@ -1165,9 +1184,28 @@ class BackupViewModel @Inject constructor(
      * a file that was not skipped keeps whatever it had, a pin included. See `FileSkip`.
      */
     suspend fun setSkipped(entry: BackupEntryEntity, skipped: Boolean) {
-        if (skipped) entryDao.setModeOverride(entry.id, FileSkip.overrideFor(true))
-        else if (FileSkip.isSkipped(entry.modeOverride)) entryDao.setModeOverride(entry.id, null)
+        if (skipped) {
+            entryDao.setModeOverride(entry.id, FileSkip.overrideFor(true))
+            // A file gone from its Cloud that the user has now decided about leaves the red count.
+            _state.update { current ->
+                val left = current.missingFromCloud[entry.album].orEmpty() - entry.id
+                current.copy(
+                    missingFromCloud = if (left.isEmpty()) current.missingFromCloud - entry.album
+                        else current.missingFromCloud + (entry.album to left)
+                )
+            }
+        } else if (FileSkip.isSkipped(entry.modeOverride)) {
+            entryDao.setModeOverride(entry.id, null)
+        }
         refresh()
+    }
+
+    /** Swipe right on a failed file: just that one goes back in the queue, and a backup starts. Adds work only. */
+    suspend fun retryFile(entry: BackupEntryEntity) {
+        if (entryDao.retryFailed(entry.id) > 0) {
+            refresh()
+            runBackupNow()
+        }
     }
 
     suspend fun setPinned(entry: BackupEntryEntity, pinned: Boolean) {

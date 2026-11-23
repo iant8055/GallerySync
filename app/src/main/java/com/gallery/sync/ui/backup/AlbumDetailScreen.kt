@@ -165,6 +165,8 @@ fun AlbumDetailScreen(
     stalledUploads: Set<String> = emptySet(),
     /** Swipe left: do not back up this file; swipe right: back it up again (Ian, 23 Nov 2026). See `FileSkip`. */
     onSetSkipped: (BackupEntryEntity, Boolean) -> Unit = { _, _ -> },
+    /** Swipe right on a file the queue gave up on: try just that one again. */
+    onRetryFile: (BackupEntryEntity) -> Unit = {},
     /** Only the Camera album passes this. See [CameraOptimizeControls]. */
     camera: CameraOptimizeControls? = null,
     opener: OpenFileViewModel = hiltViewModel()
@@ -200,11 +202,9 @@ fun AlbumDetailScreen(
     }
     val selected = remember(selection) { selection.toHashSet() }
 
-    // Which of the files gone from the Cloud to send again. Nothing is selected to start with (Ian, 22 Nov 2026: they
-    // may have been deleted there on purpose); right selects, left deselects, as on the Restore tab.
-    var resendSelection by rememberSaveable(albumName) { mutableStateOf(ArrayList<String>()) }
-    val resendable = if (mode.uploads) missingFromCloud else emptySet()
-    val toResend = remember(resendSelection, resendable) { resendSelection.filter { it in resendable }.toSet() }
+    // Files gone from the Cloud. One gesture for every file not backed up (Ian, 23 Nov 2026): right sends it again,
+    // left keeps it out. Nothing is sent on its own: they may have been deleted there on purpose (Ian, 22 Nov 2026).
+    val resendable = missingFromCloud
     val toOptimize = remember(entries, selected) { CameraSelection.toOptimize(entries, selected) }
 
     // Every file, in the camera folder as everywhere else. Nothing on the header hides one.
@@ -298,13 +298,7 @@ fun AlbumDetailScreen(
                 resend = ResendHeader(
                     missing = missingFromCloud.size,
                     canResend = mode.uploads,
-                    selected = toResend.size,
-                    onSelectAll = { resendSelection = ArrayList(resendable) },
-                    onClear = { resendSelection = ArrayList() },
-                    onResend = {
-                        onResend(toResend)
-                        resendSelection = ArrayList()
-                    }
+                    onBackUpAll = { onResend(missingFromCloud) }
                 ),
                 onBack = leave,
                 backsUpTo = backsUpTo,
@@ -366,23 +360,15 @@ fun AlbumDetailScreen(
                                                 )
                                             }
                                         } else if (entry.id in resendable) {
-                                            // Gone from the Cloud since it was sent: greyed until selected, highlighted
-                                            // once selected, as on the Restore tab (Ian, 22 Nov 2026).
-                                            val isSelected = entry.id in toResend
-                                            val toggle = {
-                                                resendSelection = ArrayList(
-                                                    if (isSelected) resendSelection - entry.id else resendSelection + entry.id
-                                                )
-                                            }
+                                            // Gone from the Cloud since it was sent, greyed until decided. Right sends it
+                                            // again (checked against the Cloud first), left keeps it out of the backup.
                                             SwipeChoiceBox(
                                                 enabled = true,
-                                                stateKey = isSelected,
-                                                onSwipeRight = { if (!isSelected) toggle() },
-                                                onSwipeLeft = { if (isSelected) toggle() },
-                                                accessibilityLabel = stringResource(
-                                                    if (isSelected) R.string.select_action_deselect else R.string.select_action_select
-                                                ),
-                                                onAccessibilityAction = toggle
+                                                stateKey = entry.id,
+                                                onSwipeRight = { if (mode.uploads) onResend(setOf(entry.id)) },
+                                                onSwipeLeft = { onSetSkipped(entry, true) },
+                                                accessibilityLabel = stringResource(R.string.album_action_back_up),
+                                                onAccessibilityAction = { if (mode.uploads) onResend(setOf(entry.id)) }
                                             ) { drawn ->
                                                 FileCard(
                                                     entry = entry,
@@ -390,7 +376,7 @@ fun AlbumDetailScreen(
                                                     showKeepBox = false,
                                                     onSetPinned = {},
                                                     modifier = drawn.longPressToOpen { opener.open(entry) },
-                                                    cameraSelected = isSelected,
+                                                    cameraSelected = false,
                                                     goneFromCloud = true
                                                 )
                                             }
@@ -401,7 +387,13 @@ fun AlbumDetailScreen(
                                             SwipeChoiceBox(
                                                 enabled = true,
                                                 stateKey = skipped,
-                                                onSwipeRight = { if (skipped) onSetSkipped(entry, false) },
+                                                onSwipeRight = {
+                                                    when {
+                                                        skipped -> onSetSkipped(entry, false)
+                                                        // A file the queue gave up on: try this one again.
+                                                        entry.state == BackupState.FAILED && mode.uploads -> onRetryFile(entry)
+                                                    }
+                                                },
                                                 onSwipeLeft = { if (!skipped) onSetSkipped(entry, true) },
                                                 accessibilityLabel = stringResource(
                                                     if (skipped) R.string.album_action_back_up else R.string.album_action_skip
@@ -592,22 +584,11 @@ private fun DetailHeader(
                         // An Off album gets no buttons; its count stays on the counts line.
                         if (resend.missing > 0 && resend.canResend) {
                             WithHelp(HelpTopic.ALBUM_RESEND) {
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    HeroOutlinedButton(
-                                        onClick = if (resend.selected == resend.missing) resend.onClear else resend.onSelectAll,
-                                        label = stringResource(
-                                            if (resend.selected == resend.missing) R.string.retrieve_clear_selection
-                                            else R.string.retrieve_select_all
-                                        ),
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                    HeroOutlinedButton(
-                                        onClick = resend.onResend,
-                                        label = stringResource(R.string.album_resend, resend.selected),
-                                        enabled = resend.selected > 0,
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                }
+                                HeroOutlinedButton(
+                                    onClick = resend.onBackUpAll,
+                                    label = stringResource(R.string.album_back_up_all, resend.missing),
+                                    modifier = Modifier.fillMaxWidth()
+                                )
                             }
                         }
 
@@ -796,14 +777,11 @@ private fun FileCard(
     }
 }
 
-/** What the header needs for **Resend**: how many files are gone from the Cloud, how many are selected, and the actions. */
+/** What the header needs for files gone from the Cloud: how many, whether the album sends, and **Back up all**. */
 private class ResendHeader(
     val missing: Int,
     val canResend: Boolean,
-    val selected: Int,
-    val onSelectAll: () -> Unit,
-    val onClear: () -> Unit,
-    val onResend: () -> Unit
+    val onBackUpAll: () -> Unit
 )
 
 /** What the header needs to draw the camera folder's controls: the choices, what they select, and what to do. */
@@ -987,10 +965,9 @@ private fun BackupEntryEntity.statusLines(stalled: Boolean = false): List<Pair<S
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     val error = MaterialTheme.colorScheme.error
     return when {
-        // Kept out of the backup by the user (FileSkip). A copy sent before stays; nothing new goes.
-        FileSkip.isSkipped(modeOverride) && state == BackupState.UPLOADED ->
-            listOf("✓ backed up" to primary, "not backing up changes" to muted)
-        FileSkip.isSkipped(modeOverride) -> listOf("not backed up · your choice" to muted)
+        // Kept out of the backup by the user (FileSkip). Said the same way whether or not a copy was sent before: that
+        // copy may since have gone from the Cloud, and "backed up" would then be untrue.
+        FileSkip.isSkipped(modeOverride) -> listOf("kept out of the backup · your choice" to muted)
         isProxied && state == BackupState.UPLOADED -> listOf("✓ backed up" to primary, "optimized" to optimized)
         isProxied -> listOf("✓ optimized" to optimized)
         state == BackupState.UPLOADED -> listOf("✓ backed up" to primary)

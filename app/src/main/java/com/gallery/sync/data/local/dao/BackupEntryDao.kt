@@ -142,7 +142,10 @@ data class AlbumBackupCount(
      * "3 files archived" with all three on the phone (Moto G, 8 Oct 2026).
      */
     val goneFromPhone: Int = 0,
-    val goneFromPhoneBytes: Long = 0L
+    val goneFromPhoneBytes: Long = 0L,
+
+    /** Files here the user chose not to back up (`FileSkip`), while on the phone. */
+    val skipped: Int = 0
 )
 
 /** How many of one album's files went to one non-OneDrive location. Counted only while on the phone. */
@@ -601,6 +604,7 @@ interface BackupEntryDao {
         """
         SELECT id, displayName, sizeBytes, location, remoteItemId, relativePath FROM backup_entries
         WHERE album = :album AND state = :uploaded AND localMissingSinceEpochMillis IS NULL AND isProxied = 0
+            AND (modeOverride IS NULL OR modeOverride != 'OFF')
         """
     )
     suspend fun uploadedOnPhone(album: String, uploaded: BackupState = BackupState.UPLOADED): List<ReverifyRow>
@@ -617,6 +621,7 @@ interface BackupEntryDao {
             uploadedAtEpochMillis = NULL, attemptCount = 0, lastError = NULL,
             uploadSessionUrl = NULL, uploadSessionExpiresAtEpochMillis = NULL
         WHERE id IN (:ids) AND state = :uploaded AND localMissingSinceEpochMillis IS NULL AND isProxied = 0
+            AND (modeOverride IS NULL OR modeOverride != 'OFF')
         """
     )
     suspend fun requeueMissingFromCloud(
@@ -652,6 +657,14 @@ interface BackupEntryDao {
     )
 
     /** Clears the failure count so the user can retry something that has given up. */
+    /** One failed file back in the queue, from a swipe on the album's page. Only a failed row moves. */
+    @Query("UPDATE backup_entries SET state = :pending, attemptCount = 0, lastError = NULL WHERE id = :id AND state = :failed")
+    suspend fun retryFailed(
+        id: String,
+        pending: BackupState = BackupState.PENDING,
+        failed: BackupState = BackupState.FAILED
+    ): Int
+
     @Query("UPDATE backup_entries SET state = :pending, attemptCount = 0, lastError = NULL WHERE state = :failed")
     suspend fun resetFailures(
         pending: BackupState = BackupState.PENDING,
@@ -1396,7 +1409,10 @@ interface BackupEntryDao {
                SUM(CASE WHEN modeOverride = :pin AND localMissingSinceEpochMillis IS NULL
                         THEN 1 ELSE 0 END) AS pinned,
                SUM(CASE WHEN state = :failedState AND localMissingSinceEpochMillis IS NULL
+                        AND (modeOverride IS NULL OR modeOverride != :skip)
                         THEN 1 ELSE 0 END) AS failed,
+               SUM(CASE WHEN modeOverride = :skip AND localMissingSinceEpochMillis IS NULL
+                        THEN 1 ELSE 0 END) AS skipped,
                SUM(CASE WHEN state = :uploaded AND location != :oneDrive
                         AND localMissingSinceEpochMillis IS NULL
                         THEN 1 ELSE 0 END) AS sentElsewhere,
@@ -1414,7 +1430,8 @@ interface BackupEntryDao {
         uploaded: BackupState = BackupState.UPLOADED,
         pin: AlbumMode = AlbumMode.BACKUP,
         failedState: BackupState = BackupState.FAILED,
-        oneDrive: BackupLocation = BackupLocation.ONEDRIVE
+        oneDrive: BackupLocation = BackupLocation.ONEDRIVE,
+        skip: AlbumMode = AlbumMode.OFF
     ): List<AlbumBackupCount>
 
     /** Per album and per cloud, what was sent somewhere other than OneDrive. For the cloud line on each album. */

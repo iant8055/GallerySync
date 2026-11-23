@@ -176,6 +176,7 @@ fun BackupScreen(
             missingFromCloud = state.missingFromCloud[album.name].orEmpty(),
             stalledUploads = state.stalledUploads,
             onSetSkipped = { entry, skipped -> scope.launch { viewModel.setSkipped(entry, skipped) } },
+            onRetryFile = { entry -> scope.launch { viewModel.retryFile(entry) } },
             onResend = { selected ->
                 scope.launch {
                     viewModel.resendMissing(album.name, selected)
@@ -819,13 +820,24 @@ private fun AlbumModeRow(
                 )
                 // Sent, and gone from the Cloud since (Ian, 22 Nov 2026). Only said, never acted on: the user may have
                 // deleted them there on purpose, and Resend on the album's page is where they choose.
-                if (album.missingFromCloud > 0) {
+                // Ian, 23 Nov 2026: one red count for every file that needs a decision (gone from the Cloud, failed, or
+                // unable to finish), decided on the album's page; and, apart, the files kept out by choice.
+                if (album.needsDecisionCount > 0) {
                     Text(
                         text = pluralStringResource(
-                            R.plurals.album_missing_from_cloud, album.missingFromCloud, album.missingFromCloud
+                            R.plurals.album_missing_from_cloud, album.needsDecisionCount, album.needsDecisionCount
                         ),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.error
+                    )
+                }
+                if (album.skippedCount > 0) {
+                    Text(
+                        text = pluralStringResource(
+                            R.plurals.album_skipped_by_choice, album.skippedCount, album.skippedCount
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 // A mode chosen earlier that this album's cloud cannot do — the folder was moved to
@@ -1355,11 +1367,7 @@ private fun AlbumRow.statusBreakdown(): String {
             if (isNotEmpty()) append(separator)
             append(stringResource(R.string.album_status_pending, pending))
         }
-        // The part of "pending" the queue has given up on, so the album can be opened and retried.
-        if (failedCount > 0 && mode != AlbumMode.OFF) {
-            if (isNotEmpty()) append(separator)
-            append(stringResource(R.string.album_status_failed, failedCount))
-        }
+        // Failed files are in the red "not backed up" line now (Ian, 23 Nov 2026), not repeated here.
     }
 }
 
