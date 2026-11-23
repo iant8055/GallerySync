@@ -1434,12 +1434,20 @@ private fun HeroDetail(
     // continuation of the counts above it. Standing alone now, it has to be a sentence.
     //
     // The claim must be true of everything shown, including Off albums — a phone with two unsynced
-    // photos in Camera must not announce that everything is safe.
+    // photos in Camera must not announce that everything is safe. It also must be true of what the
+    // Clouds themselves last said: if any row has a file waiting to be sent, a file a Cloud confirmed
+    // it no longer holds (red "N files not backed up"), or a Cloud whose check has not yet verified
+    // what was sent to it (grey "X of Y verified …"), the banner cannot claim everything is backed
+    // up. `everyCloudVerified()` is the same test that tints the Cloud line green on each row (Ian,
+    // 22 Nov 2026), so the banner and the rows agree.
     val shown = state.albums.filter { modeFilter == null || it.mode == modeFilter }
     // `all` over empty albums is vacuously true, which put "0 Images · 0 Videos / are backed up" on
     // the Archive filter — where every album is empty by design. The claim needs something to be
-    // true of, so the counts it sits under must be non-zero.
-    if (shown.sumOf { it.itemCount } > 0 && shown.all { it.outstanding == 0 }) {
+    // true of, so the counts it sits under must be non-zero. `everyCloudVerified()` returns false for
+    // an empty album (nothing to verify, nothing was asked), so the non-empty rows are what the
+    // banner is judged against — otherwise a mixed shelf of empty and full albums could never qualify.
+    val nonEmpty = shown.filter { it.itemCount > 0 }
+    if (nonEmpty.isNotEmpty() && nonEmpty.all { it.outstanding == 0 && it.everyCloudVerified() }) {
         WithHelp(HelpTopic.ALBUMS_ALL_BACKED_UP) {
             Text(
                 text = stringResource(R.string.albums_all_backed_up),
