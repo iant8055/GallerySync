@@ -21,6 +21,7 @@ import com.gallery.sync.worker.VideoOptimizeLauncher
 import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.data.local.settings.folderFor
 import com.gallery.sync.domain.backup.AlbumMergeWarning
+import com.gallery.sync.domain.backup.UploadStalls
 import com.gallery.sync.worker.BackupScheduling
 import com.gallery.sync.worker.BackupWorker
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -419,6 +420,8 @@ data class BackupUiState(
     val folderToPlace: String? = null,
     /** Per album, what the last check found sent but no longer in a Cloud. See [AlbumRow.missingFromCloud]. */
     val missingFromCloud: Map<String, Set<String>> = emptyMap(),
+    /** Files whose upload keeps being interrupted without gaining ground (row ids). See `UploadStalls`. */
+    val stalledUploads: Set<String> = emptySet(),
     /** The Camera album's manual optimize is queued or running. Drives its button and its list. */
     val cameraOptimizing: Boolean = false,
     /** *Special settings for Camera*, off out of the box. See `BackupPreferences.cameraSpecialEnabled`. */
@@ -641,6 +644,7 @@ class BackupViewModel @Inject constructor(
                         videos = prefs.cameraOptimizeVideo
                     ),
                     cameraVideoQuality = prefs.cameraVideoQuality,
+                    stalledUploads = UploadStalls.stalled(UploadStalls.decode(prefs.uploadStalls)),
                     isPaused = prefs.isPaused,
                     runBaselineBytes = prefs.runBaselineBytes,
                     backupLocation = prefs.backupLocation,

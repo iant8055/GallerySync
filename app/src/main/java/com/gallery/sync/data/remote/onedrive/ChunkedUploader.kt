@@ -236,8 +236,14 @@ class ChunkedUploader @Inject constructor(
         // Continue a session left over from an interrupted run, when there is one and the server
         // still recognises it. Anything unusable falls through to opening a fresh session, which is
         // exactly the old behaviour.
+        //
+        // The server is asked every time, and the expiry stored with the session is not consulted. That expiry is the
+        // one Graph gave when the session was created, and Graph moves it later with every chunk it accepts; the app
+        // never recorded the later one. So a session still being fed read as expired twenty-odd minutes after it was
+        // opened, a fresh one was started, and its empty placeholder was filled from byte zero. On the Fold 8, 23 Nov
+        // 2026, an 8.3 GB video went 0 -> 1.34 GB -> resumed -> 2.79 GB -> back to 0, every twenty minutes, for good.
+        // One status request costs nothing; a dead session answers 404 and falls through to a fresh one as before.
         val resumed = existingSession
-            ?.takeIf { !it.hasExpired() }
             ?.let { session -> resumeOffsetOf(session, total)?.let { session.uploadUrl to it } }
 
         val uploadUrl: String
@@ -285,20 +291,23 @@ class ChunkedUploader @Inject constructor(
             )
             Logger.d(TAG, "uploading ${source.displayName} in chunks ($total bytes)")
         }
+        // One buffer for the whole file: at 25 MiB a fresh array per chunk is a lot of garbage for an 8 GB video.
+        // Uploads run one at a time, so this is the only one. The request body is written before uploadChunk
+        // returns, so the next read cannot overwrite bytes still being sent.
+        val buffer = ByteArray(minOf(CHUNK_SIZE_BYTES.toLong(), total).toInt())
         source.open().use { reader ->
             while (offset < total) {
                 // Cooperative cancellation: a stopped worker must not keep pushing bytes.
                 coroutineContext.ensureActive()
 
                 val size = minOf(CHUNK_SIZE_BYTES.toLong(), total - offset).toInt()
-                val buffer = ByteArray(size)
                 reader.readFully(offset, buffer, size)
 
                 val range = contentRange(offset, offset + size - 1, total)
                 val response = chunkApi.uploadChunk(
                     uploadUrl = uploadUrl,
                     contentRange = range,
-                    body = buffer.toRequestBody(OCTET_STREAM)
+                    body = buffer.toRequestBody(OCTET_STREAM, 0, size)
                 )
 
                 when {
@@ -394,8 +403,12 @@ class ChunkedUploader @Inject constructor(
          */
         const val CHUNK_ALIGNMENT_BYTES = 327_680
 
-        /** 5 MiB: 16 alignment units. Large enough to be efficient, small enough to retry cheaply. */
-        const val CHUNK_SIZE_BYTES = CHUNK_ALIGNMENT_BYTES * 16
+        /**
+         * 25 MiB: 80 alignment units. Was 5 MiB, and each chunk waits for Graph's answer before the next is sent, so
+         * the round trips set the speed: the Fold 8 sent 2.2 MB/s on a 160 Mbps line (23 Nov 2026), and an 8.3 GB
+         * video needed an hour. Graph allows up to 60 MiB; 25 keeps a retried chunk and the one buffer modest.
+         */
+        const val CHUNK_SIZE_BYTES = CHUNK_ALIGNMENT_BYTES * 80
 
         /** Graph's ceiling for a single-request upload. */
         const val SMALL_FILE_THRESHOLD_BYTES = 4L * 1024 * 1024

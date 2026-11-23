@@ -174,6 +174,7 @@ fun BackupScreen(
                 }
             },
             missingFromCloud = state.missingFromCloud[album.name].orEmpty(),
+            stalledUploads = state.stalledUploads,
             onResend = { selected ->
                 scope.launch {
                     viewModel.resendMissing(album.name, selected)

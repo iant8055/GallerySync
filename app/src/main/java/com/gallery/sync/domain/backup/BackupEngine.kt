@@ -36,7 +36,9 @@ import com.gallery.sync.domain.repository.OneDriveRepository
 import com.gallery.sync.domain.repository.OneDriveUploadRepository
 import com.gallery.sync.util.Logger
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -210,6 +212,27 @@ class BackupEngine @Inject constructor(
      * The clock stops on either button: Resume and Stop both clear the stamp, because both are the
      * user attending to the run. Only walking away leaves it running.
      */
+    /** The stall record, or none when it cannot be read: a missing record only means nothing is held back. */
+    private suspend fun storedUploadStalls(): Map<String, Int> =
+        runCatching { UploadStalls.decode(settings.current().uploadStalls) }.getOrDefault(emptyMap())
+
+    /** Records an interrupted upload; written even though the run is being cancelled. See [UploadStalls]. */
+    private suspend fun noteUploadInterrupted(id: String, gainedGround: Boolean) = withContext(NonCancellable) {
+        runCatching {
+            settings.updateUploadStalls { stored ->
+                UploadStalls.encode(UploadStalls.afterInterruption(UploadStalls.decode(stored), id, gainedGround))
+            }
+        }
+        if (!gainedGround) Logger.w(TAG, "upload of $id interrupted without gaining ground")
+    }
+
+    /** Forgets a file's stall record once it has been sent. Writes only when there is one to forget. */
+    private suspend fun clearUploadStall(id: String) {
+        if (storedUploadStalls().containsKey(id)) {
+            settings.updateUploadStalls { stored -> UploadStalls.encode(UploadStalls.cleared(UploadStalls.decode(stored), id)) }
+        }
+    }
+
     suspend fun discardStaleUploadSessions() = withContext(dispatcher) {
         val interruptedAt = settings.current().uploadInterruptedAtEpochMillis
         if (interruptedAt <= 0L) return@withContext
@@ -736,7 +759,12 @@ class BackupEngine @Inject constructor(
                 // The upload gate reads modes. See AlbumIdentityReconciler for why that waits on it.
                 albumIdentity.reconcile()
                 entryDao.nextPending(limit = limit, maxAttempts = MAX_ATTEMPTS)
-            }.let { candidates -> withinByteBudget(candidates, maxBytes) }
+            }.let { candidates ->
+                // A file whose upload keeps being interrupted without gaining ground goes last, so it cannot hold up
+                // every other file (Ian, 23 Nov 2026). It is still tried, after the rest. See UploadStalls.
+                val stalled = UploadStalls.stalled(storedUploadStalls())
+                withinByteBudget(UploadStalls.lastIfStalled(candidates, stalled) { it.id }, maxBytes)
+            }
 
             // Split by destination — see TASK-026. The two loops below are independent on purpose:
             // Ian, 23 Sept 2026, "a failed Google run (or iDrive or OneDrive) should never stop
@@ -914,10 +942,14 @@ class BackupEngine @Inject constructor(
                     )
                 )
 
-                val result = uploadRepository.upload(
+                // Server-confirmed progress callbacks this run: a resume reports its starting offset once, then one per
+                // chunk, so two or more means a chunk was kept. See UploadStalls.
+                var confirmations = 0
+                val result = try { uploadRepository.upload(
                     source = source,
                     remoteFolderPath = remotePathFor(entry.album),
                     onProgress = { sent, total ->
+                        confirmations++
                         onProgress(
                             BackupProgress(
                                 completed = uploaded + skipped + pruned,
@@ -949,7 +981,11 @@ class BackupEngine @Inject constructor(
                             expiresAt = session.expiresAtEpochMillis
                         )
                     }
-                )
+                ) } catch (e: CancellationException) {
+                    noteUploadInterrupted(entry.id, gainedGround = confirmations >= 2)
+                    throw e
+                }
+                if (result is DataResult.Success) clearUploadStall(entry.id)
 
                 when (result) {
                     is DataResult.Success -> {
@@ -1067,7 +1103,7 @@ class BackupEngine @Inject constructor(
                         sizeBytes = entry.sizeBytes
                     )
 
-                    val result = uploader.upload(
+                    val result = try { uploader.upload(
                         source = source,
                         album = entry.album,
                         root = folderFor(location),
@@ -1083,7 +1119,12 @@ class BackupEngine @Inject constructor(
                                 )
                             )
                         }
-                    )
+                    ) } catch (e: CancellationException) {
+                        // None of these Clouds resumes yet, so whatever was sent is lost: always no ground gained.
+                        noteUploadInterrupted(entry.id, gainedGround = false)
+                        throw e
+                    }
+                    if (result is DataResult.Success) clearUploadStall(entry.id)
 
                     when (result) {
                         is DataResult.Success -> {

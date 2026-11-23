@@ -379,7 +379,9 @@ data class BackupPreferences(
      * not a setting: no screen shows it. Stored rather than passed with the work because a large folder's ids
      * would not fit in WorkManager's 10 KB of input.
      */
-    val cameraRunSelection: Set<String> = emptySet()
+    val cameraRunSelection: Set<String> = emptySet(),
+    /** Uploads interrupted without gaining ground, by row id. Bookkeeping; see `UploadStalls`. */
+    val uploadStalls: Set<String> = emptySet()
 )
 
 /**
@@ -470,7 +472,8 @@ class BackupSettings @Inject constructor(
             cameraOptimizePhotos = stored[KEY_CAMERA_OPTIMIZE_PHOTOS] ?: false,
             cameraOptimizeVideo = stored[KEY_CAMERA_OPTIMIZE_VIDEO] ?: false,
             cameraVideoQuality = VideoQuality.fromNameOrDefault(stored[KEY_CAMERA_VIDEO_QUALITY]),
-            cameraRunSelection = stored[KEY_CAMERA_RUN_SELECTION] ?: emptySet()
+            cameraRunSelection = stored[KEY_CAMERA_RUN_SELECTION] ?: emptySet(),
+            uploadStalls = stored[KEY_UPLOAD_STALLS] ?: emptySet()
         )
     }
 
@@ -714,6 +717,11 @@ class BackupSettings @Inject constructor(
     }
 
     /** What the next Camera optimize pass works on. See [BackupPreferences.cameraRunSelection]. */
+    /** Rewrites the stall record in one transaction, so two quick updates cannot lose each other. */
+    suspend fun updateUploadStalls(change: (Set<String>) -> Set<String>) {
+        context.dataStore.edit { it[KEY_UPLOAD_STALLS] = change(it[KEY_UPLOAD_STALLS] ?: emptySet()) }
+    }
+
     suspend fun setCameraRunSelection(ids: Set<String>) {
         context.dataStore.edit { it[KEY_CAMERA_RUN_SELECTION] = ids }
     }
@@ -945,6 +953,7 @@ class BackupSettings @Inject constructor(
         val KEY_CAMERA_SPECIAL = booleanPreferencesKey("camera_special_enabled")
         val KEY_CAMERA_FOLDER = stringPreferencesKey("camera_folder")
         val KEY_CAMERA_RUN_SELECTION = stringSetPreferencesKey("camera_run_selection")
+        val KEY_UPLOAD_STALLS = stringSetPreferencesKey("upload_stalls")
         val KEY_CAMERA_DEFAULT_AGE = stringPreferencesKey("camera_default_age")
         val KEY_CAMERA_OPTIMIZE_PHOTOS = booleanPreferencesKey("camera_optimize_photos")
         val KEY_CAMERA_OPTIMIZE_VIDEO = booleanPreferencesKey("camera_optimize_video")

@@ -160,6 +160,8 @@ fun AlbumDetailScreen(
      */
     missingFromCloud: Set<String> = emptySet(),
     onResend: (Set<String>) -> Unit = {},
+    /** Files whose upload keeps being interrupted without getting anywhere: said on their card. See `UploadStalls`. */
+    stalledUploads: Set<String> = emptySet(),
     /** Only the Camera album passes this. See [CameraOptimizeControls]. */
     camera: CameraOptimizeControls? = null,
     opener: OpenFileViewModel = hiltViewModel()
@@ -396,7 +398,8 @@ fun AlbumDetailScreen(
                                                 showKeepBox = entry.id in restoredIds,
                                                 onSetPinned = { pinned -> onSetPinned(entry, pinned) },
                                                 modifier = Modifier.longPressToOpen { opener.open(entry) },
-                                                goneFromCloud = entry.id in missingFromCloud
+                                                goneFromCloud = entry.id in missingFromCloud,
+                                                stalled = entry.id in stalledUploads
                                             )
                                         }
                                     }
@@ -658,7 +661,9 @@ private fun FileCard(
      */
     cameraSelected: Boolean? = null,
     /** Sent, and no longer in its Cloud at the last check: the line says so rather than naming the Cloud as its place. */
-    goneFromCloud: Boolean = false
+    goneFromCloud: Boolean = false,
+    /** Its upload keeps being interrupted without getting anywhere; it is sent after the other files. */
+    stalled: Boolean = false
 ) {
     val scheme = MaterialTheme.colorScheme
     val selected = cameraSelected == true
@@ -718,7 +723,7 @@ private fun FileCard(
                     Instant.ofEpochSecond(entry.dateForSorting).atZone(ZoneId.systemDefault())
                 )
                 // Gone from the Cloud since: it is not backed up any more, whatever the record says.
-                val marks = entry.statusLines().filterNot { goneFromCloud && it.first == "✓ backed up" }
+                val marks = entry.statusLines(stalled).filterNot { goneFromCloud && it.first == "✓ backed up" }
                 // Which Cloud it went to, named only once it is actually there (Ian, 4 Oct 2026: "or
                 // where it was backed up to" — past tense). A pending or failed row has a *destination*
                 // rather than a place, and naming one would read as a claim the app has not earned.
@@ -955,7 +960,7 @@ private fun BackupEntryEntity.sizeOnPhone(): Long =
  * Safe is one colour. Uploaded reads primary whether or not it was later optimized.
  */
 @Composable
-private fun BackupEntryEntity.statusLines(): List<Pair<String, Color>> {
+private fun BackupEntryEntity.statusLines(stalled: Boolean = false): List<Pair<String, Color>> {
     // The safe green, not `primary`: in the light theme primary is nearly black. Ian, 19 Sept 2026.
     val primary = LocalGallerySyncColors.current.safeText
     val optimized = MaterialTheme.colorScheme.tertiary
@@ -965,6 +970,8 @@ private fun BackupEntryEntity.statusLines(): List<Pair<String, Color>> {
         isProxied && state == BackupState.UPLOADED -> listOf("✓ backed up" to primary, "optimized" to optimized)
         isProxied -> listOf("✓ optimized" to optimized)
         state == BackupState.UPLOADED -> listOf("✓ backed up" to primary)
+        // Ian, 23 Nov 2026: flag a file that keeps failing to finish, and let the others go first.
+        state == BackupState.PENDING && stalled -> listOf("⟳ couldn't finish uploading · trying after the rest" to error)
         state == BackupState.PENDING -> listOf("⟳ pending" to muted)
         state == BackupState.FAILED -> listOf("✗ failed" to error)
         else -> listOf("?" to muted)

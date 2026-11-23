@@ -473,6 +473,35 @@ class ChunkedUploaderTest {
 
     // ---------- helpers ----------
 
+    /**
+     * Fold 8, 23 Nov 2026: the stored expiry is the one Graph gave at creation, which Graph moves later with every
+     * chunk. Trusting it threw away a live session every twenty minutes and an 8.3 GB video never got past 2.8 GB.
+     */
+    @Test
+    fun `a session past its stored expiry is still resumed when the server says it is alive`() = runTest {
+        val size = ChunkedUploader.CHUNK_SIZE_BYTES.toLong() * 2
+        val sessionUrl = server.url("/session/abc").toString()
+        server.enqueue(jsonResponse(200, """{"nextExpectedRanges":["${ChunkedUploader.CHUNK_SIZE_BYTES}-"]}"""))
+        server.enqueue(jsonResponse(201, """{"id":"V1","name":"big.mp4","size":$size}"""))
+
+        val outcome = uploader.upload(
+            FileUploadSource(fileOfSize("big.mp4", size)),
+            "DCIM/Camera",
+            existingSession = ResumableSession(sessionUrl, expiresAtEpochMillis = 1L)
+        )
+
+        assertTrue(outcome is UploadOutcome.Success)
+        assertEquals(2, server.requestCount)
+        val status = server.takeRequest()
+        assertEquals("GET", status.method)
+        assertEquals("/session/abc", status.path)
+        val chunk = server.takeRequest()
+        assertEquals(
+            "bytes ${ChunkedUploader.CHUNK_SIZE_BYTES}-${size - 1}/$size",
+            chunk.getHeader("Content-Range")
+        )
+    }
+
     private fun jsonResponse(code: Int, body: String) = MockResponse()
         .setResponseCode(code)
         .setHeader("Content-Type", "application/json")
