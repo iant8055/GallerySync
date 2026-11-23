@@ -1,0 +1,35 @@
+<en-US>
+• Large videos no longer start again from zero: an interrupted upload now continues where it stopped, and the next backup starts straight away.
+• Swipe a file left on its album's page to keep it out of the backup, right to back it up, send it again or retry it.
+• The red "files not backed up" now counts only files that need your decision; files you keep out are counted in grey.
+</en-US>
+<es-ES>
+• Los vídeos grandes ya no empiezan de cero: una subida interrumpida continúa donde se quedó, y la siguiente copia empieza enseguida.
+• En la página del álbum, desliza un archivo a la izquierda para dejarlo fuera de la copia y a la derecha para copiarlo, reenviarlo o reintentarlo.
+• El aviso rojo "files not backed up" solo cuenta los archivos que necesitan tu decisión; los que dejas fuera aparecen en gris.
+</es-ES>
+<pt-BR>
+• Vídeos grandes não recomeçam mais do zero: um envio interrompido continua de onde parou, e o próximo backup começa na hora.
+• Na página do álbum, deslize um arquivo para a esquerda para deixá-lo fora do backup e para a direita para fazer backup, reenviar ou tentar de novo.
+• O aviso vermelho "files not backed up" conta só os arquivos que precisam da sua decisão; os que você deixa de fora aparecem em cinza.
+</pt-BR>
+<fr-FR>
+• Les grandes vidéos ne repartent plus de zéro : un envoi interrompu reprend là où il s'est arrêté, et la sauvegarde suivante démarre aussitôt.
+• Sur la page de l'album, balayez un fichier vers la gauche pour l'exclure de la sauvegarde, vers la droite pour le sauvegarder, le renvoyer ou réessayer.
+• Le rouge "files not backed up" ne compte que les fichiers qui demandent votre décision ; ceux que vous excluez sont comptés en gris.
+</fr-FR>
+<de-DE>
+• Große Videos beginnen nicht mehr bei null: Ein unterbrochener Upload macht dort weiter, wo er aufgehört hat, und die nächste Sicherung startet sofort.
+• Auf der Albumseite eine Datei nach links wischen, um sie von der Sicherung auszunehmen, nach rechts, um sie zu sichern, erneut zu senden oder neu zu versuchen.
+• Das rote "files not backed up" zählt nur Dateien, die Ihre Entscheidung brauchen; ausgenommene Dateien werden grau gezählt.
+</de-DE>
+<ja-JP>
+• 大きな動画が最初からやり直しにならなくなりました。中断したアップロードは止まった所から続き、次のバックアップもすぐに始まります。
+• アルバムのページでファイルを左にスワイプするとバックアップから外し、右にスワイプするとバックアップ・再送信・再試行します。
+• 赤い "files not backed up" は判断が必要なファイルだけを数えます。外したファイルは灰色で数えます。
+</ja-JP>
+<hi-IN>
+• बड़े वीडियो अब शुरू से दोबारा नहीं भेजे जाते: रुका हुआ अपलोड वहीं से जारी रहता है, और अगला बैकअप तुरंत शुरू होता है।
+• एल्बम के पेज पर फ़ाइल को बाईं ओर स्वाइप करें तो वह बैकअप से बाहर रहती है, दाईं ओर करें तो बैकअप, दोबारा भेजना या फिर से कोशिश होती है।
+• लाल "files not backed up" अब सिर्फ़ उन फ़ाइलों को गिनता है जिन पर आपका फ़ैसला चाहिए; बाहर रखी फ़ाइलें धूसर में गिनी जाती हैं।
+</hi-IN>

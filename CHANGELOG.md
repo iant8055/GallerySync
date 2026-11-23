@@ -3,6 +3,23 @@
 Every change since version 26 (0.3.25), the last build the Closed Testing group had. The short notes Play shows to users
 (500 characters per language) are in `release-notes/`; this file is the full record.
 
+## Version 41 (0.3.40) — 23 Nov 2026, built, not uploaded
+
+**Large uploads**
+- A big video no longer starts again from zero. Android stops every backup after about ten minutes; the next one now always continues the OneDrive upload from where it stopped. Before, about twenty minutes in, a still-good upload was treated as expired and begun again, so a file over about 2.5 GB could never finish. Seen on the Moto G: an 8.4 GB video resumed at 3.0 GB and finished whole.
+- A backup that Android stops now carries on straight away. One started by new photos used to wait for the next new photo, and the six-hourly one for six hours.
+- A file that keeps being interrupted without getting further goes to the end of the queue, so the other files go first, and its album page says *couldn't finish uploading · trying after the rest*.
+
+**Album page: one swipe for every file**
+- Swipe left keeps a file out of the backup: greyed, *kept out of the backup · your choice*, never uploaded, optimized or archived. A copy already in a Cloud stays.
+- Swipe right backs it up: puts a kept-out file back, sends a file gone from its Cloud again (asking the Cloud first), or retries a failed one.
+- *Select all*, *Clear* and *Resend* are replaced by **Back up all** for files gone from the Cloud.
+- The camera folder keeps its own swipe, which selects files to optimize.
+
+**Albums tab**
+- The red *N files not backed up* counts files that need a decision: gone from their Cloud, failed, or unable to finish. New files waiting for the next backup are not counted.
+- New grey line *N files not backed up by choice*.
+
 ## Version 40 (0.3.39) — 23 Nov 2026, uploaded
 
 **Restore tab**
