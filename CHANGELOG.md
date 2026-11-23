@@ -3,7 +3,7 @@
 Every change since version 26 (0.3.25), the last build the Closed Testing group had. The short notes Play shows to users
 (500 characters per language) are in `release-notes/`; this file is the full record.
 
-## Not yet in a build
+## Version 40 (0.3.39) — 23 Nov 2026, built, not uploaded
 
 **Wording**
 - The Sync mode is now called **Optimize**, and *Sync now* is **Back Up Now**. Every on-screen "optimize" is spelt "optimize". In Settings the *Sync* section is **Optimization** and *Camera Sync* is **Camera Folder**, whose rows now read **Select Camera Folder**, **Only Optimize Photos/Videos older than**, **Optimize Photos** and **Optimize Videos**. Nothing behaves differently.
@@ -12,8 +12,13 @@ Every change since version 26 (0.3.25), the last build the Closed Testing group 
 - A folder inside a top-level folder can choose its own Cloud. Adding *DCIM / Funny stuff* now asks about that folder and lists it under DCIM in *Where each folder goes*; before, the answer moved the whole of DCIM. Every folder added under *Folders to back up* has its own row, following its parent's Cloud until one is chosen.
 
 **Albums tab**
-- An album whose Cloud no longer holds some of the files it sent says so in red ("25 files are no longer in the Cloud"), found by the tab's check and **Rescan**. Nothing is sent again on its own.
+- An album whose Cloud no longer holds some of the files it sent says so in red ("25 files not backed up"), found by the tab's check and **Rescan**. Nothing is sent again on its own.
 - On the album's page those files are greyed and marked "not in Dropbox". Select them as on the Restore tab (swipe right, or **Select all**) and press **Resend** to send them again, to where their folder goes now. A new (?) explains it. Optimized files are never offered: their full-size original was only in the Cloud.
+- *Everything here is backed up* no longer shows while an album below says otherwise: every Cloud an album names must have confirmed what was sent to it.
+- The album's page follows uploads as they finish. Before, files resent or newly added went on reading "pending" after they had reached the Cloud, until the page was left and opened again.
+
+**Settings reset**
+- The stored names of the optimize settings were respelt, so on an existing install these start again from their defaults: Settings → *Optimize photos* and *Optimize video* (and their modes and ages), and the Camera Folder's *Optimize Photos* default. Choose them again after updating. Nothing is optimized because of the reset: the defaults are off.
 
 ## Version 39 (0.3.38) — 16 Nov 2026, uploaded, installed on the Fold
 
