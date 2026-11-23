@@ -1131,6 +1131,9 @@ class BackupViewModel @Inject constructor(
 
     suspend fun albumEntries(album: String) = entryDao.entriesForAlbum(album)
 
+    /** The album's ledger rows, re-emitted on every write, so the album's page follows uploads as they finish. */
+    fun observeAlbumEntries(album: String) = entryDao.observeEntriesForAlbum(album)
+
     /**
      * *Retry failed* on one album: its failed files go back in the queue and a backup starts.
      *

@@ -1507,6 +1507,19 @@ interface BackupEntryDao {
     suspend fun entriesForAlbum(album: String): List<BackupEntryEntity>
 
     /**
+     * [entriesForAlbum], re-emitted whenever the ledger is written, for the album's page. A one-off read went
+     * stale: after a Resend the uploads finished while the page went on saying "10 pending" (Moto G, 23 Nov 2026).
+     */
+    @Query(
+        """
+        SELECT * FROM backup_entries
+        WHERE album = :album
+        ORDER BY displayName ASC
+        """
+    )
+    fun observeEntriesForAlbum(album: String): Flow<List<BackupEntryEntity>>
+
+    /**
      * Entries safe to remove the local copy of.
      *
      * Requires both that OneDrive confirmed the file **and** that the size it reported equals the

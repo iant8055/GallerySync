@@ -92,7 +92,6 @@ import com.gallery.sync.ui.help.HelpTopic
 import com.gallery.sync.ui.help.TitleWithHelp
 import com.gallery.sync.ui.help.WithHelp
 import com.gallery.sync.ui.theme.LocalGallerySyncColors
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.OutlinedIconButton
@@ -141,18 +140,13 @@ fun BackupScreen(
         else viewModel.onCameraConsentDeclined()
     }
 
-    // The drill-down lists what the ledger holds, so it is read again whenever the counts move: an
-    // optimize running in the background makes files smaller one at a time, and the Camera list
-    // should shrink as it happens rather than when the screen is next opened.
-    LaunchedEffect(detailAlbum?.name, state.cameraOptimizing, state.albums) {
+    // The drill-down lists what the ledger holds, and follows it: every write re-emits the album's rows, so an
+    // upload finishing or an optimize shrinking a file shows as it happens. It used to be re-read only when
+    // the Albums tab's rows changed, and after a Resend the page said "10 pending" about ten files already
+    // in Dropbox (Moto G, 23 Nov 2026), because finishing an upload does not change those rows.
+    LaunchedEffect(detailAlbum?.name) {
         val name = detailAlbum?.name ?: return@LaunchedEffect
-        detailEntries = viewModel.albumEntries(name)
-        // While the Camera optimize runs the ledger changes a file at a time and nothing else tells this
-        // screen, so it looks again every couple of seconds until the run is over.
-        while (state.cameraOptimizing) {
-            delay(2_000)
-            detailEntries = viewModel.albumEntries(name)
-        }
+        viewModel.observeAlbumEntries(name).collect { detailEntries = it }
     }
 
     detailAlbum?.let { album ->
