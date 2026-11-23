@@ -100,15 +100,16 @@ object ElsewhereTally {
         rows: List<SentElsewhereRow>,
         listing: Map<String, Long>,
         lookUp: suspend (remoteItemId: String) -> RemoteCheck
-    ): Outcome = outcomeOf(answer(rows, listing, lookUp).values)
+    ): Outcome = outcomeOf(answer(rows, listing, MAX_LOOKUPS, lookUp).values)
 
     /** [of], plus the ledger ids of the rows it counted missing: what Rescan may queue again. Never an unchecked one. */
     suspend fun withMissing(
         rows: List<SentElsewhereRow>,
         listing: Map<String, Long>,
+        maxLookups: Int = MAX_LOOKUPS,
         lookUp: suspend (remoteItemId: String) -> RemoteCheck
     ): Pair<Outcome, List<String>> {
-        val answers = answer(rows, listing, lookUp)
+        val answers = answer(rows, listing, maxLookups, lookUp)
         return outcomeOf(answers.values) to answers.filterValues { it == Answer.MISSING }.keys.map { it.id }
     }
 
@@ -121,6 +122,7 @@ object ElsewhereTally {
     private suspend fun answer(
         rows: List<SentElsewhereRow>,
         listing: Map<String, Long>,
+        maxLookups: Int,
         lookUp: suspend (remoteItemId: String) -> RemoteCheck
     ): Map<SentElsewhereRow, Answer> {
         var lookups = 0
@@ -129,7 +131,7 @@ object ElsewhereTally {
             val listed = listing[row.remoteItemId]
             out[row] = when {
                 listed != null -> if (listed == row.sizeBytes) Answer.VERIFIED else Answer.MISSING
-                lookups >= MAX_LOOKUPS -> Answer.UNCHECKED
+                lookups >= maxLookups -> Answer.UNCHECKED
                 else -> {
                     lookups++
                     when (val answer = lookUp(row.remoteItemId)) {

@@ -13,6 +13,7 @@ import com.gallery.sync.domain.backup.DriveListing
 import com.gallery.sync.domain.backup.DownloadMissingFile
 import com.gallery.sync.domain.backup.RestoreInPlaceResult
 import com.gallery.sync.domain.backup.RestoreProxyInPlace
+import com.gallery.sync.domain.backup.RestoreElsewhereCheck
 import com.gallery.sync.domain.backup.RestoreStillInOneDrive
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -232,7 +233,8 @@ class RestoreViewModel @Inject constructor(
     private val downloader: DownloadMissingFile,
     private val settings: BackupSettings,
     private val listingStore: DriveListingStore,
-    private val connections: CloudConnections
+    private val connections: CloudConnections,
+    private val elsewhere: RestoreElsewhereCheck
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(RestoreUiState())
@@ -253,6 +255,22 @@ class RestoreViewModel @Inject constructor(
      */
     private var driveListing: DriveListing? = null
     private var driveListedAt = 0L
+
+    /**
+     * Ledger ids the other Clouds (Dropbox, pCloud, ...) answered for and no longer hold, and when they were asked. Kept
+     * in memory only, with the same time-to-live as the OneDrive listing. See [RestoreElsewhereCheck].
+     */
+    private var goneElsewhere: Set<String> = emptySet()
+    private var elsewhereCheckedAt = 0L
+
+    /** Asks the other Clouds again when their answer has gone stale or the user pressed Refresh. */
+    private suspend fun checkElsewhere(force: Boolean) {
+        if (!force && elsewhereCheckedAt != 0L &&
+            System.currentTimeMillis() - elsewhereCheckedAt <= DRIVE_LISTING_TTL_MILLIS
+        ) return
+        goneElsewhere = runCatching { elsewhere.gone(ledgerRows().map { it.entry }) }.getOrDefault(goneElsewhere)
+        elsewhereCheckedAt = System.currentTimeMillis()
+    }
 
     init {
         refresh()
@@ -281,6 +299,8 @@ class RestoreViewModel @Inject constructor(
             // ledger's rows still cover every other cloud that can restore, so show those and stop.
             if (connections.of(BackupLocation.ONEDRIVE)?.accountLabel() == null) {
                 driveListing = null
+                publishFrom(null, checkingCloud = true)
+                checkElsewhere(force)
                 publishFrom(null, checkingCloud = false)
                 return@launch
             }
@@ -304,8 +324,10 @@ class RestoreViewModel @Inject constructor(
             // gone stale, or the user pressed Refresh.
             if (held != null && !isStale() && !force) return@launch
 
+            checkElsewhere(force)
             val listing = runCatching { engine.listDriveFolders() }.getOrNull()
             if (listing == null) {
+                publishFrom(held, checkingCloud = false)
                 _state.value = _state.value.copy(checkingCloud = false, cloudUnavailable = true)
                 return@launch
             }
@@ -328,14 +350,14 @@ class RestoreViewModel @Inject constructor(
      */
     private suspend fun publishFrom(listing: DriveListing?, checkingCloud: Boolean) {
         if (listing == null) {
-            publish(ledgerRows(), loading = false, checkingCloud = checkingCloud)
+            publish(ledgerRows().filterNot { it.id in goneElsewhere }, loading = false, checkingCloud = checkingCloud)
             return
         }
         val drive = engine.driveRestoreFiles(listing)
         // A row whose OneDrive copy the listing no longer holds is not offered: it could not be brought back.
         val ledger = ledgerRows().let { rows ->
             val kept = RestoreStillInOneDrive.keep(rows.map { it.entry }, listing).mapTo(HashSet()) { it.id }
-            rows.filter { it.id in kept }
+            rows.filter { it.id in kept && it.id !in goneElsewhere }
         }
         val known = ledger.mapTo(HashSet()) { it.album.lowercase() + "/" + it.displayName }
         val fromDrive = drive.missing.map { RestoreRow(it, RowKind.Download) } +
