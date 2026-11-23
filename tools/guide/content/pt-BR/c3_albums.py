@@ -120,8 +120,8 @@ Sem miniaturas nem pré-visualizações. **Toque e segure um arquivo** para abri
         "en_hash": "0b4ffba87f22d1c6",
     },
     "album-resend": {
-        "title": 'Arquivos que não estão mais na Cloud',
-        "body": """Arquivos que este álbum enviou e que a Cloud deles não tem mais. **Rescan** na aba Albums os encontra, e o cartão do álbum os conta em vermelho.
+        "title": 'Arquivos sem backup',
+        "body": """Arquivos que este álbum enviou e que não estão mais na sua Cloud. **Rescan** na aba Albums os encontra, e o cartão do álbum os conta em vermelho como **N files not backed up**.
 
 • Cada um aparece esmaecido e marcado **not in <Cloud>**.
 • Nada é reenviado sozinho. Eles podem ter sido apagados na Cloud de propósito.
@@ -130,7 +130,7 @@ Sem miniaturas nem pré-visualizações. **Toque e segure um arquivo** para abri
 • Arquivos otimizados não aparecem: o original em tamanho total só estava na Cloud.
 • Em um álbum **Off**, escolha um modo primeiro.
 • Nas Clouds que não são o OneDrive, cada Rescan consulta no máximo 25 arquivos por álbum que não estão na pasta do álbum. Use Rescan de novo para o resto.""",
-        "en_hash": "82015bd5d3445a55",
+        "en_hash": "966ae07aace959b6",
     },
 
     'album-file-sort': {

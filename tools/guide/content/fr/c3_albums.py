@@ -120,8 +120,8 @@ Pas de miniatures ni d'aperçus. **Appuyez longuement sur un fichier** pour l'ou
         "en_hash": "0b4ffba87f22d1c6",
     },
     "album-resend": {
-        "title": 'Fichiers qui ne sont plus dans le Cloud',
-        "body": """Fichiers que cet album a envoyés et que leur Cloud n'a plus. **Rescan** dans l'onglet Albums les trouve, et la carte de l'album les compte en rouge.
+        "title": 'Fichiers non sauvegardés',
+        "body": """Fichiers que cet album a envoyés et qui ne sont plus dans leur Cloud. **Rescan** dans l'onglet Albums les trouve, et la carte de l'album les compte en rouge sous la forme **N files not backed up**.
 
 • Chacun est grisé et marqué **not in <Cloud>**.
 • Rien n'est renvoyé tout seul. Ils ont peut-être été supprimés exprès dans le Cloud.
@@ -130,7 +130,7 @@ Pas de miniatures ni d'aperçus. **Appuyez longuement sur un fichier** pour l'ou
 • Les fichiers optimisés n'apparaissent pas : l'original en taille réelle n'était que dans le Cloud.
 • Dans un album **Off**, choisissez d'abord un mode.
 • Pour les Clouds autres que OneDrive, chaque Rescan vérifie au plus 25 fichiers par album absents du dossier de l'album. Relancez Rescan pour le reste.""",
-        "en_hash": "82015bd5d3445a55",
+        "en_hash": "966ae07aace959b6",
     },
 
     "album-file-sort": {

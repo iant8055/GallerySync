@@ -120,8 +120,8 @@ Keine Miniaturansichten oder Vorschauen. **Drücke lange auf eine Datei**, um si
         "en_hash": "0b4ffba87f22d1c6",
     },
     "album-resend": {
-        "title": 'Dateien, die nicht mehr in der Cloud sind',
-        "body": """Dateien, die dieses Album gesendet hat und die ihre Cloud nicht mehr hat. **Rescan** im Tab Albums findet sie, und die Karte des Albums zählt sie in Rot.
+        "title": 'Nicht gesicherte Dateien',
+        "body": """Dateien, die dieses Album gesendet hat und die nicht mehr in ihrer Cloud sind. **Rescan** im Tab Albums findet sie, und die Karte des Albums zählt sie in Rot als **N files not backed up**.
 
 • Jede ist ausgegraut und mit **not in <Cloud>** markiert.
 • Nichts wird von selbst erneut gesendet. Sie wurden vielleicht absichtlich in der Cloud gelöscht.
@@ -130,7 +130,7 @@ Keine Miniaturansichten oder Vorschauen. **Drücke lange auf eine Datei**, um si
 • Optimierte Dateien erscheinen nicht: Das Original in voller Größe war nur in der Cloud.
 • In einem Album auf **Off** zuerst einen Modus wählen.
 • Bei anderen Clouds als OneDrive prüft jedes Rescan höchstens 25 Dateien pro Album, die nicht im Ordner des Albums sind. Für den Rest erneut Rescan.""",
-        "en_hash": "82015bd5d3445a55",
+        "en_hash": "966ae07aace959b6",
     },
 
     "album-file-sort": {

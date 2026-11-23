@@ -132,8 +132,8 @@ Sin miniaturas ni vistas previas. **Mantén pulsado un archivo** para abrirlo en
     },
 
     "album-resend": {
-        "title": 'Archivos que ya no están en la Cloud',
-        "body": """Archivos que este álbum envió y que su Cloud ya no tiene. **Rescan** en la pestaña Albums los encuentra, y la tarjeta del álbum los cuenta en rojo.
+        "title": 'Archivos sin copia',
+        "body": """Archivos que este álbum envió y que ya no están en su Cloud. **Rescan** en la pestaña Albums los encuentra, y la tarjeta del álbum los cuenta en rojo como **N files not backed up**.
 
 • Cada uno aparece atenuado y marcado **not in <Cloud>**.
 • Nada se vuelve a enviar por sí solo. Puede que se borraran en la Cloud a propósito.
@@ -142,7 +142,7 @@ Sin miniaturas ni vistas previas. **Mantén pulsado un archivo** para abrirlo en
 • Los archivos optimizados no aparecen: el original a tamaño completo solo estaba en la Cloud.
 • En un álbum **Off**, elige antes un modo.
 • En las Clouds distintas de OneDrive, cada Rescan consulta como máximo 25 archivos por álbum que no estén en la carpeta del álbum. Vuelve a pulsar Rescan para el resto.""",
-        "en_hash": "82015bd5d3445a55",
+        "en_hash": "966ae07aace959b6",
     },
 
     "album-file-sort": {

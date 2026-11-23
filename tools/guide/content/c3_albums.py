@@ -109,8 +109,8 @@ CHAPTER = Chapter(
             **Retry** puts failed files back in the queue and starts a backup. It removes nothing.
         """, ui=True),
 
-        topic("album-resend", "Files no longer in the Cloud", """
-            Files this album sent that their Cloud no longer has. **Rescan** on the Albums tab finds them, and the album's card counts them in red.
+        topic("album-resend", "Files not backed up", """
+            Files this album sent that are no longer in their Cloud. **Rescan** on the Albums tab finds them, and the album's card counts them in red as **N files not backed up**.
 
             • Each is greyed and marked **not in <Cloud>**.
             • Nothing is sent again on its own. They may have been deleted in the Cloud on purpose.
