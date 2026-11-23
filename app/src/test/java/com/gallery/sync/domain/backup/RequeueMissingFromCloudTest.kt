@@ -123,9 +123,9 @@ class RequeueMissingFromCloudTest {
 
     @Test
     fun `another Cloud's missing files count only if they could be resent`() = runTest {
-        // An optimised file, or one gone from the phone, is not returned by uploadedOnPhone, so it never counts.
+        // An optimized file, or one gone from the phone, is not returned by uploadedOnPhone, so it never counts.
         given(AlbumMode.BACKUP, null, row("a", location = BackupLocation.DROPBOX))
-        assertEquals(listOf("a"), requeue.missingElsewhere("Trip", listOf("a", "optimised")).map { it.id })
+        assertEquals(listOf("a"), requeue.missingElsewhere("Trip", listOf("a", "optimized")).map { it.id })
     }
 
     // ── The other Clouds' answer, by row ────────────────────────────────────

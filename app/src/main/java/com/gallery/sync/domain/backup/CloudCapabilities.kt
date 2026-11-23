@@ -9,7 +9,7 @@ enum class CloudFeature { RESTORE, ARCHIVE, SYNC }
  * What one cloud can do beyond taking a copy. Ian, 24 Sept 2026: *"All modes and functionality should
  * now be based on the cloud service."* Every screen and rule that used to say "OneDrive" or "backup-only"
  * now asks this instead: which album modes are on offer, whether the Restore and Archive tabs are live,
- * whether a plan that optimises can be chosen.
+ * whether a plan that optimizes can be chosen.
  *
  * **Restore** needs only a way to fetch the file back (`CloudDownloader`): it adds a file to the phone and the
  * writer checks the finished download against the size the phone recorded at upload, so it cannot cost anything.

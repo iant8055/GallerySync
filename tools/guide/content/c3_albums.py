@@ -10,7 +10,7 @@ CHAPTER = Chapter(
             • **Status line:** shown while something is running or just finished.
             • **Album list:** one card per album, A to Z. Two columns on a wide screen.
 
-            Each time you open the tab, it looks at the phone and asks OneDrive again (**Rescan** reads **Checking...**). Other Clouds are asked about a file just before it is optimised or removed.
+            Each time you open the tab, it looks at the phone and asks OneDrive again (**Rescan** reads **Checking...**). Other Clouds are asked about a file just before it is optimized or removed.
 
             Looking, filtering and scrolling never change a file. Only choosing a mode does.
         """),
@@ -39,10 +39,10 @@ CHAPTER = Chapter(
             Shown when every album in view has files and none are waiting to be sent. It comes from the app's own record; the Cloud's own answer is the last line of each album card.
         """, ui=True),
 
-        topic("albums-optimised-line", "Optimised and Saved", """
-            With **Sync** selected: how many files in Sync albums have been optimised, and the space saved.
+        topic("albums-optimized-line", "Optimized and Saved", """
+            With **Sync** selected: how many files in Sync albums have been optimized, and the space saved.
 
-            The originals stay in the Cloud. **Restore** brings them back. See [[how-optimising-works]].
+            The originals stay in the Cloud. **Restore** brings them back. See [[how-optimizing-works]].
         """, ui=True),
 
         topic("albums-archive-lines", "Files archived and Scheduled to leave this phone", """
@@ -55,7 +55,7 @@ CHAPTER = Chapter(
 
         topic("albums-run-controls", "Sync now, Rescan, Pause, Resume and Stop", """
             ## When nothing is running
-            • **Sync now:** backs up now. If an Optimise switch in Settings is on with its **Mode** set to **Manual**, it then optimises too (see [[settings-optimise-mode]]). Greyed out when there is nothing to send or optimise.
+            • **Sync now:** backs up now. If an Optimize switch in Settings is on with its **Mode** set to **Manual**, it then optimizes too (see [[settings-optimize-mode]]). Greyed out when there is nothing to send or optimize.
             • **Rescan:** looks at the phone and asks OneDrive again.
 
             ## While a backup runs
@@ -65,7 +65,7 @@ CHAPTER = Chapter(
 
             ## Good to know
             • **Sync now** does not wait for the charger, but still follows your Wi-Fi setting. See [[settings-mobile-data]].
-            • It backs up every album set to **Backup**, **Sync** or **Archive**, but only ever optimises files in **Sync** albums.
+            • It backs up every album set to **Backup**, **Sync** or **Archive**, but only ever optimizes files in **Sync** albums.
         """, ui=True),
 
         topic("albums-status-line", "Upload progress and status messages", """
@@ -82,7 +82,7 @@ CHAPTER = Chapter(
 
             ## Album cards
             • **Name, file count and size** of the album on your phone.
-            • **Second line** (only when needed): how many files are optimised, kept at full size, pending or failed.
+            • **Second line** (only when needed): how many files are optimized, kept at full size, pending or failed.
             • **Cloud line:** **N verified in <Cloud>**, or **N of M verified in <Cloud>**, means the Cloud confirmed the files at the right size. OneDrive, Dropbox, Google Drive, pCloud, Backblaze B2 and IDrive e2 are each checked when you open the tab and on **Rescan**. **Could not reach <Cloud>** means the last check failed. Before the first check — and always for Google Photos, which cannot be asked — the line reads **N sent to <Cloud>**. The line is green when every Cloud on it has verified everything.
             • **Mode button** (right side): tap to change the album's mode. Archive asks you to confirm first. If the album's Cloud cannot do that mode, the card says so.
             • **Tap the card** to see the album's files. See [[album-detail]].
@@ -93,15 +93,15 @@ CHAPTER = Chapter(
 
             • **Header:** back arrow, album name, mode and file count, **Backs up to** (the Cloud and folder new files go to, plus any other Cloud already holding some), the counts ([[album-file-status]]), **Sort by** ([[album-file-sort]]) and **Keep at full size** ([[album-file-pin]]).
             • **▲ Hide Details ▲** at the bottom of the header folds it to the album's name, mode and file count; **▼ Show Details ▼** brings the rest back. The page remembers your choice.
-            • **Files:** one card per file with its size, date and marks. An optimised file shows its smaller size on the phone.
-            • **Camera folder** (if chosen in Settings): extra optimise controls. See [[album-camera-optimise]].
+            • **Files:** one card per file with its size, date and marks. An optimized file shows its smaller size on the phone.
+            • **Camera folder** (if chosen in Settings): extra optimize controls. See [[album-camera-optimize]].
 
             No thumbnails or previews. **Long-press a file** to open it in your phone's photo or video app, or in its Cloud if it is no longer on the phone. See [[settings-open-not-on-phone]].
         """, ui=True),
 
         topic("album-file-status", "File marks and counts in an album", """
             • **✓ backed up:** in the Cloud, full size on the phone.
-            • **✓ backed up · optimised:** in the Cloud; the phone has a smaller copy.
+            • **✓ backed up · optimized:** in the Cloud; the phone has a smaller copy.
             • **⟳ pending:** waiting to be sent.
             • **✗ failed:** could not be sent after several tries.
 
@@ -116,7 +116,7 @@ CHAPTER = Chapter(
             • Nothing is sent again on its own. They may have been deleted in the Cloud on purpose.
             • Swipe right to select, left to deselect. **Select all** and **Clear** do every one.
             • **Resend** sends the selected files again, to the Cloud their folder goes to now. It removes nothing.
-            • Optimised files are not listed: the full-size original was only in the Cloud.
+            • Optimized files are not listed: the full-size original was only in the Cloud.
             • In an **Off** album, set a mode first.
             • For Clouds other than OneDrive, each Rescan looks up at most 25 files per album that are not in the album's folder. Rescan again for the rest.
         """, ui=True),
@@ -124,21 +124,21 @@ CHAPTER = Chapter(
         topic("album-file-sort", "Sorting an album's files", """
             • **Name:** A to Z.
             • **Date:** newest first.
-            • **Status:** failed, then pending, then optimised, then backed up.
+            • **Status:** failed, then pending, then optimized, then backed up.
 
             The list opens in name order each time. Sorting changes nothing about the files.
         """),
 
         topic("album-file-pin", "Keep at full size", """
             A checkbox beside files that **Restore** brought back. While selected, GallerySync leaves that file alone:
-            • In a **Sync** album, it is not optimised.
+            • In a **Sync** album, it is not optimized.
             • In an **Archive** album, it is not removed.
             • In **Backup** or **Off**, nothing changes, but the choice is remembered.
 
             Restore selects it automatically. Deselect it to let the file follow its album's mode again.
         """, ui=True),
 
-        topic("album-camera-optimise", "Optimise older photos and videos in your Camera folder", """
+        topic("album-camera-optimize", "Optimize older photos and videos in your Camera folder", """
             Only the **Camera folder** you chose in Settings under **Camera Sync** ([[settings-section-camera]]) has these controls.
 
             ## Selecting files
@@ -147,13 +147,13 @@ CHAPTER = Chapter(
             • Swipe a file right to select, left to deselect. The card shows how many are selected and the estimated saving.
 
             ## Buttons
-            • **Sync now:** backs up anything waiting in the folder, then optimises the selected files only.
+            • **Sync now:** backs up anything waiting in the folder, then optimizes the selected files only.
             • **Rescan:** checks the Cloud again.
 
             ## Good to know
             • Only files OneDrive has confirmed at full size can be selected.
-            • Nothing is optimised until you press **Sync now**. New photos stay as they are.
-            • The Camera folder has no **Sync** mode, and the Optimise switches in Settings do not affect it.
+            • Nothing is optimized until you press **Sync now**. New photos stay as they are.
+            • The Camera folder has no **Sync** mode, and the Optimize switches in Settings do not affect it.
             • Leaving with changed choices asks whether to make them your defaults.
         """, ui=True),
 
@@ -162,9 +162,9 @@ CHAPTER = Chapter(
 
             • **Photos**, **Videos** and the age select every match.
             • Swipe right to select, left to deselect.
-            • **Sync now** optimises only the selected files.
+            • **Sync now** optimizes only the selected files.
 
-            A greyed file cannot be selected: it is not yet confirmed in OneDrive, or is already optimised. See [[album-camera-optimise]].
+            A greyed file cannot be selected: it is not yet confirmed in OneDrive, or is already optimized. See [[album-camera-optimize]].
         """, ui=True),
 
         topic("album-merge-warning", "Duplicate album names detected", """

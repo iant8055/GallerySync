@@ -21,7 +21,7 @@ TRANSLATIONS = {
 • La primera copia puede tardar horas. Continúa aunque salgas de la app.
 • La app se abre en la pantalla de progreso hasta que termina la primera copia.
 • Las respuestas de la configuración se aplican solo a la primera copia. Consulta [[setup-and-settings]].""",
-        "en_hash": "a398aa1dfcdb2e54",
+        "en_hash": "567365c5913c13ff",
     },
 
     "setup-welcome-tour": {
@@ -137,17 +137,17 @@ Nada fuera de las carpetas que elegiste se analiza ni se modifica.""",
 
 ## Conviene saber
 Esta primera copia es única y se hace sin tener en cuenta el modo. Después, todos los álbumes quedan en **Off**, lo cual es correcto: a partir de ahí eliges tú el modo de cada álbum en la pestaña Albums.{{full: Consulta [[faq-albums-off-after-backup]].}}""",
-        "en_hash": "80f55e21398db3f8",
+        "en_hash": "f8d3c929c65d3751",
     },
 
-    "setup-optimise": {
+    "setup-optimize": {
         "title": "Configuración de optimización durante la instalación",
         "body": """Solo para los planes 2 y 3.
 
 • **Optimizar fotos** y **Optimizar vídeo:** activado o desactivado.
 • **Nivel de compresión de vídeo:** **Alta** (480p, la más pequeña), **Media** (720p) o **Baja** (1080p).
 • Cada una muestra un ahorro estimado, con una línea de **Ahorro total estimado**. Los resultados reales varían.""",
-        "en_hash": "d3ff8b60c0328479",
+        "en_hash": "6b0ae75a40de322e",
     },
 
     "setup-ready": {
@@ -160,7 +160,7 @@ Esta primera copia es única y se hace sin tener en cuenta el modo. Después, to
 ## Conviene saber
 • Una copia con retraso empieza solo mientras el teléfono está enchufado, y puede empezar un poco tarde.
 • La app se queda en la pantalla de progreso hasta que termina la primera copia.""",
-        "en_hash": "90436741649f85c6",
+        "en_hash": "3f75384b016ca5b6",
     },
 
     "setup-progress": {
@@ -181,7 +181,7 @@ El anillo muestra el progreso total. Debajo: la Nube a la que se envía y su rec
 • **Cerrar:** cierra la app; la copia continúa.
 • **Finalizar:** aparece cuando todo está hecho, con un resumen de lo que se revisó, lo que ya estaba en la Nube y lo que se envió.
 • **Cancelar:** pregunta **¿Detener la copia de seguridad?** Los archivos ya enviados se quedan enviados; no se elimina nada.""",
-        "en_hash": "625986b0864a86c8",
+        "en_hash": "ce535ae7a9b7c3bd",
     },
 
     "setup-and-settings": {

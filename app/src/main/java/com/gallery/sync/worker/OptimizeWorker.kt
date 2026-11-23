@@ -9,12 +9,12 @@ import androidx.work.Data
 import com.gallery.sync.data.local.dao.BackupEntryDao
 import com.gallery.sync.data.local.media.ProxyApplier
 import com.gallery.sync.data.local.media.ProxyOutcome
-import com.gallery.sync.data.local.media.VideoOptimiser
+import com.gallery.sync.data.local.media.VideoOptimizer
 import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.domain.backup.CameraSelection
 import com.gallery.sync.domain.backup.FilePin
-import com.gallery.sync.domain.backup.PhotoOptimisePolicy
-import com.gallery.sync.domain.backup.WizardBulkOptimise
+import com.gallery.sync.domain.backup.PhotoOptimizePolicy
+import com.gallery.sync.domain.backup.WizardBulkOptimize
 import com.gallery.sync.util.Logger
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -26,8 +26,8 @@ import kotlinx.coroutines.ensureActive
  *
  * ### Why this exists
  *
- * Both optimise passes used to run in `viewModelScope`, which is cleared with the activity. Uploading
- * survived Close because it is a WorkManager chain; optimising did not, and the difference was
+ * Both optimize passes used to run in `viewModelScope`, which is cleared with the activity. Uploading
+ * survived Close because it is a WorkManager chain; optimizing did not, and the difference was
  * invisible to the user — the card said "You can check progress any time by opening the app", which
  * was true of one half and not the other. Observed on the Moto G, 4 Sept 2026: closing during the
  * video pass left three clips transcoded and two untouched, with nothing to resume them.
@@ -48,17 +48,17 @@ import kotlinx.coroutines.ensureActive
  * the cloud, and `ProxyApplier` refuses any file that would grow.
  */
 @HiltWorker
-class OptimiseWorker @AssistedInject constructor(
+class OptimizeWorker @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted params: WorkerParameters,
     private val proxyApplier: ProxyApplier,
-    private val videoOptimiser: VideoOptimiser,
+    private val videoOptimizer: VideoOptimizer,
     private val settings: BackupSettings,
     private val entryDao: BackupEntryDao
 ) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result {
-        val phase = inputData.getString(BackupScheduling.KEY_OPTIMISE_PHASE)
+        val phase = inputData.getString(BackupScheduling.KEY_OPTIMIZE_PHASE)
             ?: return Result.success()
 
         if (phase == BackupScheduling.PHASE_CAMERA) return runCamera()
@@ -68,7 +68,7 @@ class OptimiseWorker @AssistedInject constructor(
             BackupScheduling.PHASE_SYNC_PHOTOS -> runSyncPhotos()
             BackupScheduling.PHASE_VIDEO -> runVideo()
             else -> {
-                Logger.w(TAG, "unknown optimise phase '$phase'")
+                Logger.w(TAG, "unknown optimize phase '$phase'")
                 0
             }
         }
@@ -76,11 +76,11 @@ class OptimiseWorker @AssistedInject constructor(
         // More to do than one batch could hold. Re-enqueued rather than looped, so each run stays
         // inside WorkManager's execution window instead of being killed part way through a file.
         //
-        // Enqueued directly, not through `enqueueOptimiseIfAbsent`: this phase is `RUNNING` right
+        // Enqueued directly, not through `enqueueOptimizeIfAbsent`: this phase is `RUNNING` right
         // now and carries the tag that check looks for, so asking would refuse its own continuation.
         if (remaining > 0) {
             Logger.i(TAG, "$phase: $remaining left, queueing another batch")
-            BackupScheduling.enqueueOptimise(WorkManager.getInstance(applicationContext), phase)
+            BackupScheduling.enqueueOptimize(WorkManager.getInstance(applicationContext), phase)
             return Result.success()
         }
 
@@ -95,13 +95,13 @@ class OptimiseWorker @AssistedInject constructor(
     }
 
     /**
-     * One batch of the camera folder's manual optimise, and a continuation while more is left.
+     * One batch of the camera folder's manual optimize, and a continuation while more is left.
      *
      * Acts on exactly the files that were selected on the screen when Sync now was pressed
-     * (`cameraRunSelection`), through [CameraSelection.toOptimise], so nothing outside the selection can get in
+     * (`cameraRunSelection`), through [CameraSelection.toOptimize], so nothing outside the selection can get in
      * and anything done, gone or declined since drops out. A file kept at full size is stepped over as well:
      * Sync now clears the pin of any pinned file the person selected before this is queued, so a pin still set
-     * here was set afterwards and wins. The Settings Optimise switches play no part (they govern Sync albums
+     * here was set afterwards and wins. The Settings Optimize switches play no part (they govern Sync albums
      * only, Ian, 27 Sept 2026). Clips use the Camera video quality from Settings.
      *
      * A file that fails is not retried by the next batch. Its id travels in the continuation and is
@@ -113,16 +113,16 @@ class OptimiseWorker @AssistedInject constructor(
      * write fails and the file is stepped over like any other failure.
      */
     private suspend fun runCamera(): Result {
-        val album = inputData.getString(BackupScheduling.KEY_OPTIMISE_ALBUM) ?: return Result.success()
-        val excluded = inputData.getStringArray(BackupScheduling.KEY_OPTIMISE_EXCLUDED)?.toMutableSet()
+        val album = inputData.getString(BackupScheduling.KEY_OPTIMIZE_ALBUM) ?: return Result.success()
+        val excluded = inputData.getStringArray(BackupScheduling.KEY_OPTIMIZE_EXCLUDED)?.toMutableSet()
             ?: mutableSetOf()
 
         val prefs = settings.current()
-        val selected = CameraSelection.toOptimise(entryDao.entriesForAlbum(album), prefs.cameraRunSelection)
+        val selected = CameraSelection.toOptimize(entryDao.entriesForAlbum(album), prefs.cameraRunSelection)
             .filterNot { FilePin.isPinned(it.modeOverride) }
         val ready = proxyApplier.onDevice(selected.filter { it.id !in excluded })
         if (ready.isEmpty()) {
-            Logger.d(TAG, "camera: nothing left to optimise")
+            Logger.d(TAG, "camera: nothing left to optimize")
             return Result.success()
         }
 
@@ -143,20 +143,20 @@ class OptimiseWorker @AssistedInject constructor(
             }
         }
         if (videos.isNotEmpty()) {
-            val result = videoOptimiser.optimiseEntries(videos, prefs.cameraVideoQuality)
-            progressed += result.optimised + result.skipped
+            val result = videoOptimizer.optimizeEntries(videos, prefs.cameraVideoQuality)
+            progressed += result.optimized + result.skipped
             excluded += result.failedIds
         }
 
         val notYetTried = ready.size - photos.size - videos.size
         if (progressed > 0 && notYetTried > 0 && excluded.size <= MAX_EXCLUDED) {
             Logger.i(TAG, "camera: $notYetTried left, queueing another batch")
-            BackupScheduling.enqueueOptimise(
+            BackupScheduling.enqueueOptimize(
                 WorkManager.getInstance(applicationContext),
                 BackupScheduling.PHASE_CAMERA,
                 Data.Builder()
-                    .putString(BackupScheduling.KEY_OPTIMISE_ALBUM, album)
-                    .putStringArray(BackupScheduling.KEY_OPTIMISE_EXCLUDED, excluded.toTypedArray())
+                    .putString(BackupScheduling.KEY_OPTIMIZE_ALBUM, album)
+                    .putStringArray(BackupScheduling.KEY_OPTIMIZE_EXCLUDED, excluded.toTypedArray())
                     .build()
             )
         }
@@ -165,18 +165,18 @@ class OptimiseWorker @AssistedInject constructor(
 
     private suspend fun handOffToVideo() {
         val preferences = settings.current()
-        if (!WizardBulkOptimise.shouldContinueToVideo(
+        if (!WizardBulkOptimize.shouldContinueToVideo(
                 setupComplete = preferences.hasCompletedSetup,
                 choice = preferences.libraryChoice
             )
         ) return
 
-        if (videoOptimiser.wizardCandidates().isEmpty()) {
+        if (videoOptimizer.wizardCandidates().isEmpty()) {
             Logger.d(TAG, "photos done; no video eligible")
             return
         }
 
-        val started = BackupScheduling.enqueueOptimiseIfAbsent(
+        val started = BackupScheduling.enqueueOptimizeIfAbsent(
             WorkManager.getInstance(applicationContext),
             BackupScheduling.PHASE_VIDEO
         )
@@ -198,7 +198,7 @@ class OptimiseWorker @AssistedInject constructor(
      */
     private suspend fun runSyncPhotos(): Int {
         val prefs = settings.current()
-        if (!PhotoOptimisePolicy.mayContinue(prefs.hasCompletedSetup, prefs.isOptimiseEnabled, prefs.optimisePhotos)) {
+        if (!PhotoOptimizePolicy.mayContinue(prefs.hasCompletedSetup, prefs.isOptimizeEnabled, prefs.optimizePhotos)) {
             Logger.d(TAG, "sync photos: switched off, stopping")
             return 0
         }
@@ -244,7 +244,7 @@ class OptimiseWorker @AssistedInject constructor(
     }
 
     private suspend fun runVideo(): Int {
-        val candidates = videoOptimiser.wizardCandidates()
+        val candidates = videoOptimizer.wizardCandidates()
         if (candidates.isEmpty()) {
             Logger.d(TAG, "video: nothing eligible")
             return 0
@@ -261,13 +261,13 @@ class OptimiseWorker @AssistedInject constructor(
 
         // The wizard's own answer, not Settings': the two are independent, in both directions.
         val quality = settings.current().wizardVideoQuality
-        Logger.i(TAG, "video: optimising up to $VIDEO_BATCH of ${candidates.size} at $quality")
-        videoOptimiser.runForWizard(quality, limit = VIDEO_BATCH)
+        Logger.i(TAG, "video: optimizing up to $VIDEO_BATCH of ${candidates.size} at $quality")
+        videoOptimizer.runForWizard(quality, limit = VIDEO_BATCH)
         return (candidates.size - VIDEO_BATCH).coerceAtLeast(0)
     }
 
     private companion object {
-        const val TAG = "OptimiseWorker"
+        const val TAG = "OptimizeWorker"
 
         /** A photo proxy is fast — around 150 in ninety seconds on the Moto G. */
         const val PHOTO_BATCH = 60

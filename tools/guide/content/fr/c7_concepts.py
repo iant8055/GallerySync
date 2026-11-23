@@ -17,7 +17,7 @@ TRANSLATIONS = {
 Backup fonctionne avec tous les Clouds. Sync et Archive demandent OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 ou Backblaze B2, pas Google Photos.
 
 ## Dossier de l'appareil photo
-Si vous définissez un dossier de l'appareil photo dans Settings, il propose Off, Backup et Archive, avec ses propres commandes d'optimisation au lieu de Sync. Voir [[album-camera-optimise]].
+Si vous définissez un dossier de l'appareil photo dans Settings, il propose Off, Backup et Archive, avec ses propres commandes d'optimisation au lieu de Sync. Voir [[album-camera-optimize]].
 
 ## Lequel choisir
 • Garder tel quel, mais protégé : **Backup**.
@@ -28,7 +28,7 @@ Si vous définissez un dossier de l'appareil photo dans Settings, il propose Off
 ## Bon à savoir
 • Vous seul réglez les modes. La seule exception est la fusion d'albums en double, qui règle **Off**. Voir [[album-merge-warning]].
 • Passer à Archive demande une confirmation. En sortir arrête les retraits suivants.""",
-        "en_hash": "43d293213ae2b8f7",
+        "en_hash": "4817ca4e1d16f44e",
     },
     "how-verification-works": {
         "title": "Comment fonctionne la vérification",
@@ -51,9 +51,9 @@ Si vous définissez un dossier de l'appareil photo dans Settings, il propose Off
 
 ## Bon à savoir
 Une vérification de taille ne peut pas détecter tous les types de dommages. Ouvrez votre Cloud de temps en temps et vérifiez quelques photos.""",
-        "en_hash": "3a19869102cce663",
+        "en_hash": "988cc8c55e5dcf2e",
     },
-    "how-optimising-works": {
+    "how-optimizing-works": {
         "title": "Comment fonctionne l'optimisation",
         "body": """Optimiser remplace la copie du téléphone par une copie plus petite, de sorte que le téléphone cesse de se remplir tout en gardant tout dans votre galerie.
 
@@ -70,7 +70,7 @@ Réencodée en **480p** (Compression élevée), **720p** (Compression moyenne) o
 
 ## Récupérer l'original
 Utilisez l'onglet **Restore**. Restaurez avant de modifier si vous voulez tout le détail.""",
-        "en_hash": "1c7d13215d15f27e",
+        "en_hash": "58e50d866f3c6a61",
     },
     "where-deleted-files-go": {
         "title": "Où vont les fichiers retirés",
@@ -90,15 +90,15 @@ Sous **Ask**, les copies que vous choisissez de retirer vont dans la **corbeille
     "background-work": {
         "title": "Quand les choses se passent",
         "body": """• **Sauvegarde :** peu après l'apparition de nouvelles photos, et toutes les six heures. Wi-Fi uniquement sauf si les données mobiles sont activées ; pas quand la batterie ou le stockage est faible. **Sync now** s'exécute immédiatement.
-• **Optimising photos :** Automatique, dès que le Cloud confirme un fichier d'un album Sync. Manuel, avec **Sync now**.
-• **Optimising video :** Automatique, après les sauvegardes, pendant la charge. Manuel, avec **Sync now**.
+• **Optimizing photos :** Automatique, dès que le Cloud confirme un fichier d'un album Sync. Manuel, avec **Sync now**.
+• **Optimizing video :** Automatique, après les sauvegardes, pendant la charge. Manuel, avec **Sync now**.
 • **Fichiers supprimés :** sous **Ask**, vous êtes notifié peu après la suppression d'un fichier qui a une copie Cloud (pas quand les sauvegardes sont en pause).
 • **Archivage :** seulement quand vous dites Yes dans l'onglet Archive.
 • **Restauration :** seulement quand vous appuyez sur Restore.
 
 ## Fermer l'application
 Retour ou Accueil, ça va : le travail continue. Balayer l'application hors des applications récentes peut arrêter le travail en arrière-plan jusqu'à ce que vous la rouvriez.""",
-        "en_hash": "b52b93819f999605",
+        "en_hash": "d386bc34cb7fa40b",
     },
     "where-your-data-lives": {
         "title": "Où vivent vos données",

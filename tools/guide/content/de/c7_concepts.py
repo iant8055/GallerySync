@@ -17,7 +17,7 @@ TRANSLATIONS = {
 Backup funktioniert mit jeder Cloud. Sync und Archive brauchen OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 oder Backblaze B2, nicht Google Photos.
 
 ## Kameraordner
-Wenn du in Settings einen Kameraordner festlegst, bietet er Off, Backup und Archive, mit eigener Optimise-Steuerung statt Sync. Siehe [[album-camera-optimise]].
+Wenn du in Settings einen Kameraordner festlegst, bietet er Off, Backup und Archive, mit eigener Optimize-Steuerung statt Sync. Siehe [[album-camera-optimize]].
 
 ## Was du wählen solltest
 • So lassen, aber geschützt: **Backup**.
@@ -28,7 +28,7 @@ Wenn du in Settings einen Kameraordner festlegst, bietet er Off, Backup und Arch
 ## Gut zu wissen
 • Nur du legst Modi fest. Die einzige Ausnahme ist das Zusammenführen doppelter Alben, das **Off** setzt. Siehe [[album-merge-warning]].
 • Der Wechsel zu Archive fragt nach Bestätigung. Der Wechsel weg davon stoppt weitere Entfernungen.""",
-        "en_hash": "43d293213ae2b8f7",
+        "en_hash": "4817ca4e1d16f44e",
     },
     "how-verification-works": {
         "title": "So funktioniert die Überprüfung",
@@ -51,9 +51,9 @@ Wenn du in Settings einen Kameraordner festlegst, bietet er Off, Backup und Arch
 
 ## Gut zu wissen
 Eine Größenprüfung kann nicht jede Art von Schaden erkennen. Öffne ab und zu deine Cloud und sieh dir ein paar Fotos an.""",
-        "en_hash": "3a19869102cce663",
+        "en_hash": "988cc8c55e5dcf2e",
     },
-    "how-optimising-works": {
+    "how-optimizing-works": {
         "title": "So funktioniert das Optimieren",
         "body": """Das Optimieren tauscht die Kopie auf dem Telefon gegen eine kleinere aus, sodass das Telefon nicht mehr volläuft, während alles in deiner Galerie bleibt.
 
@@ -70,7 +70,7 @@ Neu kodiert mit **480p** (Hohe Kompression), **720p** (Mittlere) oder **1080p** 
 
 ## Das Original zurückholen
 Nutze den Tab **Restore**. Stelle vor dem Bearbeiten wieder her, wenn du alle Details willst.""",
-        "en_hash": "1c7d13215d15f27e",
+        "en_hash": "58e50d866f3c6a61",
     },
     "where-deleted-files-go": {
         "title": "Wohin entfernte Dateien gehen",
@@ -90,15 +90,15 @@ Bei **Mich zur Kopie in der Cloud fragen** gehen Kopien, deren Entfernung du wä
     "background-work": {
         "title": "Wann was passiert",
         "body": """• **Sichern:** kurz nachdem neue Fotos erscheinen, und alle sechs Stunden. Nur über WLAN, außer „Mobile Daten verwenden“ ist an; nicht bei niedrigem Akkustand oder wenig Speicher. **Sync now** läuft sofort.
-• **Optimising photos:** Automatisch, sobald die Cloud eine Datei in einem Sync-Album bestätigt. Manuell, bei **Sync now**.
-• **Optimising video:** Automatisch, nach Backups, beim Laden. Manuell, bei **Sync now**.
+• **Optimizing photos:** Automatisch, sobald die Cloud eine Datei in einem Sync-Album bestätigt. Manuell, bei **Sync now**.
+• **Optimizing video:** Automatisch, nach Backups, beim Laden. Manuell, bei **Sync now**.
 • **Gelöschte Dateien:** bei **Mich zur Kopie in der Cloud fragen** wirst du kurz nach dem Löschen einer Datei mit Cloud-Kopie benachrichtigt (nicht, solange Backups pausiert sind).
 • **Archivieren:** nur, wenn du im Archive-Tab Yes sagst.
 • **Wiederherstellen:** nur, wenn du Restore drückst.
 
 ## Die App schließen
 Zurück oder Home ist in Ordnung: Die Arbeit läuft weiter. Wenn du die App aus den zuletzt verwendeten Apps wegwischst, kann die Hintergrundarbeit stoppen, bis du sie wieder öffnest.""",
-        "en_hash": "b52b93819f999605",
+        "en_hash": "d386bc34cb7fa40b",
     },
     "where-your-data-lives": {
         "title": "Wo deine Daten liegen",

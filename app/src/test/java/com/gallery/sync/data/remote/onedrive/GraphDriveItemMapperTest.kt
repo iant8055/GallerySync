@@ -146,7 +146,7 @@ class GraphDriveItemMapperTest {
         assertEquals(java.time.Instant.parse("2023-11-02T08:00:00Z").toEpochMilli(), node.createdAtUtc)
     }
 
-    /** No date is treated as an old file: #3 then leaves it alone rather than optimising it. */
+    /** No date is treated as an old file: #3 then leaves it alone rather than optimizing it. */
     @Test
     fun `a file with no createdDateTime arrived at zero`() {
         val dto = GraphDriveItemDto(

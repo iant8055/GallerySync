@@ -12,7 +12,7 @@ import java.time.Instant
  * What the Archive tab's *Only show files older than* control will hold back.
  *
  * Ian's list, 22 Sept 2026: 1 hour, 1 day, 1 week, 1 month, 1 year, All — a shorter first step than
- * [CameraOptimiseAge]'s, because Archive removes a file outright rather than shrinking it.
+ * [CameraOptimizeAge]'s, because Archive removes a file outright rather than shrinking it.
  */
 class ArchiveAgeTest {
 
@@ -140,9 +140,9 @@ class ArchiveAgeTest {
     }
 
     @Test
-    fun `an old photo optimised today is judged by when it was taken`() {
-        val optimised = item("old.jpg", ageSeconds = 0).copy(dateTakenEpochSeconds = now.epochSecond - 400 * day)
-        val taken = ArchiveAge(1, ArchiveAgeUnit.Year).split(listOf(optimised), now)
+    fun `an old photo optimized today is judged by when it was taken`() {
+        val optimized = item("old.jpg", ageSeconds = 0).copy(dateTakenEpochSeconds = now.epochSecond - 400 * day)
+        val taken = ArchiveAge(1, ArchiveAgeUnit.Year).split(listOf(optimized), now)
         assertEquals(listOf("old.jpg"), names(taken.eligible))
     }
 

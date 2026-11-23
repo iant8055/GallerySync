@@ -21,7 +21,7 @@ import com.gallery.sync.domain.backup.FirstBackupHold
 import com.gallery.sync.domain.backup.LibraryChoice
 import com.gallery.sync.domain.backup.CloudDeletionPolicy
 import com.gallery.sync.domain.backup.FirstBackupWindow
-import com.gallery.sync.domain.backup.OptimiseMode
+import com.gallery.sync.domain.backup.OptimizeMode
 import com.gallery.sync.domain.backup.ReconcileWithCloud
 import com.gallery.sync.domain.backup.RemoteRoots
 import com.gallery.sync.domain.backup.TreeScope
@@ -44,7 +44,7 @@ import javax.inject.Inject
 /**
  * A folder the wizard asked the picker for and did not get.
  *
- * Matters because the grant is not only the write path for optimising: whenever any folder is
+ * Matters because the grant is not only the write path for optimizing: whenever any folder is
  * granted, the scan covers granted folders only (`ScopedDirectories.currentScope`). Moto G, 15 Sept
  * 2026: DCIM and Pictures ticked, DCIM cancelled in the picker, Pictures granted — and DCIM's 247 files
  * left the backup with DCIM still ticked and nothing on screen. So a pick that does not cover the
@@ -139,8 +139,8 @@ data class ReconcileUiState(
     val sourcesLoaded: Boolean = false,
     /** Defaults the wizard offers to set. Each is also reachable from Settings afterwards. */
     val allowMeteredNetwork: Boolean = false,
-    val isAutoOptimiseEnabled: Boolean = false,
-    val optimiseVideo: Boolean = false,
+    val isAutoOptimizeEnabled: Boolean = false,
+    val optimizeVideo: Boolean = false,
     val videoQuality: VideoQuality = VideoQuality.DEFAULT,
     val cloudDeletionPolicy: CloudDeletionPolicy = CloudDeletionPolicy.DEFAULT,
     val backupCompleted: Int = 0,
@@ -185,31 +185,31 @@ data class ReconcileUiState(
      * the user says what to do. Null while the walk is going normally. See [SafGrantIssue].
      */
     val safGrantIssue: SafGrantIssue? = null,
-    /** Photos eligible for the wizard's one-time bulk optimise. */
-    val optimiseCandidateCount: Int = 0,
-    /** Whether the one-time optimise pass is running. */
-    val optimiseRunning: Boolean = false,
-    /** How many files were optimised in the one-time pass. */
-    val optimisedCount: Int = 0,
+    /** Photos eligible for the wizard's one-time bulk optimize. */
+    val optimizeCandidateCount: Int = 0,
+    /** Whether the one-time optimize pass is running. */
+    val optimizeRunning: Boolean = false,
+    /** How many files were optimized in the one-time pass. */
+    val optimizedCount: Int = 0,
     /** Whether the one-time pass finished. */
-    val optimiseFinished: Boolean = false,
-    /** Videos eligible for the wizard's one-time bulk optimise. */
+    val optimizeFinished: Boolean = false,
+    /** Videos eligible for the wizard's one-time bulk optimize. */
     val videoCandidateCount: Int = 0,
-    /** Whether video optimisation is running. */
-    val videoOptimiseRunning: Boolean = false,
-    /** How many videos were optimised. */
-    val videoOptimisedCount: Int = 0,
-    /** Whether video optimisation finished. */
-    val videoOptimiseFinished: Boolean = false,
+    /** Whether video optimization is running. */
+    val videoOptimizeRunning: Boolean = false,
+    /** How many videos were optimized. */
+    val videoOptimizedCount: Int = 0,
+    /** Whether video optimization finished. */
+    val videoOptimizeFinished: Boolean = false,
     /**
-     * How far through the optimise phase that is currently running, and how many it has to do.
+     * How far through the optimize phase that is currently running, and how many it has to do.
      *
      * One pair rather than two, because photos and video never run at once — the wizard's phase
      * says which of them these numbers describe. Zero total means no count is known yet, and the
      * screen shows the phase without a number rather than "0 of 0".
      */
-    val optimiseProgressDone: Int = 0,
-    val optimiseProgressTotal: Int = 0
+    val optimizeProgressDone: Int = 0,
+    val optimizeProgressTotal: Int = 0
 ) {
     /**
      * Whether Gate 1 has been answered.
@@ -251,7 +251,7 @@ class ReconcileViewModel @Inject constructor(
     private val backupEngine: BackupEngine,
     private val scanner: MediaScanner,
     private val proxyApplier: com.gallery.sync.data.local.media.ProxyApplier,
-    private val videoOptimiser: com.gallery.sync.data.local.media.VideoOptimiser,
+    private val videoOptimizer: com.gallery.sync.data.local.media.VideoOptimizer,
     private val entryDao: com.gallery.sync.data.local.dao.BackupEntryDao,
     private val recentsCard: RecentsCard,
     private val setFolderDestination: SetFolderDestination
@@ -274,8 +274,8 @@ class ReconcileViewModel @Inject constructor(
      */
     private var backupObserverJob: Job? = null
 
-    /** The optimise-progress loop, held so it can be replaced or stopped rather than stacked. */
-    private var optimiseObserverJob: Job? = null
+    /** The optimize-progress loop, held so it can be replaced or stopped rather than stacked. */
+    private var optimizeObserverJob: Job? = null
 
     init {
         viewModelScope.launch {
@@ -299,7 +299,7 @@ class ReconcileViewModel @Inject constructor(
             // step 5 has grants and no setup decision and is indistinguishable from an upgrade.
             // On the Moto G, 3 Sept 2026, that user had their half-finished setup declared
             // complete and was dropped on the tabs with every album Off, never seeing the library
-            // choice, the optimise step or the first backup.
+            // choice, the optimize step or the first backup.
             if (!settings.hasCheckedUpgradeBackfill()) {
                 val looksLikeUpgrade = !settings.hasSetupDecision() &&
                     !settings.hasStartedWizard() &&
@@ -351,8 +351,8 @@ class ReconcileViewModel @Inject constructor(
                     hasCompletedSetup = prefs.hasCompletedSetup,
                     settingsLoaded = true,
                     allowMeteredNetwork = prefs.allowMeteredNetwork,
-                    isAutoOptimiseEnabled = prefs.wizardOptimisePhotos,
-                    optimiseVideo = prefs.wizardOptimiseVideo,
+                    isAutoOptimizeEnabled = prefs.wizardOptimizePhotos,
+                    optimizeVideo = prefs.wizardOptimizeVideo,
                     videoQuality = prefs.wizardVideoQuality,
                     libraryChoice = prefs.libraryChoice,
                     cloudDeletionPolicy = prefs.cloudDeletionPolicy,
@@ -377,16 +377,16 @@ class ReconcileViewModel @Inject constructor(
         viewModelScope.launch { settings.setAllowMeteredNetwork(allowed) }
     }
 
-    // The wizard's Optimisation Settings card. It writes its own three values and never the Settings tab's:
+    // The wizard's Optimization Settings card. It writes its own three values and never the Settings tab's:
     // Ian, 26 Sept 2026, "THE WIZARD SHOULD NEVER EVER SET A DEFAULT IN SETTINGS". These used to switch on the
-    // master optimise switch, put photos in Auto, and turn video on for good, so a phone set up in the wizard
-    // came out with Settings already changed and a Sync album optimising by itself.
-    fun setWizardOptimisePhotos(enabled: Boolean) {
-        viewModelScope.launch { settings.setWizardOptimisePhotos(enabled) }
+    // master optimize switch, put photos in Auto, and turn video on for good, so a phone set up in the wizard
+    // came out with Settings already changed and a Sync album optimizing by itself.
+    fun setWizardOptimizePhotos(enabled: Boolean) {
+        viewModelScope.launch { settings.setWizardOptimizePhotos(enabled) }
     }
 
-    fun setWizardOptimiseVideo(enabled: Boolean) {
-        viewModelScope.launch { settings.setWizardOptimiseVideo(enabled) }
+    fun setWizardOptimizeVideo(enabled: Boolean) {
+        viewModelScope.launch { settings.setWizardOptimizeVideo(enabled) }
     }
 
     fun setWizardVideoQuality(quality: VideoQuality) {
@@ -404,7 +404,7 @@ class ReconcileViewModel @Inject constructor(
     private var pendingProxyCandidates: List<com.gallery.sync.data.local.entity.BackupEntryEntity> = emptyList()
 
     /**
-     * Builds a write request for the one-time bulk optimise, or returns null if the SAF grant
+     * Builds a write request for the one-time bulk optimize, or returns null if the SAF grant
      * already covers the files (in which case it applies immediately).
      */
     suspend fun buildWizardProxyRequest(): android.content.IntentSender? {
@@ -413,15 +413,15 @@ class ReconcileViewModel @Inject constructor(
             // Marked finished, not silently skipped. The video twin below always did this; the
             // photo half did not, and it did not matter while the card was the only thing that
             // started a pass. Once the worker could drain the candidates on its own, an empty list
-            // here meant the card kept a stale count, showed "Optimising photos" with a "…" ring,
+            // here meant the card kept a stale count, showed "Optimizing photos" with a "…" ring,
             // and never offered Finish — the user shut out of the app with no work left to do.
             // Moto G, 5 Sept 2026.
-            _state.value = _state.value.copy(optimiseFinished = true)
+            _state.value = _state.value.copy(optimizeFinished = true)
             return null
         }
 
         if (!proxyApplier.needsWriteRequest(pendingProxyCandidates)) {
-            Logger.i(TAG, "optimising ${pendingProxyCandidates.size} files through the tree grant")
+            Logger.i(TAG, "optimizing ${pendingProxyCandidates.size} files through the tree grant")
             applyWizardProxies()
             return null
         }
@@ -430,7 +430,7 @@ class ReconcileViewModel @Inject constructor(
     }
 
     /**
-     * Hands the photo pass to [OptimiseWorker] and watches the ledger for its progress.
+     * Hands the photo pass to [OptimizeWorker] and watches the ledger for its progress.
      *
      * The work used to run here, in `viewModelScope`, which dies with the wizard — closing the app
      * mid-pass abandoned it with nothing to resume it. The consent dialog still has to come from the
@@ -439,41 +439,41 @@ class ReconcileViewModel @Inject constructor(
      */
     fun applyWizardProxies() {
         _state.value = _state.value.copy(
-            optimiseRunning = true
+            optimizeRunning = true
         )
         // Asks rather than appends: the upload chain now starts this pass by itself when a first
-        // backup drains with nobody watching, so opening the app mid-optimise would otherwise queue
+        // backup drains with nobody watching, so opening the app mid-optimize would otherwise queue
         // a second photo pass behind the one already running.
         viewModelScope.launch {
-            val started = BackupScheduling.enqueueOptimiseIfAbsent(
+            val started = BackupScheduling.enqueueOptimizeIfAbsent(
                 workManager,
                 BackupScheduling.PHASE_PHOTOS
             )
             Logger.i(
                 TAG,
-                if (started) "photo optimise handed to the worker"
-                else "photo optimise already under way"
+                if (started) "photo optimize handed to the worker"
+                else "photo optimize already under way"
             )
         }
-        observeOptimise()
+        observeOptimize()
     }
 
     private var pendingVideoCandidates: List<com.gallery.sync.data.local.entity.BackupEntryEntity> = emptyList()
 
     /**
-     * Builds a write request for the wizard's one-time video optimise, or returns null if the
+     * Builds a write request for the wizard's one-time video optimize, or returns null if the
      * SAF grant already covers the files (in which case it runs immediately).
      */
     suspend fun buildWizardVideoRequest(): android.content.IntentSender? {
-        pendingVideoCandidates = videoOptimiser.wizardCandidates()
+        pendingVideoCandidates = videoOptimizer.wizardCandidates()
         if (pendingVideoCandidates.isEmpty()) {
-            _state.value = _state.value.copy(videoOptimiseFinished = true)
+            _state.value = _state.value.copy(videoOptimizeFinished = true)
             return null
         }
 
         if (!proxyApplier.needsWriteRequest(pendingVideoCandidates)) {
-            Logger.i(TAG, "optimising ${pendingVideoCandidates.size} videos through the tree grant")
-            applyWizardVideoOptimise()
+            Logger.i(TAG, "optimizing ${pendingVideoCandidates.size} videos through the tree grant")
+            applyWizardVideoOptimize()
             return null
         }
 
@@ -481,23 +481,23 @@ class ReconcileViewModel @Inject constructor(
     }
 
     /** The video pass, on the same footing as the photo one. See [applyWizardProxies]. */
-    fun applyWizardVideoOptimise() {
+    fun applyWizardVideoOptimize() {
         _state.value = _state.value.copy(
-            videoOptimiseRunning = true
+            videoOptimizeRunning = true
         )
         // Same reasoning as the photo pass: the worker chain may have queued this already.
         viewModelScope.launch {
-            val started = BackupScheduling.enqueueOptimiseIfAbsent(
+            val started = BackupScheduling.enqueueOptimizeIfAbsent(
                 workManager,
                 BackupScheduling.PHASE_VIDEO
             )
             Logger.i(
                 TAG,
-                if (started) "video optimise handed to the worker"
-                else "video optimise already under way"
+                if (started) "video optimize handed to the worker"
+                else "video optimize already under way"
             )
         }
-        observeOptimise()
+        observeOptimize()
     }
 
     /**
@@ -506,42 +506,42 @@ class ReconcileViewModel @Inject constructor(
      * Counts describe the phase rather than the attempt — done plus still-eligible — so reopening
      * the wizard part way through cannot make the number fall backwards.
      */
-    fun observeOptimise() {
-        optimiseObserverJob?.cancel()
-        optimiseObserverJob = viewModelScope.launch {
+    fun observeOptimize() {
+        optimizeObserverJob?.cancel()
+        optimizeObserverJob = viewModelScope.launch {
             while (true) {
                 // Which phase is live is read from the ledger, not from flags this class sets.
                 //
-                // This used to open with `if (!videoOptimiseRunning && !optimiseRunning) return`,
+                // This used to open with `if (!videoOptimizeRunning && !optimizeRunning) return`,
                 // which only ever followed a pass the card had started itself. The worker chain now
                 // starts both passes when an unattended first backup drains, so those flags are
-                // false, the observer returned on its first line, and the wizard sat on "Optimising
+                // false, the observer returned on its first line, and the wizard sat on "Optimizing
                 // photos" with every candidate already done.
                 val photoRemaining = proxyApplier.remainingAll()
-                val videoRemaining = videoOptimiser.wizardCandidates().size
+                val videoRemaining = videoOptimizer.wizardCandidates().size
                 val onVideo = photoRemaining == 0
                 val remaining = if (onVideo) videoRemaining else photoRemaining
                 val done = entryDao.countProxied(video = onVideo)
 
                 _state.value = _state.value.copy(
-                    optimiseCandidateCount = photoRemaining,
+                    optimizeCandidateCount = photoRemaining,
                     videoCandidateCount = videoRemaining,
-                    optimiseRunning = photoRemaining > 0,
-                    videoOptimiseRunning = onVideo && videoRemaining > 0,
-                    optimiseProgressDone = done,
-                    optimiseProgressTotal = done + remaining
+                    optimizeRunning = photoRemaining > 0,
+                    videoOptimizeRunning = onVideo && videoRemaining > 0,
+                    optimizeProgressDone = done,
+                    optimizeProgressTotal = done + remaining
                 )
 
                 if (photoRemaining == 0 && videoRemaining == 0) {
                     _state.value = _state.value.copy(
-                        optimiseRunning = false,
-                        optimiseFinished = true,
-                        optimisedCount = entryDao.countProxied(video = false),
-                        videoOptimiseRunning = false,
-                        videoOptimiseFinished = true,
-                        videoOptimisedCount = entryDao.countProxied(video = true)
+                        optimizeRunning = false,
+                        optimizeFinished = true,
+                        optimizedCount = entryDao.countProxied(video = false),
+                        videoOptimizeRunning = false,
+                        videoOptimizeFinished = true,
+                        videoOptimizedCount = entryDao.countProxied(video = true)
                     )
-                    Logger.i(TAG, "optimising finished: nothing eligible remains")
+                    Logger.i(TAG, "optimizing finished: nothing eligible remains")
                     return@launch
                 }
 
@@ -753,14 +753,14 @@ class ReconcileViewModel @Inject constructor(
     fun abortBackup() {
         backupObserverJob?.cancel()
         backupObserverJob = null
-        optimiseObserverJob?.cancel()
-        optimiseObserverJob = null
+        optimizeObserverJob?.cancel()
+        optimizeObserverJob = null
         viewModelScope.launch {
             BackupScheduling.cancelManualRun(workManager)
-            // Stops the optimise chain as well. Files already proxied stay proxied — their
+            // Stops the optimize chain as well. Files already proxied stay proxied — their
             // originals are in OneDrive, which is the guarantee they had a moment earlier — so this
             // halts remaining work rather than undoing finished work.
-            BackupScheduling.cancelOptimise(workManager)
+            BackupScheduling.cancelOptimize(workManager)
             settings.setFirstBackupStartAt(null)
             settings.setWizardRun(total = 0, startedAt = 0L)
             settings.setWizardStep(TOTAL_STEPS - 1)
@@ -770,13 +770,13 @@ class ReconcileViewModel @Inject constructor(
                 backupCompleted = 0,
                 backupTotal = 0,
                 backupCurrentFile = "",
-                optimiseRunning = false,
-                optimiseFinished = false,
-                optimiseCandidateCount = 0,
-                optimiseProgressDone = 0,
-                optimiseProgressTotal = 0,
-                videoOptimiseRunning = false,
-                videoOptimiseFinished = false,
+                optimizeRunning = false,
+                optimizeFinished = false,
+                optimizeCandidateCount = 0,
+                optimizeProgressDone = 0,
+                optimizeProgressTotal = 0,
+                videoOptimizeRunning = false,
+                videoOptimizeFinished = false,
                 videoCandidateCount = 0
             )
             Logger.i(TAG, "backup aborted by user; wizard returned to settings")
@@ -925,12 +925,12 @@ class ReconcileViewModel @Inject constructor(
                 // Not before verification has recorded what it found, or the card would finish without saying it.
                 // A run with no verification in flight (one started by an older version) finishes as before.
                 if (remaining == 0 && (verified || !BackupScheduling.manualRunExecuting(workManager))) {
-                    val shouldOptimise = _state.value.libraryChoice.optimisesAtInstall
-                    val photoCandidates = if (shouldOptimise) {
+                    val shouldOptimize = _state.value.libraryChoice.optimizesAtInstall
+                    val photoCandidates = if (shouldOptimize) {
                         proxyApplier.candidatesAll()
                     } else emptyList()
-                    val videoCandidates = if (shouldOptimise) {
-                        videoOptimiser.wizardCandidates()
+                    val videoCandidates = if (shouldOptimize) {
+                        videoOptimizer.wizardCandidates()
                     } else emptyList()
                     val videoCount = videoCandidates.size
                     _state.value = _state.value.copy(
@@ -939,16 +939,16 @@ class ReconcileViewModel @Inject constructor(
                         backupTotal = total,
                         backupCompleted = total,
                         backupSent = highWater,
-                        optimiseCandidateCount = photoCandidates.size,
+                        optimizeCandidateCount = photoCandidates.size,
                         videoCandidateCount = videoCount
                     )
 
-                    // Hand over to the optimise observer rather than stopping here. Reopening the
+                    // Hand over to the optimize observer rather than stopping here. Reopening the
                     // wizard mid-pass used to leave the count frozen — "10 of 128" for minutes on
                     // end while the worker was demonstrably transcoding — because nothing was
                     // watching a pass this screen had not started. It self-terminates when nothing
                     // is eligible, so calling it when there is no work to do costs one poll.
-                    if (shouldOptimise) observeOptimise()
+                    if (shouldOptimize) observeOptimize()
 
                     return@launch
                 }
@@ -983,7 +983,7 @@ class ReconcileViewModel @Inject constructor(
     /** Selects a Gate 2 option without acting on it. Applying is a separate, deliberate tap. */
     fun setLibraryChoice(choice: LibraryChoice) {
         // Written through, not just held. Closing the wizard mid-backup ends the process, and this
-        // is what step 9 reads to decide whether anything gets optimised when the upload finishes.
+        // is what step 9 reads to decide whether anything gets optimized when the upload finishes.
         //
         // The cutoff goes with it, and until 6 Sept 2026 nothing wrote one. Its only caller was a
         // bulk applier reachable from two screens that nothing rendered, so in the app users
@@ -996,7 +996,7 @@ class ReconcileViewModel @Inject constructor(
         // new cutoff rather than leave the old one standing.
         viewModelScope.launch {
             settings.setLibraryChoice(choice)
-            settings.setOptimiseCutoff(choice.cutoffFor(System.currentTimeMillis()))
+            settings.setOptimizeCutoff(choice.cutoffFor(System.currentTimeMillis()))
         }
         _state.value = _state.value.copy(libraryChoice = choice)
     }
@@ -1127,7 +1127,7 @@ class ReconcileViewModel @Inject constructor(
      *
      * The walk advances only when the pick covers the folder asked for — that folder itself, or a
      * parent of it. Anything else pauses the walk on a [SafGrantIssue] for the user to decide,
-     * because the grant sets what is backed up, not only what can be optimised. Until 15 Sept 2026
+     * because the grant sets what is backed up, not only what can be optimized. Until 15 Sept 2026
      * this advanced on every result: a cancel skipped the folder without a word, and a subfolder or an
      * unrelated folder was granted as though it were the one asked for.
      */

@@ -21,7 +21,7 @@ Zurück in den Ordner, aus dem sie kamen. Dateien direkt oben in **DCIM**, **Pic
 
 ## Gefahrlos ausprobieren
 Eine Datei wird erst ersetzt, nachdem der vollständige Download angekommen ist und seine Größe stimmt. Wenn etwas fehlschlägt, bleibt die Datei auf dem Telefon, wie sie war.""",
-        "en_hash": "1bc7e998be6fc106",
+        "en_hash": "e0e4777a168b1a80",
     },
     "restore-hero": {
         "title": "Albums to Restore and Files in this album",
@@ -76,7 +76,7 @@ Ausgegraut, solange eine Wiederherstellung läuft.""",
 • **Already on this phone:** ausgegraut; nichts zu tun.
 
 Während der Arbeit: **Working...** mit einem Prozentwert. Danach **Restored to full size**, **Back on this phone** oder **Could not restore, your file is unchanged** mit dem Grund.""",
-        "en_hash": "995fafe0c00691e4",
+        "en_hash": "149d33e155d89326",
     },
     "restore-greyed-files": {
         "title": "Warum sind manche Dateien ausgegraut?",
@@ -102,6 +102,6 @@ Ein Fortschrittsbalken zeigt, wie viele wiederhergestellt sind. Braucht eine Int
 
 ## Gut zu wissen
 Die meisten Editoren speichern eine neue Datei, die nie betroffen ist. Eine bearbeitete Datei wird als neue Datei gesichert, mit **edited** und dem Datum im Namen; das Original in deiner Cloud wird nie ersetzt.""",
-        "en_hash": "6292714bbfa760d3",
+        "en_hash": "b09bfcaa2e57bdf3",
     },
 }

@@ -13,7 +13,7 @@ import java.time.Instant
  * This object keeps only the default and the names that list saved. 6 months was 182 days and reads as
  * 6 months of 30, 180: two days younger, on a choice made with the list in view before anything is done.
  */
-object CameraOptimiseAge {
+object CameraOptimizeAge {
 
     /** Every file, whatever its age (Ian, 20 Sept 2026). The user's own choice on this screen. */
     val All = ArchiveAge.All
@@ -40,7 +40,7 @@ object CameraOptimiseAge {
  * choice that differs from the defaults asks whether to make it the default (Ian, 27 Sept 2026); nothing
  * else writes them back.
  */
-data class CameraOptimiseChoice(
+data class CameraOptimizeChoice(
     val age: ArchiveAge,
     val photos: Boolean,
     val videos: Boolean
@@ -50,12 +50,12 @@ data class CameraOptimiseChoice(
 
     companion object {
         /** Settings' defaults out of the box: both kinds off, age All. Ian, 27 Sept 2026. */
-        val DEFAULT = CameraOptimiseChoice(CameraOptimiseAge.DEFAULT, photos = false, videos = false)
+        val DEFAULT = CameraOptimizeChoice(CameraOptimizeAge.DEFAULT, photos = false, videos = false)
     }
 }
 
 /**
- * Which files in the camera folder *Sync now* will optimise.
+ * Which files in the camera folder *Sync now* will optimize.
  *
  * ### What is listed and what is selected are separate (Ian, 27 Sept 2026)
  *
@@ -78,7 +78,7 @@ data class CameraOptimiseChoice(
  */
 object CameraSelection {
 
-    /** Whether [entry] can be optimised at all. Not selectable means listed, greyed, and never acted on. */
+    /** Whether [entry] can be optimized at all. Not selectable means listed, greyed, and never acted on. */
     fun isSelectable(entry: BackupEntryEntity): Boolean =
         entry.state == BackupState.UPLOADED &&
             entry.remoteSizeBytes != null &&
@@ -88,7 +88,7 @@ object CameraSelection {
             entry.localMissingSinceEpochMillis == null
 
     /** Whether the header's [choice], with its age turned into [takenBeforeEpochSeconds], selects [entry]. */
-    fun matches(entry: BackupEntryEntity, choice: CameraOptimiseChoice, takenBeforeEpochSeconds: Long): Boolean =
+    fun matches(entry: BackupEntryEntity, choice: CameraOptimizeChoice, takenBeforeEpochSeconds: Long): Boolean =
         isSelectable(entry) &&
             !FilePin.isPinned(entry.modeOverride) &&
             (if (entry.isVideo) choice.videos else choice.photos) &&
@@ -97,21 +97,21 @@ object CameraSelection {
     /** What the header selects: the starting selection, and the one a changed choice replaces it with. */
     fun byChoice(
         entries: List<BackupEntryEntity>,
-        choice: CameraOptimiseChoice,
+        choice: CameraOptimizeChoice,
         takenBeforeEpochSeconds: Long
     ): Set<String> =
         entries.filter { matches(it, choice, takenBeforeEpochSeconds) }.mapTo(LinkedHashSet()) { it.id }
 
     /**
-     * The files a run will optimise: those in [selectedIds] that can still be optimised, largest first. The only
+     * The files a run will optimize: those in [selectedIds] that can still be optimized, largest first. The only
      * list the worker acts on. A file that stopped being selectable since it was selected (done, gone, declined)
      * drops out here; nothing outside [selectedIds] can get in.
      */
-    fun toOptimise(entries: List<BackupEntryEntity>, selectedIds: Set<String>): List<BackupEntryEntity> =
+    fun toOptimize(entries: List<BackupEntryEntity>, selectedIds: Set<String>): List<BackupEntryEntity> =
         entries.filter { it.id in selectedIds && isSelectable(it) }.sortedByDescending { it.sizeBytes }
 
     /**
-     * What optimising [files] is expected to give back, in bytes.
+     * What optimizing [files] is expected to give back, in bytes.
      *
      * An estimate and labelled as one wherever it is drawn. It is the size times the measured saving for that
      * kind, so it over-promises for a photo that is already small (skipped, no saving) and for a clip that will

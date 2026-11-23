@@ -57,7 +57,7 @@ Vale para os backups automáticos e para o **Sync now**. Deixe desligado, a meno
 • **Baixar temporariamente:** copia o arquivo para o cache do app e o abre. A cópia fica só no cache, nunca é adicionada à sua galeria e é apagada depois.
 
 O download temporário segue **Usar dados móveis**. Em dados móveis, um arquivo acima de 750 MB pergunta antes; no Wi-Fi nunca pergunta. Arquivos do Google Photos não podem ser baixados: eles sempre abrem no Google Photos ou no navegador.""",
-        "en_hash": "ea4a196fdc3cb392",
+        "en_hash": "81688ea868ba640e",
     },
     'settings-section-backup': {
         "title": 'Backup',
@@ -88,7 +88,7 @@ Primeiro vem um aviso: os backups para essa Cloud param, nada é apagado. Se ess
 • **Cancelar:** continua conectado.
 
 As pastas continuam vinculadas a essa Cloud e esperam até você entrar de novo. Para enviá-las para outro lugar, mude **Para onde vai cada pasta**.""",
-        "en_hash": "37be6bd6eea0ccf2",
+        "en_hash": "c7ea077b91c59b6e",
     },
     'settings-destination': {
         "title": 'Para onde vai cada pasta',
@@ -195,16 +195,16 @@ Esses arquivos ainda estão na lixeira do seu telefone.
     'settings-section-sync': {
         "title": 'Sincronização',
         "body": """Como as fotos e os vídeos em álbuns **Sync** são otimizados. Os arquivos só mudam depois que a Cloud os verificou. Funciona com OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 e Backblaze B2.""",
-        "en_hash": "1147f4e959ac06bc",
+        "en_hash": "4fa2ef3f02a17596",
     },
-    'settings-optimise-photos': {
+    'settings-optimize-photos': {
         "title": 'Otimizar fotos',
         "body": """**Off** por padrão. Quando ligado, as fotos em álbuns Sync são substituídas por cópias menores: cerca de 2048 pixels no lado maior, aproximadamente um décimo do tamanho. Elas continuam na sua galeria com um pequeno selo de nuvem. Os originais ficam na Cloud.
 
-Fotos que já são pequenas o bastante e arquivos em **Keep at full size** são deixados em paz. **Modo** define quando roda. Veja [[settings-optimise-mode]].""",
-        "en_hash": "dee027d401742ca5",
+Fotos que já são pequenas o bastante e arquivos em **Keep at full size** são deixados em paz. **Modo** define quando roda. Veja [[settings-optimize-mode]].""",
+        "en_hash": "d06a13dffade42bc",
     },
-    'settings-optimise-video': {
+    'settings-optimize-video': {
         "title": 'Otimizar vídeos',
         "body": """**Off** por padrão. Quando ligado, mostra **Modo**, **Com mais de** e **Compressão**.
 
@@ -216,22 +216,22 @@ Em um álbum Sync, verified in the Cloud, mais antigo que a sua configuração, 
 ## Quando
 • **Automático:** depois dos backups, somente com o aparelho carregando.
 • **Manual:** quando você pressiona **Sync now**.""",
-        "en_hash": "09cf14026b288ef6",
+        "en_hash": "6e9896836e47e62e",
     },
-    'settings-optimise-mode': {
+    'settings-optimize-mode': {
         "title": 'Modo: Automático ou Manual',
         "body": """• **Automático** (padrão): os arquivos em álbuns Sync são otimizados assim que a Cloud os confirma. O vídeo espera o carregador.
 • **Manual:** nada acontece até você pressionar **Sync now** na aba Albums.
 
 Fotos fora das pastas às quais você deu acesso precisam da confirmação do Android, então esperam até você abrir o app ou pressionar **Sync now**.""",
-        "en_hash": "2d55959b2e538398",
+        "en_hash": "741f924a42b5494f",
     },
     'settings-video-age': {
         "title": 'Com mais de (vídeo)',
         "body": """Quão antigo um vídeo precisa ser antes de ser otimizado. Escolha um número de **½** a **9** e uma unidade — **hour**, **day**, **week**, **month**, **year** ou **Na hora**. O backup não é atrasado.
 
 **Na hora** inclui os clipes gravados hoje; editar um deles começa a partir da cópia menor, até você restaurá-lo.""",
-        "en_hash": "e807e16faa3aadc9",
+        "en_hash": "f395d661a1b8ceb7",
     },
     'settings-video-quality': {
         "title": 'Compressão (vídeo)',
@@ -243,7 +243,7 @@ Números típicos; os resultados variam.
 
 ## Depois de torná-la mais forte
 O app pergunta **Otimizar de novo os vídeos existentes?** **Sim** permite que vídeos que eram pequenos demais para encolher antes sejam tentados de novo. **Não** os deixa como estão. Os vídeos já otimizados não são tocados.""",
-        "en_hash": "b68338f9be222883",
+        "en_hash": "c4f2cc138e2abac8",
     },
     'settings-section-restore': {
         "title": 'Restaurar (Settings)',
@@ -259,11 +259,11 @@ O app pergunta **Otimizar de novo os vídeos existentes?** **Sim** permite que v
         "title": 'Sync da câmera (Settings)',
         "body": """**Configurações especiais para a câmera**, desligado por padrão. Quando ligado:
 • **Pasta da câmera:** a pasta em que a sua câmera salva. Escolha na lista, ou **Outra…**.
-• **Select Photos/Videos older than**, **Photos**, **Videos:** padrões para os controles de otimização dessa pasta ([[album-camera-optimise]]).
+• **Select Photos/Videos older than**, **Photos**, **Videos:** padrões para os controles de otimização dessa pasta ([[album-camera-optimize]]).
 • **Compressão de vídeo:** para os vídeos otimizados ali.
 
-A Pasta da câmera não tem o modo **Sync**, e nada é otimizado até você pressionar **Sync now** nela. Os botões Optimise acima não afetam essa pasta.""",
-        "en_hash": "d596a9c99a8de79d",
+A Pasta da câmera não tem o modo **Sync**, e nada é otimizado até você pressionar **Sync now** nela. Os botões Optimize acima não afetam essa pasta.""",
+        "en_hash": "37e57d5f3b81a8e9",
     },
     'settings-section-archive': {
         "title": 'Arquivar (Settings)',

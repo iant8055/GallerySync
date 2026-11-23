@@ -78,7 +78,7 @@ translation. If not, flag.
 
 ### 4. Spelling discipline
 
-`Optimise`, `Optimised`, `Optimisation` (British `-ise` spellings) must not
+`Optimize`, `Optimized`, `Optimization` (British `-ise` spellings) must not
 have been "corrected" to American `-ize` anywhere, including inside the
 translated prose when the word is quoted as an English on-screen label.
 
@@ -111,7 +111,7 @@ instead of pulling from the wizard, flag.
 A quick index: common wizard-label references in the English setup chapter
 include button names (`Next`, `Back`, `Finish`, `Cancel`, `Try again`,
 `Choose all`), screen titles (`Welcome to GallerySync`, `Cloud Storage`,
-`Choose folders to back up`, `Choose your Backup Plan`, `Optimisation
+`Choose folders to back up`, `Choose your Backup Plan`, `Optimization
 Settings`, `Ready to Back Up`, `Backup Progress`), and messages like
 `Please select your language to continue`.
 

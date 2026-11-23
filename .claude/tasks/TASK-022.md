@@ -24,14 +24,14 @@ three edits:
 2. Drop `fun applyLibraryChoice()`.
 3. Drop the `libraryApplied` and `applyingLibraryChoice` state fields — read **only** by
    `ReconcileScreen:179-180`, which goes in the same change. Note `setLibraryChoice` sets
-   `libraryApplied = null` and is also the function that writes the optimise cutoff, so edit it
+   `libraryApplied = null` and is also the function that writes the optimize cutoff, so edit it
    carefully; that cutoff write is what makes Gate 2 #3 work at all.
 
 Then reword two stale prose mentions: `MediaAge.kt:52` and the KDoc in `LibraryChoiceTest` that names
 the class. Neither is a KDoc link, so nothing fails to compile — they would simply point at nothing.
 
 Hilt needs no cleanup (`@Singleton` + `@Inject constructor`, no module entry). `LibraryChoice.mode`
-survives: `optimisesAtInstall` and `uploads` both read it. Some string resources become unused, which
+survives: `optimizesAtInstall` and `uploads` both read it. Some string resources become unused, which
 is harmless.
 
 **Verify with a real wizard run**, not just a build. The edit is in the live wizard's ViewModel and a
@@ -51,7 +51,7 @@ superseded by the approved (?) tooltips, and the just-in-time prompt was premise
 no longer has. So **`SetupTopic.kt` and the whole acknowledgement chain went too** — four files, 1,236
 deletions, 14 insertions.
 
-Not touched, deliberately: `settings.setOptimiseCutoff(...)` in `setLibraryChoice`, and the Archive
+Not touched, deliberately: `settings.setOptimizeCutoff(...)` in `setLibraryChoice`, and the Archive
 confirmation in `BackupScreen`, which never used the acknowledgement record and is what CLAUDE.md's consent
 rule actually rests on.
 
@@ -62,7 +62,7 @@ Verified: compile + Hilt/KSP, 315/315 unit tests, `assembleDebug`, clean install
 empty crash buffer and the wizard entering at step 1, then **Ian walked the wizard on the device and
 reported it good**.
 
-## Part B — remove `photoOptimiseAge`
+## Part B — remove `photoOptimizeAge`
 
 Ian ruled on 19 Aug 2026, TASK-011: *"only the Sync age is limited to video. Photos are proxied
 whatever their age, because a 2048px proxy leaves the photo in the gallery and costs an edit nothing
@@ -84,21 +84,21 @@ same arithmetic.
 
 ### Part B done — 15 Sept 2026
 
-Removed: `BackupPreferences.photoOptimiseAge`, `KEY_PHOTO_OPTIMISE_AGE`, its read and
-`setPhotoOptimiseAge` in `BackupSettings`; the state field, mapping and setter in `BackupViewModel`;
-the *Older than* dropdown under *Optimise photos* in `SettingsScreen`; the line in the MILESTONES Area 2
+Removed: `BackupPreferences.photoOptimizeAge`, `KEY_PHOTO_OPTIMIZE_AGE`, its read and
+`setPhotoOptimizeAge` in `BackupSettings`; the state field, mapping and setter in `BackupViewModel`;
+the *Older than* dropdown under *Optimize photos* in `SettingsScreen`; the line in the MILESTONES Area 2
 tree. `MediaAge`, `settings_older_than` and the `media_age_*` strings stay — the video row uses all of
 them. Two historical comments (`BackupEntryDao.proxyCandidates`, `MediaAge.thresholdEpochSeconds`)
 reworded to say the control is gone rather than that it should go. SETTINGS-AUDIT annotated.
 
-A `photo_optimise_age` value already stored on a device is left in DataStore, unread. Nothing has
+A `photo_optimize_age` value already stored on a device is left in DataStore, unread. Nothing has
 shipped, so there is no user to migrate, and an unread key is inert.
 
 Verified: compile, 315/315 unit tests, `assembleDebug`, then on the Moto G (`ZT422CTZQV`) — installed
-over the existing app, launched, crash buffer empty. With *Optimise photos* switched on, the photo
+over the existing app, launched, crash buffer empty. With *Optimize photos* switched on, the photo
 section shows only *Mode*; the *Older than* dropdown is gone and the video row keeps its own. Checked
 in light and dark. Switched back off afterwards, master following it; all three switches read off.
 
-**Left for Ian — copy that still implies a photo age.** `settings_auto_optimise_on` and
-`settings_optimise_master_on` both say photos and video are optimised once *"old enough"*. Only video
+**Left for Ian — copy that still implies a photo age.** `settings_auto_optimize_on` and
+`settings_optimize_master_on` both say photos and video are optimized once *"old enough"*. Only video
 waits. Not changed here because it is product copy, not the control.

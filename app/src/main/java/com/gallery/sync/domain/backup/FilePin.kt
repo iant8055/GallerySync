@@ -26,7 +26,7 @@ import com.gallery.sync.data.local.entity.BackupState
  * column of its own. Because the pin can only make the app do less, letting the user set it on any
  * file there still adds no removal.
  *
- * And the **Camera album's optimise list** (Ian, 20 Sept 2026): once an age is chosen, each file it would
+ * And the **Camera album's optimize list** (Ian, 20 Sept 2026): once an age is chosen, each file it would
  * shrink can be swiped out, which greys and pins it, and swiped back in, which clears the pin. There the pin
  * means "leave this one at full size", so it needs no column either. Because the Camera album is never Sync,
  * this is the only thing a pin does to a Camera file today besides the Archive opt-out.
@@ -95,7 +95,7 @@ enum class FileSort { NAME, DATE, STATUS }
  * - **Name:** A to Z, ignoring case.
  * - **Date:** the file's own modification date, newest first. A restored file carries the date it was
  *   restored, which is the date the phone gives it.
- * - **Status:** the ones that need attention first — failed, then pending — then optimised, then
+ * - **Status:** the ones that need attention first — failed, then pending — then optimized, then
  *   backed up. Ties fall back to name, so the order is stable and predictable.
  */
 object AlbumFileSort {

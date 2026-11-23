@@ -21,7 +21,7 @@ TRANSLATIONS = {
 
 ## 試しても安全です
 ファイルが置き換えられるのは、ダウンロードが完全に届き、サイズが一致した後だけです。何かが失敗した場合、スマートフォンのファイルはそのままです。""",
-        "en_hash": "1bc7e998be6fc106",
+        "en_hash": "e0e4777a168b1a80",
     },
     "restore-hero": {
         "title": "Albums to Restore and Files in this album",
@@ -76,7 +76,7 @@ OneDrive の一覧は記憶され、10 分後または **Refresh** を押した�
 • **Already on this phone**：グレー表示。何もする必要はありません。
 
 処理中は、パーセンテージ付きの **Working...** が表示されます。その後、理由とともに **Restored to full size**、**Back on this phone**、または **Could not restore, your file is unchanged** が表示されます。""",
-        "en_hash": "995fafe0c00691e4",
+        "en_hash": "149d33e155d89326",
     },
     "restore-greyed-files": {
         "title": "グレー表示のファイルがあるのはなぜですか？",
@@ -102,6 +102,6 @@ OneDrive の一覧は記憶され、10 分後または **Refresh** を押した�
 
 ## 知っておくと便利なこと
 ほとんどの編集アプリは新しいファイルとして保存するため、影響を受けません。編集されたファイルは、名前に **edited** と日付が付いた新しいファイルとしてバックアップされます。Cloud 上の元のファイルが置き換えられることはありません。""",
-        "en_hash": "6292714bbfa760d3",
+        "en_hash": "b09bfcaa2e57bdf3",
     },
 }

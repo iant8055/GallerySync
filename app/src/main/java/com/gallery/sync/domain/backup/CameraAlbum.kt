@@ -7,9 +7,9 @@ import com.gallery.sync.data.local.entity.AlbumMode
  * album.**
  *
  * Ian, 20 Sept 2026: *"I don't want a user to take a picture/video and then BAM it's optimized already."* Sync
- * optimises a file as soon as OneDrive has it, which is exactly right for a folder the user has set aside and
+ * optimizes a file as soon as OneDrive has it, which is exactly right for a folder the user has set aside and
  * exactly wrong for the one the shutter writes to. So the camera folder offers Off, Backup and Archive; Sync is
- * not on its menu and nothing that seeds a mode may write it. In place of Sync it has a manual optimise in its
+ * not on its menu and nothing that seeds a mode may write it. In place of Sync it has a manual optimize in its
  * own file list: see [CameraSelection].
  *
  * ### There is no camera folder until the person chooses one (Ian, 27 Sept 2026)

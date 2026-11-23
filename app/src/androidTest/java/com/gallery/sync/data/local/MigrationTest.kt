@@ -84,7 +84,7 @@ class MigrationTest {
     fun migrate3To4_mapsEnabledToBackupAndDisabledToOff() {
         // The whole risk of this migration. BACKUP uploads and touches nothing locally, which is
         // exactly what an enabled album does today. SYNC would start rewriting photos nobody chose
-        // to optimise, and ARCHIVE would remove them from the phone altogether.
+        // to optimize, and ARCHIVE would remove them from the phone altogether.
         helper.createDatabase(TEST_DB, 3).apply {
             execSQL("INSERT INTO album_preferences (albumName, isEnabled) VALUES ('Camera', 1)")
             execSQL("INSERT INTO album_preferences (albumName, isEnabled) VALUES ('Screenshots', 0)")
@@ -95,7 +95,7 @@ class MigrationTest {
 
         db.query("SELECT mode FROM album_preferences WHERE albumName = 'Camera'").use { cursor ->
             cursor.moveToFirst()
-            assertEquals("an enabled album must not start optimising", "BACKUP", cursor.getString(0))
+            assertEquals("an enabled album must not start optimizing", "BACKUP", cursor.getString(0))
         }
         db.query("SELECT mode FROM album_preferences WHERE albumName = 'Screenshots'").use { cursor ->
             cursor.moveToFirst()

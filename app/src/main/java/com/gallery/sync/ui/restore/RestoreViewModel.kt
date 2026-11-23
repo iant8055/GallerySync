@@ -352,8 +352,8 @@ class RestoreViewModel @Inject constructor(
     private suspend fun ledgerRows(): List<RestoreRow> {
         val proxies = entryDao.restorableProxies()
         val proxyIds = proxies.mapTo(HashSet()) { it.id }
-        // A file is one row or the other, never both: an optimised file still on the phone is a
-        // restore in place, and `filesNotOnThePhone` now considers optimised files too.
+        // A file is one row or the other, never both: an optimized file still on the phone is a
+        // restore in place, and `filesNotOnThePhone` now considers optimized files too.
         return proxies.map { RestoreRow(it, RowKind.Restore) } +
             engine.filesNotOnThePhone()
                 .filterNot { it.id in proxyIds }

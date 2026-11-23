@@ -27,7 +27,7 @@ was too long for an album card, which is the right call for the card and leaves 
 homeless.
 
 There is no Help or About anywhere in the app today. Settings holds Appearance, Account, Folders,
-Destination, Cloud files, Automatic sync, Default mode, Optimise and Deletion, and none of them
+Destination, Cloud files, Automatic sync, Default mode, Optimize and Deletion, and none of them
 explains *why* the app behaves as it does.
 
 ## What belongs in it
@@ -40,9 +40,9 @@ applies.
 | **Archive is a standing instruction** — files added to an Archive album later are covered by the choice already made | in the confirmation dialog, once, at the moment of consent | the album card can only show a mode badge; the consequence outlives the dialog |
 | **A local removal cannot be promised as recoverable** | in the archive prompt | it is the app's most important caveat and appears only where a removal is being authorised |
 | **The verified cloud copy is the guarantee** — not the trash | same place | this is what makes the rest safe, and it is stated only in passing |
-| **Videos are never optimised** | one line in Settings under Optimise | a user who optimises an album of clips and sees no change has no way to know it is deliberate |
+| **Videos are never optimized** | one line in Settings under Optimize | a user who optimizes an album of clips and sees no change has no way to know it is deliberate |
 | **What the four modes actually do** | the dropdown labels, and nothing else | Backup / Sync / Archive / Off is not self-describing, and one of the four removes files |
-| **Optimising is reversible through Restore** | nowhere | the full-size original stays in OneDrive; the user is never told they can get it back |
+| **Optimizing is reversible through Restore** | nowhere | the full-size original stays in OneDrive; the user is never told they can get it back |
 
 ## Scope
 

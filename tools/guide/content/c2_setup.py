@@ -13,9 +13,9 @@ CHAPTER = Chapter(
             2. Choose your Clouds and sign in. See [[setup-cloud]].
             3. Allow access to your photos, then choose folders. See [[setup-choose-folders]].
             4. Choose a Backup Plan.
-            5. Optimisation settings (plans 2 and 3 only).
+            5. Optimization settings (plans 2 and 3 only).
             6. When to start.
-            7. The first backup: check the Cloud, upload, then optimise if your plan includes it.
+            7. The first backup: check the Cloud, upload, then optimize if your plan includes it.
 
             ## Good to know
             • The first backup can take hours. It carries on if you leave the app.
@@ -117,24 +117,24 @@ CHAPTER = Chapter(
             What to do with the photos and videos already on your phone. **No plan removes anything.**
 
             • **1. Back up everything not already in the Cloud.** Nothing on the phone changes. Selected when you arrive.
-            • **2. Back up, then optimise every file on the phone.** The most space saved.
-            • **3. Back up, then optimise only the files this backup sent.**
+            • **2. Back up, then optimize every file on the phone.** The most space saved.
+            • **3. Back up, then optimize only the files this backup sent.**
             • **4. Check the Cloud but send nothing.** You choose each album's mode afterwards on the Albums tab.
 
             ## Good to know
             This first backup is one-shot and runs regardless of mode. Afterwards every album is **Off**, which is correct: from here on you choose each album's mode yourself on the Albums tab.{{full: See [[faq-albums-off-after-backup]].}}
         """),
 
-        topic("setup-optimise", "Optimisation settings during setup", """
+        topic("setup-optimize", "Optimization settings during setup", """
             Only for plans 2 and 3.
 
-            • **Optimise photos** and **Optimise video:** on or off.
+            • **Optimize photos** and **Optimize video:** on or off.
             • **Video compression level:** **High** (480p, smallest), **Medium** (720p) or **Low** (1080p).
             • Each shows an estimated saving, with a **Total estimated savings** line. Real results vary.
         """),
 
         topic("setup-ready", "Ready to Back Up", """
-            Shows how much will be backed up and, if optimising, how much space you will save.
+            Shows how much will be backed up and, if optimizing, how much space you will save.
 
             • **Right now:** starts straight away.
             • **Delay:** **1h, 2h, 4h, 8h, 12h** or **24h**.
@@ -154,8 +154,8 @@ CHAPTER = Chapter(
             ## Step 2: Uploading
             The ring shows overall progress. Below it: the Cloud being sent to and its count. Other Clouds waiting show as **Pending**.
 
-            ## Step 3: Optimising
-            **Optimising photos**, then **Optimising video**, if your plan includes them.
+            ## Step 3: Optimizing
+            **Optimizing photos**, then **Optimizing video**, if your plan includes them.
 
             ## Buttons
             • **Close:** closes the app; the backup carries on.

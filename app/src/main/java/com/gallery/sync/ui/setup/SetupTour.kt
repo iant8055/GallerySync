@@ -355,13 +355,13 @@ private fun SetupTourBody(
         ActivityResultContracts.StartIntentSenderForResult()
     ) { result ->
         if (result.resultCode == android.app.Activity.RESULT_OK) {
-            viewModel.applyWizardVideoOptimise()
+            viewModel.applyWizardVideoOptimize()
         }
     }
 
-    // After backup finishes, trigger one-time photo optimise if the library choice calls for it
-    LaunchedEffect(state.backupFinished, state.optimiseCandidateCount) {
-        if (state.backupFinished && state.optimiseCandidateCount > 0 && !state.optimiseRunning && !state.optimiseFinished) {
+    // After backup finishes, trigger one-time photo optimize if the library choice calls for it
+    LaunchedEffect(state.backupFinished, state.optimizeCandidateCount) {
+        if (state.backupFinished && state.optimizeCandidateCount > 0 && !state.optimizeRunning && !state.optimizeFinished) {
             val sender = viewModel.buildWizardProxyRequest()
             if (sender != null) {
                 proxyLauncher.launch(
@@ -371,10 +371,10 @@ private fun SetupTourBody(
         }
     }
 
-    // After photo optimise finishes (or was skipped), trigger video optimise
-    LaunchedEffect(state.backupFinished, state.optimiseFinished, state.optimiseCandidateCount, state.videoCandidateCount) {
-        val photosDone = state.optimiseCandidateCount == 0 || state.optimiseFinished
-        if (state.backupFinished && photosDone && state.videoCandidateCount > 0 && !state.videoOptimiseRunning && !state.videoOptimiseFinished) {
+    // After photo optimize finishes (or was skipped), trigger video optimize
+    LaunchedEffect(state.backupFinished, state.optimizeFinished, state.optimizeCandidateCount, state.videoCandidateCount) {
+        val photosDone = state.optimizeCandidateCount == 0 || state.optimizeFinished
+        if (state.backupFinished && photosDone && state.videoCandidateCount > 0 && !state.videoOptimizeRunning && !state.videoOptimizeFinished) {
             val sender = viewModel.buildWizardVideoRequest()
             if (sender != null) {
                 videoProxyLauncher.launch(
@@ -405,7 +405,7 @@ private fun SetupTourBody(
 
     // Compute effective step count — step 7 only shows if optimization was chosen
     val showOptimization = state.libraryChoice == LibraryChoice.BACK_UP_AND_FREE_SPACE ||
-        state.libraryChoice == LibraryChoice.BACK_UP_AND_OPTIMISE_NEW
+        state.libraryChoice == LibraryChoice.BACK_UP_AND_OPTIMIZE_NEW
 
     val cloudState by cloudViewModel.state.collectAsStateWithLifecycle()
     // OneDrive specifically: the cloud check and the OneDrive-only steps depend on it being connected, not
@@ -437,7 +437,7 @@ private fun SetupTourBody(
     // files each album under `unchecked` rather than `outstanding`. That is the correct call on its
     // own terms — "could not check" is not "not backed up" — but it leaves `photosOutstanding` and
     // `videosOutstanding` at zero, and every figure downstream is computed from those two. Step 7
-    // then offers optimising with no sizes against it and step 8 quotes an empty backup.
+    // then offers optimizing with no sizes against it and step 8 quotes an empty backup.
     //
     // Confirmed on the Moto G, 4 Sept 2026: `album_cloud_status` held three rows, all written
     // 12:07:17, all `couldNotCheck = 1`, while the card sat there with both switches on and nothing
@@ -484,7 +484,7 @@ private fun SetupTourBody(
     // Step 9 is three phases, not one. Uploading ends, and then photo proxies and video proxies
     // run — usually with no dialog at all, because the SAF tree grant already covers the files.
     // The screen used to be told only whether the *upload* had finished, so it hit 100%, said
-    // "Press Finish", and sat there through an optimise it could not describe and a button that
+    // "Press Finish", and sat there through an optimize it could not describe and a button that
     // was still labelled Close.
     // Choosing to back up manually makes step 8 the last step: there is no backup to watch, so the
     // wizard ends there. Derived once and used by the button label, the branch that acts on it, and
@@ -492,8 +492,8 @@ private fun SetupTourBody(
     val skipsBackupStep = !state.libraryChoice.uploads
     val lastStep = if (skipsBackupStep) TOTAL_STEPS - 1 else TOTAL_STEPS
 
-    val photosOptimised = state.optimiseCandidateCount == 0 || state.optimiseFinished
-    val videoOptimised = state.videoCandidateCount == 0 || state.videoOptimiseFinished
+    val photosOptimized = state.optimizeCandidateCount == 0 || state.optimizeFinished
+    val videoOptimized = state.videoCandidateCount == 0 || state.videoOptimizeFinished
 
     // The delayed start, counted in real time.
     //
@@ -524,8 +524,8 @@ private fun SetupTourBody(
         waitingForDelay -> WizardBackupPhase.WAITING
         state.verifying -> WizardBackupPhase.VERIFYING
         !state.backupFinished -> WizardBackupPhase.UPLOADING
-        !photosOptimised -> WizardBackupPhase.OPTIMISING_PHOTOS
-        !videoOptimised -> WizardBackupPhase.OPTIMISING_VIDEO
+        !photosOptimized -> WizardBackupPhase.OPTIMIZING_PHOTOS
+        !videoOptimized -> WizardBackupPhase.OPTIMIZING_VIDEO
         else -> WizardBackupPhase.DONE
     }
     val backupComplete = backupPhase == WizardBackupPhase.DONE
@@ -553,9 +553,9 @@ private fun SetupTourBody(
         }
     }
 
-    // A main cloud other than OneDrive is backup-only, so a plan that optimises cannot stay chosen.
+    // A main cloud other than OneDrive is backup-only, so a plan that optimizes cannot stay chosen.
     LaunchedEffect(step, cloudState.main, state.libraryChoice) {
-        if (step == 6 && !cloudState.main.capabilities.sync && state.libraryChoice.optimisesAtInstall) {
+        if (step == 6 && !cloudState.main.capabilities.sync && state.libraryChoice.optimizesAtInstall) {
             viewModel.setLibraryChoice(LibraryChoice.BACK_UP_EVERYTHING)
         }
     }
@@ -806,7 +806,7 @@ private fun SetupTourBody(
                     canAdvance = canAdvance(),
                     isLast = step == lastStep,
                     // Finish means "setup is done, open the app". That is true on step 8 for a
-                    // manual backup, and on step 9 only once everything has uploaded and optimised.
+                    // manual backup, and on step 9 only once everything has uploaded and optimized.
                     lastButtonLabel = if (backupComplete || skipsBackupStep)
                         stringResource(R.string.wizard_finish_label)
                     else
@@ -881,14 +881,14 @@ private fun SetupTourBody(
                         )
                         6 -> BackupOptionsContent(
                             selected = state.libraryChoice,
-                            optimiseAvailable = cloudState.main.capabilities.sync,
+                            optimizeAvailable = cloudState.main.capabilities.sync,
                             onSelect = viewModel::setLibraryChoice
                         )
                         7 -> OptimizationContent(
-                            optimisePhotos = state.isAutoOptimiseEnabled,
-                            onOptimisePhotosChanged = viewModel::setWizardOptimisePhotos,
-                            optimiseVideo = state.optimiseVideo,
-                            onOptimiseVideoChanged = viewModel::setWizardOptimiseVideo,
+                            optimizePhotos = state.isAutoOptimizeEnabled,
+                            onOptimizePhotosChanged = viewModel::setWizardOptimizePhotos,
+                            optimizeVideo = state.optimizeVideo,
+                            onOptimizeVideoChanged = viewModel::setWizardOptimizeVideo,
                             videoQuality = state.videoQuality,
                             onVideoQualityChanged = viewModel::setWizardVideoQuality,
                             state = state
@@ -909,8 +909,8 @@ private fun SetupTourBody(
                             currentFile = state.backupCurrentFile,
                             isRunning = state.backupRunning,
                             phase = backupPhase,
-                            optimiseDone = state.optimiseProgressDone,
-                            optimiseTotal = state.optimiseProgressTotal,
+                            optimizeDone = state.optimizeProgressDone,
+                            optimizeTotal = state.optimizeProgressTotal,
                             remainingMillis = remainingMillis,
                             delayTotalMillis = state.firstBackupDelayMillis ?: 0L,
                             clouds = state.cloudProgress,
@@ -1723,8 +1723,8 @@ private fun FolderDestinationPicker(
 @Composable
 private fun BackupOptionsContent(
     selected: LibraryChoice,
-    /** Optimising needs copies proven by size, which only OneDrive can give; other clouds are backup-only. */
-    optimiseAvailable: Boolean,
+    /** Optimizing needs copies proven by size, which only OneDrive can give; other clouds are backup-only. */
+    optimizeAvailable: Boolean,
     onSelect: (LibraryChoice) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -1733,7 +1733,7 @@ private fun BackupOptionsContent(
             style = MaterialTheme.typography.titleLarge
         )
 
-        LibraryChoice.entries.filter { optimiseAvailable || !it.optimisesAtInstall }.forEachIndexed { index, choice ->
+        LibraryChoice.entries.filter { optimizeAvailable || !it.optimizesAtInstall }.forEachIndexed { index, choice ->
             val isSelected = selected == choice
             if (isSelected) {
                 Button(
@@ -1766,7 +1766,7 @@ private fun BackupOptionsContent(
 private fun labelOf(choice: LibraryChoice): Int = when (choice) {
     LibraryChoice.CHOOSE_PER_ALBUM -> R.string.library_per_album
     LibraryChoice.BACK_UP_EVERYTHING -> R.string.library_back_up_all
-    LibraryChoice.BACK_UP_AND_OPTIMISE_NEW -> R.string.library_optimise_new
+    LibraryChoice.BACK_UP_AND_OPTIMIZE_NEW -> R.string.library_optimize_new
     LibraryChoice.BACK_UP_AND_FREE_SPACE -> R.string.library_free_space
 }
 
@@ -1774,18 +1774,18 @@ private fun labelOf(choice: LibraryChoice): Int = when (choice) {
 
 @Composable
 private fun OptimizationContent(
-    optimisePhotos: Boolean,
-    onOptimisePhotosChanged: (Boolean) -> Unit,
-    optimiseVideo: Boolean,
-    onOptimiseVideoChanged: (Boolean) -> Unit,
+    optimizePhotos: Boolean,
+    onOptimizePhotosChanged: (Boolean) -> Unit,
+    optimizeVideo: Boolean,
+    onOptimizeVideoChanged: (Boolean) -> Unit,
     videoQuality: VideoQuality,
     onVideoQualityChanged: (VideoQuality) -> Unit,
     state: ReconcileUiState
 ) {
-    var localPhotoChecked by rememberSaveable { mutableStateOf(optimisePhotos) }
-    if (localPhotoChecked != optimisePhotos) localPhotoChecked = optimisePhotos
-    var localVideoChecked by rememberSaveable { mutableStateOf(optimiseVideo) }
-    if (localVideoChecked != optimiseVideo) localVideoChecked = optimiseVideo
+    var localPhotoChecked by rememberSaveable { mutableStateOf(optimizePhotos) }
+    if (localPhotoChecked != optimizePhotos) localPhotoChecked = optimizePhotos
+    var localVideoChecked by rememberSaveable { mutableStateOf(optimizeVideo) }
+    if (localVideoChecked != optimizeVideo) localVideoChecked = optimizeVideo
 
     val context = LocalContext.current
     val result = state.result
@@ -1793,8 +1793,8 @@ private fun OptimizationContent(
     // Which population this card is describing, and why it is not the outstanding one.
     //
     // Until 6 Sept 2026 both tallies read `…Outstanding` — files not yet in OneDrive. That is the
-    // population `BACK_UP_AND_OPTIMISE_NEW` is described against, and this card is shown for every
-    // choice. `BACK_UP_AND_FREE_SPACE` optimises everything eligible, through `candidatesAll()` and
+    // population `BACK_UP_AND_OPTIMIZE_NEW` is described against, and this card is shown for every
+    // choice. `BACK_UP_AND_FREE_SPACE` optimizes everything eligible, through `candidatesAll()` and
     // `wizardCandidates()`, neither of which asks whether this run uploaded the file.
     //
     // Measured on the Moto G that day, on a library already in OneDrive: the card offered 60 MB with
@@ -1805,20 +1805,20 @@ private fun OptimizationContent(
     // `CloudReconciliation.photos` already documents itself as "what proxying could act on", so the
     // right number was there to be asked for.
     // #2 acts on the whole library; #3 acts only on what this run uploads, which is `outstanding`;
-    // #1 and #4 optimise nothing at install, so there is no figure to give. See
-    // `LibraryChoice.optimisesWholeLibrary`.
+    // #1 and #4 optimize nothing at install, so there is no figure to give. See
+    // `LibraryChoice.optimizesWholeLibrary`.
     val choice = state.libraryChoice
     val totalPhotoBytes = when {
-        !choice.optimisesAtInstall -> 0L
-        choice.optimisesWholeLibrary -> result?.photos?.bytes ?: 0L
+        !choice.optimizesAtInstall -> 0L
+        choice.optimizesWholeLibrary -> result?.photos?.bytes ?: 0L
         else -> result?.photosOutstanding?.bytes ?: 0L
     }
     val totalVideoBytes = when {
-        !choice.optimisesAtInstall -> 0L
-        choice.optimisesWholeLibrary -> result?.videos?.bytes ?: 0L
+        !choice.optimizesAtInstall -> 0L
+        choice.optimizesWholeLibrary -> result?.videos?.bytes ?: 0L
         else -> result?.videosOutstanding?.bytes ?: 0L
     }
-    val optimisesAtInstall = choice.optimisesAtInstall
+    val optimizesAtInstall = choice.optimizesAtInstall
 
     // What proxying gives back, not what the photos weigh.
     //
@@ -1835,21 +1835,21 @@ private fun OptimizationContent(
     // themselves what a switch with no figure under it means.
     val stillChecking = state.running || result == null
     val albumsUnchecked = result?.albumsUnchecked ?: 0
-    val nothingToOptimise = totalPhotoBytes == 0L && totalVideoBytes == 0L
-    val estimateUnavailable = !stillChecking && nothingToOptimise && albumsUnchecked > 0
-    // Nothing will be optimised at install because the choice does not ask for it — #1 and #4. The
+    val nothingToOptimize = totalPhotoBytes == 0L && totalVideoBytes == 0L
+    val estimateUnavailable = !stillChecking && nothingToOptimize && albumsUnchecked > 0
+    // Nothing will be optimized at install because the choice does not ask for it — #1 and #4. The
     // switches still matter, since they govern albums the user later sets to Sync, so the card says
     // that rather than quoting a figure of zero or falling through to silence.
-    val laterOnly = !optimisesAtInstall
-    val nothingLeftToSend = !stillChecking && nothingToOptimise && albumsUnchecked == 0 && !laterOnly
+    val laterOnly = !optimizesAtInstall
+    val nothingLeftToSend = !stillChecking && nothingToOptimize && albumsUnchecked == 0 && !laterOnly
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
-            text = stringResource(R.string.tour_optimise_title),
+            text = stringResource(R.string.tour_optimize_title),
             style = MaterialTheme.typography.titleLarge
         )
         Text(
-            text = stringResource(R.string.tour_optimise_body),
+            text = stringResource(R.string.tour_optimize_body),
             style = MaterialTheme.typography.bodyMedium
         )
 
@@ -1864,7 +1864,7 @@ private fun OptimizationContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                stringResource(R.string.settings_optimise_photos),
+                stringResource(R.string.settings_optimize_photos),
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.weight(1f)
             )
@@ -1872,7 +1872,7 @@ private fun OptimizationContent(
                 checked = localPhotoChecked,
                 onCheckedChange = { value ->
                     localPhotoChecked = value
-                    onOptimisePhotosChanged(value)
+                    onOptimizePhotosChanged(value)
                 },
                 colors = SwitchDefaults.colors(
                     uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1884,7 +1884,7 @@ private fun OptimizationContent(
         if (localPhotoChecked && photoSavingBytes > 0) {
             Text(
                 text = stringResource(
-                    R.string.tour_optimise_photos_saving,
+                    R.string.tour_optimize_photos_saving,
                     formatBytes(context, photoSavingBytes)
                 ),
                 style = MaterialTheme.typography.bodySmall,
@@ -1903,7 +1903,7 @@ private fun OptimizationContent(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                stringResource(R.string.settings_optimise_videos),
+                stringResource(R.string.settings_optimize_videos),
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.weight(1f)
             )
@@ -1911,7 +1911,7 @@ private fun OptimizationContent(
                 checked = localVideoChecked,
                 onCheckedChange = { value ->
                     localVideoChecked = value
-                    onOptimiseVideoChanged(value)
+                    onOptimizeVideoChanged(value)
                 },
                 colors = SwitchDefaults.colors(
                     uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -1928,7 +1928,7 @@ private fun OptimizationContent(
         ) {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 Text(
-                    text = stringResource(R.string.tour_optimise_video_quality),
+                    text = stringResource(R.string.tour_optimize_video_quality),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
@@ -1989,7 +1989,7 @@ private fun OptimizationContent(
                     val savingBytes = totalVideoBytes * videoQuality.approximateSavingPercent / 100
                     Text(
                         text = stringResource(
-                            R.string.tour_optimise_video_saving,
+                            R.string.tour_optimize_video_saving,
                             formatBytes(context, savingBytes)
                         ),
                         style = MaterialTheme.typography.bodySmall,
@@ -2011,7 +2011,7 @@ private fun OptimizationContent(
                 total > 0 -> {
                     Text(
                         text = stringResource(
-                            R.string.tour_optimise_total_saving,
+                            R.string.tour_optimize_total_saving,
                             formatBytes(context, total)
                         ),
                         style = MaterialTheme.typography.bodyMedium,
@@ -2023,7 +2023,7 @@ private fun OptimizationContent(
                     if (albumsUnchecked > 0) {
                         Text(
                             text = stringResource(
-                                R.string.tour_optimise_incomplete,
+                                R.string.tour_optimize_incomplete,
                                 albumsUnchecked
                             ),
                             style = MaterialTheme.typography.bodySmall,
@@ -2033,25 +2033,25 @@ private fun OptimizationContent(
                 }
 
                 stillChecking -> Text(
-                    text = stringResource(R.string.tour_optimise_checking),
+                    text = stringResource(R.string.tour_optimize_checking),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 estimateUnavailable -> Text(
-                    text = stringResource(R.string.tour_optimise_unchecked),
+                    text = stringResource(R.string.tour_optimize_unchecked),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 nothingLeftToSend -> Text(
-                    text = stringResource(R.string.tour_optimise_nothing),
+                    text = stringResource(R.string.tour_optimize_nothing),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 laterOnly -> Text(
-                    text = stringResource(R.string.tour_optimise_later_only),
+                    text = stringResource(R.string.tour_optimize_later_only),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -2086,9 +2086,9 @@ private fun BackupDelayContent(
     // wrong one twice over. Found by Ian, 6 Sept 2026, reading the card after choosing #1: "why the
     // savings if I'm just uploading and not optimizing?"
     //
-    //  - **The switches are not the gate.** They say whether optimising is wanted; the *choice*
-    //    says whether any of it runs at install. #1 and #4 run no optimise pass at all —
-    //    `WizardBulkOptimise.shouldHandOff` is false for both — so the card was promising a saving
+    //  - **The switches are not the gate.** They say whether optimizing is wanted; the *choice*
+    //    says whether any of it runs at install. #1 and #4 run no optimize pass at all —
+    //    `WizardBulkOptimize.shouldHandOff` is false for both — so the card was promising a saving
     //    nothing would deliver, on the last screen before the user commits to the run.
     //  - **Outstanding is the wrong population**, exactly as it was on Step 7: the install pass
     //    reads `candidatesAll()` and `wizardCandidates()`, neither of which asks whether this run
@@ -2100,19 +2100,19 @@ private fun BackupDelayContent(
     // nothing for #1 and #4.
     val choice = state.libraryChoice
     val photoPool = when {
-        !choice.optimisesAtInstall -> 0L
-        choice.optimisesWholeLibrary -> result?.photos?.bytes ?: 0L
+        !choice.optimizesAtInstall -> 0L
+        choice.optimizesWholeLibrary -> result?.photos?.bytes ?: 0L
         else -> result?.photosOutstanding?.bytes ?: 0L
     }
     val videoPool = when {
-        !choice.optimisesAtInstall -> 0L
-        choice.optimisesWholeLibrary -> result?.videos?.bytes ?: 0L
+        !choice.optimizesAtInstall -> 0L
+        choice.optimizesWholeLibrary -> result?.videos?.bytes ?: 0L
         else -> result?.videosOutstanding?.bytes ?: 0L
     }
-    val photoSaving = if (state.isAutoOptimiseEnabled)
+    val photoSaving = if (state.isAutoOptimizeEnabled)
         photoPool * ProxyGenerator.APPROXIMATE_SAVING_PERCENT / 100
     else 0L
-    val videoSaving = if (state.optimiseVideo)
+    val videoSaving = if (state.optimizeVideo)
         videoPool * state.videoQuality.approximateSavingPercent / 100
     else 0L
     val totalSaving = photoSaving + videoSaving
@@ -2327,8 +2327,8 @@ private fun BackupProgressContent(
     currentFile: String,
     isRunning: Boolean,
     phase: WizardBackupPhase,
-    optimiseDone: Int,
-    optimiseTotal: Int,
+    optimizeDone: Int,
+    optimizeTotal: Int,
     remainingMillis: Long,
     delayTotalMillis: Long,
     clouds: List<CloudProgress>,
@@ -2353,24 +2353,24 @@ private fun BackupProgressContent(
     // Each pass drives the ring from its own counters, so it fills three times: upload, photos,
     // video.
     //
-    // It used to pin at 100% through both optimise passes, on the reasoning that the bytes were
+    // It used to pin at 100% through both optimize passes, on the reasoning that the bytes were
     // already safe in OneDrive and a bar dropping back to zero would read as the backup coming
     // undone. Ian asked for the reset on 4 Sept 2026, after watching a run sit at a full ring for
     // four minutes with no sense of how far through it was.
     //
     // What makes the reset safe now is the label directly beneath it. When the ring says
-    // "Optimising photos / 85 of 150", a half-full ring plainly measures the photo pass rather than
+    // "Optimizing photos / 85 of 150", a half-full ring plainly measures the photo pass rather than
     // the backup — the ambiguity the old comment guarded against was created by the bare word
-    // "Optimising", and naming the phase is what removed it.
+    // "Optimizing", and naming the phase is what removed it.
     //
-    // `applyWizardProxies` and `applyWizardVideoOptimise` each zero `optimiseProgress*` on entry, so
+    // `applyWizardProxies` and `applyWizardVideoOptimize` each zero `optimizeProgress*` on entry, so
     // the video pass starts from empty rather than inheriting where the photos finished.
     val percent = when {
         phase == WizardBackupPhase.DONE -> 100
         verifying -> if (verifyTotal > 0) ((verifyChecked * 100) / verifyTotal).coerceIn(0, 100) else 0
         uploading && total > 0 -> ((completed * 100) / total).coerceIn(0, 100)
         uploading -> 0
-        optimiseTotal > 0 -> ((optimiseDone * 100) / optimiseTotal).coerceIn(0, 100)
+        optimizeTotal > 0 -> ((optimizeDone * 100) / optimizeTotal).coerceIn(0, 100)
         // Counted but not started, or started but not yet counted: an empty ring is honest, and it
         // fills within a file or two.
         else -> 0
@@ -2400,8 +2400,8 @@ private fun BackupProgressContent(
                     WizardBackupPhase.WAITING -> R.string.tour_progress_waiting_body
                     WizardBackupPhase.VERIFYING -> R.string.tour_progress_verifying_body
                     WizardBackupPhase.UPLOADING -> R.string.tour_progress_body
-                    WizardBackupPhase.OPTIMISING_PHOTOS -> R.string.tour_progress_optimising_photos
-                    WizardBackupPhase.OPTIMISING_VIDEO -> R.string.tour_progress_optimising_video
+                    WizardBackupPhase.OPTIMIZING_PHOTOS -> R.string.tour_progress_optimizing_photos
+                    WizardBackupPhase.OPTIMIZING_VIDEO -> R.string.tour_progress_optimizing_video
                     WizardBackupPhase.DONE -> R.string.tour_progress_complete
                 }
             ),
@@ -2448,7 +2448,7 @@ private fun BackupProgressContent(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 // A percentage nobody has counted yet is not zero.
                 //
-                // Reopening mid-phase builds a fresh view model, so `optimiseTotal` is 0 until the
+                // Reopening mid-phase builds a fresh view model, so `optimizeTotal` is 0 until the
                 // first ledger read returns and the ring announced a confident "0%" before jumping
                 // to the truth. Ian, 4 Sept 2026. Same rule the count line below already follows:
                 // say nothing rather than say zero.
@@ -2456,7 +2456,7 @@ private fun BackupProgressContent(
                     !(verifying && verifyTotal > 0) &&
                     phase != WizardBackupPhase.UPLOADING &&
                     phase != WizardBackupPhase.DONE &&
-                    optimiseTotal == 0
+                    optimizeTotal == 0
                 Text(
                     text = when {
                         waiting -> formatCountdown(remainingMillis)
@@ -2469,7 +2469,7 @@ private fun BackupProgressContent(
                 )
                 // What the phase is, and underneath it how far through. Ian, 4 Sept 2026: the
                 // count belongs on its own line rather than run together with the name — the ring
-                // is 180dp wide and "Optimising photos 85 of 150" would wrap awkwardly inside it.
+                // is 180dp wide and "Optimizing photos 85 of 150" would wrap awkwardly inside it.
                 val ringLabel = when {
                     // At zero the wait is for the charger or for Android, not the clock, so
                     // "0:00 until backup starts" would be promising something that just failed.
@@ -2478,10 +2478,10 @@ private fun BackupProgressContent(
                     phase == WizardBackupPhase.DONE ->
                         stringResource(R.string.wizard_finish_label)
                     verifying -> stringResource(R.string.tour_progress_verifying)
-                    phase == WizardBackupPhase.OPTIMISING_PHOTOS ->
-                        stringResource(R.string.tour_progress_optimising_photos_label)
-                    phase == WizardBackupPhase.OPTIMISING_VIDEO ->
-                        stringResource(R.string.tour_progress_optimising_video_label)
+                    phase == WizardBackupPhase.OPTIMIZING_PHOTOS ->
+                        stringResource(R.string.tour_progress_optimizing_photos_label)
+                    phase == WizardBackupPhase.OPTIMIZING_VIDEO ->
+                        stringResource(R.string.tour_progress_optimizing_video_label)
                     // Nothing has landed yet: the count would read "0 of 155" through
                     // WorkManager's start-up, the whole first upload and the poll lag behind it,
                     // which looks stuck rather than busy.
@@ -2520,10 +2520,10 @@ private fun BackupProgressContent(
                     showCloud -> stringResource(
                         R.string.tour_progress_count, activeProgress!!.done, activeProgress.total
                     )
-                    phase != WizardBackupPhase.OPTIMISING_PHOTOS &&
-                        phase != WizardBackupPhase.OPTIMISING_VIDEO -> null
-                    optimiseTotal > 0 -> stringResource(
-                        R.string.tour_progress_count, optimiseDone, optimiseTotal
+                    phase != WizardBackupPhase.OPTIMIZING_PHOTOS &&
+                        phase != WizardBackupPhase.OPTIMIZING_VIDEO -> null
+                    optimizeTotal > 0 -> stringResource(
+                        R.string.tour_progress_count, optimizeDone, optimizeTotal
                     )
                     else -> null
                 }
@@ -2775,8 +2775,8 @@ private enum class WizardBackupPhase {
     /** Step one: the Cloud is asked what it already has. Nothing is sent. */
     VERIFYING,
     UPLOADING,
-    OPTIMISING_PHOTOS,
-    OPTIMISING_VIDEO,
+    OPTIMIZING_PHOTOS,
+    OPTIMIZING_VIDEO,
     DONE
 }
 

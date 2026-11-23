@@ -47,42 +47,42 @@ class LibraryChoiceTest {
     // ---------- the estimate ----------
 
     /**
-     * The predicate Step 7's estimate and `OptimiseWorker` both read.
+     * The predicate Step 7's estimate and `OptimizeWorker` both read.
      *
      * Pinned because they disagreed on 6 Sept 2026 and nothing caught it: the card described the
-     * outstanding population for every choice, while the worker optimised everything eligible. A
+     * outstanding population for every choice, while the worker optimized everything eligible. A
      * `BACK_UP_AND_FREE_SPACE` install promised 60 MB and reclaimed 2.26 GB.
      */
     @Test
-    fun onlyTheTwoOptimisingChoicesOptimiseAtInstall() {
-        assertFalse(LibraryChoice.BACK_UP_EVERYTHING.optimisesAtInstall)
-        assertTrue(LibraryChoice.BACK_UP_AND_FREE_SPACE.optimisesAtInstall)
-        assertTrue(LibraryChoice.BACK_UP_AND_OPTIMISE_NEW.optimisesAtInstall)
-        assertFalse(LibraryChoice.CHOOSE_PER_ALBUM.optimisesAtInstall)
+    fun onlyTheTwoOptimizingChoicesOptimizeAtInstall() {
+        assertFalse(LibraryChoice.BACK_UP_EVERYTHING.optimizesAtInstall)
+        assertTrue(LibraryChoice.BACK_UP_AND_FREE_SPACE.optimizesAtInstall)
+        assertTrue(LibraryChoice.BACK_UP_AND_OPTIMIZE_NEW.optimizesAtInstall)
+        assertFalse(LibraryChoice.CHOOSE_PER_ALBUM.optimizesAtInstall)
     }
 
-    /** It must stay the same question `WizardBulkOptimise` asks, or the two can drift apart again. */
+    /** It must stay the same question `WizardBulkOptimize` asks, or the two can drift apart again. */
     @Test
     fun theEstimateAndTheWorkerAgreeOnEveryChoice() {
         LibraryChoice.entries.forEach { choice ->
             assertEquals(
                 choice.name,
-                choice.optimisesAtInstall,
-                WizardBulkOptimise.shouldContinueToVideo(setupComplete = false, choice = choice)
+                choice.optimizesAtInstall,
+                WizardBulkOptimize.shouldContinueToVideo(setupComplete = false, choice = choice)
             )
         }
     }
 
     /**
-     * The two choices that run no install-time optimise, so no wizard card may promise a saving.
+     * The two choices that run no install-time optimize, so no wizard card may promise a saving.
      *
-     * Step 8 promised one anyway until 6 Sept 2026, gated on the optimise switches alone — Ian,
+     * Step 8 promised one anyway until 6 Sept 2026, gated on the optimize switches alone — Ian,
      * having chosen #1: *"why the savings if I'm just uploading and not optimizing?"*
      */
     @Test
     fun theChoicesThatUploadOnlyPromiseNoSaving() {
-        assertFalse(LibraryChoice.BACK_UP_EVERYTHING.optimisesAtInstall)
-        assertFalse(LibraryChoice.CHOOSE_PER_ALBUM.optimisesAtInstall)
+        assertFalse(LibraryChoice.BACK_UP_EVERYTHING.optimizesAtInstall)
+        assertFalse(LibraryChoice.CHOOSE_PER_ALBUM.optimizesAtInstall)
     }
 
     /**
@@ -94,11 +94,11 @@ class LibraryChoiceTest {
      * TASK-022; `ReconcileViewModel.setLibraryChoice` is now the only writer.
      */
     @Test
-    fun onlyFreeSpaceOptimisesTheWholeLibrary() {
-        assertTrue(LibraryChoice.BACK_UP_AND_FREE_SPACE.optimisesWholeLibrary)
-        assertFalse(LibraryChoice.BACK_UP_AND_OPTIMISE_NEW.optimisesWholeLibrary)
-        assertFalse(LibraryChoice.BACK_UP_EVERYTHING.optimisesWholeLibrary)
-        assertFalse(LibraryChoice.CHOOSE_PER_ALBUM.optimisesWholeLibrary)
+    fun onlyFreeSpaceOptimizesTheWholeLibrary() {
+        assertTrue(LibraryChoice.BACK_UP_AND_FREE_SPACE.optimizesWholeLibrary)
+        assertFalse(LibraryChoice.BACK_UP_AND_OPTIMIZE_NEW.optimizesWholeLibrary)
+        assertFalse(LibraryChoice.BACK_UP_EVERYTHING.optimizesWholeLibrary)
+        assertFalse(LibraryChoice.CHOOSE_PER_ALBUM.optimizesWholeLibrary)
     }
 
     /** The cutoff is the mechanism behind that, and it must line up with the flag. */
@@ -106,11 +106,11 @@ class LibraryChoiceTest {
     fun theCutoffMatchesTheWholeLibraryFlag() {
         val now = 1_788_000_000_000L
         LibraryChoice.entries.forEach { choice ->
-            val actsOnEverything = choice.cutoffFor(now) == OptimiseCutoff.EVERYTHING
-            if (choice.optimisesAtInstall) {
-                assertEquals(choice.name, choice.optimisesWholeLibrary, actsOnEverything)
+            val actsOnEverything = choice.cutoffFor(now) == OptimizeCutoff.EVERYTHING
+            if (choice.optimizesAtInstall) {
+                assertEquals(choice.name, choice.optimizesWholeLibrary, actsOnEverything)
             }
         }
-        assertEquals(now, LibraryChoice.BACK_UP_AND_OPTIMISE_NEW.cutoffFor(now))
+        assertEquals(now, LibraryChoice.BACK_UP_AND_OPTIMIZE_NEW.cutoffFor(now))
     }
 }

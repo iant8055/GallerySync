@@ -132,7 +132,7 @@ fun BackupScreen(
     var detailAlbum by remember { mutableStateOf<AlbumRow?>(null) }
     var detailEntries by remember { mutableStateOf<List<BackupEntryEntity>>(emptyList()) }
 
-    // Android's own confirmation for the Camera album's Optimise, asked only for files outside a folder
+    // Android's own confirmation for the Camera album's Optimize, asked only for files outside a folder
     // the app was granted at setup. Declared ahead of the drill-down because that returns early.
     val cameraConsentLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartIntentSenderForResult()
@@ -142,14 +142,14 @@ fun BackupScreen(
     }
 
     // The drill-down lists what the ledger holds, so it is read again whenever the counts move: an
-    // optimise running in the background makes files smaller one at a time, and the Camera list
+    // optimize running in the background makes files smaller one at a time, and the Camera list
     // should shrink as it happens rather than when the screen is next opened.
-    LaunchedEffect(detailAlbum?.name, state.cameraOptimising, state.albums) {
+    LaunchedEffect(detailAlbum?.name, state.cameraOptimizing, state.albums) {
         val name = detailAlbum?.name ?: return@LaunchedEffect
         detailEntries = viewModel.albumEntries(name)
-        // While the Camera optimise runs the ledger changes a file at a time and nothing else tells this
+        // While the Camera optimize runs the ledger changes a file at a time and nothing else tells this
         // screen, so it looks again every couple of seconds until the run is over.
-        while (state.cameraOptimising) {
+        while (state.cameraOptimizing) {
             delay(2_000)
             detailEntries = viewModel.albumEntries(name)
         }
@@ -188,10 +188,10 @@ fun BackupScreen(
             },
             modifier = modifier,
             camera = if (isCamera) {
-                CameraOptimiseControls(
+                CameraOptimizeControls(
                     defaults = state.cameraDefaults,
                     estimate = { files -> viewModel.cameraEstimate(files, state) },
-                    running = state.cameraOptimising,
+                    running = state.cameraOptimizing,
                     uploading = state.isRunning,
                     checkingCloud = state.isCheckingCloud,
                     onRescan = viewModel::rescan,
@@ -221,8 +221,8 @@ fun BackupScreen(
     }
 
     var hasOfferedAutoProxy by remember { mutableStateOf(false) }
-    LaunchedEffect(state.isAutoOptimiseEnabled, state.proxyCandidateCount, state.canProxy) {
-        if (state.isAutoOptimiseEnabled && state.canProxy &&
+    LaunchedEffect(state.isAutoOptimizeEnabled, state.proxyCandidateCount, state.canProxy) {
+        if (state.isAutoOptimizeEnabled && state.canProxy &&
             state.proxyCandidateCount > 0 && !hasOfferedAutoProxy
         ) {
             hasOfferedAutoProxy = true
@@ -1339,7 +1339,7 @@ private fun AlbumRow.everyCloudVerified(): Boolean {
  * underneath now carries the claim that actually matters, and it is sourced from the drive.
  *
  * What is left describes the phone in the present tense and cannot drift: how many files here are
- * optimised, and how many are still waiting to go.
+ * optimized, and how many are still waiting to go.
  */
 @Composable
 private fun AlbumRow.statusBreakdown(): String {
@@ -1348,7 +1348,7 @@ private fun AlbumRow.statusBreakdown(): String {
         if (proxiedCount > 0) {
             append(stringResource(R.string.album_status_optimized, proxiedCount))
         }
-        // After optimised, before pending. Ian, 18 Sept 2026. Files the user kept at full size, or
+        // After optimized, before pending. Ian, 18 Sept 2026. Files the user kept at full size, or
         // that Restore put back, so the card says how many the app has been told to leave alone.
         if (pinnedCount > 0) {
             if (isNotEmpty()) append(separator)
@@ -1378,7 +1378,7 @@ private fun AlbumRow.statusBreakdown(): String {
  * What the filter is currently showing, in its own terms.
  *
  * Per-mode rather than one fixed set of lines, because the interesting number differs: Sync is
- * judged on what optimising saved, Archive on what is not yet verified and so cannot be removed,
+ * judged on what optimizing saved, Archive on what is not yet verified and so cannot be removed,
  * and Backup on neither since it never touches the local copy.
  *
  * This replaced a line reading "Everything is backed up", which counted only switched-on albums and
@@ -1450,11 +1450,11 @@ private fun HeroDetail(
 
     // Sync is the mode that shrinks things, so it is judged on what came back.
     if (modeFilter == AlbumMode.SYNC) {
-        WithHelp(HelpTopic.ALBUMS_OPTIMISED_LINE) {
+        WithHelp(HelpTopic.ALBUMS_OPTIMIZED_LINE) {
             Text(
                 text = stringResource(
-                    R.string.albums_optimised_summary,
-                    summary.optimisedCount,
+                    R.string.albums_optimized_summary,
+                    summary.optimizedCount,
                     formatBytes(context, summary.savedBytes)
                 ),
                 style = MaterialTheme.typography.bodyMedium
@@ -1579,7 +1579,7 @@ private fun HeroActions(
             } else {
                 Button(
                     onClick = onSyncNow,
-                    // Files to send, or Manual optimising to run: Ian, 19 Sept 2026, Manual means
+                    // Files to send, or Manual optimizing to run: Ian, 19 Sept 2026, Manual means
                     // through this button, so it must be pressable with nothing left to upload.
                     enabled = state.canSyncNow,
                     modifier = Modifier.weight(1f),

@@ -89,7 +89,7 @@ class ReconcileWithCloud @Inject constructor(
             // A proxied file is smaller on disk than the original OneDrive holds, so without its
             // pre-proxy size the size test fails and a verified file counts as missing — the Albums
             // tab said "2 of 5 verified in OneDrive" for an album whose five were all uploaded, and
-            // the number fell further with every clip optimised.
+            // the number fell further with every clip optimized.
             val proxiedOriginals = entryDao.proxiedOriginalSizes(album.name)
                 .associate { it.displayName to it.sizeBytes }
 

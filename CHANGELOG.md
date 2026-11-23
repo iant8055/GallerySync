@@ -6,7 +6,7 @@ Every change since version 26 (0.3.25), the last build the Closed Testing group 
 ## Not yet in a build
 
 **Wording**
-- The Sync mode is now called **Optimize**, and *Sync now* is **Back Up Now**. Every on-screen "optimise" is spelt "optimize". In Settings the *Sync* section is **Optimization** and *Camera Sync* is **Camera Folder**, whose rows now read **Select Camera Folder**, **Only Optimize Photos/Videos older than**, **Optimize Photos** and **Optimize Videos**. Nothing behaves differently.
+- The Sync mode is now called **Optimize**, and *Sync now* is **Back Up Now**. Every on-screen "optimize" is spelt "optimize". In Settings the *Sync* section is **Optimization** and *Camera Sync* is **Camera Folder**, whose rows now read **Select Camera Folder**, **Only Optimize Photos/Videos older than**, **Optimize Photos** and **Optimize Videos**. Nothing behaves differently.
 
 **Settings**
 - A folder inside a top-level folder can choose its own Cloud. Adding *DCIM / Funny stuff* now asks about that folder and lists it under DCIM in *Where each folder goes*; before, the answer moved the whole of DCIM. Every folder added under *Folders to back up* has its own row, following its parent's Cloud until one is chosen.
@@ -25,7 +25,7 @@ Every change since version 26 (0.3.25), the last build the Closed Testing group 
 ## Version 38 (0.3.37) — 15 Nov 2026, uploaded
 
 **Sync**
-- Settings → Sync → *Optimise video* → *Older than* is now the same two menus as Archive's: a number from 1 to 9, and hour, day, week, month, year or Straight away. The number is greyed while Straight away is chosen. A choice saved earlier keeps its meaning, except 12 hours, which now reads as 1 day.
+- Settings → Sync → *Optimize video* → *Older than* is now the same two menus as Archive's: a number from 1 to 9, and hour, day, week, month, year or Straight away. The number is greyed while Straight away is chosen. A choice saved earlier keeps its meaning, except 12 hours, which now reads as 1 day.
 - **Every age in the app now has ½.** The number menu reads ½, 1 to 9, on the Archive tab, Settings → Archive, Settings → Sync → *Older than*, and the Camera folder.
 - **The Camera folder's age is now the same two menus**, on its screen and in Settings → Camera Sync. A choice saved earlier keeps its meaning; 6 months is now 6 × 30 days (180, was 182).
 
@@ -45,7 +45,7 @@ Every change since version 26 (0.3.25), the last build the Closed Testing group 
 ## Version 35 (0.3.34) — 1 Nov 2026, uploaded
 
 **Dates**
-- Files now sort and age by the date they were taken, not the date they were last modified. Optimising a file rewrites its modified date, so an optimised album read as all new and Archive's *older than* held all of it back. Covers Archive's *older than*, the Camera folder's age, *Sort by Date* in an album, *Newest first* on Restore, and the date shown on each file.
+- Files now sort and age by the date they were taken, not the date they were last modified. Optimizing a file rewrites its modified date, so an optimized album read as all new and Archive's *older than* held all of it back. Covers Archive's *older than*, the Camera folder's age, *Sort by Date* in an album, *Newest first* on Restore, and the date shown on each file.
 
 ## Version 34 (0.3.33) — built 1 Nov 2026, never uploaded; these changes first reach users in version 35
 

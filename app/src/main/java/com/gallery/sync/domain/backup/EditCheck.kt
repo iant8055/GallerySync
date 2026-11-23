@@ -4,7 +4,7 @@ package com.gallery.sync.domain.backup
  * Whether a file this app shrank has been changed on the phone since, so that putting the original back
  * over it would throw a person's edit away.
  *
- * Measured on the Moto G, 26 Sept 2026 (Ian asked for the test): an in-place edit of an optimised photo
+ * Measured on the Moto G, 26 Sept 2026 (Ian asked for the test): an in-place edit of an optimized photo
  * keeps its MediaStore id, so the upload scan skips it, and Restore then replaced it with the Cloud original
  * without a word. The ledger records the size of the copy the app wrote (`localProxySizeBytes`); a re-save
  * in any editor changes the byte count, so a file that is no longer that size is one somebody edited.

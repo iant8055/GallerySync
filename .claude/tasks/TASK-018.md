@@ -43,7 +43,7 @@ drive rather than two roots. Rebuilding a worse version of it inside GallerySync
 CLAUDE.md's design principle exists to prevent.
 
 **It never restored anything.** The fetched file lands *beside* the file the user already has,
-under a different name, in a different folder. For an optimised photo that is the wrong outcome
+under a different name, in a different folder. For an optimized photo that is the wrong outcome
 twice over: the small copy is still the one the gallery shows in the album the user looks at, and
 the full-size copy is somewhere they did not put it.
 
@@ -63,9 +63,9 @@ A list driven by a local scan for proxies has exactly the property that argument
 phone this tab is empty**, because a new phone has no proxies on it. Ian accepted that consequence on
 27 Aug 2026, and the reason is better than "use OneDrive": **the initial setup downloads.** TASK-014's
 guided first run is where a new phone gets its library back — bulk, one time, before this tab is
-relevant to anything. Restore is what happens *after* that, to files this app has since optimised.
+relevant to anything. Restore is what happens *after* that, to files this app has since optimized.
 So the tab being empty on a fresh install is not a gap; it is the correct answer to "what have I
-optimised on this device?" when the answer is nothing yet.
+optimized on this device?" when the answer is nothing yet.
 
 That also settles the shape of the two features. Initial setup **downloads** files that are not here.
 Restore **replaces** files that are here but shrunken. They are different verbs on different
@@ -219,11 +219,11 @@ A successfully restored file satisfies every one of those again — the local co
 byte-identical to the cloud original, so `remoteSizeBytes = sizeBytes` holds. The only thing keeping
 it out is `isProxied`, and that leaves two bad options:
 
-- **Leave `isProxied = true`.** No re-optimise, but the ledger now lies. `localProxySizeBytes` says
+- **Leave `isProxied = true`.** No re-optimize, but the ledger now lies. `localProxySizeBytes` says
   small while the file is full size, and `ProxyApplier`'s requirement that "which photos are still
   full quality" stay answerable is broken.
 - **Clear it.** The ledger is honest and the file is a proxy candidate on the next run. With
-  automatic optimising on — which it is by default — that is restore, shrink, restore, shrink: a loop
+  automatic optimizing on — which it is by default — that is restore, shrink, restore, shrink: a loop
   the user drives without understanding why the photo keeps changing.
 
 **A per-file flag is the answer.** Ian, 27 Aug 2026. `isProxied` goes false so the ledger stops lying,
@@ -233,14 +233,14 @@ deliberately un-shrunk this file. `proxyCandidates` gains one more `AND`.
 It must be its own column and not a second meaning for `isProxySkipped`. That flag means *cannot
 usefully shrink*; this means *must not be shrunk*. One is a fact about the file, the other is a
 standing instruction from the user, and a query that conflated them would silently start
-re-optimising restored files the day someone widened the skip logic.
+re-optimizing restored files the day someone widened the skip logic.
 
 This is a Room schema change and therefore an escalation under CLAUDE.md. Raised with Ian and agreed
 in the same conversation, 27 Aug 2026.
 
 **Rejected: switching the album to Off.** Considered and dropped the same day. Mechanically it works
 — `proxyCandidates` filters on album mode — but `AlbumMode.OFF` means *not uploaded*, not merely *not
-optimised*. Restoring one photo would stop backing up every other file in that album and every photo
+optimized*. Restoring one photo would stop backing up every other file in that album and every photo
 taken into it afterwards, silently, five weeks before Samsung's sync stops. It also inverts the
 consent model: CLAUDE.md has behaviour following from "a mode the user set, and from nothing else",
 and an app that rewrites a mode on the user's behalf is deciding for them in the direction of less
@@ -282,13 +282,13 @@ one is set and the album's mode where it is not.
 Two things this buys over a boolean:
 
 - **It says why, not just what.** A row reading `BACKUP` explains itself; a row reading
-  `restoredToFullSize = 1` needs the reader to know what that implies about optimising.
+  `restoredToFullSize = 1` needs the reader to know what that implies about optimizing.
 - **It generalises.** The same column later lets a user pin any individual file out of Sync without a
   second mechanism, which is a thing people will ask for once they understand what Sync does.
 
 It must still not be confused with `isProxySkipped`. That means *cannot usefully shrink* — a fact
 about the file. This means *the user chose full quality for this file* — a standing instruction. A
-query that treated them as interchangeable would silently start re-optimising restored files.
+query that treated them as interchangeable would silently start re-optimizing restored files.
 
 ### The user sees it worked when the badge goes
 
@@ -528,8 +528,8 @@ file restored and every untouched proxy untouched.
 - MediaStore reports the restored size after the run, verified by opening the file in Samsung Gallery
 - The per-file progress screen reports each file's outcome by name, and says which of the two things
   it did
-- A restored file is never re-optimised. `isProxied` is cleared and a per-file flag records the
-  user's choice; the regression test is a restored photo surviving an automatic optimise run
+- A restored file is never re-optimized. `isProxied` is cleared and a per-file flag records the
+  user's choice; the regression test is a restored photo surviving an automatic optimize run
 - A restored file's per-file mode reads BACKUP while its album stays SYNC, and the album's mode is
   unchanged
 - The cloud badge is gone from the restored file, checked by opening the album in Samsung Gallery

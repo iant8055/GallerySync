@@ -148,7 +148,7 @@ data class BackupEntryEntity(
      *
      * **Not the same as [isProxySkipped].** That means *cannot usefully shrink*, a fact about the
      * file. This means *the user chose full quality for this one*, a standing instruction. A query
-     * treating them as interchangeable would silently start re-optimising restored files the day
+     * treating them as interchangeable would silently start re-optimizing restored files the day
      * someone widened the skip logic.
      */
     val modeOverride: AlbumMode? = null,
@@ -185,11 +185,11 @@ data class BackupEntryEntity(
     val relativePath: String? = null,
 
     /**
-     * When the file was taken, which is what sorting and age go by (Ian, 1 Nov 2026). Optimising or restoring a
-     * file rewrites its modified date, so a whole optimised album read as all taken on the day it was optimised.
+     * When the file was taken, which is what sorting and age go by (Ian, 1 Nov 2026). Optimizing or restoring a
+     * file rewrites its modified date, so a whole optimized album read as all taken on the day it was optimized.
      *
      * Written by the scan and then left alone: MediaStore's `datetaken`, or else the photo's EXIF date, or else the
-     * row's [dateModifiedEpochSeconds], which optimising a file does not rewrite (`markProxied`).
+     * row's [dateModifiedEpochSeconds], which optimizing a file does not rewrite (`markProxied`).
      * Null until a scan has seen the file on the phone. **Not identity**: [backupKeyOf] stays on the modified date.
      */
     val dateTakenEpochSeconds: Long? = null

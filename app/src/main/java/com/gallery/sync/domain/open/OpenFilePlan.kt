@@ -19,7 +19,7 @@ object OpenFilePlan {
     /**
      * The first step for a long-press.
      *
-     * A file on the phone opens there whatever the setting, an optimised one included (decisions 2 and 3): the
+     * A file on the phone opens there whatever the setting, an optimized one included (decisions 2 and 3): the
      * setting is only for files that are not on the phone. A Cloud with no link at all downloads with no
      * question (decision 5).
      */

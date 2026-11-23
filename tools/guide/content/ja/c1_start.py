@@ -12,13 +12,13 @@ TRANSLATIONS = {
 
 ## できること
 • **Backup**：写真と動画を Cloud にコピーします。
-• **Optimise**：ファイルが Cloud に安全に保存されたら、スマートフォン上のコピーをより小さなものに置き換えます。ギャラリーにはそのまま残ります。
+• **Optimize**：ファイルが Cloud に安全に保存されたら、スマートフォン上のコピーをより小さなものに置き換えます。ギャラリーにはそのまま残ります。
 • **Archive**：アルバムが Cloud に安全に保存されたら、スマートフォン上のコピーをスマートフォンのゴミ箱に移して、空き容量を増やします。
 • **Restore**：フルサイズのファイルを Cloud から戻します。
 
 ## できないこと
 GallerySync のサーバーはありません。ファイルは、スマートフォンとご自身の Cloud アカウントの間で直接やり取りされます。""",
-        "en_hash": "f560953fbf3c92e7",
+        "en_hash": "656c3367d74ad975",
     },
     "safety-promises": {
         "title": "安全のためのお約束",
@@ -31,7 +31,7 @@ GallerySync のサーバーはありません。ファイルは、スマート�
 
 ## 知っておくと便利なこと
 ときどき Cloud を開いて、数枚の写真を確認してください。特にゴミ箱を空にする前に確認しましょう。""",
-        "en_hash": "1c0ec24cf3b86130",
+        "en_hash": "dc04803b96b07455",
     },
     "tabs-at-a-glance": {
         "title": "4 つのタブのメニュー",
@@ -43,7 +43,7 @@ GallerySync のサーバーはありません。ファイルは、スマート�
 • **Settings**（歯車）：Cloud、フォルダ、最適化、そのほかの設定。
 
 **(?)** をタップすると、短い説明が表示されます。完全なガイドは **Settings** の最初のカードにあります。""",
-        "en_hash": "32825a40e115b409",
+        "en_hash": "2057cebe7ff9c66f",
     },
     "quick-start": {
         "title": "クイックスタート",
@@ -53,7 +53,7 @@ GallerySync のサーバーはありません。ファイルは、スマート�
 4. 各アルバムの最後の行を確認します。Cloud が確認したファイル数が表示されます。
 5. 容量が必要なときは、アルバムを最適化するなら **Sync** を、スマートフォンから移すなら **Archive** を選びます。
 6. ファイルをフルサイズで戻したいときは、**Restore** タブを使います。""",
-        "en_hash": "70ac9b8e11cc0206",
+        "en_hash": "201e473222d36f7f",
     },
     "words-you-will-see": {
         "title": "よく出てくる用語",
@@ -61,10 +61,10 @@ GallerySync のサーバーはありません。ファイルは、スマート�
 • **Mode**：アルバムに対して行われる処理：**Off**、**Backup**、**Sync**、**Archive**。[[modes-in-depth]]を参照してください。
 • **Cloud**：OneDrive、Google Photos、Google Drive、Dropbox、pCloud、IDrive e2、Backblaze B2 のいずれか。[[setup-cloud]]を参照してください。
 • **Pairing**：スマートフォン上の最上位の各フォルダが、どの Cloud に送られるか。**DCIM**、**Pictures**、そのほかスマートフォンが写真を保存するフォルダを、このガイドでは最上位フォルダと呼びます。[[settings-destination]]を参照してください。
-• **Optimise**：スマートフォン上のコピーをより小さなものに置き換えること。元のファイルは Cloud に残ります。[[how-optimising-works]]を参照してください。
+• **Optimize**：スマートフォン上のコピーをより小さなものに置き換えること。元のファイルは Cloud に残ります。[[how-optimizing-works]]を参照してください。
 • **Verified**：Cloud が、同じサイズでそのファイルを保持していると確認した状態。[[how-verification-works]]を参照してください。
 • **ゴミ箱**：削除されたファイルが待機する場所。[[where-deleted-files-go]]を参照してください。
 • **Rescan**：スマートフォンと Cloud をもう一度調べて、最新の数字を取得すること。""",
-        "en_hash": "7ad8a0f90c3217e9",
+        "en_hash": "7fb26c96ebb57608",
     },
 }

@@ -24,7 +24,7 @@ import javax.inject.Singleton
  *
  * - **A complete answer only.** A failed or partial listing, an unknown size, or a lookup past the cap is not evidence
  *   of absence, and leaves the file as it was.
- * - **Still on the phone, never optimised.** An optimised file's full-size original existed only in the Cloud; sending
+ * - **Still on the phone, never optimized.** An optimized file's full-size original existed only in the Cloud; sending
  *   the shrunk copy would record it as backed up with the original gone. It is not counted and cannot be resent; its
  *   album line keeps saying it is not verified. The query and the update both refuse such rows.
  * - **Only albums that upload** (Backup, Sync, Archive) can resend; an Off album sends nothing, as with Retry failed.

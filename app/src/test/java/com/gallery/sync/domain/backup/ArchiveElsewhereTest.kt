@@ -142,7 +142,7 @@ class ArchiveElsewhereTest {
     }
 
     @Test
-    fun `an optimised file is found by its MediaStore id and checked against the original's size`() = runTest {
+    fun `an optimized file is found by its MediaStore id and checked against the original's size`() = runTest {
         // On the phone the file is now a 400-byte proxy (new key); the row still holds the 1000-byte original.
         val proxyOnPhone = item("p.jpg", 7, size = 400L)
         val original = item("p.jpg", 7, size = 1_000L)

@@ -12,13 +12,13 @@ TRANSLATIONS = {
 
 ## Qué hace
 • **Backup:** copia tus fotos y vídeos en tu Cloud.
-• **Optimise:** cuando un archivo está a salvo en la Cloud, cambia la copia del teléfono por otra más pequeña. Sigue en tu galería.
+• **Optimize:** cuando un archivo está a salvo en la Cloud, cambia la copia del teléfono por otra más pequeña. Sigue en tu galería.
 • **Archive:** cuando un álbum está a salvo en la Cloud, mueve las copias del teléfono a la papelera del teléfono para liberar espacio.
 • **Restore:** recupera de la Cloud los archivos a tamaño completo.
 
 ## Qué no hace
 No hay servidores de GallerySync. Tus archivos van directamente entre tu teléfono y tu propia cuenta de la Cloud.""",
-        "en_hash": "f560953fbf3c92e7",
+        "en_hash": "656c3367d74ad975",
     },
 
     "safety-promises": {
@@ -32,7 +32,7 @@ No hay servidores de GallerySync. Tus archivos van directamente entre tu teléfo
 
 ## Conviene saber
 De vez en cuando, abre tu Cloud y echa un vistazo a algunas fotos, sobre todo antes de vaciar una papelera.""",
-        "en_hash": "1c0ec24cf3b86130",
+        "en_hash": "dc04803b96b07455",
     },
 
     "tabs-at-a-glance": {
@@ -45,7 +45,7 @@ De vez en cuando, abre tu Cloud y echa un vistazo a algunas fotos, sobre todo an
 • **Settings** (engranaje): Clouds, carpetas, optimización y otras preferencias.
 
 Pulsa cualquier **(?)** para ver una explicación breve. La guía completa es la primera tarjeta de **Settings**.""",
-        "en_hash": "32825a40e115b409",
+        "en_hash": "2057cebe7ff9c66f",
     },
 
     "quick-start": {
@@ -56,7 +56,7 @@ Pulsa cualquier **(?)** para ver una explicación breve. La guía completa es la
 4. Mira la última línea de cada álbum: muestra cuántos archivos ha confirmado tu Cloud.
 5. ¿Necesitas espacio? Elige **Sync** para optimizar un álbum, o **Archive** para sacarlo del teléfono.
 6. ¿Necesitas un archivo de vuelta a tamaño completo? Usa la pestaña **Restore**.""",
-        "en_hash": "70ac9b8e11cc0206",
+        "en_hash": "201e473222d36f7f",
     },
 
     "words-you-will-see": {
@@ -65,11 +65,11 @@ Pulsa cualquier **(?)** para ver una explicación breve. La guía completa es la
 • **Mode:** lo que ocurre con un álbum: **Off**, **Backup**, **Sync** o **Archive**. Consulta [[modes-in-depth]].
 • **Cloud:** OneDrive, Google Photos, Google Drive, Dropbox, pCloud, IDrive e2 o Backblaze B2. Consulta [[setup-cloud]].
 • **Pairing:** a qué Cloud envía cada carpeta de primer nivel de tu teléfono. **DCIM**, **Pictures** y las demás carpetas donde tu teléfono guarda fotos son lo que la guía llama carpetas de primer nivel. Consulta [[settings-destination]].
-• **Optimise:** sustituir la copia del teléfono por otra más pequeña; el original se queda en la Cloud. Consulta [[how-optimising-works]].
+• **Optimize:** sustituir la copia del teléfono por otra más pequeña; el original se queda en la Cloud. Consulta [[how-optimizing-works]].
 • **Verified:** la Cloud confirmó que tiene el archivo con el mismo tamaño. Consulta [[how-verification-works]].
 • **Papelera / Papelera de reciclaje:** donde esperan los archivos quitados. Consulta [[where-deleted-files-go]].
 • **Rescan:** volver a mirar el teléfono y la Cloud para obtener cifras actualizadas.""",
-        "en_hash": "7ad8a0f90c3217e9",
+        "en_hash": "7fb26c96ebb57608",
     },
 
 }

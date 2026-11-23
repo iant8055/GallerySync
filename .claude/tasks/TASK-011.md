@@ -8,7 +8,7 @@ Blocks: nothing, but it is what makes v0.3 a product rather than a button
 The user sets a ceiling once. A background worker keeps the phone under it by proxying the
 largest verified photos, without being asked again.
 
-Everything works today only because someone taps **Optimise**. That is a demo, not the
+Everything works today only because someone taps **Optimize**. That is a demo, not the
 "set up and forget" behaviour the design principle promises.
 
 ## Scope — photos only in this pass
@@ -45,7 +45,7 @@ Two consequences that follow from a floor and must be built in from the start:
   worker usually does nothing. Only when free space drops below the floor does it act, and only
   by enough to get back over it. Hard rule 4 already says stop at the ceiling, not past it.
 - **The trigger can be something GallerySync did not cause.** Another app growing, or a few 8K
-  videos, can push free space under the floor and cause photos to be optimised. The user will
+  videos, can push free space under the floor and cause photos to be optimized. The user will
   experience that as unprompted. The UI has to be able to say *why* a run happened, or it reads
   as arbitrary — which is exactly the objection that was weighed against the floor.
 
@@ -64,7 +64,7 @@ error state; on a video-heavy phone it is the expected one.
    proxying alone, it stops and says so — it does not start removing files to reach the number.
 3. **Largest first.** Most space reclaimed for the fewest photos touched, which is also the
    fewest chances to get something wrong.
-4. **Stop at the ceiling, not past it.** Over-optimising to build headroom degrades photos nobody
+4. **Stop at the ceiling, not past it.** Over-optimizing to build headroom degrades photos nobody
    asked to degrade.
 5. **Respect per-album "keep originals"** once that exists. Until then, no album is exempt, and
    that limitation is worth saying out loud in the UI.
@@ -115,10 +115,10 @@ The worker checks free space against the floor and lands in exactly one of these
    it did — how many photos, how much reclaimed. Low priority: this is the case where the feature
    worked, and it should not interrupt anyone.
 2. **Below the floor, grant pool empty.** The actionable one. "Your phone is below *N* GB free.
-   Approve the next batch of photos to optimise." Tapping opens the Activity and launches
+   Approve the next batch of photos to optimize." Tapping opens the Activity and launches
    `createWriteRequest`. Without this the feature simply stops, silently, the moment the pool runs
    dry — which on a large library is soon.
-3. **Below the floor, nothing left to proxy.** Everything eligible is already optimised and the
+3. **Below the floor, nothing left to proxy.** Everything eligible is already optimized and the
    floor is still unmet. Say so plainly, and say what is holding it — on a video-heavy phone that
    is video, which this task deliberately will not touch. **Expect this state on Ian's own device.**
 
@@ -228,7 +228,7 @@ Verified against the platform docs rather than assumed. An earlier commit messag
   The consent dialog also has to render and count the affected items, and "modify 47,000 photos?"
   is not informed consent in any case.
 
-**It is a cap per request, not a lifetime quota and not a ceiling on how much can be optimised.**
+**It is a cap per request, not a lifetime quota and not a ceiling on how much can be optimized.**
 Nothing limits how many grants are requested over time.
 
 ### Consequence: this is a first-run problem, not a steady-state one
@@ -300,7 +300,7 @@ Dialogs appear in exactly two places, both of which *modify* local files, and bo
 |---|---|---|
 | Backup / upload | none | — |
 | Move redundant local copies (`createTrashRequest`) | yes, 2000 cap | user taps "Move to backup" |
-| Optimise (`createWriteRequest`) | yes, 2000 cap | user taps "Optimise" |
+| Optimize (`createWriteRequest`) | yes, 2000 cap | user taps "Optimize" |
 
 So the thing worth scheduling overnight and the thing that needs the user present are different
 operations, and they separate cleanly.
@@ -314,7 +314,7 @@ apps removed. It also runs directly against this project's own rule that nothing
 trashed without the user confirming that specific action. The dialog is the refusal opportunity;
 answering it on the user's behalf removes the only thing it is for.
 
-It is also not needed. The first optimise pass over 6,289 images is **at most four dialogs, once**
+It is also not needed. The first optimize pass over 6,289 images is **at most four dialogs, once**
 — fewer in practice, since anything already under 2048px is skipped.
 
 ### Is there a way around the tap at all? — asked by Ian, 19 Aug 2026
@@ -397,7 +397,7 @@ This is the natural shape of first run, and it happens to be exactly option 3:
 
 - **Overnight, unattended:** the whole-gallery upload. Hours of transfer, battery and heat, and no
   user input possible or required. Schedule it.
-- **Next time the app is opened:** the optimise pass, where the user taps through a few grants with
+- **Next time the app is opened:** the optimize pass, where the user taps through a few grants with
   a progress indicator between them. They are present because the platform requires it, and the
   work is fast because the uploads already happened.
 
@@ -593,18 +593,18 @@ differently for one album than another.
 
 | Setting | Photos in a Sync album | Video in a Sync album |
 |---|---|---|
-| **Photos only** | uploaded, then optimised | uploaded, left at full size |
-| **Video only** | uploaded, left at full size | uploaded, then optimised |
-| **Both** *(default)* | uploaded, then optimised | uploaded, then optimised |
+| **Photos only** | uploaded, then optimized | uploaded, left at full size |
+| **Video only** | uploaded, left at full size | uploaded, then optimized |
+| **Both** *(default)* | uploaded, then optimized | uploaded, then optimized |
 
 > **Revised by Ian, 29 Aug 2026.** The three "not uploaded, untouched" cells above are struck: they
 > said this setting could stop a medium being backed up, and it cannot. Uploading follows the album
 > mode — Backup, Sync and Archive all upload; only Off does not — so a setting scoping *Sync* scopes
-> the optimising half and nothing else. *"Turning off syncing/optimising doesn't mean it can't still
+> the optimizing half and nothing else. *"Turning off syncing/optimizing doesn't mean it can't still
 > be backed up."*
 >
 > The old reading was also unsafe in a way nobody had noticed: everything downstream needs a verified
-> cloud copy, so excluding video from upload would have silently disabled optimising, archiving and
+> cloud copy, so excluding video from upload would have silently disabled optimizing, archiving and
 > restore for it, and left the largest files on the phone with no cloud copy at all. The shape is now
 > two toggles rather than a tri-state, and the worst a toggle can do is leave a file at full size.
 
@@ -614,9 +614,9 @@ mode not-quite-safe.
 
 ### The reading this assumes, stated plainly
 
-The setting scopes **what Sync includes at all**, not merely what it optimises. That is the only
+The setting scopes **what Sync includes at all**, not merely what it optimizes. That is the only
 reading that produces three distinct buildable behaviours: Sync's space-saving mechanism is the
-photo proxy, video is never proxied, so a setting that scoped only the optimising step would make
+photo proxy, video is never proxied, so a setting that scoped only the optimizing step would make
 "Photos only" identical to today's behaviour and leave the other two waiting on video proxies that
 do not exist. If the narrower reading was intended, this section is wrong and the feature waits on
 the video-proxy item — worth a word before it is built.
@@ -754,7 +754,7 @@ Set by Ian, 19 Aug 2026, replacing an earlier `Never / 30 days / 90 days / 6 mon
 30-day floor.
 
 - **Default: 1 year.** Deliberately conservative, matching every other default in this app —
-  automatic optimising off, metered off, `ARCHIVE` never a default. The cost of a cautious default
+  automatic optimizing off, metered off, `ARCHIVE` never a default. The cost of a cautious default
   is that the feature does little until the user lowers it, which is recoverable in one tap. The
   cost of an eager one is a degraded clip somebody still wanted.
 - **"Never" is gone, and nothing is lost.** `SyncScope.PHOTOS_ONLY` already expresses "leave my

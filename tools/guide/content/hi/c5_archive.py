@@ -25,7 +25,7 @@ OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 और Backblaze B2। Google
 • Archive में आपका मौजूद होना ज़रूरी है: Android टैप माँगता है। देखें [[dialog-exit-warning]]।
 • बाद में Archive एल्बम में जोड़ी गई फ़ाइलें भी इसमें शामिल रहती हैं।
 • जब आखिरी फ़ाइल चली जाती है, तो एल्बम सूची से हट जाता है और उसका मोड भुला दिया जाता है। अगर वह वापस आए, तो Off से शुरू होता है।""",
-        "en_hash": "767ff53f0ad97065",
+        "en_hash": "8608b1f31cca18a3",
     },
     "archive-hero": {
         "title": "Files to Archive",

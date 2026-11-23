@@ -65,37 +65,37 @@ mobile-data switch above. A file on the phone always opens in the phone's own ap
 ---
 
 > **Checked 18 Sept 2026.** The "automatic" entry below uses the pre-28-Aug name. The real master switch
-> is `isOptimiseEnabled` (default `false`); `isAutoOptimiseEnabled` survives only as a derived UI value
+> is `isOptimizeEnabled` (default `false`); `isAutoOptimizeEnabled` survives only as a derived UI value
 > (master on **and** photo mode Auto). **Ian, 18 Sept: initial state is Off for both Photos and Video.**
-> The stored defaults were already Off, but `BackupUiState.optimiseVideo` still started as `true` in
+> The stored defaults were already Off, but `BackupUiState.optimizeVideo` still started as `true` in
 > `BackupViewModel` — the same shape as the 7 Sept photo defect. Corrected 18 Sept; a fresh install now
 > shows both switches Off in every layer (DataStore fallback, `BackupPreferences`, `BackupUiState`,
 > `ReconcileUiState`). Not yet watched on a device.
 
-### Optimise photos automatically — **off**
-`isAutoOptimiseEnabled = false`
+### Optimize photos automatically — **off**
+`isAutoOptimizeEnabled = false`
 
-**If untouched:** no photo is ever replaced with a smaller copy. With the switches on, the **Mode** decides *when*. Ian, 19 Sept 2026: **Automatic** is *"as soon as a file hits an Album whose mode is SYNC or an Album mode is switched to SYNC"*, **Manual** is *"through the Sync Now button on the Albums tab"*. There is no Optimise button in Settings any more.
+**If untouched:** no photo is ever replaced with a smaller copy. With the switches on, the **Mode** decides *when*. Ian, 19 Sept 2026: **Automatic** is *"as soon as a file hits an Album whose mode is SYNC or an Album mode is switched to SYNC"*, **Manual** is *"through the Sync Now button on the Albums tab"*. There is no Optimize button in Settings any more.
 
-**Why off:** optimising rewrites the file on the phone, and that is not undoable from the phone — the
+**Why off:** optimizing rewrites the file on the phone, and that is not undoable from the phone — the
 full-quality original only exists in OneDrive from then on. Recovering it is a download.
 
-**Cost of leaving it off:** no space is reclaimed by optimising. The 4.8 GB of proxy candidates on a
+**Cost of leaving it off:** no space is reclaimed by optimizing. The 4.8 GB of proxy candidates on a
 real library stays occupied until asked for.
 
-**Note (corrected 19 Sept 2026):** Automatic photo optimising **is** unattended inside the folders
-granted at setup: `OptimiseWorker`'s `sync-photos` pass writes through the tree grant with no dialog,
-started at the end of a backup run (so a new file is optimised the moment OneDrive has confirmed it)
+**Note (corrected 19 Sept 2026):** Automatic photo optimizing **is** unattended inside the folders
+granted at setup: `OptimizeWorker`'s `sync-photos` pass writes through the tree grant with no dialog,
+started at the end of a backup run (so a new file is optimized the moment OneDrive has confirmed it)
 and when an album is switched to Sync. A photo **outside** the granted folders still needs Android's
 confirmation, which only an Activity can show, so it waits until the app is open (Automatic) or Sync
 now is pressed (Manual).
 
 ---
 
-### Optimise photos — **off**
-`optimisePhotos = false` · [BackupSettings.kt:64](../app/src/main/java/com/gallery/sync/data/local/settings/BackupSettings.kt)
+### Optimize photos — **off**
+`optimizePhotos = false` · [BackupSettings.kt:64](../app/src/main/java/com/gallery/sync/data/local/settings/BackupSettings.kt)
 
-**If untouched:** the Sync section shows Optimise photos off, and no photo is a proxy candidate.
+**If untouched:** the Sync section shows Optimize photos off, and no photo is a proxy candidate.
 
 **Why off:** it is the switch that says "yes, rewrite my photos smaller". Every default that rewrites
 a file is off, and this is one of them.
@@ -104,10 +104,10 @@ a file is off, and this is one of them.
 this file had no entry for it, and that absence is why it drifted — the entry below covered the
 *automatic* master only, and the per-medium switches were added later without one.
 
-**Why it was not merely cosmetic.** The master (`isOptimiseEnabled`) is off by default, so nothing
-optimised. But the screen showed the switch on while nothing was happening, and the video row's
-handler clears the master only `if (!optimisePhotos)`. Turning video on and then off again therefore
-left the master on with photos still marked wanted — and photo optimising started, having never been
+**Why it was not merely cosmetic.** The master (`isOptimizeEnabled`) is off by default, so nothing
+optimized. But the screen showed the switch on while nothing was happening, and the video row's
+handler clears the master only `if (!optimizePhotos)`. Turning video on and then off again therefore
+left the master on with photos still marked wanted — and photo optimizing started, having never been
 asked for. Fixing the default closes that path too.
 
 **Cost of leaving it off:** no photo proxies, so the photo half of the space saving is unclaimed
@@ -115,8 +115,8 @@ until the user asks for it.
 
 ---
 
-### Optimise video — **off**
-`optimiseVideo = false` · [BackupSettings.kt:70](../app/src/main/java/com/gallery/sync/data/local/settings/BackupSettings.kt)
+### Optimize video — **off**
+`optimizeVideo = false` · [BackupSettings.kt:70](../app/src/main/java/com/gallery/sync/data/local/settings/BackupSettings.kt)
 
 **If untouched:** no video is transcoded. Always was off; recorded here for symmetry with the entry
 above, so a future reader does not have to infer the pair from one of them.
@@ -254,7 +254,7 @@ These are not user settings, but they shape what a default run does.
 | `DEFAULT_BATCH_BYTES` | 512 MB | Roughly one run's transfer. ~9 min at 1 MB/s, inside WorkManager's limit. A single file larger than this is still attempted alone, or the biggest files would never upload. |
 | `MAX_ATTEMPTS` | 5 | Failures before a file is given up on, rather than retried forever. |
 | `MAX_REMOTE_PAGES` | 200 | Ceiling on the listing page walk — 20,000 files per album. |
-| `TARGET_LONG_EDGE_PX` | 2048 | What an optimised photo is resized to, roughly a tenth of the size. |
+| `TARGET_LONG_EDGE_PX` | 2048 | What an optimized photo is resized to, roughly a tenth of the size. |
 | `SQL_BATCH` | 500 | Bound variables per statement, under SQLite's 999 limit on older Android. |
 
 A consequence worth stating: at 25 files and 512 MB per run, a large folder is confirmed over
@@ -331,8 +331,8 @@ is the worst possible moment to offer a bulk action.
 |---|---|---|
 | **Automatic sync → off** | No | Scheduled runs stop. Nothing already uploaded changes. Photos taken from now on are not backed up until "Sync now" is tapped, and nothing will remind you. |
 | **Mobile data → on** | No | The next run may use cellular. If the first backup has not completed, that is the whole library — 148 GB on the measured device. This is the only setting whose change can cost real money. |
-| **Optimise photos / video → Mode Automatic** | No | Photos in Sync albums are optimised as soon as OneDrive has confirmed them, and when an album is switched to Sync; video does the same but only while charging. Already-optimised files are unaffected. |
-| **Optimise photos / video → Mode Manual** | No | Nothing is optimised until **Sync now** is pressed on the Albums tab, which is then enabled even when there is nothing to send. |
+| **Optimize photos / video → Mode Automatic** | No | Photos in Sync albums are optimized as soon as OneDrive has confirmed them, and when an album is switched to Sync; video does the same but only while charging. Already-optimized files are unaffected. |
+| **Optimize photos / video → Mode Manual** | No | Nothing is optimized until **Sync now** is pressed on the Albums tab, which is then enabled even when there is nothing to send. |
 | **New albums start as → Backup or Sync** | **No** — existing albums keep their modes | Only albums discovered *after* the change get it. `insertIfNew` uses `IGNORE`, so a choice already made is never overwritten. The live risk is different: a new folder appearing later — a messaging app's media directory, a new camera mode — begins uploading without a decision. Archive can never be selected here. |
 | **Backs up into → a new folder** | No | New uploads go to the new path. Nothing already uploaded moves, and the old root stays permanently in the search set, so nothing is stranded and nothing is sent twice. |
 | **First backup hour / charging** | Only until the first backup completes | Moves or removes the overnight gate. With charging off, a fourteen-hour transfer can begin on battery. Once `hasCompletedFirstBackup` is set the whole setting is inert, and it is one-way. |
@@ -340,7 +340,7 @@ is the worst possible moment to offer a bulk action.
 
 ## Two changes that cannot be undone by changing the setting back
 
-- **Optimising a photo.** Turning auto-optimise off later does not restore anything already
+- **Optimizing a photo.** Turning auto-optimize off later does not restore anything already
   replaced; the full-quality original exists only in OneDrive from then on, and getting it back is a
   download.
 - **`hasCompletedFirstBackup`.** One-way by design. Nothing in the app sets it false again.

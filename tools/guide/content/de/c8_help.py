@@ -7,7 +7,7 @@ TRANSLATIONS = {
     "faq-sync-now-greyed": {
         "title": "Sync now ist ausgegraut",
         "body": """Es gibt nichts zu senden oder zu optimieren: Alles ist schon gesendet, oder kein Album steht auf Backup, Sync oder Archive. Prüfe die Modus-Summen in der Kopfzeile.""",
-        "en_hash": "d76ec512e56c7203",
+        "en_hash": "7b543eca08835984",
     },
     "faq-albums-off-after-backup": {
         "title": "Meine Alben stehen nach dem ersten Backup auf Off",
@@ -39,12 +39,12 @@ Google Photos kann nicht gefragt werden, daher zeigen seine Alben immer **N sent
     "faq-photo-looks-small": {
         "title": "Ein Foto sieht kleiner oder schlechter aus als vorher",
         "body": """Es wurde optimiert (achte auf das kleine Wolkensymbol). Das Original liegt in deiner Cloud: Nutze den Tab **Restore**.""",
-        "en_hash": "4e1a6a3f710360db",
+        "en_hash": "009dd053a72c34e0",
     },
     "faq-restore-empty": {
         "title": "Der Restore-Tab sagt, es gibt nichts zurückzuholen",
         "body": """Es wurde nichts optimiert oder archiviert, und (bei OneDrive) ist jedes Foto in deinen Backup-Ordnern schon auf dem Telefon. Das ist richtig.""",
-        "en_hash": "e0720600e98ca0e2",
+        "en_hash": "e91f44f270b19e04",
     },
     "faq-backup-stops-when-closed": {
         "title": "Backups scheinen zu stoppen, wenn ich die App schließe",

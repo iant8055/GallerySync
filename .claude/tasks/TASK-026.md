@@ -86,7 +86,7 @@ verified byte-size match, nothing weaker — and Google's API simply has nothing
 workaround exists (a `HEAD` request against the upload response's `baseUrl`, valid for 60 minutes,
 read `Content-Length` once, right after upload) but it was not built — Ian: *"Backup only for now."*
 Revisit if Archive-for-Google-Photos is ever wanted; until then, Google-Photos-routed albums simply
-should not offer Archive or Sync (optimise) as modes — see below for why that needs no special-casing.
+should not offer Archive or Sync (optimize) as modes — see below for why that needs no special-casing.
 
 **One destination per album, chosen by the user — not mirrored to every active location.** Ian, from
 what he's seen in other apps: *"Internal Storage/DCIM → OneDrive/.../DCIM, Internal Storage/Pictures
@@ -109,7 +109,7 @@ everywhere." "At least one must stay on" still holds: switching off a signed-in 
 album is still routed to would leave that album with nowhere to go.
 
 **The Archive/Sync restriction needs no new code.** Both already gate on `remoteSizeBytes ==
-sizeBytes` (`verifiedInCloud`, `CameraOptimisePlan.isReady`, the general proxy-candidate queries).
+sizeBytes` (`verifiedInCloud`, `CameraOptimizePlan.isReady`, the general proxy-candidate queries).
 Google Photos rows simply never populate `remoteSizeBytes` — Backup-only falls out of the *existing*,
 already-tested eligibility checks for free. What does need building: the Albums UI must not *offer*
 Archive or Sync on a Google-Photos-routed album in the first place (TASK-014's rule — never offer an
@@ -215,7 +215,7 @@ sign-in UI, which doesn't exist yet, and `BackupEngine` actually calling any of 
 
 Read the whole of `uploadPendingWhileHolding` (`BackupEngine.kt`, the loop `BackupWorker` actually
 runs) before touching it, since it's the one place CLAUDE.md's absolute deletion-safety bar and the
-Camera-album "no instant optimise" rule both ultimately rest on. That reading surfaced two things
+Camera-album "no instant optimize" rule both ultimately rest on. That reading surfaced two things
 worth having settled before writing the dispatch itself, both now resolved.
 
 **A real near-miss, caught in the wire client before it ever reached this file:** the naive dispatch —
@@ -226,7 +226,7 @@ the *local* size (Google never reports one), so recording a success through the 
 always equal `sizeBytes` — and `BackupEntryDao.verifiedInCloud()` (`remoteSizeBytes IS NOT NULL AND
 remoteSizeBytes = sizeBytes`) would read every Google Photos row as byte-verified, forever, having
 confirmed nothing. Restricting Archive/Sync to OneDrive in the UI does not stop that row from
-satisfying `verifiedInCloud()` for any *other* code that trusts it — `CameraOptimisePlan`, the
+satisfying `verifiedInCloud()` for any *other* code that trusts it — `CameraOptimizePlan`, the
 deleted-files "kept vs gone" reconciliation, more. Fixed structurally: `BackupEntryDao
 .markUploadedWithoutSizeVerification`, whose SQL always writes `remoteSizeBytes = NULL`, so a Google
 Photos row can never satisfy `verifiedInCloud()` no matter what dispatch code does or later gets
@@ -394,7 +394,7 @@ signed-in OneDrive session in any case. Compile + full unit suite only.
    Google Photos shows its limitations (Backup only, no Archive/Sync, no dedup against an existing
    Google library); (3) sign in to every chosen account; (4) media permission and scan; (5) list the
    local *folders* and pick a destination for each; then the existing steps 6–9. CLAUDE.md's
-   wizard-independence rule concerns album modes and the optimise tree; destination is a new concept
+   wizard-independence rule concerns album modes and the optimize tree; destination is a new concept
    it never covered, so the wizard *does* write folder destinations (that was my misreading and Ian
    corrected it). It must still write no album modes.
    **Built the same day — compile + unit suite + install/launch only; the wizard cards themselves have
@@ -453,7 +453,7 @@ each cloud a file went to ("12 verified in OneDrive · 3 sent to Dropbox"). The 
 cover all of them at once, at the same upload boundary.
 
 **Every one of them is backup-only, and that is structural, not a label.** `BackupLocation.isBackupOnly`
-is true for everything but OneDrive: no Archive, no Sync (optimise), no Restore. Each adapter's row is
+is true for everything but OneDrive: no Archive, no Sync (optimize), no Restore. Each adapter's row is
 written with `markUploadedWithoutSizeVerification`, so `remoteSizeBytes` is always NULL and no row can
 satisfy `verifiedInCloud()` or `fetchableFromCloud()` — which act on OneDrive ids and OneDrive byte-size
 proof and would be wrong, and for Archive dangerous, for anyone else's. Upgrading a provider (Drive, Dropbox
@@ -533,7 +533,7 @@ something I do. See "Open" below — this is now the actual priority.
   app-wide default destination and always uploads; every other cloud, OneDrive included, needs Pro or the
   30-day trial, checked at the upload boundary in `BackupEngine`. OneDrive is a `CloudConnection` like the
   rest; "signed in" means any cloud is connected; the wizard's cloud step is *Your cloud (free)* plus
-  *Add more clouds (Pro)*; plans that optimise are hidden when the main cloud is not OneDrive.
+  *Add more clouds (Pro)*; plans that optimize are hidden when the main cloud is not OneDrive.
 - **What a cloud cannot do is greyed, with a message.** Restore, Archive and Sync exist only for OneDrive.
   With no OneDrive connected the Restore and Archive tabs are greyed and tapping one says "<Cloud> doesn't
   support RESTORE — Please switch to another Cloud Service to enable this feature". In an album whose folder

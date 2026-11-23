@@ -12,13 +12,13 @@ Ele **não** é um app de galeria. Ver, pesquisar, editar e compartilhar continu
 
 ## O que ele faz
 • **Backup:** copia suas fotos e vídeos para a sua Cloud.
-• **Optimise:** depois que um arquivo está seguro na Cloud, troca a cópia do telefone por uma menor. Ele continua na sua galeria.
+• **Optimize:** depois que um arquivo está seguro na Cloud, troca a cópia do telefone por uma menor. Ele continua na sua galeria.
 • **Archive:** depois que um álbum está seguro na Cloud, move as cópias do telefone para a lixeira do aparelho para liberar espaço.
 • **Restore:** traz de volta da Cloud os arquivos em tamanho real.
 
 ## O que ele não faz
 Não existem servidores do GallerySync. Seus arquivos vão direto entre o seu telefone e a sua própria conta de Cloud.""",
-        "en_hash": "f560953fbf3c92e7",
+        "en_hash": "656c3367d74ad975",
     },
     'safety-promises': {
         "title": 'As promessas de segurança',
@@ -31,7 +31,7 @@ Não existem servidores do GallerySync. Seus arquivos vão direto entre o seu te
 
 ## Bom saber
 De vez em quando, abra sua Cloud e olhe algumas fotos, principalmente antes de esvaziar uma lixeira.""",
-        "en_hash": "1c0ec24cf3b86130",
+        "en_hash": "dc04803b96b07455",
     },
     'tabs-at-a-glance': {
         "title": 'O menu das quatro abas',
@@ -43,7 +43,7 @@ De vez em quando, abra sua Cloud e olhe algumas fotos, principalmente antes de e
 • **Settings** (engrenagem): Clouds, pastas, otimização e outras preferências.
 
 Toque em qualquer **(?)** para uma explicação curta. O guia completo é o primeiro cartão em **Settings**.""",
-        "en_hash": "32825a40e115b409",
+        "en_hash": "2057cebe7ff9c66f",
     },
     'quick-start': {
         "title": 'Início rápido',
@@ -53,7 +53,7 @@ Toque em qualquer **(?)** para uma explicação curta. O guia completo é o prim
 4. Confira a última linha de cada álbum: ela mostra quantos arquivos a sua Cloud confirmou.
 5. Precisa de espaço? Escolha **Sync** para otimizar um álbum, ou **Archive** para tirá-lo do telefone.
 6. Precisa de um arquivo de volta em tamanho real? Use a aba **Restore**.""",
-        "en_hash": "70ac9b8e11cc0206",
+        "en_hash": "201e473222d36f7f",
     },
     'words-you-will-see': {
         "title": 'Palavras que você vai ver',
@@ -61,10 +61,10 @@ Toque em qualquer **(?)** para uma explicação curta. O guia completo é o prim
 • **Mode:** o que acontece com um álbum: **Off**, **Backup**, **Sync** ou **Archive**. Veja [[modes-in-depth]].
 • **Cloud:** OneDrive, Google Photos, Google Drive, Dropbox, pCloud, IDrive e2 ou Backblaze B2. Veja [[setup-cloud]].
 • **Pairing:** para qual Cloud vai cada pasta de nível superior do seu telefone. **DCIM**, **Pictures** e as outras pastas em que o seu telefone guarda fotos são o que o Guia chama de pastas de nível superior. Veja [[settings-destination]].
-• **Optimise:** trocar a cópia do telefone por uma menor; o original continua na Cloud. Veja [[how-optimising-works]].
+• **Optimize:** trocar a cópia do telefone por uma menor; o original continua na Cloud. Veja [[how-optimizing-works]].
 • **Verified:** a Cloud confirmou que tem o arquivo com o mesmo tamanho. Veja [[how-verification-works]].
 • **Lixeira:** onde os arquivos removidos esperam. Veja [[where-deleted-files-go]].
 • **Rescan:** olhar o telefone e a Cloud de novo para obter números atualizados.""",
-        "en_hash": "7ad8a0f90c3217e9",
+        "en_hash": "7fb26c96ebb57608",
     },
 }

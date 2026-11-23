@@ -87,8 +87,8 @@ Otherwise every proxied photo is re-uploaded on the next run. This is the single
 line of the task.
 
 ### 4. UI
-Settings gains a "Optimise photos" action showing what would be reclaimed. Album rows show which
-photos are optimised versus whole. Nothing automatic in this task — the storage budget is
+Settings gains a "Optimize photos" action showing what would be reclaimed. Album rows show which
+photos are optimized versus whole. Nothing automatic in this task — the storage budget is
 TASK-011, and automatic destructive work should not ship in the same change as the mechanism.
 
 ## Test requirements

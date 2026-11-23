@@ -84,7 +84,7 @@ data class AlbumBackupCount(
     val backedUp: Int,
     val proxied: Int,
     /**
-     * What optimising actually reclaimed: the original's size less the proxy now on disk.
+     * What optimizing actually reclaimed: the original's size less the proxy now on disk.
      *
      * Summed from the ledger rather than measured, because the original is no longer on the phone
      * to measure. `sizeBytes` is what was uploaded and `localProxySizeBytes` is what replaced it,
@@ -158,7 +158,7 @@ data class SentElsewhereRow(
     val id: String = ""
 )
 
-/** A sent file still on the phone and never optimised: what Rescan may queue again. See `RequeueMissingFromCloud`. */
+/** A sent file still on the phone and never optimized: what Rescan may queue again. See `RequeueMissingFromCloud`. */
 data class ReverifyRow(
     val id: String,
     val displayName: String,
@@ -607,7 +607,7 @@ interface BackupEntryDao {
 
     /**
      * Puts files the Cloud no longer holds back in the queue, to [location]: what was recorded about the copy that is
-     * gone is cleared, so nothing later trusts it. Re-checks the same limits as [uploadedOnPhone], so an optimised file
+     * gone is cleared, so nothing later trusts it. Re-checks the same limits as [uploadedOnPhone], so an optimized file
      * or one that has left the phone can never be put back however it was chosen. Adds work only; removes nothing.
      */
     @Query(
@@ -883,7 +883,7 @@ interface BackupEntryDao {
     /**
      * How many of one kind are already proxied.
      *
-     * The optimise phases use it as an offset so their counter describes the whole phase rather than
+     * The optimize phases use it as an offset so their counter describes the whole phase rather than
      * the current attempt. Closing the wizard part-way through and reopening it recomputes the
      * *remaining* candidates, so without this the screen went from "2 of 5" to "0 of 3" — each
      * number true, the pair of them reading as progress lost.
@@ -952,9 +952,9 @@ interface BackupEntryDao {
     suspend fun markProxySkipped(id: String)
 
     /**
-     * Gives every clip once judged not worth optimising another chance, after the user chose a stronger
-     * compression and said Yes to *Re-optimise existing videos?* (Ian, 9 Oct 2026). A clip skipped as already at
-     * or under 720p can still be shrunk to 480p. Clips already optimised are not touched. Returns how many.
+     * Gives every clip once judged not worth optimizing another chance, after the user chose a stronger
+     * compression and said Yes to *Re-optimize existing videos?* (Ian, 9 Oct 2026). A clip skipped as already at
+     * or under 720p can still be shrunk to 480p. Clips already optimized are not touched. Returns how many.
      */
     @Query("UPDATE backup_entries SET isProxySkipped = 0 WHERE isVideo = 1 AND isProxied = 0 AND isProxySkipped = 1")
     suspend fun reopenSkippedVideos(): Int
@@ -1016,11 +1016,11 @@ interface BackupEntryDao {
      * per-folder for Restore: a copy in an unrelated album is not an answer to "get that album
      * back".
      *
-     * ### Optimised files are included (18 Sept 2026)
+     * ### Optimized files are included (18 Sept 2026)
      *
-     * This used to say `isProxied = 0`, on the reasoning that an optimised file is a *restore in
+     * This used to say `isProxied = 0`, on the reasoning that an optimized file is a *restore in
      * place* row and belongs to [restorableProxies]. True while its proxy is on the phone. Once the
-     * proxy has gone (an Archive album whose photos had been optimised first, a path the app
+     * proxy has gone (an Archive album whose photos had been optimized first, a path the app
      * deliberately supports) the row has `localMissingSinceEpochMillis` set, so [restorableProxies]
      * drops it, and this dropped it too: the file was in OneDrive, off the phone, and on neither list.
      * Ian found it on the Moto G with `Test 4` and `Test 5`.
@@ -1100,7 +1100,7 @@ interface BackupEntryDao {
      * Everything else on the row survives, `remoteItemId` above all — this is an UPDATE precisely so
      * the pointer to the cloud original is not lost the way a delete-and-reinsert would lose it.
      *
-     * [modeOverride] is set to `BACKUP` by the caller, so the optimiser does not shrink back what the
+     * [modeOverride] is set to `BACKUP` by the caller, so the optimizer does not shrink back what the
      * user just pulled down.
      */
     @Query(
@@ -1188,7 +1188,7 @@ interface BackupEntryDao {
           AND isProxied = 0
           -- Only a file that is still on the phone. A row whose file has gone (Archive removed it on purpose, or it
           -- is missing) has nothing to shrink, and trying stops the whole run behind it: 25 Sept 2026, Temp0's
-          -- archived rows led the queue and failed on the trashed file, so nothing after them was optimised.
+          -- archived rows led the queue and failed on the trashed file, so nothing after them was optimized.
           AND localMissingSinceEpochMillis IS NULL
           AND (cloudDecision IS NULL OR cloudDecision != 'ARCHIVED')
           AND isProxySkipped = 0
@@ -1198,12 +1198,12 @@ interface BackupEntryDao {
           -- age, because a 2048px proxy leaves the photo in the gallery and costs an edit nothing
           -- until the export. There is no photo age setting and none is wanted."
           --
-          -- Briefly added on 6 Sept 2026 and reverted the same evening: a dead `photoOptimiseAge`
+          -- Briefly added on 6 Sept 2026 and reverted the same evening: a dead `photoOptimizeAge`
           -- control on the Settings screen was mistaken for evidence that the query was missing
           -- something. The control was the thing that should not exist, and TASK-022 Part B
           -- removed it.
           -- The file's own mode wins over its album's. A restored photo is pinned to BACKUP so the
-          -- optimiser does not shrink back what the user just pulled down; every other row is null
+          -- optimizer does not shrink back what the user just pulled down; every other row is null
           -- here and follows its album exactly as before. See TASK-018.
           AND (
               modeOverride = :syncMode
@@ -1225,7 +1225,7 @@ interface BackupEntryDao {
     /**
      * All photos eligible for proxying, regardless of album mode.
      *
-     * Used by the install wizard's one-time bulk optimise (Area 1), which acts on the files
+     * Used by the install wizard's one-time bulk optimize (Area 1), which acts on the files
      * currently on the phone and is not governed by album modes.
      */
     @Query(
@@ -1242,7 +1242,7 @@ interface BackupEntryDao {
           AND isProxied = 0
           -- Only a file that is still on the phone. A row whose file has gone (Archive removed it on purpose, or it
           -- is missing) has nothing to shrink, and trying stops the whole run behind it: 25 Sept 2026, Temp0's
-          -- archived rows led the queue and failed on the trashed file, so nothing after them was optimised.
+          -- archived rows led the queue and failed on the trashed file, so nothing after them was optimized.
           AND localMissingSinceEpochMillis IS NULL
           AND (cloudDecision IS NULL OR cloudDecision != 'ARCHIVED')
           AND isProxySkipped = 0
@@ -1276,8 +1276,8 @@ interface BackupEntryDao {
      *   shrink", which for video also covers "this phone cannot decode it" — permanent facts that
      *   must stop the candidate count sticking above zero.
      * - **Old enough**, per file, against `dateModifiedEpochSeconds`. See `MediaAge`.
-     * - **Backed up after the cutoff**, which is how Gate 2's *optimise only the new* keeps a
-     *   library the user already owns at full size. Zero means no cutoff. See `OptimiseCutoff`.
+     * - **Backed up after the cutoff**, which is how Gate 2's *optimize only the new* keeps a
+     *   library the user already owns at full size. Zero means no cutoff. See `OptimizeCutoff`.
      * - **In a Sync album.** The mode is the consent, and `modeOverride` wins over it so a clip just
      *   restored at full quality is not immediately shrunk again.
      *
@@ -1299,7 +1299,7 @@ interface BackupEntryDao {
           AND isProxied = 0
           -- Only a file that is still on the phone. A row whose file has gone (Archive removed it on purpose, or it
           -- is missing) has nothing to shrink, and trying stops the whole run behind it: 25 Sept 2026, Temp0's
-          -- archived rows led the queue and failed on the trashed file, so nothing after them was optimised.
+          -- archived rows led the queue and failed on the trashed file, so nothing after them was optimized.
           AND localMissingSinceEpochMillis IS NULL
           AND (cloudDecision IS NULL OR cloudDecision != 'ARCHIVED')
           AND isProxySkipped = 0
@@ -1318,7 +1318,7 @@ interface BackupEntryDao {
         LIMIT :limit
         """
     )
-    suspend fun videoOptimiseCandidates(
+    suspend fun videoOptimizeCandidates(
         modifiedBeforeEpochSeconds: Long,
         cutoffMillis: Long,
         limit: Int = 50,
@@ -1327,9 +1327,9 @@ interface BackupEntryDao {
     ): List<BackupEntryEntity>
 
     /**
-     * All verified videos eligible for optimising, regardless of album mode, age, or cutoff.
+     * All verified videos eligible for optimizing, regardless of album mode, age, or cutoff.
      *
-     * Used by the install wizard's one-time bulk optimise (Area 1), which acts on every verified
+     * Used by the install wizard's one-time bulk optimize (Area 1), which acts on every verified
      * video on the phone and is not governed by album modes or ongoing settings.
      */
     @Query(
@@ -1347,7 +1347,7 @@ interface BackupEntryDao {
           AND isProxied = 0
           -- Only a file that is still on the phone. A row whose file has gone (Archive removed it on purpose, or it
           -- is missing) has nothing to shrink, and trying stops the whole run behind it: 25 Sept 2026, Temp0's
-          -- archived rows led the queue and failed on the trashed file, so nothing after them was optimised.
+          -- archived rows led the queue and failed on the trashed file, so nothing after them was optimized.
           AND localMissingSinceEpochMillis IS NULL
           AND (cloudDecision IS NULL OR cloudDecision != 'ARCHIVED')
           AND isProxySkipped = 0
@@ -1358,7 +1358,7 @@ interface BackupEntryDao {
         LIMIT :limit
         """
     )
-    suspend fun videoOptimiseCandidatesAll(
+    suspend fun videoOptimizeCandidatesAll(
         cutoffMillis: Long,
         uploaded: BackupState = BackupState.UPLOADED,
         limit: Int = 500

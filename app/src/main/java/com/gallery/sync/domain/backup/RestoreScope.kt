@@ -34,14 +34,14 @@ object RestoreScope {
     /**
      * The size a row's file has **on the phone**, which is what a device scan reports.
      *
-     * For an optimised file that is the proxy, not the original: the ledger keeps the original's size
+     * For an optimized file that is the proxy, not the original: the ledger keeps the original's size
      * in `sizeBytes` (it is what the cloud copy is checked against) and the proxy's in
      * `localProxySizeBytes`. Comparing the original against a scan would never match a proxy that is
      * still in its folder, and would offer to download a file the user is looking at.
      *
      * Added 18 Sept 2026 with the fix that lets an archived proxy appear on the Restore tab at all.
      * Until then proxied rows were left out of the download list wholesale, which hid this problem
-     * and also hid every optimised file that had been archived.
+     * and also hid every optimized file that had been archived.
      */
     fun onDiskSizeBytes(isProxied: Boolean, localProxySizeBytes: Long?, sizeBytes: Long): Long =
         if (isProxied && localProxySizeBytes != null) localProxySizeBytes else sizeBytes
@@ -60,7 +60,7 @@ object RestoreScope {
         /**
          * The phone has a file of that name in that folder at a *different* size.
          *
-         * Possibly an optimised copy the ledger has lost, possibly a photo the user edited. Nothing
+         * Possibly an optimized copy the ledger has lost, possibly a photo the user edited. Nothing
          * here can tell them apart, and overwriting an edit is the one thing Restore must never do,
          * so it is left alone and not offered.
          */

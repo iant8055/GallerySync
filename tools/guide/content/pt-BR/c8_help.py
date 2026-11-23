@@ -7,7 +7,7 @@ TRANSLATIONS = {
     'faq-sync-now-greyed': {
         "title": 'Sync now está em cinza',
         "body": """Não há nada para enviar ou otimizar: tudo já foi enviado, ou nenhum álbum está em Backup, Sync ou Archive. Confira os totais de modo no cabeçalho.""",
-        "en_hash": "d76ec512e56c7203",
+        "en_hash": "7b543eca08835984",
     },
     'faq-albums-off-after-backup': {
         "title": 'Meus álbuns dizem Off depois do primeiro backup',
@@ -39,12 +39,12 @@ O Google Photos não pode ser consultado, então seus álbuns sempre mostram **N
     'faq-photo-looks-small': {
         "title": 'Uma foto parece menor ou de qualidade pior que antes',
         "body": """Ela foi otimizada (procure o pequeno selo de nuvem). O original está na sua Cloud: use a aba **Restore**.""",
-        "en_hash": "4e1a6a3f710360db",
+        "en_hash": "009dd053a72c34e0",
     },
     'faq-restore-empty': {
         "title": 'A aba Restore diz que não há nada para trazer de volta',
         "body": """Nada foi otimizado nem arquivado e (no OneDrive) todas as fotos das suas pastas de backup já estão no telefone. Isso está correto.""",
-        "en_hash": "e0720600e98ca0e2",
+        "en_hash": "e91f44f270b19e04",
     },
     'faq-backup-stops-when-closed': {
         "title": 'Os backups parecem parar quando fecho o app',

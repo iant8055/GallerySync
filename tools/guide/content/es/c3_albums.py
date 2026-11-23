@@ -13,7 +13,7 @@ TRANSLATIONS = {
 Cada vez que abres la pestaña, mira el teléfono y vuelve a consultar OneDrive (**Rescan** muestra **Checking...**). Las demás Clouds se consultan sobre un archivo justo antes de optimizarlo o quitarlo.
 
 Mirar, filtrar y desplazarse nunca cambian un archivo. Solo elegir un modo lo hace.""",
-        "en_hash": "3c7f69542cac04f4",
+        "en_hash": "e3efef2f9212aaf3",
     },
 
     "albums-new": {
@@ -47,12 +47,12 @@ Filtrar solo cambia lo que ves. Para cambiar un modo, usa el botón de la tarjet
         "en_hash": "79b43044d6005ada",
     },
 
-    "albums-optimised-line": {
-        "title": "Optimised and Saved",
+    "albums-optimized-line": {
+        "title": "Optimized and Saved",
         "body": """Con **Sync** seleccionado: cuántos archivos de los álbumes Sync se han optimizado, y el espacio ahorrado.
 
-Los originales se quedan en la Cloud. **Restore** los recupera. Consulta [[how-optimising-works]].""",
-        "en_hash": "1fbc295f2322e4d0",
+Los originales se quedan en la Cloud. **Restore** los recupera. Consulta [[how-optimizing-works]].""",
+        "en_hash": "701f3a7e8e63d389",
     },
 
     "albums-archive-lines": {
@@ -68,7 +68,7 @@ Aquí no se quita nada. La eliminación ocurre en la pestaña Archive. Consulta 
     "albums-run-controls": {
         "title": "Sync now, Rescan, Pause, Resume y Stop",
         "body": """## Cuando no se está ejecutando nada
-• **Sync now:** hace la copia ahora. Si un interruptor de optimización de Settings está activado con su **Modo** en **Manual**, entonces también optimiza (consulta [[settings-optimise-mode]]). Aparece en gris cuando no hay nada que enviar ni optimizar.
+• **Sync now:** hace la copia ahora. Si un interruptor de optimización de Settings está activado con su **Modo** en **Manual**, entonces también optimiza (consulta [[settings-optimize-mode]]). Aparece en gris cuando no hay nada que enviar ni optimizar.
 • **Rescan:** mira el teléfono y vuelve a consultar OneDrive.
 
 ## Mientras se ejecuta una copia
@@ -79,7 +79,7 @@ Aquí no se quita nada. La eliminación ocurre en la pestaña Archive. Consulta 
 ## Conviene saber
 • **Sync now** no espera al cargador, pero sigue respetando tu ajuste de Wi-Fi. Consulta [[settings-mobile-data]].
 • Hace copia de todos los álbumes en **Backup**, **Sync** o **Archive**, pero solo optimiza archivos de los álbumes **Sync**.""",
-        "en_hash": "846b4240970f2d4a",
+        "en_hash": "4c3628a3516a9b52",
     },
 
     "albums-status-line": {
@@ -103,7 +103,7 @@ Aquí no se quita nada. La eliminación ocurre en la pestaña Archive. Consulta 
 • **Línea de la Cloud:** **N verified in <Cloud>** o **N of M verified in <Cloud>** significa que la Cloud confirmó los archivos con el tamaño correcto. OneDrive, Dropbox, Google Drive, pCloud, Backblaze B2 e IDrive e2 se comprueban cada vez que abres la pestaña y con **Rescan**. **Could not reach <Cloud>** significa que la última comprobación falló. Antes de la primera comprobación —y siempre en Google Photos, al que no se puede preguntar— la línea pone **N sent to <Cloud>**. La línea está verde cuando todas las Clouds en ella han verificado todo.
 • **Botón de modo** (a la derecha): púlsalo para cambiar el modo del álbum. Archive te pide confirmar antes. Si la Cloud del álbum no puede hacer ese modo, la tarjeta lo indica.
 • **Pulsa la tarjeta** para ver los archivos del álbum. Consulta [[album-detail]].""",
-        "en_hash": "a6647ec1c67a8010",
+        "en_hash": "d76ad64ef37ca818",
     },
 
     "album-detail": {
@@ -113,22 +113,22 @@ Aquí no se quita nada. La eliminación ocurre en la pestaña Archive. Consulta 
 • **Cabecera:** flecha atrás, nombre del álbum, modo y número de archivos, **Backs up to** (la Cloud y la carpeta a las que van los archivos nuevos, más cualquier otra Cloud que ya tenga algunos), los recuentos ([[album-file-status]]), **Sort by** ([[album-file-sort]]) y **Keep at full size** ([[album-file-pin]]).
 • **▲ Hide Details ▲** al pie de la cabecera la pliega hasta el nombre del álbum, el modo y el número de archivos; **▼ Show Details ▼** devuelve el resto. La página recuerda tu elección.
 • **Archivos:** una tarjeta por archivo con su tamaño, fecha y marcas. Un archivo optimizado muestra en el teléfono su tamaño menor.
-• **Carpeta de la cámara** (si se eligió en Settings): controles de optimización adicionales. Consulta [[album-camera-optimise]].
+• **Carpeta de la cámara** (si se eligió en Settings): controles de optimización adicionales. Consulta [[album-camera-optimize]].
 
 Sin miniaturas ni vistas previas. **Mantén pulsado un archivo** para abrirlo en la app de fotos o vídeos de tu teléfono, o en su Cloud si ya no está en el teléfono. Consulta [[settings-open-not-on-phone]].""",
-        "en_hash": "98ee587b80210c15",
+        "en_hash": "daf3817bf4e259d3",
     },
 
     "album-file-status": {
         "title": "Marcas y recuentos de archivos en un álbum",
         "body": """• **✓ backed up:** en la Cloud, a tamaño completo en el teléfono.
-• **✓ backed up · optimised:** en la Cloud; el teléfono tiene una copia más pequeña.
+• **✓ backed up · optimized:** en la Cloud; el teléfono tiene una copia más pequeña.
 • **⟳ pending:** esperando a enviarse.
 • **✗ failed:** no se pudo enviar tras varios intentos.
 
 ## Reintentar los fallidos
 **Retry** vuelve a poner en cola los archivos fallidos y empieza una copia. No quita nada.""",
-        "en_hash": "a1305dbfcdea48b5",
+        "en_hash": "0b4ffba87f22d1c6",
     },
 
     "album-resend": {
@@ -142,7 +142,7 @@ Sin miniaturas ni vistas previas. **Mantén pulsado un archivo** para abrirlo en
 • Los archivos optimizados no aparecen: el original a tamaño completo solo estaba en la Cloud.
 • En un álbum **Off**, elige antes un modo.
 • En las Clouds distintas de OneDrive, cada Rescan consulta como máximo 25 archivos por álbum que no estén en la carpeta del álbum. Vuelve a pulsar Rescan para el resto.""",
-        "en_hash": "a8f795b13b82f94e",
+        "en_hash": "82015bd5d3445a55",
     },
 
     "album-file-sort": {
@@ -152,7 +152,7 @@ Sin miniaturas ni vistas previas. **Mantén pulsado un archivo** para abrirlo en
 • **Status:** fallidos, luego pendientes, luego optimizados, luego con copia.
 
 La lista se abre cada vez ordenada por nombre. Ordenar no cambia nada de los archivos.""",
-        "en_hash": "8de134098638b3d8",
+        "en_hash": "768559e84cdab251",
     },
 
     "album-file-pin": {
@@ -163,10 +163,10 @@ La lista se abre cada vez ordenada por nombre. Ordenar no cambia nada de los arc
 • En **Backup** u **Off**, no cambia nada, pero la elección se recuerda.
 
 Restore la selecciona automáticamente. Deselecciónala para que el archivo vuelva a seguir el modo de su álbum.""",
-        "en_hash": "34b89b8b5829a956",
+        "en_hash": "3691f19075c93c85",
     },
 
-    "album-camera-optimise": {
+    "album-camera-optimize": {
         "title": "Optimizar fotos y vídeos antiguos de tu carpeta de la cámara",
         "body": """Solo la **Carpeta de la cámara** que elegiste en Settings, en **Sync de la cámara** ([[settings-section-camera]]), tiene estos controles.
 
@@ -184,7 +184,7 @@ Restore la selecciona automáticamente. Deselecciónala para que el archivo vuel
 • No se optimiza nada hasta que pulsas **Sync now**. Las fotos nuevas se quedan como están.
 • La carpeta de la cámara no tiene modo **Sync**, y los interruptores de optimización de Settings no la afectan.
 • Si sales con las opciones cambiadas, se pregunta si quieres convertirlas en tus valores predeterminados.""",
-        "en_hash": "2af285e1cc476243",
+        "en_hash": "19ad4bbf62950ae9",
     },
 
     "album-camera-select": {
@@ -195,8 +195,8 @@ Restore la selecciona automáticamente. Deselecciónala para que el archivo vuel
 • Desliza hacia la derecha para seleccionar, hacia la izquierda para deseleccionar.
 • **Sync now** optimiza solo los archivos seleccionados.
 
-Un archivo en gris no se puede seleccionar: aún no está confirmado en OneDrive, o ya está optimizado. Consulta [[album-camera-optimise]].""",
-        "en_hash": "9904773f638bae7b",
+Un archivo en gris no se puede seleccionar: aún no está confirmado en OneDrive, o ya está optimizado. Consulta [[album-camera-optimize]].""",
+        "en_hash": "ec8dfe5b2063e196",
     },
 
     "album-merge-warning": {

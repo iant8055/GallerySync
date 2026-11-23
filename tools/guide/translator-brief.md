@@ -48,7 +48,7 @@ script rule block at the end of this document also applies.
    - the four album modes (Off, Backup, Sync, Archive);
    - section headers in Settings named after a tab or a mode;
    - the Archive tab's age filter (`archive_age_*`, "Only show files older than", "All", ...);
-   - the camera folder's controls (`camera_age_*`, `camera_kind_*`, `camera_optimise_heading`).
+   - the camera folder's controls (`camera_age_*`, `camera_kind_*`, `camera_optimize_heading`).
 
 ## Scope — nine sub-tasks per language
 

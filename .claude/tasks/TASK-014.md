@@ -139,7 +139,7 @@ it can be pressed without the sentence above it entering the decision at all. Re
 consequence in the button:
 
 > **I understand — Archive takes these files off my phone**
-> **I understand — optimised photos are smaller until I fetch the original**
+> **I understand — optimized photos are smaller until I fetch the original**
 
 Longer, harder to press reflexively, and it survives being the only thing the user actually reads.
 
@@ -183,7 +183,7 @@ nothing to notify about, and Android only prompts once.
 - Nothing is uploaded, proxied or removed before both gates are answered
 - The tree picker's grants are persisted, and the granted set covers every album offered for Sync
 - An album set to Sync that is not under a granted tree either cannot be chosen or prompts for the
-  grant — never silently fails to optimise
+  grant — never silently fails to optimize
 - "Choose per album" is the default, and leaves the library untouched
 - Archive is not offered as a bulk choice anywhere in the flow
 - Skipping the tour leaves a safe, working configuration
@@ -329,12 +329,12 @@ it is the one that removes files and the one the acknowledgement record gates.
    ever removes anything while you have the app open (see the trigger map below)
 5. **What we can promise** — a verified cloud copy, and plainly what we cannot promise
 6. **Getting files back** — the Restored folder, the `_restored` suffix, repeatable
-7. **Optimising photos** — smaller copies on the phone, originals in the cloud, never video, and
+7. **Optimizing photos** — smaller copies on the phone, originals in the cloud, never video, and
    like Archive it needs the app open and a tap
 8. **When you delete a photo from this phone** — the Leave/Ask choice, at the moment it first matters
 9. **Emptying trash** — never done by this app, in either place
 10. **When each thing happens** — what starts a backup, a restore, an archive removal and an
-    optimise. See the trigger map below; two of the four cannot happen unless the app is open, and
+    optimize. See the trigger map below; two of the four cannot happen unless the app is open, and
     a user who does not know that will think the app is broken.
 
 Topics 8 and 10 are the two the wizard *asks* about; the rest it explains.
@@ -365,7 +365,7 @@ once the backlog clears.
 Manual only, and there is no background or automatic path. Worth saying plainly: nothing is ever
 fetched back without someone asking for it.
 
-### Archive and Optimise — only while the app is open
+### Archive and Optimize — only while the app is open
 
 `createTrashRequest` and `createWriteRequest` both need an **Activity** to raise Android's dialog,
 and a worker cannot show one (see the platform constraints in MILESTONES). So both are prompts on
@@ -402,7 +402,7 @@ upload — and mobile data, where "Wi-Fi only" is the wrong default for someone 
 poor Wi-Fi.
 
 **Explained, never asked:** the default mode for new albums, the cloud deletion policy, the grace
-period, auto-optimise, the destination folder, and the theme.
+period, auto-optimize, the destination folder, and the theme.
 
 The test is whether the user can answer it usefully *yet*. Asking "what should happen to your
 OneDrive copy when you delete a photo?" of someone who has not backed up a single file invites a

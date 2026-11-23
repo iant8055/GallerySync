@@ -21,7 +21,7 @@ De volta para a pasta de onde vieram. Os arquivos soltos no topo de **DCIM**, **
 
 ## Pode tentar sem medo
 Um arquivo só é substituído depois que o download completo chega e o tamanho confere. Se algo falhar, o arquivo do telefone fica como estava.""",
-        "en_hash": "1bc7e998be6fc106",
+        "en_hash": "e0e4777a168b1a80",
     },
     'restore-hero': {
         "title": 'Albums to Restore e Files in this album',
@@ -76,7 +76,7 @@ Ficam em cinza enquanto uma restauração está rodando.""",
 • **Already on this phone:** em cinza; nada a fazer.
 
 Enquanto trabalha: **Working...** com uma porcentagem. Depois **Restored to full size**, **Back on this phone** ou **Could not restore, your file is unchanged** com o motivo.""",
-        "en_hash": "995fafe0c00691e4",
+        "en_hash": "149d33e155d89326",
     },
     'restore-greyed-files': {
         "title": 'Por que alguns arquivos estão em cinza?',
@@ -102,6 +102,6 @@ Uma barra de progresso mostra quantos foram restaurados. Precisa de conexão com
 
 ## Bom saber
 A maioria dos editores salva um arquivo novo, que nunca é afetado. Um arquivo editado passa por backup como um arquivo novo com **edited** e a data no nome; o original na sua Cloud nunca é substituído.""",
-        "en_hash": "6292714bbfa760d3",
+        "en_hash": "b09bfcaa2e57bdf3",
     },
 }

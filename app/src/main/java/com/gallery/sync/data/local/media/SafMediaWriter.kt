@@ -27,7 +27,7 @@ import javax.inject.Singleton
  * ### Why this exists
  *
  * `MediaStore.createWriteRequest` raises a system dialog for every batch and only launches from an
- * Activity, so optimising could never be unattended — the user had to be present and tap for each
+ * Activity, so optimizing could never be unattended — the user had to be present and tap for each
  * batch. A persisted tree grant has no such limit.
  *
  * **Verified on the Fold 4, 19 Aug 2026**, including the case that matters here: a 4.4 MB photo owned
@@ -83,7 +83,7 @@ class SafMediaWriter @Inject constructor(
      * Whether a write to the file behind [contentUri] would go through a granted tree.
      *
      * The single-file form of [covers], which takes **folder paths**, not content URIs. The two were
-     * confused once: video optimising passed a URI here, no folder path ever starts with
+     * confused once: video optimizing passed a URI here, no folder path ever starts with
      * `content://`, and so every clip was reported as outside the granted folders. Asking MediaStore
      * where the file lives is what turns a URI into the path [covers] wants.
      *

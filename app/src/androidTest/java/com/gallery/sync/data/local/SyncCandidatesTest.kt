@@ -18,7 +18,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * TASK-027 stage 2: which uploaded rows Sync (optimise) may consider, and which proxies Restore may put back.
+ * TASK-027 stage 2: which uploaded rows Sync (optimize) may consider, and which proxies Restore may put back.
  *
  * The clouds that can Sync carry no remembered size by design, so they are matched on having uploaded with an id.
  * Google Photos must never appear. The live per-file check still stands in front of every overwrite.
@@ -110,7 +110,7 @@ class SyncCandidatesTest {
             )
         )
 
-        val names = entryDao.videoOptimiseCandidatesAll(cutoffMillis = 0L).map { it.displayName }.toSet()
+        val names = entryDao.videoOptimizeCandidatesAll(cutoffMillis = 0L).map { it.displayName }.toSet()
 
         assertEquals(setOf("d.mp4", "o.mp4"), names)
     }

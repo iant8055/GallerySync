@@ -30,7 +30,7 @@ import javax.inject.Singleton
  * ### Where this is called from
  *
  * [checkAndNotify] is called at the end of every complete [BackupWorker] run, the same point that
- * queues the photo and video optimisers — reached by every content trigger and by the six-hourly
+ * queues the photo and video optimizers — reached by every content trigger and by the six-hourly
  * safety net, so a file that has just become ready is noticed without a clock of its own. It costs
  * nothing extra to ask: [BackupEngine.redundantLocalCopies] is the same local-only ledger read
  * `BackupViewModel.refreshCounts` already does for the exit-warning dialog's count, not a fresh
@@ -38,7 +38,7 @@ import javax.inject.Singleton
  *
  * ### Never allowed to fail the backup
  *
- * Every call site wraps this in `runCatching`, matching how the optimise requests beside it are
+ * Every call site wraps this in `runCatching`, matching how the optimize requests beside it are
  * called — a failure to notify is a missed convenience, not a reason to report the run as failed.
  */
 @Singleton

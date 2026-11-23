@@ -2,12 +2,12 @@
 
 Milestone: v0.3.0 / v0.4.0 — information architecture
 Requested by: Ian, 18 Aug 2026
-Depends on: TASK-011 (storage budget) for the auto-optimise toggle to control something
+Depends on: TASK-011 (storage budget) for the auto-optimize toggle to control something
 
 ## What Ian asked for
 1. Per-album **Off / Sync / Backup** dropdown, replacing the on/off toggle
 2. A **default mode** for new albums, set in Settings
-3. **Auto Optimise Photos** as a Settings toggle
+3. **Auto Optimize Photos** as a Settings toggle
 4. **Storage** becomes where backup options live, including a schedule
 5. **Remove the OneDrive tab**, unless thumbnails can be shown per file
 6. Rename the tab — first to **Sync**, then to **Album Modes** on reflection. *Done, 93bf7d4 and this commit*
@@ -429,7 +429,7 @@ word — and Archive now occupies the meaning Ian wanted a name for.
 migration and Ian's sign-off.
 
 **Map `true` to Backup**, and nothing to Archive ever. Today an enabled album uploads and touches
-nothing local; optimising happens only on a tap. Mapping to Sync would switch on space management
+nothing local; optimizing happens only on a tap. Mapping to Sync would switch on space management
 nobody chose; mapping to Archive would empty their gallery. `false` maps to Off.
 
 ### Default for new albums
@@ -437,24 +437,24 @@ nobody chose; mapping to Archive would empty their gallery. `false` maps to Off.
 than "lost something you did". The equivalent under four modes is **Backup**. Configurable in
 Settings, offering Off, Backup and Sync — **Archive is not selectable as a default.**
 
-## Optimise is not a feature — it is what Sync mode does
+## Optimize is not a feature — it is what Sync mode does
 
-Ian, 19 Aug 2026: *"The Optimise is the actual SYNC function that needs to happen automatically
+Ian, 19 Aug 2026: *"The Optimize is the actual SYNC function that needs to happen automatically
 behind the scenes."*
 
 Correct, and it collapses two things this spec was treating separately. In the mode ladder, **SYNC
-already means upload and optimise** — that is the whole difference between it and BACKUP. So
-"Optimise" should stop being a user-facing concept with its own section and its own switch; setting
-an album to Sync *is* asking for its photos to be optimised.
+already means upload and optimize** — that is the whole difference between it and BACKUP. So
+"Optimize" should stop being a user-facing concept with its own section and its own switch; setting
+an album to Sync *is* asking for its photos to be optimized.
 
 ### What that changes
-- **The Settings "Optimise automatically" toggle is a stopgap.** It exists because the mode dropdown
+- **The Settings "Optimize automatically" toggle is a stopgap.** It exists because the mode dropdown
   is not built yet and a global switch was the only place to put the preference. Once modes ship it
   is redundant, and worse than redundant — a global "off" and a per-album "Sync" would contradict
   each other, and there is no good answer for which wins.
 - **That section should become the default-mode selector** described above, not a switch. "What
   should new albums do?" is the question actually left over once modes exist.
-- **The word "Optimise" survives only as an explanation**, in the copy that says what Sync does to a
+- **The word "Optimize" survives only as an explanation**, in the copy that says what Sync does to a
   photo. Not as a button, not as a section, not as a setting.
 
 ### How automatic it can actually be
@@ -463,7 +463,7 @@ Everything except the last step already runs without the user:
 | Step | Needs the user? |
 |---|---|
 | Notice a photo is verified and eligible | no |
-| Choose what to optimise, largest first | no |
+| Choose what to optimize, largest first | no |
 | Generate the proxy — decode, downscale, badge, copy EXIF | no, it writes to app cache |
 | **Write the proxy over the original** | **yes — one dialog per batch, from an Activity** |
 | Update the ledger | no |
@@ -479,13 +479,13 @@ close to behind-the-scenes as the platform allows a third-party app, and the UI 
 that way rather than promising invisibility it cannot deliver.
 
 
-## 2. Auto Optimise Photos — a stopgap, superseded by Sync mode
+## 2. Auto Optimize Photos — a stopgap, superseded by Sync mode
 Built 19 Aug 2026 as a Settings toggle, because the mode dropdown does not exist yet. See above:
 once modes ship this becomes the default-mode selector rather than a switch. While it exists it is
 the on/off for TASK-011's worker, and it does not replace the free-space floor — the two answer
 different questions:
 
-- **The toggle** — may the app optimise photos without being asked each time?
+- **The toggle** — may the app optimize photos without being asked each time?
 - **The floor** — at what point is it worth doing?
 
 Without the floor, an "on" toggle would proxy every eligible photo the moment it qualified, degrading
@@ -494,7 +494,7 @@ Keep both, and put them together so the relationship is visible.
 
 ## Target Settings screen, once modes ship
 
-Ian, 19 Aug 2026, asking whether Storage and Optimise photos both disappear. Optimise photos does.
+Ian, 19 Aug 2026, asking whether Storage and Optimize photos both disappear. Optimize photos does.
 Storage does not — but **nothing currently in it survives**, which the spec had not followed through.
 
 | Section | Fate |
@@ -503,11 +503,11 @@ Storage does not — but **nothing currently in it survives**, which the spec ha
 | Account | stays as built |
 | Your cloud files | stays as built |
 | Automatic sync | stays; still sync-on-change plus the metered choice |
-| **Optimise photos** | **gone.** Becomes per-album Sync mode, plus a default-mode selector |
+| **Optimize photos** | **gone.** Becomes per-album Sync mode, plus a default-mode selector |
 | **Storage** | stays as a section; every control in it is replaced |
 
-### Why Optimise photos goes entirely
-Setting an album to Sync *is* asking for its photos to be optimised. A global switch beside it would
+### Why Optimize photos goes entirely
+Setting an album to Sync *is* asking for its photos to be optimized. A global switch beside it would
 contradict a per-album choice with no good answer for which wins. What is genuinely left over is
 "what should new albums do?", so that is what the section becomes — and it is a default-mode
 selector, not a switch, which means it belongs beside the mode UI rather than under a heading named
@@ -538,7 +538,7 @@ look when the screen is actually rebuilt.
 See the target-state table above for what this section keeps and loses. Absorbs the start-time item
 added to v0.2 today: when the first whole-library upload runs, defaulting
 to overnight and requiring charging. Storage already holds the verified count, the floor, and the
-optimise controls, so scheduling belongs beside them — all four answer "how much of this phone is in
+optimize controls, so scheduling belongs beside them — all four answer "how much of this phone is in
 use, and when does anything change".
 
 ## 4. The OneDrive tab — remove it, or repurpose it
@@ -579,7 +579,7 @@ works** — recorded here so it is not lost, not scheduled here.
    exactly what each of the four album settings does**. Ian, 19 Aug 2026.
 
    An earlier draft of this section claimed the app invents vocabulary the user has never met. Ian's
-   correction: most people know what archive, optimise, sync and verified mean. That is right, and it
+   correction: most people know what archive, optimize, sync and verified mean. That is right, and it
    sharpens what Help is actually for.
 
    **The risk is not an unknown word, it is a wrong assumption about the mechanism.** Someone who
@@ -741,12 +741,12 @@ density 540`. A user who needs large text is exactly the user who hits this.
 ## Acceptance
 - An album can be set to Off, Backup, Sync or Archive, and the choice persists
 - The mode dropdown lists Off, Backup, Sync, Archive in that order
-- Backup mode never optimises or removes a local file, verified by observation not by reading code
+- Backup mode never optimizes or removes a local file, verified by observation not by reading code
 - Existing enabled albums land in Backup after migration — never Sync, never Archive
 - Archive removes nothing until the item is verified in OneDrive and older than the archive age
 - Archive is unavailable as the default for new albums
 - The default for new albums is configurable and starts at Backup
-- Auto-optimise is a Settings toggle governing TASK-011's worker
+- Auto-optimize is a Settings toggle governing TASK-011's worker
 - Scheduling lives in Storage with the other space controls
 - The OneDrive tab either fetches things back or is gone; it does not grow thumbnails
 - Verified on hardware in both themes, per CLAUDE.md

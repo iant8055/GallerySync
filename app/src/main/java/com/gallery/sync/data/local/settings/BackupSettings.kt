@@ -12,11 +12,11 @@ import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.gallery.sync.domain.backup.ArchiveAge
 import com.gallery.sync.domain.backup.BackupLocation
-import com.gallery.sync.domain.backup.CameraOptimiseAge
+import com.gallery.sync.domain.backup.CameraOptimizeAge
 import com.gallery.sync.domain.backup.LibraryChoice
 import com.gallery.sync.domain.backup.MediaAge
-import com.gallery.sync.domain.backup.OptimiseCutoff
-import com.gallery.sync.domain.backup.OptimiseMode
+import com.gallery.sync.domain.backup.OptimizeCutoff
+import com.gallery.sync.domain.backup.OptimizeMode
 import com.gallery.sync.domain.backup.VideoQuality
 import com.gallery.sync.domain.backup.CloudDeletionPolicy
 import com.gallery.sync.domain.backup.AlbumIdentityRules
@@ -50,38 +50,38 @@ data class BackupPreferences(
      * Optimize your photos and video to save space"*. Off until asked, because it is the only
      * setting here that changes files on the phone.
      *
-     * Replaces `isAutoOptimiseEnabled`, which was photo-only and conflated two questions: whether to
-     * optimise at all, and whether to do it without asking. Those are now this and
-     * [photoOptimiseMode] / [videoOptimiseMode].
+     * Replaces `isAutoOptimizeEnabled`, which was photo-only and conflated two questions: whether to
+     * optimize at all, and whether to do it without asking. Those are now this and
+     * [photoOptimizeMode] / [videoOptimizeMode].
      */
-    val isOptimiseEnabled: Boolean = false,
+    val isOptimizeEnabled: Boolean = false,
     /**
-     * Optimise photos at all?
+     * Optimize photos at all?
      *
      * Ian's structure, and it is deliberately a plain yes/no rather than a third value on
-     * [OptimiseMode]: *"do you want to opt video - Y / N. If Y how do you want - Man / Aut. Simple
+     * [OptimizeMode]: *"do you want to opt video - Y / N. If Y how do you want - Man / Aut. Simple
      * as that."* One question per line, each only asked when the one above it was answered yes.
      */
     /**
      * **Off by default**, like every other setting that rewrites a file. Corrected 7 Sept 2026
      * after Ian found it reading On out of the box.
      *
-     * It defaulting On was not merely cosmetic. `isOptimiseEnabled` is off by default, so nothing
-     * optimised — but the Settings screen showed the switch On while nothing was happening, and
-     * the video row's handler clears the master only `if (!optimisePhotos)`. So turning video on
-     * and off again left the master on with photos still marked wanted, and photo optimising
+     * It defaulting On was not merely cosmetic. `isOptimizeEnabled` is off by default, so nothing
+     * optimized — but the Settings screen showed the switch On while nothing was happening, and
+     * the video row's handler clears the master only `if (!optimizePhotos)`. So turning video on
+     * and off again left the master on with photos still marked wanted, and photo optimizing
      * began having never been asked for. See DEFAULTS.md.
      */
-    val optimisePhotos: Boolean = false,
-    /** Whether photos are optimised on their own, or on a tap. Only asked when [optimisePhotos]. */
-    val photoOptimiseMode: OptimiseMode = OptimiseMode.DEFAULT,
+    val optimizePhotos: Boolean = false,
+    /** Whether photos are optimized on their own, or on a tap. Only asked when [optimizePhotos]. */
+    val photoOptimizeMode: OptimizeMode = OptimizeMode.DEFAULT,
     // No photo age. Ian, 19 Aug 2026, TASK-011: "Photos are proxied whatever their age ... There is
     // no photo age setting and none is wanted." One was added on 28 Aug anyway, governed nothing,
-    // and was removed in TASK-022 Part B. Only video has an age - see [videoOptimiseAge].
-    /** Optimise video at all? See [optimisePhotos]. */
-    val optimiseVideo: Boolean = false,
-    /** Whether video is optimised on its own, or on a tap. Only asked when [optimiseVideo]. */
-    val videoOptimiseMode: OptimiseMode = OptimiseMode.DEFAULT,
+    // and was removed in TASK-022 Part B. Only video has an age - see [videoOptimizeAge].
+    /** Optimize video at all? See [optimizePhotos]. */
+    val optimizeVideo: Boolean = false,
+    /** Whether video is optimized on its own, or on a tap. Only asked when [optimizeVideo]. */
+    val videoOptimizeMode: OptimizeMode = OptimizeMode.DEFAULT,
     /**
      * Folder in OneDrive that **new** uploads go into.
      *
@@ -260,45 +260,45 @@ data class BackupPreferences(
      */
     val videoQuality: VideoQuality = VideoQuality.DEFAULT,
     /**
-     * The install wizard's own answers to its Optimisation Settings card. **Not the Settings tab's.**
+     * The install wizard's own answers to its Optimization Settings card. **Not the Settings tab's.**
      *
      * Ian, 26 Sept 2026, in capitals: the wizard must never set a default in Settings, ever. These three
-     * used to be [optimisePhotos] (through the master switch and Auto mode), [optimiseVideo] and
-     * [videoQuality], so a stranger who turned video on in the wizard found Optimise video already on in
-     * Settings, and a Sync album then optimised old clips by itself. They are separate keys now: the wizard
+     * used to be [optimizePhotos] (through the master switch and Auto mode), [optimizeVideo] and
+     * [videoQuality], so a stranger who turned video on in the wizard found Optimize video already on in
+     * Settings, and a Sync album then optimized old clips by itself. They are separate keys now: the wizard
      * reads and writes only these, and Settings reads and writes only its own. Both start at their defaults.
      */
-    val wizardOptimisePhotos: Boolean = false,
-    val wizardOptimiseVideo: Boolean = false,
+    val wizardOptimizePhotos: Boolean = false,
+    val wizardOptimizeVideo: Boolean = false,
     val wizardVideoQuality: VideoQuality = VideoQuality.DEFAULT,
     /**
      * The one-time install choice, kept so the wizard survives its own process ending.
      *
      * It used to live only in `ReconcileUiState`. Closing the wizard mid-backup — which is the
      * ordinary way to leave a long first run — took the process with it, and the choice came back
-     * as the default. The optimise pass at the end of step 9 then found nothing to do and said
-     * nothing about it. Moto G, 4 Sept 2026, closed at 40%%: no photo and no video was optimised.
+     * as the default. The optimize pass at the end of step 9 then found nothing to do and said
+     * nothing about it. Moto G, 4 Sept 2026, closed at 40%%: no photo and no video was optimized.
      *
      * This is Area 1 and nothing else. It does not touch album modes, which only the user sets,
-     * and it does not touch the ongoing optimise settings.
+     * and it does not touch the ongoing optimize settings.
      */
     val libraryChoice: LibraryChoice = LibraryChoice.DEFAULT,
     /**
      * Files backed up before this moment are left at full size on the phone.
      *
      * Zero means no cutoff, which is the ordinary case. Set only by Gate 2's
-     * "optimise only the new" - see [com.gallery.sync.domain.backup.OptimiseCutoff].
+     * "optimize only the new" - see [com.gallery.sync.domain.backup.OptimizeCutoff].
      */
-    val optimiseCutoffEpochMillis: Long = OptimiseCutoff.EVERYTHING,
+    val optimizeCutoffEpochMillis: Long = OptimizeCutoff.EVERYTHING,
     /**
-     * How old a clip must be before it may be optimised. See [MediaAge].
+     * How old a clip must be before it may be optimized. See [MediaAge].
      *
-     * Defaults to a day. Gates the local optimise and **never** the upload - a
+     * Defaults to a day. Gates the local optimize and **never** the upload - a
      * clip is sent to OneDrive the moment it qualifies whatever its age, because a threshold that
      * held new video out of the cloud would rebuild the founding failure while wearing the name of
      * the fix.
      */
-    val videoOptimiseAge: ArchiveAge = MediaAge.DEFAULT,
+    val videoOptimizeAge: ArchiveAge = MediaAge.DEFAULT,
     /**
      * The wizard step the user was on when the app last closed, or 0 if no wizard is in progress.
      *
@@ -358,24 +358,24 @@ data class BackupPreferences(
     val cameraSpecialEnabled: Boolean = false,
     /**
      * Which album is the camera folder while [cameraSpecialEnabled] is on: no Sync on its menu, and its own
-     * manual optimise in its file list. Blank until the person picks one, and nothing is assumed.
+     * manual optimize in its file list. Blank until the person picks one, and nothing is assumed.
      */
     val cameraFolder: String = "",
     /**
-     * The camera folder's manual optimise: what its header starts at. Ian, 27 Sept 2026: it is a manual
-     * operation, *"sort of like the wizard"*, with its own age and optimise choices and **its defaults here**:
+     * The camera folder's manual optimize: what its header starts at. Ian, 27 Sept 2026: it is a manual
+     * operation, *"sort of like the wizard"*, with its own age and optimize choices and **its defaults here**:
      * Photos and Videos off, age All, so nothing is selected until someone chooses to.
      *
-     * Its own values, not the Optimise switches above: those govern Sync albums only and have no effect on any
+     * Its own values, not the Optimize switches above: those govern Sync albums only and have no effect on any
      * album set to Backup (Ian, 27 Sept 2026). Changing the choices on the Camera screen is for that visit; they
      * are written here only when the person answers Yes to *make these your default settings*.
      */
-    val cameraDefaultAge: ArchiveAge = CameraOptimiseAge.DEFAULT,
-    val cameraOptimisePhotos: Boolean = false,
-    val cameraOptimiseVideo: Boolean = false,
+    val cameraDefaultAge: ArchiveAge = CameraOptimizeAge.DEFAULT,
+    val cameraOptimizePhotos: Boolean = false,
+    val cameraOptimizeVideo: Boolean = false,
     val cameraVideoQuality: VideoQuality = VideoQuality.DEFAULT,
     /**
-     * The files the last *Sync now* on the camera folder selected, for the optimise worker to read. Bookkeeping,
+     * The files the last *Sync now* on the camera folder selected, for the optimize worker to read. Bookkeeping,
      * not a setting: no screen shows it. Stored rather than passed with the work because a large folder's ids
      * would not fit in WorkManager's 10 KB of input.
      */
@@ -391,7 +391,7 @@ data class BackupPreferences(
  *
  * The other two stay cautious, and for different reasons. Mobile data stays off because uploading
  * gigabytes over a metered connection is an expensive surprise unless it was chosen on purpose.
- * Automatic optimising stays off because it rewrites photos, which is not undoable from the phone.
+ * Automatic optimizing stays off because it rewrites photos, which is not undoable from the phone.
  */
 @Singleton
 class BackupSettings @Inject constructor(
@@ -403,11 +403,11 @@ class BackupSettings @Inject constructor(
             isAutomaticEnabled = stored[KEY_AUTOMATIC] ?: true,
             allowMeteredNetwork = stored[KEY_ALLOW_METERED] ?: false,
             openNotOnPhone = OpenNotOnPhone.fromNameOrDefault(stored[KEY_OPEN_NOT_ON_PHONE]),
-            isOptimiseEnabled = stored[KEY_OPTIMISE_ENABLED] ?: false,
-            optimisePhotos = stored[KEY_OPTIMISE_PHOTOS] ?: false,
-            photoOptimiseMode = OptimiseMode.fromNameOrDefault(stored[KEY_PHOTO_OPTIMISE_MODE]),
-            optimiseVideo = stored[KEY_OPTIMISE_VIDEO] ?: false,
-            videoOptimiseMode = OptimiseMode.fromNameOrDefault(stored[KEY_VIDEO_OPTIMISE_MODE]),
+            isOptimizeEnabled = stored[KEY_OPTIMIZE_ENABLED] ?: false,
+            optimizePhotos = stored[KEY_OPTIMIZE_PHOTOS] ?: false,
+            photoOptimizeMode = OptimizeMode.fromNameOrDefault(stored[KEY_PHOTO_OPTIMIZE_MODE]),
+            optimizeVideo = stored[KEY_OPTIMIZE_VIDEO] ?: false,
+            videoOptimizeMode = OptimizeMode.fromNameOrDefault(stored[KEY_VIDEO_OPTIMIZE_MODE]),
             // Validated on the way out, not only on the way in. A stored value that is somehow
             // unusable must fall back to the default rather than sending uploads to a path Graph
             // will reject on every file, forever.
@@ -448,12 +448,12 @@ class BackupSettings @Inject constructor(
             uploadInterruptedAtEpochMillis = stored[KEY_INTERRUPTED_AT] ?: 0L,
             runBaselineBytes = stored[KEY_RUN_BASELINE] ?: 0L,
             videoQuality = VideoQuality.fromNameOrDefault(stored[KEY_VIDEO_QUALITY]),
-            wizardOptimisePhotos = stored[KEY_WIZARD_OPTIMISE_PHOTOS] ?: false,
-            wizardOptimiseVideo = stored[KEY_WIZARD_OPTIMISE_VIDEO] ?: false,
+            wizardOptimizePhotos = stored[KEY_WIZARD_OPTIMIZE_PHOTOS] ?: false,
+            wizardOptimizeVideo = stored[KEY_WIZARD_OPTIMIZE_VIDEO] ?: false,
             wizardVideoQuality = VideoQuality.fromNameOrDefault(stored[KEY_WIZARD_VIDEO_QUALITY]),
             libraryChoice = LibraryChoice.fromNameOrDefault(stored[KEY_LIBRARY_CHOICE]),
-            optimiseCutoffEpochMillis = stored[KEY_OPTIMISE_CUTOFF] ?: OptimiseCutoff.EVERYTHING,
-            videoOptimiseAge = MediaAge.fromNameOrDefault(stored[KEY_VIDEO_OPTIMISE_AGE]),
+            optimizeCutoffEpochMillis = stored[KEY_OPTIMIZE_CUTOFF] ?: OptimizeCutoff.EVERYTHING,
+            videoOptimizeAge = MediaAge.fromNameOrDefault(stored[KEY_VIDEO_OPTIMIZE_AGE]),
             wizardStep = stored[KEY_WIZARD_STEP] ?: 0,
             wizardBackupTotal = stored[KEY_WIZARD_BACKUP_TOTAL] ?: 0,
             wizardRunStartedAt = stored[KEY_WIZARD_RUN_STARTED_AT] ?: 0L,
@@ -466,9 +466,9 @@ class BackupSettings @Inject constructor(
             archiveReadyLastSeenCount = stored[KEY_ARCHIVE_READY_LAST_SEEN] ?: 0,
             cameraSpecialEnabled = stored[KEY_CAMERA_SPECIAL] ?: false,
             cameraFolder = stored[KEY_CAMERA_FOLDER] ?: "",
-            cameraDefaultAge = CameraOptimiseAge.fromNameOrDefault(stored[KEY_CAMERA_DEFAULT_AGE]),
-            cameraOptimisePhotos = stored[KEY_CAMERA_OPTIMISE_PHOTOS] ?: false,
-            cameraOptimiseVideo = stored[KEY_CAMERA_OPTIMISE_VIDEO] ?: false,
+            cameraDefaultAge = CameraOptimizeAge.fromNameOrDefault(stored[KEY_CAMERA_DEFAULT_AGE]),
+            cameraOptimizePhotos = stored[KEY_CAMERA_OPTIMIZE_PHOTOS] ?: false,
+            cameraOptimizeVideo = stored[KEY_CAMERA_OPTIMIZE_VIDEO] ?: false,
             cameraVideoQuality = VideoQuality.fromNameOrDefault(stored[KEY_CAMERA_VIDEO_QUALITY]),
             cameraRunSelection = stored[KEY_CAMERA_RUN_SELECTION] ?: emptySet()
         )
@@ -537,18 +537,18 @@ class BackupSettings @Inject constructor(
         context.dataStore.edit { it[KEY_INTERRUPTED_AT] = millis }
     }
 
-    /** How hard to optimise video. See [VideoQuality]. */
+    /** How hard to optimize video. See [VideoQuality]. */
     suspend fun setVideoQuality(quality: VideoQuality) {
         context.dataStore.edit { it[KEY_VIDEO_QUALITY] = quality.name }
     }
 
-    /** The wizard's answers. See [BackupPreferences.wizardOptimisePhotos]: never Settings' own keys. */
-    suspend fun setWizardOptimisePhotos(enabled: Boolean) {
-        context.dataStore.edit { it[KEY_WIZARD_OPTIMISE_PHOTOS] = enabled }
+    /** The wizard's answers. See [BackupPreferences.wizardOptimizePhotos]: never Settings' own keys. */
+    suspend fun setWizardOptimizePhotos(enabled: Boolean) {
+        context.dataStore.edit { it[KEY_WIZARD_OPTIMIZE_PHOTOS] = enabled }
     }
 
-    suspend fun setWizardOptimiseVideo(enabled: Boolean) {
-        context.dataStore.edit { it[KEY_WIZARD_OPTIMISE_VIDEO] = enabled }
+    suspend fun setWizardOptimizeVideo(enabled: Boolean) {
+        context.dataStore.edit { it[KEY_WIZARD_OPTIMIZE_VIDEO] = enabled }
     }
 
     suspend fun setWizardVideoQuality(quality: VideoQuality) {
@@ -560,35 +560,35 @@ class BackupSettings @Inject constructor(
         context.dataStore.edit { it[KEY_LIBRARY_CHOICE] = choice.name }
     }
 
-    /** How old a clip must be before it may be optimised. See [MediaAge]. */
-    suspend fun setVideoOptimiseAge(age: ArchiveAge) {
-        context.dataStore.edit { it[KEY_VIDEO_OPTIMISE_AGE] = age.storedName }
+    /** How old a clip must be before it may be optimized. See [MediaAge]. */
+    suspend fun setVideoOptimizeAge(age: ArchiveAge) {
+        context.dataStore.edit { it[KEY_VIDEO_OPTIMIZE_AGE] = age.storedName }
     }
 
-    /** Files backed up before this are left alone. See [OptimiseCutoff]. */
-    suspend fun setOptimiseCutoff(millis: Long) {
-        context.dataStore.edit { it[KEY_OPTIMISE_CUTOFF] = millis }
+    /** Files backed up before this are left alone. See [OptimizeCutoff]. */
+    suspend fun setOptimizeCutoff(millis: Long) {
+        context.dataStore.edit { it[KEY_OPTIMIZE_CUTOFF] = millis }
     }
 
     /** The master switch for making smaller local copies at all. */
-    suspend fun setOptimiseEnabled(enabled: Boolean) {
-        context.dataStore.edit { it[KEY_OPTIMISE_ENABLED] = enabled }
+    suspend fun setOptimizeEnabled(enabled: Boolean) {
+        context.dataStore.edit { it[KEY_OPTIMIZE_ENABLED] = enabled }
     }
 
-    suspend fun setOptimisePhotos(enabled: Boolean) {
-        context.dataStore.edit { it[KEY_OPTIMISE_PHOTOS] = enabled }
+    suspend fun setOptimizePhotos(enabled: Boolean) {
+        context.dataStore.edit { it[KEY_OPTIMIZE_PHOTOS] = enabled }
     }
 
-    suspend fun setOptimiseVideo(enabled: Boolean) {
-        context.dataStore.edit { it[KEY_OPTIMISE_VIDEO] = enabled }
+    suspend fun setOptimizeVideo(enabled: Boolean) {
+        context.dataStore.edit { it[KEY_OPTIMIZE_VIDEO] = enabled }
     }
 
-    suspend fun setPhotoOptimiseMode(mode: OptimiseMode) {
-        context.dataStore.edit { it[KEY_PHOTO_OPTIMISE_MODE] = mode.name }
+    suspend fun setPhotoOptimizeMode(mode: OptimizeMode) {
+        context.dataStore.edit { it[KEY_PHOTO_OPTIMIZE_MODE] = mode.name }
     }
 
-    suspend fun setVideoOptimiseMode(mode: OptimiseMode) {
-        context.dataStore.edit { it[KEY_VIDEO_OPTIMISE_MODE] = mode.name }
+    suspend fun setVideoOptimizeMode(mode: OptimizeMode) {
+        context.dataStore.edit { it[KEY_VIDEO_OPTIMIZE_MODE] = mode.name }
     }
 
     /** Holds backing up until Resume or Stop. See [BackupPreferences.isPaused]. */
@@ -713,7 +713,7 @@ class BackupSettings @Inject constructor(
         context.dataStore.edit { it[KEY_CAMERA_SPECIAL] = enabled }
     }
 
-    /** What the next Camera optimise pass works on. See [BackupPreferences.cameraRunSelection]. */
+    /** What the next Camera optimize pass works on. See [BackupPreferences.cameraRunSelection]. */
     suspend fun setCameraRunSelection(ids: Set<String>) {
         context.dataStore.edit { it[KEY_CAMERA_RUN_SELECTION] = ids }
     }
@@ -728,12 +728,12 @@ class BackupSettings @Inject constructor(
         context.dataStore.edit { it[KEY_CAMERA_DEFAULT_AGE] = age.storedName }
     }
 
-    suspend fun setCameraOptimisePhotos(enabled: Boolean) {
-        context.dataStore.edit { it[KEY_CAMERA_OPTIMISE_PHOTOS] = enabled }
+    suspend fun setCameraOptimizePhotos(enabled: Boolean) {
+        context.dataStore.edit { it[KEY_CAMERA_OPTIMIZE_PHOTOS] = enabled }
     }
 
-    suspend fun setCameraOptimiseVideo(enabled: Boolean) {
-        context.dataStore.edit { it[KEY_CAMERA_OPTIMISE_VIDEO] = enabled }
+    suspend fun setCameraOptimizeVideo(enabled: Boolean) {
+        context.dataStore.edit { it[KEY_CAMERA_OPTIMIZE_VIDEO] = enabled }
     }
 
     suspend fun setCameraVideoQuality(quality: VideoQuality) {
@@ -744,8 +744,8 @@ class BackupSettings @Inject constructor(
     suspend fun setCameraDefaults(age: ArchiveAge, photos: Boolean, videos: Boolean) {
         context.dataStore.edit {
             it[KEY_CAMERA_DEFAULT_AGE] = age.storedName
-            it[KEY_CAMERA_OPTIMISE_PHOTOS] = photos
-            it[KEY_CAMERA_OPTIMISE_VIDEO] = videos
+            it[KEY_CAMERA_OPTIMIZE_PHOTOS] = photos
+            it[KEY_CAMERA_OPTIMIZE_VIDEO] = videos
         }
     }
 
@@ -892,14 +892,14 @@ class BackupSettings @Inject constructor(
         val KEY_AUTOMATIC = booleanPreferencesKey("automatic_backup_enabled")
         val KEY_ALLOW_METERED = booleanPreferencesKey("allow_metered_network")
         val KEY_OPEN_NOT_ON_PHONE = stringPreferencesKey("open_not_on_phone")
-        // New key rather than reusing auto_optimise_enabled. That one meant "optimise photos
-        // without asking", and this means "optimise at all" - a stored true would silently answer a
+        // New key rather than reusing auto_optimize_enabled. That one meant "optimize photos
+        // without asking", and this means "optimize at all" - a stored true would silently answer a
         // broader question than the user was asked, and now covers video as well.
-        val KEY_OPTIMISE_ENABLED = booleanPreferencesKey("optimise_enabled")
-        val KEY_OPTIMISE_PHOTOS = booleanPreferencesKey("optimise_photos")
-        val KEY_OPTIMISE_VIDEO = booleanPreferencesKey("optimise_video")
-        val KEY_PHOTO_OPTIMISE_MODE = stringPreferencesKey("photo_optimise_mode")
-        val KEY_VIDEO_OPTIMISE_MODE = stringPreferencesKey("video_optimise_mode")
+        val KEY_OPTIMIZE_ENABLED = booleanPreferencesKey("optimize_enabled")
+        val KEY_OPTIMIZE_PHOTOS = booleanPreferencesKey("optimize_photos")
+        val KEY_OPTIMIZE_VIDEO = booleanPreferencesKey("optimize_video")
+        val KEY_PHOTO_OPTIMIZE_MODE = stringPreferencesKey("photo_optimize_mode")
+        val KEY_VIDEO_OPTIMIZE_MODE = stringPreferencesKey("video_optimize_mode")
         val KEY_APP_LANGUAGE = stringPreferencesKey("app_language")
         val KEY_PAST_DESTINATION_ROOTS = stringSetPreferencesKey("past_destination_roots")
         fun cloudFolderKey(location: BackupLocation) = stringPreferencesKey("cloud_folder_${location.name}")
@@ -925,12 +925,12 @@ class BackupSettings @Inject constructor(
         val KEY_INTERRUPTED_AT = longPreferencesKey("upload_interrupted_at")
         val KEY_RUN_BASELINE = longPreferencesKey("run_baseline_bytes")
         val KEY_VIDEO_QUALITY = stringPreferencesKey("video_quality")
-        val KEY_WIZARD_OPTIMISE_PHOTOS = booleanPreferencesKey("wizard_optimise_photos")
-        val KEY_WIZARD_OPTIMISE_VIDEO = booleanPreferencesKey("wizard_optimise_video")
+        val KEY_WIZARD_OPTIMIZE_PHOTOS = booleanPreferencesKey("wizard_optimize_photos")
+        val KEY_WIZARD_OPTIMIZE_VIDEO = booleanPreferencesKey("wizard_optimize_video")
         val KEY_WIZARD_VIDEO_QUALITY = stringPreferencesKey("wizard_video_quality")
         val KEY_LIBRARY_CHOICE = stringPreferencesKey("library_choice")
-        val KEY_OPTIMISE_CUTOFF = longPreferencesKey("optimise_cutoff")
-        val KEY_VIDEO_OPTIMISE_AGE = stringPreferencesKey("video_optimise_age")
+        val KEY_OPTIMIZE_CUTOFF = longPreferencesKey("optimize_cutoff")
+        val KEY_VIDEO_OPTIMIZE_AGE = stringPreferencesKey("video_optimize_age")
         val KEY_WIZARD_STEP = intPreferencesKey("wizard_step")
         val KEY_WIZARD_BACKUP_TOTAL = intPreferencesKey("wizard_backup_total")
         val KEY_WIZARD_RUN_STARTED_AT = longPreferencesKey("wizard_run_started_at")
@@ -946,8 +946,8 @@ class BackupSettings @Inject constructor(
         val KEY_CAMERA_FOLDER = stringPreferencesKey("camera_folder")
         val KEY_CAMERA_RUN_SELECTION = stringSetPreferencesKey("camera_run_selection")
         val KEY_CAMERA_DEFAULT_AGE = stringPreferencesKey("camera_default_age")
-        val KEY_CAMERA_OPTIMISE_PHOTOS = booleanPreferencesKey("camera_optimise_photos")
-        val KEY_CAMERA_OPTIMISE_VIDEO = booleanPreferencesKey("camera_optimise_video")
+        val KEY_CAMERA_OPTIMIZE_PHOTOS = booleanPreferencesKey("camera_optimize_photos")
+        val KEY_CAMERA_OPTIMIZE_VIDEO = booleanPreferencesKey("camera_optimize_video")
         val KEY_CAMERA_VIDEO_QUALITY = stringPreferencesKey("camera_video_quality")
     }
 }

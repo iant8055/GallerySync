@@ -217,7 +217,7 @@ Six **Translator** agents (one per language) run in parallel, then one
   3. **No half-translated locked phrases.** Phrases like `Sync now`,
      `Keep at full size`, `Back up to Cloud` must appear whole, not with a
      translated verb and English noun. Done by searching for the exact phrase.
-  4. **Spelling discipline.** `Optimise`/`Optimised`/`Optimisation` must not
+  4. **Spelling discipline.** `Optimize`/`Optimized`/`Optimization` must not
      have been "corrected" to the American spelling anywhere.
   5. **Spot-read for sense.** Pick 5 topics per language at random and read the
      translation back to English; flag anything whose meaning drifted from the

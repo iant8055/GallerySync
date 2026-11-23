@@ -72,10 +72,10 @@ import com.gallery.sync.data.local.entity.BackupEntryEntity
 import com.gallery.sync.data.local.entity.BackupState
 import com.gallery.sync.domain.backup.AlbumFileSort
 import com.gallery.sync.domain.backup.ArchiveAge
-import com.gallery.sync.domain.backup.CameraOptimiseAge
+import com.gallery.sync.domain.backup.CameraOptimizeAge
 import com.gallery.sync.ui.common.ArchiveAgePicker
 import com.gallery.sync.ui.common.label
-import com.gallery.sync.domain.backup.CameraOptimiseChoice
+import com.gallery.sync.domain.backup.CameraOptimizeChoice
 import com.gallery.sync.domain.backup.CameraSelection
 import com.gallery.sync.domain.backup.FilePin
 import com.gallery.sync.domain.backup.FileSort
@@ -108,16 +108,16 @@ private val WideBreakpoint = 600.dp
  * What the camera folder's header needs from its owner. Null for every other album, which is what keeps the
  * control off them.
  *
- * Ian, 27 Sept 2026: the camera folder's optimise is a manual operation. Every file is listed; the header's age,
+ * Ian, 27 Sept 2026: the camera folder's optimize is a manual operation. Every file is listed; the header's age,
  * Photos and Videos select files, starting at the Camera defaults in Settings, a swipe selects or deselects one,
  * and the header acts like the Albums tab's, with Sync now and Rescan.
  */
-data class CameraOptimiseControls(
+data class CameraOptimizeControls(
     /** Where the header's three choices start: the Camera defaults in Settings. */
-    val defaults: CameraOptimiseChoice,
-    /** What optimising these files is expected to give back. */
+    val defaults: CameraOptimizeChoice,
+    /** What optimizing these files is expected to give back. */
     val estimate: (List<BackupEntryEntity>) -> Long,
-    /** An optimise pass is queued or running, so Sync now and the swipes wait. */
+    /** An optimize pass is queued or running, so Sync now and the swipes wait. */
     val running: Boolean,
     /** A backup run is going, from this Sync now or any other. */
     val uploading: Boolean,
@@ -125,10 +125,10 @@ data class CameraOptimiseControls(
     val checkingCloud: Boolean,
     val onRescan: () -> Unit,
     /** Yes to *make these your default settings*, on leaving with choices that differ from [defaults]. */
-    val onSaveDefaults: (CameraOptimiseChoice) -> Unit,
+    val onSaveDefaults: (CameraOptimizeChoice) -> Unit,
     /** The header's choices while they differ from [defaults], or null: lets the bottom bar ask before leaving. */
-    val onUnsavedChanged: (CameraOptimiseChoice?) -> Unit,
-    /** *Sync now*: upload what is waiting, then optimise exactly the selected files. */
+    val onUnsavedChanged: (CameraOptimizeChoice?) -> Unit,
+    /** *Sync now*: upload what is waiting, then optimize exactly the selected files. */
     val onSyncNow: (selectedIds: Set<String>) -> Unit
 )
 
@@ -160,8 +160,8 @@ fun AlbumDetailScreen(
      */
     missingFromCloud: Set<String> = emptySet(),
     onResend: (Set<String>) -> Unit = {},
-    /** Only the Camera album passes this. See [CameraOptimiseControls]. */
-    camera: CameraOptimiseControls? = null,
+    /** Only the Camera album passes this. See [CameraOptimizeControls]. */
+    camera: CameraOptimizeControls? = null,
     opener: OpenFileViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -170,19 +170,19 @@ fun AlbumDetailScreen(
 
     // The camera folder's three choices. They start at the Camera defaults in Settings and change here for this
     // visit only; leaving with different ones asks whether to make them the defaults (Ian, 27 Sept 2026).
-    val defaults = camera?.defaults ?: CameraOptimiseChoice.DEFAULT
+    val defaults = camera?.defaults ?: CameraOptimizeChoice.DEFAULT
     var ageName by rememberSaveable(albumName) { mutableStateOf(defaults.age.storedName) }
     var photos by rememberSaveable(albumName) { mutableStateOf(defaults.photos) }
     var videos by rememberSaveable(albumName) { mutableStateOf(defaults.videos) }
-    val choice = CameraOptimiseChoice(
+    val choice = CameraOptimizeChoice(
         ArchiveAge.parse(ageName) ?: defaults.age, photos, videos
     )
 
-    // What Sync now will optimise, highlighted as on the Restore tab. Set by the header's choices, then changed a
+    // What Sync now will optimize, highlighted as on the Restore tab. Set by the header's choices, then changed a
     // file at a time by swiping; a changed choice selects afresh. For this visit only (Ian, 27 Sept 2026).
     var selection by rememberSaveable(albumName) { mutableStateOf(ArrayList<String>()) }
     var selectionMade by rememberSaveable(albumName) { mutableStateOf(false) }
-    fun selectByChoice(next: CameraOptimiseChoice) {
+    fun selectByChoice(next: CameraOptimizeChoice) {
         val before = next.age.thresholdEpochSeconds(Instant.now())
         selection = ArrayList(CameraSelection.byChoice(entries, next, before))
     }
@@ -200,7 +200,7 @@ fun AlbumDetailScreen(
     var resendSelection by rememberSaveable(albumName) { mutableStateOf(ArrayList<String>()) }
     val resendable = if (mode.uploads) missingFromCloud else emptySet()
     val toResend = remember(resendSelection, resendable) { resendSelection.filter { it in resendable }.toSet() }
-    val toOptimise = remember(entries, selected) { CameraSelection.toOptimise(entries, selected) }
+    val toOptimize = remember(entries, selected) { CameraSelection.toOptimize(entries, selected) }
 
     // Every file, in the camera folder as everywhere else. Nothing on the header hides one.
     val shown = remember(entries, sort) { AlbumFileSort.sorted(entries, sort) }
@@ -267,10 +267,10 @@ fun AlbumDetailScreen(
                     CameraHeader(
                         controls = it,
                         choice = choice,
-                        toOptimise = toOptimise,
+                        toOptimize = toOptimize,
                         // Why nothing is selected, when the choices are on but the age leaves every file out: said
                         // plainly, or a ticked Photos over a grey list reads as a toggle that did nothing.
-                        tooYoung = !choice.nothingChosen && choice.age != CameraOptimiseAge.All &&
+                        tooYoung = !choice.nothingChosen && choice.age != CameraOptimizeAge.All &&
                             CameraSelection.byChoice(entries, choice, Long.MAX_VALUE).isNotEmpty() &&
                             CameraSelection.byChoice(entries, choice, choice.age.thresholdEpochSeconds(Instant.now())).isEmpty(),
                         hasPending = entries.any { entry -> entry.state == BackupState.PENDING },
@@ -286,7 +286,7 @@ fun AlbumDetailScreen(
                             videos = on
                             selectByChoice(choice.copy(videos = on))
                         },
-                        onSyncNow = { it.onSyncNow(toOptimise.mapTo(HashSet()) { entry -> entry.id }) }
+                        onSyncNow = { it.onSyncNow(toOptimize.mapTo(HashSet()) { entry -> entry.id }) }
                     )
                 },
                 onRetryFailed = onRetryFailed,
@@ -333,7 +333,7 @@ fun AlbumDetailScreen(
                                     shown.getOrNull(position)?.let { entry ->
                                         if (camera != null) {
                                             // Right selects, left deselects, as in every list that selects. A file
-                                            // that cannot be optimised is listed greyed and takes no swipe.
+                                            // that cannot be optimized is listed greyed and takes no swipe.
                                             val selectable = CameraSelection.isSelectable(entry)
                                             val isSelected = selectable && entry.id in selected
                                             val toggle = {
@@ -347,7 +347,7 @@ fun AlbumDetailScreen(
                                                 onSwipeRight = { if (!isSelected) toggle() },
                                                 onSwipeLeft = { if (isSelected) toggle() },
                                                 accessibilityLabel = stringResource(
-                                                    if (isSelected) R.string.camera_action_keep else R.string.camera_action_optimise
+                                                    if (isSelected) R.string.camera_action_keep else R.string.camera_action_optimize
                                                 ),
                                                 onAccessibilityAction = toggle
                                             ) { drawn ->
@@ -467,13 +467,13 @@ private fun DetailHeader(
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f)
                     )
-                    // In the camera folder, how many files Sync now will optimise, large, as Restore and Archive show
+                    // In the camera folder, how many files Sync now will optimize, large, as Restore and Archive show
                     // their number (Ian, 27 Sept 2026). It moves as the choices change and files are swiped.
                     // Set a little lower and to the right of centre (Ian, 28 Sept 2026).
                     if (camera != null) {
                         Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
                             Text(
-                                text = camera.toOptimise.size.toString(),
+                                text = camera.toOptimize.size.toString(),
                                 style = MaterialTheme.typography.displayMedium,
                                 modifier = Modifier.padding(start = 24.dp, top = 8.dp)
                             )
@@ -588,7 +588,7 @@ private fun DetailHeader(
                             }
                         }
 
-                        if (camera != null) CameraOptimiseSection(camera)
+                        if (camera != null) CameraOptimizeSection(camera)
 
                         // Sort by and Keep at full size on one line. The heading is two lines, and only
                         // there when some file has a box.
@@ -653,7 +653,7 @@ private fun FileCard(
     onSetPinned: (Boolean) -> Unit,
     modifier: Modifier = Modifier,
     /**
-     * In the camera folder only: whether Sync now will optimise this file. Selected is highlighted as on the
+     * In the camera folder only: whether Sync now will optimize this file. Selected is highlighted as on the
      * Restore tab; not selected is greyed (Ian, 27 Sept 2026). Null everywhere else, which draws the plain card.
      */
     cameraSelected: Boolean? = null,
@@ -711,9 +711,9 @@ private fun FileCard(
                 // Date, marks and Cloud on the lower line, each mark in its own colour. The date is
                 // beside the status and not instead of it (Ian, 27 Sept 2026): Sort by Date and the
                 // Camera age both go by it, so it has to be on screen. The date taken (Ian, 1 Nov 2026).
-                // An optimised file's size is what is on the phone now, not the original's (Ian, 27 Sept 2026): the
-                // original size made a file just optimised look as if nothing had shrunk — the size now sits on the
-                // line above, and the optimised mark here says the full-size original is in the Cloud.
+                // An optimized file's size is what is on the phone now, not the original's (Ian, 27 Sept 2026): the
+                // original size made a file just optimized look as if nothing had shrunk — the size now sits on the
+                // line above, and the optimized mark here says the full-size original is in the Cloud.
                 val date = FileDateFormat.format(
                     Instant.ofEpochSecond(entry.dateForSorting).atZone(ZoneId.systemDefault())
                 )
@@ -783,10 +783,10 @@ private class ResendHeader(
 
 /** What the header needs to draw the camera folder's controls: the choices, what they select, and what to do. */
 private data class CameraHeader(
-    val controls: CameraOptimiseControls,
-    val choice: CameraOptimiseChoice,
-    /** The selected files that can still be optimised: what Sync now will do. */
-    val toOptimise: List<BackupEntryEntity>,
+    val controls: CameraOptimizeControls,
+    val choice: CameraOptimizeChoice,
+    /** The selected files that can still be optimized: what Sync now will do. */
+    val toOptimize: List<BackupEntryEntity>,
     /** Files in this folder waiting to upload, which Sync now sends too. */
     val hasPending: Boolean,
     /** The chosen kinds have files ready, but none is as old as the chosen age. */
@@ -802,11 +802,11 @@ private data class CameraHeader(
  * would give back; and Sync now and Rescan as the Albums tab has them.
  *
  * Ian's design, 20 Sept 2026, reworked 27 Sept 2026. The choices start at the Camera defaults in Settings. Nothing
- * is optimised until Sync now is pressed, which also sends anything waiting to upload. The count and the estimate
+ * is optimized until Sync now is pressed, which also sends anything waiting to upload. The count and the estimate
  * are of exactly the files Sync now will hand the worker.
  */
 @Composable
-private fun CameraOptimiseSection(camera: CameraHeader) {
+private fun CameraOptimizeSection(camera: CameraHeader) {
     val controls = camera.controls
     val context = LocalContext.current
     val signal = LocalGallerySyncColors.current
@@ -815,10 +815,10 @@ private fun CameraOptimiseSection(camera: CameraHeader) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = stringResource(R.string.camera_optimise_heading),
+                text = stringResource(R.string.camera_optimize_heading),
                 style = MaterialTheme.typography.bodyMedium
             )
-            HelpButton(HelpTopic.ALBUM_CAMERA_OPTIMISE)
+            HelpButton(HelpTopic.ALBUM_CAMERA_OPTIMIZE)
         }
         // The age's two menus, as every age in the app has them (Ian, 14 Nov 2026), then the two kinds. The kinds
         // are toggles: a check mark and full ink when on, the word alone and faded when off.
@@ -847,21 +847,21 @@ private fun CameraOptimiseSection(camera: CameraHeader) {
         }
 
         // One short status line. How selecting works is in the (?) beside it, not spelled out here (Ian, 27 Sept 2026).
-        val count = camera.toOptimise.size
+        val count = camera.toOptimize.size
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = when {
-                    busy -> stringResource(R.string.camera_optimise_working, count)
+                    busy -> stringResource(R.string.camera_optimize_working, count)
                     count == 0 && camera.tooYoung -> stringResource(
-                        R.string.camera_optimise_none_old_enough,
+                        R.string.camera_optimize_none_old_enough,
                         camera.choice.age.label { stringResource(R.string.camera_age_all) }
                     )
-                    count == 0 -> stringResource(R.string.camera_optimise_none_selected)
+                    count == 0 -> stringResource(R.string.camera_optimize_none_selected)
                     else -> pluralStringResource(
-                        R.plurals.camera_optimise_summary,
+                        R.plurals.camera_optimize_summary,
                         count,
                         count,
-                        formatBytes(context, controls.estimate(camera.toOptimise))
+                        formatBytes(context, controls.estimate(camera.toOptimize))
                     )
                 },
                 style = MaterialTheme.typography.bodyMedium,
@@ -870,7 +870,7 @@ private fun CameraOptimiseSection(camera: CameraHeader) {
             HelpButton(HelpTopic.ALBUM_CAMERA_SELECT)
         }
 
-        // Sync now and Rescan, as the Albums tab has them. Sync now sends what is waiting and optimises what is
+        // Sync now and Rescan, as the Albums tab has them. Sync now sends what is waiting and optimizes what is
         // listed, so it is pressable when either is there to do.
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -891,7 +891,7 @@ private fun CameraOptimiseSection(camera: CameraHeader) {
             ) {
                 Text(
                     text = when {
-                        busy -> stringResource(R.string.camera_optimise_working, count)
+                        busy -> stringResource(R.string.camera_optimize_working, count)
                         controls.uploading -> stringResource(R.string.backup_syncing)
                         else -> stringResource(R.string.backup_run_now)
                     },
@@ -936,15 +936,15 @@ private fun FileSort.label(): Int = when (this) {
     FileSort.STATUS -> R.string.album_sort_status
 }
 
-/** What the file takes on the phone: the smaller copy once optimised, otherwise the file itself. */
+/** What the file takes on the phone: the smaller copy once optimized, otherwise the file itself. */
 private fun BackupEntryEntity.sizeOnPhone(): Long =
     localProxySizeBytes?.takeIf { isProxied } ?: sizeBytes
 
 /**
- * The file's marks, in order: backed up, then optimised.
+ * The file's marks, in order: backed up, then optimized.
  *
- * Both facts, because optimised never replaces backed up. `isProxied` was tested first and won, so
- * every optimised file read "✓ optimized" and nothing said it was in the cloud — on precisely the
+ * Both facts, because optimized never replaces backed up. `isProxied` was tested first and won, so
+ * every optimized file read "✓ optimized" and nothing said it was in the cloud — on precisely the
  * files where that matters most, since a proxy is the case where the full-resolution image exists
  * *only* in OneDrive. Ian, 4 Sept 2026, reading a folder of 100 rows: "all the files are labeled as
  * optimized NOT backed up". A proxy is only ever written over a file the ledger has verified in the
@@ -952,18 +952,18 @@ private fun BackupEntryEntity.sizeOnPhone(): Long =
  *
  * They were two lines for a while (Ian, 18 Sept 2026) and share the size's line now (19 Sept).
  *
- * Safe is one colour. Uploaded reads primary whether or not it was later optimised.
+ * Safe is one colour. Uploaded reads primary whether or not it was later optimized.
  */
 @Composable
 private fun BackupEntryEntity.statusLines(): List<Pair<String, Color>> {
     // The safe green, not `primary`: in the light theme primary is nearly black. Ian, 19 Sept 2026.
     val primary = LocalGallerySyncColors.current.safeText
-    val optimised = MaterialTheme.colorScheme.tertiary
+    val optimized = MaterialTheme.colorScheme.tertiary
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     val error = MaterialTheme.colorScheme.error
     return when {
-        isProxied && state == BackupState.UPLOADED -> listOf("✓ backed up" to primary, "optimized" to optimised)
-        isProxied -> listOf("✓ optimized" to optimised)
+        isProxied && state == BackupState.UPLOADED -> listOf("✓ backed up" to primary, "optimized" to optimized)
+        isProxied -> listOf("✓ optimized" to optimized)
         state == BackupState.UPLOADED -> listOf("✓ backed up" to primary)
         state == BackupState.PENDING -> listOf("⟳ pending" to muted)
         state == BackupState.FAILED -> listOf("✗ failed" to error)

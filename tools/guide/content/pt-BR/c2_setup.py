@@ -21,7 +21,7 @@ TRANSLATIONS = {
 • O primeiro backup pode levar horas. Ele continua se você sair do app.
 • O app abre na tela de andamento até o primeiro backup terminar.
 • As respostas da configuração valem só para o primeiro backup. Veja [[setup-and-settings]].""",
-        "en_hash": "a398aa1dfcdb2e54",
+        "en_hash": "567365c5913c13ff",
     },
     'setup-welcome-tour': {
         "title": 'Boas-vindas, o tour e o que será configurado',
@@ -130,16 +130,16 @@ Nada fora das pastas que você escolheu é analisado ou alterado.""",
 
 ## Bom saber
 Este primeiro backup acontece uma vez só e roda sem olhar o modo. Depois disso todo álbum fica em **Off**, o que está correto: a partir daí você escolhe o modo de cada álbum na aba Albums.{{full: Veja [[faq-albums-off-after-backup]].}}""",
-        "en_hash": "80f55e21398db3f8",
+        "en_hash": "f8d3c929c65d3751",
     },
-    'setup-optimise': {
+    'setup-optimize': {
         "title": 'Configurações de otimização durante a configuração',
         "body": """Só para os planos 2 e 3.
 
 • **Otimizar fotos** e **Otimizar vídeos:** ligado ou desligado.
 • **Nível de compressão de vídeo:** **Alta** (480p, o menor), **Média** (720p) ou **Baixa** (1080p).
 • Cada um mostra uma economia estimada, com uma linha de **Economia total estimada**. Os resultados reais variam.""",
-        "en_hash": "d3ff8b60c0328479",
+        "en_hash": "6b0ae75a40de322e",
     },
     'setup-ready': {
         "title": 'Pronto para o backup',
@@ -151,7 +151,7 @@ Este primeiro backup acontece uma vez só e roda sem olhar o modo. Depois disso 
 ## Bom saber
 • Um backup com atraso só começa com o telefone na tomada e pode começar um pouco depois do horário.
 • O app fica na tela de andamento até o primeiro backup terminar.""",
-        "en_hash": "90436741649f85c6",
+        "en_hash": "3f75384b016ca5b6",
     },
     'setup-progress': {
         "title": 'Andamento do backup',
@@ -171,7 +171,7 @@ O anel mostra o andamento geral. Abaixo dele: a Nuvem que está recebendo e a co
 • **Fechar:** fecha o app; o backup continua.
 • **Concluir:** aparece quando tudo termina, com um resumo do que foi verificado, do que já estava na Nuvem e do que foi enviado.
 • **Cancelar:** pergunta **Parar o backup?** Os arquivos já enviados continuam enviados; nada é apagado.""",
-        "en_hash": "625986b0864a86c8",
+        "en_hash": "ce535ae7a9b7c3bd",
     },
     'setup-and-settings': {
         "title": 'A configuração e Settings são separadas',

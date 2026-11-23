@@ -120,7 +120,7 @@ were verified, which is exactly the behaviour the ban was waiting for. What repl
 | Operation | Local outcome | Wording |
 |---|---|---|
 | Upload, local copy kept | unchanged, visible | **sync** — photos and video alike |
-| Optimise, photo proxied | ~10x smaller, visible | **sync** — the flagship case |
+| Optimize, photo proxied | ~10x smaller, visible | **sync** — the flagship case |
 | Remove local copy | **gone from the gallery** | never "sync" — "Remove from this phone" |
 
 The third row is what the old rule was really protecting. "Move to backup" was a soft name for a
@@ -186,7 +186,7 @@ problem, and it must survive every future change.
 
   **The rescale weakens "recent video is never touched", knowingly.** Under a one-hour age a clip
   shot this morning can be reduced to 480p. Two measurements make that defensible: the founding
-  failure was *absence* rather than quality — the clip had been moved off the phone, where optimising
+  failure was *absence* rather than quality — the clip had been moved off the phone, where optimizing
   leaves it in the gallery playing normally — and 480p proved indistinguishable from the original on
   the Fold's inner display. A wait measured in months was protecting against a difference nobody
   could see. What survives is the edit case, which is what the age gate is now for.
@@ -285,7 +285,7 @@ other side.
 
 **The test.** If an explanation you are building requires one of these surfaces to write the other,
 the explanation is wrong by construction. Discard it rather than checking it — the same test the
-optimising areas below already carry.
+optimizing areas below already carry.
 
 **The *Run setup again* button in Settings is a testing affordance and WILL NOT SHIP.** Stated by Ian,
 7 Sept 2026. It exists so the wizard can be re-entered on a device without wiping app data, which is
@@ -301,7 +301,7 @@ the only practical way to exercise the flow repeatedly. Consequences:
   — it is simply that the wizard is still being iterated on, and re-entering it is how that is done.
   It must be gone by the Play Store submission regardless; tracked under the release gate above.
 
-## Optimising: two independent areas — do not conflate them
+## Optimizing: two independent areas — do not conflate them
 
 Stated by Ian, 29 Aug 2026, after an agent repeatedly welded these together. **They are separate. One
 does not set, read, or imply the other.** Written here exactly as specified so future runs build to
@@ -310,7 +310,7 @@ this and not to a guess.
 ### The invariant that binds all of it
 
 **Album modes (Off / Backup / Sync / Archive) are set ONLY by the user, per album.** Nothing else
-ever writes an album's mode — not the install wizard, not the optimise settings, not a worker. Every
+ever writes an album's mode — not the install wizard, not the optimize settings, not a worker. Every
 sentence below rests on this.
 
 ### Area 1 — the initial-install choice (the four modes)
@@ -318,51 +318,51 @@ sentence below rests on this.
 - **Present ONLY at initial install.** It is a one-time choice, not a stored setting.
 - **Acts ONLY on the files currently on the device** at install time. A one-time bulk action over the
   existing library.
-- **Has NO effect on Area 2** (the optimise settings tree) and **does NOT set album modes.**
+- **Has NO effect on Area 2** (the optimize settings tree) and **does NOT set album modes.**
 
 The four options, verbatim:
 
 1. Check cloud storage and back up everything that isn't already backed up.
-2. All of #1 — plus optimise **all** files on the phone, for **maximum** storage saving.
-3. All of #1 — but optimise **only newly backed-up files** (ones that were not already in cloud
+2. All of #1 — plus optimize **all** files on the phone, for **maximum** storage saving.
+3. All of #1 — but optimize **only newly backed-up files** (ones that were not already in cloud
    storage), for **moderate** storage saving.
 4. Check cloud storage but do **not** back up any new files — no storage savings. The user will
    manually select which albums to Backup/Sync afterward.
 
-- **If #2 OR #3 is chosen**, the user is then asked the optimisation **level: High / Medium / Low**,
+- **If #2 OR #3 is chosen**, the user is then asked the optimization **level: High / Medium / Low**,
   mirroring the same three levels in Settings (High 480p · Medium 720p · Low 1080p). This level is
-  used only for the one-time bulk optimise and **does not persist into Settings.**
-- **The level applies to video only** (Ian, 29 Aug 2026). Photos optimise to their fixed proxy size —
+  used only for the one-time bulk optimize and **does not persist into Settings.**
+- **The level applies to video only** (Ian, 29 Aug 2026). Photos optimize to their fixed proxy size —
   there is no photo level to ask for. So the H/M/L prompt is a video-quality choice, and it is asked
-  because #2/#3 may optimise video.
+  because #2/#3 may optimize video.
 - **#3 identifies "newly backed up, not already in cloud" by comparing the device against cloud
   storage** (Ian, 29 Aug 2026) — the same reconcile the app already performs. This choice runs after
   access to both cloud storage and the local device has been granted, so the comparison is available:
   the files that were **not** already in the cloud are exactly the ones this pass backs up, and those
-  are the ones #3 then optimises.
+  are the ones #3 then optimizes.
 
 This is the guided first run — see TASK-014.
 
-### Area 2 — the ongoing optimise settings (after install)
+### Area 2 — the ongoing optimize settings (after install)
 
-- **One global settings tree**, establishing how photos and videos are optimised from install onward.
+- **One global settings tree**, establishing how photos and videos are optimized from install onward.
   It is **not** a per-album setting.
-- **Applies ONLY to albums the user has set to Sync.** Backup never optimises. Archive never
-  optimises. Off does nothing. The candidate queries already enforce this (`videoOptimiseCandidates`
+- **Applies ONLY to albums the user has set to Sync.** Backup never optimizes. Archive never
+  optimizes. Off does nothing. The candidate queries already enforce this (`videoOptimizeCandidates`
   and the photo equivalent only pick files in Sync-mode albums).
 - **Does NOT set album modes**, and is **not** touched by the Area 1 install choice.
 
 The tree, exactly:
 
 ```
-isOptimiseEnabled     master switch, off until asked
-  optimisePhotos      Y / N
-  photoOptimiseMode   Auto | Manual
+isOptimizeEnabled     master switch, off until asked
+  optimizePhotos      Y / N
+  photoOptimizeMode   Auto | Manual
                       (no photo age - photos are proxied whatever their age, TASK-011. One was
                       added 28-30 Aug in contradiction of that and removed 15 Sept, TASK-022 B)
-  optimiseVideo       Y / N
-  videoOptimiseMode   Auto | Manual
-  videoOptimiseAge    same five
+  optimizeVideo       Y / N
+  videoOptimizeMode   Auto | Manual
+  videoOptimizeAge    same five
   videoQuality        High 480p · Medium 720p · Low 1080p
 ```
 
@@ -382,7 +382,7 @@ keeps working.
       **Unattended from 26 Aug 2026** — written through the persisted SAF tree grant, no dialog.
       Roughly 10x smaller, and every photo stays visible and editable in the phone's own gallery.
 - [x] **Never proxy video silently** — kept as guidance, not as a hard rule; see the video section.
-- [x] **Clear marker showing which items are optimised.** Cloud badge burned into the proxy plus an
+- [x] **Clear marker showing which items are optimized.** Cloud badge burned into the proxy plus an
       EXIF marker, verified across square and 16:9 at orientation=90.
 - [x] **Stop offering photos that can never shrink.** Schema 5 records a file examined and found
       already small enough, so the candidate count reaches zero instead of sticking.
@@ -406,11 +406,11 @@ keeps working.
       TASK-011.
 
       **Audited 20 Sept 2026: half built, so left unticked.** *In total* exists: with the Sync filter on,
-      the Albums card reads "N Optimised · X Saved" (`AlbumsSummary.savedBytes`). *Per album* is computed
+      the Albums card reads "N Optimized · X Saved" (`AlbumsSummary.savedBytes`). *Per album* is computed
       (`AlbumRow.savedBytes`, from the ledger) **but no row draws it**: an album row shows only how many
-      files are optimised. *What its selected mode could free* is not built for albums at all; the only
+      files are optimized. *What its selected mode could free* is not built for albums at all; the only
       forecasts in the app are the wizard's estimate and the Camera album's per-age estimate.
-- [x] **Sync scope — two toggles, photos and video, and they gate optimising only.** Revised by Ian,
+- [x] **Sync scope — two toggles, photos and video, and they gate optimizing only.** Revised by Ian,
       29 Aug 2026, replacing a tri-state (Photos only / Video only / Both) that gated *uploading*.
 
       **The old shape was wrong about what Sync is.** TASK-011's table said the excluded medium was
@@ -418,16 +418,16 @@ keeps working.
       mode — Backup, Sync and Archive all upload, and only Off does not. Sync is backup **plus**
       space management, so a setting scoping Sync can only sensibly scope the second half.
 
-      Ian, 29 Aug: *"turning off syncing/optimising doesn't mean it can't still be backed up."*
-      Correct, and it makes the setting far safer: video with optimising off is still in OneDrive at
+      Ian, 29 Aug: *"turning off syncing/optimizing doesn't mean it can't still be backed up."*
+      Correct, and it makes the setting far safer: video with optimizing off is still in OneDrive at
       full size, and still archivable and restorable — all of which need a verified cloud copy. Under
       the old reading, one toggle silently disabled three features and left the largest files on the
       phone unprotected.
 
-      **Built, ticked 20 Sept 2026 by audit.** Settings → Sync has *Optimise photos* and *Optimise videos*
-      switches (`optimisePhotos`, `optimiseVideo`), each with its own Automatic/Manual mode. They are read
-      only by the optimise policies and workers (`PhotoOptimisePolicy`, `VideoOptimisePolicy`,
-      `OptimiseWorker`, the two launchers); nothing in the upload path reads them, so turning either off
+      **Built, ticked 20 Sept 2026 by audit.** Settings → Sync has *Optimize photos* and *Optimize videos*
+      switches (`optimizePhotos`, `optimizeVideo`), each with its own Automatic/Manual mode. They are read
+      only by the optimize policies and workers (`PhotoOptimizePolicy`, `VideoOptimizePolicy`,
+      `OptimizeWorker`, the two launchers); nothing in the upload path reads them, so turning either off
       leaves that medium backed up, archivable and restorable.
 - [x] **Video transcode for old clips**, age a user setting (wired to Settings 18 Sept 2026, see the last entry) — see TASK-013. The write needs no tap
       (SAF, verified 19 Aug 2026); the blocker is a transcode cost measured on real 8K footage, and
@@ -484,7 +484,7 @@ keeps working.
       afterwards, to files this app has since shrunk. Initial setup **downloads** what is not here;
       restore **replaces** what is here but smaller. Different verbs, different populations, and
       neither is the other's fallback. So this tab being empty on a new phone is the correct answer
-      to "what have I optimised on this device?", not a gap.
+      to "what have I optimized on this device?", not a gap.
 
       **The grow is verified.** Fold 4, 27 Aug 2026, via `SafGrowProbe` — a 4,096-byte file rewritten
       to 524,288 bytes through the tree grant, no dialog, MediaStore reporting the new size after the
@@ -508,7 +508,7 @@ keeps working.
       a 200 MB clip stopped at 47 MB with nothing left behind), and again on the Moto G on 18–19 Sept.
       **It has since grown:** from 18 Sept the tab is drive-based again and *also* downloads files
       OneDrive holds that are not on the phone, and greys out the ones already there. Replacing a proxy is
-      still what a restore of an optimised file does; downloading is the other half, not a replacement.
+      still what a restore of an optimized file does; downloading is the other half, not a replacement.
 - [x] Deletion sync, opt-in and batched. Highest-risk feature in the product; it only follows a
       backup engine that has been watched working. Never infers deletion from absence alone.
       **Built 25 Aug 2026**, default Leave, no automatic option. Screens verified. **A real cloud
@@ -569,14 +569,14 @@ The album was set to **Off** afterwards, deliberately — so nothing in it is be
 current runs, and its counts are a snapshot rather than a live figure.
 
 ### 18 Aug 2026 — proxying
-11 photos optimised, 40,283,338 bytes reclaimed; five correctly skipped as already small. EXIF
+11 photos optimized, 40,283,338 bytes reclaimed; five correctly skipped as already small. EXIF
 orientation and dates carried across. Videos untouched at 103 / 163 / 178 MB. OneDrive originals
 intact at full size beside a 348 KB local proxy.
 
 **CapCut can see the backed-up folder and its files** — the problem the project exists to solve,
 confirmed against the app that motivated it.
 
-*Consequence:* what an editor imports for an optimised photo is the 2048px proxy, so exports from it
+*Consequence:* what an editor imports for an optimized photo is the 2048px proxy, so exports from it
 are capped at that resolution. Retrieval is therefore load-bearing, not a nicety.
 
 ### 19 Aug 2026 — schema 4 and 5, the UI, and video upload
@@ -1069,7 +1069,7 @@ exactly the case where overwriting an earlier per-album choice is what was asked
 ### 25 Aug 2026 — retrieval, built and half-verified
 
 The download side of v0.4. Before this the app could list and upload and had no way to fetch anything
-back, which made proxying a one-way door: an optimised photo is capped at 2048px for any editor, and
+back, which made proxying a one-way door: an optimized photo is capped at 2048px for any editor, and
 nothing could recover the original.
 
 **What is proven.** Schema 6 -> 7 migrated cleanly on the real 6,371-row ledger on the Fold 4, the
@@ -1672,9 +1672,9 @@ running one. `APPEND_OR_REPLACE` was considered and rejected: appended work is c
 parent fails, so a drive-full run would leave the trigger silently unarmed — trading a visible flaw
 for an invisible one.
 
-### 26 Aug 2026 — optimising made unattended, seven days after it was possible
+### 26 Aug 2026 — optimizing made unattended, seven days after it was possible
 
-**Fold 4.** "Optimise automatically" meant "ask me about it automatically". `ProxyApplier` wrote
+**Fold 4.** "Optimize automatically" meant "ask me about it automatically". `ProxyApplier` wrote
 through `MediaStore.createWriteRequest`, which raises a system dialog per batch and only launches
 from an Activity — so the rewrite could never happen without the user present, whatever the setting
 said.
@@ -1688,7 +1688,7 @@ asking for taps.
 **Result, with an album switched to Sync:**
 
 ```
-optimising 53 files through the tree grant
+optimizing 53 files through the tree grant
 proxied 9 files, reclaimed 8071092 bytes, 44 not worth proxying
 ```
 
@@ -1712,20 +1712,20 @@ reclaimed total negative. Now guarded where both sizes are already known, before
 **Still true, and worth not forgetting:** video is never proxied, and Archive still needs
 `createTrashRequest` because SAF deletes permanently. This changes the write path only.
 
-### 26 Aug 2026 — optimising a photo made the app think it had been deleted
+### 26 Aug 2026 — optimizing a photo made the app think it had been deleted
 
 **Fold 4.** Found by watching an Archive run behave oddly, and it turned out to be the most dangerous
 defect of the day.
 
 `refreshLedger` decides what is still on the phone by comparing **name and size**. Proxying rewrites a
 file in place and changes both its size and its mtime, so a proxied row's remembered key can never
-match the file on disk. Six optimised photos sitting in the gallery were all classified as deleted
+match the file on disk. Six optimized photos sitting in the gallery were all classified as deleted
 from the phone; fifteen such rows across the ledger.
 
 **Two features broke on that one cause.**
 
 **Deletion sync would have offered the full-quality originals of photos the user still has.** That is
-the inverse of what optimising promises. Worse, Ian made the point that sharpens it: the local copy
+the inverse of what optimizing promises. Worse, Ian made the point that sharpens it: the local copy
 carries a **cloud badge burned into its pixels**, and that badge is a standing promise that the
 original is in OneDrive. Delete the original and every badged photo asserts something false, while
 being indistinguishable from one still telling the truth. The user's only signal that their originals
@@ -1823,7 +1823,7 @@ was frozen at 20:59:00, and on relaunch a fresh ViewModel starts at `status = nu
 work to find, so the screen reads clean. The defect is confined to one foreground session and clears
 itself when the user leaves. Still a false claim on screen; not the persistent one first recorded.
 
-**And then it optimised itself.** Recorded above as a live proxy candidate; at 21:04 the proxy ran,
+**And then it optimized itself.** Recorded above as a live proxy candidate; at 21:04 the proxy ran,
 unattended, closing the chain in the same unbroken action.
 
 | | |
@@ -1904,7 +1904,7 @@ gallery's Recently deleted; on others it is removed straight away"* is accurate 
 hedging.
 
 **One finding, and it is not a live defect.** `123_1 (1).jpg` had a local proxy of 493,769 bytes
-against an original of 404,241 — the proxy was 89 KB *larger*, so optimising it spent space to save
+against an original of 404,241 — the proxy was 89 KB *larger*, so optimizing it spent space to save
 nothing. `ProxyApplier` already refuses this (`proxy.sizeBytes >= entry.sizeBytes` → `NotWorthwhile`),
 and its comment cites this exact file as the case that motivated the guard. It is a pre-fix leftover:
 1 of 15 proxied rows, and now archived. Every proxy written since the guard is smaller than its
@@ -1925,7 +1925,7 @@ Nothing else was pressed.
 | The video | `isProxied` 0, 115,244,716 bytes, untouched |
 | The 10 photos | 56,277,329 → 7,156,743 bytes, **7.9x**, about 46.8 MB freed |
 
-The video rule had never been tested on real content before. It held: videos are never optimised,
+The video rule had never been tested on real content before. It held: videos are never optimized,
 because a degraded clip fails silently inside an editor and is only found in the export.
 
 **The defect that was never there, and how it was manufactured.** Mid-run the ledger appeared to show
@@ -2225,10 +2225,10 @@ across roughly forty runs without intervention.
 **Throughput is file-size bound, not bandwidth bound.** Measured across the run: 0.73 MB/s on 0.24 MB files,
 rising to 3.32 MB/s once multi-hundred-megabyte video dominated. Real upstream is about 22 Mbps; everything
 below that was per-request overhead. `ChunkedUploader` already sends anything under 4 MB as a single PUT
-rather than opening a session, so the obvious optimisation was checked and found already present. What
+rather than opening a session, so the obvious optimization was checked and found already present. What
 remains is one round trip plus a verification per file, which simply dominates at a quarter of a megabyte.
 
-**The rig is left armed.** `isProxied` is 0 across all 3,326 rows because auto-optimise was deliberately left
+**The rig is left armed.** `isProxied` is 0 across all 3,326 rows because auto-optimize was deliberately left
 off, so the ~8.9 GB proxy lever is unspent on a phone held at 18 GB free by a 58 GB ballast file against a
 20 GB default floor. The first thing TASK-011 ever does will be a real decision against a real deficit.
 
@@ -2562,7 +2562,7 @@ describing a real drift, not a preference. The ledger counts rows this phone onc
 content; the file count beside it comes from a live device scan. Move a file between albums, delete
 one, or add one the cloud already has, and the two numbers move independently — leaving a pair nobody
 can reconcile by looking. What remains describes the phone in the present tense and cannot drift:
-optimised, and pending. `album_status_backed_up` and `album_status_none` went with it rather than
+optimized, and pending. `album_status_backed_up` and `album_status_none` went with it rather than
 being left as callerless strings.
 
 **A defect found by looking, immediately after building it.** The first run showed `BudgetMixed`
@@ -2930,7 +2930,7 @@ numbers on it are this clip's and should not be quoted as the feature's.
 
 Ian, having watched the Gate 2 copy go through four revisions in one evening: *"both the Wizard and
 Settings will need a complete rewrite."* He is right, and the reason is not that the writing is bad.
-**The model changed underneath the copy.** Video optimising, a master switch, per-medium modes, an
+**The model changed underneath the copy.** Video optimizing, a master switch, per-medium modes, an
 age vocabulary and a quality setting all arrived on 28 Aug; the screens still describe the app as it
 was that morning.
 
@@ -2938,13 +2938,13 @@ Written down now so the rewrite starts from an inventory rather than a reading o
 
 **Copy that is now false, not merely dated:**
 
-- `settings_auto_optimise_on` — *"Android still asks you to confirm each batch — it does not allow
+- `settings_auto_optimize_on` — *"Android still asks you to confirm each batch — it does not allow
   this to happen unattended."* Untrue since 26 Aug, when the proxy write moved to the SAF tree grant.
   `ProxyApplier` picks by `safWriter.covers(paths)`: unattended inside a granted tree, a tap outside
   one. The string states the worse case as the only case.
-- `wizard_auto_optimise_body` — same claim, same problem, on the screen users actually meet.
+- `wizard_auto_optimize_body` — same claim, same problem, on the screen users actually meet.
 - Three strings still promise video is never touched: `proxy_videos_excluded`,
-  `library_free_space_detail`, and the video line in `settings_optimise_explainer`. All were true on
+  `library_free_space_detail`, and the video line in `settings_optimize_explainer`. All were true on
   27 Aug.
 - `LibraryEstimate` counts photos only, so any byte figure it produces now understates by roughly
   eight times. Gate 2 quotes no number at all rather than a wrong one, which is a stopgap.
@@ -2952,12 +2952,12 @@ Written down now so the rewrite starts from an inventory rather than a reading o
 **Structural, rather than wrong:**
 
 - **Two spellings.** The wizard says *Optimize* — Ian's words, kept verbatim at his request — and
-  everything else says *Optimise*. One of them has to move.
-- **`settings_optimise` is photo-only** and predates the master switch. The new model is
-  `isOptimiseEnabled` plus per-medium mode, age and quality, and Settings has no home for any of it.
-- **`settings_auto_optimise_off`** describes a manual tap that the new `OptimiseMode.Manual`
+  everything else says *Optimize*. One of them has to move.
+- **`settings_optimize` is photo-only** and predates the master switch. The new model is
+  `isOptimizeEnabled` plus per-medium mode, age and quality, and Settings has no home for any of it.
+- **`settings_auto_optimize_off`** describes a manual tap that the new `OptimizeMode.Manual`
   supersedes.
-- The wizard's optimise panel asks a question — *ask me first, or tell me* — that the master switch
+- The wizard's optimize panel asks a question — *ask me first, or tell me* — that the master switch
   and mode now answer better.
 
 **The thing to hold on to while rewriting.** Every screen in this app that has caused trouble caused
@@ -3021,7 +3021,7 @@ Restore uses file uris, so this was not merely a test artefact.
 ### 3 Sept 2026 — a wizard run on the Moto G, and three defects it surfaced
 
 A full first-run pass on the Moto G, stock Android 16, clean install. Two folders granted (DCIM,
-Pictures), signed in, 157 files uploaded, then photo and video optimising. The wizard reached the end,
+Pictures), signed in, 157 files uploaded, then photo and video optimizing. The wizard reached the end,
 so the flow works — but three separate defects turned up along the way and all three are now fixed.
 
 **Setup was marked complete without being completed.** `ReconcileViewModel` carried an upgrade
@@ -3031,7 +3031,7 @@ install could never hit it — *"a fresh install has no grants at this moment"* 
 the **first** construction of the ViewModel. Reinstalling over a run mid-wizard killed the process; on
 relaunch the grants from step 4 were there, no decision had been written, and it declared setup
 finished. The user lands on the tabs with every album Off, never seeing the library choice, the
-optimise step or the first backup. A crash, a force-stop, or the system reclaiming memory does the
+optimize step or the first backup. A crash, a force-stop, or the system reclaiming memory does the
 same thing.
 
 Fixed twice over: the backfill now records on disk that it ran (`upgrade_backfill_checked`), so "once"
@@ -3049,38 +3049,38 @@ wait. Close now sets a session-local `tourDismissed`: the wizard goes away, setu
 WorkManager chain keeps running, and the next launch resumes at step 9 and re-attaches to the job
 rather than enqueuing a second one.
 
-**Step 9 lied during optimising.** `BackupProgressContent` was told only whether the *upload* had
+**Step 9 lied during optimizing.** `BackupProgressContent` was told only whether the *upload* had
 finished, so the moment uploads ended the ring hit 100% and the body read *"Congratulations… Press
 Finish"* — while the phone was still transcoding video and the button still said Close. It is now
-three phases (uploading, optimising photos, optimising video, done), derived once, with `backupComplete`
-defined as `phase == DONE` so the label and the copy cannot disagree. Both optimisers report per-file
-progress through a new `onProgress(done, total)`, so the phase shows "Optimising 4 of 9" rather than
+three phases (uploading, optimizing photos, optimizing video, done), derived once, with `backupComplete`
+defined as `phase == DONE` so the label and the copy cannot disagree. Both optimizers report per-file
+progress through a new `onProgress(done, total)`, so the phase shows "Optimizing 4 of 9" rather than
 sitting silent for minutes.
 
 **Video transcode cost, measured on 1080p.** Three clips on the Moto G: 284 MB → 67 MB, 98 MB → 24 MB,
 80 MB → 19 MB, all 1080p → 720p, at roughly 20–27 seconds each. Not the 8K figure the transcode item is
-gated on, but it is the first real cost from the wizard's own path, and it is why the optimise phase
+gated on, but it is the first real cost from the wizard's own path, and it is why the optimize phase
 needs a counter at all.
 
 **The upload runs in batches of 25**, each a separate WorkManager execution — two distinct work ids
 observed for one run. So the dispatch delay before the first byte is not a one-off; it recurs at every
 batch boundary, seven times for 157 files.
 
-### 4 Sept 2026 — Close reset the install choice, and nothing was optimised
+### 4 Sept 2026 — Close reset the install choice, and nothing was optimized
 
 **Close must not stop or reset anything.** Stated by Ian, repeatedly, and this is what broke it.
 
 A full run on the Moto G: 155 files uploaded, the wizard closed at 40% and reopened at 48%, and when
-the upload finished **not one photo or video was optimised** — no attempt, no failure, no log line.
+the upload finished **not one photo or video was optimized** — no attempt, no failure, no log line.
 
 The install choice lived only in `ReconcileUiState.libraryChoice`. Nothing wrote it to disk. Closing
 the wizard mid-backup ends the process, so the ViewModel came back holding the default —
-`BACK_UP_EVERYTHING`, which does not optimise — and step 9's pass collected zero candidates:
+`BACK_UP_EVERYTHING`, which does not optimize — and step 9's pass collected zero candidates:
 
 ```kotlin
-val shouldOptimise = _state.value.libraryChoice.mode?.proxiesPhotos == true
-val photoCandidates = if (shouldOptimise) proxyApplier.candidatesAll() else emptyList()
-val videoCandidates = if (shouldOptimise) videoOptimiser.wizardCandidates() else emptyList()
+val shouldOptimize = _state.value.libraryChoice.mode?.proxiesPhotos == true
+val photoCandidates = if (shouldOptimize) proxyApplier.candidatesAll() else emptyList()
+val videoCandidates = if (shouldOptimize) videoOptimizer.wizardCandidates() else emptyList()
 ```
 
 With no candidates, `backupComplete` went true immediately and Finish appeared, so the wizard reported
@@ -3098,13 +3098,13 @@ made. Video quality was already persisted; the install choice was the only part 
 was not.
 
 **This is Area 1 and nothing else.** It writes no album mode — those are the user's alone — and it does
-not touch the ongoing optimise settings. An earlier attempt to explain the same symptom by pointing at
+not touch the ongoing optimize settings. An earlier attempt to explain the same symptom by pointing at
 `applyLibraryChoice` not being called from the tour was wrong on exactly that point: the tour is right
 not to call it, and albums reading Off after an initial backup is correct.
 
 ### 4 Sept 2026 — the app does not open until the backup is done, and Close is not a dismissal
 
-Stated by Ian: **the user should not have access to the full app until the backup and optimising are
+Stated by Ian: **the user should not have access to the full app until the backup and optimizing are
 complete, unless they chose to back up manually.** The wizard is a gate, not a tour you can step out
 of, and three things had to change for that to hold.
 
@@ -3117,7 +3117,7 @@ while the WorkManager chain runs on without it. Reopening lands on step 9 re-att
 watched working on the Moto G, 3 Sept, after a Recents swipe killed the process mid-run.
 
 **Finish appears only when everything is done.** Already gated on `backupComplete`, which since the
-phase change means uploaded *and* photos optimised *and* video optimised. It read as early only
+phase change means uploaded *and* photos optimized *and* video optimized. It read as early only
 because the ring's own text was driven by `state.backupFinished` — the upload alone — so it said
 "Finish" while video was still transcoding.
 
@@ -3135,7 +3135,7 @@ Note what this does **not** do: files already uploaded by the old behaviour stay
 here removes them, and nothing should.
 
 **Resolved by deletion, the same day.** The counter was first made truthful — derived from the steps
-this user is actually shown, nine less one for optimising when there is nothing to configure and less
+this user is actually shown, nine less one for optimizing when there is nothing to configure and less
 one more for the backup when they chose to do it manually. That worked, and it was still the wrong
 answer. Ian: *"It was only added so we could talk efficiently about the steps."* It was scaffolding for
 a conversation, not something a user needs, and **every counter is now gone** — the step number, and
@@ -3186,7 +3186,7 @@ source and are recorded so they are not lost.
    rejected. Cancel the dialog and the wizard advances reporting nothing wrong.
 3. **The returned tree is never checked against the one requested.** Navigate into a subfolder and
    `USE THIS FOLDER` grants that subfolder while the parent is ticked off the queue. Nothing loses
-   data — the tree grant is for proxying and restore, never deletion — but optimising later has no
+   data — the tree grant is for proxying and restore, never deletion — but optimizing later has no
    write path and no explanation.
 
 ### 3 Sept 2026 — the OneDrive destination can be browsed instead of typed
@@ -3207,7 +3207,7 @@ two cameras honestly produce the same filename, but silently creating `Backups 1
 Browse sits **beside** the text field, not instead of it. Typing a known path beats walking ninety
 albums to reach it, and the field still works when the network does not.
 
-### 4 Sept 2026 — the wizard's optimise numbers, measured twice, and five defects around them
+### 4 Sept 2026 — the wizard's optimize numbers, measured twice, and five defects around them
 
 **Moto G 2026, stock Android 16, `ZT422CTZQV`.** A 155-file fixture in `DCIM` — 150 camera photos at
 642,867,972 bytes and 5 clips at 613,900,657 — restored byte-identical between runs, so the two runs
@@ -3216,7 +3216,7 @@ are directly comparable.
 **The savings card showed nothing at all, and the cause was ordering.** The reconcile fires from the
 directories flow, which settles at step 4; sign-in is step 5. With no token every album listing fails,
 so `ReconciliationRules.tallyAlbum` files each album under `unchecked` rather than `outstanding` —
-correct on its own terms, and fatal downstream, because every figure on the optimise and summary cards
+correct on its own terms, and fatal downstream, because every figure on the optimize and summary cards
 is computed from `photosOutstanding` and `videosOutstanding`. `album_cloud_status` said so plainly:
 three rows, all written 12:07:17, all `couldNotCheck = 1`, `missingFiles = 0`. Nothing re-ran the check
 after sign-in. It does now, and the same table then read `couldNotCheck = 0` with 50 + 100 + 5 = 155
@@ -3282,13 +3282,13 @@ runs inside it.
 > stopped the upload and left the app force-stopped so its queued work was never dispatched. Reverted
 > to `finish()`. See the evening entry at the end of this file.
 
-**The open one: the optimise passes die with the wizard.** Uploading survives Close because it is a
-WorkManager chain; `applyWizardProxies` and `applyWizardVideoOptimise` run in `viewModelScope`, which is
+**The open one: the optimize passes die with the wizard.** Uploading survives Close because it is a
+WorkManager chain; `applyWizardProxies` and `applyWizardVideoOptimize` run in `viewModelScope`, which is
 cleared with the activity. Closing during the video pass left three clips transcoded and two untouched,
 and nothing resumed them — the album modes were all `Off` by then, so the ongoing Sync-only path could
 not pick them up either. The card says "You can check progress any time by opening the app", which is
 true of the upload and not of this. **Unfixed.** Either move the passes into a worker or say plainly
-that optimising needs the app open.
+that optimizing needs the app open.
 
 **A counter that went backwards.** Reopening mid-phase recomputes the *remaining* candidates, so after
 two clips were done the ring read "0 of 3" where it had read "2 of 5" — each number true, the pair of
@@ -3308,13 +3308,13 @@ proxy no longer matches its full-size original, so the row is describing the che
 reading as though the backup evaporated. The ledger still holds `remoteSizeBytes = sizeBytes` from
 upload time, so the information to say it properly is there.
 
-### 4 Sept 2026 — optimising moved off the wizard's lifetime, and the constants recalibrated
+### 4 Sept 2026 — optimizing moved off the wizard's lifetime, and the constants recalibrated
 
 **Moto G 2026, same restored 155-file fixture.** Follows the entry above; read it first.
 
-**The optimise passes now run in [OptimiseWorker].** They used to run in `viewModelScope`, which is
+**The optimize passes now run in [OptimizeWorker].** They used to run in `viewModelScope`, which is
 cleared with the activity, so closing the wizard abandoned them — uploading survived Close because it
-is a WorkManager chain and optimising did not, a difference the card never admitted to. Consent still
+is a WorkManager chain and optimizing did not, a difference the card never admitted to. Consent still
 comes from the activity, because `MediaStore.createWriteRequest` can only be raised there; the grant is
 per-URI and persists, which is what lets the worker carry on once the wizard is gone.
 
@@ -3322,9 +3322,9 @@ Batched at 60 photos and 3 clips with a continuation while work remains, the sam
 [BackupWorker] and for the same reason: a transcode is tens of seconds a clip and WorkManager stops a
 worker that runs too long.
 
-**Verified twice over.** WorkManager held a `gallery-sync-optimise` chain with batches succeeding
+**Verified twice over.** WorkManager held a `gallery-sync-optimize` chain with batches succeeding
 individually, and the ledger stepped `14 → 60 → 115 → 150` in batch-sized jumps, so the re-enqueue is
-real rather than one long run. **Ian confirmed closing the app several times during the optimise phase
+real rather than one long run. **Ian confirmed closing the app several times during the optimize phase
 and the work continuing** — that half is his observation, not the log's: the watcher polled every 20s
 and never caught the launcher in front, so a close and reopen between polls left no trace. Worth noting
 as an instrumentation lesson, not a doubt about the result.
@@ -3346,14 +3346,14 @@ byte count of every photo.
 **Two places the app knew a file was safe and said otherwise.** Ian, reading a folder of 100 rows:
 *"all the files are labeled as optimized NOT backed up"*.
 
-`isProxied` was tested first in `statusLabel`, so an optimised file read "✓ optimized" and nothing said
+`isProxied` was tested first in `statusLabel`, so an optimized file read "✓ optimized" and nothing said
 it was in the cloud — on exactly the files where that matters most, since a proxy is the case where the
 full-resolution image exists **only** in OneDrive. The two were never alternatives: a proxy is written
 only over a file the ledger has verified. The row now reads "✓ backed up · optimized".
 
 At folder level the same fact was lost differently, and Ian's framing is the right one — *"if it can
 say that in the files then it can say it on the folder level"*. The Albums tab read "2 of 5 verified in
-OneDrive" for an album whose five were all uploaded, falling further with every clip optimised, because
+OneDrive" for an album whose five were all uploaded, falling further with every clip optimized, because
 the reconcile matches on name **and byte size** and a proxy is deliberately smaller than the original
 OneDrive holds. `ReconciliationRules.tallyAlbum` now takes the pre-proxy sizes and compares against
 those. Confirmed on the device immediately afterwards: three albums went from 0/50, 0/100 and 2/5 to
@@ -3367,12 +3367,12 @@ recorded, only read.
 been changed globally — it had not, and the app was about 80% `-ise` with an American pocket in the
 wizard card titles ("Optimization Settings") and the album detail rows ("optimized"), so someone moving
 between Settings and the wizard met both. Nine strings and four hardcoded literals moved to `-ise`;
-string *names* (`tour_optimise_*`) were left alone, being invisible to users and pure churn to rename.
+string *names* (`tour_optimize_*`) were left alone, being invisible to users and pure churn to rename.
 Comments quoting the old label or Ian's own words keep their original spelling, because they are
 describing what was written rather than what is shown.
 
 **A percentage nobody had counted yet was rendering as zero.** Reopening mid-phase builds a fresh view
-model, so `optimiseTotal` is 0 until the first ledger read returns, and the ring announced a confident
+model, so `optimizeTotal` is 0 until the first ledger read returns, and the ring announced a confident
 "0%" before jumping to the real figure. It shows "…" until the count exists. The count line beneath it
 already followed this rule — *"0 of 0 would be worse than saying nothing"* — and the headline simply was
 not covered by it. **The same rule keeps having to be applied in one more place: unknown is not zero.**
@@ -3579,7 +3579,7 @@ upload ran to completion with the task gone. Then:
   `ForegroundServiceStartNotAllowedException ... mAllowStartForeground false`, 21:19:42. `fgs=0` at
   every subsequent sample.
 - **A swipe with the service down is fatal, as before.** Predicted aloud, then confirmed at 21:56:58
-  — `Killing 20310 (setSvc -10000): remove task`, optimising frozen mid-pass, nothing restarted in
+  — `Killing 20310 (setSvc -10000): remove task`, optimizing frozen mid-pass, nothing restarted in
   the three minutes after.
 - **Android 15 caps `dataSync` at six hours per twenty-four.** Ian: *"This app needs to be running
   24/7 - not 6 hours out of 24."* It can never be the answer for ongoing sync.
@@ -3588,7 +3588,7 @@ Removed entirely at Ian's instruction, with a hard rule added to CLAUDE.md so it
 again. The unsolved case stays unsolved and is now written down rather than assumed away: **a delayed
 start armed before a swipe never fires.** A foreground service cannot fix that one either — a pending
 delay has no run in flight to hold up. Routes worth investigating: `setExpedited` on the continuations
-(quota-limited), or a battery-optimisation exemption.
+(quota-limited), or a battery-optimization exemption.
 
 **Also shipped tonight**
 
@@ -3628,7 +3628,7 @@ delay has no run in flight to hold up. Routes worth investigating: `setExpedited
 
 ---
 
-### 5 Sept 2026 — the upload half honoured "walk away" and the optimise half never had
+### 5 Sept 2026 — the upload half honoured "walk away" and the optimize half never had
 
 Reported by Ian: a four-hour delayed start set the previous evening *"did not start — when I opened
 the phone the Backup started."* The premise turned out to be wrong, and the real defect was one step
@@ -3640,13 +3640,13 @@ four hours to the minute after arming. The manual chain's last continuation was 
 and succeeded, `first_backup_completed` was set, and the 12:04 reconcile found all four albums
 verified with 0 missing. Nothing was wrong with the delay, the window, or the network.
 
-**What never happened was optimising.** Every proxy on disk carried a **12:04 mtime** — the minute the
-phone was woken, nine hours later. The upload→optimise handoff was a `LaunchedEffect` on the wizard's
+**What never happened was optimizing.** Every proxy on disk carried a **12:04 mtime** — the minute the
+phone was woken, nine hours later. The upload→optimize handoff was a `LaunchedEffect` on the wizard's
 progress card, so it only ran while a composition was alive to run it. `BackupWorker` never handed off
-to `OptimiseWorker`; the card did. So a first run left alone did the upload and stopped, and what Ian
+to `OptimizeWorker`; the card did. So a first run left alone did the upload and stopped, and what Ian
 saw on waking was the handoff finally firing, which reads exactly like the backup starting then.
 
-Same class as the 4 Sept defect where optimising died with `viewModelScope`: **work that outlives the
+Same class as the 4 Sept defect where optimizing died with `viewModelScope`: **work that outlives the
 screen must be owned by something that also does.** That lesson was applied to the passes themselves
 and not to the transition between them.
 
@@ -3659,14 +3659,14 @@ one message and removed both.
 #### The fix
 
 - **The handoff moved into the workers.** `BackupWorker` enqueues the photo pass when a chain drains;
-  `OptimiseWorker` queues the video pass when photos drain. [WizardBulkOptimise] is the gate, and it is
+  `OptimizeWorker` queues the video pass when photos drain. [WizardBulkOptimize] is the gate, and it is
   deliberately narrow: setup not yet complete, `allAlbums` (only the wizard's runs route past album-mode
-  filtering, so a later "Sync now" cannot drag a bulk optimise behind it), and a Gate 2 choice that
-  optimises. It **reads** the install choice and writes no album mode — the two areas stay independent.
+  filtering, so a later "Sync now" cannot drag a bulk optimize behind it), and a Gate 2 choice that
+  optimizes. It **reads** the install choice and writes no album mode — the two areas stay independent.
 - **Consent is checked where the writing happens.** Both passes bail with a log line when the files sit
   outside the granted trees, since no worker can raise `createWriteRequest`. Inside a tree — the ordinary
   case after Gate 1 — there is no dialog and nothing to wait for.
-- **`enqueueOptimiseIfAbsent`, with a per-phase tag.** Two things now start these passes and both are
+- **`enqueueOptimizeIfAbsent`, with a per-phase tag.** Two things now start these passes and both are
   correct, so the second must not append a duplicate. The worker's own continuation still enqueues
   directly, because its phase is `RUNNING` and carries the tag the check looks for.
 
@@ -3692,15 +3692,15 @@ because the app was left open on the card.
 13:25:15  backup run starting (manual)                <- app closed
 13:25:31 / 13:25:34 / 13:25:37   continuations, 67 -> 48 -> 23 remaining
 13:26:30  backup run finished: 21 uploaded, 0 remaining
-13:26:30  upload drained; photo optimise handed to the worker   <- BackupWorker, not the card
+13:26:30  upload drained; photo optimize handed to the worker   <- BackupWorker, not the card
 13:26:31  photos: proxying 20 of 20
 13:26:31  photos done; video pass queued                        <- second handoff
-13:26:33  video: optimising up to 3 of 102 at High
+13:26:33  video: optimizing up to 3 of 102 at High
 ```
 
-71 files uploaded across four batches, then both optimise phases starting themselves. The duplicate
+71 files uploaded across four batches, then both optimize phases starting themselves. The duplicate
 guard was exercised for real: reopening at 13:26:39 made the card try to start the video pass and it
-was refused with `video optimise already under way`, twice. Without it there would have been two chains
+was refused with `video optimize already under way`, twice. Without it there would have been two chains
 transcoding the same clips.
 
 **It fired late and that is worth knowing: due 13:22:36, started 13:25:15** — 2m39s after the countdown
@@ -3722,7 +3722,7 @@ the copy must not promise a time it cannot keep.
   wherever no work is outstanding), and it holds.
 
   So the cost of touching it is demonstrated and the benefit is cosmetic. **Do not "fix" this by
-  citing *unknown is not zero*.** That rule stands for the optimise headline, where it was cheap;
+  citing *unknown is not zero*.** That rule stands for the optimize headline, where it was cheap;
   here the same change has repeatedly cost the accuracy of a number the user actually relies on.
 
   **The dead end, written out so it is recognisable next time.** The approach that keeps suggesting
@@ -3801,14 +3801,14 @@ a card, so the 4 Sept complaint stands and this work was needed.
 
 #### The defect this surfaced: the wizard could not reach Finish
 
-With every file uploaded and every candidate optimised, the card sat on **"Optimising photos"** with a
+With every file uploaded and every candidate optimized, the card sat on **"Optimizing photos"** with a
 `…` ring and no Finish button. The ledger said 0 photo candidates and 0 video candidates; every
-optimise pass had `SUCCEEDED`; nothing was queued. **The app was gated shut with no work left to do**,
+optimize pass had `SUCCEEDED`; nothing was queued. **The app was gated shut with no work left to do**,
 which is worse than the problem the handoff fixed.
 
 Two causes, both created by moving the handoff into the workers earlier the same day:
 
-- `observeOptimise()` opened with `if (!videoOptimiseRunning && !optimiseRunning) return`. Those flags
+- `observeOptimize()` opened with `if (!videoOptimizeRunning && !optimizeRunning) return`. Those flags
   are set only by `applyWizardProxies()` — the card starting a pass itself. Once the **worker** started
   the passes, they were false, the observer returned on its first line, and nothing ever cleared the
   count. It now reads the ledger to decide which phase is live, and terminates when neither is.
@@ -3819,12 +3819,12 @@ Two causes, both created by moving the handoff into the workers earlier the same
 Resuming at step 9 now starts the observer too, which also fixes the frozen "10 of 128" seen earlier
 while the worker was demonstrably transcoding.
 
-**Verified in one launch:** `recents card restored` → `hidden` → `optimising finished: nothing eligible
+**Verified in one launch:** `recents card restored` → `hidden` → `optimizing finished: nothing eligible
 remains` → `restored`, task flags back to `0x10000000`, and the card reading **100% · Finish**.
 
 **The lesson generalises beyond this screen.** Moving work into a worker is only half the change: the
 screen that used to own it must be rewritten to *follow* work it did not start. The 4 Sept move of
-optimising into `OptimiseWorker` needed the same thing and got it; this one did not, and the gap
+optimizing into `OptimizeWorker` needed the same thing and got it; this one did not, and the gap
 appeared as an app that could never be opened.
 
 #### A finding about standby buckets, which is not a defect but shapes the product
@@ -3912,7 +3912,7 @@ the app left the foreground:
 |---|---|---|
 | 15:35:36 | Close, with only a pending delay armed and nothing running | RARE after **6 seconds** |
 | 16:07 → 16:38 | upload chain running with the app closed | stayed **ACTIVE** for 31 minutes |
-| 17:31:55 | last optimise batch finished at 17:31:51 | RARE after **4 seconds** |
+| 17:31:55 | last optimize batch finished at 17:31:51 | RARE after **4 seconds** |
 
 So a running chain holds the app at ACTIVE, and the demotion lands within seconds of it having nothing
 left to run. The exposure is precisely the gap *between* runs — where a delayed start, the content
@@ -3933,11 +3933,11 @@ with the app closed, at a steady ~4.6 MB/s, then the photo pass (455 proxied) an
 starting themselves — all unattended, all with no Recents card.
 
 **The Albums tab was correct at this scale, which matters more than it sounds.** Ian checked every
-album's backup and optimise figures after the run and found them all as expected — with **464 of 622
+album's backup and optimize figures after the run and found them all as expected — with **464 of 622
 files proxied**. That is the 4 Sept `ReconciliationRules.tallyAlbum` fix under real load: the reconcile
 matches on name *and byte size*, and a proxy is deliberately smaller than the copy OneDrive holds, so
-before that fix an optimised album under-reported its own verified count and fell further with every
-file optimised. It was fixed against three albums; this run put 464 proxies through it.
+before that fix an optimized album under-reported its own verified count and fell further with every
+file optimized. It was fixed against three albums; this run put 464 proxies through it.
 
 **Next measurement, and it wants no attention:** arm a delay, leave the phone genuinely alone
 overnight, and read the dispatch time off the ledger in the morning. That gives the ceiling, and
@@ -4036,9 +4036,9 @@ backup already requires charging by default, so its throughput is safe once it s
 might accept, not a certainty, and not one to discover the answer to on a first submission. Ian's
 instruction, 5 Sept: find workarounds rather than request the exemption.
 
-#### Defect: optimising triggers no-op backup runs
+#### Defect: optimizing triggers no-op backup runs
 
-Observed during the exemption run, once a minute through the whole optimise phase:
+Observed during the exemption run, once a minute through the whole optimize phase:
 
 ```
 19:34:06  backup run starting
@@ -4054,7 +4054,7 @@ trigger — and the next batch of proxies fires it again. No network, about 600 
 Harmless while charging. On battery in RARE it is not: those wakeups would spend the app's entire
 ten-minute daily job budget on scans that upload nothing, so **the app would starve itself precisely
 while doing the work that saves the user space**. Worth fixing at the trigger — either suppressing the
-content trigger while an optimise chain is live, or recognising the URIs we just wrote — rather than
+content trigger while an optimize chain is live, or recognising the URIs we just wrote — rather than
 anywhere downstream.
 
 ---
@@ -4083,7 +4083,7 @@ this does not retire the finding above — but the delayed start now has a clean
 no retries. All 303 carry a `remoteItemId` *and* `remoteSizeBytes == sizeBytes` — the `verifiedInCloud()`
 bar met for every file, not merely for most of them.
 
-**Optimising followed on its own**, 04:59:28 → 05:28:08, 26 chained `OptimiseWorker` runs with the app
+**Optimizing followed on its own**, 04:59:28 → 05:28:08, 26 chained `OptimizeWorker` runs with the app
 closed: 255 proxied, 48 recorded not-worth-proxying. Local footprint 2.58 GB → 0.73 GB, and `du` agrees
 independently at 748 MB across `DCIM`. About 1.85 GB genuinely reclaimed — proxying shortens in place,
 so unlike a trashed file that space is back immediately.
@@ -4108,7 +4108,7 @@ method:
 
 - **The no-op backup loop** from the 5 Sept evening entry does not appear in `androidx.work.workdb` —
   but unique work keeps only its latest row, so absence there is not evidence of absence. It needs a
-  live logcat during an optimise pass.
+  live logcat during an optimize pass.
 - **28 videos in `Funny stuff`, up to 43 MB each, came back `NotWorthwhile`** while 31 videos elsewhere
   proxied down from as little as 3 MB. The 20 photos skipped alongside them average 0.5 MB and are
   obviously correct. **Answered the same day — see the entry below.**
@@ -4207,7 +4207,7 @@ axis is bitrate, and secondarily the short edge.**
 
 #### What is inference, and what would settle it
 
-The bitrate arithmetic is strong but it is **not the log line**. `VideoOptimiser` records the reason at
+The bitrate arithmetic is strong but it is **not the log line**. `VideoOptimizer` records the reason at
 `Logger.d`, and this device's 97-second logcat buffer had evicted it hours before anyone looked. To
 settle it: raise the buffer, clear `isProxySkipped` on two or three of these rows, and run the pass
 again — the reason string is then read directly rather than reconstructed.
@@ -4231,7 +4231,7 @@ not.
 
 A full wizard run on the Moto G with the logcat buffer raised first, which is the only reason any of
 this is readable. `pm clear`, local files restored to full size, **OneDrive deliberately left intact**
-so the reconcile would match everything and the run could reach optimising without uploading anything.
+so the reconcile would match everything and the run could reach optimizing without uploading anything.
 It worked: 8 files uploaded, 378 already there.
 
 #### The instrument fix that made the rest possible
@@ -4243,7 +4243,7 @@ one command and it is the difference between measuring and inferring.
 #### 1. The no-op backup loop, confirmed and measured
 
 The 5 Sept hypothesis was right, and the shape is worse than "about once a minute". **20 no-op runs
-across the 36-minute optimise phase**, each a full scan that uploads nothing:
+across the 36-minute optimize phase**, each a full scan that uploads nothing:
 
 ```
 13:34:19.890  backup run starting
@@ -4262,7 +4262,7 @@ seconds. The video pass writes 3 files per 40 seconds and triggered them far mor
 | Video | 13:27:29 – 14:03:40 | 49 | 14 |
 
 That matters for the fix: **the trigger fires per batch of writes, so the cost scales with how fast the
-app optimises**, and the photo pass is the fast one. Charging makes it free; in RARE on battery it is
+app optimizes**, and the photo pass is the fast one. Charging makes it free; in RARE on battery it is
 the app spending its ten-minute daily budget on scans that do nothing.
 
 #### 2. The video refusals, measured rather than inferred
@@ -4288,17 +4288,17 @@ rather than after**, which is what the class comment already claims the refusals
 Ian, mid-wizard: *"step 7 lists no information for Photo optimization values."* It is not a rendering
 bug. `OptimizationContent` computes its figures from `result.photosOutstanding` and
 `result.videosOutstanding` — files **not yet in OneDrive** — which `ReconcileScreen` documents as *"what
-`BACK_UP_AND_OPTIMISE_NEW` would actually touch"*. That is option 3's scope, and the card is shown for
+`BACK_UP_AND_OPTIMIZE_NEW` would actually touch"*. That is option 3's scope, and the card is shown for
 every choice.
 
-Under option 2, `BACK_UP_AND_FREE_SPACE`, optimising runs `proxyCandidatesAll` and
-`videoOptimiseCandidatesAll`, both of which ignore whether this run uploaded the file. So on a library
+Under option 2, `BACK_UP_AND_FREE_SPACE`, optimizing runs `proxyCandidatesAll` and
+`videoOptimizeCandidatesAll`, both of which ignore whether this run uploaded the file. So on a library
 already in the cloud:
 
 | | Promised on Step 7 | Actually reclaimed |
 |---|---|---|
 | Photos | *no line at all* | **714 MB** (233 proxied, 40 refused) |
-| Video | 60 MB | **1,602 MB** (49 optimised, 64 refused) |
+| Video | 60 MB | **1,602 MB** (49 optimized, 64 refused) |
 | **Total** | **60 MB** | **2,316 MB — 2.26 GB** |
 
 Confirmed on the device afterwards: ledger 386 rows, all uploaded and verified, 3.51 GB → 1.25 GB, and
@@ -4309,7 +4309,7 @@ installing on a phone already backed up.** The photo line vanishes rather than r
 the specific thing `SetupTour.kt:1218` says the card must never do: *"the one thing it must never do is
 leave the space blank and let the user decide for themselves what a switch with no figure under it
 means."* The total falls through to *"Everything on this phone is already in OneDrive, so there is
-nothing new to optimise yet"* — which is true of uploads and false of optimising.
+nothing new to optimize yet"* — which is true of uploads and false of optimizing.
 
 The fix is to pick the population from the `LibraryChoice`: outstanding for option 3, everything
 eligible for option 2. Not yet built.
@@ -4324,7 +4324,7 @@ found.
 #### Fixed: Step 7 described a population the worker does not use
 
 `OptimizationContent` read `photosOutstanding` / `videosOutstanding` for every choice. That is
-`BACK_UP_AND_OPTIMISE_NEW`'s population, and the card is shown for all four.
+`BACK_UP_AND_OPTIMIZE_NEW`'s population, and the card is shown for all four.
 
 - The estimate now reads `CloudReconciliation.photos` / `.videos` — which already documented itself as
   *"Every photo in scope, backed up or not — what proxying could act on"*, so the right number was
@@ -4333,23 +4333,23 @@ found.
   **Corrected the same evening, and this half was wrong when first written.** It applied the whole-
   library population to **#3 as well as #2**, on the strength of the two behaving identically in the
   code. They are not supposed to: Ian's design, recorded above under Area 1 on 29 Aug 2026, is that #3
-  optimises only *"newly backed up, not already in cloud"*. So `photosOutstanding` was the correct
+  optimizes only *"newly backed up, not already in cloud"*. So `photosOutstanding` was the correct
   population for #3 all along, and changing it was a regression introduced while fixing #2. The reason
   the code looked identical is a separate defect — see the entry below.
-- **`LibraryChoice.optimisesAtInstall`** replaces three copies of `mode?.proxiesPhotos == true`, so the
+- **`LibraryChoice.optimizesAtInstall`** replaces three copies of `mode?.proxiesPhotos == true`, so the
   screen that estimates the saving and the worker that performs it read one predicate. A unit test
   asserts the two agree for every choice, because nothing caught them disagreeing for a week.
-- Gate 2's #1 and #4 do not optimise at install at all. They now say so — *"These settings apply to any
+- Gate 2's #1 and #4 do not optimize at install at all. They now say so — *"These settings apply to any
   album you later set to Sync"* — rather than quoting a figure computed from a population they will
   never touch.
-- `tour_optimise_nothing` was reworded. It read *"Everything on this phone is already in OneDrive, so
-  there is nothing new to optimise yet"*, which is true of uploads and false of optimising — a
-  fully-backed-up library is the best placed to optimise, not the worst.
+- `tour_optimize_nothing` was reworded. It read *"Everything on this phone is already in OneDrive, so
+  there is nothing new to optimize yet"*, which is true of uploads and false of optimizing — a
+  fully-backed-up library is the best placed to optimize, not the worst.
 
 #### Fixed: the app no longer scans the library because it rewrote it
 
 `BackupWorker` declines a run when `triggeredContentUris`/`triggeredContentAuthorities` is non-empty
-*and* the optimise chain is live — the wake it caused itself. Authorities as well as URIs, because
+*and* the optimize chain is live — the wake it caused itself. Authorities as well as URIs, because
 Android reports the authority alone when a trigger's URI list overflows, which a burst of proxy writes
 is exactly what would do.
 
@@ -4357,7 +4357,7 @@ is exactly what would do.
 duration of the chain needs something to re-arm it afterwards, and a chain that dies would leave the
 app blind to new photos until the six-hourly net noticed. This keeps the watch armed exactly as before
 and drops only the scan. Liveness is asked of WorkManager through a new `BackupScheduling.
-optimiseChainLive`, a sibling of `manualRunLive`, rather than a flag that a killed process would leave
+optimizeChainLive`, a sibling of `manualRunLive`, rather than a flag that a killed process would leave
 stuck — a stuck flag here would silence the content trigger permanently.
 
 #### Not built: the video bitrate pre-check, because the measurement says no
@@ -4453,7 +4453,7 @@ direction: **when an instrument disagrees with the evidence, doubt the instrumen
 **It does not disturb the Step 7 verification.** That screenshot was taken against the 311-file scan,
 and after the reboot — with outstanding swinging 7 → 64 — the card still read 718 MB / 1.6 GB / 2.3 GB,
 unchanged. Which is the fix's whole point: the estimate now follows the population that will be
-optimised, not the one that will be uploaded, so it is immune to exactly this swing. The old code would
+optimized, not the one that will be uploaded, so it is immune to exactly this swing. The old code would
 have lurched with it.
 
 **Answered the same evening, and it was not the instrument.** Ian: *"There were optimized images
@@ -4478,10 +4478,10 @@ optimizing?"* The card was the symptom; the cause is older and larger.
 
 #### What Gate 2 is supposed to do — Ian, restated 6 Sept
 
-| | Verify local against OneDrive | Upload what is missing | Optimise |
+| | Verify local against OneDrive | Upload what is missing | Optimize |
 |---|---|---|---|
 | **#2** `BACK_UP_AND_FREE_SPACE` | yes | yes | **all files on the phone** |
-| **#3** `BACK_UP_AND_OPTIMISE_NEW` | yes | yes | **only what this run actually backed up** |
+| **#3** `BACK_UP_AND_OPTIMIZE_NEW` | yes | yes | **only what this run actually backed up** |
 
 This is not new. It is the Area 1 design recorded here on 29 Aug 2026, and Ian had tested both options
 and *seen the differing file counts* — in Step 7's output and on the device after each run.
@@ -4492,26 +4492,26 @@ and *seen the differing file counts* — in Step 7's output and on the device af
 from `SetupWizardScreen` to the new `SetupTour`. It did not carry over the `applyLibraryChoice()` call,
 and git's pickaxe confirms `SetupTour.kt` has never contained that string.
 
-`ApplyLibraryChoice` is the only caller of `settings.setOptimiseCutoff(...)`, and the cutoff is the only
+`ApplyLibraryChoice` is the only caller of `settings.setOptimizeCutoff(...)`, and the cutoff is the only
 thing separating #3 from #2 — its own comment says so. Orphaning it meant **the cutoff was never
-written**, so `optimiseCutoffEpochMillis` stayed at `EVERYTHING` for every install from that day. And
-even had it been written, `proxyCandidatesAll` and `videoOptimiseCandidatesAll` took no cutoff
+written**, so `optimizeCutoffEpochMillis` stayed at `EVERYTHING` for every install from that day. And
+even had it been written, `proxyCandidatesAll` and `videoOptimizeCandidatesAll` took no cutoff
 parameter at all.
 
 **Why it went unseen for six days.** The class was left in the tree rather than deleted, so nothing
 looked amputated. A dropped call throws nothing. The visible half of Gate 2 kept working — four
-options, `library_choice` persisted, `WizardBulkOptimise` still reading the choice to decide *whether*
-to optimise. Only the *scope* was lost. And on a fresh library with an empty cloud, #2 and #3 genuinely
+options, `library_choice` persisted, `WizardBulkOptimize` still reading the choice to decide *whether*
+to optimize. Only the *scope* was lost. And on a fresh library with an empty cloud, #2 and #3 genuinely
 are identical, which is the case a wipe-and-reinstall protocol tests most often. The commit's own note
 reads *"Verified on Moto G in both light and dark mode"* — a visual check cannot catch a behaviour that
 is never invoked.
 
 #### The fix
 
-- **`proxyCandidatesAll` and `videoOptimiseCandidatesAll`** carry
+- **`proxyCandidatesAll` and `videoOptimizeCandidatesAll`** carry
   `AND (:cutoffMillis = 0 OR uploadedAtEpochMillis >= :cutoffMillis)` — the same clause and sentinel the
   ongoing video query already used, so the two cannot drift.
-- **`ProxyApplier` and `VideoOptimiser` read the cutoff themselves.** Thirteen call sites between them;
+- **`ProxyApplier` and `VideoOptimizer` read the cutoff themselves.** Thirteen call sites between them;
   a parameter each would have to remember is one that a call site eventually gets wrong, which is the
   failure this area has already had twice.
 - **`setLibraryChoice` writes the cutoff**, recorded when Gate 2 is answered. Nothing uploads between
@@ -4544,10 +4544,10 @@ three files removes the temptation permanently. Not yet done.
 Ian, 6 Sept 2026: *"Once this ONE TIME backup has been completed the user then sets their preference
 for how the backup/sync works going forward."*
 
-So the cutoff belongs to the wizard's pass alone. `VideoOptimiser.run` — the **ongoing** path — was
-reading `optimiseCutoffEpochMillis` too, which meant a #3 install left videos already in OneDrive
-permanently exempt from optimising, months later, under a choice made once at install. It now passes
-`OptimiseCutoff.EVERYTHING`, and the cutoff is read only by the two wizard queries.
+So the cutoff belongs to the wizard's pass alone. `VideoOptimizer.run` — the **ongoing** path — was
+reading `optimizeCutoffEpochMillis` too, which meant a #3 install left videos already in OneDrive
+permanently exempt from optimizing, months later, under a choice made once at install. It now passes
+`OptimizeCutoff.EVERYTHING`, and the cutoff is read only by the two wizard queries.
 
 Note which half was the defect. The photo query never read the cutoff, and **that was correct** — the
 asymmetry was video reaching for something it should not have had, not photos missing something they
@@ -4562,7 +4562,7 @@ Ian, 6 Sept 2026: *"The initial Wizard should NOT have any age predicate for eit
 There should be a setting in the app (after the wizard) to dictate how long a **video** can age before
 being available for backing up and optimizing."*
 
-**The wizard was already right** — `proxyCandidatesAll` and `videoOptimiseCandidatesAll` carry no age
+**The wizard was already right** — `proxyCandidatesAll` and `videoOptimizeCandidatesAll` carry no age
 clause, and must not gain one. The install pass acts on the library as it stands.
 
 **The ongoing video age works and always has.**
@@ -4573,12 +4573,12 @@ clause, and must not gain one. The install pass acts on the library as it stands
 > leaves the photo in the gallery and costs an edit nothing until the export. **There is no photo age
 > setting and none is wanted.**
 
-**A wrong fix, made and reverted the same evening.** Seeing `photoOptimiseAge` on the Settings screen
+**A wrong fix, made and reverted the same evening.** Seeing `photoOptimizeAge` on the Settings screen
 doing nothing, I wired it into `proxyCandidates` — implementing a feature Ian had rejected three weeks
 earlier. Reverted in the next commit. The lesson is the order of the question: *should this control
 exist?* comes before *why doesn't it work?*, and TASK-011 answered it in one grep.
 
-**What is actually wrong is the control.** `photoOptimiseAge` entered the code on 28 Aug (`54f6124`),
+**What is actually wrong is the control.** `photoOptimizeAge` entered the code on 28 Aug (`54f6124`),
 reached the Settings screen on 30 Aug (`f650536`), and was written into the Area 2 tree in this file on
 29 Aug (`c0c9b81`) — all after the 19 Aug decision that none is wanted. It should be removed from
 `BackupSettings`, from `SettingsScreen`, and from the tree above. **Done 15 Sept 2026** — TASK-022
@@ -4613,9 +4613,9 @@ been unenforced in practice since 31 Aug.
 **One substantive correction fell out of it.** `MediaAge.kt:52` claimed Gate 2's *"Back up and free space"*
 maps to `AlbumMode.SYNC` and that `ApplyLibraryChoice` *"applies it to every album at once, with REPLACE"*.
 Wrong twice: the class is gone, and no install choice writes an album mode. It now attributes the
-whole-library reach to the optimise cutoff, which is what actually causes it.
+whole-library reach to the optimize cutoff, which is what actually causes it.
 
-**`setOptimiseCutoff` survived, deliberately.** `ReconcileViewModel.setLibraryChoice` writes it one line
+**`setOptimizeCutoff` survived, deliberately.** `ReconcileViewModel.setLibraryChoice` writes it one line
 from a deletion, and it is the only thing separating Gate 2 #3 from #2 — the defect fixed on 6 Sept.
 
 **Verified.** `compileDebugKotlin` and `compileDebugUnitTestKotlin` pass including Hilt/KSP codegen, which
@@ -4664,20 +4664,20 @@ The app split, created and renamed nothing; it read MediaStore's two spellings a
 what TASK-023 is about. Absent on the Moto G by 15 Sept because Ian renamed the folder in his copied
 files from `camera` to `Camera`; every row now reads `Camera`. The keying is unchanged.
 
-**Optimise photos defaulted On — fixed** (`03fdc48`). `isOptimiseEnabled` is off by default so nothing
-was optimising, but the Settings screen showed the switch on while nothing happened, and the video
-row's handler clears the master only `if (!optimisePhotos)`. Turning video on and off again therefore
-left the master on with photos still marked wanted, and photo optimising began having never been asked
+**Optimize photos defaulted On — fixed** (`03fdc48`). `isOptimizeEnabled` is off by default so nothing
+was optimizing, but the Settings screen showed the switch on while nothing happened, and the video
+row's handler clears the master only `if (!optimizePhotos)`. Turning video on and off again therefore
+left the master on with photos still marked wanted, and photo optimizing began having never been asked
 for — a default rewriting files nobody opted into. Changed in three places: the field, its DataStore
 read fallback, and the transient UI state in `BackupViewModel`.
 
-`DEFAULTS.md` had no entry for `optimisePhotos` at all — the existing entry covers the automatic
+`DEFAULTS.md` had no entry for `optimizePhotos` at all — the existing entry covers the automatic
 master, and the per-medium switches were added later without one. That absence is why it drifted, so
-both `optimisePhotos` and `optimiseVideo` are documented there now.
+both `optimizePhotos` and `optimizeVideo` are documented there now.
 
-**Checked on device 15 Sept 2026:** *Optimise photos* reads Off on the Moto G, on an install that had
+**Checked on device 15 Sept 2026:** *Optimize photos* reads Off on the Moto G, on an install that had
 walked the wizard on 7 Sept. A fresh DataStore holds only `upgrade_backfill_checked` and
-`wizard_step`, so `optimise_photos` is absent and the code default is what applies.
+`wizard_step`, so `optimize_photos` is absent and the code default is what applies.
 
 **Also noted, unfixed:** OkHttp logs full response bodies at INFO. Reading a run means wading through
 complete Graph JSON — every file name, size and hash — which buries the app's own `GallerySync/*`
@@ -4836,22 +4836,22 @@ times. SYNC NOW started the run 0.1 s after the tap and replaced the delayed job
 `CHARGING` was left queued. The *Right now* route after Back shares the same cancel-and-start path but
 was not tapped through.
 
-### 15 Sept 2026 (afternoon) — Gate 2 #3 optimised the whole library
+### 15 Sept 2026 (afternoon) — Gate 2 #3 optimized the whole library
 
 The test the 7 Sept pass did not run: #2 against #3 on a library mostly in OneDrive. Moto G, test
 account. Run 1 (option 1) finished at 13:43:53 with 0 remaining, so OneDrive held all 254 files. Ian
 then deleted **15 photos from `BudgetMixed` and 5 videos from `PauseTest`** in OneDrive. Clean install
-13:49:43, option 3 chosen — `library_choice = BACK_UP_AND_OPTIMISE_NEW` confirmed in the DataStore.
+13:49:43, option 3 chosen — `library_choice = BACK_UP_AND_OPTIMIZE_NEW` confirmed in the DataStore.
 
 - **The cloud check was right:** *"234 already in OneDrive, 22 outstanding"* — the 20 plus two new
   screenshots. `album_cloud_status` put the gaps exactly where Ian made them: `BudgetMixed` 15 missing,
   `PauseTest` 5, `Screenshots` 2.
 - **The Step 7 card was right:** 52 MB photos, 438 MB video, 491 MB total — consistent with the 22
   outstanding (80% of ~65 MB of photos; 85% of ~515 MB of video), not the library.
-- **The optimiser was not.** *"photos: proxying 60 of 77 … 17 of 17"* across batches — **176 photos
-  proxied, 22 refused as too small**, i.e. every photo — and *"video: optimising up to 3 of 59"*,
+- **The optimizer was not.** *"photos: proxying 60 of 77 … 17 of 17"* across batches — **176 photos
+  proxied, 22 refused as too small**, i.e. every photo — and *"video: optimizing up to 3 of 59"*,
   every video. Local footprint by `du`: **2.33 GB → 0.71 GB**, every album shrunk, including the five
-  Ian never touched. Ian confirmed by eye that everything was optimised.
+  Ian never touched. Ian confirmed by eye that everything was optimized.
 
 **Cause.** On a fresh install the ledger is empty, so a file found already in OneDrive is marked
 backed up during the run by the skip-existing path — which stamped `uploadedAt = now`. The ledger read
@@ -4861,8 +4861,8 @@ Sept fix (`f706d9e`) restored the cutoff but not what it is compared against; on
 is what a wipe-and-reinstall tests, the two options are identical, so nothing showed it.
 
 **For a real user this rewrites their whole library against the choice they made.** Nothing is lost —
-proxying requires a verified cloud copy and leaves every file in the gallery — but "optimise only new
-files" optimising everything is exactly the kind of widening a user's choice must not undergo.
+proxying requires a verified cloud copy and leaves every file in the gallery — but "optimize only new
+files" optimizing everything is exactly the kind of widening a user's choice must not undergo.
 
 **Fix, built and awaiting a run:** the skip-existing path (and the recovered-proxy path beside it)
 record Graph's `createdDateTime` — when the file arrived in OneDrive — instead of now. The listing
@@ -4881,7 +4881,7 @@ run uploads falls after it. No date from Graph records `0`, which #3 treats as o
   MB buffer fast enough that `upload: stored` and skip lines were gone within minutes, and a grep read
   zero on a run that had skipped 131. The database was the reliable instrument. Dropping OkHttp to
   `BASIC` is now a testing need, not only a release one.
-- **The Optimisation Settings card said** *"These settings can be changed at any time in the Settings
+- **The Optimization Settings card said** *"These settings can be changed at any time in the Settings
   tab"* — removed at Ian's request: the wizard and Settings do not touch each other.
 
 #### The fix, verified the same afternoon
@@ -4890,12 +4890,12 @@ Fixture reset by Ian, then deleted from OneDrive: **10 photos from `BudgetMixed`
 videos from `PauseTest`**, and he shot new photos into `DCIM/Camera` (8 on disk). Clean install of the
 fix 14:34:05, option 3.
 
-- Cloud check: *"219 already in OneDrive, 30 outstanding"* — exact. The Optimisation Settings card no
+- Cloud check: *"219 already in OneDrive, 30 outstanding"* — exact. The Optimization Settings card no
   longer carries the Settings-tab line.
 - Mid-run, with the cutoff at 14:38:14: **165 skipped rows carried OneDrive's own arrival dates from
   earlier days — all before the cutoff** — and the rows uploaded by the run after it.
 - After the run: **30 rows new** (10 BudgetMixed, 5 camping, 8 Camera, 5 PauseTest, 2 screenshots);
-  **27 optimised** — 23 photos and 4 videos — and **zero optimised files that were not new**. The
+  **27 optimized** — 23 photos and 4 videos — and **zero optimized files that were not new**. The
   three new files left alone were refused on merit: a 10 MB low-bitrate clip that transcoded no
   smaller, and two screenshots too small to shrink.
 - `du`: `budgetphotos`, `car show` and `funny stuff` **byte-for-byte unchanged**; `camping` −20 MB for
@@ -4933,7 +4933,7 @@ recorded, because of a fact the 3 Sept entry did not have.
 
 **The scan scope is the granted trees whenever any exist.** `ScopedDirectories.currentScope()` returns
 the SAF grants if there are any, and falls back to the wizard's ticked folder names only when there
-are none. So the picker does not merely decide what can be *optimised* — it decides what is *backed
+are none. So the picker does not merely decide what can be *optimized* — it decides what is *backed
 up*, and a tick without a grant counts for nothing once any other folder has one.
 
 - **"The picker opens in the wrong place" — does not reproduce.** The document URI the wizard builds
@@ -4943,7 +4943,7 @@ up*, and a tick without a grant counts for nothing once any other folder has one
   3 Sept saw. Left unchanged.
 - **Cancel skips silently — confirmed.** Both pickers cancelled: the wizard went on to Cloud Storage
   with no grants and no word. The scan then falls back to the ticked names, so everything is backed up
-  and nothing can ever be optimised, unannounced.
+  and nothing can ever be optimized, unannounced.
 - **Cancel one, grant another — confirmed, and the worst case.** DCIM and Pictures ticked; DCIM
   cancelled, Pictures granted. Before the grant: `scanAll: 257 items across 8 albums`. After it:
   `scanAll: 10 items across 1 albums within 1 granted folders`. **DCIM's 247 files dropped out of the
@@ -5055,8 +5055,8 @@ they always have.
 - **The 85% video-savings estimate stands.** The Step 7 card keeps it. It is measured on camera
   footage and will over-promise on screen recordings; Ian accepts that rather than complicating the
   figure.
-- **The "old enough" copy goes.** `settings_optimise_master_on` and `settings_auto_optimise_on` said
-  photos and video are optimised "once verified in OneDrive **and old enough**" — but photos are
+- **The "old enough" copy goes.** `settings_optimize_master_on` and `settings_auto_optimize_on` said
+  photos and video are optimized "once verified in OneDrive **and old enough**" — but photos are
   proxied whatever their age, and only video has an age, set by its own *Older than* control. Both now
   end at "verified in OneDrive". The orphaned `settings_photo_age` label went with them.
 - **OkHttp keeps logging bodies for now.** It buries the app's own lines within minutes and should drop
@@ -5069,8 +5069,8 @@ Ian would rather the tour's Settings backdrop were a screenshot of the real tab;
 nearest thing that survives a screen changing or being translated, so the mockup now **mirrors**
 `SettingsScreen` instead of resembling it: General, Albums, Backup, Sync in that order, the same rows,
 and the same strings read from the same resources. Only the sample values are invented. The switches
-show the real defaults — mobile data off, Optimise photos and video off — so the picture cannot teach a
-setting the app does not ship with; it had shown Optimise photos on since before the 7 Sept default fix.
+show the real defaults — mobile data off, Optimize photos and video off — so the picture cannot teach a
+setting the app does not ship with; it had shown Optimize photos on since before the 7 Sept default fix.
 
 **The Help card now rings the Albums help button**, not Backup. The longer mockup pushed Backup's
 button down behind the card, hiding the very thing the card points at; the tooltip is `help_albums` to
@@ -5164,22 +5164,22 @@ The 18-file album was backed up as `camera`, archived (18 `.trashed-` files), an
   OneDrive folder now holds files from both albums, under the spelling it had when first created.
   `camera` (Archive) did not act on any of them.
 
-#### "8 optimised photos in Camera, now 1" — explained, nothing optimised today (16 Sept 2026)
+#### "8 optimized photos in Camera, now 1" — explained, nothing optimized today (16 Sept 2026)
 
 Ian emptied the trash, and the Files app then showed one small photo in `Camera` where there had been
-eight. **Nothing was optimised on this install.** No ledger row has `isProxied` or
-`localProxySizeBytes` set, and no optimise log lines appear.
+eight. **Nothing was optimized on this install.** No ledger row has `isProxied` or
+`localProxySizeBytes` set, and no optimize log lines appear.
 
 The eight are the burst taken 15 Sept 14:35 (`IMG_20260915_1435*`, 367–601 KB, and Graph reports
 2048×1536, against 4096×3072 for the 21:31 shots). They were **already shrunk when today's clean
-install ran**, left over from the 15 Sept optimise tests and not put back to full size in the reset.
-Two siblings from the same burst, trashed on 15 Sept before the optimiser ran, were 3.2 MB each. With
+install ran**, left over from the 15 Sept optimize tests and not put back to full size in the reset.
+Two siblings from the same burst, trashed on 15 Sept before the optimizer ran, were 3.2 MB each. With
 an empty ledger, today's first backup uploaded the shrunk bytes as the only OneDrive copy. That is
 expected after `pm clear`: the app has no record that a file is a proxy.
 
 Seven of the eight were in `camera` (Archive) and went to the trash, and Ian's emptying removed them.
 The eighth is `IMG_20260915_143513095_HDR.jpg`, the one restored from OneDrive at 499,165 bytes. So
-8 → 1 is the trash being emptied, not a change of optimisation.
+8 → 1 is the trash being emptied, not a change of optimization.
 
 #### TASK-023 — the camera app did NOT split the spelling this time (Moto G, 16 Sept 2026, 16:32)
 
@@ -5298,7 +5298,7 @@ crash buffer is empty.
 Wizard defects were closed (the last one, *Keep <subfolder> only*, verified the same day), so TASK-021
 was cleared to start. Reproduced on the Moto G, wired to this machine over wireless debugging.
 
-**Method.** Camera set to Sync, backed up to a clean baseline (5/5 verified, optimise chain settled —
+**Method.** Camera set to Sync, backed up to a clean baseline (5/5 verified, optimize chain settled —
 `dumpsys jobscheduler` showed only the periodic job waiting on `TIMING_DELAY` and the content-trigger
 job waiting on `CONTENT_TRIGGER`, nothing `ENQUEUED`/`BLOCKED`). A file copied into `DCIM/Camera` under
 a fresh name plus a `MEDIA_SCANNER_SCAN_FILE` broadcast stands in for a new camera photo. The app was
@@ -5620,26 +5620,26 @@ check), and confirming behaviour is the same on a device that doesn't reach REST
 this aggressively — both lower priority than the fix itself being correct, which tonight's capture
 settles.
 
-### 18 Sept 2026 (evening, continued) — TASK-021 fix: skip the cold-start scan during a live optimise chain
+### 18 Sept 2026 (evening, continued) — TASK-021 fix: skip the cold-start scan during a live optimize chain
 
 Ian caught a gap the fix above shipped with, before it went further: the new continuation enqueue in
 `armAutomaticSync()` isn't a content-triggered dispatch, so `BackupWorker`'s existing
-`selfTriggered && optimiseChainIsLive()` guard — the one that stops a content-triggered wake from
-scanning for no reason while an optimise chain is rewriting files — never sees it and can't apply. A
-cold start landing mid-optimise was running an unconditional scan the equivalent content-triggered wake
+`selfTriggered && optimizeChainIsLive()` guard — the one that stops a content-triggered wake from
+scanning for no reason while an optimize chain is rewriting files — never sees it and can't apply. A
+cold start landing mid-optimize was running an unconditional scan the equivalent content-triggered wake
 would have declined.
 
 **Not the 5 Sept self-triggering loop returning.** That loop was per-*file* — each proxy rewrite fired
 its own content trigger, so a sixty-file batch could wake the app sixty times. The new call fires once
-per cold start, not once per file, so a continuously-running optimise chain inside an already-alive
+per cold start, not once per file, so a continuously-running optimize chain inside an already-alive
 process causes no extra wakes at all. The real, narrower cost was one unconditional scan on the specific
 case of a cold start landing while a chain from an earlier process session was still live.
 
-**Fix:** `armAutomaticSync()` now checks `BackupScheduling.optimiseChainLive(workManager)` — the same
+**Fix:** `armAutomaticSync()` now checks `BackupScheduling.optimizeChainLive(workManager)` — the same
 function `doWork()` already uses — before enqueueing the continuation, and skips the scan (not the
 re-arm) when a chain is live. 343/343 unit tests pass. Verified on the Moto G: clean install, no crash,
-cold-start sync still runs normally with no optimise chain active (`backup run starting` →
-`0 uploaded … 0 remaining`, matching a still-caught-up library). The mid-optimise branch itself wasn't
+cold-start sync still runs normally with no optimize chain active (`backup run starting` →
+`0 uploaded … 0 remaining`, matching a still-caught-up library). The mid-optimize branch itself wasn't
 separately forced on hardware — low priority, since it reuses an already-tested function under a
 guard shaped exactly like the one `doWork()` has run in production all along.
 
@@ -5664,13 +5664,13 @@ grants existed, and had not been touched since. Between them they said the app n
 never modifies files on the phone, "only ever adds copies", lets you "browse what is stored" in OneDrive,
 "may cache copies of files you open so they can be used by other apps", and that signing out "immediately
 deletes ... the local index of your files". None of that is true now: Archive moves local files to the
-phone's trash, Optimise replaces photos and video in place, Restore writes originals back, the optional
+phone's trash, Optimize replaces photos and video in place, Restore writes originals back, the optional
 *Ask* policy can move OneDrive copies to the OneDrive recycle bin, the ContentProvider is an unexported
 empty skeleton that serves nothing, and `signOut` only calls MSAL's sign-out and clears no table. An
 18 Aug session had already noted that the policy "needs revising before submission"; nothing tracked it.
 
 Both pages were rewritten. The policy now states what the app can change on the phone and in OneDrive,
-that Optimise is off unless turned on (and that first-time setup can run it once across the chosen
+that Optimize is off unless turned on (and that first-time setup can run it once across the chosen
 folders), the write access granted through Android's folder picker, that Microsoft is the only network
 destination, that there is no analytics, crash reporting or advertising SDK, and that the app never
 permanently deletes and never empties a trash. The deletion page no longer claims sign-out clears the
@@ -5682,15 +5682,15 @@ text.
 
 #### Changes made
 
-- **Initial Optimise is Off for both photos and video (Ian).** The stored defaults were already `false`,
-  but `BackupUiState.optimiseVideo` in `BackupViewModel` still started `true` — the same shape as the
+- **Initial Optimize is Off for both photos and video (Ian).** The stored defaults were already `false`,
+  but `BackupUiState.optimizeVideo` in `BackupViewModel` still started `true` — the same shape as the
   7 Sept photo defect, which was fixed in three places and missed this one. Now `false` in every layer.
 - **Settings → Setup (*Run setup again*) removed (Ian).** Along with `restartSetup()` and its three
   strings. CLAUDE.md said this button would not ship; it is gone, so that paragraph is now stale (see
   below).
-- **Settings → "Optimise automatically" switch removed (Ian).** The Photos and Video switches, each with
-  its own Auto/Manual, remain, as does the manual Optimise button. `BackupViewModel.setAutoOptimiseEnabled`
-  and three strings went with it; nothing else called them. The setup tour keeps its own optimise choice.
+- **Settings → "Optimize automatically" switch removed (Ian).** The Photos and Video switches, each with
+  its own Auto/Manual, remain, as does the manual Optimize button. `BackupViewModel.setAutoOptimizeEnabled`
+  and three strings went with it; nothing else called them. The setup tour keeps its own optimize choice.
 - **Three cards at the foot of Settings.** *Privacy Policy* and *Delete Account Info* open the pages
   full-screen inside the app (`InAppPage.kt`): a WebView with JavaScript off, no file or content access,
   no mixed content, and navigation confined to `https://iant8055.github.io/GallerySync/` by
@@ -5712,10 +5712,10 @@ text.
 **Verified.** 350/350 unit tests (343 + 7 new), 0 failures. On the Moto G (`ZT422CTZQV`, Android 16), in
 light and dark, crash buffer empty after every install: the section order and bands; the band and the
 Albums hero card sampling to the same pixel in both themes (`(10,82,56)` light, `(11,80,57)` dark); no
-Setup section and no "Optimise automatically" switch; both viewer pages opening, Back and Close working,
+Setup section and no "Optimize automatically" switch; both viewer pages opening, Back and Close working,
 and an external link (the Microsoft consent page) handing off to Chrome; the Contact page in both themes,
 Copy changing to "Copied" and Android's clipboard preview showing the address.
-**Not verified:** the Optimise-video default on a fresh install — the Moto G's stored settings still
+**Not verified:** the Optimize-video default on a fresh install — the Moto G's stored settings still
 carry its earlier choices, so only the unit level and the code were checked; anything at 344dp; anything
 on Samsung One UI or API 37.
 
@@ -5740,7 +5740,7 @@ Recorded here rather than edited into the old entries, so the withdrawn text sta
 - **19 Aug says there are zero uses of `rememberSaveable`.** `SetupTour` now uses it; whether
   `MainActivity` saves the selected tab is unchecked.
 - **`SETTINGS-AUDIT.md`** said the `SafGrowProbeSection` was still in Settings (removed in `c910a26`),
-  that `optimise_photos` and `optimise_video` default `true`, and that eight of nine optimise settings
+  that `optimize_photos` and `optimize_video` default `true`, and that eight of nine optimize settings
   have no UI. It now carries a banner listing what is stale; its tables are unchanged. **`DEFAULTS.md`**
   carries a matching note that the "automatic" entry uses a pre-28-Aug name.
 
@@ -5839,11 +5839,11 @@ with an accordion version as well if it fitted better. Both were built.
 
 #### Found while writing the guide, for Ian
 
-1. **The Settings video controls are not wired to anything after setup.** *Optimise video*, *Mode*,
-   *Older than* and *Quality* are stored, but `VideoOptimiser.run()` — the entry that honours them — has
+1. **The Settings video controls are not wired to anything after setup.** *Optimize video*, *Mode*,
+   *Older than* and *Quality* are stored, but `VideoOptimizer.run()` — the entry that honours them — has
    **no caller**. The only video pass is the wizard's (`wizardCandidates()` / `runForWizard`), which is why
    MILESTONES still has "Video transcode for old clips" unticked. The guide says this plainly ("saved, but
-   the app does not yet shrink video on its own after setup"). The in-app line *"Video is optimised
+   the app does not yet shrink video on its own after setup"). The in-app line *"Video is optimized
    separately, and only clips older than the age you set"* is therefore not true yet. Either wire it, or
    hide the controls and reword.
 2. **Settings → Restore → *Show empty folders* changes nothing.** Only `RetrieveViewModel` reads it, and
@@ -5865,52 +5865,52 @@ A guide that describes the app is only worth having while it does. Any change to
 a control or a number's source should change `tools/guide/content/` in the same commit; the consistency
 test catches the guide and the pop-ups disagreeing, but not the guide and the screen.
 
-### 18 Sept 2026 (night, continued) — video optimising is now wired to Settings
+### 18 Sept 2026 (night, continued) — video optimizing is now wired to Settings
 
 Ian, on the previous entry's finding that the Settings video controls did nothing: *"Build this"*. They
 now drive a real background chain. What was built, what it found on the way, and what was watched.
 
 #### What was built
 
-- **`VideoOptimiseWorker`**, a separate worker on its own unique chain (`VIDEO_OPTIMISE_WORK`), not the
-  wizard's `OptimiseWorker`. The wizard's pass is Area 1 and ignores modes, age and switches; this is
+- **`VideoOptimizeWorker`**, a separate worker on its own unique chain (`VIDEO_OPTIMIZE_WORK`), not the
+  wizard's `OptimizeWorker`. The wizard's pass is Area 1 and ignores modes, age and switches; this is
   Area 2 and obeys nothing else. Sharing a chain would also have queued a button press *behind* an
-  automatic run waiting for the charger (`APPEND_OR_REPLACE`), so pressing Optimise now would have done
+  automatic run waiting for the charger (`APPEND_OR_REPLACE`), so pressing Optimize now would have done
   nothing until the phone was plugged in.
-- **`VideoOptimisePolicy`** (pure, 11 tests): automatic runs need setup complete, the master switch, the
+- **`VideoOptimizePolicy`** (pure, 11 tests): automatic runs need setup complete, the master switch, the
   video switch and Mode = Automatic. A chain continues only if the batch attempted something and clips
   remain; failed clips ride in the next batch's input data as exclusions, so every pass either shortens
   the candidate list or grows the exclusions and the chain always ends. Capped at 40 (WorkManager's
   10 KB input limit).
-- **`VideoOptimiseLauncher`**: `requestAutomatic()` (charging required, TASK-013 rule 5) and
+- **`VideoOptimizeLauncher`**: `requestAutomatic()` (charging required, TASK-013 rule 5) and
   `requestNow()` (the button: no charger, replaces a run that is only *waiting*, never one executing).
 - **Triggers.** The end of every *complete* backup run (reached by every content trigger and the
   six-hourly net, which is also what notices a clip that has just grown older than the age setting),
-  and any change to Optimise video, Mode, Older than or the master switch.
-- **Settings.** A video status line and a **Optimise N MB of video** button, four states (ready, none,
+  and any change to Optimize video, Mode, Older than or the master switch.
+- **Settings.** A video status line and a **Optimize N MB of video** button, four states (ready, none,
   waiting for the charger, working), an "outside the granted folders" line, and the *Straight away*
   warning that had been written and never shown. The photo status lines now appear only while the photo
-  switch is on. `proxy_videos_excluded` ("Video is optimised separately…") is gone; it described a pass
+  switch is on. `proxy_videos_excluded` ("Video is optimized separately…") is gone; it described a pass
   that did not exist.
 - **The guide** (`tools/guide/`) says how it works now; the pop-up for the new status line is
-  `settings-optimise-video-status`.
+  `settings-optimize-video-status`.
 
 #### Two defects in the code that was already there
 
-1. **`VideoOptimiser.run()` could never have optimised anything.** It asked `SafMediaWriter.covers()` —
+1. **`VideoOptimizer.run()` could never have optimized anything.** It asked `SafMediaWriter.covers()` —
    which takes folder paths — about a content URI. No path starts with `content://`, so every clip would
    have been reported as outside the granted folders. Fixed with `SafMediaWriter.coverage(uri)`, which asks
    MediaStore where the file is.
 2. **Uncovered clips could starve the batch.** The query took the ten biggest clips and filtered after;
    clips outside a granted folder stay candidates for ever, so a run whose ten were all uncovered would
-   never reach anything smaller. The optimiser now reads a pool of 2000, narrows it, then takes the batch.
+   never reach anything smaller. The optimizer now reads a pool of 2000, narrows it, then takes the batch.
 
 Also corrected: a comment saying transcoded clips are not stamped with the proxy marker. They have been
 since 29 Aug (`VideoTranscoder`); it was verified here (marker present in a pulled clip).
 
 #### A hazard avoided
 
-`optimiseChainLive()` is what makes `BackupWorker` decline a content-triggered run as "our own optimise
+`optimizeChainLive()` is what makes `BackupWorker` decline a content-triggered run as "our own optimize
 writes woke it" and what holds back the cold-start scan. It counted a chain that was merely *queued*. A
 video batch waiting hours for the charger would therefore have made the app ignore every real new photo
 for as long as it waited. The video chain now counts only while **executing**. **Watched:** with a chain
@@ -5924,9 +5924,9 @@ blocked on the charger, a new photo pushed into Camera still produced a backup r
   chain ended. A pulled clip: H.264 + AAC, 8.09 s, proxy marker present.
 - **No re-upload:** the backup run that followed reported 0 uploaded, 0 remaining.
 - **Waiting for the charger:** with the battery simulated as *discharging*, a new clip uploaded, the log
-  said *"queueing video optimising for the charger"*, JobScheduler held the job, and Settings said so and
+  said *"queueing video optimizing for the charger"*, JobScheduler held the job, and Settings said so and
   offered the button. **The button** started it with no charger (tags no longer carry the charging tag)
-  and Settings showed *"Optimising video in the background. 1 clip left."*
+  and Settings showed *"Optimizing video in the background. 1 clip left."*
 - **Manual mode:** nothing queued after an upload; the button appeared once the count refreshed.
   Switching back to Automatic queued the chain; restoring the charger released it.
 - **Restore round-trip:** one clip restored to exactly 29,256,747 bytes, its original. `markRestored`
@@ -5952,8 +5952,8 @@ Use `set ac 0`, `set usb 0`, `set status 3` and `set level 80`, then `reset`.
 #### For Ian
 
 1. **Setup and Settings share these preferences.** The wizard's video switch and quality write the same
-   stored values Settings reads (`setOptimiseVideo`, `setVideoQuality`), so a phone set up with plan 2 or
-   3 and video on now has Optimise video on in Settings and, once an album is set to Sync, will optimise
+   stored values Settings reads (`setOptimizeVideo`, `setVideoQuality`), so a phone set up with plan 2 or
+   3 and video on now has Optimize video on in Settings and, once an album is set to Sync, will optimize
    its old clips on the charger. What Settings shows is what runs. CLAUDE.md says the two are independent
    in both directions; the code is not. Not changed.
 2. **The count on the button lags a backup run** until you change tab (it refreshes on tab entry, as the
@@ -6041,14 +6041,14 @@ deleted their rows. Restore is built from rows, so there was nothing to list.
 **Three faults in a chain, one from each layer:**
 
 1. **The recovered-proxy path wrote an empty OneDrive id.** After the `pm clear` the phone's photos were
-   already optimised, so the reconcile matched them as *backed-up proxies* (`markRecoveredAsProxied`) and
+   already optimized, so the reconcile matched them as *backed-up proxies* (`markRecoveredAsProxied`) and
    passed `remoteItemId = ""`, although the listing it was reading held the real id. The sibling path for
    files at their exact size had been fixed for this on an earlier day; this one had not.
 2. **The prune protects a row only if it has a real id.** `forgetAlbumsNotOnDevice` spares *"a file still in
    OneDrive that can be fetched"* by testing `remoteItemId != ''`. An empty id made the rows look stale, so
    the archive that had just confirmed them in OneDrive also erased the record of them.
-3. **Even with an id, an archived optimised file was on neither Restore list.** `restorableProxies` needs the
-   file still on the phone; `fetchableFromCloud` said `isProxied = 0`. An optimised file whose album is then
+3. **Even with an id, an archived optimized file was on neither Restore list.** `restorableProxies` needs the
+   file still on the phone; `fetchableFromCloud` said `isProxied = 0`. An optimized file whose album is then
    archived (a path the engine deliberately supports, 26 Aug) is off the phone *and* proxied: neither query
    returned it. This one was found by reading the queries, then proven on the device (below).
 
@@ -6056,53 +6056,53 @@ deleted their rows. Restore is built from rows, so there was nothing to list.
 `confirmStillInCloud`, which runs before an archive, writes the id it has just been handed onto any row that
 lacks one (`BackupEntryDao.fillMissingRemoteItemId`; bookkeeping only, touches only rows whose id is empty),
 so **rows already in a ledger are healed at the moment their album is archived**. (3) `fetchableFromCloud`
-no longer excludes optimised rows; `filesNotOnThePhone` compares an optimised row at the size it has *on the
+no longer excludes optimized rows; `filesNotOnThePhone` compares an optimized row at the size it has *on the
 phone* (`RestoreScope.onDiskSizeBytes`), so a proxy still in its folder is not also offered as a download;
 `RestoreViewModel` additionally never lists one entry as both kinds. Suite 382/382 (four new, on the size rule).
 
-**Watched on the Moto G, Test 6 (Off, four optimised photos, rows with empty ids):**
+**Watched on the Moto G, Test 6 (Off, four optimized photos, rows with empty ids):**
 - Set to Archive, *Check these files*: `confirmStillInCloud: 4 confirmed`. Ledger read straight after, before
   the trash tap: `test 6` had 4 of 4 ids (`F6D661310DF0…`), every other album still empty. That is the heal.
 - Allowed the trash request: `kept 4 rows for files still in OneDrive but not on the device`, where the same
   step on Test 4 and 5 had logged `forgot 8 rows`.
 - Restore tab: **test 6 — 4 files · 13 MB · 0 to restore · 4 to download.**
 - Restore: `downloaded … into test 6` four times; the folder holds 3,250,107 / 3,317,173 / 3,782,577 /
-  3,104,202 bytes, against 568 to 745 KB for the optimised copies that were archived. Summary *4 back on this
+  3,104,202 bytes, against 568 to 745 KB for the optimized copies that were archived. Summary *4 back on this
   phone*.
 - Test 6 put back to **Off** afterwards, as it was. (Set by tapping the UI, as the user would, on the test
   phone. The app wrote no mode.)
 
 **Not fixed, and why it matters.**
 - **`Test 4` and `Test 5` stay off the Restore tab.** Their rows are gone and Restore only offers what this
-  app has a record of; the 8 optimised copies are in the phone's Trash. To get them back: restore the 8 files
+  app has a record of; the 8 optimized copies are in the phone's Trash. To get them back: restore the 8 files
   from the Trash, let the app rescan (the recovered-proxy path now records ids), and archive again.
 - **The other 41 rows on this phone still have empty ids** (Camera and tests 1, 2, 3, 7, 8): the heal happens
   only when an album is archived. **Restore in place fails on them**: pressing Restore on `test 8` gave *None
   recovered. 4 unchanged.* The cause was not read from the log (nothing was written for it); an empty id is
   the one difference from `test 6`, whose downloads succeeded. A backup-time heal, or a guard that offers a
   restore only for a row with an id, would close it.
-- **Reinstall is the door for both.** Any phone whose optimised photos are re-recognised after a reinstall or
+- **Reinstall is the door for both.** Any phone whose optimized photos are re-recognised after a reinstall or
   on a new phone gets these rows. Older rows on the Fold 8 may already hold empty ids.
 
 ### 18 Sept 2026 (late night) — "keep at full size": a per-file pin you can see, a count on the card, a sort
 
 Ian, after the Restore discussion: *"Safer only ('keep this one at full size'): a per-file Backup pin inside a
 Sync or Archive album… have Restore set the flag ON, allow the user to switch it off"*, then *"just a check box
-I think will suffice"*, a count on the Albums card after *optimised*, and a sort in the album's file list.
+I think will suffice"*, a count on the Albums card after *optimized*, and a sort in the album's file list.
 
 - **The pin is the flag Restore already wrote.** `modeOverride = BACKUP` on a row; `FilePin` names it. Restore
   (`markRestored`, both the in-place and the download path) has set it since 27 Aug, hidden. It is now a tick
   box on every file in an album's list, headed **Keep at full size**, and the user can clear it. Ticking can
   only make the app do less, so it has no confirmation. A per-file Archive or Sync was not built: that is
   removal or rewriting decided file by file, a different consent from the album's mode.
-- **Archive now honours it.** Until now only the optimiser read the flag. `filesInArchiveAlbums` (the Archive
+- **Archive now honours it.** Until now only the optimizer read the flag. `filesInArchiveAlbums` (the Archive
   tab's list) and `redundantLocalCopies` (what may be removed, and the *Scheduled to leave* count) both leave
   pinned files out, matched by ledger key **or** MediaStore id, since a restore changes the key and not the id.
   This closes the loop found earlier tonight: a restored file in an Archive album was offered for archiving
   again.
-- **Albums card:** *3 optimised · 4 kept at full size · 2 pending*, each part only when non-zero (counted from
+- **Albums card:** *3 optimized · 4 kept at full size · 2 pending*, each part only when non-zero (counted from
   files still on the phone). **File list:** the same count, a **Sort** row (Name A–Z, Date newest first,
-  Status: failed, pending, optimised, backed up; ties by name), and the tick column. Three new guide topics
+  Status: failed, pending, optimized, backed up; ties by name), and the tick column. Three new guide topics
   and pop-ups (`album-file-sort`, `album-file-pin`, plus edited `albums-list`, `album-detail`,
   `album-file-status`, and the Restore overview). 96 topics, 54 with a (?).
 - **Tests:** 392/392 (ten new: the pin's values, the Archive filter by key and by MediaStore id, and the three
@@ -6234,7 +6234,7 @@ both lists. Suite 398/398.
 green card the other tabs open with (`heroContainer`/`onHero`, 28dp corners), holding the return arrow in the
 card's ink, the **folder name in bold**, the mode line, the counts and the controls; (2) **Sort by and Keep at
 full size share one line** inside it; (3) each file is a rounded card in Restore's `FileCard` style (22dp corners,
-1dp outline, name in `titleMedium`, two columns from 600dp); (4) **backed up on one line and optimised on the one
+1dp outline, name in `titleMedium`, two columns from 600dp); (4) **backed up on one line and optimized on the one
 below it**. **Correction to the earlier bold request:** Ian meant the *folder* name, not files. File names are
 regular weight again, matching Restore; album names on the Albums list stay bold. The header is drawn in the file
 rather than through `HeroCard` because that card splits into two columns on a wide screen. The counts on the green
@@ -6244,9 +6244,9 @@ and Camera (two-line marks, one ticked). **Not checked:** dark mode of the new h
 Suite 398/398.
 
 **Follow-up (Ian, 19 Sept): size and marks on one line.** *"Since you moved it around you can put backed up ·
-optimized on the same line next to size."* Each file card's second line is now *3 MB · ✓ backed up · optimised*,
+optimized on the same line next to size."* Each file card's second line is now *3 MB · ✓ backed up · optimized*,
 each part in its own colour (one annotated `Text`, so it wraps if a line is ever too long). Watched on the Moto G:
-photo rows and the longest case, video rows (*29 MB · video · ✓ backed up · optimised*), all on one line at 360dp.
+photo rows and the longest case, video rows (*29 MB · video · ✓ backed up · optimized*), all on one line at 360dp.
 Guide updated. Suite 398/398.
 
 **"Backed up" text made obviously green (Ian, 19 Sept).** In the light theme `primary` is `#003525`, nearly black,
@@ -6356,7 +6356,7 @@ one-line change if he wants the literal characters. The guide's `restore-hero`, 
   shown as designed): same result.
 - **A real download of files the app had no ledger row for: yes.** test 8 was offered by Restore from the OneDrive
   listing (*4 to download*), swiped to select, restored: four full-size files landed in `DCIM/test 8` (3.3 MB against
-  the 589 KB optimised copies), and four ledger rows were written, each `UPLOADED`, `remoteSizeBytes` equal to
+  the 589 KB optimized copies), and four ledger rows were written, each `UPLOADED`, `remoteSizeBytes` equal to
   `sizeBytes`, not proxied, `modeOverride = BACKUP` (Keep at full size). The folder then left the Restore list
   (10 to 9), and test 8 came back on the Albums tab as a **new album at Off**, *4 kept at full size, 4 verified in
   OneDrive*, with no `album_preferences` row written for it. That is the whole loop the redesign was for, and it
@@ -6775,7 +6775,7 @@ Ian pressed **Yes** and **Allow** on Temp 5 (10 files) and Temp 9 (10 files) wit
 Also still true: the Albums tab counts the swiped-out files as *kept at full size*, which is the pin's older meaning.
 **Side effect.** 15 test photos are in the phone's trash, 30 days, and fetchable from Restore.
 
-### 20 Sept 2026 - optimising runs from its Settings: Automatic on arrival, Manual on Sync now; the Settings status lines are gone
+### 20 Sept 2026 - optimizing runs from its Settings: Automatic on arrival, Manual on Sync now; the Settings status lines are gone
 
 Ian: *"All optimizations should run based on their Settings in Settings. Automatically - as soon as a file hits an Album who's mode is SYNC or an Album mode is switched to SYNC. Manually - through the "Sync Now" Button on the Albums Tab. So let get rid
 of the "Every single photo is already optimized" and the "No video is ready......" lines in Settings, along with the associated (?) in the "How To Guide"."*
@@ -6784,90 +6784,90 @@ of the "Every single photo is already optimized" and the "No video is ready.....
 with a status line above it (the two lines Ian named are `proxy_none_all_done` and `video_none`, the "nothing to do" states of those blocks).
 
 **What it is now.**
-- **Photos, Automatic:** a new `OptimiseWorker` phase, `sync-photos` (Area 2: Sync albums only, honouring the Settings switches and the "Keep at full size" pin; not the wizard's `photos` phase). Started by `PhotoOptimiseLauncher.requestAutomatic()` at the end of every complete backup run, when an album is switched to Sync, and when a photo
+- **Photos, Automatic:** a new `OptimizeWorker` phase, `sync-photos` (Area 2: Sync albums only, honouring the Settings switches and the "Keep at full size" pin; not the wizard's `photos` phase). Started by `PhotoOptimizeLauncher.requestAutomatic()` at the end of every complete backup run, when an album is switched to Sync, and when a photo
   switch or mode changes. Works only through folders granted at setup (no dialog), so it can run unattended; `ProxyApplier.splitByConsent` sorts each candidate. It stops when photos are switched off and **stops rather than loops** if a photo will not replace.
-- **Manual, both kinds:** the backup run started by **Sync now** ends by starting whatever is set to Manual (`requestOnSyncNow`, video without waiting for the charger). **Sync now is enabled when Manual optimising is waiting**, even with nothing to send (`OptimiseOnSyncNow`, `BackupUiState.canSyncNow`), because it was only ever enabled for files to upload.
+- **Manual, both kinds:** the backup run started by **Sync now** ends by starting whatever is set to Manual (`requestOnSyncNow`, video without waiting for the charger). **Sync now is enabled when Manual optimizing is waiting**, even with nothing to send (`OptimizeOnSyncNow`, `BackupUiState.canSyncNow`), because it was only ever enabled for files to upload.
 - **Photos outside the granted folders** need Android's dialog. `buildProxyWriteRequest` now asks only about those. Automatic offers it when the app is open; Manual offers it when Sync now finishes. **Not seen on the phone:** every folder on the Moto G is inside a grant.
-- **Settings:** the status-and-button blocks for photos and video are gone, with the auto-offer effect, the results text, the button's entry point and the strings, state fields and the `ProxyStatus`/`VideoOptimiseRun` types that only they used. What is left under the switches is the "needs Android 11" note on an old phone. **Guide:** topics `settings-optimise-status` and `settings-optimise-video-status` are deleted
-  (94 topics, 48 with a (?)); Mode, Optimise photos, Optimise video, Sync now and "When things happen" were rewritten to match; DEFAULTS.md and CLAUDE.md's Area 2 line updated, and DEFAULTS' two *Waiting period* rows removed (that Settings option went earlier this session).
+- **Settings:** the status-and-button blocks for photos and video are gone, with the auto-offer effect, the results text, the button's entry point and the strings, state fields and the `ProxyStatus`/`VideoOptimizeRun` types that only they used. What is left under the switches is the "needs Android 11" note on an old phone. **Guide:** topics `settings-optimize-status` and `settings-optimize-video-status` are deleted
+  (94 topics, 48 with a (?)); Mode, Optimize photos, Optimize video, Sync now and "When things happen" were rewritten to match; DEFAULTS.md and CLAUDE.md's Area 2 line updated, and DEFAULTS' two *Waiting period* rows removed (that Settings option went earlier this session).
 
 **Seen on the Moto G** (photo and video both on Manual to start, as Ian had them; photo Mode flipped to Automatic for the test and put back to Manual):
-1. **Manual:** a 7.2 MB photo dropped into `Temp 0` (a Sync album) uploaded and **stayed full size**; **Sync now went from greyed to enabled with nothing to send**; pressed: *photo optimising queued, proxying 1 of 1, reclaimed 6,576,488 bytes*, the file 7,164,060 to 587,572 bytes; Sync now greyed again.
-2. **Automatic, hands off:** a second photo added at 00:23:15; the backup ran at 00:23:45, *photo optimising queued*, optimised by 00:23:52 (7,301,107 to 485,685 bytes).
-3. **Album switched to Sync:** a new album `zz_album` set to Sync at 00:24:52; uploaded, optimised by 00:24:58 (7,302,296 to 403,971 bytes). After Rescan the album reads *1 optimised, 1 verified in OneDrive*. **It briefly read "0 of 1 verified" from the cloud check that predates the upload**, until Rescan.
+1. **Manual:** a 7.2 MB photo dropped into `Temp 0` (a Sync album) uploaded and **stayed full size**; **Sync now went from greyed to enabled with nothing to send**; pressed: *photo optimizing queued, proxying 1 of 1, reclaimed 6,576,488 bytes*, the file 7,164,060 to 587,572 bytes; Sync now greyed again.
+2. **Automatic, hands off:** a second photo added at 00:23:15; the backup ran at 00:23:45, *photo optimizing queued*, optimized by 00:23:52 (7,301,107 to 485,685 bytes).
+3. **Album switched to Sync:** a new album `zz_album` set to Sync at 00:24:52; uploaded, optimized by 00:24:58 (7,302,296 to 403,971 bytes). After Rescan the album reads *1 optimized, 1 verified in OneDrive*. **It briefly read "0 of 1 verified" from the cloud check that predates the upload**, until Rescan.
 4. Settings: the Sync section holds the two switches, their Mode, Older than and Quality, and nothing under them; the Mode (?) shows the new text.
 No crash; no dialog appeared in any run.
 
-**Tests.** 530 pass (15 new: `PhotoOptimisePolicyTest`, `OptimiseOnSyncNowTest`, three more in `VideoOptimisePolicyTest`). **Six mutations each caught:** Manual photos run alone, Manual photos never run on Sync now, a chain continues after photos are switched off, Automatic video pushed past the charger by Sync now, Sync now ignoring waiting Manual optimising, an Automatic kind counted as waiting for the button.
+**Tests.** 530 pass (15 new: `PhotoOptimizePolicyTest`, `OptimizeOnSyncNowTest`, three more in `VideoOptimizePolicyTest`). **Six mutations each caught:** Manual photos run alone, Manual photos never run on Sync now, a chain continues after photos are switched off, Automatic video pushed past the charger by Sync now, Sync now ignoring waiting Manual optimizing, an Automatic kind counted as waiting for the button.
 **Not covered by a test:** the worker phase and the launchers, which need WorkManager and are seen only on the phone; the album-switch hook (the run it queues did the work here; the direct call finds nothing for an album that still has files to upload).
 
-**Side effects of testing, all on the test rig.** New files `zz_opt_1.jpg`, `zz_opt_2.jpg` in `Temp 0` and `zz_album/zz_opt_3.jpg`, each now optimised and in OneDrive; `zz_album` is set back to Off. Photo Mode is back to Manual. Nothing of Ian's was rewritten: the only candidates were the three new photos.
+**Side effects of testing, all on the test rig.** New files `zz_opt_1.jpg`, `zz_opt_2.jpg` in `Temp 0` and `zz_album/zz_opt_3.jpg`, each now optimized and in OneDrive; `zz_album` is set back to Off. Photo Mode is back to Manual. Nothing of Ian's was rewritten: the only candidates were the three new photos.
 
-**Decisions made without asking, worth knowing.** (1) The Settings **buttons** went too, not only the two named lines: with Manual meaning Sync now they would have been a second, contradicting route. (2) Photos do **not** wait for the charger (video does); a switch on a large existing album will therefore optimise a batch of 60 at a time in the background whenever the battery is not low.
-(3) **Sync now optimises whatever is set to Manual, not only what it uploaded**, since Manual means the button and not "the files this run sent".
+**Decisions made without asking, worth knowing.** (1) The Settings **buttons** went too, not only the two named lines: with Manual meaning Sync now they would have been a second, contradicting route. (2) Photos do **not** wait for the charger (video does); a switch on a large existing album will therefore optimize a batch of 60 at a time in the background whenever the battery is not low.
+(3) **Sync now optimizes whatever is set to Manual, not only what it uploaded**, since Manual means the button and not "the files this run sent".
 
 ### 20 Sept 2026 (night) - three data-integrity defects found and two fixed; a long test campaign on the Moto G
 
-Ian asked, before bed, whether anything stops an optimised file being backed up over its full version, then told me to test backups, syncs, restores and archives under different settings while he slept, using his disposable pictures.
+Ian asked, before bed, whether anything stops an optimized file being backed up over its full version, then told me to test backups, syncs, restores and archives under different settings while he slept, using his disposable pictures.
 
 **1. FIXED - a small upload REPLACED a cloud file of the same name.** `GraphUploadService.uploadSmallFile` (`PUT ...:/content`, the route for files under 4 MiB) sent no conflict setting, and Graph's default for that route is to **replace**. Only `createUploadSession` carried `rename`. Measured on the phone: a 133,017-byte file uploaded, then
-a different 187,856-byte file under the same name: the folder count did not change, the name read 187,856 bytes, the first was overwritten. **Every optimised photo is under 4 MiB**, so the route an optimised copy would take past the other guards was the one that overwrote the full-size original; an edited photo did the same. The `rename` is now in the URL (`?@microsoft.graph.conflictBehavior=rename`) so no caller can leave
+a different 187,856-byte file under the same name: the folder count did not change, the name read 187,856 bytes, the first was overwritten. **Every optimized photo is under 4 MiB**, so the route an optimized copy would take past the other guards was the one that overwrote the full-size original; an edited photo did the same. The `rename` is now in the URL (`?@microsoft.graph.conflictBehavior=rename`) so no caller can leave
 it out. Re-measured: the second upload came back `zz_replace2 1.png` and the original survived; both the over- and under-4 MiB edits produced `name 1.jpg`. The existing test "uploads never request replace on conflict" only ever covered the resumable route (its file is over 5 MiB), which is how this survived; two tests now cover the simple route and the 4 MiB boundary, and putting the old URL back fails them.
 **This corrects two claims written earlier:** the 19 Sept cache entry said uploads "rename on conflict and never overwrite", and the uploader's own class comment said it never overwrites. Both were false for small files until now. OneDrive keeps prior versions of a replaced file, so an overwrite made before this fix may be recoverable from OneDrive's version history; nothing in this app can do it.
-**The other layers that keep an optimised file out of the upload path were already sound** and are what protected real data: an optimised row stays UPLOADED so it is never pending; the scan skips a proxied file by MediaStore id; the upload loop skips a same-name-same-size file and recognises a proxy (marker plus a larger same-named cloud file) after a lost ledger.
+**The other layers that keep an optimized file out of the upload path were already sound** and are what protected real data: an optimized row stays UPLOADED so it is never pending; the scan skips a proxied file by MediaStore id; the upload loop skips a same-name-same-size file and recognises a proxy (marker plus a larger same-named cloud file) after a lost ledger.
 
 **2. FIXED - Pause then Resume uploaded every pending file twice.** Resume started the automatic chain and the manual chain within 15 ms; both read the same pending rows and uploaded them side by side, so 24 photos became 30 files in OneDrive, six of them ` 1.jpg` copies. An old race, not from today's work. `BackupEngine.uploadPending` now holds a process-wide `Mutex`: a second run waits and then reads the ledger as the first left it.
 Re-run with the fix: 24 files, no duplicates. `UploadRunExclusionTest` pins it, and removing the lock fails it.
 
 **3. KNOWN, not fixed - a hard kill mid-upload can leave one duplicate.** The file in flight when the process dies is finished by OneDrive after the app has gone, and the next run's listing may not show it yet, so it is sent again as ` 1.jpg` (1 in 25 in the run; the earlier 40-file run that included a kill had the same cause plus the Resume race). Loses nothing. **Proposed fix:** send with `conflictBehavior=fail`; on a 409 list the folder once, and if a same-size copy is there treat the file as already uploaded, otherwise retry with `rename`.
 
-**Also found and fixed:** after a background run uploaded a file, **Sync now stayed grey with Manual photos waiting**, and stayed enabled after they were optimised, because nothing told the open screen the ledger had changed. `BackupViewModel.observeWhatOptimisingWaits` now re-reads when the uploaded count or the optimise chain changes.
+**Also found and fixed:** after a background run uploaded a file, **Sync now stayed grey with Manual photos waiting**, and stayed enabled after they were optimized, because nothing told the open screen the ledger had changed. `BackupViewModel.observeWhatOptimizingWaits` now re-reads when the uploaded count or the optimize chain changes.
 
 **Campaign results** (test albums `zzT1..zzT13` and `zz_*`; files drawn from Ian's `camera roll` and `temp` folders; 13 scenarios; every PASS below was checked against the ledger, the files on disk and OneDrive's own listing):
-- **Backup and Off albums are never optimised**, even with photos and video on Automatic; a Backup album with two files over 4 MiB uploaded through the resumable route at exact sizes.
-- **Sync + photos Automatic:** 8 uploaded and optimised, 26.7 MB down to 5.1 MB; OneDrive lists 8 files at the original sizes; later runs upload nothing.
-- **Sync + photos Manual:** uploaded untouched; **Sync now enabled with nothing to send**; pressed, all optimised; grey again afterwards (re-verified in one process after the refresh fix).
-- **Optimise photos switch:** off, nothing optimised; on, optimising starts by itself. **Mixed formats:** HEIC optimised; small PNG, WebP and JPEG deliberately skipped and never retried; no file left half-processed.
-- **Video Automatic** (AC power): 2 clips optimised (4.4 MB to 0.8 MB, 1440x1080 to 640x480), a third judged "no smaller" and marked; lengths preserved. **Video Manual:** untouched on arrival, transcoded by Sync now, length within 55 ms.
-- **Album switched Backup to Sync with files already in OneDrive:** the direct hook fired (log shows optimising queued before the run finished), 6 s, 26.3 MB reclaimed. **Sync to Backup:** new files uploaded, not touched.
-- **Restore an optimised album:** every file back to its exact original size, pinned Keep at full size, OneDrive unchanged, Automatic optimising did not shrink them again.
+- **Backup and Off albums are never optimized**, even with photos and video on Automatic; a Backup album with two files over 4 MiB uploaded through the resumable route at exact sizes.
+- **Sync + photos Automatic:** 8 uploaded and optimized, 26.7 MB down to 5.1 MB; OneDrive lists 8 files at the original sizes; later runs upload nothing.
+- **Sync + photos Manual:** uploaded untouched; **Sync now enabled with nothing to send**; pressed, all optimized; grey again afterwards (re-verified in one process after the refresh fix).
+- **Optimize photos switch:** off, nothing optimized; on, optimizing starts by itself. **Mixed formats:** HEIC optimized; small PNG, WebP and JPEG deliberately skipped and never retried; no file left half-processed.
+- **Video Automatic** (AC power): 2 clips optimized (4.4 MB to 0.8 MB, 1440x1080 to 640x480), a third judged "no smaller" and marked; lengths preserved. **Video Manual:** untouched on arrival, transcoded by Sync now, length within 55 ms.
+- **Album switched Backup to Sync with files already in OneDrive:** the direct hook fired (log shows optimizing queued before the run finished), 6 s, 26.3 MB reclaimed. **Sync to Backup:** new files uploaded, not touched.
+- **Restore an optimized album:** every file back to its exact original size, pinned Keep at full size, OneDrive unchanged, Automatic optimizing did not shrink them again.
 - **Archive with opt-outs:** swipe-out remembered; Android asked about exactly 4 of 6; 4 trashed, 2 kept; rows ARCHIVED and flagged gone; OneDrive holds all 6; the deleted-files window stayed silent; **Restore returned the 4 at full size and pinned.**
-- **Edited photo** in a Backup album: both versions kept, renamed, on both upload routes. **An edit saved over an already-optimised photo is not uploaded at all** (same MediaStore id, so it is taken to be the proxy). Nothing is overwritten, but the edit has no cloud copy until the file is restored to full size; pre-existing design, worth Ian's decision.
+- **Edited photo** in a Backup album: both versions kept, renamed, on both upload routes. **An edit saved over an already-optimized photo is not uploaded at all** (same MediaStore id, so it is taken to be the proxy). Nothing is overwritten, but the edit has no cloud copy until the file is restored to full size; pre-existing design, worth Ian's decision.
 - **Pause / Resume / force-kill,** 40 files: all uploaded at the right sizes; duplicates as above.
 
-**Test-rig notes.** My first attempts at driving the UI mis-tapped neighbouring albums, which is why `zzT1_backup` briefly ended up on Sync; **none of Ian's albums, pins or settings changed** (checked against a baseline taken before testing) and his optimise switches are back to photos Manual, video Manual. A file that exists elsewhere on the phone by name and size is never marked "gone" after Archive, by design; the test set had to avoid Ian's `Pictures` album to see the flag. Left on the phone and in OneDrive (`Samsung Gallery/DCIM/zz*`): the test albums, in modes SYNC, BACKUP and ARCHIVE. Nothing was deleted.
+**Test-rig notes.** My first attempts at driving the UI mis-tapped neighbouring albums, which is why `zzT1_backup` briefly ended up on Sync; **none of Ian's albums, pins or settings changed** (checked against a baseline taken before testing) and his optimize switches are back to photos Manual, video Manual. A file that exists elsewhere on the phone by name and size is never marked "gone" after Archive, by design; the test set had to avoid Ian's `Pictures` album to see the flag. Left on the phone and in OneDrive (`Samsung Gallery/DCIM/zz*`): the test albums, in modes SYNC, BACKUP and ARCHIVE. Nothing was deleted.
 
 
-### 20 Sept 2026 - the Camera album: no Sync, and a manual "optimise what is old" control in its file list
+### 20 Sept 2026 - the Camera album: no Sync, and a manual "optimize what is old" control in its file list
 
-Ian's design, after the Automatic-optimise change: *"I don't want a user to take a picture/video and then BAM it's optimized already."* Answers taken as given: Archive stays available for Camera; the control respects the Optimise photos / Optimise video switches; age is read from the file's modified time; and *"this isn't a Backup - this is basically a Manual Optimization for a single folder"*.
+Ian's design, after the Automatic-optimize change: *"I don't want a user to take a picture/video and then BAM it's optimized already."* Answers taken as given: Archive stays available for Camera; the control respects the Optimize photos / Optimize video switches; age is read from the file's modified time; and *"this isn't a Backup - this is basically a Manual Optimization for a single folder"*.
 
 **What was built.**
 - **`CameraAlbum`** (by name, ignoring case): the Camera menu offers Off, Backup and Archive. Three doors shut: the menu (`AlbumModeDropdown` takes the list), `setAlbumMode` (refuses Sync), and seeding (`BackupEngine.refreshLedger` and Select all write `CameraAlbum.seeded`, so a default of Sync gives a new Camera album Backup). **An album already at Sync is left alone**, which is why Ian's Moto G Camera still read Sync until I moved it by hand for the test.
-- **The control**, in Camera's file list only: *Only list Photos/Videos older than* 1 day / 1 week / 1 month / 6 months / 1 year (`CameraOptimiseAge`, its own scale, not `MediaAge`). Picking one fills the list with the files it would touch and the card says how many and about how much space (`CameraOptimisePlan.estimatedSavedBytes`: 80% of a photo, the chosen video quality's figure for a clip, marked "(estimate)"). Nothing happens until **Optimise N files** is pressed. The choice is screen state and is not stored: it is not a rule.
-- **Swipe a file out** (left = keep at full size, greys it and takes it out of the count; right = back in). It is `FilePin`, the same pin Restore and the Archive tab use, so there is no new column and no migration. **The invariant: a pinned file is never in `CameraOptimisePlan.eligible`**, the only list the worker acts on. A file at full size in a Camera list that is also an Archive opt-out is why **the control is not shown while Camera is set to Archive**: the swipe would silently opt the file out of Archive too.
-- **The work** is a new phase of the existing `OptimiseWorker` (`PHASE_CAMERA`, inputs: album, cutoff, excluded ids). It recomputes the plan from the ledger with the cutoff fixed at the tap, so the set done is the set shown; a file can leave the plan meanwhile (swiped out, finished, gone) and never join it. Photos one at a time through `ProxyApplier.apply`; clips three a batch through the new `VideoOptimiser.optimiseEntries`. A file that fails is stepped over, its id carried in the continuation; a batch that makes no progress ends the chain. Files outside a granted folder go through Android's own dialog first (`prepareCameraOptimise` -> `NeedsConsent`), then the worker runs; **that route was not exercised on hardware, because every Camera file on the Moto G sits inside a granted folder** and the scanner only follows granted folders, so there is no way to put one outside from the UI.
+- **The control**, in Camera's file list only: *Only list Photos/Videos older than* 1 day / 1 week / 1 month / 6 months / 1 year (`CameraOptimizeAge`, its own scale, not `MediaAge`). Picking one fills the list with the files it would touch and the card says how many and about how much space (`CameraOptimizePlan.estimatedSavedBytes`: 80% of a photo, the chosen video quality's figure for a clip, marked "(estimate)"). Nothing happens until **Optimize N files** is pressed. The choice is screen state and is not stored: it is not a rule.
+- **Swipe a file out** (left = keep at full size, greys it and takes it out of the count; right = back in). It is `FilePin`, the same pin Restore and the Archive tab use, so there is no new column and no migration. **The invariant: a pinned file is never in `CameraOptimizePlan.eligible`**, the only list the worker acts on. A file at full size in a Camera list that is also an Archive opt-out is why **the control is not shown while Camera is set to Archive**: the swipe would silently opt the file out of Archive too.
+- **The work** is a new phase of the existing `OptimizeWorker` (`PHASE_CAMERA`, inputs: album, cutoff, excluded ids). It recomputes the plan from the ledger with the cutoff fixed at the tap, so the set done is the set shown; a file can leave the plan meanwhile (swiped out, finished, gone) and never join it. Photos one at a time through `ProxyApplier.apply`; clips three a batch through the new `VideoOptimizer.optimizeEntries`. A file that fails is stepped over, its id carried in the continuation; a batch that makes no progress ends the chain. Files outside a granted folder go through Android's own dialog first (`prepareCameraOptimize` -> `NeedsConsent`), then the worker runs; **that route was not exercised on hardware, because every Camera file on the Moto G sits inside a granted folder** and the scanner only follows granted folders, so there is no way to put one outside from the UI.
 - Screens: the drill-down re-reads the ledger every two seconds while a Camera run is live and once when it ends, and the album cards refresh when it finishes (found stale on the first hardware pass and fixed).
-- Guide: new topic `album-camera-optimise` with a (?) beside the control's heading; the modes topic says Camera has no Sync. 95 topics, 49 with a (?), 0 out of date.
+- Guide: new topic `album-camera-optimize` with a (?) beside the control's heading; the modes topic says Camera has no Sync. 95 topics, 49 with a (?), 0 out of date.
 
-**Tests.** 20 new (`CameraAlbumTest`, `CameraOptimisePlanTest`); 553 in all, 0 failed. Mutation-checked: seeding ignoring the rule, the menu offering Sync, pinned files becoming eligible, the OneDrive size check removed, the master switch ignored, and the age comparison inverted each fail a test.
+**Tests.** 20 new (`CameraAlbumTest`, `CameraOptimizePlanTest`); 553 in all, 0 failed. Mutation-checked: seeding ignoring the rule, the menu offering Sync, pinned files becoming eligible, the OneDrive size check removed, the master switch ignored, and the age comparison inverted each fail a test.
 
 **Hardware (Moto G, a fixture of 12 files aged 0-500 days in DCIM/Camera, then a second of 12).**
-- Camera's menu shows Off, Backup, Archive. Choosing 1 week listed exactly the 8 files 7+ days old (7 photos and 1 clip) and "about 40 MB saved"; swiping one out gave 7 and "about 37 MB" and a greyed row; the button optimised the 6 photos and the clip, left the swiped one and the four newer ones at their original bytes, and OneDrive kept every original size.
-- The switches: video off listed 5 photos and said so; photos off listed the clip; both off said "Optimising is switched off in Settings" with no button. All 6 swiped out said "Everything this old is kept at full size"; swiping right returned the file to the list.
-- Second run: the card read "Optimising... 6 left", then 1 left, then "Nothing this old is ready to optimise", the list emptying as it went; the album counts went 42 to 48 optimised.
-- After both runs OneDrive lists 59 files for Camera, equal to the ledger: optimising re-uploaded nothing. Dark mode reads correctly (a theme change drops the open drill-down, which every album's drill-down already did). Crash log clean after every install.
+- Camera's menu shows Off, Backup, Archive. Choosing 1 week listed exactly the 8 files 7+ days old (7 photos and 1 clip) and "about 40 MB saved"; swiping one out gave 7 and "about 37 MB" and a greyed row; the button optimized the 6 photos and the clip, left the swiped one and the four newer ones at their original bytes, and OneDrive kept every original size.
+- The switches: video off listed 5 photos and said so; photos off listed the clip; both off said "Optimizing is switched off in Settings" with no button. All 6 swiped out said "Everything this old is kept at full size"; swiping right returned the file to the list.
+- Second run: the card read "Optimizing... 6 left", then 1 left, then "Nothing this old is ready to optimize", the list emptying as it went; the album counts went 42 to 48 optimized.
+- After both runs OneDrive lists 59 files for Camera, equal to the ledger: optimizing re-uploaded nothing. Dark mode reads correctly (a theme change drops the open drill-down, which every album's drill-down already did). Crash log clean after every install.
 - Not driven by hand: the harness's swipes sometimes missed a row when scrolling a long list; the swipes were then repeated by hand and the pin state checked in the ledger each time.
 
-**Left on the Moto G:** Camera is now **Backup** (it cannot be set back to Sync from the app, by design), 24 aged files `IMG_CT_*`/`VID_CT_*` and `IMG_CU_*`/`VID_CU_*` in DCIM/Camera and OneDrive (13 of them optimised, `IMG_CT_b1.jpg` kept at full size, the rest too new for the ages chosen), and both Settings switches on with Manual as before.
+**Left on the Moto G:** Camera is now **Backup** (it cannot be set back to Sync from the app, by design), 24 aged files `IMG_CT_*`/`VID_CT_*` and `IMG_CU_*`/`VID_CU_*` in DCIM/Camera and OneDrive (13 of them optimized, `IMG_CT_b1.jpg` kept at full size, the rest too new for the ages chosen), and both Settings switches on with Manual as before.
 
-**Open.** Whether the install wizard's "optimise everything" choices (2 and 3) should also skip Camera: Ian said he would consider it, and nothing here touches the wizard. An age is read from the modified time, so a photo edited yesterday is "1 day" old whatever it was taken.
+**Open.** Whether the install wizard's "optimize everything" choices (2 and 3) should also skip Camera: Ian said he would consider it, and nothing here touches the wizard. An age is read from the modified time, so a photo edited yesterday is "1 day" old whatever it was taken.
 
-**Same day, after Ian used it - changes to the Camera control.** Heading now reads *Only list Photos/Videos older than*. **Cancel** sits beside the age box (shown once an age is chosen) instead of a "Don't optimise" menu item; Choose and Cancel are wider. **All** is the last age (zero wait, so it lists a file modified a moment ago; it is the user's choice, made with the list in front of them and a swipe to leave anything out, and the guide says so). **The Camera list is empty until an age is chosen**, with a line saying so (Ian offered "list nothing" or "default to All"; I took the first because a default of All would put a one-tap "optimise everything" bar on screen the moment the album opens). The Sort row is hidden until then. The **Optimise N files** button moved out of the header to a full-width bar at the foot of the screen, the same as Restore's, shown when something is listed or a run is going, disabled and reading "Optimising... N left" during a run. **The (?) beside the bottom button is gone on both this bar and the Restore tab's**; the guide topic for Restore's bar therefore became guide-only (`ui=False`), because `HowToGuideConsistencyTest` requires every pop-up topic to be offered by a screen. Ian also reported swiping "non-functional"; it was the plain list, which does not swipe (before this change it still showed files). Checked on the Moto G in light and dark themes; Cancel returns to the empty state and the bar button optimised the two listed files.
+**Same day, after Ian used it - changes to the Camera control.** Heading now reads *Only list Photos/Videos older than*. **Cancel** sits beside the age box (shown once an age is chosen) instead of a "Don't optimize" menu item; Choose and Cancel are wider. **All** is the last age (zero wait, so it lists a file modified a moment ago; it is the user's choice, made with the list in front of them and a swipe to leave anything out, and the guide says so). **The Camera list is empty until an age is chosen**, with a line saying so (Ian offered "list nothing" or "default to All"; I took the first because a default of All would put a one-tap "optimize everything" bar on screen the moment the album opens). The Sort row is hidden until then. The **Optimize N files** button moved out of the header to a full-width bar at the foot of the screen, the same as Restore's, shown when something is listed or a run is going, disabled and reading "Optimizing... N left" during a run. **The (?) beside the bottom button is gone on both this bar and the Restore tab's**; the guide topic for Restore's bar therefore became guide-only (`ui=False`), because `HowToGuideConsistencyTest` requires every pop-up topic to be offered by a screen. Ian also reported swiping "non-functional"; it was the plain list, which does not swipe (before this change it still showed files). Checked on the Moto G in light and dark themes; Cancel returns to the empty state and the bar button optimized the two listed files.
 
 **Same day - one selecting gesture everywhere (Ian): swipe right to select, swipe left to deselect.** The Restore folder list already did it; the Restore **file** list (inside a folder) only took taps, and Ian reported it as not swiping. It now uses `SwipeChoiceBox`, as do the deleted-files window's cards (a tick still removes nothing by itself: the confirmation dialog stands between a swipe and OneDrive) and, already, Archive and Camera. Taps still work wherever they did. The hint text is one wording in every list (`select_swipe_hint`, "Swipe right to select / left to deselect"), Archive and Camera add "A deselected file stays ...", and screen-reader actions read Select / Deselect. Checked on the Moto G: Restore file list (right selects and brings the Restore bar up, left deselects and removes it, nothing restored) and the deleted-files window (3 test files deleted from the phone; right ticked one and showed "Remove 1 from OneDrive", left unticked it; finished with Keep all, nothing removed). **Left as they were:** the install wizard's folder checkboxes (a separate surface). Also made `SwipeChoiceBox` read its callbacks through `rememberUpdatedState`, so a list that reorders can never leave a swipe acting on the file that used to be in that slot; I could not make that fail on the phone, so it is hardening rather than a fix.
 
-**Decision, 20 Sept 2026 (Ian): the wizard is left as it is, Camera included.** The open question above (should choices #2 and #3 skip the Camera album, or apply an age floor, or should the wizard's optimise options be removed altogether) is closed with no change. Reasoning as Ian gave it: an optimise made by mistake is recoverable, because **Restore brings the full-size original back from OneDrive** and pins it so it is not shrunk again. Two facts worth keeping from the discussion, since the first was misstated at one point: **#3 optimises only what the run itself uploads** (what was on the phone and not yet in OneDrive), so a reinstalled phone with an existing cloud backup gets very little from it, and what it does touch skews to the newest photos; and **#2 optimises the whole library**. Not built, deliberately: a Camera skip (it would nearly empty #3), an age floor, and removing the wizard's optimise options.
+**Decision, 20 Sept 2026 (Ian): the wizard is left as it is, Camera included.** The open question above (should choices #2 and #3 skip the Camera album, or apply an age floor, or should the wizard's optimize options be removed altogether) is closed with no change. Reasoning as Ian gave it: an optimize made by mistake is recoverable, because **Restore brings the full-size original back from OneDrive** and pins it so it is not shrunk again. Two facts worth keeping from the discussion, since the first was misstated at one point: **#3 optimizes only what the run itself uploads** (what was on the phone and not yet in OneDrive), so a reinstalled phone with an existing cloud backup gets very little from it, and what it does touch skews to the newest photos; and **#2 optimizes the whole library**. Not built, deliberately: a Camera skip (it would nearly empty #3), an age floor, and removing the wizard's optimize options.
 
 ### 20 Sept 2026 (late) - the hard-kill duplicate: fixed, and the cause was not what this file said
 
@@ -6920,7 +6920,7 @@ default, the content trigger and 6-hourly periodic worker, the wizard's steps, t
 **Release gate, on this reading:** v0.3 has one item open (per-album space saved) and v0.4 none; the checklist
 no longer says otherwise. What still stands between the two milestones and a Play submission is not on the
 checklist: the testing affordances to strip, the open items in TASK-023, and whatever Ian decides about
-optimised photos that are edited (TASK-024).
+optimized photos that are edited (TASK-024).
 
 ### 20 Sept 2026 (night) - Settings re-laid out: Language last, a light line between settings, Albums reordered, folders ticked then removed
 
@@ -6942,15 +6942,15 @@ Ian sketched the changes as text mockups over several messages; this is what was
 - Guide (`c6_settings.py`) and the tour's Settings mock follow; regenerated, `--check` clean.
 - **Not done, and not asked for after Ian rewrote his message:** a "clear demarcation after the Archive heading", and "a user default
   for the Settings section". The first version of his message had both; the resent one did not.
-- **During the screenshot run the harness's swipes appeared to tick a folder box and flip Optimise photos on the test phone.** A targeted
+- **During the screenshot run the harness's swipes appeared to tick a folder box and flip Optimize photos on the test phone.** A targeted
   probe (swipes starting on the folder row, three times) did not reproduce it, so it is unexplained rather than ruled out.
 
-### 21 Sept 2026 - overnight on the Moto G: a 1,891-file Sync album, optimised unattended, and the Archive prompt after its Delay
+### 21 Sept 2026 - overnight on the Moto G: a 1,891-file Sync album, optimized unattended, and the Archive prompt after its Delay
 
 Ian set the `Pictures` album (1,891 files, 6.3 GB) to **Sync** and `zzT10_pause` to Archive (having pressed *Delay, 1 hour* on the Archive question) and asked for both to be watched overnight. A read-only monitor (a PC script; it taps nothing and changes nothing) took a ledger snapshot every 3 minutes from 00:09 to 10:18, with the phone on the charger.
 
 - **Backup half:** 1,613 pending rows were resolved in about 35 minutes by the skip-existing path (batches of 25, ~50 a minute): every file was already in OneDrive from the earlier wizard run, so **nothing was re-sent and no duplicate appeared**.
-- **Optimise half:** ran on its own straight after, **32 batches of 60 photos, about a minute each, finished at 01:13**: 1,798 optimised, 93 left as not worth shrinking, 3 missing. **5,213 MB reclaimed**; the phone's free space rose from 95.0 to 100.1 GB, agreeing with it.
+- **Optimize half:** ran on its own straight after, **32 batches of 60 photos, about a minute each, finished at 01:13**: 1,798 optimized, 93 left as not worth shrinking, 3 missing. **5,213 MB reclaimed**; the phone's free space rose from 95.0 to 100.1 GB, agreeing with it.
 - **Nothing else:** no failed row, no crash-buffer entry, no stall, no error in the app's log, no change to any other album's mode or counts. Battery 100 % on the charger throughout.
 - **Archive:** nothing was removed and no file changed on disk (`zzT10_pause` still 24 present). The 10:13 log reads `validate: 25 confirmed, 0 could not be archived` and the screen shows the question again, *Yes / No / Delay*, over all 25 files. That is the Delay working as designed: it silences the question for the chosen time, and when the time has run out the question comes back; it is not a timer that archives anything. Removal still waits for Yes and then Android's own dialog.
 - **A correction to something said in chat the night before:** it was said that an Archive "minimum age" had never been built. The Delay (1 hour / 12 hours / 1 day) is built, in `ArchiveScreen`. What is not built is a rule that only archives files older than some age.
@@ -7077,7 +7077,7 @@ an explanatory line, never as a lie. `ArchiveReadyNotice.shouldNotify(lastSeen, 
 **growth** past the last count it was asked about — never merely because the count is still above zero —
 reusing the exact signal `ExitWarning`'s readyCount already uses (`BackupEngine.redundantLocalCopies`, a
 local ledger read, no extra network cost). Checked at the end of every complete `BackupWorker` run, the
-same point the photo/video optimisers are queued, wrapped in `runCatching` so it can never fail the backup.
+same point the photo/video optimizers are queued, wrapped in `runCatching` so it can never fail the backup.
 Tapping the notification opens `MainActivity` straight onto the Archive tab (`EXTRA_OPEN_ARCHIVE`, standard
 launch mode so `onCreate` always sees the Intent fresh). Deliberately **additive**, never a replacement for
 the Albums tab summons or the exit-warning dialog — see `ArchiveReadyNotifier`'s own doc comment for why a
@@ -7149,7 +7149,7 @@ First non-OneDrive, non-Google cloud run against a real account. Bucket `iandev-
 Google Drive (12 files, `camera roll`, 76.5 MB) and Dropbox (46 files, `dropbox`, 187 MB) uploaded from the Moto G with no retries and no errors; Ian confirmed the Dropbox files in his account. Drive reuses the Google Photos client ID (`drive.file` scope, same redirect), so it needed only the Drive API enabled and the scope added under Data Access in the Google Cloud Console. Dropbox needed `files.content.write`, the redirect `com.gallery.sync:/dropbox`, and **Enable additional users** because the app was created under a different account from the one signed in on the phone. Dropbox refused the wrong account with "This app has reached its user limit". pCloud is submitted and waiting on pCloud's manual approval; IDrive e2 is unrun. Albums that went wholly to another cloud no longer report "verified in OneDrive" (`AlbumRow.showsOneDriveClause`).
 
 ### 24 Sept 2026 — Restore works for Dropbox, verified on the Moto G (Ian)
-First non-OneDrive Restore. New `CloudDownloader` (implemented by `DropboxCloud.openStream`: `files/download` by the `id:` recorded at upload); `DownloadMissingFile` picks the source from the row's `location`; `BackupEntryDao.fetchableElsewhere` feeds `BackupEngine.filesNotOnThePhone`; `CloudCapabilities` gives Dropbox `restore = true` only. A restore is checked against the size the phone recorded at upload, so the row stays unverified (`remoteSizeBytes` NULL) and Archive/Sync stay off: verified sizes are what those need, and making Dropbox rows look verified would have let the wizard optimise plans act on files whose way back is not built. Device test: 5 Dropbox files moved out of `/dropbox`, listed on the Restore tab as 5 to download, restored with the progress bar, byte sizes identical to the originals. The first attempt failed cleanly with Dropbox 400 `files.content.read` missing: the app only requested the write scope. Now both are requested, and a sign-in without read reports "sign in to that cloud again". **Landing folder:** MediaStore only allows photos under DCIM/Pictures and videos under DCIM/Movies, so the album's own folder is used when it is one of those, and otherwise `DCIM/<album>` (Ian's `/dropbox` at the top of storage is not one). **Not done:** the Restore tab still lists OneDrive's drive and says "Checking OneDrive"; a Dropbox-only user would see a OneDrive warning.
+First non-OneDrive Restore. New `CloudDownloader` (implemented by `DropboxCloud.openStream`: `files/download` by the `id:` recorded at upload); `DownloadMissingFile` picks the source from the row's `location`; `BackupEntryDao.fetchableElsewhere` feeds `BackupEngine.filesNotOnThePhone`; `CloudCapabilities` gives Dropbox `restore = true` only. A restore is checked against the size the phone recorded at upload, so the row stays unverified (`remoteSizeBytes` NULL) and Archive/Sync stay off: verified sizes are what those need, and making Dropbox rows look verified would have let the wizard optimize plans act on files whose way back is not built. Device test: 5 Dropbox files moved out of `/dropbox`, listed on the Restore tab as 5 to download, restored with the progress bar, byte sizes identical to the originals. The first attempt failed cleanly with Dropbox 400 `files.content.read` missing: the app only requested the write scope. Now both are requested, and a sign-in without read reports "sign in to that cloud again". **Landing folder:** MediaStore only allows photos under DCIM/Pictures and videos under DCIM/Movies, so the album's own folder is used when it is one of those, and otherwise `DCIM/<album>` (Ian's `/dropbox` at the top of storage is not one). **Not done:** the Restore tab still lists OneDrive's drive and says "Checking OneDrive"; a Dropbox-only user would see a OneDrive warning.
 
 ### 24 Sept 2026 — Restore for Google Drive, Backblaze B2 and IDrive e2; Restore tab no longer assumes OneDrive (Ian)
 `GoogleDriveCloud.openStream` (`files/{id}?alt=media`, covered by the existing `drive.file` scope) and `S3CompatibleCloud.openStream` (signed GET on the object key recorded at upload, via `S3Client.getObject`) join `DropboxCloud` as `CloudDownloader`s. All four get `CloudCapabilities.RESTORE_ONLY`; Google Photos and pCloud stay backup-only (pCloud download not built). Device test on the Moto G: 3 Drive files and 3 Backblaze files moved out and restored together, byte sizes identical to the originals, progress bar shown, "6 back on this phone". IDrive e2 shares the S3 path and is untested on a real account. Files under `Movies/` that are photos land in `DCIM/<album>` (Android only allows photos under DCIM/Pictures). Restore tab: with OneDrive not connected the drive listing and its OneDrive warning are skipped (`RestoreViewModel`, ledger rows only); the empty-list wording and a failure reason say "cloud", and the guide sentence was updated. That skip is unit-untested and device-untested (would need OneDrive signed out); the OneDrive-connected path was re-checked on the phone. Archive and Sync still need verified sizes per cloud, and are the next stage.
@@ -7160,9 +7160,9 @@ Built and unit tested; **not yet run on the phone** (album modes are only set by
 **Archive stage 1 verified on the Moto G, 25 Sept 2026 (Google Drive).** Album `camera roll` set to Archive by Ian. Check: `confirmStillInCloud: 9 confirmed, 0 no longer in OneDrive, 0 could not be checked` (the log line still says OneDrive; the counts are the ones that matter), each answered live by Drive. Ian's three restored files were correctly left alone (Restore pins what it brings back). Android's trash dialog "Allow GallerySync to move 9 photos to trash?" raised once (batch 1 of 1); the 9 files were renamed `.trashed-<expiry>-<name>` in place, as on every earlier trash test. The Restore tab then offered exactly those 9 ("9 files · 56 MB, 9 to download") and restored them from Drive; all 9 byte sizes equal their trashed originals. Not exercised on the device: the prune after an album empties completely (the pinned files kept `camera roll` on the scan); that is covered by the androidTest. Backblaze, Dropbox and IDrive share the verifier interface but their live Archive checks have only run against local servers. The trashed originals stay in the phone's Trash until Ian empties it.
 
 ### 25 Sept 2026 — Sync for Dropbox, Google Drive, Backblaze B2 and IDrive e2, stage 2 of TASK-027 (Ian)
-Built and tested; **device test with Ian pending** (he sets the Optimise switches and an album to Sync). See TASK-027 for the design: a live per-file check (`CloudOriginalCheck`) stands in front of every in-place overwrite, because Sync leaves the cloud as the only holder of the original. Verified so far: unit tests (gate, held/expiry, capability list matches the SQL list, Archive of an optimised file by MediaStore id) and 11 androidTests on the Moto G run by hand (`SyncCandidatesTest`, `LedgerPruningTest`). Not on a real cloud yet.
+Built and tested; **device test with Ian pending** (he sets the Optimize switches and an album to Sync). See TASK-027 for the design: a live per-file check (`CloudOriginalCheck`) stands in front of every in-place overwrite, because Sync leaves the cloud as the only holder of the original. Verified so far: unit tests (gate, held/expiry, capability list matches the SQL list, Archive of an optimized file by MediaStore id) and 11 androidTests on the Moto G run by hand (`SyncCandidatesTest`, `LedgerPruningTest`). Not on a real cloud yet.
 
-**Sync verified on the Moto G with Dropbox, 25 Sept 2026.** Ian set `dropbox` to Sync with Optimise photos on. `OptimiseWorker: sync photos: proxying 41 of 41` then `ProxyApplier: proxied 41 files, reclaimed 138312679 bytes, 0 not worth proxying`; 187 MB became 31 MB, each file gated by the live Dropbox check first. A pulled proxy is a valid 2048x1152 JPEG with its EXIF and GPS kept. The 5 pinned files were skipped. Restore in place: 4 files restored from Dropbox, each at exactly its recorded original size, no staging leftovers, and they were pinned (`modeOverride = BACKUP`) so Sync does not shrink them again. Archive of an optimised file and Sync on Drive / Backblaze are still to test.
+**Sync verified on the Moto G with Dropbox, 25 Sept 2026.** Ian set `dropbox` to Sync with Optimize photos on. `OptimizeWorker: sync photos: proxying 41 of 41` then `ProxyApplier: proxied 41 files, reclaimed 138312679 bytes, 0 not worth proxying`; 187 MB became 31 MB, each file gated by the live Dropbox check first. A pulled proxy is a valid 2048x1152 JPEG with its EXIF and GPS kept. The 5 pinned files were skipped. Restore in place: 4 files restored from Dropbox, each at exactly its recorded original size, no staging leftovers, and they were pinned (`modeOverride = BACKUP`) so Sync does not shrink them again. Archive of an optimized file and Sync on Drive / Backblaze are still to test.
 
 ### 25 Sept 2026 — Signing out of a cloud no longer re-pairs its folders (Ian)
 `CloudProvidersViewModel.disconnect` used to move every folder paired with that cloud, and its unsent files, to the main cloud. Ian signed out of Dropbox to change account and his `dropbox` folder silently became OneDrive; new files in it (a copy, `dropbox (1)`) then went to OneDrive. Ian: this must be the user's decision, since a sign-out may be a mistake or the files may be meant to stay. Now `disconnect` only signs out. A folder stays paired and its unsent files wait: `BackupEngine.uploadPending` already skips a cloud that is not connected without failing rows. Moving a folder is done from its own menu in Settings. The main cloud is no longer re-pointed either. `setMain` (the wizard's choice of free cloud) is unchanged.
@@ -7173,17 +7173,17 @@ Built and tested; **device test with Ian pending** (he sets the Optimise switche
 *Where each folder goes* listed no Movies row although 12 files sat in `Movies/blaze-test`. An album is a folder's leaf name, so `DCIM/blaze-test` (3 restored files) and `Movies/blaze-test` (12) were one album, and `MediaAlbum.topLevelFolder` named only the first, DCIM. The folder list, and `SetFolderDestination`'s re-pointing of unsent rows, now use `MediaAlbum.inFolders` (per-folder counts) through `sharesByFolder()`. Seen on the Moto G: a Movies row, 12 files, Backblaze B2. Uploads were never affected: `BackupEngine` routes each file by its own path. **Known limit:** the album row's own "sent to" line and its routing still speak for the album's first folder, and re-pointing a folder retargets unsent rows by album name, so an album that lives in two folders retargets both folders' unsent files together. Ian's `blaze-test` is the only case; nothing more is done about it until it matters.
 
 ### 25 Sept 2026 — "OneDrive" removed from wording that applies to every cloud (Ian)
-Ian saw "Checking OneDrive for more…" under the Restore header while restoring from Dropbox. About 40 strings that describe cloud-agnostic behaviour now say "your cloud": Restore's checking and unreachable lines, the Albums Rescan label (now just "Checking…", the longer text clipped in its button), Archive's check and refusal messages, the ready-to-archive notice and exit warning, sync and optimise explainers, the wizard and abort wording, upload status and stop reasons, the error messages, and the in-app topics on what the app does, modes, Archive, the promise, optimising, deleting and the recycle bin. **Kept on purpose because they are true of OneDrive only:** sign-in and the OneDrive folder picker, the deletion window (moves OneDrive copies to OneDrive's recycle bin), the per-album "verified in OneDrive" line (shown only for OneDrive albums), first-run reconciliation, and the Camera manual optimise. **Not touched:** `help_topics.xml` (the (?) help pages, ~40 mentions, several describing the old Settings layout, e.g. the removed "Current folder location") and Ian's guide in `tools/guide`; both need a content pass of their own. `BrowseScreen` and `RetrieveScreen` hold more OneDrive text but nothing navigates to them.
+Ian saw "Checking OneDrive for more…" under the Restore header while restoring from Dropbox. About 40 strings that describe cloud-agnostic behaviour now say "your cloud": Restore's checking and unreachable lines, the Albums Rescan label (now just "Checking…", the longer text clipped in its button), Archive's check and refusal messages, the ready-to-archive notice and exit warning, sync and optimize explainers, the wizard and abort wording, upload status and stop reasons, the error messages, and the in-app topics on what the app does, modes, Archive, the promise, optimizing, deleting and the recycle bin. **Kept on purpose because they are true of OneDrive only:** sign-in and the OneDrive folder picker, the deletion window (moves OneDrive copies to OneDrive's recycle bin), the per-album "verified in OneDrive" line (shown only for OneDrive albums), first-run reconciliation, and the Camera manual optimize. **Not touched:** `help_topics.xml` (the (?) help pages, ~40 mentions, several describing the old Settings layout, e.g. the removed "Current folder location") and Ian's guide in `tools/guide`; both need a content pass of their own. `BrowseScreen` and `RetrieveScreen` hold more OneDrive text but nothing navigates to them.
 
 ### 25 Sept 2026 — Sync no longer tries files that are gone from the phone; Sync verified with Drive, Backblaze and IDrive e2 (Ian)
-**Bug found on the IDrive test.** `e2test` uploaded, but Sync stopped at once: `stopped at 20180628_180020.jpg (RecoverableSecurityException)`. The album `Temp0` is set to Sync and held 16 ledger rows for files Archive had removed earlier (trashed, `cloudDecision = ARCHIVED`). They were pinned until Ian's clean-up of pins, then became candidates; the queue is largest-first, so the trashed 8 MB file led it, failed three times and stopped the run, and nothing behind it was optimised. The four candidate queries (`proxyCandidates`, `proxyCandidatesAll`, `videoOptimiseCandidates`, `videoOptimiseCandidatesAll`) now also require `localMissingSinceEpochMillis IS NULL` and `cloudDecision` not `ARCHIVED`. androidTest `SyncCandidatesTest.rowsWhoseFileHasGoneAreNeverCandidates` (4 pass on the Moto G). After the fix `e2test` shrank 10 of 10 (49.0 MB to 9.6 MB). **Still open:** one file that fails with a permissions error still stops the whole run behind it; a per-file hold would be safer.
+**Bug found on the IDrive test.** `e2test` uploaded, but Sync stopped at once: `stopped at 20180628_180020.jpg (RecoverableSecurityException)`. The album `Temp0` is set to Sync and held 16 ledger rows for files Archive had removed earlier (trashed, `cloudDecision = ARCHIVED`). They were pinned until Ian's clean-up of pins, then became candidates; the queue is largest-first, so the trashed 8 MB file led it, failed three times and stopped the run, and nothing behind it was optimized. The four candidate queries (`proxyCandidates`, `proxyCandidatesAll`, `videoOptimizeCandidates`, `videoOptimizeCandidatesAll`) now also require `localMissingSinceEpochMillis IS NULL` and `cloudDecision` not `ARCHIVED`. androidTest `SyncCandidatesTest.rowsWhoseFileHasGoneAreNeverCandidates` (4 pass on the Moto G). After the fix `e2test` shrank 10 of 10 (49.0 MB to 9.6 MB). **Still open:** one file that fails with a permissions error still stops the whole run behind it; a per-file hold would be safer.
 
 **Device results, 25 Sept 2026.** Sync (upload, live check, shrink), Restore in place and Restore of archived files were run on the Moto G against real accounts: Dropbox (41 shrunk, 4 restored in place, 36 archived and restored), Google Drive (10 shrunk, 5 restored), Backblaze B2 (12 shrunk, 4 restored in place, 16 archived and 10 restored) and IDrive e2 (10 uploaded and shrunk). Every restored file matched its recorded original size. Archive's live check refused 10 Dropbox files while Dropbox was signed out ("could not be checked": nothing removed) and confirmed the B2 files. Restoring from another cloud lands photos under `DCIM/<album>` when the album folder is not a photo root.
 
 **One failing file no longer stops a Sync run, 25 Sept 2026 (Ian).** `ProxyApplier.apply` used to stop at the first file that failed three attempts, so one file ahead of the rest (largest first) blocked every photo behind it. Now that file is held back for six hours in memory (`CloudOriginalCheck.holdFailed`) and the run goes on; three failures in a row still stop it (`FailureStreak`), since that points at the run (no space, revoked grant) and not the file. Nothing is recorded as shrunk unless it was, so "which photos are still full quality" stays answerable from `isProxied`. Unit tested (`FailureStreakTest`); the hold-and-continue path itself is unexercised on the phone, because the trashed-file case that caused it is now filtered out earlier.
 
 ### 25 Sept 2026 — How To Guide rewritten for the multi-cloud app (Ian: "you can start rewriting")
-The guide (`tools/guide/content`, one source for the published pages, the setup page and the (?) pop-ups) was brought up to date with the app. **First-time setup:** one list of clouds with nothing ticked, the first ticked is free, one Connect card per cloud finished before the next, no skip, and a **Goes to** button that starts blank. **Albums:** the New tag and *Show new Albums*, the cloud line for OneDrive against "N sent to <cloud>" for the others, and what a cloud that cannot do a mode says. **Restore:** every cloud, where restored files land (DCIM/<album> when the album's folder is not a photo root), the progress bar. **Archive:** the live per-file check for Dropbox, Google Drive, Backblaze B2 and IDrive e2, the original's size after Sync, and that being unable to ask removes nothing. **Settings:** Clouds and Sign out (warning, then leave or restore first), *Where each folder goes* replacing *Current folder location*, the deletion choice worded as Cloud, and the removed default-mode setting. **Concepts and FAQ:** how verification works per cloud, where data lives, four new questions (signed-out folders wait, rejected keys, could not check, reconnect that cloud). Everything that is true of OneDrive only keeps its OneDrive wording (the OneDrive folder chooser, whose two topics say it is not on Settings in this version, the deletion window, the OneDrive album line, first-run reconciliation, the Camera manual optimise). The pages were regenerated (`docs/how-to-guide*.html`, `docs/setup-guide.html`, `help_topics.xml`) and the guide consistency test passes. **Not covered:** the Delete Account Info and Privacy Policy pages in `docs/` are separate hand-written pages and still describe OneDrive and a Microsoft account.
+The guide (`tools/guide/content`, one source for the published pages, the setup page and the (?) pop-ups) was brought up to date with the app. **First-time setup:** one list of clouds with nothing ticked, the first ticked is free, one Connect card per cloud finished before the next, no skip, and a **Goes to** button that starts blank. **Albums:** the New tag and *Show new Albums*, the cloud line for OneDrive against "N sent to <cloud>" for the others, and what a cloud that cannot do a mode says. **Restore:** every cloud, where restored files land (DCIM/<album> when the album's folder is not a photo root), the progress bar. **Archive:** the live per-file check for Dropbox, Google Drive, Backblaze B2 and IDrive e2, the original's size after Sync, and that being unable to ask removes nothing. **Settings:** Clouds and Sign out (warning, then leave or restore first), *Where each folder goes* replacing *Current folder location*, the deletion choice worded as Cloud, and the removed default-mode setting. **Concepts and FAQ:** how verification works per cloud, where data lives, four new questions (signed-out folders wait, rejected keys, could not check, reconnect that cloud). Everything that is true of OneDrive only keeps its OneDrive wording (the OneDrive folder chooser, whose two topics say it is not on Settings in this version, the deletion window, the OneDrive album line, first-run reconciliation, the Camera manual optimize). The pages were regenerated (`docs/how-to-guide*.html`, `docs/setup-guide.html`, `help_topics.xml`) and the guide consistency test passes. **Not covered:** the Delete Account Info and Privacy Policy pages in `docs/` are separate hand-written pages and still describe OneDrive and a Microsoft account.
 
 ### 25 Sept 2026: release build for Play Internal Testing (versionCode 3, 0.3.2)
 
@@ -7195,7 +7195,7 @@ Bumped `versionCode` 2 to 3 and `versionName` 0.3.0 to 0.3.2 and built the signe
 
 ### 25 Sept 2026: the Play build on a fresh Moto G, and Restore writes back into the folder it left
 
-**Fresh install from Play Internal Testing (versionCode 3, 0.3.2), Moto G, real accounts.** The Play-signed build's key is `A9:85:65:5D:F5:C5:A9:12:62:23:D4:8D:78:73:23:81:FF:AE:24:24` (read off the installed APK with `apksigner`); the `deployment_cert.der` in Play's *Download certificates* zip matches it. **OneDrive, Google Photos, Dropbox and IDrive e2 all signed in on it** with no registration of that key anywhere, so neither the MSAL hash nor the Google Android client needed a release-only config. The trial started and let the three extra clouds through. First backup (276 files, four clouds) finished; a Camera album made from 7 photos and a video appeared as a new album at Off, was set to Backup by Ian, and uploaded to OneDrive. Photo Sync shrank Temp01 and Temp02 (33 MB to 6 MB). **Optimise video is off by default**, so PauseTest's videos did not shrink until Ian turned it on (Manual, Straight away): the 107.7 MB clip became 20.8 MB, played in full, and Restore in place returned it to exactly 107,719,409 bytes; five smaller clips were left alone. **Archive then Restore on IDrive e2, twice:** 20 photos archived, Trash emptied by Ian, restored from IDrive e2 alone to exactly 68,684 KB, the album came back at Off (never Archive) with all 20 kept at full size; after opting the files out of the pin the second Archive ran and the album's mode retired again. The Play build's database cannot be read (`run-as` refuses a non-debuggable package), so results came from the screen, the disk and the network counters.
+**Fresh install from Play Internal Testing (versionCode 3, 0.3.2), Moto G, real accounts.** The Play-signed build's key is `A9:85:65:5D:F5:C5:A9:12:62:23:D4:8D:78:73:23:81:FF:AE:24:24` (read off the installed APK with `apksigner`); the `deployment_cert.der` in Play's *Download certificates* zip matches it. **OneDrive, Google Photos, Dropbox and IDrive e2 all signed in on it** with no registration of that key anywhere, so neither the MSAL hash nor the Google Android client needed a release-only config. The trial started and let the three extra clouds through. First backup (276 files, four clouds) finished; a Camera album made from 7 photos and a video appeared as a new album at Off, was set to Backup by Ian, and uploaded to OneDrive. Photo Sync shrank Temp01 and Temp02 (33 MB to 6 MB). **Optimize video is off by default**, so PauseTest's videos did not shrink until Ian turned it on (Manual, Straight away): the 107.7 MB clip became 20.8 MB, played in full, and Restore in place returned it to exactly 107,719,409 bytes; five smaller clips were left alone. **Archive then Restore on IDrive e2, twice:** 20 photos archived, Trash emptied by Ian, restored from IDrive e2 alone to exactly 68,684 KB, the album came back at Off (never Archive) with all 20 kept at full size; after opting the files out of the pin the second Archive ran and the album's mode retired again. The Play build's database cannot be read (`run-as` refuses a non-debuggable package), so results came from the screen, the disk and the network counters.
 
 **Found: a restored top-level folder split into two.** Restore creates files through MediaStore, which only allows photos under DCIM or Pictures, so `/iDrive` came back into `DCIM/iDrive`. Routing is by top-level folder, so those files would then follow DCIM's cloud. **Fix, built the same day, not yet run on a device:** `RestoreFolder.pick` chooses the granted folder named for the album when MediaStore could not write there; `SafMediaWriter.restoreFolderFor` and `createFile` write into it through the tree grant (download to a cache file, check the size, then create the document, rescan and wait for the MediaStore row; nothing here deletes). `DownloadMissingFile` tries it first and falls back to the MediaStore route when the grant cannot be used before anything is read. **No Room migration was needed:** the folder is found from the granted trees rather than recorded per row, so a file archived before this change is covered too. Ian had approved recording the folder; the lookup made that unnecessary, and it stays an option if two folders ever share an album name. Unit tests: `RestoreFolderTest` (8). Also the same day: the 3-minute delay chip is gone (six chips, two rows of three); the Backup Progress card lists how many files are pending per cloud, not x of y; Backup Plan is capitalised; Cloud is capitalised on the app's screens and in every document; tick became select except for the drawn mark, which is now a check mark. The Privacy Policy and Delete Account pages were rewritten for every cloud.
 
@@ -7217,55 +7217,55 @@ Bumped `versionCode` 2 to 3 and `versionName` 0.3.0 to 0.3.2 and built the signe
 
 **Every sign-out path now seen on the Moto G (Ian, 25 Sept 2026, version 9, 0.3.8).** Restore-first with all files back: signed out (twice, earlier and again with 7 files). **Leave them there:** the question read *There are 7 files (32 MB) not at full size on this phone.*, OneDrive signed out, every file byte-for-byte unchanged, app stayed on Settings, and signing back in also returned to Settings. **Stop, stay signed in** at 4 of 12: four files restored, the fifth logged `JobCancellationException` and stayed at its old small size (nothing half-written), still signed in, still on Settings. **Not everything came back** (network blocked for the app only, `cmd connectivity set-chain3-enabled true` then `set-package-networking-enabled false com.gallery.sync`; the second command does nothing without the first): *0 restored, 8 could not be. You are still signed in to OneDrive.*, files unchanged; **Stay signed in** closed it and kept the connection; **Sign out anyway** signed OneDrive out with the files left small, on Settings. No crash in any run. **Noticed, not changed:** with the network blocked the dialog sat on *0 of 8* for about a minute and a half before the Incomplete dialog appeared, because each download waits out a network timeout, and nothing on screen says it is waiting. Also: Restore pins every file it brings back, so Sync will not shrink them again until the user un-pins them (Sync now, which is inactive for Automatic and lit for Manual, ran only once files were un-pinned). The message reads *There are 1 files* for a single file; not fixed.
 
-**Dead-code audit (Ian, 26 Sept 2026): 2,703 lines removed, nothing user-visible changes, one latent bug found.** Method: Android lint (`UnusedResources`), a scan of every declared function, class, object, constant and property for names that appear nowhere else in `app/src` (`main`, `test`, `androidTest`, manifest and resources), repeated after each removal because deleting one thing orphans what only it used, and the Kotlin compiler's warnings (deprecations only, no unused variables or parameters). **Removed:** the old Browse screen and view model (`ui/browse`, with its test), the old `RetrieveScreen` and `RetrieveViewModel` (the Restore tab is `ui/restore/RestoreScreen`; `DeletionSection` and `DeletionViewModel` in `ui/retrieve` are live and stay), `RestoreFromCloud` and `RestoreResult`, `RestorableFile` and `BackupEngine.restorableFilesIn` (all reachable only from the deleted screen), `BackupViewModel.buildMoveToBackupRequest` and `onMoveToBackupFinished` (Archive has its own confirmation path), `ArchivePlan.withMark`, `ScopedDirectories.hasAny`, `BackupSettings.setWizardBackupTotal`, `OneDriveLauncher.isInstalled`, `SingleChoiceControl`, `LocationHeading`, `AlbumMode.settingsLabel`, the deprecated `BackupEngine.REMOTE_ROOT`, five DAO queries (`disabledAlbums`, `countNotInState`, `observeTotal`, `observePendingBytes`, `deleteMissing`; no schema change), unread properties (`didAnything`, `looksComplete`, `mainConnected`, `backedUpOnly`, `enabledBytes`, `isSelectionFullyBackedUp`, `activeAlbumCount`, `canRunBackup`, `removalHeldBack`, `optimisedBytes`, `videoOptimisedBytes`), 195 strings, 4 plurals and 7 colours that nothing referenced, and 23 unused imports. **Kept on purpose, and why:** `BackupViewModel.setAllAlbums` (its own note says it is kept for the wizard's Gate 2), `DestinationSection` and `FirstBackupSettings` (a note in `SettingsScreen` says they are kept for the OneDrive folder chooser). **Left for Ian to decide, not removed:** (1) the original ContentProvider (`provider/`, exported=false) and the `media_items` / `media_folders` tables with `MediaItemDao` and `MediaFolderDao`: nothing in the app reads or writes them except tests, but removing the tables is a Room schema change and needs a migration; (2) pure functions that only tests call: `FirstBackupWindow.hoursUntilOpen` and `mayRunNow`, the whole `LibraryEstimate` object, `MediaAge.hasElapsedFor`, `TreeScope.withoutRedundant`, `BackupLocations.inUse` and `canSwitchOff`, `BackupLocation.isBackupOnly`, `CloudCapabilities.RESTORE_ONLY`, `AlbumMode.removesLocal`. **Found by lint, fixed separately:** `VideoTranscoder.readSource` used `MediaMetadataRetriever().use { }`, but that class is `AutoCloseable` only from API 29 and the app supports 26, so on Android 8 and 9 the call threw, `runCatching` swallowed it and every video read as unreadable. It now releases in a `finally`. Lint also reports 32 `UnsafeOptInUsageError` errors on the media3 `UnstableApi` in `VideoTranscoder`, which the Kotlin compiler accepts; not investigated. Verified: debug build, 725 unit tests (0 failures), instrumented-test sources compile, `build_guide.py --check` clean. Not run on a device: every removal is compile-checked, and a removed resource that code still named would not have built.
+**Dead-code audit (Ian, 26 Sept 2026): 2,703 lines removed, nothing user-visible changes, one latent bug found.** Method: Android lint (`UnusedResources`), a scan of every declared function, class, object, constant and property for names that appear nowhere else in `app/src` (`main`, `test`, `androidTest`, manifest and resources), repeated after each removal because deleting one thing orphans what only it used, and the Kotlin compiler's warnings (deprecations only, no unused variables or parameters). **Removed:** the old Browse screen and view model (`ui/browse`, with its test), the old `RetrieveScreen` and `RetrieveViewModel` (the Restore tab is `ui/restore/RestoreScreen`; `DeletionSection` and `DeletionViewModel` in `ui/retrieve` are live and stay), `RestoreFromCloud` and `RestoreResult`, `RestorableFile` and `BackupEngine.restorableFilesIn` (all reachable only from the deleted screen), `BackupViewModel.buildMoveToBackupRequest` and `onMoveToBackupFinished` (Archive has its own confirmation path), `ArchivePlan.withMark`, `ScopedDirectories.hasAny`, `BackupSettings.setWizardBackupTotal`, `OneDriveLauncher.isInstalled`, `SingleChoiceControl`, `LocationHeading`, `AlbumMode.settingsLabel`, the deprecated `BackupEngine.REMOTE_ROOT`, five DAO queries (`disabledAlbums`, `countNotInState`, `observeTotal`, `observePendingBytes`, `deleteMissing`; no schema change), unread properties (`didAnything`, `looksComplete`, `mainConnected`, `backedUpOnly`, `enabledBytes`, `isSelectionFullyBackedUp`, `activeAlbumCount`, `canRunBackup`, `removalHeldBack`, `optimizedBytes`, `videoOptimizedBytes`), 195 strings, 4 plurals and 7 colours that nothing referenced, and 23 unused imports. **Kept on purpose, and why:** `BackupViewModel.setAllAlbums` (its own note says it is kept for the wizard's Gate 2), `DestinationSection` and `FirstBackupSettings` (a note in `SettingsScreen` says they are kept for the OneDrive folder chooser). **Left for Ian to decide, not removed:** (1) the original ContentProvider (`provider/`, exported=false) and the `media_items` / `media_folders` tables with `MediaItemDao` and `MediaFolderDao`: nothing in the app reads or writes them except tests, but removing the tables is a Room schema change and needs a migration; (2) pure functions that only tests call: `FirstBackupWindow.hoursUntilOpen` and `mayRunNow`, the whole `LibraryEstimate` object, `MediaAge.hasElapsedFor`, `TreeScope.withoutRedundant`, `BackupLocations.inUse` and `canSwitchOff`, `BackupLocation.isBackupOnly`, `CloudCapabilities.RESTORE_ONLY`, `AlbumMode.removesLocal`. **Found by lint, fixed separately:** `VideoTranscoder.readSource` used `MediaMetadataRetriever().use { }`, but that class is `AutoCloseable` only from API 29 and the app supports 26, so on Android 8 and 9 the call threw, `runCatching` swallowed it and every video read as unreadable. It now releases in a `finally`. Lint also reports 32 `UnsafeOptInUsageError` errors on the media3 `UnstableApi` in `VideoTranscoder`, which the Kotlin compiler accepts; not investigated. Verified: debug build, 725 unit tests (0 failures), instrumented-test sources compile, `build_guide.py --check` clean. Not run on a device: every removal is compile-checked, and a removed resource that code still named would not have built.
 
 **Version 10 (0.3.9) built for the Play Internal Testing track (Ian, 26 Sept 2026).** Carries the dead-code removal and the `MediaMetadataRetriever` fix, with no behaviour change on the Moto G or the Fold 8. Ian: test-only code and its tests stay until the app is published; the factory-reset Moto G and the Galaxy Z Fold 8 are still to be tested, and this is the build for both. Not yet installed on a device.
 
-**Factory-reset Moto G, Play version 10, Plan #2 (Ian, 26 Sept 2026).** Fresh install, all four Clouds signed in, folders routed DCIM to OneDrive, Pictures to IDrive e2 and DropBox to Dropbox, photos and video both optimised at High, delayed start 4 hours, closed with the wizard's Close, phone charging. **The delayed start fired unattended** at 05:17 for an arming time of 01:13 plus 4 hours (3 min 42 s late, inside the card's *may start after* wording), with the app closed and never swiped. All 187 files uploaded in eight batches, 0 failed; 178 of 181 photos shrunk and 3 were not worth it; 1 of 6 videos transcoded (107.7 MB to 20.8 MB) and 5 were not worth it. **Estimate against reality:** photos 583 MB estimated, 575 MB reclaimed (disk agrees: 696 MB to 121 MB); video 137 MB estimated, 83 MB reclaimed (154 MB to 71 MB), so the card promised about 60 percent more video saving than it delivered; total 721 MB estimated, 658 MB actual. The Albums tab agreed with the log (Car Show 34 optimised, DropBox 31 sent to Dropbox, iDrive 25 verified in OneDrive because that is `DCIM/iDrive`, PauseTest 1 optimised). The Pictures card (IDrive e2) was not read. **Noticed, not fixed:** Dropbox and IDrive uploads write no per-file log line, so routing can only be confirmed on screen; the reconcile counts files routed to another Cloud as *outstanding* (81 = 50 Pictures + 31 DropBox) because it looks only in OneDrive, harmless (the next run uploaded 0) but the number is wrong; the log labels the delayed run `(manual)`. **Found and fixed:** *Show new Albums* set the tab-wide mode filter to Off, which lit the Off pill, un-lit *All Albums*, rewrote the summary and showed every Off album, not just the new ones. It is now its own view (`showNewOnly`) that leaves the mode pills and the summary alone, with *Show all Albums* to return; tapping a mode pill clears it. **Wording:** the wizard heading is now *Ready to Back Up* (`tour_delay_title`, and the guide topic). Unit tests pass (725); not yet seen on a device.
+**Factory-reset Moto G, Play version 10, Plan #2 (Ian, 26 Sept 2026).** Fresh install, all four Clouds signed in, folders routed DCIM to OneDrive, Pictures to IDrive e2 and DropBox to Dropbox, photos and video both optimized at High, delayed start 4 hours, closed with the wizard's Close, phone charging. **The delayed start fired unattended** at 05:17 for an arming time of 01:13 plus 4 hours (3 min 42 s late, inside the card's *may start after* wording), with the app closed and never swiped. All 187 files uploaded in eight batches, 0 failed; 178 of 181 photos shrunk and 3 were not worth it; 1 of 6 videos transcoded (107.7 MB to 20.8 MB) and 5 were not worth it. **Estimate against reality:** photos 583 MB estimated, 575 MB reclaimed (disk agrees: 696 MB to 121 MB); video 137 MB estimated, 83 MB reclaimed (154 MB to 71 MB), so the card promised about 60 percent more video saving than it delivered; total 721 MB estimated, 658 MB actual. The Albums tab agreed with the log (Car Show 34 optimized, DropBox 31 sent to Dropbox, iDrive 25 verified in OneDrive because that is `DCIM/iDrive`, PauseTest 1 optimized). The Pictures card (IDrive e2) was not read. **Noticed, not fixed:** Dropbox and IDrive uploads write no per-file log line, so routing can only be confirmed on screen; the reconcile counts files routed to another Cloud as *outstanding* (81 = 50 Pictures + 31 DropBox) because it looks only in OneDrive, harmless (the next run uploaded 0) but the number is wrong; the log labels the delayed run `(manual)`. **Found and fixed:** *Show new Albums* set the tab-wide mode filter to Off, which lit the Off pill, un-lit *All Albums*, rewrote the summary and showed every Off album, not just the new ones. It is now its own view (`showNewOnly`) that leaves the mode pills and the summary alone, with *Show all Albums* to return; tapping a mode pill clears it. **Wording:** the wizard heading is now *Ready to Back Up* (`tour_delay_title`, and the guide topic). Unit tests pass (725); not yet seen on a device.
 
 **New albums are announced in a pop-up (Ian, 26 Sept 2026, later the same morning).** The coloured card in the Albums list is gone. A pop-up called *New Albums* says how many are waiting, with *Show new Albums* and *Dismiss*; Dismiss is the standing answer (`dismissWaitingAlbums`), and closing it any other way marks those albums as asked for this session, so it returns only when a further new album appears. While the list is narrowed to the new albums a quiet line above it reads *Showing new Albums* with *Show all Albums*. Uses theme colours and `AlertDialog`, so it follows dark mode; not yet seen on a device. The guide topic *New albums* was rewritten to match.
 
-**Routing confirmed on screen for the overnight run (Ian, 26 Sept 2026).** The Pictures card reads *50 files, 31 MB, 47 optimised, 50 sent to iDrive*. With Car Show, iDrive (`DCIM/iDrive`), PauseTest, Temp01 and Temp02 verified in OneDrive (106), DropBox sent to Dropbox (31) and Pictures sent to IDrive e2 (50), the total is 187, the number the run reported with 0 failed. The 3 Pictures photos that are not optimised are the 3 the log called *not worth proxying*. The fresh-install path on Play version 10 is now seen end to end on the reset Moto G: four Clouds, folder routing, delayed start with the app closed, first backup, photo and video optimise. Not yet exercised on this install: Sync, Archive, Restore and sign-out (all seen on the earlier install), the Fold 8, and the version 11 changes (Show new Albums as its own view, the New Albums pop-up).
+**Routing confirmed on screen for the overnight run (Ian, 26 Sept 2026).** The Pictures card reads *50 files, 31 MB, 47 optimized, 50 sent to iDrive*. With Car Show, iDrive (`DCIM/iDrive`), PauseTest, Temp01 and Temp02 verified in OneDrive (106), DropBox sent to Dropbox (31) and Pictures sent to IDrive e2 (50), the total is 187, the number the run reported with 0 failed. The 3 Pictures photos that are not optimized are the 3 the log called *not worth proxying*. The fresh-install path on Play version 10 is now seen end to end on the reset Moto G: four Clouds, folder routing, delayed start with the app closed, first backup, photo and video optimize. Not yet exercised on this install: Sync, Archive, Restore and sign-out (all seen on the earlier install), the Fold 8, and the version 11 changes (Show new Albums as its own view, the New Albums pop-up).
 
 **Cloud consoles checked against the overnight run, and two findings (Ian, 26 Sept 2026).** IDrive e2: 50 objects, 172.82 MB (binary MB), which is the 181 MB the wizard scan counted before anything shrank, so the Cloud holds the full-size originals while the phone holds 31 MB. OneDrive: 6 folders and 106 files, about 556 MB, folder by folder equal to the phone (Car Show 34, iDrive 25, PauseTest 6 at 154 MB against 74 MB on the phone, Temp01 30, Temp02 10, Camera 1). Dropbox: the `dropbox` folder holds 77 items, not 31, because it is a shared destination and the app never deletes from a Cloud, so earlier installs' files are still there. `IMG_4941.JPG` is on the phone at 837 KB and in Dropbox at 3.93 MB, uploaded and modified 25 Sept 2:33 pm. The reset install has an empty ledger, so all 31 went up again at about 05:2x, and Dropbox kept the old date: an `overwrite` upload (`DropboxCloud.kt:199`, `mode: overwrite`, `autorename: false`) with identical bytes appears to be a no-op that leaves the date alone, and only the two files Dropbox did not already hold (`20181006_152021.jpg`, `20200920_134910 (1).jpg`) show 5 am. **Finding 1, open, Ian's console:** Dropbox saves under `/Apps/iandev-gallertysync/GallerySync/dropbox`. The app name in the Dropbox App Console is spelled *gallertysync*, and every user who connects Dropbox will see that folder. Correct it in the console before anyone else connects; existing folders do not move. **Finding 2, not fixed:** a reset install re-sends every file to a Cloud that already has it, because the ledger is empty and only OneDrive is reconciled against the drive (the reconcile called 81 files outstanding for the two other Clouds). It is harmless on Dropbox because an identical overwrite changes nothing, but it costs the upload time and bandwidth of the whole library on a new phone or after Clear data, and it is worth deciding whether Dropbox, Google Drive, IDrive e2 and Backblaze B2 should be asked by name and size first.
 
-**The wizard no longer writes anything Settings owns (Ian, 26 Sept 2026, in capitals: THE WIZARD SHOULD NEVER EVER SET A DEFAULT IN SETTINGS).** Found on the reset Moto G: Settings showed Video Optimisation already on after a phone that had only been through the wizard, because the wizard's Optimisation Settings card wrote Settings' own stored values. It had done so since the card was built (`951926f`, 28 Aug, the photo switch through the master switch and Auto mode; `64c9caa`, 31 Aug, the video switch and quality). The 5 Sept report even listed it under *For Ian* ("CLAUDE.md says the two are independent in both directions; the code is not. Not changed") and it was left, and on 26 Sept it was wrongly offered back to Ian as a choice ("keep it shared") when it is a standing rule. **Fixed:** three wizard-owned values, `wizard_optimise_photos`, `wizard_optimise_video` and `wizard_video_quality` (`BackupPreferences.wizardOptimisePhotos`, `wizardOptimiseVideo`, `wizardVideoQuality`); `ReconcileViewModel` now has `setWizardOptimisePhotos`, `setWizardOptimiseVideo` and `setWizardVideoQuality` in place of `setAutoOptimiseEnabled`, `setOptimiseVideo` and `setVideoQuality`; the wizard's own video pass (`OptimiseWorker.runVideo`) reads the wizard's quality. Settings' values (`optimise_enabled`, `optimise_photos`, `photo_optimise_mode`, `optimise_video`, `video_quality`) are written only from the Settings tab. Settings keeps its defaults (video off). **Guard:** `WizardDoesNotWriteSettingsTest` reads the source and fails the build if `SetupTour` or any `ReconcileViewModel` function the tour calls writes a Settings-owned setter; add a new Settings value to its list. **Behaviour change to know about:** what someone chooses in the wizard's card no longer turns on Automatic optimising for Sync albums afterwards; that is now only what Settings says, and the wizard's one-time passes still follow the plan chosen, as before. Phones already set up keep whatever the old wizard wrote into Settings; nothing here rewrites it. **Still crossing, for Ian to rule on (the other direction of the rule):** the wizard READS Settings' *Use mobile data* (`allowMeteredNetwork`) and the deleted-files policy (`cloudDeletionPolicy`), and the main Cloud. Not changed. Unit tests pass (728); not yet seen on a device.
+**The wizard no longer writes anything Settings owns (Ian, 26 Sept 2026, in capitals: THE WIZARD SHOULD NEVER EVER SET A DEFAULT IN SETTINGS).** Found on the reset Moto G: Settings showed Video Optimization already on after a phone that had only been through the wizard, because the wizard's Optimization Settings card wrote Settings' own stored values. It had done so since the card was built (`951926f`, 28 Aug, the photo switch through the master switch and Auto mode; `64c9caa`, 31 Aug, the video switch and quality). The 5 Sept report even listed it under *For Ian* ("CLAUDE.md says the two are independent in both directions; the code is not. Not changed") and it was left, and on 26 Sept it was wrongly offered back to Ian as a choice ("keep it shared") when it is a standing rule. **Fixed:** three wizard-owned values, `wizard_optimize_photos`, `wizard_optimize_video` and `wizard_video_quality` (`BackupPreferences.wizardOptimizePhotos`, `wizardOptimizeVideo`, `wizardVideoQuality`); `ReconcileViewModel` now has `setWizardOptimizePhotos`, `setWizardOptimizeVideo` and `setWizardVideoQuality` in place of `setAutoOptimizeEnabled`, `setOptimizeVideo` and `setVideoQuality`; the wizard's own video pass (`OptimizeWorker.runVideo`) reads the wizard's quality. Settings' values (`optimize_enabled`, `optimize_photos`, `photo_optimize_mode`, `optimize_video`, `video_quality`) are written only from the Settings tab. Settings keeps its defaults (video off). **Guard:** `WizardDoesNotWriteSettingsTest` reads the source and fails the build if `SetupTour` or any `ReconcileViewModel` function the tour calls writes a Settings-owned setter; add a new Settings value to its list. **Behaviour change to know about:** what someone chooses in the wizard's card no longer turns on Automatic optimizing for Sync albums afterwards; that is now only what Settings says, and the wizard's one-time passes still follow the plan chosen, as before. Phones already set up keep whatever the old wizard wrote into Settings; nothing here rewrites it. **Still crossing, for Ian to rule on (the other direction of the rule):** the wizard READS Settings' *Use mobile data* (`allowMeteredNetwork`) and the deleted-files policy (`cloudDeletionPolicy`), and the main Cloud. Not changed. Unit tests pass (728); not yet seen on a device.
 
 **Dropbox edit test (Ian, 26 Sept 2026): no duplicates, and one open item.** Ian's aim was to see Dropbox not duplicate files across a wizard re-run. It did not: 77 items before and after the reset install's re-send of 31 identical files, and 77 after an edited same-named file. To force the collision he renamed the editor's output back to the original name, because both video editors he tried saved under a new name in a folder of their own in `Pictures`, and an editor that does that uploads as a new file and never collides. The edited file (`20210131_200750.jpg`, saved from the already-shrunk copy, 287.06 KB, 1536 x 969) replaced the Dropbox object; Dropbox kept the original *Date uploaded* and shows a new *Modified*. **Open, low urgency:** `DropboxCloud` uploads with `mode: overwrite` (line 199), and the S3 uploaders (IDrive e2, Backblaze B2) write to a fixed key, while OneDrive's uploader is written never to replace (`conflictBehavior = rename`, `UploadDtos.kt`: "CLAUDE.md forbids destroying a user's cloud file"). So an editor that saves over the file in place (the Samsung Gallery editor's Save, not Save as copy) would replace the full-size Cloud original with an edit of the shrunk copy on Dropbox and the S3 Clouds; Dropbox's Version history is the only recovery. Not decided, not changed. Possible shape if wanted: same name and same size means already there, same name and a different size means keep both under a different name, as OneDrive does. Worth checking the Samsung Gallery editor on the Fold 8 before deciding. Google Drive not confirmed.
 
-**An edit made in place over an optimised photo: measured on the Moto G, and Restore does not protect it (Ian asked for the test, 26 Sept 2026).** Test file `DCIM/Temp01/20171014_122728.jpg`, MediaStore id 153, album Temp01 on Backup (30 files, 30 optimised, 30 verified in OneDrive, confirmed by Ian), on Play version 10. The optimised copy was 744,869 bytes. An in-place edit was simulated over adb by appending 17 bytes (`INPLACE-EDIT-TEST`) to the file and having MediaStore rescan it: **the id stayed 153**, the size became 744,886 and the date changed. **Upload:** after Ian opened the app and pressed Rescan, every run said 0 uploaded, the cloud check still read 106 already in OneDrive and 82 outstanding (a new file would have made 83), and the ledger scan still reported 10 files seen: the edit was **skipped, never uploaded**, because `BackupEngine.refreshLedger` skips any file whose MediaStore id is on a proxied row before it looks at size or date. **Restore:** the Restore tab listed the edited file as a normal *to restore* file (744 KB now, 3.75 MB in OneDrive) with no sign that it had changed. Ian tapped Restore: the file became **3,845,655 bytes**, its last bytes are the JPEG end marker, and the appended marker was gone: **Restore replaced the edit with the OneDrive original without asking or warning.** The card still read *30 optimised, 30 verified in OneDrive* throughout. **`TASK-024`'s claim that "Restore already refuses to write over a file whose size has changed" is wrong for this path and is corrected there.** Consequences: an editor that saves over the file in place (Samsung Gallery's plain Save, unconfirmed) leaves an edit that is never backed up, and Restore, Restore all, or *Restore them to the phone first* at sign-out can silently destroy it. Editors that save a copy (both of Ian's) are unaffected. **Not fixed; Ian has not decided.** Proposed, in two parts: (1) Restore refuses a file whose current size no longer equals `localProxySizeBytes`, with a reason the user can read; (2) a proxied file whose size has changed is treated as edited, unflagged, and uploaded as a new file (OneDrive renames it, `name 1.jpg`), which is the fix `TASK-024` already proposes. Dropbox and the S3 Clouds would overwrite the original instead (see the open item above), so (2) needs that decided too.
+**An edit made in place over an optimized photo: measured on the Moto G, and Restore does not protect it (Ian asked for the test, 26 Sept 2026).** Test file `DCIM/Temp01/20171014_122728.jpg`, MediaStore id 153, album Temp01 on Backup (30 files, 30 optimized, 30 verified in OneDrive, confirmed by Ian), on Play version 10. The optimized copy was 744,869 bytes. An in-place edit was simulated over adb by appending 17 bytes (`INPLACE-EDIT-TEST`) to the file and having MediaStore rescan it: **the id stayed 153**, the size became 744,886 and the date changed. **Upload:** after Ian opened the app and pressed Rescan, every run said 0 uploaded, the cloud check still read 106 already in OneDrive and 82 outstanding (a new file would have made 83), and the ledger scan still reported 10 files seen: the edit was **skipped, never uploaded**, because `BackupEngine.refreshLedger` skips any file whose MediaStore id is on a proxied row before it looks at size or date. **Restore:** the Restore tab listed the edited file as a normal *to restore* file (744 KB now, 3.75 MB in OneDrive) with no sign that it had changed. Ian tapped Restore: the file became **3,845,655 bytes**, its last bytes are the JPEG end marker, and the appended marker was gone: **Restore replaced the edit with the OneDrive original without asking or warning.** The card still read *30 optimized, 30 verified in OneDrive* throughout. **`TASK-024`'s claim that "Restore already refuses to write over a file whose size has changed" is wrong for this path and is corrected there.** Consequences: an editor that saves over the file in place (Samsung Gallery's plain Save, unconfirmed) leaves an edit that is never backed up, and Restore, Restore all, or *Restore them to the phone first* at sign-out can silently destroy it. Editors that save a copy (both of Ian's) are unaffected. **Not fixed; Ian has not decided.** Proposed, in two parts: (1) Restore refuses a file whose current size no longer equals `localProxySizeBytes`, with a reason the user can read; (2) a proxied file whose size has changed is treated as edited, unflagged, and uploaded as a new file (OneDrive renames it, `name 1.jpg`), which is the fix `TASK-024` already proposes. Dropbox and the S3 Clouds would overwrite the original instead (see the open item above), so (2) needs that decided too.
 
-**Edited optimised files: asked before Restore overwrites, and uploaded as new files (Ian's rulings, 26 Sept 2026; built, not yet on a device).** Ian: Restore should say *"This photo/video has been edited since it was backed up. Do you overwrite it?"*, because a person knows they are editing an optimised copy and most editors save under a new name, leaving only a deliberate in-place save; and *"treat the edited optimized file as a new file"*. **Restore:** `RestoreProxyInPlace.restore` now checks the file's real size on disk (`openFileDescriptor`, falling back to MediaStore) against `localProxySizeBytes` before downloading anything (`EditCheck.isEdited`); a mismatch returns `RestoreInPlaceResult.EditedSinceBackup` and touches nothing. The Restore tab marks those rows *Edited since it was backed up, left alone* and, once the run finishes, asks once: *Keep my edits* (first, the safe answer) or *Overwrite*, worded for one photo, one video or N files; Overwrite runs just those with `overwriteEdited = true`. Signing out with *Restore them to the phone first* asks the same question in a new `SignOutState.Edited` dialog (*Keep my edits* signs out and leaves them, *Overwrite*, *Stay signed in*); if anything else failed the existing Incomplete dialog counts the edits with the failures. **Upload:** `BackupEngine.refreshLedger` no longer skips a proxied file by MediaStore id alone. It skips it only while its size is the copy the app wrote or the original (the original so a stale MediaStore right after a shrink is not mistaken for an edit, `EditCheck.isEditedNow`); any other size is an edit, is scanned and ledgered as a new row, and uploads under its own name in every Cloud, `name (edited yyyyMMdd-HHmmss).ext` from the edit's own modified time (`EditedName`, chosen by `uploadNameFor` in both upload paths, decided by `BackupEntryDao.countProxiedSiblings`), so Dropbox and the S3 Clouds, which overwrite a fixed name, can no longer replace the full-size original with an edit. **Guard:** more than 10 edits in one scan and more than one in twenty of the shrunk files is treated as a stale or wrong index and stands down (`MAX_EDITS_PER_SCAN`), logged. No schema change. Tests: `EditCheckTest`, `EditedNameTest`, `EditedFileLedgerTest` (a shrunk file at its size, a stale index, one real edit, a dozen at once, one edit among forty), and two cases in `RestoreEverythingFromTest`; 746 unit tests pass. **Not yet seen on a device**: it needs a version 11 build; the risk to watch on the first run is any shrunk file being uploaded again as an `(edited …)` copy, which the log line `refreshLedger: N shrunk file(s) edited since they were backed up` would show. Guide topic *A photo or video you edited* added.
+**Edited optimized files: asked before Restore overwrites, and uploaded as new files (Ian's rulings, 26 Sept 2026; built, not yet on a device).** Ian: Restore should say *"This photo/video has been edited since it was backed up. Do you overwrite it?"*, because a person knows they are editing an optimized copy and most editors save under a new name, leaving only a deliberate in-place save; and *"treat the edited optimized file as a new file"*. **Restore:** `RestoreProxyInPlace.restore` now checks the file's real size on disk (`openFileDescriptor`, falling back to MediaStore) against `localProxySizeBytes` before downloading anything (`EditCheck.isEdited`); a mismatch returns `RestoreInPlaceResult.EditedSinceBackup` and touches nothing. The Restore tab marks those rows *Edited since it was backed up, left alone* and, once the run finishes, asks once: *Keep my edits* (first, the safe answer) or *Overwrite*, worded for one photo, one video or N files; Overwrite runs just those with `overwriteEdited = true`. Signing out with *Restore them to the phone first* asks the same question in a new `SignOutState.Edited` dialog (*Keep my edits* signs out and leaves them, *Overwrite*, *Stay signed in*); if anything else failed the existing Incomplete dialog counts the edits with the failures. **Upload:** `BackupEngine.refreshLedger` no longer skips a proxied file by MediaStore id alone. It skips it only while its size is the copy the app wrote or the original (the original so a stale MediaStore right after a shrink is not mistaken for an edit, `EditCheck.isEditedNow`); any other size is an edit, is scanned and ledgered as a new row, and uploads under its own name in every Cloud, `name (edited yyyyMMdd-HHmmss).ext` from the edit's own modified time (`EditedName`, chosen by `uploadNameFor` in both upload paths, decided by `BackupEntryDao.countProxiedSiblings`), so Dropbox and the S3 Clouds, which overwrite a fixed name, can no longer replace the full-size original with an edit. **Guard:** more than 10 edits in one scan and more than one in twenty of the shrunk files is treated as a stale or wrong index and stands down (`MAX_EDITS_PER_SCAN`), logged. No schema change. Tests: `EditCheckTest`, `EditedNameTest`, `EditedFileLedgerTest` (a shrunk file at its size, a stale index, one real edit, a dozen at once, one edit among forty), and two cases in `RestoreEverythingFromTest`; 746 unit tests pass. **Not yet seen on a device**: it needs a version 11 build; the risk to watch on the first run is any shrunk file being uploaded again as an `(edited …)` copy, which the log line `refreshLedger: N shrunk file(s) edited since they were backed up` would show. Guide topic *A photo or video you edited* added.
 
-**Version 11 (0.3.10) built for the Play Internal Testing track (Ian, 27 Sept 2026).** Carries, since version 10: the wizard's optimise card keeps its own answers and never writes Settings (`WizardDoesNotWriteSettingsTest` guards it); *Show new Albums* is its own view and new albums are announced in a *New Albums* pop-up; the wizard heading reads *Ready to Back Up*; Restore asks *Keep my edits* or *Overwrite* before replacing an edited file, and an edited optimised file uploads as a new file named `name (edited yyyyMMdd-HHmmss).ext`. 746 unit tests pass. **To verify on the Moto G once it is installed, in this order:** (1) after the update, no shrunk photo uploads again (the log must not show a run of `shrunk file(s) edited since they were backed up`, and `Everything here is backed up` must still read true); (2) repeat the in-place edit on a shrunk photo in an OneDrive album on Backup: it should upload as an `(edited …)` copy, the original in OneDrive untouched, and Restore on the original should now ask before overwriting; (3) Show new Albums and the New Albums pop-up in light and dark; (4) a fresh wizard run leaves Settings' Optimise switches at their defaults. Not yet installed.
+**Version 11 (0.3.10) built for the Play Internal Testing track (Ian, 27 Sept 2026).** Carries, since version 10: the wizard's optimize card keeps its own answers and never writes Settings (`WizardDoesNotWriteSettingsTest` guards it); *Show new Albums* is its own view and new albums are announced in a *New Albums* pop-up; the wizard heading reads *Ready to Back Up*; Restore asks *Keep my edits* or *Overwrite* before replacing an edited file, and an edited optimized file uploads as a new file named `name (edited yyyyMMdd-HHmmss).ext`. 746 unit tests pass. **To verify on the Moto G once it is installed, in this order:** (1) after the update, no shrunk photo uploads again (the log must not show a run of `shrunk file(s) edited since they were backed up`, and `Everything here is backed up` must still read true); (2) repeat the in-place edit on a shrunk photo in an OneDrive album on Backup: it should upload as an `(edited …)` copy, the original in OneDrive untouched, and Restore on the original should now ask before overwriting; (3) Show new Albums and the New Albums pop-up in light and dark; (4) a fresh wizard run leaves Settings' Optimize switches at their defaults. Not yet installed.
 
 **Version 11's edited-file upload found broken on first real test, fixed in version 12 (Ian, 27 Sept 2026).** On the Moto G with version 11, the same in-place-edit simulation as before (append bytes to a shrunk photo, id kept, size 744,886 style change) produced `refreshLedger: 1 shrunk file(s) edited since they were backed up` correctly, but the backup run then logged `recovered proxy record for 20181006_142732.jpg` and finished `0 uploaded, 1 already there` — the edit never left the phone. **Cause:** the ledger scan fix (BackupEngine.refreshLedger) was right, but the upload matching loop still looked the file up in OneDrive's listing by `entry.displayName` — the original photo's name — at three places: the exact-match skip, the proxy-recovery check, and the progress line. The edited row's displayName is still the original name (only the upload call itself was changed to send it as `uploadNameFor(entry)`), so it matched the untouched original already in OneDrive and was read as either already-uploaded or a proxy of that original, and skipped before the renamed upload could run. **Fix:** every lookup in the OneDrive matching loop, and `reconcileAndRequeue`'s own listing check, now uses `uploadNameFor(entry)` — computed once per row — instead of `entry.displayName`, so an edit is looked for (and not found) under its own edited name and falls through to a real upload. Guard test attempted (`EditedFileUploadTest`) but abandoned: exercising the OneDrive loop end-to-end needs `android.net.Uri.parse` and a suspend interface mock that this project's plain JVM unit tests (no Robolectric) cannot cleanly drive; the logic is covered instead by `EditedFileLedgerTest`, `EditCheckTest` and `EditedNameTest`, and by this device test. 746 unit tests pass. **To verify on the Moto:** repeat the same in-place edit; expect `1 uploaded` (not `1 already there`), the file appearing in OneDrive under its own `(edited …)` name alongside the untouched original, and Restore on the original prompting before overwrite.
 
 **Version 12 verified end to end on the Moto G (Ian, 27 Sept 2026).** The v11 leftover (a poisoned ledger row from the bug just fixed, recording the edit's size as a legitimate proxy size) meant a plain Rescan showed nothing new; a fresh edit (436,557 to 436,567 bytes) was needed to test past it. Result: `refreshLedger` detected the edit, the backup run logged `upload: stored 20181006_142732 (edited 20260927-062505).jpg (436567 bytes)` and finished `1 uploaded` — the fix holds. Ian then did Select all + Restore on the whole Temp01 folder (30 files): 28 untouched photos restored to full size normally, and the edited file was hit twice (the poisoned row and the genuine original, both `isProxied`, both pointing at mediaStoreId 155) and both times logged `20181006_142732.jpg: edited since it was backed up, left alone` — refused, nothing downloaded over it. The run finished, the header read *28 back to full quality. 2 edited, left alone.*, and the pop-up asked *2 files have been edited since they were backed up. Overwrite them with the originals?* with Overwrite and Keep my edits. Ian chose **Keep my edits**: the file stayed at 436,567 bytes, both duplicate restorable rows cleared from the list, no crash. **Feature proven end to end**: detected, uploaded under its own name, refused by Restore including in a bulk run, and left alone on request. **Confirmed side effect, not a defect, left for a future decision:** the edited file's Cloud copy also came down as a second physical file on the phone (`20181006_142732 (edited …).jpg`, logged via `DownloadMissingFile`), because Restore's missing-file check matches by name and no local file has that literal name yet. Harmless — no data lost — but a real duplicate on disk; worth deciding whether an edited file's own backup should ever be offered back as something 'missing'.
 
-**Version 12 on the Moto G, the version 11 checks (Ian, 27 Sept 2026).** Installed from Play (`versionCode=12`, `0.3.11`). The phone reports `minSdk=32`: that is Play's split for devices on API 32 and up, not the build, which is `minSdk = 26` in `build.gradle.kts` and in every merged manifest. **(1) No shrunk photo re-uploaded:** every scan logs `1 shrunk file(s) edited`, the one test edit already uploaded, and no run sent anything it had sent before. **(2) The New Albums pop-up and view, light and dark:** `DCIM/test01` (10 photos) raised *1 new Album is waiting for you to choose a mode* in light; set to Backup, all 10 uploaded at full size in 30 s. `DCIM/test02` (1 photo) raised it again in dark, and *Show new Albums* narrowed the list to `test02` with the *New* badge, *Showing new Albums* and *Show all Albums*, while the header stayed *All Albums* with the mode count unchanged. Settings in dark read cleanly and the tab survived the theme change. **(3) A fresh wizard leaving Settings' Optimise switches at their defaults** is still to run. **Found, low priority:** opening the app runs `refreshLedger` three times and the OneDrive reconcile twice, a few milliseconds apart, with the same answers. **Also:** the phone's log buffer was 256 KB and rolled over within minutes; raised to 16 MB with `logcat -G 16M`. New camera shots in `Camera` did not upload because Camera was at Off, which is correct.
+**Version 12 on the Moto G, the version 11 checks (Ian, 27 Sept 2026).** Installed from Play (`versionCode=12`, `0.3.11`). The phone reports `minSdk=32`: that is Play's split for devices on API 32 and up, not the build, which is `minSdk = 26` in `build.gradle.kts` and in every merged manifest. **(1) No shrunk photo re-uploaded:** every scan logs `1 shrunk file(s) edited`, the one test edit already uploaded, and no run sent anything it had sent before. **(2) The New Albums pop-up and view, light and dark:** `DCIM/test01` (10 photos) raised *1 new Album is waiting for you to choose a mode* in light; set to Backup, all 10 uploaded at full size in 30 s. `DCIM/test02` (1 photo) raised it again in dark, and *Show new Albums* narrowed the list to `test02` with the *New* badge, *Showing new Albums* and *Show all Albums*, while the header stayed *All Albums* with the mode count unchanged. Settings in dark read cleanly and the tab survived the theme change. **(3) A fresh wizard leaving Settings' Optimize switches at their defaults** is still to run. **Found, low priority:** opening the app runs `refreshLedger` three times and the OneDrive reconcile twice, a few milliseconds apart, with the same answers. **Also:** the phone's log buffer was 256 KB and rolled over within minutes; raised to 16 MB with `logcat -G 16M`. New camera shots in `Camera` did not upload because Camera was at Off, which is correct.
 
-**The Camera folder reworked (Ian, 27 Sept 2026, versionCode 13, 0.3.12; built, not yet on a device).** Found on the Moto: the Camera list was empty on *All* because Settings had optimising off, and the 20 Sept design had the Camera control obey those switches. The design was then settled with Ian in several steps the same afternoon. **Withdrawn:** the 20 Sept line "the control respects the Optimise photos / Optimise video switches". It was recorded as an answer "taken as given" and paraphrased in a code comment as Ian's words; Ian: *"the Optimize switch in setting should have NO impact on ANY folder that is set to BACKUP"*. **Also withdrawn:** the album named Camera always being the camera folder. **Built:**
+**The Camera folder reworked (Ian, 27 Sept 2026, versionCode 13, 0.3.12; built, not yet on a device).** Found on the Moto: the Camera list was empty on *All* because Settings had optimizing off, and the 20 Sept design had the Camera control obey those switches. The design was then settled with Ian in several steps the same afternoon. **Withdrawn:** the 20 Sept line "the control respects the Optimize photos / Optimize video switches". It was recorded as an answer "taken as given" and paraphrased in a code comment as Ian's words; Ian: *"the Optimize switch in setting should have NO impact on ANY folder that is set to BACKUP"*. **Also withdrawn:** the album named Camera always being the camera folder. **Built:**
 - **Settings → Camera Sync → Special settings for Camera**, **off** out of the box. Ian: it starts at No *"otherwise we are assuming what folder the system is saving camera to"*. Off, there is no camera folder and every album is ordinary, Camera included, with Sync on its menu. On, a **Camera folder** picker (blank until chosen, reads *Choose*), and the defaults: **Select Photos/Videos older than** (**All**), **Photos** (off), **Videos** (off), **Video quality**. Ian's defaults: *"OFF for Optimizing and ALL for age"*. `CameraAlbum.chosen(enabled, folder)`; every `CameraAlbum` call now takes the folder in force or null.
 - **Not in the wizard** (Ian agreed): it is a Settings value and the wizard never writes Settings. The new setters are in `WizardDoesNotWriteSettingsTest`'s list.
-- **The camera folder's list is a selection, like Restore's.** Ian: *"separate what's listed from what gets optimized"*; *"initially all items should be greyed out - unless setting in Setting have already been set"*; items *"highlighted like in RESTORE drill down but can be deselected with a swipe"*. Every file is listed. The header's age, Photos and Videos select (`CameraSelection.byChoice`); swipe right selects, left deselects; a changed choice selects afresh. Selected files use Restore's highlight and check mark; the rest are greyed. Only a file OneDrive confirmed at full size, not optimised, declined or gone, can be selected (`isSelectable`); pending and optimised files are listed greyed with their marks and take no swipe. A pinned file (Keep at full size) is not selected by the header but can be swiped in; Sync now then clears its pin. **The selection is for the visit only** (Ian).
-- **The header:** age, Photos/Videos toggles, count and estimate of what is selected, **Sync now** (runs the ordinary backup if the folder has anything pending, and optimises exactly the selected files) and **Rescan**. The bottom Optimise bar, Cancel and the age-as-filter are gone.
+- **The camera folder's list is a selection, like Restore's.** Ian: *"separate what's listed from what gets optimized"*; *"initially all items should be greyed out - unless setting in Setting have already been set"*; items *"highlighted like in RESTORE drill down but can be deselected with a swipe"*. Every file is listed. The header's age, Photos and Videos select (`CameraSelection.byChoice`); swipe right selects, left deselects; a changed choice selects afresh. Selected files use Restore's highlight and check mark; the rest are greyed. Only a file OneDrive confirmed at full size, not optimized, declined or gone, can be selected (`isSelectable`); pending and optimized files are listed greyed with their marks and take no swipe. A pinned file (Keep at full size) is not selected by the header but can be swiped in; Sync now then clears its pin. **The selection is for the visit only** (Ian).
+- **The header:** age, Photos/Videos toggles, count and estimate of what is selected, **Sync now** (runs the ordinary backup if the folder has anything pending, and optimizes exactly the selected files) and **Rescan**. The bottom Optimize bar, Cancel and the age-as-filter are gone.
 - **Leaving** (return arrow or the phone's Back, now handled on every album's file list) with choices that differ from the defaults asks *Do you want to make these your default settings?* **Yes** / **No**; only Yes writes Settings.
-- **The worker** acts on `cameraRunSelection` (a DataStore string set written by Sync now, because a large folder's ids would not fit in WorkManager's 10 KB input) through `CameraSelection.toOptimise`, skips anything pinned, and uses `cameraVideoQuality`. The Settings Optimise switches are not read. `KEY_OPTIMISE_BEFORE`/`PHOTOS`/`VIDEOS` removed.
+- **The worker** acts on `cameraRunSelection` (a DataStore string set written by Sync now, because a large folder's ids would not fit in WorkManager's 10 KB input) through `CameraSelection.toOptimize`, skips anything pinned, and uses `cameraVideoQuality`. The Settings Optimize switches are not read. `KEY_OPTIMIZE_BEFORE`/`PHOTOS`/`VIDEOS` removed.
 
-Guide: `album-camera-optimise` and the concepts text rewritten, `settings-section-camera` added. No schema change. `CameraOptimisePlanTest` replaced by `CameraSelectionTest`; `CameraAlbumTest` covers no folder, a picked folder, and the album named Camera losing the rule. 749 unit tests pass. **To check on the Moto:** Settings shows Camera Sync off and nothing changes for Camera (Sync on its menu); turning it on and choosing `Camera` takes Sync off its menu and gives it the new screen; the list shows every file greyed with the defaults; Photos on highlights the backed-up photos; swipes select and deselect; Sync now uploads the waiting shots and optimises only the highlighted files; leaving after a change asks, Yes changes Settings and No does not; light and dark; crash log after each.
+Guide: `album-camera-optimize` and the concepts text rewritten, `settings-section-camera` added. No schema change. `CameraOptimizePlanTest` replaced by `CameraSelectionTest`; `CameraAlbumTest` covers no folder, a picked folder, and the album named Camera losing the rule. 749 unit tests pass. **To check on the Moto:** Settings shows Camera Sync off and nothing changes for Camera (Sync on its menu); turning it on and choosing `Camera` takes Sync off its menu and gives it the new screen; the list shows every file greyed with the defaults; Photos on highlights the backed-up photos; swipes select and deselect; Sync now uploads the waiting shots and optimizes only the highlighted files; leaving after a change asks, Yes changes Settings and No does not; light and dark; crash log after each.
 
 **First test purchase attempted on the Moto G, version 13 (Ian, 27 Sept 2026): the app side works, Play did not treat the account as a license tester.** Play Store account on the phone: `iandev8055@gmail.com`. Settings showed *Free trial: 29 days left. After that, a one-time unlock: $2.49 (or your local price)*, so the trial clock is running. Tapping the unlock button launched Play's sheet (`ProxyBillingActivity`) for **GallerySync, $2.49**, app shown as `com.gallery.sync (unreviewed)`, but it offered only *Add card / Add PayPal / Redeem code / Ask someone else to pay*, **no test card**, so nothing was bought and no card was added. Back closed it: `ProxyBillingActivity: resultCode 3, billing responseCode 1` (USER_CANCELED), no crash, and the app's background backup ran normally afterwards. **Open:** confirm `iandev8055@gmail.com` under Play Console **Settings → License testing** (account level, not the app's testers list), clear the Play Store app's cache on the Moto, and retry; then check Pro shows, and that a reinstall restores it. Ian has not finished the app's Play setup (store listing etc.); that is not thought to block license testing, but it is unconfirmed. Parked, not failed.
 
-**Version 14 (0.3.13) built (Ian, 27 Sept 2026; not yet on a device).** The four *Next* items from the Idea Inbox, all found while checking version 13 on the Moto: (1) **Camera header:** age, Photos and Videos on one line; the explanatory sentences are gone from the header and live in (?) pop-ups, a new topic `album-camera-select` beside a short status line (*12 selected · about 30 MB saved (estimate)* or *Nothing selected*). (2) **Settings → Camera folder → Other…** opens Android's folder picker (`OpenDocumentTree`); the name is the tree document id's last folder (`CameraAlbum.folderNameFromTreeDocumentId`, tested); the grant is not persisted and nothing is written. A folder not yet on the Albums tab shows by name and takes the Camera rules once it appears. (3) **Camera Video quality** is shown only while the Videos default is on. (4) **Every album file line shows the file's date** beside the status: *4.2 MB · 12 Sep 2026 · ✓ backed up* (`d MMM yyyy`, the modified date Sort by Date uses). Ian's condition: the longest line, an optimised video, must fit on one line on the Moto at normal font size, else shorten the date first (*12 Sep* this year); **to check by screenshot**. Guide updated. 750 unit tests pass.
+**Version 14 (0.3.13) built (Ian, 27 Sept 2026; not yet on a device).** The four *Next* items from the Idea Inbox, all found while checking version 13 on the Moto: (1) **Camera header:** age, Photos and Videos on one line; the explanatory sentences are gone from the header and live in (?) pop-ups, a new topic `album-camera-select` beside a short status line (*12 selected · about 30 MB saved (estimate)* or *Nothing selected*). (2) **Settings → Camera folder → Other…** opens Android's folder picker (`OpenDocumentTree`); the name is the tree document id's last folder (`CameraAlbum.folderNameFromTreeDocumentId`, tested); the grant is not persisted and nothing is written. A folder not yet on the Albums tab shows by name and takes the Camera rules once it appears. (3) **Camera Video quality** is shown only while the Videos default is on. (4) **Every album file line shows the file's date** beside the status: *4.2 MB · 12 Sep 2026 · ✓ backed up* (`d MMM yyyy`, the modified date Sort by Date uses). Ian's condition: the longest line, an optimized video, must fit on one line on the Moto at normal font size, else shorten the date first (*12 Sep* this year); **to check by screenshot**. Guide updated. 750 unit tests pass.
 
-**Version 14 on the Moto G, and version 15 built (Ian, 27 Sept 2026).** Version 14 installed from Play (19:29), crash log empty, auto-rotate still off after the update. **Seen working:** Camera Sync off/on; Video quality hides and returns with Videos; *Other…* opens the folder picker and Back leaves the folder unchanged; the Camera album's menu has no Sync; the Camera header's three buttons on one line; every file listed greyed with its date on one line (the longest seen, *6 MB · 26 Sep 2026 · ✓ backed up · optimised*, fits with room; a video line not yet seen). A screen recording (60 s, 1 fps frames) showed the header starting at the Settings defaults, Videos toggling on and off, Photos on, and **Yes** writing *1 year · Photos on · Videos off* to Settings. **Found by Ian:** leaving the Camera screen **by the bottom bar** skipped the question, so changed choices were lost and the header seemed not to sync with Settings. **Also:** with Photos on and the age at 1 year the status read *Nothing selected* over a grey list, because every Camera photo is from this month, which read as a broken toggle. **Version 15 (0.3.14):** the open Camera screen reports its unsaved choices (`BackupUiState.cameraUnsaved`), and the bottom bar asks *Do you want to make these your default settings?* before leaving: Yes saves and goes, No goes, tapping outside stays; the flag clears whenever the screen closes. The status line reads *Nothing older than <age>* when the chosen kinds have files ready but none is old enough. **Also noted:** Optimise photos and video in the Sync section were found on (Automatic); Ian switched them off during the recording. A tap sent over adb to test the header landed on Settings instead (the phone had moved on); nothing it could have hit was changed, and no optimise ran (log checked). Lesson: read the screen with `uiautomator dump` before any tap.
+**Version 14 on the Moto G, and version 15 built (Ian, 27 Sept 2026).** Version 14 installed from Play (19:29), crash log empty, auto-rotate still off after the update. **Seen working:** Camera Sync off/on; Video quality hides and returns with Videos; *Other…* opens the folder picker and Back leaves the folder unchanged; the Camera album's menu has no Sync; the Camera header's three buttons on one line; every file listed greyed with its date on one line (the longest seen, *6 MB · 26 Sep 2026 · ✓ backed up · optimized*, fits with room; a video line not yet seen). A screen recording (60 s, 1 fps frames) showed the header starting at the Settings defaults, Videos toggling on and off, Photos on, and **Yes** writing *1 year · Photos on · Videos off* to Settings. **Found by Ian:** leaving the Camera screen **by the bottom bar** skipped the question, so changed choices were lost and the header seemed not to sync with Settings. **Also:** with Photos on and the age at 1 year the status read *Nothing selected* over a grey list, because every Camera photo is from this month, which read as a broken toggle. **Version 15 (0.3.14):** the open Camera screen reports its unsaved choices (`BackupUiState.cameraUnsaved`), and the bottom bar asks *Do you want to make these your default settings?* before leaving: Yes saves and goes, No goes, tapping outside stays; the flag clears whenever the screen closes. The status line reads *Nothing older than <age>* when the chosen kinds have files ready but none is old enough. **Also noted:** Optimize photos and video in the Sync section were found on (Automatic); Ian switched them off during the recording. A tap sent over adb to test the header landed on Settings instead (the phone had moved on); nothing it could have hit was changed, and no optimize ran (log checked). Lesson: read the screen with `uiautomator dump` before any tap.
 
-**Version 15 on the Moto G: the Camera folder proven end to end (Ian, 27 Sept 2026).** Installed from Play 22:28, crash log empty, auto-rotate still off. The header opened at the Settings defaults (Photos on, Videos off, 1 day) and read *Nothing older than 1 day*, correct since every photo was taken that day. **The bottom-bar question works on all three answers:** a header change then Settings in the bar asked; **Yes** wrote Videos on to Camera Sync, **No** left Settings unchanged, tapping outside stayed on the Camera screen. **A real Sync now:** age All, Photos on, Videos off, `IMG_20260927_115157396_HDR.jpg` swiped out. `camera: 8 photos and 0 clips of 8 ready`; the 8 selected photos went from 2.0–3.5 MB to 0.33–0.57 MB (about 18.8 MB reclaimed, 0 not worth it), while the swiped-out photo (3,287,904), the already-optimised one (931,675) and the video (77,522,641) kept their sizes to the byte. No Android permission dialog, because DCIM was granted at setup (only Archive has ever asked). The next backup run uploaded nothing, so the shrunk photos were not taken for edits. The header then read *12 backed up · 9 optimised* and *Nothing selected*. Every file line fitted on one line. **Found, for version 16:** an optimised file's line shows its original size (*6 MB*, *2 MB*) rather than the size on the phone (0.9 MB, about 0.5 MB), which looks as if nothing shrank; Ian chose to show the size on the phone. **Also for version 16:** the large selected-count number in the Camera header's top right, as Restore and Archive have. Both are in the Idea Inbox as Next.
+**Version 15 on the Moto G: the Camera folder proven end to end (Ian, 27 Sept 2026).** Installed from Play 22:28, crash log empty, auto-rotate still off. The header opened at the Settings defaults (Photos on, Videos off, 1 day) and read *Nothing older than 1 day*, correct since every photo was taken that day. **The bottom-bar question works on all three answers:** a header change then Settings in the bar asked; **Yes** wrote Videos on to Camera Sync, **No** left Settings unchanged, tapping outside stayed on the Camera screen. **A real Sync now:** age All, Photos on, Videos off, `IMG_20260927_115157396_HDR.jpg` swiped out. `camera: 8 photos and 0 clips of 8 ready`; the 8 selected photos went from 2.0–3.5 MB to 0.33–0.57 MB (about 18.8 MB reclaimed, 0 not worth it), while the swiped-out photo (3,287,904), the already-optimized one (931,675) and the video (77,522,641) kept their sizes to the byte. No Android permission dialog, because DCIM was granted at setup (only Archive has ever asked). The next backup run uploaded nothing, so the shrunk photos were not taken for edits. The header then read *12 backed up · 9 optimized* and *Nothing selected*. Every file line fitted on one line. **Found, for version 16:** an optimized file's line shows its original size (*6 MB*, *2 MB*) rather than the size on the phone (0.9 MB, about 0.5 MB), which looks as if nothing shrank; Ian chose to show the size on the phone. **Also for version 16:** the large selected-count number in the Camera header's top right, as Restore and Archive have. Both are in the Idea Inbox as Next.
 
-**Version 16 (0.3.15) built (Ian, 27 Sept 2026; not yet on a device).** The two *Next* items from the version 15 test: (1) the Camera header's title row carries the number of files selected for Sync now, large (`displayMedium`) in the right half, as Restore's and Archive's headers carry theirs; it is `toOptimise.size`, so it moves with the choices and swipes. (2) An album file line shows an optimised file's size **on the phone** (`localProxySizeBytes` when `isProxied`), not the original's; Ian chose this over showing both. Guide updated.
+**Version 16 (0.3.15) built (Ian, 27 Sept 2026; not yet on a device).** The two *Next* items from the version 15 test: (1) the Camera header's title row carries the number of files selected for Sync now, large (`displayMedium`) in the right half, as Restore's and Archive's headers carry theirs; it is `toOptimize.size`, so it moves with the choices and swipes. (2) An album file line shows an optimized file's size **on the phone** (`localProxySizeBytes` when `isProxied`), not the original's; Ian chose this over showing both. Guide updated.
 
-**Version 16 seen on the Moto G (27 Sept 2026, 23:13):** the Camera header's large number (0, with *Nothing older than 1 year*) and optimised files at their size on the phone (931 KB, 574 KB, 331 KB, 340 KB). Ian: the number should sit a little lower and further right (Idea Inbox, after the Play listing).
+**Version 16 seen on the Moto G (27 Sept 2026, 23:13):** the Camera header's large number (0, with *Nothing older than 1 year*) and optimized files at their size on the phone (931 KB, 574 KB, 331 KB, 340 KB). Ian: the number should sit a little lower and further right (Idea Inbox, after the Play listing).
 
 **MAJOR: signing out of every cloud re-ran the wizard after setup, fixed in version 17 (Ian, 28 Sept 2026).** Ian signed out of every cloud in Settings on the Moto G, to see which accounts each used, and the app launched the install wizard. Cause: `MainActivity` showed the wizard on `needsSetup || !cloudState.anyConnected`, and `needsSetup` included `!hasSources`. The cloud half came from `9a7348d` (24 Sept, one free cloud of the user's choice), which turned the old "not signed in to OneDrive" gate, from when sign-in was setup's first step, into "no cloud connected". Removing every folder to back up would have done the same. **Neither was ever decided by Ian**, and it was wrongly called "by design" when he first reported it. Ian: *"Once the Wizard has finished NOTHING should EVER CALL IT"*, *"NOTHING SHOULD CALL THE WIZARD ONCE IT SUCCESSFULLY COMPLETES THE INITIAL BACKUP"*. **Fix:** `WizardGate` is the only decision: once `hasCompletedFirstBackup` (written once, never cleared) or `hasCompletedSetup` is true, the wizard never shows. With no cloud connected after setup the app opens normally with a *No Cloud connected. Connect one in Settings to keep backing up.* bar and *Open Settings*. The first cloud connected from Settings when none is connected becomes the free cloud (only after setup; folder pairings untouched). `WizardGateTest` (every combination after the first backup; a source check on `MainActivity`). CLAUDE.md carries the rule. *Run setup again* no longer exists in the app, so nothing resets setup. 755 unit tests pass. **To check on the Moto:** install version 17 while the app is sitting in the wizard with no cloud connected; it must open on the app with the bar, not the wizard; reconnect clouds from Settings.
 
@@ -7275,7 +7275,7 @@ Guide: `album-camera-optimise` and the concepts text rewritten, `settings-sectio
 
 **Overnight check on the Moto (still version 16, since 17 is on the Closed track; 28 Sept 2026, 02:25).** No crash. The app is on its normal screens with Dropbox as the free cloud (after tonight's three wizard passes). A photo taken at 01:39 (`IMG_20260928_013941415_HDR.jpg`) uploaded to Dropbox, as DCIM is now routed there. `NoToken` warnings are OneDrive's (signed out), not Dropbox's; album cards then read *Could not reach OneDrive when this was last checked*, which describes a deliberate sign-out as a network fault (Idea Inbox). The icon images copied to `Documents` were not uploaded.
 
-**Camera Sync now optimised two files, as designed (Ian, 28 Sept 2026, 11:50).** Log: `camera: 1 photos and 1 clips of 2 ready`; `IMG_20260927_115157396_HDR.jpg` 3,287,904 → 490,858 and `VID_20260927_115210007.mp4` 77,522,641 → 9,210,795. It looked like an unprompted optimise: the photo had been swiped out the night before, and Videos had been off then. **It was Ian pressing Sync now on the Camera screen** with Camera Sync defaults of All · Photos · Videos, which selected every backed-up file on opening; swipes last for the visit only (Ian, 27 Sept). Both files were verified in OneDrive at full size first, and the 10 photos and video taken minutes later were not touched because they were not yet backed up. **Ian's ruling:** a manual Sync now does what the user's settings say, with no confirmation and no warning that it will optimise; swipes stay visit-only. Do not add a confirmation step or split the button on the strength of this entry. The only route that can start a Camera optimise is Sync now on the Camera screen (`BackupViewModel.cameraSyncNow`); nothing in the background enqueues `PHASE_CAMERA`.
+**Camera Sync now optimized two files, as designed (Ian, 28 Sept 2026, 11:50).** Log: `camera: 1 photos and 1 clips of 2 ready`; `IMG_20260927_115157396_HDR.jpg` 3,287,904 → 490,858 and `VID_20260927_115210007.mp4` 77,522,641 → 9,210,795. It looked like an unprompted optimize: the photo had been swiped out the night before, and Videos had been off then. **It was Ian pressing Sync now on the Camera screen** with Camera Sync defaults of All · Photos · Videos, which selected every backed-up file on opening; swipes last for the visit only (Ian, 27 Sept). Both files were verified in OneDrive at full size first, and the 10 photos and video taken minutes later were not touched because they were not yet backed up. **Ian's ruling:** a manual Sync now does what the user's settings say, with no confirmation and no warning that it will optimize; swipes stay visit-only. Do not add a confirmation step or split the button on the strength of this entry. The only route that can start a Camera optimize is Sync now on the Camera screen (`BackupViewModel.cameraSyncNow`); nothing in the background enqueues `PHASE_CAMERA`.
 
 **Routing restored (Ian, 28 Sept 2026 morning).** Ian reconnected OneDrive, Google Photos and IDrive e2 from Settings on version 16 (Dropbox was already connected), and *Where each folder goes* reads DCIM → OneDrive, Pictures → IDrive e2, DropBox → Dropbox, as on 26 Sept. Dropbox remains the free cloud (the last wizard pass made it so). One Camera photo taken at 01:39 went to Dropbox while DCIM pointed there.
 
@@ -7335,7 +7335,7 @@ per the dark-mode rule.
 
 **The Album drill-down names the Cloud each file went to (Ian, 4 Oct 2026).** The card was one line of name
 and one of `size · video · date · marks`; it is now `name  2 MB · video` on top and
-`28 Sep 2026 · ✓ backed up · optimised · OneDrive` below. The size moved up so the lower line is about what
+`28 Sep 2026 · ✓ backed up · optimized · OneDrive` below. The size moved up so the lower line is about what
 happened to the file rather than what it is, which is what made room for the Cloud. **The Cloud is named only
 once the file is there** (`BackupState.UPLOADED`, from `BackupEntryEntity.location`): Ian's words were *"or
 where it was backed up to"*, past tense, and a pending or failed row has a destination rather than a place, so
@@ -7395,7 +7395,7 @@ search box is the app's only text input and carries no colours of its own.
 **The `minSdk=32` discrepancy is explained, and is not a defect.** `dumpsys package` on the Moto has reported
 `minSdk=32` for every Play-installed build while the build file says 26. The bundle is not wrong: the merged
 release manifest inside `app-release.aab` declares `android:minSdkVersion="26"`. Play builds several APK
-variants from one bundle, split by SDK level so newer devices can take newer dex and resource optimisations,
+variants from one bundle, split by SDK level so newer devices can take newer dex and resource optimizations,
 and the variant served to a phone on Android 16 carries the higher floor in its own manifest. So the number
 describes the variant this handset was given, not the app. **Not measured:** that a device below Android 16 is
 served a variant it can install, because there is no such device left to try it on — the inference rests on how
@@ -7447,7 +7447,7 @@ Moto. This is a second vendor, the target OS, and an 8,600-file queue.
 
 **Also seen:** `listFolderByPath: Graph returned HTTP 404` for an album with no OneDrive folder, read correctly as
 *0 files*; an 86.7 MB video uploaded in one piece in about 30 seconds; Camera reading 2,847 files, all 2,847
-verified. **Not a defect:** the wizard's library choice was the default, which uploads without optimising, so
+verified. **Not a defect:** the wizard's library choice was the default, which uploads without optimizing, so
 nothing on that phone was shrunk.
 
 **Unfolded the inner screen is about 708dp**, so it is the only device here that engages the 600dp two-column
@@ -7743,7 +7743,7 @@ Temp02 16, test01 10, Car Show, PauseTest, Temp01 and test02 one each): shrunk c
 proxy marker, with the larger original in OneDrive, which the upload path's `LedgerRecovery.isBackedUpProxy`
 recognises and `ReconcileWithCloud` does not, since it compares sizes only. So verification was right and the
 cloud check over-counted. **Left open:** the cloud check still counts a shrunk file as outstanding, so the card's
-starting figure can be too high on a phone that was optimised before a reinstall; it corrects itself once
+starting figure can be too high on a phone that was optimized before a reinstall; it corrects itself once
 verification runs. Version 23 (0.3.22) built from this.
 
 **Verification at scale on the Moto G (6–7 Oct 2026, version 23 debug).** 2,001 photos copied loose into `DCIM` plus
@@ -7757,7 +7757,7 @@ anything was actually verified."** The card shows *Starting upload… 0%* throug
 never what was checked or found. Proposed: a *Checking your Cloud — N of M checked* phase on the ring, and a closing
 line naming what was found (*2,214 checked — all already in OneDrive*). Awaiting Ian.
 
-**Not bugs, found while checking:** the album row behind the wizard's card reading *1205 optimised / 1205 verified in
+**Not bugs, found while checking:** the album row behind the wizard's card reading *1205 optimized / 1205 verified in
 OneDrive* is `AlbumsTabPreview`'s sample data (a pretend *WhatsApp* album), drawn behind every tour card, not this
 phone's albums. The Albums tab's *221 of 2001 verified* after the upload was an `album_cloud_status` row written by a
 check taken mid-run; the tab's own recheck replaced it with *2001 verified*. **Auto-rotate** was back on on the
@@ -7795,7 +7795,7 @@ pause would be longer. Version 24 (0.3.23) built from this.
 
 ## MAJOR: every backup reached the Cloud without its location (found 8 Oct 2026, Moto G, fixed in the code, NOT RELEASED)
 
-**Found by Restore.** Three photos in `verify24b` (copies of `DCIM` photos taken in 2018) were optimised and restored.
+**Found by Restore.** Three photos in `verify24b` (copies of `DCIM` photos taken in 2018) were optimized and restored.
 Each came back at exactly its original byte size, and `md5sum` differed from the source: `cmp` showed 43 bytes, all
 around offset 6000, zeroed in the restored file. That is the EXIF GPS block. Source: 45°03′N 93°18′W, altitude
 218.663, GPS date 2018:07:15; restored: every GPS value zero. The proxies were made from the same blanked read and
@@ -7809,7 +7809,7 @@ copy. **No size check could ever catch it**, because the redacted file is exactl
 
 **Consequence.** Every file this app has backed up is in the Cloud without its location, on every device and every
 Cloud. A file still on the phone at full size still has its location, so nothing is lost yet; **a file that was
-optimised or archived has its location only in the phone's trash, if anywhere**. On a real library that is a
+optimized or archived has its location only in the phone's trash, if anywhere**. On a real library that is a
 permanent loss once the trash empties. Ian was sent a push notification: do not Sync or Archive on the Fold 8.
 
 **Fix.** `data/local/media/OriginalMedia` opens a MediaStore item as its original (falls back to the plain read, and
@@ -7828,10 +7828,10 @@ dialog (`granted=true, USER_SET`).
 1. **The permission and Play.** `ACCESS_MEDIA_LOCATION` is a new permission. Data safety may need to say that photo
    location travels with the files to the user's own Cloud.
 2. **The copies already in the Cloud have no location.** A repair would re-send every file whose full-size original
-   is still on the phone, so the Cloud copy gains its location. Files already optimised or archived cannot be
+   is still on the phone, so the Cloud copy gains its location. Files already optimized or archived cannot be
    repaired from the phone. Not built.
 3. **Videos:** the transcoder now reads the original, but whether Media3 carries the container's location into the
-   optimised clip is untested.
+   optimized clip is untested.
 
 ## Autonomous test session on the Moto G (8 Oct 2026, evening, Ian at work, debug build of `d136ca3` and after)
 
@@ -7840,15 +7840,15 @@ accounts test-only. OneDrive the only Cloud connected (the other Clouds need Ian
 
 | # | Test | Result |
 |---|---|---|
-| 1a | `verify24b` (30 photos) set to Sync with **Optimise photos off** | Pass: nothing optimised |
-| 1b | Optimise photos **on, Automatic** | Pass: 30 proxied in 13 s, 133 MB → 26 MB, 2048 px, EXIF make/model/date kept, marker set, ledger original size = remote size |
+| 1a | `verify24b` (30 photos) set to Sync with **Optimize photos off** | Pass: nothing optimized |
+| 1b | Optimize photos **on, Automatic** | Pass: 30 proxied in 13 s, 133 MB → 26 MB, 2048 px, EXIF make/model/date kept, marker set, ledger original size = remote size |
 | 2 | Restore 3 of them | Pass on size (exact bytes), **fail on content**: GPS zeroed. Led to the location fix above |
 | 2b | After the fix: `gpstest` upload → proxy → restore | Pass: proxy keeps GPS, restored files md5-identical to the originals |
-| 3 | Optimise video on, **Medium 720p**, older than 1 day, `Funny stuff` (33 clips) at Sync | Pass: the one 1080p clip → 1280×720, 70.7 MB → 29.4 MB, 58 s, AAC kept, decodes cleanly; 32 clips already ≤ 720p skipped |
+| 3 | Optimize video on, **Medium 720p**, older than 1 day, `Funny stuff` (33 clips) at Sync | Pass: the one 1080p clip → 1280×720, 70.7 MB → 29.4 MB, 58 s, AAC kept, decodes cleanly; 32 clips already ≤ 720p skipped |
 | 3b | Quality changed to **High 480p**, Sync now | **Not retried**: the 32 clips stay `isProxySkipped` from the 720p pass. For Ian: should a stronger quality reopen clips skipped at a weaker one? |
 | 4 | `verify24` (5 photos) to Archive | Pass: confirmation dialog; Check reports 5 confirmed live in OneDrive; Android's trash dialog; all 5 renamed `.trashed-1794091719-…` in place, md5 unchanged, 31-day expiry; ledger `ARCHIVED`; the emptied album's mode forgotten |
 | 5 | Restore the archived 5 | Pass: downloaded into `verify24`, md5-identical; the trashed copies stay in the trash |
-| 6a | Optimise photos **Manual**, new 7.2 MB photo into the Sync album | Pass: uploaded, not optimised; Sync now optimised it (→ 0.5 MB) |
+| 6a | Optimize photos **Manual**, new 7.2 MB photo into the Sync album | Pass: uploaded, not optimized; Sync now optimized it (→ 0.5 MB) |
 | 6b | Archive *Only show files older than* = 1 day | Pass after a restart; an Archive tab already open keeps its earlier filter until the app restarts (minor) |
 
 **Fixed in this session (Albums tab, Archive filter):** with `gpstest` at Archive and its three files kept at full
@@ -7866,12 +7866,12 @@ full MediaStore scan of 2,351 items) once per album listed, 16 times per check.
 **Videos keep their location too, after the fix (Moto G, 8 Oct 2026, 18:06–18:08).** No clip on the Moto carried a
 location, so one was made: a 10 s 1920×1080 test clip with a QuickTime `©xyz` atom `+45.0552-093.3093/`, pushed as
 `DCIM/vidgps/vidgps_1.mov` with an old modification date. Album at Sync, video quality High 480p: uploaded
-(15,512,104 bytes), transcoded to 854×480 (3,094,413 bytes) **with `©xyz +45.0552-93.3093/` in the optimised
+(15,512,104 bytes), transcoded to 854×480 (3,094,413 bytes) **with `©xyz +45.0552-93.3093/` in the optimized
 clip**, and restored from OneDrive md5-identical to the original (`16a99069…`). That closes item 3 of the
 location fix's open questions; items 1 (the permission and Play's Data safety) and 2 (repairing copies already in
 the Cloud) are still Ian's.
 
-## Version 25 (0.3.24) built (Ian, 9 Oct 2026): the location fix, its repair, re-optimise, compression labels
+## Version 25 (0.3.24) built (Ian, 9 Oct 2026): the location fix, its repair, re-optimize, compression labels
 
 Ian's answers to the three questions: Data safety *"add please"*, the repair *"build repair"*, release *"build -
 commit - push"*. Then, mid-build: *"add a card for USER choice REOPTIMIZE EXISTING FILES in CLOUD with YES/NO"*, in
@@ -7880,7 +7880,7 @@ Settings → Sync becoming *"Compression"*.
 
 **Location repair (Settings → Backup → *Photo locations*).** `LocationRepair`, `BackupEngine.repairLocations`,
 `LocationRepairWorker` (batches of 25, cursor in DataStore, Wi-Fi unless mobile data is allowed),
-`LocationRepairViewModel` / `LocationRepairSection`. Candidates: uploaded, still on the phone, not optimised or
+`LocationRepairViewModel` / `LocationRepairSection`. Candidates: uploaded, still on the phone, not optimized or
 archived, sent before `locationFixedAt` (the first moment the app held `ACCESS_MEDIA_LOCATION`, written once by the
 Application or the grant), to OneDrive, Dropbox, pCloud, IDrive e2 or Backblaze B2. Each is checked again on the
 phone: size equal to the ledger's, no proxy marker, and a location actually in it (`MediaLocation`: EXIF lat/long
@@ -7892,10 +7892,10 @@ file a second copy) and Google Photos (duplicates) are not repaired. Card shows 
 dialog → progress *Repairing: N of M checked, R repaired* → *Repair finished*. **Built, unit tests pass, NOT YET
 SEEN ON A DEVICE** (the Moto dropped off wireless debugging).
 
-**Re-optimise existing videos (Settings → Sync → Optimise video).** Choosing a stronger compression asks
-*Re-optimise existing videos?* Yes/No. Yes clears `isProxySkipped` on videos not yet optimised
+**Re-optimize existing videos (Settings → Sync → Optimize video).** Choosing a stronger compression asks
+*Re-optimize existing videos?* Yes/No. Yes clears `isProxySkipped` on videos not yet optimized
 (`reopenSkippedVideos`), so clips skipped as already at or under the old target are tried at the new one, by the same
-pass and rules as any other (Automatic on the charger, Manual on Sync now). **Clips already optimised are not
+pass and rules as any other (Automatic on the charger, Manual on Sync now). **Clips already optimized are not
 re-shrunk**: that would compress an already-compressed copy. Doing it properly means transcoding from the Cloud
 original, which is not built. Not yet seen on a device.
 
@@ -7914,8 +7914,8 @@ the phone is and never reads or uses those locations itself. For Play Console, s
   repaired, 10 without a location, 1 skipped. `repair: replaced 20180715_154203.jpg (5084819 bytes)`. That photo was
   then moved off the phone (`Download/hold`) and restored from OneDrive: **md5 `dbd6b876…`, identical to the original,
   GPS 45°03′N present**, where on 8 Oct the same photo came back with its location zeroed.
-- **Re-optimise card proven.** Compression High → Medium asked nothing; Medium → High asked *Re-optimise existing
-  videos?*; Yes: `re-optimise: 32 skipped clips reopened at the new compression`, then `optimising up to 3 of 32 clips
+- **Re-optimize card proven.** Compression High → Medium asked nothing; Medium → High asked *Re-optimize existing
+  videos?*; Yes: `re-optimize: 32 skipped clips reopened at the new compression`, then `optimizing up to 3 of 32 clips
   at High`.
 - **Bug found and fixed: a loose DCIM file restored into `DCIM/DCIM/`.** `DownloadMissingFile.relativePathFor` built
   `DCIM/<album>/`, and the album of the files directly in `DCIM` is named `DCIM`. Now an album named DCIM, Pictures
@@ -7942,8 +7942,8 @@ the phone is and never reads or uses those locations itself. For Play Console, s
 **After v25 was submitted (10 Oct 2026, Moto G, debug build).**
 - **The wizard's delayed start works.** Ian set a 1 hour delay; the job sat with only `TIMING_DELAY` unsatisfied (on
   charge, so `CHARGING` held), fired on its own at about 10:22, verified (everything already in OneDrive, nothing to
-  send) and went on to optimise photos. No crash.
-- **The optimise card's total climbed with every file done** ("176 of 2176", "220 of 2220", "236 of 2236"). The
+  send) and went on to optimize photos. No crash.
+- **The optimize card's total climbed with every file done** ("176 of 2176", "220 of 2220", "236 of 2236"). The
   observer counted `ProxyApplier.candidatesAll()`, which is capped at 2,000 (one MediaStore write request), so
   "remaining" read 2,000 for as long as more than that remained. Now `remainingAll()` counts the same live list
   uncapped; installed over the running pass, the card read 461 of 2274 and held. It can still move by a few when a
@@ -7984,7 +7984,7 @@ to true and `BackupViewModel.setAutomaticEnabled` is called from no screen, so a
 full-capability, Sync, Restore, Archive-check and verification lists (it is FULL since v19); the setup order in Quick start;
 the first backup's verification step and finish summary (not described); the Archive "files archived" line (now counts
 files that left the phone, kept files not scheduled, 5335abb); Restore's loose DCIM/Pictures/Movies rule (56b455b); the
-Re-optimise question; the Camera Sync and Help & Feedback bands (Rate us, Bug Report) missing from the Settings layout;
+Re-optimize question; the Camera Sync and Help & Feedback bands (Rate us, Bug Report) missing from the Settings layout;
 the deleted-files notice in "When things happen"; the stale Restored-album line; typos. LAST_UPDATED 11 October 2026.
 
 **How To Guide rewritten for brevity (11 Oct 2026, Ian).** Ian approved a short rewrite of the All Albums (?) card ("The Albums
@@ -7995,7 +7995,7 @@ seen on the Moto.
 **New-user review of the guide (11 Oct 2026).** The translation session read the guide as a newcomer (27 findings); reviewed
 here against the code, 20 edits agreed, 3 deletions refused (topics with (?) buttons), dialog-destination/folder-picker left
 for Ian. Facts settled: free Cloud = first selected in setup; OneDrive destination Samsung Gallery/DCIM on every phone;
-the trial starts with "Start 30-day free trial" (Unlock Pro buys); Sync now optimises only with the switch on and Mode
+the trial starts with "Start 30-day free trial" (Unlock Pro buys); Sync now optimizes only with the switch on and Mode
 Manual; MassAbsence = over half of backed-up files. Ian: go.
 
 **Album vs Folder (Ian, 11 Oct 2026).** The app says Album for its own groups and Folder only for Android or Cloud folders.
@@ -8022,7 +8022,7 @@ phone Restore falls back to DCIM/<album>. Pre-existing; a fix needs a Room colum
 
 **Restore puts a file back in the folder it came from (Ian, 12 Oct 2026: "add the column and fix restore").** Room 14 to 15,
 `MIGRATION_14_15`: `backup_entries.relativePath` (TEXT, nullable), MediaStore's RELATIVE_PATH. Set on new rows, and every scan
-updates any row whose file is on the phone in a different folder (matched by MediaStore id from the unscoped scan, so optimised
+updates any row whose file is on the phone in a different folder (matched by MediaStore id from the unscoped scan, so optimized
 photos and unwatched folders are covered too). `DownloadMissingFile` uses it first when Android allows that kind of file there,
 then the old guesses. Moto G: the live migration kept all 2,315 rows; one scan later all 2,317 rows had a folder; the four
 FolderTest photos moved back to Pictures/FolderTest were recorded there, deleted, and restored from Dropbox, Google Drive, pCloud
@@ -8031,7 +8031,7 @@ with am instrument so the app was not uninstalled): 23 tests OK, including migra
 
 **Version 26 (0.3.25) built, 12 Oct 2026** (Ian: "build the release"). app-release.aab 11:07, unit tests pass. Contents since v25: backup
 folder per Cloud (setup + Settings) and the album header line; Restore back to the original folder (Room 15); deleted-files
-notification under Ask; location repair removed; finish-summary keeps first figures after a retry; optimise card total uncapped;
+notification under Ask; location repair removed; finish-summary keeps first figures after a retry; optimize card total uncapped;
 Album/Folder wording; "1 file" plurals; the rewritten How To Guide and (?) cards.
 
 **Version 26 from Play on a fresh Moto G (13 Oct 2026, Ian driving, watched over adb).** Installed 15:56 by Play. Wizard: the
@@ -8121,10 +8121,10 @@ string changed later means updating `wizard_en.json` and every `<lang>.py`. The 
 translated (it is not a tab). The sample Settings screen was already English: the Spanish seen earlier was the next
 card, composed behind it. Walked on the Moto as far as setup goes without signing in (Welcome to Connect to OneDrive):
 German and Hindi and Portuguese light, Japanese and French dark, no overflow, no crash. Cards past the Cloud sign-in
-(folders, Backup Plan, optimise, delay, progress) are not yet seen in any language.
+(folders, Backup Plan, optimize, delay, progress) are not yet seen in any language.
 - 14 Oct: editor review of the six wizard languages applied (es: endpoint hint, Reset, trial line; fr: endpoint hint, SYNCHRONISER MAINTENANT; ja: Backup folder; hi: plural of hours). Declined: de "Haupt (kostenlos)" (not grammatical alone), ja/hi Sync-now button wording. Backup/Sync naming waits on Ian.
 - 14 Oct: Ian: "All references to any functionality that has a rendering inside the app should remain in English". Mode names Backup/Sync/Archive stay English in every language (library_per_album, the Google Photos Backup-only line); "back up" as a plain action is translated naturally.
-- 14 Oct: OneDrive signed in on the Moto (test account, Ian's OK) and the German wizard walked end to end: Connect, folder dialog and picker, search permission, folders, Backup Plan, optimisation, start time, progress, finish (1 test photo from Documents). Found and fixed: the folder list's "15 folders, 2212 photos, 42 videos" was built from English words (now plurals in every language); German "Komprimierung" clipped in the video-quality buttons (now "Kompression"); the finish summary read "1 Dateien" (reworded to "label: count" in es, pt-BR, fr, de, hi — the English "1 files checked" has the same flaw, raised with Ian); sizes use the wizard language's decimal mark. Settings → Language seen on a phone for the first time: it shows Deutsch.
+- 14 Oct: OneDrive signed in on the Moto (test account, Ian's OK) and the German wizard walked end to end: Connect, folder dialog and picker, search permission, folders, Backup Plan, optimization, start time, progress, finish (1 test photo from Documents). Found and fixed: the folder list's "15 folders, 2212 photos, 42 videos" was built from English words (now plurals in every language); German "Komprimierung" clipped in the video-quality buttons (now "Kompression"); the finish summary read "1 Dateien" (reworded to "label: count" in es, pt-BR, fr, de, hi — the English "1 files checked" has the same flaw, raised with Ian); sizes use the wizard language's decimal mark. Settings → Language seen on a phone for the first time: it shows Deutsch.
 - 14 Oct: the whole wizard (Welcome to Finish, with a real OneDrive sign-in and a one-photo backup) walked on the Moto in every language: de light, es dark, pt-BR light, fr light, ja dark, hi dark. Nothing cut off, no crash.
 - 15 Oct: help_open_guide now names each language's guide (Guía de uso, Guia de uso, Mode d'emploi, Anleitung, 使い方ガイド, How To Guide); Google Photos kept as the brand name in pt-BR, de, ja; de heading Videokompression to match the buttons.
 - 15 Oct: guide published in six languages (f224eb5); all 18 translated pages return 200 on GitHub Pages with the right lang, and the English page's language row links all six. HowToGuideConsistencyTest allowed the setup page's language row (links to setup-guide.<loc>.html only). Translated (?) pop-ups and in-app pages not yet seen on the Moto: it dropped off wireless debugging and needs re-pairing.
@@ -8140,7 +8140,7 @@ Testing (Room 16: the original ContentProvider and its tables removed). **Langua
 (`bundle { language { enableSplit = false } }`): Play otherwise installs only the phone's own languages, so a language chosen
 on the Welcome screen that differs from the phone's would have shown English. Debug installs carry every language, which is
 why the Moto never showed it; confirmed in the bundle's BundleConfig (LANGUAGE split negated).
-- 15 Oct (Ian): **the Settings tab is translated**, "using the same parameters about what to and not to translate", and **Language moved under the How To Guide card, above Appearance**. `InChosenLanguage` (ui/common/InLanguage.kt) now wraps both the wizard and Settings; `MainActivity.localisedLanguage` (was `wizardLanguage`) makes their dialogs follow. Kept English because the English tabs show them too: the tab bar, section headers named after tabs and modes (Albums, Restore, Archive, Sync, Backup), the Archive tab's age filter (`archive_age_*`), the camera folder's controls (`camera_age_*`, `camera_kind_*`, `camera_optimise_heading`). The How To Guide card uses each language's guide name; the wizard's Help card says the same. 88 strings × 6 in `tools/wizard/<lang>.py` (276 per language in all). The wizard's sample Settings screen now follows the language like the real tab. Seen on the Moto: German light, Japanese dark, Hindi light, top to bottom, plus the backup-folder dialog in German; the Albums tab stays English afterwards; no crash. The guide's Settings chapter and the Settings (?) cards still quote English labels — handed to the translation session.
+- 15 Oct (Ian): **the Settings tab is translated**, "using the same parameters about what to and not to translate", and **Language moved under the How To Guide card, above Appearance**. `InChosenLanguage` (ui/common/InLanguage.kt) now wraps both the wizard and Settings; `MainActivity.localisedLanguage` (was `wizardLanguage`) makes their dialogs follow. Kept English because the English tabs show them too: the tab bar, section headers named after tabs and modes (Albums, Restore, Archive, Sync, Backup), the Archive tab's age filter (`archive_age_*`), the camera folder's controls (`camera_age_*`, `camera_kind_*`, `camera_optimize_heading`). The How To Guide card uses each language's guide name; the wizard's Help card says the same. 88 strings × 6 in `tools/wizard/<lang>.py` (276 per language in all). The wizard's sample Settings screen now follows the language like the real tab. Seen on the Moto: German light, Japanese dark, Hindi light, top to bottom, plus the backup-folder dialog in German; the Albums tab stays English afterwards; no crash. The guide's Settings chapter and the Settings (?) cards still quote English labels — handed to the translation session.
 - **Version 28 rebuilt, 16 Oct 2026, 01:24** (Ian: roll the Settings changes in and keep it version 28; v27 still waiting for production approval, v28 not yet uploaded). Adds the translated Settings tab (5ccb389), the guide's Settings chapter and (?) cards quoting the translated labels (11334ff), and the Appearance card saying the guide and policy pages follow the app's setting (063b061). Unit tests pass, guide `--check` clean, language splits still off in the bundle.
 - 17 Oct (Ian): Pro unlock price shown in the app changed from $2.49 to $9.99 (trial offer, days-left and trial-ended lines, all seven languages). The price Play charges is set by Ian on the pro_unlock product in Play Console. Version 28 rebuilt with it.
 - **17 Oct 2026: Play production access granted** (Ian). Version 28 (0.3.27) not yet uploaded; v26 is the last on Closed Testing (v27 was built but never uploaded).
@@ -8185,41 +8185,42 @@ why the Moto never showed it; confirmed in the bundle's BundleConfig (LANGUAGE s
 - 1 Nov 2026 (Ian: "move the Pro Unlock notification into the Backup Section header"): `cloud_pro_unlocked` now sits in the Backup `SectionHeader`, right-aligned after the (?), through a new `note` parameter, and inherits the band's `onHero` colour rather than the theme primary it had under the Clouds heading. Same string, so no new translations. Seen on the Moto with its real promo-code unlock: English in dark and light on one line at font scale 1.15; no crash. Replaced the same day: see the next entry. Noticed, not changed: `settings_backup`, `settings_albums`, `settings_sync`, `settings_restore` and `settings_archive` exist only in English, so those five section titles stay English in every language. Translated since (below). Not yet released (version 34).
 - 1 Nov 2026 (Ian: "translate the section titles"): `settings_backup`, `settings_albums`, `settings_sync`, `settings_restore` and `settings_archive` added to `tools/wizard` in all six languages. Tabs and album mode names stay English, so a title can now differ from the tab of the same name (Archiv over the Archive tab), which is what was asked. Not checked by a native speaker. Seen on the Moto: all five titles on screen in German, Spanish, French, Japanese and Hindi at font scale 1.5 and density 320, no crash; Portuguese Backup header only. *Copia de seguridad* then squeezed the right-aligned Pro note into a one-word-wide column, seven lines tall, so the note now goes through a `FlowRow`: beside the title when it fits (English at the Moto's normal size), on its own line below when not (Spanish and German at normal size; Spanish, German and Portuguese at large). French, Japanese and Hindi not re-looked at since that change. **The guide's (?) card titles and its section names still say Backup, Albums, Sync, Restore and Archive**: passed to the guide session, done in 19d5192. Not yet released (version 34).
 - **1 Nov 2026: version 34 (0.3.33) built** (Ian: "build version 34 once the guide is done"): Pro unlocked in the Backup header and the five translated section titles, with the guide (ba559c6, 19d5192). Unit tests pass; roboto.ttf in; language splits off; signed. Release notes in release-notes/v34-0.3.33.txt, each language under 500 characters, not checked by a native speaker. Seen on the Moto (debug build of the same code): the Backup (?) card in Spanish and Japanese, title and sentence matching the new header; no crash. The other four languages' cards not looked at on screen. Not yet uploaded.
-- 1 Nov 2026 (Ian: "change all the sorting to Date_taken - as if a picture is compressed during the Sync it changes the modified date"): Archive's *older than*, the Camera folder's age, an album's *Sort by Date*, Restore's *Newest first* and the date on each file row now use `dateForSorting`: date taken, else modified. Room 16 to 17 adds nullable `backup_entries.dateTakenEpochSeconds`; `LocalMediaItem` carries it too. **`datetaken` is often empty, so it cannot be used alone:** on the Moto, 388 of 2,329 photos have it NULL, all 34 in Car Show. Of a random 40 NULL JPEGs, 38 have EXIF `DateTimeOriginal` and none of those 38 has an offset or GPS date; of 40 with `datetaken` set and differing from modified by more than a day, all have `DateTimeOriginal`, 33 an offset, 9 a GPS date. So `refreshLedger` fills the column once per file: MediaStore, else EXIF (read as local time), else the row's modified date. A file that could not be read is retried. **Deliberately left on the modified date:** `backupKeyOf` and all identity and edit detection; `MediaAge`, the Sync video wait (a file just copied in stays untouched); the upload queue's order. Seen on the Moto: migration ran, 2,375 of 2,382 rows filled, no crash, Car Show optimised photos show 12 Mar 2017 and so on (modified Oct 2026), Sort by Date newest first; Archive at 1 year offered all 34 of Car Show and held back all 38 of Camera, nothing checked or removed, both albums' modes put back. The other 7 rows are videos in Movies whose ledger MediaStore id no longer matches, so they stay on the modified date. Restore's *Newest first* not looked at on screen. Not seen on a large library: the first fill reads EXIF for every undated photo, and this has not been timed. MigrationTest case added and compiled, not run. Not yet released (version 35).
+- 1 Nov 2026 (Ian: "change all the sorting to Date_taken - as if a picture is compressed during the Sync it changes the modified date"): Archive's *older than*, the Camera folder's age, an album's *Sort by Date*, Restore's *Newest first* and the date on each file row now use `dateForSorting`: date taken, else modified. Room 16 to 17 adds nullable `backup_entries.dateTakenEpochSeconds`; `LocalMediaItem` carries it too. **`datetaken` is often empty, so it cannot be used alone:** on the Moto, 388 of 2,329 photos have it NULL, all 34 in Car Show. Of a random 40 NULL JPEGs, 38 have EXIF `DateTimeOriginal` and none of those 38 has an offset or GPS date; of 40 with `datetaken` set and differing from modified by more than a day, all have `DateTimeOriginal`, 33 an offset, 9 a GPS date. So `refreshLedger` fills the column once per file: MediaStore, else EXIF (read as local time), else the row's modified date. A file that could not be read is retried. **Deliberately left on the modified date:** `backupKeyOf` and all identity and edit detection; `MediaAge`, the Sync video wait (a file just copied in stays untouched); the upload queue's order. Seen on the Moto: migration ran, 2,375 of 2,382 rows filled, no crash, Car Show optimized photos show 12 Mar 2017 and so on (modified Oct 2026), Sort by Date newest first; Archive at 1 year offered all 34 of Car Show and held back all 38 of Camera, nothing checked or removed, both albums' modes put back. The other 7 rows are videos in Movies whose ledger MediaStore id no longer matches, so they stay on the modified date. Restore's *Newest first* not looked at on screen. Not seen on a large library: the first fill reads EXIF for every undated photo, and this has not been timed. MigrationTest case added and compiled, not run. Not yet released (version 35).
 - **1 Nov 2026: version 35 (0.3.34) built** (Ian: "build version 35"): date taken for sorting and age (564925b), with the guide fix for it (1301a43: album-file-sort no longer says a restored file has the date it was restored). Unit tests pass; bundle signed; roboto.ttf in; language splits off. Release notes in release-notes/v35-0.3.34.txt, each language under 500 characters, not checked by a native speaker; they cover only the date change, so if version 34 is skipped they need its two lines added. Seen on the Moto (debug build of the same code): opens without a crash. Still unseen: the first scan on a large library, Restore's Newest first on screen. Not yet uploaded.
 - 1 Nov 2026: **version 34 was never uploaded** (Ian), so version 35 is the first release carrying its changes. release-notes/v35-0.3.34.txt now also has the two lines from version 34 (Pro unlocked in the Backup header, the translated section titles). The bundle is unchanged; the notes are not part of it.
 - **1 Nov 2026: version 35 (0.3.34) uploaded and installed on the Fold 8 from Play** (Ian). Next release is version 36. Read over wireless adb at 23:55 the same day, looking only: versionCode 35 from `com.android.vending`, installed 19:48; crash buffer and dropbox hold no crash or ANR for the app; every recent exit is `REMOVE TASK`, a swipe from Recents. A release build cannot be `run-as`, so whether the date fill finished on this library cannot be read from adb. To check on the Fold 8: how long the first scan takes to fill dates on the real library (MIGRATION_16_17 then the EXIF fill, never timed at this size), Restore's Newest first, the Backup header folded and unfolded, the two-column Clouds layout unfolded, the cover screen, and Add a folder. Still open: the wizard's About this Cloud card says "Free for 30 days" to someone who owns Pro.
 - 2 Nov 2026 (Ian): the Archive age filter is now a number (1-9) and a unit (hour, day, week, month, year, All) instead of a fixed list, on the Archive tab and in Settings, through one `ArchiveAgePicker`. `ArchiveAge` is a data class; a month is still 30 days and a year 365. All has no number, so the number menu is greyed for it (All must stay: it is the default and the contract that nothing is held back out of the box). First built hidden; Ian, the same day: with only the unit showing, the number read as missing, so it is always drawn and greyed under All ("perfect"). Settings stores `"3 Month"`; the old names (`OneHour` ... `OneYear`, `All`) still read as what they were. Unit words follow the number (`1 year`, `3 years`) and stay English like the rest of `archive_age_*`. Seen on the Moto, debug build: 1 year and 3 years offered 0 of 38, 3 hours all 38, 1 week 31 with 7 held back; a Settings default of 1 week survived a force stop and was where the tab started; light and dark read correctly. At 288dp and font scale 1.5 the label broke mid-word beside two buttons, so the row is now a `FlowRow` and the menus drop under the label; at normal size they stay beside it. Settings at large text and the Fold 8 not seen. Camera was set to Archive for the test and returned to Off, Settings to All, no check run and no `.trashed` file in DCIM/Camera. The Guide said `1 hour` to `1 year` in `archive-age-filter` and `settings-archive-default-age`; the How To session rewrote both in seven languages (8a26cd0, 2 Nov).
 - **2 Nov 2026: version 36 (0.3.35) built** (Ian: "please build"). Carries the age filter as a number and a unit (bddffda, 28ecd62) and the Guide cards for it (8a26cd0). Bundle app/build/outputs/bundle/release/app-release.aab, 18,175,096 bytes, jar verified, versionName 0.3.35 in the manifest, roboto in, `enableSplit = false`; unit tests pass. Notes in release-notes/v36-0.3.35.txt, one bullet, 132-185 characters, unit words left in English, not checked by a native speaker. Not yet uploaded. To check on the Fold 8 after installing from Play: the two menus on the Archive tab folded, unfolded and on the cover screen, and Settings at large text.
 - **5 Nov 2026: version 36 (0.3.35) uploaded and installed on the Fold 8 from Play** (Ian). Next release is version 37. The Fold 8 was not reachable over adb when this was written, so its crash log was not read. Still to check on it: the two age menus on the Archive tab folded, unfolded and on the cover screen, Settings at large text, and the version 35 checks (first date fill on the real library, Restore's Newest first, the Backup header, two-column Clouds, Add a folder).
-- 11 Nov 2026 (Ian: "give the user the ability to click on any file in the albums, restore and archive tabs and have that open that file in their image/video application of choice"): **specced as TASK-028, nothing built.** Long-press opens a file on all three tabs (tap and swipe unchanged); a file on the phone, optimised ones included, opens in the phone's default app; a file not on the phone follows a new Settings → General choice, **Open in the Cloud** (default) or **Download temporarily**, with B2 and IDrive e2 always downloading (no link exists). The download obeys the mobile-data switch and asks first only on mobile data and over 750 MB. Cloud links researched, not tried: OneDrive's `webUrl` is documented for the browser only, Google Photos' `productUrl` and Drive's link are not confirmed to open their apps. Written in a cloud session with no SDK or adb; to be built on Ian's machine. Both open points answered by Ian the same day: the setting goes directly below *Use mobile data* in General, and a Cloud link that cannot be fetched tells the user and offers Cancel or Download.
+- 11 Nov 2026 (Ian: "give the user the ability to click on any file in the albums, restore and archive tabs and have that open that file in their image/video application of choice"): **specced as TASK-028, nothing built.** Long-press opens a file on all three tabs (tap and swipe unchanged); a file on the phone, optimized ones included, opens in the phone's default app; a file not on the phone follows a new Settings → General choice, **Open in the Cloud** (default) or **Download temporarily**, with B2 and IDrive e2 always downloading (no link exists). The download obeys the mobile-data switch and asks first only on mobile data and over 750 MB. Cloud links researched, not tried: OneDrive's `webUrl` is documented for the browser only, Google Photos' `productUrl` and Drive's link are not confirmed to open their apps. Written in a cloud session with no SDK or adb; to be built on Ian's machine. Both open points answered by Ian the same day: the setting goes directly below *Use mobile data* in General, and a Cloud link that cannot be fetched tells the user and offers Cancel or Download.
 - 11 Nov 2026 (Ian, from a screenshot of the Archive tab, 550 files, details shown, check running: "see where all this verbiage came back … we removed a lot of this and put this into the how-to guide"; "we need some sort of progress indicator … I can't tell whether it's still going or if it's stuck"). **Found by reading, nothing changed; Ian will decide on his machine.**
   - **The wording never left.** No commit since the 20 Oct import removes or re-adds `archive_intro`, `archive_restore_pointer` or `archive_folders_hint` (bfa9422, f5df701 and 7c35ab5 only move them). On 25 Oct they were made to fold under *Hide Details*, not deleted. What did move to (?) pop-ups and the guide was elsewhere: the Camera header (27 Sept, version 14), the Albums *Total* line (Sept), "Tap to filter by mode" (25 Oct). The explanation is also in the guide (`tools/guide/content/c5_archive.py`), so it is now in both places.
   - **Defect: the Hide Details line can be pushed out of sight.** bfa9422 (23 Oct) caps the header block at 72% of the screen height and scrolls inside it, so the question's Yes/No stay reachable on the cover screen. 7c35ab5 (25 Oct) then put `HeaderDetailsToggle` at the bottom of that block (`ArchiveScreen.kt`, ~line 516). With 11 album names and the details open the card passes 72%, so the fold line sits below the cut-off: only its top divider shows, and the header cannot be folded without scrolling inside the green card. Proposed: keep the toggle outside the scrolling part, always visible. Check Albums and Restore for the same pattern.
   - **Defect: the Archive check gives no sign of progress.** `ArchivePhase.VALIDATING` draws a 16dp indeterminate `CircularProgressIndicator` and *Checking with your Cloud…*, nothing else. Behind it are two stages that look the same: (1) `BackupEngine.confirmStillInCloud`, one listing per album for OneDrive, but **one live request per file** for every other Cloud (550 files can mean 550 requests); (2) if anything is missing, `ArchiveViewModel.backUpAndRecheck` starts a manual backup and waits for the whole WorkManager chain, still reading *Checking…*. Proposed: a callback from `confirmStillInCloud` driving *Checking N of M* with a determinate bar, and *Backing up N of M* during stage 2. No Room change, no permission.
   - **For Ian:** (1) fix the fold line as proposed? (2) keep the explanation and the Restore line foldable, or take them off the header so they live only in the (?) and the guide? (3) progress as proposed, as a task spec or built directly? The screenshot's phone and Cloud were not stated.
 - **11 Nov 2026: TASK-028 built, not yet seen on a device** (Ian: "start the build on Task 028"). Long-press opens a file on the Albums, Restore and Archive tabs; Settings → General gains *Files not on the phone* (Open in the Cloud, the default / Download temporarily). What differs from the spec, and the file list, is in TASK-028. pCloud has no link (its only file link is a direct download); Dropbox's link is the web preview of the file's folder; Google Photos cannot be downloaded, so it says so. New `FileProvider` (not a permission). No Room change. Compiles; all unit tests pass, with `OpenFilePlanTest` and `OpenFileNamesTest` new. **The Moto was not reachable over adb, so nothing has been tried by thumb**: the long-press against the swipe on each tab, where each Cloud's link lands, the downloads, light and dark, large text. No (?) or Guide topic yet.
-- 11 Nov 2026, TASK-028 first look on the Moto (debug build, paired over wireless debugging), cut short when the Moto went offline: **Albums**, long-press on an optimised Car Show photo opened Android's *Open with* sheet (the Moto has no default photo app, which is decision 2 working) and *Just once* showed the optimised copy in Google Photos; no default was set. **Restore**, a tap on an *Already on this phone* row selected nothing, as before. **Defect, fixed the same hour:** a long-press on that row went to OneDrive instead of the phone, because Restore builds those rows from the Cloud listing with no MediaStore address (`BackupEngine.driveEntity`, `contentUri = ""`). `OpenFileRepository.uriIfOnPhone` now falls back to name and size in the album's folder, the test Restore itself uses for *already here*; rebuilt and unit tests pass, not yet re-tried on the phone. **Where OneDrive's link lands:** the OneDrive app takes the `webUrl`, then says *This page can't be opened in the OneDrive app* and offers *Open in browser* or Cancel. Still to try: that row again, a real *Available for download* row, the swipe against the long-press, Archive, the other Clouds' links, the downloads, light mode and large text.
+- 11 Nov 2026, TASK-028 first look on the Moto (debug build, paired over wireless debugging), cut short when the Moto went offline: **Albums**, long-press on an optimized Car Show photo opened Android's *Open with* sheet (the Moto has no default photo app, which is decision 2 working) and *Just once* showed the optimized copy in Google Photos; no default was set. **Restore**, a tap on an *Already on this phone* row selected nothing, as before. **Defect, fixed the same hour:** a long-press on that row went to OneDrive instead of the phone, because Restore builds those rows from the Cloud listing with no MediaStore address (`BackupEngine.driveEntity`, `contentUri = ""`). `OpenFileRepository.uriIfOnPhone` now falls back to name and size in the album's folder, the test Restore itself uses for *already here*; rebuilt and unit tests pass, not yet re-tried on the phone. **Where OneDrive's link lands:** the OneDrive app takes the `webUrl`, then says *This page can't be opened in the OneDrive app* and offers *Open in browser* or Cancel. Still to try: that row again, a real *Available for download* row, the swipe against the long-press, Archive, the other Clouds' links, the downloads, light mode and large text.
 - 11 Nov 2026, TASK-028 on the Moto, second look (debug build with a51b025, reconnected): **the fix holds**, the greyed-out Restore row now opens on the phone. **Restore**: a swipe right selected and a swipe left deselected, and neither opened anything; a long-press selected nothing. **Open in the Cloud, OneDrive**, on a DCIM file only in the Cloud: the OneDrive app takes the link, says *This page can't be opened in the OneDrive app*, and its *Open item* button opens onedrive.live.com in Chrome, with a Microsoft 365 promotion over it (not touched). So OneDrive files reach the browser, one tap and one pop-up later; **for Ian to judge**. **Download temporarily**, on `Documents/ProTest_164849.webp` (78,752 bytes, on no folder of the phone): the copy landed in `cache/open/` at exactly that size, and Google Photos showed it with only *Share*, so it is not in the gallery. **Archive**: a long-press on a Car Show file opened it and started no check. Settings row read in dark and light. The Moto has no default photo app, so every open went through Android's *Open with* sheet; *Just once* every time, no default set. Note on the test data: 2,002 of Restore's 2,001 DCIM download rows are also in `DCIM/new album` at the same name and size, so they open from the phone (same bytes); only Documents had a truly absent file. Setting put back to *Open in the Cloud*, stay-awake back to 15, dark mode as found. **Not tried:** the Dropbox, Google Drive and Google Photos links (no file of theirs off the phone), the mobile-data refusal and the 750 MB question (the Moto was on Wi-Fi), cancelling a download, large text.
 - 11 Nov 2026 (Ian: "look for a link the OneDrive app opens directly"): **none found.** Microsoft documents no deep link to a file, and says only that some links ("an older link") open in the browser. On the Moto, OneDrive 7.64.2 declares `DeepLinkingActivity` for any path on onedrive.live.com, 1drv.ms and photos.onedrive.com, and an `ms-onedrive:` scheme on `MainActivity`. Tried with `am start` on `Documents/ProTest_164849.webp` (id `F6D661310DF0D2A8!sf256f95525cf49a9bfcfa9ac7c2b40ed`): `onedrive.live.com/?cid=<cid>&id=<id>` (either case of cid) and `photos.onedrive.com/photo/<id>` give *This page can't be opened in the OneDrive app* with *Open in browser*; `onedrive.live.com/redir?resid=<id>`, `view.aspx?resid=<id>` and `ms-onedrive://items/<id>` open the app at *My files* with no error, but not the file. A sharing link (Graph `createLink`) was not tried and must not be: it makes the file viewable by anyone with the link. So `webUrl` stays, and reaches the file in the browser; whether OneDrive files should download instead is Ian's call.
 - 11 Nov 2026 (Ian, after talking it over with the documentation session): the first choice of *Files not on the phone* is renamed **Opens in Cloud App or Browser** (`settings_open_cloud`), in all seven languages, so the user knows before choosing that a Cloud may send them to the browser. Ian chose renaming over a separate OneDrive row or a row per Cloud, and asked for no Cloud to be named ("remove OneDrive reference"). Behaviour unchanged; the stored value is still `CLOUD`. The Google Photos refusal message names the option by its new label. Seen on the Moto in dark mode: fits on one line beside the label at font scale 1.15.
 - 12 Nov 2026: the (?) on *Files not on the phone* (`HelpTopic.SETTINGS_OPEN_NOT_ON_PHONE`, 69685f5), from the How To session's topic (79cead5, corrected in 2952701: Google Photos opens through its link; Archive files are always on the phone). Seen on the Moto over USB: the card opens with the right text; the row at font scale 1.5 and density 400 wraps the label and drops the button under it. Small wording glitch in the card: *Use mobile data ("Use mobile data")*, the topic link repeating its own name. **The Moto has no mobile data** (no SIM connection: with Wi-Fi off, no default network), so the mobile-data refusal and the 750 MB question cannot be tested on it; offline, Restore lists only files on the phone, so the no-connection message cannot be reached there either. Wi-Fi, font scale 1.15, density, stay-awake 15 and the setting restored.
 - **12 Nov 2026: version 37 (0.3.36) built** (Ian: "build version 37 once tested on Moto"). Carries TASK-028: long-press to open on the Albums, Restore and Archive tabs, Settings → General → *Files not on the phone*, its (?), and the Guide topics. Bundle app/build/outputs/bundle/release/app-release.aab, 18,225,921 bytes, jar verified, versionName 0.3.36 and the `.openfiles` provider in the manifest, roboto in, `enableSplit = false`; unit tests pass. Notes in release-notes/v37-0.3.36.txt, two bullets, 137-327 characters, not checked by a native speaker. Not yet uploaded. Untested anywhere: the Dropbox, Google Drive and Google Photos links, mobile data, cancelling a download. On the Fold 8 after a Play install: long-press on each tab, folded and unfolded, and the cover screen.
 - **14 Nov 2026: version 37 (0.3.36) uploaded to Play and installed on the Fold 8** (Ian). Still to check there: long-press to open on the Albums, Restore and Archive tabs, folded and unfolded, and the cover screen. The Moto carries the same commit (81bf480) as a debug build.
-- **14 Nov 2026: Sync's video *Older than* is now the number and unit menus** (Ian, on version 37: it "reverted back to the 5 option drop down which was supposed to be replaced by the Number / time setting"). **It had not reverted.** Version 36 (2 Nov) replaced only Archive's *Only show files older than*; the video age was a separate setting, `MediaAge`, a fixed list of Straight away / 1 hour / 12 hours / 1 day / 1 week, and was never changed. Now it stores an `ArchiveAge` and uses the same `ArchiveAgePicker`, whose zero entry reads *Straight away* here (and All on Archive); `MediaAge` keeps only the default (1 day) and the old saved names. **12 hours has no place on a 1-9 scale and reads as 1 day**, the side that waits longer, so a saved choice can only optimise less than it did. Still measured against the modified date, unlike Archive (taken date); not changed here. Seen on the Moto over USB, light and dark: a saved 1 week reads 1 · week, the unit menu lists hour to year and Straight away, Straight away greys the number and shows the warning; set back to 1 week. The Camera folder's age (`CameraOptimiseAge`, 1 day to 1 year and All) is still its own list. The How To Guide topic `settings-video-age` still lists the five old values and needs the sibling.
-- **15 Nov 2026: ½ on every age, and the Camera folder's age on the same two menus** (Ian: "can you add a .5 or 1/2 to the number list? anywhere where a time limit can be set should get the same functionality"). `ArchiveAge.count` is now a Double (an Int constructor keeps the old call sites); `COUNTS` is ½ then 1-9; a whole number is still stored as "3 Day" so saved values read, ½ as "0.5 Day". The menu shows ½; the unit takes the singular ("½ month"). `CameraOptimiseAge` is now an object holding the default (All) and the old names (6 months reads as 6 × 30 = 180 days, was 182). The places a time limit is set, all now one picker: the Archive tab, Settings → Archive, Settings → Sync → video *Older than*, Settings → Camera Sync, and the Camera folder's header (where the two menus now sit on their own line above Photos and Videos). Unit tests pass. **Seen on the Moto over USB**, light and dark: the video row's number menu lists ½ then 1-9, ½ month shows; ½ on the Archive default; Camera default ½ week. **Not yet seen: the Camera folder's header**, because the Moto kept dropping off USB. Found on the Moto, set by Ian and left as they were: video *Older than* 3 months, Archive default 4 months, Optimise photos on. Left changed by this test, to put back: Camera Sync *Special settings* on, Camera folder = Camera, Camera default ½ week.
+- **14 Nov 2026: Sync's video *Older than* is now the number and unit menus** (Ian, on version 37: it "reverted back to the 5 option drop down which was supposed to be replaced by the Number / time setting"). **It had not reverted.** Version 36 (2 Nov) replaced only Archive's *Only show files older than*; the video age was a separate setting, `MediaAge`, a fixed list of Straight away / 1 hour / 12 hours / 1 day / 1 week, and was never changed. Now it stores an `ArchiveAge` and uses the same `ArchiveAgePicker`, whose zero entry reads *Straight away* here (and All on Archive); `MediaAge` keeps only the default (1 day) and the old saved names. **12 hours has no place on a 1-9 scale and reads as 1 day**, the side that waits longer, so a saved choice can only optimize less than it did. Still measured against the modified date, unlike Archive (taken date); not changed here. Seen on the Moto over USB, light and dark: a saved 1 week reads 1 · week, the unit menu lists hour to year and Straight away, Straight away greys the number and shows the warning; set back to 1 week. The Camera folder's age (`CameraOptimizeAge`, 1 day to 1 year and All) is still its own list. The How To Guide topic `settings-video-age` still lists the five old values and needs the sibling.
+- **15 Nov 2026: ½ on every age, and the Camera folder's age on the same two menus** (Ian: "can you add a .5 or 1/2 to the number list? anywhere where a time limit can be set should get the same functionality"). `ArchiveAge.count` is now a Double (an Int constructor keeps the old call sites); `COUNTS` is ½ then 1-9; a whole number is still stored as "3 Day" so saved values read, ½ as "0.5 Day". The menu shows ½; the unit takes the singular ("½ month"). `CameraOptimizeAge` is now an object holding the default (All) and the old names (6 months reads as 6 × 30 = 180 days, was 182). The places a time limit is set, all now one picker: the Archive tab, Settings → Archive, Settings → Sync → video *Older than*, Settings → Camera Sync, and the Camera folder's header (where the two menus now sit on their own line above Photos and Videos). Unit tests pass. **Seen on the Moto over USB**, light and dark: the video row's number menu lists ½ then 1-9, ½ month shows; ½ on the Archive default; Camera default ½ week. **Not yet seen: the Camera folder's header**, because the Moto kept dropping off USB. Found on the Moto, set by Ian and left as they were: video *Older than* 3 months, Archive default 4 months, Optimize photos on. Left changed by this test, to put back: Camera Sync *Special settings* on, Camera folder = Camera, Camera default ½ week.
 - **15 Nov 2026: version 38 (0.3.37) built** (Ian: "once How To is completed - build version 38"). Carries the age menus (c156d4e, ccc1190): ½ to 9 and a unit on Archive, Sync's video *Older than* and the Camera folder, and the How To session's Guide update for them (912c9e5, which also fixed the *Use mobile data ("Use mobile data")* glitch). Bundle app/build/outputs/bundle/release/app-release.aab, 18,225,122 bytes, jar verified, versionName 0.3.37 and the `.openfiles` provider in the manifest; unit tests pass. Debug build on the Moto (over wireless debugging; the laptop's USB ports are loose) shows versionCode 38 and launches with no crash. Notes in release-notes/v38-0.3.37.txt, two bullets, 131-259 characters, not checked by a native speaker. Not yet uploaded.
 - **15 Nov 2026: version 38 (0.3.37) uploaded to Play and installed on the Fold 8** (Ian). Still to check there: the age menus with ½ on the Archive tab, Settings → Archive, Settings → Sync → video *Older than*, Settings → Camera Sync and the Camera folder's header, folded and unfolded. The Moto carries the same commit (fbb432d) as a debug build.
 - **16 Nov 2026: the v38 age menus verified on the Fold 8** (Ian): correct on every screen that sets an age. The Camera folder's header shows its age menus only when Settings → Camera Sync → *Special settings for Camera* is on and a folder is chosen, which is as built: until then there is no camera folder and every album, Camera included, is ordinary.
-- **16 Nov 2026: GallerySync in Samsung's Secure Folder** (Ian, Fold 8; I only read adb output, installed nothing). Secure Folder is Android user 150; a copy installed there is a separate app with its own settings, ledger, sign-ins and photos. Ian routes it to its own OneDrive folder. **At the default battery setting it uploads only while on screen**: the moment it left the screen Samsung's `OlafRestriction` switched on, the system destroyed that uid's TCP sockets (`Destroyed live tcp sockets for uids={15010501}`), WorkManager logged the BackupWorker cancelled, and JobScheduler gave the stop reason `olaf` (a Samsung reason, not AOSP; Instagram in the main profile was stopped the same way). The profile stayed RUNNING_UNLOCKED throughout, so it is not the Secure Folder lock. On return the job was rescheduled and the upload resumed from its byte offset (15%). The main-profile copy showed no `olaf` stops in the same window. **Fix, verified by Ian:** inside Secure Folder, Settings → Apps → GallerySync → Battery → *Unrestricted*. After that an upload carried on while he used other apps, and even a swipe out of Recents only interrupted it: the job history shows `unexpectedly disconnected` then START again within milliseconds, and no new `olaf` stops. What triggers `olaf` in general is not known. Neither copy holds a battery-optimisation exemption (`deviceidle whitelist` empty for com.gallery.sync). Guide line requested from the How To session.
-- 16 Nov 2026 (Ian): the battery setting is **shared between the two copies**: changing GallerySync's battery optimisation in the personal profile or in the Secure Folder shows the same value in both. So setting *Unrestricted* in either place covers both copies. Not read from the device; Ian's observation in the settings screens.
+- **16 Nov 2026: GallerySync in Samsung's Secure Folder** (Ian, Fold 8; I only read adb output, installed nothing). Secure Folder is Android user 150; a copy installed there is a separate app with its own settings, ledger, sign-ins and photos. Ian routes it to its own OneDrive folder. **At the default battery setting it uploads only while on screen**: the moment it left the screen Samsung's `OlafRestriction` switched on, the system destroyed that uid's TCP sockets (`Destroyed live tcp sockets for uids={15010501}`), WorkManager logged the BackupWorker cancelled, and JobScheduler gave the stop reason `olaf` (a Samsung reason, not AOSP; Instagram in the main profile was stopped the same way). The profile stayed RUNNING_UNLOCKED throughout, so it is not the Secure Folder lock. On return the job was rescheduled and the upload resumed from its byte offset (15%). The main-profile copy showed no `olaf` stops in the same window. **Fix, verified by Ian:** inside Secure Folder, Settings → Apps → GallerySync → Battery → *Unrestricted*. After that an upload carried on while he used other apps, and even a swipe out of Recents only interrupted it: the job history shows `unexpectedly disconnected` then START again within milliseconds, and no new `olaf` stops. What triggers `olaf` in general is not known. Neither copy holds a battery-optimization exemption (`deviceidle whitelist` empty for com.gallery.sync). Guide line requested from the How To session.
+- 16 Nov 2026 (Ian): the battery setting is **shared between the two copies**: changing GallerySync's battery optimization in the personal profile or in the Secure Folder shows the same value in both. So setting *Unrestricted* in either place covers both copies. Not read from the device; Ian's observation in the settings screens.
 - **16 Nov 2026: the Albums upload line names the album and shows sizes, and moved inside the header** (Ian: Show/Hide did nothing while syncing, because the only thing it folded was the mode-total line; the upload line sat below the card). `BackupProgress.currentAlbum` (from `entry.album`, last path segment shown) and the file's total size go through the worker's progress data (`PROGRESS_ALBUM`, `PROGRESS_CURRENT_TOTAL`) into `BackupStatus.Uploading`. New string `backup_status_uploading_album`: "Uploading %1$d of %2$d · album · file · sent of total", with non-breaking spaces so "94 MB of 249 MB" stays on one line; the old percentage string remains as the fallback when the size or album is not known. `UploadingDetail` draws the line and bar inside `HeaderDetailsSection`, bar in the header's content colour; every other status stays below the card. This narrows HeaderDetails' "whatever is happening right now stays" for the Albums tab: the upload line hides, *Syncing…*/Pause/Stop stay. **Seen on the Moto** (two 249 MB copies of a camera clip, VID_20261116_UPLOADTEST*.mp4, left in DCIM/Camera as test data): line reads "Uploading 1 of 1 · Camera · … · 31 MB of 249 MB", Hide Details folds line and bar mid-upload and Show brings them back, light and dark app themes readable, no crash. Unit tests pass (757). Guide topics albums-status-line and albums-list sent to the How To session to update.
 - **16 Nov 2026: every Cloud that can be asked now has a "verified" line on the Albums tab, per album, like OneDrive's** (Ian: "every Cloud that can be checked - per folder like OneDrive"). `CheckOtherClouds` runs after `ReconcileWithCloud` in the Albums tab's check (never in the wizard, which keeps `ReconcileWithCloud` as it was): for each album and Cloud it lists `<backup folder>/<album>` once (`CloudVerifier.listAlbum`: Dropbox `list_folder`, Drive by the folder chain without creating, pCloud `listfolder`, B2/IDrive e2 ListObjectsV2) and counts a file verified when the Cloud holds **the object id recorded at upload at exactly the local size**, the Archive bar. A file the listing does not show is asked about by id (the folder may have changed since it was sent), at most 25 per album; one not answered for is unchecked, never missing. **Display only**: it writes the new `album_elsewhere_status` table (database 18, additive `MIGRATION_17_18`, migration test added) and nothing else; Archive still asks live per file. Lines: "N verified in X", "N of M verified in X", "Could not reach X when this was last checked"; never checked, and Google Photos always, keep "N sent to X". The line is green when every Cloud on it has verified everything. Dropbox now asks for `files.metadata.read` by name; the Dropbox app already held it (greyed tick in the App Console, implied by `files.content.read`), and the Moto's existing sign-in listed without a reconnect. **Verified on the Moto G** (dark theme): every Dropbox album reads "N verified in Dropbox" in green (31, 50, 27, 2, 1), no crash. Google Drive, B2 and IDrive e2 not exercised on hardware: no album on the Moto currently sends to them.
 - **16 Nov 2026: version 39 (0.3.38) built** (Ian: "build version 39"). Carries the upload line with album and size sent of total inside the header card (8ac611f), the per-Cloud "verified" line (5bea808, database 18) and the How To session's Guide updates for both (b84fa98, e777265). Bundle app/build/outputs/bundle/release/app-release.aab, 18,244,756 bytes, jar verified; unit tests pass. Debug build on the Moto shows versionCode 39 / 0.3.38 and launches with no crash. Notes in release-notes/v39-0.3.38.txt, two bullets, 189-330 characters, not checked by a native speaker. Not yet uploaded.
 - **16 Nov 2026: version 39 (0.3.38) uploaded to Play** (Ian: "uploaded"). Installed on the Fold 8 the same day (Ian: "version 39 installed on Fold").
 - **21 Nov 2026: the per-album Dropbox "verified" line confirmed on the Fold 8**, version 39 (0.3.38) from Play, on Ian's own library: several albums read "N verified in Dropbox" (Ian: "I have several albums with \"XXX verified in Dropbox\""). First run of `MIGRATION_17_18` on a real upgraded install; no crash reported. Google Drive, pCloud, B2 and IDrive e2 still not exercised on hardware.
 - **22 Nov 2026: a folder inside a top-level folder can choose its own Cloud; the most specific folder wins** (Ian: "build and test option 1"). **The defect:** Ian added `Internal Storage / DCIM / Funny stuff` under *Folders to back up* and chose pCloud for it, and `DCIM` itself moved from OneDrive to pCloud. Routing had been per top-level folder only since TASK-026 (24 Sept): `ReconcileViewModel.addSource` reduced the picked folder to `DCIM` with `topLevelFolderOf`, so the pop-up asked "Where should DCIM back up to?" and `SetFolderDestination` re-pointed every unsent DCIM row. Nothing was removed or moved; files already in OneDrive stayed there. **Now:** `folder_preferences` keys may be a path (`DCIM/Funny stuff`; no schema change, the key was always text). `FolderDestination.routeOf` picks the longest chosen key that is the file's folder or one it lies inside (matched by whole folder names, ignoring case, exact spelling preferred), else the top-level folder; `resolve` takes a `RELATIVE_PATH`. Used by `refreshLedger` per file, by the Albums row (`MediaAlbum.mainPath`, the folder holding most of the album, new `inPaths`), and by Settings. `SetFolderDestination` now re-points unsent rows one by one (`unsentRoutes`, `retargetUnsentRows`): only rows whose governing folder is the one just chosen move, so choosing for `DCIM` leaves `DCIM/Funny stuff` alone, and an album in two top-level folders moves only the files in the chosen one (before, the whole album moved). A row with no recorded folder goes by its album's folder now. `addSource` passes the picked folder itself, so the pop-up asks about "DCIM / Funny stuff" and starts at its parent's Cloud; *Decide later* writes nothing and the folder keeps following its parent. *Where each folder goes* (`folderRows`) lists each chosen subfolder under its parent, the parent counting only what it governs; a parent whose files are all in such a folder keeps a row at zero; **every folder added under *Folders to back up* has a row, one inside DCIM included, even before it has a Cloud of its own**: it counts its own files and shows (and follows) its parent's Cloud until one is chosen on its row, so a folder added before this change (Ian's `Funny stuff`, whose answer was stored as `DCIM`) can be given its Cloud without removing and re-adding it. A chosen subfolder no longer added keeps its row while it still governs files. The wizard is unchanged: it still routes top-level folders only. Already-sent files never move. Unit tests: `FolderDestinationResolveTest`, `SetFolderDestinationTest` (rewritten for row-level re-pointing), new `FolderRowsTest`; all pass. **Not yet verified on hardware** (the Moto was not connected). **Not yet changed:** the guide (`c1_start.py` "Pairing: which Cloud each top-level folder…", `settings-destination`, `dialog-new-folder-cloud`), in seven languages.
-- **22 Nov 2026: files gone from the Cloud are flagged on the Albums tab and resent only by choice, from the album's page, selected as on Restore** (Ian: *"rather than have the Album automatically resend missing files - we need to give the user the option"*, *"They may have deleted or Restored those files purposefully"*, *"build it like the RESTORE tab"*, *"get rid of all the verbiage on the Drill down Header - add a new (?)"*). **Why:** a file recorded as sent stayed "sent" for ever after it was deleted in the Cloud; only the wizard's first check compared the ledger with the Cloud, and only in the direction of marking files sent. **First built as automatic** (Rescan re-queued what was missing) and withdrawn the same hour, before it was ever pressed on a device: never re-send on the app's own initiative. **Now:** the tab's check (entry and **Rescan**, still display only) counts, per album, files recorded as sent, still on the phone and never optimised, that a Cloud **definitely** no longer holds: OneDrive by a complete listing with neither the upload id nor the name at the recorded size (an entry with no size is unknown); other Clouds by `ElsewhereTally` (now one pass, `withMissing`), so a failed listing, an unknown answer or a lookup past the 25 cap is never counted. Held in memory only (`BackupUiState.missingFromCloud`, row ids), no schema change. The album card says "N files are no longer in the Cloud" in red. The album page counts them out of "backed up" ("37 backed up · 25 not in the Cloud"), greys them and marks each "not in <Cloud>" instead of "✓ backed up · <Cloud>"; nothing selected to start; swipe right/left, **Select all**/**Clear**, **Resend N**; no hint text, a new (?) `album-resend` in all seven languages (guide date 22 Nov). Off albums show the count and no buttons. **Resend** (`RequeueMissingFromCloud.resend`) asks the Clouds again at that moment and puts back only selected files still proven missing (`requeueMissingFromCloud`: PENDING, ids/sizes of the gone copy cleared, location re-resolved from the folder's current choice; the SQL re-checks on phone, not optimised, UPLOADED), then starts a run. Adds copies, removes nothing. `ReconcileWithCloud.run` gained an `onAlbumListed` hook before `onProgress`, default no-op, so the wizard's call is unchanged. **Verified on the Moto G** (dark): DropBox album flagged 25 (cap; 37 unchecked), two swiped and resent, uploaded to Dropbox within 3 s, Rescan then read "2 of 62 verified in Dropbox"; a Funny stuff file (sent to OneDrive in Sept) resent to **Dropbox**, its folder's own choice since today, which is also the first device proof of per-folder routing; Ian then resent the other 77 with Select all; Camera (Off) shows 29 flagged and no buttons; the (?) opens; no crash. Light theme checked on the Moto the same afternoon (Appearance on System, phone in light mode): the red flags, the mint highlight with its check mark, greyed unselected files and "not in Dropbox" all read. **Also seen:** the DropBox album's listing finds none of its files because Dropbox's backup folder was changed to `funny` after they were sent, so its check relies on per-file lookups (25 a Rescan); the summary line "Everything here is backed up" does not yet consider these flags.
-- **22 Nov 2026: the album mode is called "Optimise" on every screen; "Sync" is gone from the UI** (Ian: *"where we say SYNC doesn't really sync files - it is just a backup with optimization"*). Wording only: `AlbumMode.SYNC`, its stored value and every behaviour are unchanged, so no migration. Ian's choices: the mode **Optimise** (British spelling, matching the app's ~55 other uses); **Sync now** → **Back Up Now**; the wizard's **SYNC NOW** → **BACK UP NOW**; **Syncing…** → **Backing up now…**; Settings section **Sync** → **Optimisation**; **Camera Sync** → **Camera Folder** (Ian: *"or just Camera Folder"*); "Syncs on Wi-Fi and mobile data" → "Backs up on Wi-Fi and mobile data"; the two permission explanations say "back up" instead of "sync". Mode names stay English in every language (like Backup/Archive); the two Settings titles and the wizard button are translated in all six (settings_sync and settings_camera were added where a locale had fallen back to English). The one label written in code (`AlbumMode.label()` in AlbumDetailScreen) changed too. **The guide is the Guide sibling's** (Ian: *"please pass changes to Guide Sibling"*): the edits were made, checked and put back, and handed over with the full mapping, plus `.claude/tasks/guide-sync-to-optimise.patch`. Until it lands, the (?) cards and the guide still say Sync. Topic ids (`settings-section-sync`, `faq-sync-now-greyed`) stay so links hold. Unit tests pass; **not yet seen on the Moto** (off wireless debugging). In these notes "Sync album" still means `AlbumMode.SYNC`.
-- **22 Nov 2026: the Sync → Optimise rename seen on the Moto G** (864e156 debug build), dark and light: Albums tab pill and totals read *Optimise*, the run button *Back Up Now*; Settings headers *Optimisation* and *Camera Folder*; mobile-data line *Backs up on Wi-Fi and mobile data.*; no crash. Not seen: *Backing up now…* (no run in progress at the time). The (?) cards and guide still say Sync until the guide sibling applies `.claude/tasks/guide-sync-to-optimise.patch`.
+- **22 Nov 2026: files gone from the Cloud are flagged on the Albums tab and resent only by choice, from the album's page, selected as on Restore** (Ian: *"rather than have the Album automatically resend missing files - we need to give the user the option"*, *"They may have deleted or Restored those files purposefully"*, *"build it like the RESTORE tab"*, *"get rid of all the verbiage on the Drill down Header - add a new (?)"*). **Why:** a file recorded as sent stayed "sent" for ever after it was deleted in the Cloud; only the wizard's first check compared the ledger with the Cloud, and only in the direction of marking files sent. **First built as automatic** (Rescan re-queued what was missing) and withdrawn the same hour, before it was ever pressed on a device: never re-send on the app's own initiative. **Now:** the tab's check (entry and **Rescan**, still display only) counts, per album, files recorded as sent, still on the phone and never optimized, that a Cloud **definitely** no longer holds: OneDrive by a complete listing with neither the upload id nor the name at the recorded size (an entry with no size is unknown); other Clouds by `ElsewhereTally` (now one pass, `withMissing`), so a failed listing, an unknown answer or a lookup past the 25 cap is never counted. Held in memory only (`BackupUiState.missingFromCloud`, row ids), no schema change. The album card says "N files are no longer in the Cloud" in red. The album page counts them out of "backed up" ("37 backed up · 25 not in the Cloud"), greys them and marks each "not in <Cloud>" instead of "✓ backed up · <Cloud>"; nothing selected to start; swipe right/left, **Select all**/**Clear**, **Resend N**; no hint text, a new (?) `album-resend` in all seven languages (guide date 22 Nov). Off albums show the count and no buttons. **Resend** (`RequeueMissingFromCloud.resend`) asks the Clouds again at that moment and puts back only selected files still proven missing (`requeueMissingFromCloud`: PENDING, ids/sizes of the gone copy cleared, location re-resolved from the folder's current choice; the SQL re-checks on phone, not optimized, UPLOADED), then starts a run. Adds copies, removes nothing. `ReconcileWithCloud.run` gained an `onAlbumListed` hook before `onProgress`, default no-op, so the wizard's call is unchanged. **Verified on the Moto G** (dark): DropBox album flagged 25 (cap; 37 unchecked), two swiped and resent, uploaded to Dropbox within 3 s, Rescan then read "2 of 62 verified in Dropbox"; a Funny stuff file (sent to OneDrive in Sept) resent to **Dropbox**, its folder's own choice since today, which is also the first device proof of per-folder routing; Ian then resent the other 77 with Select all; Camera (Off) shows 29 flagged and no buttons; the (?) opens; no crash. Light theme checked on the Moto the same afternoon (Appearance on System, phone in light mode): the red flags, the mint highlight with its check mark, greyed unselected files and "not in Dropbox" all read. **Also seen:** the DropBox album's listing finds none of its files because Dropbox's backup folder was changed to `funny` after they were sent, so its check relies on per-file lookups (25 a Rescan); the summary line "Everything here is backed up" does not yet consider these flags.
+- **22 Nov 2026: the album mode is called "Optimize" on every screen; "Sync" is gone from the UI** (Ian: *"where we say SYNC doesn't really sync files - it is just a backup with optimization"*). Wording only: `AlbumMode.SYNC`, its stored value and every behaviour are unchanged, so no migration. Ian's choices: the mode **Optimize** (British spelling, matching the app's ~55 other uses); **Sync now** → **Back Up Now**; the wizard's **SYNC NOW** → **BACK UP NOW**; **Syncing…** → **Backing up now…**; Settings section **Sync** → **Optimization**; **Camera Sync** → **Camera Folder** (Ian: *"or just Camera Folder"*); "Syncs on Wi-Fi and mobile data" → "Backs up on Wi-Fi and mobile data"; the two permission explanations say "back up" instead of "sync". Mode names stay English in every language (like Backup/Archive); the two Settings titles and the wizard button are translated in all six (settings_sync and settings_camera were added where a locale had fallen back to English). The one label written in code (`AlbumMode.label()` in AlbumDetailScreen) changed too. **The guide is the Guide sibling's** (Ian: *"please pass changes to Guide Sibling"*): the edits were made, checked and put back, and handed over with the full mapping, plus `.claude/tasks/guide-sync-to-optimize.patch`. Until it lands, the (?) cards and the guide still say Sync. Topic ids (`settings-section-sync`, `faq-sync-now-greyed`) stay so links hold. Unit tests pass; **not yet seen on the Moto** (off wireless debugging). In these notes "Sync album" still means `AlbumMode.SYNC`.
+- **22 Nov 2026: the Sync → Optimize rename seen on the Moto G** (864e156 debug build), dark and light: Albums tab pill and totals read *Optimize*, the run button *Back Up Now*; Settings headers *Optimization* and *Camera Folder*; mobile-data line *Backs up on Wi-Fi and mobile data.*; no crash. Not seen: *Backing up now…* (no run in progress at the time). The (?) cards and guide still say Sync until the guide sibling applies `.claude/tasks/guide-sync-to-optimize.patch`.
 - **22 Nov 2026, later: every on-screen "optimise" is spelt "optimize"** (Ian: *"Lets change every instance of Optimise to Optimize"*), and the Settings → Camera Folder rows renamed (Ian): *Select Camera Folder*, *Only Optimize Photos/Videos older than*, *Optimize Photos*, *Optimize Videos*. Scope: text in `values/strings.xml` (all forms: Optimize, Optimization, optimized, optimizing), the English mode name inside the six translations (French *optimiser* etc. left alone, it is French), and the four shown literals in `AlbumDetailScreen`. Resource names, identifiers, log lines, comments and stored values keep British spelling. The camera rows got their own strings (`settings_camera_age`, `_photos`, `_videos`, translated) so the album page's header (*Photos* / *Videos* toggles) is unchanged. `help_topics.xml` and the guide are the guide sibling's. **Seen on the Moto G**, light and dark: Optimize pill and totals, Optimization/Optimize video in Settings, the four camera rows (switch turned on to look, then back off); no crash.
+- **22 Nov 2026, still later: the "keep British spelling in code" carve-out above is withdrawn — now every instance of Optimise is spelt Optimize, identifiers and stored values included** (Ian: *"please change every instance of Optimise and its derivation to Optimize and its derivation"*, confirmed after the earlier narrower rename on 91bf6c9). Mechanical case-preserving replacement (`optimis` → `optimiz`) across the whole repo, with French protection: in French files, native French morphology — `optimiser`, `optimisé/ée/és/ées`, `optimisation(s)`, and the present-tense verb forms `optimise/es/ons/ez/ent` when they stand as whole words (not inside slugs or identifiers) — is left alone, so French content still reads correctly. 15 Kotlin files renamed with `git mv` (`OptimiseWorker.kt` → `OptimizeWorker.kt`, `VideoOptimiser.kt` → `VideoOptimizer.kt`, `CameraOptimise.kt` → `CameraOptimize.kt`, `OptimiseMode.kt` → `OptimizeMode.kt`, `OptimiseOnSyncNow.kt`, `PhotoOptimisePolicy.kt`, `VideoOptimisePolicy.kt`, `WizardBulkOptimise.kt`, `PhotoOptimiseLauncher.kt`, `VideoOptimiseLauncher.kt`, `VideoOptimiseWorker.kt`, plus the four matching test files). Guide topic slugs renamed in English and all six translations (`settings-optimise-photos` → `settings-optimize-photos`, `albums-optimised-line`, `album-camera-optimise`, `how-optimising-works`, etc.); all `[[cross-refs]]` updated to match; every translation's `en_hash` recomputed against the new English and rewritten. `build_guide.py` publishes all seven locales. XML resource keys renamed (`settings_optimise_photos`, `library_optimise_new`, `tour_optimise_body`, …) and the HelpTopic enum regenerated with `_OPTIMIZE_` names. **The 10 DataStore preference keys were renamed too** (`optimise_enabled`, `optimise_photos`, `optimise_video`, `photo_optimise_mode`, `video_optimise_mode`, `wizard_optimise_photos`, `wizard_optimise_video`, `optimise_cutoff`, `video_optimise_age`, `camera_optimise_photos` — all now `optimize_*`): this **resets those settings on every existing install** (Closed Testing only, so the trade-off is acceptable; the Fold 8 will need Optimize photos / Optimize video / Camera folder defaults chosen again on next launch). `./gradlew test` passes. 200 files touched; patch file `guide-sync-to-optimise.patch` renamed to `guide-sync-to-optimize.patch` to match historical references. **Not yet seen on hardware.**

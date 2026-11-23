@@ -10,7 +10,7 @@ package com.gallery.sync.domain.backup
  * so name-and-size never matches and the file looks unbacked-up — and uploading it would put a
  * 2048px copy in OneDrive beside the full-size original it was made from. The remote copy is
  * renamed rather than overwritten, so nothing is destroyed, but the user is left with a low-res
- * duplicate of every photo they optimised.
+ * duplicate of every photo they optimized.
  */
 object LedgerRecovery {
 

@@ -3,9 +3,9 @@ package com.gallery.sync.worker
 import android.content.Context
 import androidx.work.ExistingWorkPolicy
 import androidx.work.WorkManager
-import com.gallery.sync.data.local.media.VideoOptimiser
+import com.gallery.sync.data.local.media.VideoOptimizer
 import com.gallery.sync.data.local.settings.BackupSettings
-import com.gallery.sync.domain.backup.VideoOptimisePolicy
+import com.gallery.sync.domain.backup.VideoOptimizePolicy
 import com.gallery.sync.util.Logger
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
@@ -25,38 +25,38 @@ import kotlinx.coroutines.flow.first
  * **Now** is the button. It is the same chain, minus the wait for the charger.
  */
 @Singleton
-class VideoOptimiseLauncher @Inject constructor(
+class VideoOptimizeLauncher @Inject constructor(
     @param:ApplicationContext private val context: Context,
     private val settings: BackupSettings,
-    private val videoOptimiser: VideoOptimiser
+    private val videoOptimizer: VideoOptimizer
 ) {
 
     /**
-     * Starts a chain if video should be optimising on its own and there is something to do.
+     * Starts a chain if video should be optimizing on its own and there is something to do.
      *
      * Returns whether one was queued. It queues nothing when a chain is already waiting or running:
      * asking again on every backup run must not stack batches.
      */
     suspend fun requestAutomatic(): Boolean {
         val prefs = settings.current()
-        if (!VideoOptimisePolicy.runsAutomatically(
+        if (!VideoOptimizePolicy.runsAutomatically(
                 setupComplete = prefs.hasCompletedSetup,
-                optimiseEnabled = prefs.isOptimiseEnabled,
-                optimiseVideo = prefs.optimiseVideo,
-                mode = prefs.videoOptimiseMode
+                optimizeEnabled = prefs.isOptimizeEnabled,
+                optimizeVideo = prefs.optimizeVideo,
+                mode = prefs.videoOptimizeMode
             )
         ) return false
 
         val workManager = WorkManager.getInstance(context)
-        if (BackupScheduling.videoOptimiseWork(workManager).first().any { !it.state.isFinished }) {
+        if (BackupScheduling.videoOptimizeWork(workManager).first().any { !it.state.isFinished }) {
             return false
         }
 
-        val ready = videoOptimiser.readiness()
+        val ready = videoOptimizer.readiness()
         if (ready.count == 0) return false
 
-        Logger.i(TAG, "${ready.count} clips are ready; queueing video optimising for the charger")
-        BackupScheduling.enqueueVideoOptimise(
+        Logger.i(TAG, "${ready.count} clips are ready; queueing video optimizing for the charger")
+        BackupScheduling.enqueueVideoOptimize(
             workManager,
             requiresCharging = true,
             excludedClips = emptySet(),
@@ -74,19 +74,19 @@ class VideoOptimiseLauncher @Inject constructor(
      */
     suspend fun requestOnSyncNow(): Boolean {
         val prefs = settings.current()
-        if (!VideoOptimisePolicy.runsOnSyncNow(
+        if (!VideoOptimizePolicy.runsOnSyncNow(
                 setupComplete = prefs.hasCompletedSetup,
-                optimiseEnabled = prefs.isOptimiseEnabled,
-                optimiseVideo = prefs.optimiseVideo,
-                mode = prefs.videoOptimiseMode
+                optimizeEnabled = prefs.isOptimizeEnabled,
+                optimizeVideo = prefs.optimizeVideo,
+                mode = prefs.videoOptimizeMode
             )
         ) return false
-        if (videoOptimiser.readiness().count == 0) return false
+        if (videoOptimizer.readiness().count == 0) return false
         return requestNow()
     }
 
     /**
-     * Starts a chain because somebody pressed Optimise now.
+     * Starts a chain because somebody pressed Optimize now.
      *
      * Not held for the charger, since they asked. A run that is only *waiting* for it is replaced;
      * one that is executing is left alone, because replacing it would throw away the clip in flight.
@@ -94,13 +94,13 @@ class VideoOptimiseLauncher @Inject constructor(
      */
     suspend fun requestNow(): Boolean {
         val prefs = settings.current()
-        if (!prefs.hasCompletedSetup || !prefs.isOptimiseEnabled || !prefs.optimiseVideo) return false
+        if (!prefs.hasCompletedSetup || !prefs.isOptimizeEnabled || !prefs.optimizeVideo) return false
 
         val workManager = WorkManager.getInstance(context)
-        if (BackupScheduling.videoOptimiseRunning(workManager)) return false
+        if (BackupScheduling.videoOptimizeRunning(workManager)) return false
 
-        Logger.i(TAG, "video optimising started by hand")
-        BackupScheduling.enqueueVideoOptimise(
+        Logger.i(TAG, "video optimizing started by hand")
+        BackupScheduling.enqueueVideoOptimize(
             workManager,
             requiresCharging = false,
             excludedClips = emptySet(),
@@ -110,6 +110,6 @@ class VideoOptimiseLauncher @Inject constructor(
     }
 
     private companion object {
-        const val TAG = "VideoOptimiseLauncher"
+        const val TAG = "VideoOptimizeLauncher"
     }
 }

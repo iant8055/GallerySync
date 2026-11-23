@@ -11,11 +11,11 @@ Moto G, 6 Sept 2026:
 
 1. Took several photos and videos. The **Camera folder appeared on the Albums tab**, mode `Off`,
    which is the configured default and correct.
-2. **He set Camera to Sync himself.** Photos and videos then backed up and optimised as designed.
+2. **He set Camera to Sync himself.** Photos and videos then backed up and optimized as designed.
 3. **Verified in the Files app and in OneDrive — everything correct.** This half works.
 4. Took several more photos and videos.
 5. **Did not open the app.** Waited several minutes.
-6. Checked via the Files app: **nothing backed up, nothing optimised.**
+6. Checked via the Files app: **nothing backed up, nothing optimized.**
 
 His conclusion: *"it looks like when the app is running it does not auto sync/backup files without
 opening the app."*
@@ -46,8 +46,8 @@ not a foreground service, which is closed off in CLAUDE.md.
 
 ### 2. The 6 Sept trigger guard — our own change, made the same day
 
-`BackupWorker` now declines a content-triggered run when `BackupScheduling.optimiseChainLive()` is
-true, to stop the app scanning the library because it rewrote it. **If an optimise chain can sit
+`BackupWorker` now declines a content-triggered run when `BackupScheduling.optimizeChainLive()` is
+true, to stop the app scanning the library because it rewrote it. **If an optimize chain can sit
 `ENQUEUED` indefinitely** — blocked on a constraint, or waiting on a write request that never comes —
 then every content trigger is declined for as long as it does, and new photos are ignored exactly as
 described.
@@ -56,11 +56,11 @@ The guard re-arms the trigger before returning, so the watch is not lost, and th
 pass ignores the guard entirely. That bounds the damage but would not stop the symptom Ian saw over
 "several minutes".
 
-**Check:** `WorkInfo` state for `gallery-sync-optimise` at the moment new photos are ignored. If it is
+**Check:** `WorkInfo` state for `gallery-sync-optimize` at the moment new photos are ignored. If it is
 `ENQUEUED` or `BLOCKED` rather than `RUNNING`, the guard is too broad and should test for `RUNNING`
 only, or carry a deadline.
 
-Note the ordering: Ian's step 2 succeeded, and the optimise chain from it would have been live around
+Note the ordering: Ian's step 2 succeeded, and the optimize chain from it would have been live around
 then. If that chain never reached a finished state, step 6 follows directly.
 
 ## What "fixed" looks like

@@ -7,27 +7,27 @@ import org.junit.Test
 
 /**
  * Whether the **Sync now** button can be pressed with nothing to send. Ian, 19 Sept 2026: Manual
- * optimising is *"through the Sync Now Button on the Albums Tab"*, and the button used to be enabled
+ * optimizing is *"through the Sync Now Button on the Albums Tab"*, and the button used to be enabled
  * only while files were waiting to upload, so a Manual album that was already backed up had nothing to
  * press.
  */
-class OptimiseOnSyncNowTest {
+class OptimizeOnSyncNowTest {
 
     private fun waiting(
-        photoMode: OptimiseMode = OptimiseMode.Manual,
-        videoMode: OptimiseMode = OptimiseMode.Manual,
-        optimisePhotos: Boolean = true,
-        optimiseVideo: Boolean = true,
+        photoMode: OptimizeMode = OptimizeMode.Manual,
+        videoMode: OptimizeMode = OptimizeMode.Manual,
+        optimizePhotos: Boolean = true,
+        optimizeVideo: Boolean = true,
         photosReady: Int = 0,
         videoReady: Int = 0,
-        optimiseEnabled: Boolean = true,
+        optimizeEnabled: Boolean = true,
         setupComplete: Boolean = true
-    ) = OptimiseOnSyncNow.isWaiting(
+    ) = OptimizeOnSyncNow.isWaiting(
         setupComplete = setupComplete,
-        optimiseEnabled = optimiseEnabled,
-        optimisePhotos = optimisePhotos,
+        optimizeEnabled = optimizeEnabled,
+        optimizePhotos = optimizePhotos,
         photoMode = photoMode,
-        optimiseVideo = optimiseVideo,
+        optimizeVideo = optimizeVideo,
         videoMode = videoMode,
         photosReady = photosReady,
         videoReady = videoReady
@@ -50,19 +50,19 @@ class OptimiseOnSyncNowTest {
 
     @Test
     fun `automatic kinds never wait for the button, whatever is ready`() {
-        assertFalse(waiting(photoMode = OptimiseMode.Auto, videoMode = OptimiseMode.Auto, photosReady = 9, videoReady = 9))
+        assertFalse(waiting(photoMode = OptimizeMode.Auto, videoMode = OptimizeMode.Auto, photosReady = 9, videoReady = 9))
     }
 
     @Test
     fun `a manual kind that is switched off is not waiting`() {
-        assertFalse(waiting(optimisePhotos = false, optimiseVideo = false, photosReady = 9, videoReady = 9))
-        assertFalse(waiting(optimiseEnabled = false, photosReady = 9, videoReady = 9))
+        assertFalse(waiting(optimizePhotos = false, optimizeVideo = false, photosReady = 9, videoReady = 9))
+        assertFalse(waiting(optimizeEnabled = false, photosReady = 9, videoReady = 9))
     }
 
     @Test
     fun `the button follows what is waiting, alongside files to send`() {
         assertTrue(BackupUiState(pendingCount = 2).canSyncNow)
-        assertTrue(BackupUiState(manualOptimiseWaiting = true).canSyncNow)
+        assertTrue(BackupUiState(manualOptimizeWaiting = true).canSyncNow)
         assertFalse(BackupUiState().canSyncNow)
     }
 }

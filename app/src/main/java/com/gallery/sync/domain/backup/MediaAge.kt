@@ -4,13 +4,13 @@ import java.time.Duration
 import java.time.Instant
 
 /**
- * How old a clip must be before Sync's video optimising may reach it: Settings → Sync → *Older than*.
+ * How old a clip must be before Sync's video optimizing may reach it: Settings → Sync → *Older than*.
  *
  * **The same two menus as Archive's *Only show files older than*** (Ian, 14 Nov 2026: a number from
  * 1 to 9 and hour, day, week, month or year, with the zero entry reading *Straight away*). The value is
  * an [ArchiveAge]; this object holds only what differs, the default and the names the old fixed list
  * (Straight away, 1 hour, 12 hours, 1 day, 1 week) saved. 12 hours has no place on a 1-9 scale and reads
- * as 1 day, the side that waits longer, so a saved choice can only ever optimise less than it did.
+ * as 1 day, the side that waits longer, so a saved choice can only ever optimize less than it did.
  *
  * **One vocabulary, every setting.** Ian has held to this through two revisions: on 19 Aug 2026 the
  * values were Immediately / 1 week / 1 month / 1 year, and on 28 Aug he replaced them with hours
@@ -24,7 +24,7 @@ import java.time.Instant
  * defensible, and both are evidence rather than argument:
  *
  * - **The founding failure was absence, not quality.** Ian could not find a video ten minutes after
- *   shooting it, because backing up had moved it off the phone. Optimising leaves the clip in the
+ *   shooting it, because backing up had moved it off the phone. Optimizing leaves the clip in the
  *   gallery, playing normally, under its own name. What it costs is detail, not availability.
  * - **480p proved indistinguishable** on the Fold's inner display, the hardest screen this app runs
  *   on. A wait measured in months was protecting against a difference nobody could see.
@@ -55,7 +55,7 @@ import java.time.Instant
  * nothing outside a Sync album is ever a candidate.
  *
  * That is a real limit and not quite a reassuring one. Gate 2's *"Back up and free space"* sets the
- * optimise cutoff to `EVERYTHING`, so every file in a Sync album is in range from the first sweep.
+ * optimize cutoff to `EVERYTHING`, so every file in a Sync album is in range from the first sweep.
  * The whole-library case is one tap away at setup, taken by someone who has not yet met this
  * setting — which is an argument for the first sweep being announced rather than for the age value
  * being expected to restrain it.

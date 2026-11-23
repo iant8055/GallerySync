@@ -242,7 +242,7 @@ carried over mechanically, and then described to Ian as "by design", which it wa
 
 ### The backup is three distinct steps
 
-## **VERIFICATION, then BACKUP, then OPTIMISE**
+## **VERIFICATION, then BACKUP, then OPTIMIZE**
 
 Stated by Ian, 5 Oct 2026, after a day in which every defect found on his 8,642-file library traced back to the
 first two being tangled together.
@@ -251,7 +251,7 @@ first two being tangled together.
    ledger**: a file the Cloud already has is `UPLOADED`, and only what is genuinely missing stays `PENDING`.
 2. **Backup** — upload exactly what verification left pending. The question has already been answered, so this
    step does not ask it again.
-3. **Optimise** — only if the wizard's library choice asked for it.
+3. **Optimize** — only if the wizard's library choice asked for it.
 
 **What was wrong.** `ReconcileWithCloud` computed the true answer — *8,620 already in OneDrive, 22 outstanding* —
 and wrote it only to `album_cloud_status`, for the Albums tab. The ledger kept all 8,642 rows `PENDING`, so the
@@ -262,7 +262,7 @@ four files, a run on course for sixteen hours, and a progress card reading *1 of
 
 **The plans already promise this, in Ian's own wording.** Backup Plan #1 is *"Check Cloud Storage and back up
 everything that isn't already backed up"*; #4 is *"Check Cloud Storage but do not back up any new files"*; #3 adds
-*"only Optimise newly backed up files"*. Check, then back up what is not already there, then optimise. The user has
+*"only Optimize newly backed up files"*. Check, then back up what is not already there, then optimize. The user has
 been agreeing to that contract at install since the plans were written — this is not a new design, it is making the
 code do what the screen says.
 
@@ -324,7 +324,7 @@ Not a bug, in the Settings → wizard direction:
 Not a bug, in the wizard → Settings direction:
 
 - **Settings unchanged after the wizard has been answered.** The wizard's four modes do not write the
-  Settings optimise tree — the rule immediately below has always said so, and this is the same fact
+  Settings optimize tree — the rule immediately below has always said so, and this is the same fact
   stated from the other side.
 - **A wizard answer that leaves no trace in Settings at all.**
 
@@ -337,14 +337,14 @@ wrong — discard it rather than checking it.
 asks it (step 5, only when a second cloud is actually connected) and writes the `folder_preferences`
 table, the same table Settings lists. That is not the wizard writing Settings: the table is the
 routing itself, not a Settings value, and the wizard still reads none of it. It writes no album modes
-and no optimise settings, and none of the rules above changed. See TASK-026.
+and no optimize settings, and none of the rules above changed. See TASK-026.
 
 **A second deliberate exception, Ian, 12 Oct 2026: the backup folder inside each Cloud.** The user chooses where
 in each Cloud account the backups go (every Cloud with folders; Google Photos has none), both on that Cloud's
 Connect card in the wizard and in Settings, and it is one stored value per Cloud that both surfaces read and write.
 Ian: *"the user should be able to change where in any Cloud account they want to backup to — this should be during
 the Wizard AND in Settings."* Like the routing above, it is the destination itself rather than a preference about
-how the app behaves, and it widens nothing else: the wizard still writes no album modes, no optimise settings and
+how the app behaves, and it widens nothing else: the wizard still writes no album modes, no optimize settings and
 no other Settings value. Changing it moves nothing: files already sent stay where they are, and only new files go
 to the new folder. (It was removed from Settings on 24 Sept 2026, `f12ab67`, as a side effect of a layout tidy-up,
 not a decision.)
@@ -355,9 +355,9 @@ to continue"*, and Settings → Language shows and changes the same stored value
 which How To Guide pages open (a language not yet published falls back to English); the app's own screens are English
 only for now. Nothing else the wizard asks is shared, and the rules above are unchanged.
 
-**Enforced in code, 26 Sept 2026.** The wizard's Optimisation Settings card stores its answers in its own `wizard_optimise_photos`, 
-`wizard_optimise_video` and `wizard_video_quality` values and never in the ones Settings shows. They were shared from 31 Aug to 26 Sept, 
-against this rule, and Ian found Video Optimisation already on in Settings on a phone that had only been through the wizard. 
+**Enforced in code, 26 Sept 2026.** The wizard's Optimization Settings card stores its answers in its own `wizard_optimize_photos`, 
+`wizard_optimize_video` and `wizard_video_quality` values and never in the ones Settings shows. They were shared from 31 Aug to 26 Sept, 
+against this rule, and Ian found Video Optimization already on in Settings on a phone that had only been through the wizard. 
 `WizardDoesNotWriteSettingsTest` fails the build if the tour, or any view-model function it calls, writes a Settings-owned setter. 
 **Never offer "keep it shared" as an option: this is not a choice.**
 
@@ -374,16 +374,16 @@ loads, because a memory file recording the same rule did not stop it recurring.
 Three areas, fully independent:
 
 1. **The install wizard's four modes.** One-time, at install. Acts only on files already on the
-   device. Does **not** set album modes and does **not** write the Settings optimise tree.
-2. **The ongoing optimise settings.** Global, not per-album. Applies only to Sync albums — Backup and
-   Archive never optimise. Does **not** set album modes. **When it runs (Ian, 19 Sept 2026):**
+   device. Does **not** set album modes and does **not** write the Settings optimize tree.
+2. **The ongoing optimize settings.** Global, not per-album. Applies only to Sync albums — Backup and
+   Archive never optimize. Does **not** set album modes. **When it runs (Ian, 19 Sept 2026):**
    *Automatic* is as soon as a file reaches a Sync album (after OneDrive has confirmed it) or an album is
    switched to Sync; *Manual* is through **Sync now** on the Albums tab, which is enabled for it even
-   with nothing to send. There is no optimise button or status line in Settings.
+   with nothing to send. There is no optimize button or status line in Settings.
 3. **Album modes** (Off / Backup / Sync / Archive). Set **only** by the user, per album.
-   On screen the Sync mode is called **Optimize** since 22 Nov 2026 (Ian; first spelt Optimise, US spelling the same day for every shown word); the code and these notes keep `SYNC` and British spellings in identifiers.
+   On screen the Sync mode is called **Optimize** since 22 Nov 2026 (Ian; first spelt Optimise, then switched to the US Optimize the same day for every shown word, and later the same day the identifiers and stored values followed — the AlbumMode enum stays `SYNC` because its stored value cannot be renamed without a migration, and this file keeps "Sync" as the album-mode noun to match that enum).
 
-**The camera folder has no Sync, and has its own manual optimise. Ian, 20 Sept 2026, reworked 27 Sept 2026.**
+**The camera folder has no Sync, and has its own manual optimize. Ian, 20 Sept 2026, reworked 27 Sept 2026.**
 *"I don't want a user to take a picture/video and then BAM it's optimized already."* The camera folder
 (`CameraAlbum`) offers Off, Backup and Archive; Sync is not on its menu, `setAlbumMode` refuses it, and seeding
 or Select all writes Backup where every other album would get Sync. **An album already at Sync is left alone**,
@@ -401,18 +401,18 @@ wizard never writes Settings.
 **The camera folder's file list is a selection, like Restore's (Ian, 27 Sept 2026).** It lists **every** file;
 nothing hides one. The header's age, **Photos** and **Videos** *select* files (highlighted as on Restore; the
 rest greyed), a swipe right selects and left deselects, and changing a header choice selects afresh. Only a file
-OneDrive has confirmed at full size, not already optimised or declined, can be selected (`CameraSelection`); a
+OneDrive has confirmed at full size, not already optimized or declined, can be selected (`CameraSelection`); a
 file kept at full size (`FilePin`) is not selected by the header but can be swiped in, and *Sync now* clears its
 pin. The selection is **for the visit only** and is not stored as a preference. The header has **Sync now**
-(uploads what is waiting in the folder **and** optimises exactly the selected files) and **Rescan**. It is a
-**one-shot, manual optimise of one folder, not a mode and not a standing rule**, it writes no album mode, so it
+(uploads what is waiting in the folder **and** optimizes exactly the selected files) and **Rescan**. It is a
+**one-shot, manual optimize of one folder, not a mode and not a standing rule**, it writes no album mode, so it
 is none of the three areas above and touches none of them. **The invariant to protect: nothing outside the
-selection is ever optimised** — `CameraSelection.toOptimise` is the only list the worker acts on, read from
+selection is ever optimized** — `CameraSelection.toOptimize` is the only list the worker acts on, read from
 `cameraRunSelection`, which Sync now writes.
 
-**Its own settings; the Optimise switches never reach it.** Ian: *"The Optimize switch in settings should have NO
+**Its own settings; the Optimize switches never reach it.** Ian: *"The Optimize switch in settings should have NO
 impact on ANY folder that is set to BACKUP."* The header's choices start at the Camera defaults in Settings
-(`cameraDefaultAge` **All**, `cameraOptimisePhotos` and `cameraOptimiseVideo` **off**), and clips use
+(`cameraDefaultAge` **All**, `cameraOptimizePhotos` and `cameraOptimizeVideo` **off**), and clips use
 `cameraVideoQuality`. The 20 Sept line that the control "respects the same switches as Sync does" is withdrawn
 and must not come back: its only record was a paraphrase in a code comment. Changing the choices on the screen
 is for that visit; leaving with choices that differ from the defaults asks *"Do you want to make these your
@@ -439,7 +439,7 @@ leaves", which is exactly why it needs to be closed off in writing.
 
 What was built: `FOREGROUND_SERVICE` + `FOREGROUND_SERVICE_DATA_SYNC`, a `dataSync` type on
 WorkManager's `SystemForegroundService`, and `setForeground()` from `BackupWorker` and
-`OptimiseWorker`, scoped to the wizard's first backup.
+`OptimizeWorker`, scoped to the wizard's first backup.
 
 Why it was removed — measured on the Moto G, not reasoned:
 
@@ -449,7 +449,7 @@ Why it was removed — measured on the Moto G, not reasoned:
   `ForegroundServiceStartNotAllowedException: ... due to mAllowStartForeground false`, logged
   21:19:42. A first backup is dozens of batches, so it is unprotected for nearly all of it.
 - **A swipe with the service down kills the run exactly as before.** Predicted, then confirmed at
-  21:56:58: `Killing 20310 (setSvc -10000): remove task`, process gone, optimising frozen mid-pass,
+  21:56:58: `Killing 20310 (setSvc -10000): remove task`, process gone, optimizing frozen mid-pass,
   no restart in the three minutes after.
 - **The cost is real.** Two manifest permissions and a Play Console foreground-service declaration
   on a first submission, in exchange for a few percent of the window.
@@ -465,7 +465,7 @@ The unsolved case is a **swipe out of Recents**, which kills the process and sto
 being dispatched until it is next opened — a delayed start armed before a swipe never fires. A
 foreground service does not fix that either, because a pending delay has no run in flight to hold up.
 If that case must be solved, the routes worth investigating are `setExpedited` on the continuations
-(quota-limited) or a battery-optimisation exemption — not this.
+(quota-limited) or a battery-optimization exemption — not this.
 
 ### Other hard rules
 - All file operations on device are cache management, never source-of-truth writes

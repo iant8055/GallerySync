@@ -6,7 +6,7 @@ import org.junit.Test
 import java.io.File
 
 /**
- * The wizard never writes a value the Settings tab owns. Ian, 26 Sept 2026, after finding Optimise video
+ * The wizard never writes a value the Settings tab owns. Ian, 26 Sept 2026, after finding Optimize video
  * already on in Settings on a phone that had only been through the wizard: "THE WIZARD SHOULD NEVER EVER SET A
  * DEFAULT IN SETTINGS". CLAUDE.md has carried the rule since 7 Sept; the code broke it from 31 August, and a
  * note about it sat in MILESTONES for three weeks. This reads the source, because the storage needs an Android
@@ -24,10 +24,10 @@ class WizardDoesNotWriteSettingsTest {
      * backup folder in each Cloud, 12 Oct 2026) and `setAppLanguage` (the language, 14 Oct 2026).
      */
     private val settingsOwned = listOf(
-        "setOptimiseEnabled", "setOptimisePhotos", "setOptimiseVideo", "setPhotoOptimiseMode",
-        "setVideoOptimiseMode", "setVideoQuality", "setVideoOptimiseAge", "setAllowMeteredNetwork",
+        "setOptimizeEnabled", "setOptimizePhotos", "setOptimizeVideo", "setPhotoOptimizeMode",
+        "setVideoOptimizeMode", "setVideoQuality", "setVideoOptimizeAge", "setAllowMeteredNetwork",
         "setCloudDeletionPolicy", "setAutomaticEnabled", "setBackupLocation", "setPaused",
-        "setCameraFolder", "setCameraDefaultAge", "setCameraOptimisePhotos", "setCameraOptimiseVideo",
+        "setCameraFolder", "setCameraDefaultAge", "setCameraOptimizePhotos", "setCameraOptimizeVideo",
         "setCameraVideoQuality", "setCameraDefaults", "setCameraSpecialEnabled"
     )
 
@@ -63,7 +63,7 @@ class WizardDoesNotWriteSettingsTest {
 
     @Test
     fun `the old shared switches are gone from the wizard's view model`() {
-        val gone = listOf("setAutoOptimiseEnabled", "setOptimiseVideo", "setVideoQuality")
+        val gone = listOf("setAutoOptimizeEnabled", "setOptimizeVideo", "setVideoQuality")
         val present = gone.filter { Regex("""fun $it\b""").containsMatchIn(viewModel) }
         assertEquals("These wrote Settings' own values from the wizard: $present", emptyList<String>(), present)
     }

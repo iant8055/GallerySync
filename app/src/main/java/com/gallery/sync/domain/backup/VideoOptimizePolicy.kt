@@ -1,36 +1,36 @@
 package com.gallery.sync.domain.backup
 
 /**
- * When the ongoing video optimiser may start, and when its chain may go on.
+ * When the ongoing video optimizer may start, and when its chain may go on.
  *
  * This is Area 2 (CLAUDE.md's three areas): the Settings tree, applied to Sync albums after install.
- * It is deliberately a different thing from [WizardBulkOptimise], which is Area 1 and acts once, at
+ * It is deliberately a different thing from [WizardBulkOptimize], which is Area 1 and acts once, at
  * setup, on the library choice alone. Neither may read the other's gates, so the two have their own
  * rules in their own files.
  *
  * Pure, so the rules are pinned by tests and not by watching a phone.
  */
-object VideoOptimisePolicy {
+object VideoOptimizePolicy {
 
     /**
-     * Whether video may be optimised without anyone asking.
+     * Whether video may be optimized without anyone asking.
      *
      * Every one of these has to hold, and the first is the reason setup is not something this can
      * run around: until setup completes the wizard's own pass owns video, and a second chain
      * transcoding the same clips would only double the work.
      *
-     * [OptimiseMode.Manual] is not a way to switch this off, it is the user saying they will press the
+     * [OptimizeMode.Manual] is not a way to switch this off, it is the user saying they will press the
      * button themselves, so it answers false here and the button still works.
      */
     fun runsAutomatically(
         setupComplete: Boolean,
-        optimiseEnabled: Boolean,
-        optimiseVideo: Boolean,
-        mode: OptimiseMode
-    ): Boolean = setupComplete && optimiseEnabled && optimiseVideo && mode == OptimiseMode.Auto
+        optimizeEnabled: Boolean,
+        optimizeVideo: Boolean,
+        mode: OptimizeMode
+    ): Boolean = setupComplete && optimizeEnabled && optimizeVideo && mode == OptimizeMode.Auto
 
     /**
-     * Whether pressing **Sync now** should also optimise video.
+     * Whether pressing **Sync now** should also optimize video.
      *
      * Ian, 19 Sept 2026: Manual means *"through the Sync Now button on the Albums tab"*. So it is the
      * mode that answers here, the mirror of [runsAutomatically]: a Manual clip waits for that button and
@@ -38,22 +38,22 @@ object VideoOptimisePolicy {
      */
     fun runsOnSyncNow(
         setupComplete: Boolean,
-        optimiseEnabled: Boolean,
-        optimiseVideo: Boolean,
-        mode: OptimiseMode
-    ): Boolean = setupComplete && optimiseEnabled && optimiseVideo && mode == OptimiseMode.Manual
+        optimizeEnabled: Boolean,
+        optimizeVideo: Boolean,
+        mode: OptimizeMode
+    ): Boolean = setupComplete && optimizeEnabled && optimizeVideo && mode == OptimizeMode.Manual
 
     /**
      * Whether a batch that just finished should be followed by another.
      *
      * Two things have to be true, and between them they are what makes the chain end.
      *
-     * - **The batch took a real look at something** ([attempted] is optimised, skipped or failed).
+     * - **The batch took a real look at something** ([attempted] is optimized, skipped or failed).
      *   A batch that found nothing to do is finished; queueing another would spin for ever.
      * - **Something is left that this chain has not already given up on** ([moreReady] is counted
      *   with the chain's failures excluded).
      *
-     * Each pass either removes a clip from the candidates (optimised, or marked as one that cannot
+     * Each pass either removes a clip from the candidates (optimized, or marked as one that cannot
      * shrink) or adds it to the chain's exclusions (failed), so the list only ever gets shorter and
      * the chain always ends. The exclusions ride in WorkManager's input data, which is capped, so
      * past [MAX_EXCLUDED] the chain stops rather than losing track and retrying what failed.

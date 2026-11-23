@@ -11,7 +11,7 @@ import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.domain.backup.BackupEngine
 import com.gallery.sync.domain.backup.FirstBackupWindow
 import com.gallery.sync.domain.backup.StopReason
-import com.gallery.sync.domain.backup.WizardBulkOptimise
+import com.gallery.sync.domain.backup.WizardBulkOptimize
 import java.time.LocalTime
 import java.util.concurrent.atomic.AtomicInteger
 import kotlinx.coroutines.coroutineScope
@@ -37,8 +37,8 @@ class BackupWorker @AssistedInject constructor(
     private val engine: BackupEngine,
     private val settings: BackupSettings,
     private val charging: ChargingState,
-    private val videoOptimise: VideoOptimiseLauncher,
-    private val photoOptimise: PhotoOptimiseLauncher,
+    private val videoOptimize: VideoOptimizeLauncher,
+    private val photoOptimize: PhotoOptimizeLauncher,
     private val archiveReadyNotifier: ArchiveReadyNotifier,
     private val deletedFilesNotifier: DeletedFilesNotifier,
     private val trialEndingNotifier: TrialEndingNotifier
@@ -66,12 +66,12 @@ class BackupWorker @AssistedInject constructor(
 
         // A wake this app caused itself.
         //
-        // Optimising rewrites files in place, MediaStore reports each rewrite as a change, and the
+        // Optimizing rewrites files in place, MediaStore reports each rewrite as a change, and the
         // content trigger fires - so a backup run wakes, scans every granted folder, finds nothing
         // to upload, re-arms, and the next batch of proxies does it again. Measured on the Moto G,
-        // 6 Sept 2026: twenty such runs across one 36-minute optimise pass, six of them inside the
+        // 6 Sept 2026: twenty such runs across one 36-minute optimize pass, six of them inside the
         // 85-second photo pass, because that pass rewrites sixty files at a time. The rate tracks
-        // how fast the app is optimising, not the clock.
+        // how fast the app is optimizing, not the clock.
         //
         // It looks cheap at 386 files and is not at 6,371: the scan walks every item in every
         // granted folder, and in RARE those wakes come out of a ten-minute daily job budget spent
@@ -79,7 +79,7 @@ class BackupWorker @AssistedInject constructor(
         // work that saves the user space.
         //
         // Declined rather than disarmed, deliberately. Suppressing the trigger for the duration of
-        // the chain would need something to re-arm it afterwards, and an optimise chain that dies
+        // the chain would need something to re-arm it afterwards, and an optimize chain that dies
         // would leave the app blind to new photos until the six-hourly net noticed. This keeps the
         // watch armed exactly as before and drops only the scan.
         //
@@ -87,8 +87,8 @@ class BackupWorker @AssistedInject constructor(
         // list overflows, and a burst of proxy writes is what would overflow it.
         val selfTriggered = triggeredContentUris.isNotEmpty() ||
             triggeredContentAuthorities.isNotEmpty()
-        if (selfTriggered && optimiseChainIsLive()) {
-            Logger.i(TAG, "backup run declined: our own optimise writes triggered it")
+        if (selfTriggered && optimizeChainIsLive()) {
+            Logger.i(TAG, "backup run declined: our own optimize writes triggered it")
             rearmContentTrigger(preferences)
             return Result.success()
         }
@@ -269,63 +269,63 @@ class BackupWorker @AssistedInject constructor(
             )
         }
 
-        // Nothing left to upload. During the guided first run, that is the moment the bulk optimise
+        // Nothing left to upload. During the guided first run, that is the moment the bulk optimize
         // the user chose has to begin — and it has to begin here rather than on the wizard card,
         // which only runs while somebody is looking at it. Moto G, 5 Sept 2026: a delayed start
-        // uploaded 230 files by 02:55 and optimised nothing until the phone was woken at 12:04.
+        // uploaded 230 files by 02:55 and optimized nothing until the phone was woken at 12:04.
         //
         // Read fresh rather than reusing `preferences`: a run can outlast the screen, and setup
         // finishing mid-run must not be answered with a bulk pass nobody is expecting any more.
         if (result.isComplete) {
             val now = settings.current()
-            if (WizardBulkOptimise.shouldHandOff(
+            if (WizardBulkOptimize.shouldHandOff(
                     setupComplete = now.hasCompletedSetup,
                     allAlbums = allAlbums,
                     choice = now.libraryChoice
                 )
             ) {
-                val started = BackupScheduling.enqueueOptimiseIfAbsent(
+                val started = BackupScheduling.enqueueOptimizeIfAbsent(
                     WorkManager.getInstance(applicationContext),
                     BackupScheduling.PHASE_PHOTOS
                 )
                 Logger.i(
                     TAG,
-                    if (started) "upload drained; photo optimise handed to the worker"
-                    else "upload drained; photo optimise already queued"
+                    if (started) "upload drained; photo optimize handed to the worker"
+                    else "upload drained; photo optimize already queued"
                 )
             }
         }
 
         // The backlog is drained, so whatever is now verified in OneDrive is in reach of the video
-        // optimiser. Asked at the end of every complete run, and that is the point: this is reached
+        // optimizer. Asked at the end of every complete run, and that is the point: this is reached
         // by every content trigger and by the six-hourly pass, so a clip that has just grown older
         // than the age setting is noticed without a clock of its own.
         //
         // Never allowed to fail the backup. Queueing video work is a convenience, and a run that
         // uploaded everything must not report failure because scheduling something else threw.
         if (result.isComplete) {
-            runCatching { videoOptimise.requestAutomatic() }
-                .onFailure { Logger.w(TAG, "could not queue video optimising: ${it.javaClass.simpleName}") }
+            runCatching { videoOptimize.requestAutomatic() }
+                .onFailure { Logger.w(TAG, "could not queue video optimizing: ${it.javaClass.simpleName}") }
 
             // Photos likewise. Ian, 19 Sept 2026: Automatic means *"as soon as a file hits an Album
             // whose mode is SYNC"*, and a file that has just been sent and verified is the earliest a
             // photo can be touched at all. Reached by every content trigger, so a new photo is
-            // optimised the moment it is safe rather than the next time the app is opened.
-            runCatching { photoOptimise.requestAutomatic() }
-                .onFailure { Logger.w(TAG, "could not queue photo optimising: ${it.javaClass.simpleName}") }
+            // optimized the moment it is safe rather than the next time the app is opened.
+            runCatching { photoOptimize.requestAutomatic() }
+                .onFailure { Logger.w(TAG, "could not queue photo optimizing: ${it.javaClass.simpleName}") }
 
             // Manual means Sync now (Ian, same day). This run was that button, so whatever is set to
-            // Manual is optimised now. Photos outside the granted folders need a dialog and are
+            // Manual is optimized now. Photos outside the granted folders need a dialog and are
             // offered by the screen once the run has finished.
             if (manual) {
-                runCatching { photoOptimise.requestOnSyncNow() }
-                    .onFailure { Logger.w(TAG, "could not queue photo optimising: ${it.javaClass.simpleName}") }
-                runCatching { videoOptimise.requestOnSyncNow() }
-                    .onFailure { Logger.w(TAG, "could not queue video optimising: ${it.javaClass.simpleName}") }
+                runCatching { photoOptimize.requestOnSyncNow() }
+                    .onFailure { Logger.w(TAG, "could not queue photo optimizing: ${it.javaClass.simpleName}") }
+                runCatching { videoOptimize.requestOnSyncNow() }
+                    .onFailure { Logger.w(TAG, "could not queue video optimizing: ${it.javaClass.simpleName}") }
             }
 
             // Whatever just got verified in OneDrive may also have brought an Archive album's ready
-            // count up. Same reasoning as the optimise requests above: reached by every content
+            // count up. Same reasoning as the optimize requests above: reached by every content
             // trigger and the six-hourly net, so a file is noticed the moment it is ready rather than
             // the next time someone happens to open the app. Never allowed to fail the run.
             runCatching { archiveReadyNotifier.checkAndNotify() }
@@ -388,7 +388,7 @@ class BackupWorker @AssistedInject constructor(
      * periodic pass catches whatever a missed trigger dropped.
      */
     /**
-     * Whether the install-time optimise chain is still running or queued.
+     * Whether the install-time optimize chain is still running or queued.
      *
      * Asked of WorkManager rather than tracked in settings, so it cannot go stale: a chain killed
      * with the process leaves no flag behind to clear, and a stuck flag here would silence the
@@ -397,8 +397,8 @@ class BackupWorker @AssistedInject constructor(
      * Any failure answers false. Declining a real backup is the worse mistake of the two, and a
      * false answer only costs the scan this exists to avoid.
      */
-    private suspend fun optimiseChainIsLive(): Boolean = runCatching {
-        BackupScheduling.optimiseChainLive(WorkManager.getInstance(applicationContext))
+    private suspend fun optimizeChainIsLive(): Boolean = runCatching {
+        BackupScheduling.optimizeChainLive(WorkManager.getInstance(applicationContext))
     }.getOrDefault(false)
 
     private suspend fun rearmContentTrigger(preferences: BackupPreferences) {

@@ -7,7 +7,7 @@ TRANSLATIONS = {
     "faq-sync-now-greyed": {
         "title": "Sync now est grisé",
         "body": """Il n'y a rien à envoyer ni à optimiser : tout est déjà envoyé, ou aucun album n'est réglé sur Backup, Sync ou Archive. Vérifiez les totaux de mode dans l'en-tête.""",
-        "en_hash": "d76ec512e56c7203",
+        "en_hash": "7b543eca08835984",
     },
     "faq-albums-off-after-backup": {
         "title": "Mes albums indiquent Off après la première sauvegarde",
@@ -39,12 +39,12 @@ Google Photos ne peut pas être interrogé, donc ses albums affichent toujours *
     "faq-photo-looks-small": {
         "title": "Une photo semble plus petite ou de moindre qualité qu'avant",
         "body": """Elle a été optimisée (cherchez le petit badge de nuage). L'original est dans votre Cloud : utilisez l'onglet **Restore**.""",
-        "en_hash": "4e1a6a3f710360db",
+        "en_hash": "009dd053a72c34e0",
     },
     "faq-restore-empty": {
         "title": "L'onglet Restore dit qu'il n'y a rien à ramener",
         "body": """Rien n'a été optimisé ni archivé, et (pour OneDrive) chaque photo de vos dossiers de sauvegarde est déjà sur le téléphone. C'est normal.""",
-        "en_hash": "e0720600e98ca0e2",
+        "en_hash": "e91f44f270b19e04",
     },
     "faq-backup-stops-when-closed": {
         "title": "Les sauvegardes semblent s'arrêter quand je ferme l'application",

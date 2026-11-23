@@ -87,10 +87,10 @@ class GallerySyncApplication : Application(), Configuration.Provider {
      * photo the same day, on the next time the process is touched at all, rather than waiting for
      * another trigger or the six-hour net.
      *
-     * Skipped while an optimise chain is live, same as `BackupWorker` already declines a
+     * Skipped while an optimize chain is live, same as `BackupWorker` already declines a
      * content-triggered run in that state (see its `selfTriggered` guard) — this call isn't a
      * content trigger, so that guard never sees it, and without this check a cold start landing
-     * mid-optimise would run an unconditional scan the equivalent content-triggered wake would have
+     * mid-optimize would run an unconditional scan the equivalent content-triggered wake would have
      * skipped. The future watch is still re-armed either way; only the immediate scan is held back.
      */
     private fun armAutomaticSync() {
@@ -100,7 +100,7 @@ class GallerySyncApplication : Application(), Configuration.Provider {
                 if (preferences.isAutomaticEnabled) {
                     val workManager = WorkManager.getInstance(this@GallerySyncApplication)
                     BackupScheduling.enable(workManager, preferences.allowMeteredNetwork)
-                    if (!BackupScheduling.optimiseChainLive(workManager)) {
+                    if (!BackupScheduling.optimizeChainLive(workManager)) {
                         BackupScheduling.enqueueContinuation(workManager, preferences.allowMeteredNetwork)
                     }
                 }

@@ -28,7 +28,7 @@
     <string name="theme_dark">Dark</string>
     <string name="settings_show_empty_folders">Show empty folders</string>
     <!--
-        Video optimising, added 28 Aug 2026, and both halves of the wording were Ian's.
+        Video optimizing, added 28 Aug 2026, and both halves of the wording were Ian's.
 
         "We'll have to be careful how or what we label this as" - because "High" alone means
         saves-the-most and therefore lowest-quality, and a settings screen is where a word ends up
@@ -40,10 +40,10 @@
         file size from resolution, and it hints at something being cut - when shortening a clip is
         the one thing this never does, and the reason TASK-013 rejects truncation outright.
 
-        "Optimise" because the app already does this exact operation to photos and calls it that.
+        "Optimize" because the app already does this exact operation to photos and calls it that.
         One mechanism should not have two verbs, and the safety story is identical: a smaller copy
         here, the full-quality original still in OneDrive. The detail line carries the honesty, the
-        same way settings_optimise_explainer does for photos.
+        same way settings_optimize_explainer does for photos.
 
         The percentages are measured, not estimated - an 18-second daylight clip at 1080x1920,
         ~17 Mbps, on the Fold 4. They come from VideoQuality.approximateSavingPercent so this screen
@@ -253,12 +253,12 @@
         by its own "Older than" control — so "and old enough" claimed a wait that photos never do.
         Removed by Ian, 15 Sept 2026, with the leftover photo-age label below it.
     -->
-    <string name="settings_optimise_photos">Optimize photos</string>
-    <string name="settings_optimise_photos_on">Photos in Optimize albums are optimized for storage.</string>
-    <string name="settings_optimise_videos">Optimize video</string>
-    <string name="settings_optimise_mode">Mode</string>
-    <string name="settings_optimise_mode_auto">Automatic</string>
-    <string name="settings_optimise_mode_manual">Manual</string>
+    <string name="settings_optimize_photos">Optimize photos</string>
+    <string name="settings_optimize_photos_on">Photos in Optimize albums are optimized for storage.</string>
+    <string name="settings_optimize_videos">Optimize video</string>
+    <string name="settings_optimize_mode">Mode</string>
+    <string name="settings_optimize_mode_auto">Automatic</string>
+    <string name="settings_optimize_mode_manual">Manual</string>
     <string name="settings_older_than">Older than</string>
     <string name="settings_quality">Compression</string>
 
@@ -277,7 +277,7 @@
     <!-- Remote errors -->
     <!--
         Says "not yet" because it almost always is. A zero-length read means the file was caught
-        mid-write, mid-optimise, or just trashed, and the next run usually finds it whole. What the
+        mid-write, mid-optimize, or just trashed, and the next run usually finds it whole. What the
         app must not do is send the zero bytes: see UploadOutcome.EmptySource.
     -->
 
@@ -308,7 +308,7 @@
         state. Says "in your albums" because files in Off albums are deliberately not counted.
     -->
     <string name="albums_all_backed_up">Everything here is backed up</string>
-    <string name="albums_optimised_summary">%1$d Optimized · %2$s Saved</string>
+    <string name="albums_optimized_summary">%1$d Optimized · %2$s Saved</string>
     <!--
         Files in Archive albums still on the phone — every one of them is scheduled to leave.
         Replaces "waiting to be verified", which compared the ledger's row count against the
@@ -820,7 +820,7 @@ full size</string>
         outstanding, measured - so this option can touch two percent of a library while sounding
         substantial. Saying what it leaves alone is what stops the honest choice looking broken.
     -->
-    <string name="library_optimise_new">All #1 - but only Optimize newly backed up files - for moderate storage saving</string>
+    <string name="library_optimize_new">All #1 - but only Optimize newly backed up files - for moderate storage saving</string>
     <string name="library_free_space">All #1 - plus Optimize All files on phone for maximum storage saving</string>
     <!-- Photo-heavy library: the saving is worth leading with. -->
     <!--
@@ -976,7 +976,7 @@ full size</string>
     <string name="tour_discover_none_found">No media folders found on this device.</string>
     <!--
         The picker came back without the folder asked for. 15 Sept 2026: a grant decides what is
-        backed up, not only what can be optimised, so each message says what the choice does to the
+        backed up, not only what can be optimized, so each message says what the choice does to the
         backup. %1$s is the ticked folder (DCIM), %2$s what was picked instead (DCIM/Camera).
     -->
     <string name="tour_grant_cancelled">No access was given to %1$s. GallerySync needs it to back up and optimize the files in %1$s. Skipping leaves %1$s out of the backup.</string>
@@ -1021,12 +1021,12 @@ full size</string>
 
     <string name="tour_backup_title">Choose your Backup Plan</string>
 
-    <string name="tour_optimise_title">Optimization Settings</string>
-    <string name="tour_optimise_body">Optimization allows you to free up storage space on your phone while still being able to see all your photos and videos on your Gallery.</string>
-    <string name="tour_optimise_photos_saving">Estimated photo savings: %1$s</string>
-    <string name="tour_optimise_video_saving">Estimated video savings: %1$s</string>
-    <string name="tour_optimise_total_saving">Total estimated savings: %1$s</string>
-    <string name="tour_optimise_video_quality">Video compression level</string>
+    <string name="tour_optimize_title">Optimization Settings</string>
+    <string name="tour_optimize_body">Optimization allows you to free up storage space on your phone while still being able to see all your photos and videos on your Gallery.</string>
+    <string name="tour_optimize_photos_saving">Estimated photo savings: %1$s</string>
+    <string name="tour_optimize_video_saving">Estimated video savings: %1$s</string>
+    <string name="tour_optimize_total_saving">Total estimated savings: %1$s</string>
+    <string name="tour_optimize_video_quality">Video compression level</string>
     <!--
         The estimate is computed from the reconcile's outstanding tallies, and those read zero for
         two very different reasons: nothing is left to send, or the drive could not be listed and
@@ -1035,23 +1035,23 @@ full size</string>
         and no reason for it. Same principle as `reconcile_incomplete` — never let "could not ask"
         render as an answer.
     -->
-    <string name="tour_optimise_checking">Checking your Cloud to work out what this would save…</string>
-    <string name="tour_optimise_unchecked">Your Cloud could not be checked just now, so there is no saving to estimate yet. These settings still apply — they act on whatever the first backup sends.</string>
-    <string name="tour_optimise_incomplete">Could not check %1$d of your albums, so the real saving is likely to be larger than this.</string>
+    <string name="tour_optimize_checking">Checking your Cloud to work out what this would save…</string>
+    <string name="tour_optimize_unchecked">Your Cloud could not be checked just now, so there is no saving to estimate yet. These settings still apply — they act on whatever the first backup sends.</string>
+    <string name="tour_optimize_incomplete">Could not check %1$d of your albums, so the real saving is likely to be larger than this.</string>
     <!--
         Reworded 6 Sept 2026, with the population it describes. It used to read "Everything on this
-        phone is already in OneDrive, so there is nothing new to optimise yet" — true of *uploads*
-        and false of *optimising*, which is what a fully-backed-up library is best placed to do. Now
+        phone is already in OneDrive, so there is nothing new to optimize yet" — true of *uploads*
+        and false of *optimizing*, which is what a fully-backed-up library is best placed to do. Now
         the tallies count every photo and video in scope, so this fires only when there genuinely is
         no media in the chosen folders.
     -->
-    <string name="tour_optimise_nothing">No photos or videos were found in the folders you chose, so there is nothing to optimize.</string>
+    <string name="tour_optimize_nothing">No photos or videos were found in the folders you chose, so there is nothing to optimize.</string>
     <!--
-        Gate 2's #1 and #4 do not run the install-time optimise at all, so there is no figure to
+        Gate 2's #1 and #4 do not run the install-time optimize at all, so there is no figure to
         quote. The switches are still worth setting, because they govern any album the user later
         puts on Sync — saying so beats a bare "0 MB", which reads as a broken estimate.
     -->
-    <string name="tour_optimise_later_only">These settings apply to any album you later set to Optimize. This install will not optimize anything on its own.</string>
+    <string name="tour_optimize_later_only">These settings apply to any album you later set to Optimize. This install will not optimize anything on its own.</string>
     <!--
         Split from video_quality_high and friends because the wizard's three side-by-side buttons
         have room for the name and nothing else. The combined "High — 480p" label is still what the
@@ -1133,11 +1133,11 @@ full size</string>
     -->
     <string name="tour_progress_starting">Starting upload…</string>
     <string name="tour_progress_verifying">Checking your Cloud</string>
-    <!-- Settings → Sync → Optimise video, after a stronger compression is chosen (Ian, 9 Oct 2026). -->
-    <string name="reoptimise_title">Re-optimize existing videos?</string>
-    <string name="reoptimise_body">Videos in Optimize albums that were too small to shrink at the old compression can be optimized again at this one. Videos already optimized stay as they are. The full-size originals stay in your Cloud.</string>
-    <string name="reoptimise_yes">Yes</string>
-    <string name="reoptimise_no">No</string>
+    <!-- Settings → Sync → Optimize video, after a stronger compression is chosen (Ian, 9 Oct 2026). -->
+    <string name="reoptimize_title">Re-optimize existing videos?</string>
+    <string name="reoptimize_body">Videos in Optimize albums that were too small to shrink at the old compression can be optimized again at this one. Videos already optimized stay as they are. The full-size originals stay in your Cloud.</string>
+    <string name="reoptimize_yes">Yes</string>
+    <string name="reoptimize_no">No</string>
     <string name="tour_progress_verifying_body">Step one: checking your Cloud for the files it already has, by name and size. Nothing is sent during this step.</string>
     <string name="tour_progress_checked">%1$,d of %2$,d checked</string>
     <string name="tour_progress_verified_all">%1$,d file(s) checked: all already in OneDrive. Nothing needed sending.</string>
@@ -1145,19 +1145,19 @@ full size</string>
     <string name="tour_progress_verified_some">OneDrive: %1$,d file(s) checked, %2$,d already there. %3$,d file(s) sent in all.</string>
     <!--
         The ring's own label, which says which half of the run is on screen. Ian, 4 Sept 2026: the
-        two optimise phases both read a bare "Optimising", so the ring gave no way to tell the photo
+        two optimize phases both read a bare "Optimizing", so the ring gave no way to tell the photo
         pass from the video one — while the body text above it was already naming them.
 
         Kept as two pairs rather than one string plus a noun, because a count reads differently in
-        other languages and splicing "photos" into "Optimising %1$d of %2$d" would not survive
+        other languages and splicing "photos" into "Optimizing %1$d of %2$d" would not survive
         translation.
     -->
-    <string name="tour_progress_optimising_photos_label">Optimizing photos</string>
-    <string name="tour_progress_optimising_video_label">Optimizing video</string>
+    <string name="tour_progress_optimizing_photos_label">Optimizing photos</string>
+    <string name="tour_progress_optimizing_video_label">Optimizing video</string>
     <!-- The count on its own line under the phase name. Bare, so either name can sit above it. -->
     <string name="tour_progress_count">%1$d of %2$d</string>
-    <string name="tour_progress_optimising_photos">Upload finished and verified. Now optimizing your photos: they stay in your gallery and stay usable, and the full-size originals stay in your Cloud.</string>
-    <string name="tour_progress_optimising_video">Upload finished and verified. Now optimizing your videos: nothing is cut, they stay in your gallery, and the full-size originals stay in your Cloud.</string>
+    <string name="tour_progress_optimizing_photos">Upload finished and verified. Now optimizing your photos: they stay in your gallery and stay usable, and the full-size originals stay in your Cloud.</string>
+    <string name="tour_progress_optimizing_video">Upload finished and verified. Now optimizing your videos: nothing is cut, they stay in your gallery, and the full-size originals stay in your Cloud.</string>
     <string name="tour_progress_complete">Congratulations your backup has finished successfully and has been verified. Press Finish.</string>
     <string name="tour_progress_note">You can check progress any time by opening the app.</string>
     <!--
@@ -1174,9 +1174,9 @@ full size</string>
     <string name="abort_backup_confirm">Stop and go back</string>
     <string name="abort_backup_keep">Keep backing up</string>
 
-    <!-- Camera album: optimise what is already old (Ian, 20 Sept 2026). A one-shot, manual optimise, not a mode.
+    <!-- Camera album: optimize what is already old (Ian, 20 Sept 2026). A one-shot, manual optimize, not a mode.
          Its own age and kinds, with defaults in Settings, and Sync now and Rescan on its header (Ian, 27 Sept 2026). -->
-    <string name="camera_optimise_heading">Select Photos/Videos older than</string>
+    <string name="camera_optimize_heading">Select Photos/Videos older than</string>
     <string name="camera_kind_photos">Photos</string>
     <string name="camera_kind_videos">Videos</string>
     <string name="camera_kind_on">%1$s: selected. Tap to leave them out.</string>
@@ -1190,7 +1190,7 @@ full size</string>
     <string name="camera_age_six_months">6 months</string>
     <string name="camera_age_year">1 year</string>
     <string name="camera_age_all">All</string>
-    <plurals name="camera_optimise_summary">
+    <plurals name="camera_optimize_summary">
         <item quantity="one">%1$d selected · about %2$s saved (estimate)</item>
         <item quantity="other">%1$d selected · about %2$s saved (estimate)</item>
     </plurals>
@@ -1198,11 +1198,11 @@ full size</string>
     <string name="select_swipe_hint">Swipe right to select / left to deselect</string>
     <string name="select_action_select">Select</string>
     <string name="select_action_deselect">Deselect</string>
-    <string name="camera_optimise_working">Optimizing… %1$d left</string>
-    <string name="camera_optimise_none_selected">Nothing selected</string>
-    <string name="camera_optimise_none_old_enough">Nothing older than %1$s</string>
+    <string name="camera_optimize_working">Optimizing… %1$d left</string>
+    <string name="camera_optimize_none_selected">Nothing selected</string>
+    <string name="camera_optimize_none_old_enough">Nothing older than %1$s</string>
     <string name="camera_action_keep">Deselect (keep at full size)</string>
-    <string name="camera_action_optimise">Select (optimize this file)</string>
+    <string name="camera_action_optimize">Select (optimize this file)</string>
 
     <!-- Long-press to open a file (TASK-028, Ian, 11 Nov 2026). The Albums, Restore and Archive tabs stay English. -->
     <string name="open_file_action">Open</string>

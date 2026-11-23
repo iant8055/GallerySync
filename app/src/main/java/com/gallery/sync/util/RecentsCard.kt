@@ -22,7 +22,7 @@ import javax.inject.Singleton
  *
  * ### Why it is bounded to the first backup
  *
- * The user is gated out of the app until the first backup and its optimising finish, so hiding the
+ * The user is gated out of the app until the first backup and its optimizing finish, so hiding the
  * card during that phase is a state that ends by itself. An app permanently missing from Recents is
  * worse than the problem being solved, so every path that leaves setup restores it, and
  * [MainActivity][com.gallery.sync.MainActivity] restores it on every launch as well — a crash mid-run

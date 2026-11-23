@@ -45,7 +45,7 @@ CHAPTER = Chapter(
         """, ui=True),
 
         topic("settings-open-not-on-phone", "Files not on the phone", """
-            What a **long-press** does to a file that is no longer on your phone. A file on your phone, including an optimised copy, always opens from the phone.
+            What a **long-press** does to a file that is no longer on your phone. A file on your phone, including an optimized copy, always opens from the phone.
 
             • **Opens in Cloud App or Browser** (default): opens the file in its Cloud's app, or in the browser if the app cannot take the link. A Cloud with no link uses the next choice.
             • **Download temporarily:** copies the file into the app's cache and opens it. The copy is kept only in the cache, never added to your gallery, and cleared later.
@@ -74,7 +74,7 @@ CHAPTER = Chapter(
             The two columns are Settings only. The wizard's Cloud cards stay stacked.
 
             ## Sign out
-            A warning first: backups to that Cloud stop, nothing is deleted. If that Cloud holds files that are not full size on the phone (optimised or archived), it asks:
+            A warning first: backups to that Cloud stop, nothing is deleted. If that Cloud holds files that are not full size on the phone (optimized or archived), it asks:
             • **Restore them to the phone first:** brings them all back, then signs out.
             • **Leave them there:** signs out.
             • **Cancel:** stays signed in.
@@ -175,37 +175,37 @@ CHAPTER = Chapter(
         """, ui=True),
 
         topic("settings-section-sync", "Sync", """
-            How photos and videos in **Sync** albums are optimised. Files change only after the Cloud has verified them. Works with OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 and Backblaze B2.
+            How photos and videos in **Sync** albums are optimized. Files change only after the Cloud has verified them. Works with OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 and Backblaze B2.
         """, ui=True),
 
-        topic("settings-optimise-photos", "Optimise photos", """
+        topic("settings-optimize-photos", "Optimize photos", """
             **Off** by default. When on, photos in Sync albums are replaced with smaller copies: about 2048 pixels on the long edge, roughly a tenth of the size. They stay in your gallery with a small cloud badge. Originals stay in the Cloud.
 
-            Photos already small enough, and files set to **Keep at full size**, are left alone. **Mode** sets when it runs. See [[settings-optimise-mode]].
+            Photos already small enough, and files set to **Keep at full size**, are left alone. **Mode** sets when it runs. See [[settings-optimize-mode]].
         """, ui=True),
 
-        topic("settings-optimise-video", "Optimise video", """
+        topic("settings-optimize-video", "Optimize video", """
             **Off** by default. When on, shows **Mode**, **Older than** and **Compression**.
 
             Videos in Sync albums are re-encoded smaller. Nothing is ever cut. Originals stay in the Cloud.
 
             ## Which videos
-            In a Sync album, verified in the Cloud, older than your setting, in a folder you gave access to, and not already optimised.
+            In a Sync album, verified in the Cloud, older than your setting, in a folder you gave access to, and not already optimized.
 
             ## When
             • **Automatic:** after backups, only while charging.
             • **Manual:** when you press **Sync now**.
         """, ui=True),
 
-        topic("settings-optimise-mode", "Mode: Automatic or Manual", """
-            • **Automatic** (default): files in Sync albums are optimised once the Cloud confirms them. Video waits for the charger.
+        topic("settings-optimize-mode", "Mode: Automatic or Manual", """
+            • **Automatic** (default): files in Sync albums are optimized once the Cloud confirms them. Video waits for the charger.
             • **Manual:** nothing happens until you press **Sync now** on the Albums tab.
 
             Photos outside the folders you gave access to need Android's confirmation, so they wait until you open the app or press **Sync now**.
         """, ui=True),
 
         topic("settings-video-age", "Older than (video)", """
-            How old a video must be before it is optimised. Choose a number from **½** to **9** and a unit — **hour**, **day**, **week**, **month**, **year** or **Straight away**. Backup is not delayed.
+            How old a video must be before it is optimized. Choose a number from **½** to **9** and a unit — **hour**, **day**, **week**, **month**, **year** or **Straight away**. Backup is not delayed.
 
             **Straight away** includes clips shot today; editing one starts from the smaller copy until you restore it.
         """, ui=True),
@@ -218,7 +218,7 @@ CHAPTER = Chapter(
             Typical figures; results vary.
 
             ## After you make it stronger
-            The app asks **Re-optimise existing videos?** **Yes** lets videos that were too small to shrink before be tried again. **No** leaves them. Already optimised videos are not touched.
+            The app asks **Re-optimize existing videos?** **Yes** lets videos that were too small to shrink before be tried again. **No** leaves them. Already optimized videos are not touched.
         """, ui=True),
 
         topic("settings-section-restore", "Restore (Settings)", """
@@ -232,10 +232,10 @@ CHAPTER = Chapter(
         topic("settings-section-camera", "Camera Sync (Settings)", """
             **Special settings for Camera**, off by default. When on:
             • **Camera folder:** the folder your camera saves to. Choose it from the list, or **Other…**.
-            • **Select Photos/Videos older than**, **Photos**, **Videos:** defaults for that folder's optimise controls ([[album-camera-optimise]]).
-            • **Video compression:** for videos optimised there.
+            • **Select Photos/Videos older than**, **Photos**, **Videos:** defaults for that folder's optimize controls ([[album-camera-optimize]]).
+            • **Video compression:** for videos optimized there.
 
-            The Camera folder has no **Sync** mode, and nothing is optimised until you press **Sync now** in it. The Optimise switches above do not affect it.
+            The Camera folder has no **Sync** mode, and nothing is optimized until you press **Sync now** in it. The Optimize switches above do not affect it.
         """, ui=True),
 
         topic("settings-section-archive", "Archive (Settings)", """

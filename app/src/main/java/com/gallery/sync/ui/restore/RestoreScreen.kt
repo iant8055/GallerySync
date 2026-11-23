@@ -122,12 +122,12 @@ fun RestoreScreen(
     FileOpenerHost(opener)
     val context = LocalContext.current
 
-    // Re-read on entering the tab: an optimise or archive run since the app started changes this
+    // Re-read on entering the tab: an optimize or archive run since the app started changes this
     // list, and there is no other moment the screen would learn about it.
     LaunchedEffect(Unit) { viewModel.refresh() }
 
     // Files the person edited after the app shrank them are never overwritten unasked. Ian, 26 Sept 2026: the
-    // person knows they are editing an optimised copy, so ask at the moment of restoring, once for the run.
+    // person knows they are editing an optimized copy, so ask at the moment of restoring, once for the run.
     if (state.editedIds.isNotEmpty() && !state.running) {
         val edited = state.rows.filter { it.id in state.editedIds }
         androidx.compose.material3.AlertDialog(

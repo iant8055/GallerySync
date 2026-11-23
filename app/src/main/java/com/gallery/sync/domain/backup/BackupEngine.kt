@@ -344,7 +344,7 @@ class BackupEngine @Inject constructor(
         // moved to another folder since. From the unscoped scan, because it is a fact about the device, and so a row
         // whose folder is no longer watched still knows where to go back to. Only rows whose folder differs are
         // written, so a quiet scan writes nothing.
-        // Matched by MediaStore id rather than ledger key: an optimised photo's size on the phone is no longer the
+        // Matched by MediaStore id rather than ledger key: an optimized photo's size on the phone is no longer the
         // size its key was made from, and it can still be archived and need a folder to come back to.
         val pathOnPhone = everything.mapNotNull { item -> item.relativePath?.let { item.mediaStoreId to it } }.toMap()
         var updated = 0
@@ -668,7 +668,7 @@ class BackupEngine @Inject constructor(
     }
 
     /**
-     * **Step one of three: verification.** Ian, 5 Oct 2026 — *verification, then backup, then optimise*, which
+     * **Step one of three: verification.** Ian, 5 Oct 2026 — *verification, then backup, then optimize*, which
      * the Backup Plans have promised in their own wording since they were written: *"Check Cloud Storage and
      * back up everything that isn't already backed up"*.
      *
@@ -847,8 +847,8 @@ class BackupEngine @Inject constructor(
                         remoteSizeBytes = entry.sizeBytes,
                         // When OneDrive got it, not when we noticed. Stamping *now* here made every
                         // file already in OneDrive read as uploaded by this run, so Gate 2 #3 —
-                        // "optimise only what this run backed up", which is `uploadedAt >= cutoff` —
-                        // optimised the whole library. Moto G, 15 Sept 2026. `0` when Graph gave no
+                        // "optimize only what this run backed up", which is `uploadedAt >= cutoff` —
+                        // optimized the whole library. Moto G, 15 Sept 2026. `0` when Graph gave no
                         // date: an unknown arrival is treated as old, so #3 leaves it alone.
                         uploadedAt = match.createdAtEpochMillis
                     )
@@ -877,7 +877,7 @@ class BackupEngine @Inject constructor(
                         originalSizeBytes = remoteSize!!,
                         proxySizeBytes = entry.sizeBytes,
                         // The listing's id, as the exact-size skip above records. This said "" and
-                        // it is the path a phone that was already optimised takes after a reinstall,
+                        // it is the path a phone that was already optimized takes after a reinstall,
                         // so every such row claimed a cloud copy it could not fetch, and was
                         // forgotten outright when its album was archived: the row's protection from
                         // the prune is a real item id. Moto G, 18 Sept 2026, Test 4 and Test 5.
@@ -1189,7 +1189,7 @@ class BackupEngine @Inject constructor(
                         .map { it.name }
                 ),
             presentOnDevice = present,
-            // The size the file has on the phone, so an optimised photo still in its folder matches
+            // The size the file has on the phone, so an optimized photo still in its folder matches
             // its own proxy and is not offered as a download. See RestoreScope.onDiskSizeBytes.
             signatureOf = {
                 RestoreScope.signature(
@@ -1423,7 +1423,7 @@ class BackupEngine @Inject constructor(
 
     /**
      * Gives a scanned file with no MediaStore date the one the ledger worked out, so the age filter does not fall
-     * back to a modified date that optimising rewrote. A file with neither stays on its modified date, which can
+     * back to a modified date that optimizing rewrote. A file with neither stays on its modified date, which can
      * only read as newer and so hold it back.
      */
     private suspend fun withLedgerDatesTaken(items: List<LocalMediaItem>): List<LocalMediaItem> {
@@ -1564,7 +1564,7 @@ class BackupEngine @Inject constructor(
 
         // Proxied rows are matched by MediaStore id instead. Their content key was computed from
         // the original's size, and the file on disk is now a 2048px rewrite — so the key can never
-        // match and Archive would silently skip every photo it had already optimised. Observed
+        // match and Archive would silently skip every photo it had already optimized. Observed
         // 26 Aug 2026: an album switched Sync then Archive offered 2 of 13 files, and the 11 it
         // could not see were the ones it had shrunk itself.
         val verifiedProxiedIds = verifiedEntries.filter { it.isProxied }.mapTo(HashSet()) { it.mediaStoreId }
@@ -1625,7 +1625,7 @@ class BackupEngine @Inject constructor(
 
         // What size the cloud copy *should* be, for files whose local copy is no longer that size.
         //
-        // An optimised photo is a 2048px rewrite; OneDrive holds the full original. Comparing the
+        // An optimized photo is a 2048px rewrite; OneDrive holds the full original. Comparing the
         // remote against the local file would compare the original against the proxy, never match,
         // and report a photo as no longer in OneDrive — false, and the most alarming thing this
         // screen can say. The ledger remembers what was uploaded, so ask it.
@@ -1643,7 +1643,7 @@ class BackupEngine @Inject constructor(
         val keyOf = { item: LocalMediaItem ->
             backupKeyOf(item.album, item.displayName, item.sizeBytes, item.dateModifiedEpochSeconds)
         }
-        // An optimised file has been rewritten in place, so its key (built from size and mtime) no longer matches
+        // An optimized file has been rewritten in place, so its key (built from size and mtime) no longer matches
         // its row; the MediaStore id is what still does. The row keeps the ORIGINAL's size, which is what the
         // cloud must report.
         val proxiedRowIds = entryDao.uploadedKeys().filter { it.isProxied }.associate { it.mediaStoreId to it.id }
@@ -1680,7 +1680,7 @@ class BackupEngine @Inject constructor(
             }
 
             // The proxy's own size for an ordinary file; the remembered original for an
-            // optimised one.
+            // optimized one.
             val expected = expectedRemoteSize[item.mediaStoreId] ?: item.sizeBytes
 
             val ref = index?.get(item.displayName)

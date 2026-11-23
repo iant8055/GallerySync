@@ -24,7 +24,7 @@ OneDrive、Google Drive、Dropbox、pCloud、IDrive e2、Backblaze B2。Google P
 • Archive には、あなたがその場にいる必要があります。Android がタップを求めるためです。[[dialog-exit-warning]]を参照してください。
 • あとから Archive アルバムに追加されたファイルも、対象になります。
 • 最後のファイルがなくなると、そのアルバムは一覧から消え、モードも忘れられます。戻ってきた場合は、Off から始まります。""",
-        "en_hash": "767ff53f0ad97065",
+        "en_hash": "8608b1f31cca18a3",
     },
     "archive-hero": {
         "title": "Files to Archive",

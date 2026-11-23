@@ -7,7 +7,7 @@ findings are below so the work does not have to be rediscovered.
 
 ## The problem
 
-An optimised photo or video is a smaller copy in the gallery, with the full-size original in OneDrive. An
+An optimized photo or video is a smaller copy in the gallery, with the full-size original in OneDrive. An
 edit started from it starts from the smaller copy. Ian's original idea for the app was that **opening a file
 to edit it should fetch the full-size version automatically.** MILESTONES ("Platform constraints") records
 that Android has no hook for that: an app cannot intercept another app opening a media file, and Samsung could
@@ -24,7 +24,7 @@ tap, from where the user already is, with no change needed in the editor.
 ## What the probe found (Moto G, Google Photos 7.93, 20 Sept 2026)
 
 A temporary debug-only activity with the three intent filters above appeared in Google Photos' share sheet as
-"Gallery Sync — GS probe". Sharing an optimised photo (`IMG_CT_c1.jpg`, 622,788 bytes on the phone, 4,465,318
+"Gallery Sync — GS probe". Sharing an optimized photo (`IMG_CT_c1.jpg`, 622,788 bytes on the phone, 4,465,318
 in OneDrive) handed over:
 
 - **Caller:** `activity.referrer` = `android-app://com.google.android.apps.photos`.
@@ -52,7 +52,7 @@ So a file can be matched to its ledger row by MediaStore id (parsed), or by name
 
 ## Related, still undecided
 
-- **An edit saved over an already-optimised photo is never uploaded.** `BackupEngine.refreshLedger` skips any file
+- **An edit saved over an already-optimized photo is never uploaded.** `BackupEngine.refreshLedger` skips any file
   whose MediaStore id is in the proxied set, before it looks at date or size, so an editor that overwrites in
   place (Samsung's plain Save, probably) leaves the edit with no cloud copy; an editor that saves a copy is fine.
   Proposed fix, no schema change: treat a proxied file whose current size no longer equals `localProxySizeBytes`
@@ -72,8 +72,8 @@ So a file can be matched to its ledger row by MediaStore id (parsed), or by name
 
 ## Correction, 26 Sept 2026 (measured on the Moto G)
 
-The sentence above, *Restore already refuses to write over a file whose size has changed*, is **wrong**. An in-place edit of an optimised photo was simulated (id kept, size 744,886 instead of 744,869): the app never uploaded it, and Restore then replaced it with the 3.85 MB OneDrive original with no refusal and no warning. `RestoreProxyInPlace.restore` checks only that the download is complete, not that the file on the phone is still the copy the app wrote. Both halves of the proposed fix are needed: Restore must refuse a changed file, and a changed optimised file must be treated as edited and uploaded as a new file. Ian has not decided. See `.claude/MILESTONES.md`, 26 Sept 2026.
+The sentence above, *Restore already refuses to write over a file whose size has changed*, is **wrong**. An in-place edit of an optimized photo was simulated (id kept, size 744,886 instead of 744,869): the app never uploaded it, and Restore then replaced it with the 3.85 MB OneDrive original with no refusal and no warning. `RestoreProxyInPlace.restore` checks only that the download is complete, not that the file on the phone is still the copy the app wrote. Both halves of the proposed fix are needed: Restore must refuse a changed file, and a changed optimized file must be treated as edited and uploaded as a new file. Ian has not decided. See `.claude/MILESTONES.md`, 26 Sept 2026.
 
 ## Decided and built, 26 Sept 2026
 
-Ian ruled on both halves of the edit-over-proxy question above: Restore asks before overwriting an edited file (Keep my edits / Overwrite), and an edited optimised file is treated as a new file and uploaded under its own name. Built as described in MILESTONES, 26 Sept 2026 (EditCheck, EditedName, the scan change, the Restore and sign-out prompts). Not yet verified on a device. The DocumentsProvider route and the Share-menu route remain shelved.
+Ian ruled on both halves of the edit-over-proxy question above: Restore asks before overwriting an edited file (Keep my edits / Overwrite), and an edited optimized file is treated as a new file and uploaded under its own name. Built as described in MILESTONES, 26 Sept 2026 (EditCheck, EditedName, the scan change, the Restore and sign-out prompts). Not yet verified on a device. The DocumentsProvider route and the Share-menu route remain shelved.

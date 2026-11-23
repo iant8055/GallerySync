@@ -24,7 +24,7 @@ OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 und Backblaze B2. Nicht Googl
 • Archive braucht dich vor Ort: Android verlangt ein Tippen. Siehe [[dialog-exit-warning]].
 • Dateien, die später zu einem Archive-Album hinzukommen, sind ebenfalls abgedeckt.
 • Wenn die letzte Datei geht, verschwindet das Album aus der Liste, und sein Modus wird vergessen. Kommt es zurück, beginnt es bei Off.""",
-        "en_hash": "767ff53f0ad97065",
+        "en_hash": "8608b1f31cca18a3",
     },
     "archive-hero": {
         "title": "Files to Archive",

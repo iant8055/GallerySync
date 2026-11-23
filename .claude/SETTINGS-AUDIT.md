@@ -3,7 +3,7 @@
 > **Checked against the code 18 Sept 2026 — this is a 29 Aug snapshot and is stale in these places.
 > Where it disagrees with the list below, the code and MILESTONES win.**
 >
-> - **Optimise defaults.** `optimise_photos` and `optimise_video` both default **`false`**, not `true`
+> - **Optimize defaults.** `optimize_photos` and `optimize_video` both default **`false`**, not `true`
 >   (`BackupSettings.kt`; photos fixed 7 Sept, and the transient UI-state copy of the video default in
 >   `BackupViewModel` was still `true` until 18 Sept). Initial state for both is Off — Ian, 18 Sept.
 > - **"No UI yet" is out of date.** Settings now has switches and controls for the master, photos,
@@ -13,10 +13,10 @@
 > - **The wizard is the 9-step `SetupTour`**, not the 19-step `SetupWizardScreen` tabulated below,
 >   which was deleted in TASK-022 (7 Sept). The "19 steps" table is history only.
 > - **Settings → Setup (*Run setup again*) was removed 18 Sept 2026** at Ian's instruction.
-> - **Keys added since:** `library_choice`, `optimise_cutoff` (wizard-only), `first_backup_start_at`,
+> - **Keys added since:** `library_choice`, `optimize_cutoff` (wizard-only), `first_backup_start_at`,
 >   `first_backup_delay_millis`, `wizard_step`, `wizard_backup_total`, `wizard_run_started_at`,
 >   `upgrade_backfill_checked`, `album_merge_warnings`, plus `selected_directories` beside
->   `granted_tree_uris`. `acknowledged_topics` and `photo_optimise_age` no longer exist.
+>   `granted_tree_uris`. `acknowledged_topics` and `photo_optimize_age` no longer exist.
 
 Every setting the user can change, everything with a default, and every wizard step — plus the ones
 that were decided and never built, and the ones that quietly went away.
@@ -56,9 +56,9 @@ the user's choosing, against a list in front of them. The clause was removed fro
 on 25 Aug when it was found describing a gate that did not exist; the gate itself should stay
 unbuilt unless Archive ever gains an unattended mode.
 
-**There is no photo optimise age, and the one listed below is gone.** Ian ruled on 19 Aug, TASK-011:
+**There is no photo optimize age, and the one listed below is gone.** Ian ruled on 19 Aug, TASK-011:
 *"Photos are proxied whatever their age … There is no photo age setting and none is wanted."* This
-audit recorded `photo_optimise_age` ten days later because the code had gained it on 28 Aug anyway;
+audit recorded `photo_optimize_age` ten days later because the code had gained it on 28 Aug anyway;
 it reached the Settings screen on 30 Aug and never governed anything. Removed 15 Sept 2026 in
 TASK-022 Part B — field, key, setter and dropdown. Only video has an age.
 
@@ -97,29 +97,29 @@ Three DataStores. `backup_settings` holds 23 keys; theme and granted folders liv
 | Upload interrupted at | `upload_interrupted_at` | `0` | *internal* |
 | Run baseline bytes | `run_baseline_bytes` | `0` | *internal* |
 | Archive snooze until | `archive_delayed_until` | `0` | Archive prompt — Delay |
-| **Optimise enabled** (master) | `optimise_enabled` | `false` | **No UI yet** |
-| **Optimise photos?** | `optimise_photos` | `true` | **No UI yet** |
-| **Photo optimise mode** | `photo_optimise_mode` | `Auto` | **No UI yet** |
-| ~~**Photo optimise age**~~ | ~~`photo_optimise_age`~~ | ~~`OneDay`~~ | **Removed** 15 Sept — see above |
-| **Optimise video?** | `optimise_video` | `true` | **No UI yet** |
-| **Video optimise mode** | `video_optimise_mode` | `Auto` | **No UI yet** |
-| **Video optimise age** | `video_optimise_age` | `OneDay` | **No UI yet** |
+| **Optimize enabled** (master) | `optimize_enabled` | `false` | **No UI yet** |
+| **Optimize photos?** | `optimize_photos` | `true` | **No UI yet** |
+| **Photo optimize mode** | `photo_optimize_mode` | `Auto` | **No UI yet** |
+| ~~**Photo optimize age**~~ | ~~`photo_optimize_age`~~ | ~~`OneDay`~~ | **Removed** 15 Sept — see above |
+| **Optimize video?** | `optimize_video` | `true` | **No UI yet** |
+| **Video optimize mode** | `video_optimize_mode` | `Auto` | **No UI yet** |
+| **Video optimize age** | `video_optimize_age` | `OneDay` | **No UI yet** |
 | **Video quality** | `video_quality` | `High` (480p) | **No UI yet** |
-| **Optimise cutoff** | `optimise_cutoff` | `0` (everything) | Gate 2, option 3 |
+| **Optimize cutoff** | `optimize_cutoff` | `0` (everything) | Gate 2, option 3 |
 | Theme | `theme_mode` · *appearance_settings* | `SYSTEM` | Settings |
 | Granted source folders | `granted_tree_uris` · *media_scope* | empty | Settings + Gate 1 |
 
-Eight of the nine optimise settings have no way to be changed. They are honoured, and invisible —
+Eight of the nine optimize settings have no way to be changed. They are honoured, and invisible —
 the Settings section that asks about them is the piece still to build.
 
 The shape they answer to is Ian's, 28-29 Aug:
 
 ```
-Do you want Gallery Sync to optimise your photos and video to save space?   Y / N
-  Optimise photos?                                     Y / N
+Do you want Gallery Sync to optimize your photos and video to save space?   Y / N
+  Optimize photos?                                     Y / N
     How?                                               Manual / Auto
                    (no When? - photos have no age, TASK-011)
-  Optimise video?                                      Y / N
+  Optimize video?                                      Y / N
     How?                                               Manual / Auto
     When?          Straight away · 1h · 12h · 1 day · 1 week
     Quality?       High 480p · Medium 720p · Low 1080p
@@ -152,7 +152,7 @@ Kept because each was a real decision, and two left stale copy behind.
 
 | What | Became | When |
 |---|---|---|
-| `auto_optimise_enabled` | Master switch + per-medium mode | 28 Aug |
+| `auto_optimize_enabled` | Master switch + per-medium mode | 28 Aug |
 | Settings → Storage section | Deleted; its count duplicated the Albums hero | 26 Aug |
 | "Move to backup" button | Archive mode, per album | 26 Aug |
 | `POST_NOTIFICATIONS` | Not needed — Android warns, exit dialog summons | 28 Aug |
@@ -175,8 +175,8 @@ without.
 | 5 | Modes | explains · acknowledged | — |
 | 6 | Default mode | asks | `default_album_mode` |
 | 7 | Archive | explains · acknowledged | — |
-| 8 | Optimising | explains · acknowledged | — |
-| 9 | Auto optimise | asks | `optimise_enabled` — **copy is stale** |
+| 8 | Optimizing | explains · acknowledged | — |
+| 9 | Auto optimize | asks | `optimize_enabled` — **copy is stale** |
 | 10 | What we can promise | explains | — |
 | 11 | Check your backups yourself | explains · acknowledged | — |
 | 12 | Getting files back | explains | — |
@@ -184,7 +184,7 @@ without.
 | 14 | Deletion policy | asks | `cloud_deletion_policy` |
 | 15 | Emptying trash | explains | — |
 | 16 | When things happen | explains | — |
-| 17 | **Library choice** | **Gate 2** | album modes + `optimise_cutoff` |
+| 17 | **Library choice** | **Gate 2** | album modes + `optimize_cutoff` |
 | 18 | Mobile data | asks | `allow_metered_network` |
 | 19 | First backup window *(only if uploading)* | asks | `first_backup_start_hour`, `…requires_charging` |
 
@@ -192,8 +192,8 @@ without.
 
 | Not asked | Consequence |
 |---|---|
-| **Video quality** | Every user gets 480p without being told, once optimising runs |
-| **Video optimise age** | Defaults to 1 day, never surfaced. Photos have none |
+| **Video quality** | Every user gets 480p without being told, once optimizing runs |
+| **Video optimize age** | Defaults to 1 day, never surfaced. Photos have none |
 | **Archive age** | Does not exist to ask about |
 | **Sync scope** | Does not exist to ask about |
 | **Cloud deletion grace** | Fixed at 7 days, no UI anywhere |
@@ -209,7 +209,7 @@ without.
 | `CloudDeletionPolicy` | `LEAVE` | A cloud copy is never removed unprompted |
 | `CloudDeletionGrace` | `7` days | How long a file must be gone first |
 | `MediaAge` | `OneDay` | Chosen by me, not you — worth a look |
-| `OptimiseMode` | `Auto` | Only reachable once the master switch is on |
+| `OptimizeMode` | `Auto` | Only reachable once the master switch is on |
 | `VideoQuality` | `High` (480p) | On the evidence of the 28 Aug comparison |
 | `FirstBackupWindow` | `1` am | Six-hour window |
 | `RemoteRoots` | `Samsung Gallery/DCIM` | Always searched, even when not the destination |

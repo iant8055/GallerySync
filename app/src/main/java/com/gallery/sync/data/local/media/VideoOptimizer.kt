@@ -11,7 +11,7 @@ import com.gallery.sync.di.IoDispatcher
 import com.gallery.sync.domain.backup.AlbumIdentityReconciler
 import com.gallery.sync.domain.backup.ArchiveAge
 import com.gallery.sync.domain.backup.MediaAge
-import com.gallery.sync.domain.backup.OptimiseCutoff
+import com.gallery.sync.domain.backup.OptimizeCutoff
 import com.gallery.sync.util.Logger
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
@@ -21,9 +21,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.coroutineContext
 
-/** What one run of video optimising achieved. */
-data class VideoOptimiseResult(
-    val optimised: Int = 0,
+/** What one run of video optimizing achieved. */
+data class VideoOptimizeResult(
+    val optimized: Int = 0,
     val reclaimedBytes: Long = 0L,
     /** Examined and permanently declined — too small, or this phone cannot decode them. */
     val skipped: Int = 0,
@@ -41,11 +41,11 @@ data class VideoOptimiseResult(
     val failedIds: List<String> = emptyList()
 ) {
     /** Clips this run took a real look at, which is what proves the chain is moving. */
-    val attempted: Int get() = optimised + skipped + failed
+    val attempted: Int get() = optimized + skipped + failed
 }
 
 /**
- * What is ready to optimise right now, for a screen to say and a chain to decide by.
+ * What is ready to optimize right now, for a screen to say and a chain to decide by.
  *
  * Counts only clips that could actually be rewritten unattended: still on the phone, and inside a
  * granted folder. Those outside one are [outsideGrantedFolders], reported apart so the screen can
@@ -61,7 +61,7 @@ data class VideoReadiness(
 /**
  * Replaces old video in Sync albums with a smaller local copy.
  *
- * The destructive half of video optimising. [VideoTranscoder] makes the smaller file and touches
+ * The destructive half of video optimizing. [VideoTranscoder] makes the smaller file and touches
  * nothing; this is what overwrites the original, and it is deliberately the smaller of the two
  * classes for that reason.
  *
@@ -73,7 +73,7 @@ data class VideoReadiness(
  * consent dialog per batch, is not — TASK-013 says so plainly, and it is why the SAF finding of
  * 19 Aug is what made this feature buildable at all.
  *
- * A clip outside every granted tree is counted in [VideoOptimiseResult.notCovered] and left alone.
+ * A clip outside every granted tree is counted in [VideoOptimizeResult.notCovered] and left alone.
  * That is a real state and the UI should be able to say so, rather than the run silently doing less
  * than the candidate count promised.
  *
@@ -85,7 +85,7 @@ data class VideoReadiness(
  * gone.
  */
 @Singleton
-class VideoOptimiser @Inject constructor(
+class VideoOptimizer @Inject constructor(
     @ApplicationContext private val context: Context,
     private val entryDao: BackupEntryDao,
     private val transcoder: VideoTranscoder,
@@ -102,13 +102,13 @@ class VideoOptimiser @Inject constructor(
      * All verified videos regardless of album mode — for the wizard's one-time pass.
      */
     suspend fun wizardCandidates(): List<BackupEntryEntity> = withContext(dispatcher) {
-        entryDao.videoOptimiseCandidatesAll(settings.current().optimiseCutoffEpochMillis)
+        entryDao.videoOptimizeCandidatesAll(settings.current().optimizeCutoffEpochMillis)
     }
 
     /**
-     * One-time bulk optimise for the install wizard (Area 1).
+     * One-time bulk optimize for the install wizard (Area 1).
      *
-     * Ignores Area 2 settings gates (isOptimiseEnabled, optimiseVideo, age, cutoff) and album
+     * Ignores Area 2 settings gates (isOptimizeEnabled, optimizeVideo, age, cutoff) and album
      * modes — the library choice on step 6 is the only gate. Uses the quality the user chose on
      * step 7.
      *
@@ -120,33 +120,33 @@ class VideoOptimiser @Inject constructor(
         quality: com.gallery.sync.domain.backup.VideoQuality,
         limit: Int = WIZARD_LIMIT,
         onProgress: (done: Int, total: Int) -> Unit = { _, _ -> }
-    ): VideoOptimiseResult = withContext(dispatcher) {
-        val candidates = entryDao.videoOptimiseCandidatesAll(
-            cutoffMillis = settings.current().optimiseCutoffEpochMillis,
+    ): VideoOptimizeResult = withContext(dispatcher) {
+        val candidates = entryDao.videoOptimizeCandidatesAll(
+            cutoffMillis = settings.current().optimizeCutoffEpochMillis,
             limit = limit
         )
 
         if (candidates.isEmpty()) {
-            Logger.d(TAG, "wizard: no video is eligible for optimising")
-            return@withContext VideoOptimiseResult()
+            Logger.d(TAG, "wizard: no video is eligible for optimizing")
+            return@withContext VideoOptimizeResult()
         }
 
-        Logger.i(TAG, "wizard: optimising up to ${candidates.size} clips at $quality")
+        Logger.i(TAG, "wizard: optimizing up to ${candidates.size} clips at $quality")
 
-        var result = VideoOptimiseResult()
+        var result = VideoOptimizeResult()
         // Reported per clip, because a transcode is tens of seconds and the wizard sits on this
         // phase for minutes. The batch total is only known here, so it is handed out with each
         // step rather than asked for separately.
         onProgress(0, candidates.size)
         for ((index, entry) in candidates.withIndex()) {
             coroutineContext.ensureActive()
-            result = optimiseForWizard(entry, quality, result)
+            result = optimizeForWizard(entry, quality, result)
             onProgress(index + 1, candidates.size)
         }
 
         Logger.i(
             TAG,
-            "wizard video optimising finished: ${result.optimised} optimised, " +
+            "wizard video optimizing finished: ${result.optimized} optimized, " +
                 "${result.reclaimedBytes} bytes reclaimed, ${result.skipped} not worth it, " +
                 "${result.failed} failed, ${result.notCovered} outside a granted folder"
         )
@@ -154,36 +154,36 @@ class VideoOptimiser @Inject constructor(
     }
 
     /**
-     * Optimises exactly [entries], which the caller chose, at [quality].
+     * Optimizes exactly [entries], which the caller chose, at [quality].
      *
      * For the Camera album's manual control (Ian, 20 Sept 2026), where the person has been shown the
      * list and ticked nothing off it but the files they swiped out. Writes the way the wizard does:
      * the tree grant where one covers the file, otherwise the write grant Android gave for it when
      * the person confirmed its dialog. A clip neither reaches is counted as failed and named in
-     * [VideoOptimiseResult.failedIds], so a chain can step over it instead of retrying it for ever.
+     * [VideoOptimizeResult.failedIds], so a chain can step over it instead of retrying it for ever.
      *
      * No settings are read here. Whether video is wanted at all, and how old it must be, were decided
      * when [entries] was chosen.
      */
-    suspend fun optimiseEntries(
+    suspend fun optimizeEntries(
         entries: List<BackupEntryEntity>,
         quality: com.gallery.sync.domain.backup.VideoQuality
-    ): VideoOptimiseResult = withContext(dispatcher) {
-        var result = VideoOptimiseResult()
+    ): VideoOptimizeResult = withContext(dispatcher) {
+        var result = VideoOptimizeResult()
         for (entry in entries) {
             coroutineContext.ensureActive()
             val before = result.failed
-            result = optimiseForWizard(entry, quality, result)
+            result = optimizeForWizard(entry, quality, result)
             if (result.failed > before) result = result.copy(failedIds = result.failedIds + entry.id)
         }
         result
     }
 
-    private suspend fun optimiseForWizard(
+    private suspend fun optimizeForWizard(
         entry: BackupEntryEntity,
         quality: com.gallery.sync.domain.backup.VideoQuality,
-        running: VideoOptimiseResult
-    ): VideoOptimiseResult {
+        running: VideoOptimizeResult
+    ): VideoOptimizeResult {
         val uri = Uri.parse(entry.contentUri)
 
         // Before minutes of encoding, and long before the overwrite: the cloud must confirm the original. TASK-027.
@@ -222,10 +222,10 @@ class VideoOptimiser @Inject constructor(
                 val reclaimed = (entry.sizeBytes - outcome.sizeBytes).coerceAtLeast(0)
                 Logger.i(
                     TAG,
-                    "optimised ${entry.displayName}: ${entry.sizeBytes} -> ${outcome.sizeBytes} bytes"
+                    "optimized ${entry.displayName}: ${entry.sizeBytes} -> ${outcome.sizeBytes} bytes"
                 )
                 running.copy(
-                    optimised = running.optimised + 1,
+                    optimized = running.optimized + 1,
                     reclaimedBytes = running.reclaimedBytes + reclaimed
                 )
             }
@@ -233,7 +233,7 @@ class VideoOptimiser @Inject constructor(
     }
 
     /**
-     * What is ready to optimise under the current settings, without touching anything.
+     * What is ready to optimize under the current settings, without touching anything.
      *
      * Ignores the switches on purpose: the screen shows this only while they are on, and a chain that
      * has just been told to stop should read zero from [run], not from here. It does apply the age,
@@ -244,7 +244,7 @@ class VideoOptimiser @Inject constructor(
      */
     suspend fun readiness(exclude: Set<String> = emptySet()): VideoReadiness =
         withContext(dispatcher) {
-            val found = eligible(settings.current().videoOptimiseAge, exclude)
+            val found = eligible(settings.current().videoOptimizeAge, exclude)
             VideoReadiness(
                 count = found.ready.size,
                 bytes = found.ready.sumOf { it.sizeBytes },
@@ -266,9 +266,9 @@ class VideoOptimiser @Inject constructor(
         // Chosen by Sync mode, so one folder's spellings are merged first. TASK-023.
         albumIdentity.reconcile()
 
-        val pool = entryDao.videoOptimiseCandidates(
+        val pool = entryDao.videoOptimizeCandidates(
             modifiedBeforeEpochSeconds = cutoffSecondsFor(age),
-            cutoffMillis = OptimiseCutoff.EVERYTHING,
+            cutoffMillis = OptimizeCutoff.EVERYTHING,
             limit = CANDIDATE_POOL
         )
 
@@ -286,18 +286,18 @@ class VideoOptimiser @Inject constructor(
     }
 
     /**
-     * Optimises what is eligible right now, or explains why it did nothing.
+     * Optimizes what is eligible right now, or explains why it did nothing.
      *
      * Reads every gate itself rather than taking them as parameters: the master switch, the video
      * toggle and the age. A caller that had to assemble those correctly would be a second place for
      * them to be assembled wrongly.
      *
-     * **No optimise cutoff here.** Ian, 6 Sept 2026: *"Once this ONE TIME backup has been completed
+     * **No optimize cutoff here.** Ian, 6 Sept 2026: *"Once this ONE TIME backup has been completed
      * the user then sets their preference for how the backup/sync works going forward."* The install
      * choice governs the one-time pass and nothing after it, so a cutoff written by Gate 2 must not
      * still be narrowing what the ongoing pass will touch months later. Until this date it did, and
      * only for video — the photo query never read it — so a #3 install left videos already in
-     * OneDrive permanently exempt while their photos were optimised as normal.
+     * OneDrive permanently exempt while their photos were optimized as normal.
      *
      * This is CLAUDE.md's three-areas rule in the direction that is easiest to miss: Area 1 must not
      * reach into Area 2's behaviour any more than it may write Area 2's settings.
@@ -305,46 +305,46 @@ class VideoOptimiser @Inject constructor(
     suspend fun run(
         limit: Int = DEFAULT_LIMIT,
         exclude: Set<String> = emptySet()
-    ): VideoOptimiseResult = withContext(dispatcher) {
+    ): VideoOptimizeResult = withContext(dispatcher) {
         val prefs = settings.current()
 
-        if (!prefs.isOptimiseEnabled || !prefs.optimiseVideo) {
-            Logger.d(TAG, "video optimising is switched off")
-            return@withContext VideoOptimiseResult()
+        if (!prefs.isOptimizeEnabled || !prefs.optimizeVideo) {
+            Logger.d(TAG, "video optimizing is switched off")
+            return@withContext VideoOptimizeResult()
         }
 
-        val found = eligible(prefs.videoOptimiseAge, exclude)
+        val found = eligible(prefs.videoOptimizeAge, exclude)
         val candidates = found.ready.take(limit)
 
         if (candidates.isEmpty()) {
-            Logger.d(TAG, "no video is eligible for optimising (${found.outside} outside a granted folder)")
-            return@withContext VideoOptimiseResult(notCovered = found.outside)
+            Logger.d(TAG, "no video is eligible for optimizing (${found.outside} outside a granted folder)")
+            return@withContext VideoOptimizeResult(notCovered = found.outside)
         }
 
-        Logger.i(TAG, "optimising up to ${candidates.size} of ${found.ready.size} clips at ${prefs.videoQuality}")
+        Logger.i(TAG, "optimizing up to ${candidates.size} of ${found.ready.size} clips at ${prefs.videoQuality}")
 
-        var result = VideoOptimiseResult(notCovered = found.outside)
+        var result = VideoOptimizeResult(notCovered = found.outside)
         for (entry in candidates) {
             // A run cut short must not leave a half-written clip. The transcoder cancels its
             // Transformer and deletes its output; nothing has been overwritten by this point.
             coroutineContext.ensureActive()
-            result = optimise(entry, prefs.videoQuality, result)
+            result = optimize(entry, prefs.videoQuality, result)
         }
 
         Logger.i(
             TAG,
-            "video optimising finished: ${result.optimised} optimised, " +
+            "video optimizing finished: ${result.optimized} optimized, " +
                 "${result.reclaimedBytes} bytes reclaimed, ${result.skipped} not worth it, " +
                 "${result.failed} failed, ${result.notCovered} outside a granted folder"
         )
         result
     }
 
-    private suspend fun optimise(
+    private suspend fun optimize(
         entry: BackupEntryEntity,
         quality: com.gallery.sync.domain.backup.VideoQuality,
-        running: VideoOptimiseResult
-    ): VideoOptimiseResult {
+        running: VideoOptimizeResult
+    ): VideoOptimizeResult {
         val uri = Uri.parse(entry.contentUri)
 
         // The cloud must confirm the original before anything is spent on it. TASK-027.
@@ -392,10 +392,10 @@ class VideoOptimiser @Inject constructor(
                 val reclaimed = (entry.sizeBytes - outcome.sizeBytes).coerceAtLeast(0)
                 Logger.i(
                     TAG,
-                    "optimised ${entry.displayName}: ${entry.sizeBytes} -> ${outcome.sizeBytes} bytes"
+                    "optimized ${entry.displayName}: ${entry.sizeBytes} -> ${outcome.sizeBytes} bytes"
                 )
                 running.copy(
-                    optimised = running.optimised + 1,
+                    optimized = running.optimized + 1,
                     reclaimedBytes = running.reclaimedBytes + reclaimed
                 )
             }
@@ -412,7 +412,7 @@ class VideoOptimiser @Inject constructor(
     private fun cutoffSecondsFor(age: ArchiveAge): Long = age.thresholdEpochSeconds()
 
     private companion object {
-        const val TAG = "VideoOptimiser"
+        const val TAG = "VideoOptimizer"
 
         /**
          * Clips per run.

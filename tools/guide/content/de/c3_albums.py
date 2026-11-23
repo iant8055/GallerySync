@@ -13,7 +13,7 @@ TRANSLATIONS = {
 Jedes Mal, wenn du den Tab öffnest, sieht er sich das Telefon an und fragt OneDrive erneut (**Rescan** zeigt dann **Checking...**). Andere Clouds werden zu einer Datei befragt, kurz bevor sie optimiert oder entfernt wird.
 
 Ansehen, Filtern und Scrollen verändern nie eine Datei. Nur die Wahl eines Modus tut das.""",
-        "en_hash": "3c7f69542cac04f4",
+        "en_hash": "e3efef2f9212aaf3",
     },
     "albums-new": {
         "title": "Neue Alben",
@@ -42,12 +42,12 @@ Filtern ändert nur, was du siehst. Um einen Modus zu ändern, nutze die Schaltf
         "body": """Wird angezeigt, wenn jedes Album in der Ansicht Dateien hat und keine auf das Senden wartet. Es stammt aus der eigenen Aufzeichnung der App; die Antwort der Cloud selbst steht in der letzten Zeile jeder Albumkarte.""",
         "en_hash": "79b43044d6005ada",
     },
-    "albums-optimised-line": {
-        "title": "Optimised and Saved",
+    "albums-optimized-line": {
+        "title": "Optimized and Saved",
         "body": """Bei ausgewähltem **Sync**: wie viele Dateien in Sync-Alben optimiert wurden und wie viel Platz gespart wurde.
 
-Die Originale bleiben in der Cloud. **Restore** bringt sie zurück. Siehe [[how-optimising-works]].""",
-        "en_hash": "1fbc295f2322e4d0",
+Die Originale bleiben in der Cloud. **Restore** bringt sie zurück. Siehe [[how-optimizing-works]].""",
+        "en_hash": "701f3a7e8e63d389",
     },
     "albums-archive-lines": {
         "title": "Files archived and Scheduled to leave this phone",
@@ -61,7 +61,7 @@ Hier wird nichts entfernt. Das Entfernen geschieht im Archive-Tab. Siehe [[archi
     "albums-run-controls": {
         "title": "Sync now, Rescan, Pause, Resume and Stop",
         "body": """## Wenn nichts läuft
-• **Sync now:** sichert jetzt. Ist in Settings ein Optimierungsschalter an und sein **Modus** auf **Manuell** gestellt, wird danach auch optimiert (siehe [[settings-optimise-mode]]). Ausgegraut, wenn nichts zu senden oder zu optimieren ist.
+• **Sync now:** sichert jetzt. Ist in Settings ein Optimierungsschalter an und sein **Modus** auf **Manuell** gestellt, wird danach auch optimiert (siehe [[settings-optimize-mode]]). Ausgegraut, wenn nichts zu senden oder zu optimieren ist.
 • **Rescan:** sieht sich das Telefon an und fragt OneDrive erneut.
 
 ## Während ein Backup läuft
@@ -72,7 +72,7 @@ Hier wird nichts entfernt. Das Entfernen geschieht im Archive-Tab. Siehe [[archi
 ## Gut zu wissen
 • **Sync now** wartet nicht auf das Ladegerät, beachtet aber weiterhin deine Einstellung „Mobile Daten verwenden“. Siehe [[settings-mobile-data]].
 • Es sichert jedes Album, das auf **Backup**, **Sync** oder **Archive** steht, optimiert aber nur Dateien in **Sync**-Alben.""",
-        "en_hash": "846b4240970f2d4a",
+        "en_hash": "4c3628a3516a9b52",
     },
     "albums-status-line": {
         "title": "Fortschritt und Statusmeldungen",
@@ -94,7 +94,7 @@ Hier wird nichts entfernt. Das Entfernen geschieht im Archive-Tab. Siehe [[archi
 • **Cloud-Zeile:** **N verified in <Cloud>** oder **N of M verified in <Cloud>** bedeutet, dass die Cloud die Dateien in der richtigen Größe bestätigt hat. OneDrive, Dropbox, Google Drive, pCloud, Backblaze B2 und IDrive e2 werden jeweils bei jedem Öffnen des Tabs und bei **Rescan** geprüft. **Could not reach <Cloud>** bedeutet, dass die letzte Prüfung fehlgeschlagen ist. Vor der ersten Prüfung — und bei Google Photos immer, weil es nicht gefragt werden kann — steht dort **N sent to <Cloud>**. Die Zeile ist grün, wenn jede Cloud darauf alles bestätigt hat.
 • **Modus-Schaltfläche** (rechte Seite): tippen, um den Modus des Albums zu ändern. Archive fragt zuerst nach Bestätigung. Wenn die Cloud des Albums diesen Modus nicht kann, sagt die Karte das.
 • **Tippe auf die Karte**, um die Dateien des Albums zu sehen. Siehe [[album-detail]].""",
-        "en_hash": "a6647ec1c67a8010",
+        "en_hash": "d76ad64ef37ca818",
     },
     "album-detail": {
         "title": "Die Dateiliste eines Albums",
@@ -103,21 +103,21 @@ Hier wird nichts entfernt. Das Entfernen geschieht im Archive-Tab. Siehe [[archi
 • **Kopfzeile:** Zurück-Pfeil, Albumname, Modus und Dateizahl, **Backs up to** (die Cloud und der Ordner, in die neue Dateien gehen, plus jede andere Cloud, die schon einige hält), die Zahlen ([[album-file-status]]), **Sort by** ([[album-file-sort]]) und **Keep at full size** ([[album-file-pin]]).
 • **▲ Hide Details ▲** am unteren Rand der Kopfzeile klappt sie auf Albumname, Modus und Dateizahl zusammen; **▼ Show Details ▼** holt den Rest zurück. Die Seite merkt sich deine Wahl.
 • **Dateien:** eine Karte pro Datei mit Größe, Datum und Markierungen. Eine optimierte Datei zeigt ihre kleinere Größe auf dem Telefon.
-• **Kameraordner** (falls in Settings gewählt): zusätzliche Optimise-Steuerung. Siehe [[album-camera-optimise]].
+• **Kameraordner** (falls in Settings gewählt): zusätzliche Optimize-Steuerung. Siehe [[album-camera-optimize]].
 
 Keine Miniaturansichten oder Vorschauen. **Drücke lange auf eine Datei**, um sie in der Foto- oder Video-App deines Telefons zu öffnen, oder in ihrer Cloud, wenn sie nicht mehr auf dem Telefon ist. Siehe [[settings-open-not-on-phone]].""",
-        "en_hash": "98ee587b80210c15",
+        "en_hash": "daf3817bf4e259d3",
     },
     "album-file-status": {
         "title": "Dateimarkierungen und Zahlen in einem Album",
         "body": """• **✓ backed up:** in der Cloud, auf dem Telefon in voller Größe.
-• **✓ backed up · optimised:** in der Cloud; das Telefon hat eine kleinere Kopie.
+• **✓ backed up · optimized:** in der Cloud; das Telefon hat eine kleinere Kopie.
 • **⟳ pending:** wartet auf das Senden.
 • **✗ failed:** konnte nach mehreren Versuchen nicht gesendet werden.
 
 ## Fehlgeschlagene erneut versuchen
 **Retry** stellt fehlgeschlagene Dateien wieder in die Warteschlange und startet ein Backup. Es entfernt nichts.""",
-        "en_hash": "a1305dbfcdea48b5",
+        "en_hash": "0b4ffba87f22d1c6",
     },
     "album-resend": {
         "title": 'Dateien, die nicht mehr in der Cloud sind',
@@ -130,7 +130,7 @@ Keine Miniaturansichten oder Vorschauen. **Drücke lange auf eine Datei**, um si
 • Optimierte Dateien erscheinen nicht: Das Original in voller Größe war nur in der Cloud.
 • In einem Album auf **Off** zuerst einen Modus wählen.
 • Bei anderen Clouds als OneDrive prüft jedes Rescan höchstens 25 Dateien pro Album, die nicht im Ordner des Albums sind. Für den Rest erneut Rescan.""",
-        "en_hash": "a8f795b13b82f94e",
+        "en_hash": "82015bd5d3445a55",
     },
 
     "album-file-sort": {
@@ -140,7 +140,7 @@ Keine Miniaturansichten oder Vorschauen. **Drücke lange auf eine Datei**, um si
 • **Status:** fehlgeschlagen, dann ausstehend, dann optimiert, dann gesichert.
 
 Die Liste öffnet sich jedes Mal in Namensreihenfolge. Sortieren ändert nichts an den Dateien.""",
-        "en_hash": "8de134098638b3d8",
+        "en_hash": "768559e84cdab251",
     },
     "album-file-pin": {
         "title": "Keep at full size",
@@ -150,9 +150,9 @@ Die Liste öffnet sich jedes Mal in Namensreihenfolge. Sortieren ändert nichts 
 • Bei **Backup** oder **Off** ändert sich nichts, aber die Wahl wird gemerkt.
 
 Restore wählt es automatisch aus. Hebe die Auswahl auf, damit die Datei wieder dem Modus ihres Albums folgt.""",
-        "en_hash": "34b89b8b5829a956",
+        "en_hash": "3691f19075c93c85",
     },
-    "album-camera-optimise": {
+    "album-camera-optimize": {
         "title": "Ältere Fotos und Videos in deinem Kameraordner optimieren",
         "body": """Nur der **Kameraordner**, den du in Settings unter **Kamera-Sync** gewählt hast ([[settings-section-camera]]), hat diese Steuerung.
 
@@ -170,7 +170,7 @@ Restore wählt es automatisch aus. Hebe die Auswahl auf, damit die Datei wieder 
 • Nichts wird optimiert, bis du **Sync now** drückst. Neue Fotos bleiben, wie sie sind.
 • Der Kameraordner hat keinen **Sync**-Modus, und die Optimierungsschalter in Settings wirken sich nicht auf ihn aus.
 • Wenn du mit geänderten Auswahlen gehst, wirst du gefragt, ob sie deine Standardeinstellungen werden sollen.""",
-        "en_hash": "2af285e1cc476243",
+        "en_hash": "19ad4bbf62950ae9",
     },
     "album-camera-select": {
         "title": "Dateien in deinem Kameraordner auswählen",
@@ -180,8 +180,8 @@ Restore wählt es automatisch aus. Hebe die Auswahl auf, damit die Datei wieder 
 • Nach rechts wischen zum Auswählen, nach links zum Abwählen.
 • **Sync now** optimiert nur die ausgewählten Dateien.
 
-Eine ausgegraute Datei kann nicht ausgewählt werden: Sie ist noch nicht in OneDrive bestätigt oder schon optimiert. Siehe [[album-camera-optimise]].""",
-        "en_hash": "9904773f638bae7b",
+Eine ausgegraute Datei kann nicht ausgewählt werden: Sie ist noch nicht in OneDrive bestätigt oder schon optimiert. Siehe [[album-camera-optimize]].""",
+        "en_hash": "ec8dfe5b2063e196",
     },
     "album-merge-warning": {
         "title": "Doppelte Albumnamen erkannt",

@@ -10,14 +10,14 @@ CHAPTER = Chapter(
 
             • **Off:** this album is not looked after: nothing is sent or changed. Every album starts here.
             • **Backup:** copies to your Cloud; the phone is never touched.
-            • **Sync:** backs up, then optimises if optimising is on in Settings.
+            • **Sync:** backs up, then optimizes if optimizing is on in Settings.
             • **Archive:** backs up, verifies, then moves the files to the phone's trash after your tap. The only mode that removes files.
 
             ## Which Clouds
             Backup works with every Cloud. Sync and Archive need OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 or Backblaze B2, not Google Photos.
 
             ## Camera folder
-            If you set a Camera folder in Settings, it offers Off, Backup and Archive, with its own optimise controls instead of Sync. See [[album-camera-optimise]].
+            If you set a Camera folder in Settings, it offers Off, Backup and Archive, with its own optimize controls instead of Sync. See [[album-camera-optimize]].
 
             ## Which to pick
             • Keep as is, but protected: **Backup**.
@@ -31,29 +31,29 @@ CHAPTER = Chapter(
         """),
 
         topic("how-verification-works", "How verification works", """
-            Before anything is optimised or removed, the Cloud is asked, right then, whether it holds a good copy.
+            Before anything is optimized or removed, the Cloud is asked, right then, whether it holds a good copy.
 
             ## The test
             • **OneDrive:** lists the album folder; the file must have the same name and size.
-            • **Dropbox, Google Drive, pCloud, Backblaze B2, IDrive e2:** asked about the exact file; it must be present, not in its bin, at the same size. For an optimised photo, the original's size.
+            • **Dropbox, Google Drive, pCloud, Backblaze B2, IDrive e2:** asked about the exact file; it must be present, not in its bin, at the same size. For an optimized photo, the original's size.
 
             ## When
             • At the start of the first backup, so only missing files are sent.
             • Each time you open the Albums tab or press Rescan (OneDrive).
             • When you check files on the Archive tab, and again just before removal.
-            • Just before a file is optimised.
+            • Just before a file is optimized.
 
             ## Three answers
             • **Verified:** the Cloud has it.
             • **Not there, or wrong size:** the file stays on the phone.
-            • **Could not check:** treated as unknown. Nothing is removed or optimised.
+            • **Could not check:** treated as unknown. Nothing is removed or optimized.
 
             ## Good to know
             A size check cannot catch every kind of damage. Open your Cloud now and then and check a few photos.
         """),
 
-        topic("how-optimising-works", "How optimising works", """
-            Optimising swaps the phone's copy for a smaller one, so the phone stops filling up while everything stays in your gallery.
+        topic("how-optimizing-works", "How optimizing works", """
+            Optimizing swaps the phone's copy for a smaller one, so the phone stops filling up while everything stays in your gallery.
 
             ## Photos
             Reduced to about 2048 pixels on the long edge, roughly a tenth of the size. Same name, place, date and location, with a small cloud badge.
@@ -86,8 +86,8 @@ CHAPTER = Chapter(
 
         topic("background-work", "When things happen", """
             • **Backing up:** shortly after new photos appear, and every six hours. Wi-Fi only unless mobile data is on; not when battery or storage is low. **Sync now** runs straight away.
-            • **Optimising photos:** Automatic, once the Cloud confirms a file in a Sync album. Manual, on **Sync now**.
-            • **Optimising video:** Automatic, after backups, while charging. Manual, on **Sync now**.
+            • **Optimizing photos:** Automatic, once the Cloud confirms a file in a Sync album. Manual, on **Sync now**.
+            • **Optimizing video:** Automatic, after backups, while charging. Manual, on **Sync now**.
             • **Deleted files:** under **Ask**, you are notified shortly after deleting a file that has a Cloud copy (not while backups are paused).
             • **Archiving:** only when you say Yes on the Archive tab.
             • **Restoring:** only when you press Restore.

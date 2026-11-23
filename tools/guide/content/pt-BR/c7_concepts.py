@@ -17,7 +17,7 @@ TRANSLATIONS = {
 O Backup funciona com todas as Clouds. O Sync e o Archive exigem OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 ou Backblaze B2, não o Google Photos.
 
 ## Pasta da câmera
-Se você definir uma Pasta da câmera em Settings, ela oferece Off, Backup e Archive, com controles de otimização próprios no lugar do Sync. Veja [[album-camera-optimise]].
+Se você definir uma Pasta da câmera em Settings, ela oferece Off, Backup e Archive, com controles de otimização próprios no lugar do Sync. Veja [[album-camera-optimize]].
 
 ## Qual escolher
 • Manter como está, mas protegido: **Backup**.
@@ -28,7 +28,7 @@ Se você definir uma Pasta da câmera em Settings, ela oferece Off, Backup e Arc
 ## Bom saber
 • Só você define os modos. A única exceção é juntar álbuns duplicados, que define **Off**. Veja [[album-merge-warning]].
 • Mudar para Archive pede que você confirme. Mudar para outro modo interrompe novas remoções.""",
-        "en_hash": "43d293213ae2b8f7",
+        "en_hash": "4817ca4e1d16f44e",
     },
     'how-verification-works': {
         "title": 'Como a verificação funciona',
@@ -51,9 +51,9 @@ Se você definir uma Pasta da câmera em Settings, ela oferece Off, Backup e Arc
 
 ## Bom saber
 Uma checagem de tamanho não detecta todo tipo de dano. Abra a sua Cloud de vez em quando e confira algumas fotos.""",
-        "en_hash": "3a19869102cce663",
+        "en_hash": "988cc8c55e5dcf2e",
     },
-    'how-optimising-works': {
+    'how-optimizing-works': {
         "title": 'Como a otimização funciona',
         "body": """Otimizar troca a cópia do telefone por uma menor, para que o telefone pare de encher enquanto tudo continua na sua galeria.
 
@@ -70,7 +70,7 @@ Recodificado em **480p** (Compressão alta), **720p** (Média) ou **1080p** (Bai
 
 ## Como ter o original de volta
 Use a aba **Restore**. Restaure antes de editar se quiser todos os detalhes.""",
-        "en_hash": "1c7d13215d15f27e",
+        "en_hash": "58e50d866f3c6a61",
     },
     'where-deleted-files-go': {
         "title": 'Para onde vão os arquivos removidos',
@@ -90,15 +90,15 @@ Em **Ask**, as cópias que você escolhe remover vão para a **lixeira do OneDri
     'background-work': {
         "title": 'Quando as coisas acontecem',
         "body": """• **Fazer backup:** pouco depois de aparecerem fotos novas, e a cada seis horas. Só no Wi-Fi, a menos que os dados móveis estejam ligados; não quando a bateria ou o armazenamento estão baixos. O **Sync now** roda na hora.
-• **Optimising photos:** no Automático, assim que a Cloud confirma um arquivo em um álbum Sync. No Manual, no **Sync now**.
-• **Optimising video:** no Automático, depois dos backups, com o aparelho carregando. No Manual, no **Sync now**.
+• **Optimizing photos:** no Automático, assim que a Cloud confirma um arquivo em um álbum Sync. No Manual, no **Sync now**.
+• **Optimizing video:** no Automático, depois dos backups, com o aparelho carregando. No Manual, no **Sync now**.
 • **Arquivos apagados:** em **Ask**, você é avisado pouco depois de apagar um arquivo que tem uma cópia na Cloud (não enquanto os backups estão pausados).
 • **Arquivar:** só quando você diz Yes na aba Archive.
 • **Restaurar:** só quando você pressiona Restore.
 
 ## Fechar o app
 Voltar ou Home não tem problema: o trabalho continua. Fechar o app deslizando-o para fora dos apps recentes pode parar o trabalho em segundo plano até você abri-lo de novo.""",
-        "en_hash": "b52b93819f999605",
+        "en_hash": "d386bc34cb7fa40b",
     },
     'where-your-data-lives': {
         "title": 'Onde ficam os seus dados',

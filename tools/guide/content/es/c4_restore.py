@@ -21,7 +21,7 @@ De vuelta a la carpeta de la que vinieron. Los archivos sueltos en el nivel supe
 
 ## Se puede probar sin riesgo
 Un archivo se sustituye solo después de que la descarga llegue completa y su tamaño coincida. Si algo falla, el archivo del teléfono se queda como estaba.""",
-        "en_hash": "1bc7e998be6fc106",
+        "en_hash": "e0e4777a168b1a80",
     },
 
     "restore-hero": {
@@ -82,7 +82,7 @@ En gris mientras se ejecuta una restauración.""",
 • **Already on this phone:** en gris; no hay nada que hacer.
 
 Mientras trabaja: **Working...** con un porcentaje. Después, **Restored to full size**, **Back on this phone** o **Could not restore, your file is unchanged** con el motivo.""",
-        "en_hash": "995fafe0c00691e4",
+        "en_hash": "149d33e155d89326",
     },
 
     "restore-greyed-files": {
@@ -111,7 +111,7 @@ Una barra de progreso muestra cuántos se han restaurado. Necesita conexión a i
 
 ## Conviene saber
 La mayoría de los editores guardan un archivo nuevo, que nunca se ve afectado. Un archivo editado se copia como archivo nuevo con **edited** y la fecha en su nombre; el original de tu Cloud nunca se reemplaza.""",
-        "en_hash": "6292714bbfa760d3",
+        "en_hash": "b09bfcaa2e57bdf3",
     },
 
 }

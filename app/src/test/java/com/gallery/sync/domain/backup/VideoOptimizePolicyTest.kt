@@ -6,21 +6,21 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * The rules for the ongoing video optimiser, which is what Settings' Optimise video controls drive.
+ * The rules for the ongoing video optimizer, which is what Settings' Optimize video controls drive.
  *
  * Two questions carry the risk. Whether it may start on its own: a wrong "yes" transcodes someone's
  * clips without their having asked, and a wrong "no" is the defect this feature was written to fix,
  * settings that are saved and change nothing. And whether a chain of batches ends: a chain that does
  * not is a phone re-encoding, on charge, for ever.
  */
-class VideoOptimisePolicyTest {
+class VideoOptimizePolicyTest {
 
     private fun automatic(
         setupComplete: Boolean = true,
-        optimiseEnabled: Boolean = true,
-        optimiseVideo: Boolean = true,
-        mode: OptimiseMode = OptimiseMode.Auto
-    ) = VideoOptimisePolicy.runsAutomatically(setupComplete, optimiseEnabled, optimiseVideo, mode)
+        optimizeEnabled: Boolean = true,
+        optimizeVideo: Boolean = true,
+        mode: OptimizeMode = OptimizeMode.Auto
+    ) = VideoOptimizePolicy.runsAutomatically(setupComplete, optimizeEnabled, optimizeVideo, mode)
 
     @Test
     fun runsOnItsOwnWhenEverySwitchSaysSo() {
@@ -35,64 +35,64 @@ class VideoOptimisePolicyTest {
 
     @Test
     fun theMasterSwitchAndTheVideoSwitchAreBothRequired() {
-        assertFalse(automatic(optimiseEnabled = false))
-        assertFalse(automatic(optimiseVideo = false))
+        assertFalse(automatic(optimizeEnabled = false))
+        assertFalse(automatic(optimizeVideo = false))
     }
 
     @Test
     fun manualModeDoesNotStartOnItsOwn() {
         // Manual means "I will press the button", which is a different thing from Off.
-        assertFalse(automatic(mode = OptimiseMode.Manual))
+        assertFalse(automatic(mode = OptimizeMode.Manual))
     }
 
     @Test
     fun aBatchThatDidNothingDoesNotQueueAnother() {
-        assertFalse(VideoOptimisePolicy.shouldContinue(attempted = 0, moreReady = 5, excludedCount = 0))
+        assertFalse(VideoOptimizePolicy.shouldContinue(attempted = 0, moreReady = 5, excludedCount = 0))
     }
 
     @Test
     fun aBatchWithNothingLeftBehindItEnds() {
-        assertFalse(VideoOptimisePolicy.shouldContinue(attempted = 3, moreReady = 0, excludedCount = 0))
+        assertFalse(VideoOptimizePolicy.shouldContinue(attempted = 3, moreReady = 0, excludedCount = 0))
     }
 
     @Test
     fun aBatchThatMadeProgressWithMoreToDoContinues() {
-        assertTrue(VideoOptimisePolicy.shouldContinue(attempted = 3, moreReady = 7, excludedCount = 0))
+        assertTrue(VideoOptimizePolicy.shouldContinue(attempted = 3, moreReady = 7, excludedCount = 0))
     }
 
     @Test
     fun aBatchOfOnlyFailuresStillContinuesBecauseTheFailedClipsAreSteppedOver() {
         // A failure adds the clip to the chain's exclusions, so the list shrinks even though nothing
-        // was optimised, and the clips behind the failing one are reached.
-        assertTrue(VideoOptimisePolicy.shouldContinue(attempted = 3, moreReady = 4, excludedCount = 3))
+        // was optimized, and the clips behind the failing one are reached.
+        assertTrue(VideoOptimizePolicy.shouldContinue(attempted = 3, moreReady = 4, excludedCount = 3))
     }
 
     @Test
     fun aChainThatHasFailedOnTooManyClipsStopsRatherThanForgetting() {
-        val limit = VideoOptimisePolicy.MAX_EXCLUDED
-        assertTrue(VideoOptimisePolicy.shouldContinue(attempted = 1, moreReady = 1, excludedCount = limit))
-        assertFalse(VideoOptimisePolicy.shouldContinue(attempted = 1, moreReady = 1, excludedCount = limit + 1))
+        val limit = VideoOptimizePolicy.MAX_EXCLUDED
+        assertTrue(VideoOptimizePolicy.shouldContinue(attempted = 1, moreReady = 1, excludedCount = limit))
+        assertFalse(VideoOptimizePolicy.shouldContinue(attempted = 1, moreReady = 1, excludedCount = limit + 1))
     }
 
     @Test
     fun theExclusionsFitInWorkManagersInputData() {
         // Input data is capped at 10 KB. A ledger id is a path, a name and two numbers.
         val longestPlausibleId = 160
-        assertTrue(VideoOptimisePolicy.MAX_EXCLUDED * longestPlausibleId < 10_240)
+        assertTrue(VideoOptimizePolicy.MAX_EXCLUDED * longestPlausibleId < 10_240)
     }
 
     @Test
     fun aBatchIsSmallEnoughToFinishInsideTheWorkersWindow() {
         // 20 to 27 seconds a clip was measured at 1080p on the Moto G; WorkManager allows ten minutes.
-        assertEquals(3, VideoOptimisePolicy.BATCH)
+        assertEquals(3, VideoOptimizePolicy.BATCH)
     }
 
     private fun onSyncNow(
         setupComplete: Boolean = true,
-        optimiseEnabled: Boolean = true,
-        optimiseVideo: Boolean = true,
-        mode: OptimiseMode = OptimiseMode.Manual
-    ) = VideoOptimisePolicy.runsOnSyncNow(setupComplete, optimiseEnabled, optimiseVideo, mode)
+        optimizeEnabled: Boolean = true,
+        optimizeVideo: Boolean = true,
+        mode: OptimizeMode = OptimizeMode.Manual
+    ) = VideoOptimizePolicy.runsOnSyncNow(setupComplete, optimizeEnabled, optimizeVideo, mode)
 
     @Test
     fun manualVideoRunsWhenSyncNowIsPressed() {
@@ -103,13 +103,13 @@ class VideoOptimisePolicyTest {
     fun automaticVideoDoesNotSkipTheChargerBecauseSyncNowWasPressed() {
         // Sync now on an Automatic clip would start it without the wait for the charger, which is the
         // one thing Automatic promises.
-        assertFalse(onSyncNow(mode = OptimiseMode.Auto))
+        assertFalse(onSyncNow(mode = OptimizeMode.Auto))
     }
 
     @Test
     fun syncNowNeedsSetupAndBothSwitches() {
         assertFalse(onSyncNow(setupComplete = false))
-        assertFalse(onSyncNow(optimiseEnabled = false))
-        assertFalse(onSyncNow(optimiseVideo = false))
+        assertFalse(onSyncNow(optimizeEnabled = false))
+        assertFalse(onSyncNow(optimizeVideo = false))
     }
 }

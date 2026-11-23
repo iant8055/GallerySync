@@ -30,7 +30,7 @@ import javax.inject.Singleton
  *
  * ### Call it before reading a mode
  *
- * Anything that acts on album modes calls [reconcile] first: uploading, optimising and Archive.
+ * Anything that acts on album modes calls [reconcile] first: uploading, optimizing and Archive.
  * The order matters. The scanner renames items as soon as it runs, so between a scan and a merge a
  * new camera shot can already carry a name whose stored mode is Archive, set for the other spelling.
  * Acting in that window removes a file under a choice made for a different name. A guard at each

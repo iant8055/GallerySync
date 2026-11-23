@@ -7,7 +7,7 @@ TRANSLATIONS = {
     "faq-sync-now-greyed": {
         "title": "Sync now está en gris",
         "body": """No hay nada que enviar ni optimizar: todo está ya enviado, o ningún álbum está en Backup, Sync o Archive. Mira los totales de modo en la cabecera.""",
-        "en_hash": "d76ec512e56c7203",
+        "en_hash": "7b543eca08835984",
     },
 
     "faq-albums-off-after-backup": {
@@ -45,13 +45,13 @@ A Google Photos no se le puede preguntar, así que sus álbumes siempre ponen **
     "faq-photo-looks-small": {
         "title": "Una foto se ve más pequeña o de menor calidad que antes",
         "body": """Se ha optimizado (busca la pequeña insignia de nube). El original está en tu Cloud: usa la pestaña **Restore**.""",
-        "en_hash": "4e1a6a3f710360db",
+        "en_hash": "009dd053a72c34e0",
     },
 
     "faq-restore-empty": {
         "title": "La pestaña Restore dice que no hay nada que recuperar",
         "body": """No se ha optimizado ni archivado nada y (en OneDrive) todas las fotos de tus carpetas de copia ya están en el teléfono. Es correcto.""",
-        "en_hash": "e0720600e98ca0e2",
+        "en_hash": "e91f44f270b19e04",
     },
 
     "faq-backup-stops-when-closed": {

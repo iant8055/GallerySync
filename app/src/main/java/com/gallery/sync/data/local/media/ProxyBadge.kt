@@ -17,7 +17,7 @@ data class BadgeBounds(
 }
 
 /**
- * Draws the "this is an optimised copy" cloud into a proxy's pixels.
+ * Draws the "this is an optimized copy" cloud into a proxy's pixels.
  *
  * Baked into the image because that is the only mechanism there is: GallerySync cannot draw inside
  * Samsung Gallery, CapCut, or any other app's grid, and MediaStore has no field for a badge. The

@@ -12,7 +12,7 @@ import kotlin.math.roundToLong
  * A number from ½ to 9 and a unit, or All (Ian, 2 Nov 2026, with ½ added 14 Nov 2026; until then a fixed list of 1 hour, 1 day,
  * 1 week, 1 month, 1 year and All, which are still what a value saved back then reads as). A month is
  * 30 days and a year 365, as they always were here. A separate scale from
- * [CameraOptimiseAge] on purpose — that one is picked once, by hand, for a folder full of recent
+ * [CameraOptimizeAge] on purpose — that one is picked once, by hand, for a folder full of recent
  * shots; this one starts from a Settings default and governs every Archive album, and Archive
  * removes a file outright rather than shrinking it, so the shortest step is tighter (an hour, not a
  * day) to give a genuinely fresh file a real guard.
@@ -108,7 +108,7 @@ data class ArchiveAgeSplit(
 
 /**
  * Splits files in Archive albums by [age], measured against when each file was taken, as
- * [CameraOptimiseAge] is. Not its modified date, which optimising rewrites: every file in a Sync album
+ * [CameraOptimizeAge] is. Not its modified date, which optimizing rewrites: every file in a Sync album
  * would read as new (Ian, 1 Nov 2026).
  *
  * A file exactly on the line is old enough; the test is `<=`, matching `CameraSelection.matches`.

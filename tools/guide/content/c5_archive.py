@@ -15,7 +15,7 @@ CHAPTER = Chapter(
             5. **Empty the bin** when you are ready. The space returns only then.
 
             ## What "safely" means
-            The Cloud must confirm, right then, that it holds the file at the same size. If the Cloud cannot be asked, nothing is removed. For an optimised photo, the original's size is checked.
+            The Cloud must confirm, right then, that it holds the file at the same size. If the Cloud cannot be asked, nothing is removed. For an optimized photo, the original's size is checked.
 
             ## Which Clouds
             OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 and Backblaze B2. Not Google Photos.

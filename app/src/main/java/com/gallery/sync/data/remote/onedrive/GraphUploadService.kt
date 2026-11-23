@@ -95,8 +95,8 @@ interface GraphUploadService {
      * this endpoint is to **replace** a file of the same name, unlike `createUploadSession`, whose body
      * carries `rename`. Measured on the Moto G: a 133,017-byte file was uploaded, then a different
      * 187,856-byte file under the same name; the folder count did not change and the name read 187,856
-     * bytes, so the first was overwritten. Every optimised photo is well under 4 MiB, as is any edited
-     * one, so the path an optimised copy would take past every other guard was the one that replaced
+     * bytes, so the first was overwritten. Every optimized photo is well under 4 MiB, as is any edited
+     * one, so the path an optimized copy would take past every other guard was the one that replaced
      * the full-size original in OneDrive. Written into the annotation rather than passed in, so no
      * caller can leave it out.
      */

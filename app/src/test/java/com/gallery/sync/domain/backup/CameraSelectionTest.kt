@@ -10,12 +10,12 @@ import org.junit.Test
 import java.time.Instant
 
 /**
- * Which files in the camera folder Sync now will optimise.
+ * Which files in the camera folder Sync now will optimize.
  *
  * Ian, 27 Sept 2026: what is listed and what is selected are separate. Every file is listed; the header's age,
  * Photos and Videos select files; a swipe changes one; and the selection is for the visit. The property the rest
- * depends on is that [CameraSelection.toOptimise], the only list the worker acts on, never holds a file outside
- * the selection or one that cannot be optimised.
+ * depends on is that [CameraSelection.toOptimize], the only list the worker acts on, never holds a file outside
+ * the selection or one that cannot be optimized.
  */
 class CameraSelectionTest {
 
@@ -23,7 +23,7 @@ class CameraSelectionTest {
     private val now: Instant = Instant.parse("2026-09-15T12:00:00Z")
     private val day = 86_400L
 
-    private val both = CameraOptimiseChoice(ArchiveAge(1, ArchiveAgeUnit.Week), photos = true, videos = true)
+    private val both = CameraOptimizeChoice(ArchiveAge(1, ArchiveAgeUnit.Week), photos = true, videos = true)
 
     private fun entry(
         name: String,
@@ -54,7 +54,7 @@ class CameraSelectionTest {
         modeOverride = pin
     )
 
-    private fun selectedBy(choice: CameraOptimiseChoice, vararg entries: BackupEntryEntity): Set<String> =
+    private fun selectedBy(choice: CameraOptimizeChoice, vararg entries: BackupEntryEntity): Set<String> =
         CameraSelection.byChoice(entries.toList(), choice, choice.age.thresholdEpochSeconds(now))
             .map { id -> entries.first { it.id == id }.displayName }.toSet()
 
@@ -62,36 +62,36 @@ class CameraSelectionTest {
 
     @Test
     fun `a Camera age saved by the old fixed list keeps its meaning`() {
-        assertEquals(ArchiveAge(1, ArchiveAgeUnit.Day), CameraOptimiseAge.fromNameOrDefault("OneDay"))
-        assertEquals(ArchiveAge(1, ArchiveAgeUnit.Week), CameraOptimiseAge.fromNameOrDefault("OneWeek"))
-        assertEquals(ArchiveAge(1, ArchiveAgeUnit.Month), CameraOptimiseAge.fromNameOrDefault("OneMonth"))
-        assertEquals(ArchiveAge(6, ArchiveAgeUnit.Month), CameraOptimiseAge.fromNameOrDefault("SixMonths"))
-        assertEquals(ArchiveAge(1, ArchiveAgeUnit.Year), CameraOptimiseAge.fromNameOrDefault("OneYear"))
-        assertEquals(ArchiveAge.All, CameraOptimiseAge.fromNameOrDefault("All"))
+        assertEquals(ArchiveAge(1, ArchiveAgeUnit.Day), CameraOptimizeAge.fromNameOrDefault("OneDay"))
+        assertEquals(ArchiveAge(1, ArchiveAgeUnit.Week), CameraOptimizeAge.fromNameOrDefault("OneWeek"))
+        assertEquals(ArchiveAge(1, ArchiveAgeUnit.Month), CameraOptimizeAge.fromNameOrDefault("OneMonth"))
+        assertEquals(ArchiveAge(6, ArchiveAgeUnit.Month), CameraOptimizeAge.fromNameOrDefault("SixMonths"))
+        assertEquals(ArchiveAge(1, ArchiveAgeUnit.Year), CameraOptimizeAge.fromNameOrDefault("OneYear"))
+        assertEquals(ArchiveAge.All, CameraOptimizeAge.fromNameOrDefault("All"))
     }
 
-    /** Ian, 27 Sept 2026: the defaults in Settings are Off for optimising and All for age. */
+    /** Ian, 27 Sept 2026: the defaults in Settings are Off for optimizing and All for age. */
     @Test
     fun `out of the box both kinds are off and the age is All, so nothing is selected`() {
-        assertEquals(CameraOptimiseAge.All, CameraOptimiseAge.DEFAULT)
-        assertEquals(CameraOptimiseChoice(CameraOptimiseAge.All, photos = false, videos = false), CameraOptimiseChoice.DEFAULT)
-        assertTrue(CameraOptimiseChoice.DEFAULT.nothingChosen)
-        assertEquals(emptySet<String>(), selectedBy(CameraOptimiseChoice.DEFAULT, entry("p.jpg"), entry("v.mp4", video = true)))
+        assertEquals(CameraOptimizeAge.All, CameraOptimizeAge.DEFAULT)
+        assertEquals(CameraOptimizeChoice(CameraOptimizeAge.All, photos = false, videos = false), CameraOptimizeChoice.DEFAULT)
+        assertTrue(CameraOptimizeChoice.DEFAULT.nothingChosen)
+        assertEquals(emptySet<String>(), selectedBy(CameraOptimizeChoice.DEFAULT, entry("p.jpg"), entry("v.mp4", video = true)))
     }
 
     @Test
     fun `an unknown stored age falls back to the default`() {
-        assertEquals(CameraOptimiseAge.DEFAULT, CameraOptimiseAge.fromNameOrDefault(null))
-        assertEquals(CameraOptimiseAge.DEFAULT, CameraOptimiseAge.fromNameOrDefault("Fortnight"))
+        assertEquals(CameraOptimizeAge.DEFAULT, CameraOptimizeAge.fromNameOrDefault(null))
+        assertEquals(CameraOptimizeAge.DEFAULT, CameraOptimizeAge.fromNameOrDefault("Fortnight"))
         ArchiveAge.COUNTS.forEach { n ->
             val age = ArchiveAge(n, ArchiveAgeUnit.Week)
-            assertEquals(age, CameraOptimiseAge.fromNameOrDefault(age.storedName))
+            assertEquals(age, CameraOptimizeAge.fromNameOrDefault(age.storedName))
         }
     }
 
     @Test
     fun `a choice differs from the defaults when any one of its three parts does`() {
-        val defaults = CameraOptimiseChoice.DEFAULT
+        val defaults = CameraOptimizeChoice.DEFAULT
         assertEquals(defaults, defaults.copy())
         assertTrue(defaults != defaults.copy(age = ArchiveAge(1, ArchiveAgeUnit.Year)))
         assertTrue(defaults != defaults.copy(photos = true))
@@ -102,7 +102,7 @@ class CameraSelectionTest {
 
     @Test
     fun `All selects a file modified this very minute as well as an old one`() {
-        val all = both.copy(age = CameraOptimiseAge.All)
+        val all = both.copy(age = CameraOptimizeAge.All)
         assertEquals(setOf("fresh.jpg", "old.jpg"), selectedBy(all, entry("fresh.jpg", ageDays = 0), entry("old.jpg", ageDays = 900)))
     }
 
@@ -146,7 +146,7 @@ class CameraSelectionTest {
     }
 
     @Test
-    fun `a file already optimised, declined, or gone from the phone cannot be selected`() {
+    fun `a file already optimized, declined, or gone from the phone cannot be selected`() {
         assertFalse(CameraSelection.isSelectable(entry("done.jpg", proxied = true)))
         assertFalse(CameraSelection.isSelectable(entry("declined.jpg", skipped = true)))
         assertFalse(CameraSelection.isSelectable(entry("gone.jpg", missing = 1L)))
@@ -160,21 +160,21 @@ class CameraSelectionTest {
     // ── What the worker acts on ─────────────────────────────────────────────
 
     @Test
-    fun `nothing outside the selection is ever optimised`() {
+    fun `nothing outside the selection is ever optimized`() {
         val a = entry("a.jpg")
         val b = entry("b.jpg")
         val c = entry("c.jpg")
-        assertEquals(listOf("b.jpg"), CameraSelection.toOptimise(listOf(a, b, c), setOf(b.id)).map { it.displayName })
-        assertTrue(CameraSelection.toOptimise(listOf(a, b, c), emptySet()).isEmpty())
+        assertEquals(listOf("b.jpg"), CameraSelection.toOptimize(listOf(a, b, c), setOf(b.id)).map { it.displayName })
+        assertTrue(CameraSelection.toOptimize(listOf(a, b, c), emptySet()).isEmpty())
     }
 
     @Test
-    fun `a selected file that stopped being optimisable drops out, largest first for the rest`() {
+    fun `a selected file that stopped being optimizable drops out, largest first for the rest`() {
         val small = entry("small.jpg", size = 1_000_000L)
         val large = entry("large.jpg", size = 9_000_000L)
         val done = entry("done.jpg", proxied = true)
         val selection = setOf(small.id, large.id, done.id)
-        assertEquals(listOf("large.jpg", "small.jpg"), CameraSelection.toOptimise(listOf(small, large, done), selection).map { it.displayName })
+        assertEquals(listOf("large.jpg", "small.jpg"), CameraSelection.toOptimize(listOf(small, large, done), selection).map { it.displayName })
     }
 
     @Test

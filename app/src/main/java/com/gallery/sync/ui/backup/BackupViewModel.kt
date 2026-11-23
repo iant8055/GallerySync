@@ -14,10 +14,10 @@ import com.gallery.sync.data.local.media.MediaAlbum
 import com.gallery.sync.data.local.media.mainPath
 import com.gallery.sync.data.local.media.sharesByPath
 import com.gallery.sync.data.local.media.ProxyOutcome
-import com.gallery.sync.data.local.media.VideoOptimiser
+import com.gallery.sync.data.local.media.VideoOptimizer
 import com.gallery.sync.data.local.media.VideoReadiness
-import com.gallery.sync.worker.PhotoOptimiseLauncher
-import com.gallery.sync.worker.VideoOptimiseLauncher
+import com.gallery.sync.worker.PhotoOptimizeLauncher
+import com.gallery.sync.worker.VideoOptimizeLauncher
 import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.data.local.settings.folderFor
 import com.gallery.sync.domain.backup.AlbumMergeWarning
@@ -42,8 +42,8 @@ import com.gallery.sync.domain.backup.BackupEngine
 import com.gallery.sync.domain.backup.BackupLocation
 import com.gallery.sync.domain.backup.RemoteRoots
 import com.gallery.sync.domain.backup.CameraAlbum
-import com.gallery.sync.domain.backup.CameraOptimiseAge
-import com.gallery.sync.domain.backup.CameraOptimiseChoice
+import com.gallery.sync.domain.backup.CameraOptimizeAge
+import com.gallery.sync.domain.backup.CameraOptimizeChoice
 import com.gallery.sync.domain.backup.CameraSelection
 import com.gallery.sync.domain.backup.FilePin
 import com.gallery.sync.domain.backup.FolderDestination
@@ -51,9 +51,9 @@ import com.gallery.sync.domain.backup.GooglePhotosDestination
 import com.gallery.sync.domain.backup.ReconcileWithCloud
 import com.gallery.sync.domain.backup.SetFolderDestination
 import com.gallery.sync.domain.backup.MediaAge
-import com.gallery.sync.domain.backup.OptimiseMode
-import com.gallery.sync.domain.backup.OptimiseOnSyncNow
-import com.gallery.sync.domain.backup.PhotoOptimisePolicy
+import com.gallery.sync.domain.backup.OptimizeMode
+import com.gallery.sync.domain.backup.OptimizeOnSyncNow
+import com.gallery.sync.domain.backup.PhotoOptimizePolicy
 import com.gallery.sync.domain.backup.StopReason
 import com.gallery.sync.domain.backup.VideoQuality
 import com.gallery.sync.util.Logger
@@ -76,7 +76,7 @@ import javax.inject.Inject
  * The hero's readout for one slice of the album list.
  *
  * Per-mode rather than global, because the numbers that matter differ by mode: Sync is judged on
- * what optimising saved, Archive on what is still unverified — and asking "how much space did I
+ * what optimizing saved, Archive on what is still unverified — and asking "how much space did I
  * get back" of a Backup album is a category error, since Backup never removes anything.
  */
 data class AlbumsSummary(
@@ -85,7 +85,7 @@ data class AlbumsSummary(
     val imageCount: Int,
     val videoCount: Int,
     val totalBytes: Long,
-    val optimisedCount: Int,
+    val optimizedCount: Int,
     val savedBytes: Long,
     /** In Archive albums, files not yet confirmed in OneDrive — so, not yet removable. */
     val awaitingVerification: Int,
@@ -205,11 +205,11 @@ data class AlbumRow(
     /** What the drive itself last said about this album, or NeverChecked. */
     val cloudClaim: AlbumCloudClaim = AlbumCloudClaim.NeverChecked,
     val proxiedCount: Int = 0,
-    /** Files here kept at full size. Drawn after the optimised count. See `FilePin`. */
+    /** Files here kept at full size. Drawn after the optimized count. See `FilePin`. */
     val pinnedCount: Int = 0,
     val imageCount: Int = 0,
     val videoCount: Int = 0,
-    /** What optimising reclaimed in this album. Zero unless something here has been proxied. */
+    /** What optimizing reclaimed in this album. Zero unless something here has been proxied. */
     val savedBytes: Long = 0L,
     /** Files here the queue has given up on after five attempts. See `RetryFailed`. */
     val failedCount: Int = 0,
@@ -248,7 +248,7 @@ data class AlbumRow(
 
     /**
      * Files this album sent that a Cloud, at the last check, definitely no longer holds — still on the phone and never
-     * optimised, so they could be sent again. Flagged on the Albums tab; resent only from the album's page (Ian,
+     * optimized, so they could be sent again. Flagged on the Albums tab; resent only from the album's page (Ian,
      * 22 Nov 2026). See `RequeueMissingFromCloud`.
      */
     val missingFromCloud: Int = 0
@@ -277,7 +277,7 @@ data class AlbumRow(
      * Archive ran to completion: the mode is set, the ledger remembers files, none are still here.
      *
      * Rendered as its own line rather than through the usual counts, which would describe files
-     * that are no longer on the phone — "1 backed up · 12 optimised" over an album holding nothing.
+     * that are no longer on the phone — "1 backed up · 12 optimized" over an album holding nothing.
      */
     val isArchivedAndEmpty: Boolean
         get() = mode == AlbumMode.ARCHIVE && itemCount == 0 && everBackedUpCount > 0
@@ -360,17 +360,17 @@ data class BackupUiState(
     val canRemoveLocalCopies: Boolean = false,
     /** Back up on its own when new photos appear. */
     val isAutomaticEnabled: Boolean = false,
-    val isAutoOptimiseEnabled: Boolean = false,
+    val isAutoOptimizeEnabled: Boolean = false,
     /** Allow automatic runs on mobile data, not just Wi-Fi. */
     val allowMeteredNetwork: Boolean = false,
     /** Settings → General: what a long-press does with a file not on the phone (TASK-028). */
     val openNotOnPhone: OpenNotOnPhone = OpenNotOnPhone.DEFAULT,
-    val isOptimiseEnabled: Boolean = false,
-    val optimisePhotos: Boolean = false,
-    val photoOptimiseMode: OptimiseMode = OptimiseMode.DEFAULT,
-    val optimiseVideo: Boolean = false,
-    val videoOptimiseMode: OptimiseMode = OptimiseMode.DEFAULT,
-    val videoOptimiseAge: ArchiveAge = MediaAge.DEFAULT,
+    val isOptimizeEnabled: Boolean = false,
+    val optimizePhotos: Boolean = false,
+    val photoOptimizeMode: OptimizeMode = OptimizeMode.DEFAULT,
+    val optimizeVideo: Boolean = false,
+    val videoOptimizeMode: OptimizeMode = OptimizeMode.DEFAULT,
+    val videoOptimizeAge: ArchiveAge = MediaAge.DEFAULT,
     val videoQuality: VideoQuality = VideoQuality.DEFAULT,
     val hasCompletedFirstBackup: Boolean = false,
     /** Paired with [hasCompletedFirstBackup] to ask `WizardGate.finished` whether the wizard is over. */
@@ -389,13 +389,13 @@ data class BackupUiState(
     /** Photos whose local copy could be replaced by a proxy, and what they occupy now. */
     val proxyCandidateCount: Int = 0,
     val canProxy: Boolean = false,
-    /** Clips ready to optimise: in a Sync album, verified, old enough, and inside a granted folder. */
+    /** Clips ready to optimize: in a Sync album, verified, old enough, and inside a granted folder. */
     val videoCandidateCount: Int = 0,
     /**
      * Something set to Manual is ready, so **Sync now** has work even with nothing to send. Ian,
-     * 19 Sept 2026: Manual means through that button. See [OptimiseOnSyncNow].
+     * 19 Sept 2026: Manual means through that button. See [OptimizeOnSyncNow].
      */
-    val manualOptimiseWaiting: Boolean = false,
+    val manualOptimizeWaiting: Boolean = false,
     /**
      * Sync now has just finished and photos are Manual, so the screen should offer Android's dialog for
      * any photo outside the granted folders. Consumed by [BackupViewModel.consumeProxyDialogRequest].
@@ -419,8 +419,8 @@ data class BackupUiState(
     val folderToPlace: String? = null,
     /** Per album, what the last check found sent but no longer in a Cloud. See [AlbumRow.missingFromCloud]. */
     val missingFromCloud: Map<String, Set<String>> = emptyMap(),
-    /** The Camera album's manual optimise is queued or running. Drives its button and its list. */
-    val cameraOptimising: Boolean = false,
+    /** The Camera album's manual optimize is queued or running. Drives its button and its list. */
+    val cameraOptimizing: Boolean = false,
     /** *Special settings for Camera*, off out of the box. See `BackupPreferences.cameraSpecialEnabled`. */
     val cameraSpecialEnabled: Boolean = false,
     /** The folder picked in Settings, shown there whether or not the switch is on. Blank until one is picked. */
@@ -428,15 +428,15 @@ data class BackupUiState(
     /** The camera folder in force: the picked one while the switch is on, otherwise none. See `CameraAlbum`. */
     val cameraFolder: String? = null,
     /** What the Camera screen's header starts at: the defaults in Settings. */
-    val cameraDefaults: CameraOptimiseChoice = CameraOptimiseChoice.DEFAULT,
-    /** How hard the Camera optimise shrinks a clip. Its own value, not the Sync one. */
+    val cameraDefaults: CameraOptimizeChoice = CameraOptimizeChoice.DEFAULT,
+    /** How hard the Camera optimize shrinks a clip. Its own value, not the Sync one. */
     val cameraVideoQuality: VideoQuality = VideoQuality.DEFAULT,
     /**
      * The camera folder's header choices while they differ from the defaults and nobody has answered *make these
      * your default settings?* yet. Set by the open Camera screen, so the bottom bar can ask before it leaves
      * (Ian, 27 Sept 2026: leaving by the bottom bar skipped the question and threw the changes away).
      */
-    val cameraUnsaved: CameraOptimiseChoice? = null,
+    val cameraUnsaved: CameraOptimizeChoice? = null,
     /** Whether the restore screen lists cloud folders that hold nothing. */
     val showEmptyCloudFolders: Boolean = false,
     /** What the Archive tab's age filter starts at. See `ArchiveAge`. */
@@ -553,7 +553,7 @@ data class BackupUiState(
             imageCount = rows.sumOf { it.imageCount },
             videoCount = rows.sumOf { it.videoCount },
             totalBytes = rows.sumOf { it.totalBytes },
-            optimisedCount = rows.sumOf { it.proxiedCount },
+            optimizedCount = rows.sumOf { it.proxiedCount },
             savedBytes = rows.sumOf { it.savedBytes },
             awaitingVerification = rows.sumOf { it.outstanding },
             // What has actually left the phone, not everything ever uploaded (Moto G, 8 Oct 2026).
@@ -563,8 +563,8 @@ data class BackupUiState(
         )
     }
 
-    /** Whether the Sync now button does anything: files to send, or Manual optimising to run. */
-    val canSyncNow: Boolean get() = pendingCount > 0 || manualOptimiseWaiting
+    /** Whether the Sync now button does anything: files to send, or Manual optimizing to run. */
+    val canSyncNow: Boolean get() = pendingCount > 0 || manualOptimizeWaiting
 
     /**
      * Albums nobody has chosen a mode for yet: at Off, on the phone, and neither set by the user nor
@@ -591,9 +591,9 @@ class BackupViewModel @Inject constructor(
     private val engine: BackupEngine,
     private val localCopyRemover: LocalCopyRemover,
     private val proxyApplier: ProxyApplier,
-    private val videoOptimiser: VideoOptimiser,
-    private val videoOptimise: VideoOptimiseLauncher,
-    private val photoOptimise: PhotoOptimiseLauncher,
+    private val videoOptimizer: VideoOptimizer,
+    private val videoOptimize: VideoOptimizeLauncher,
+    private val photoOptimize: PhotoOptimizeLauncher,
     private val settings: BackupSettings,
     @param:ApplicationContext private val context: Context
 ) : ViewModel() {
@@ -625,8 +625,8 @@ class BackupViewModel @Inject constructor(
             settings.preferences.collect { prefs ->
                 _state.value = _state.value.copy(
                     isAutomaticEnabled = prefs.isAutomaticEnabled,
-                    isAutoOptimiseEnabled = prefs.isOptimiseEnabled &&
-                        prefs.photoOptimiseMode == OptimiseMode.Auto,
+                    isAutoOptimizeEnabled = prefs.isOptimizeEnabled &&
+                        prefs.photoOptimizeMode == OptimizeMode.Auto,
                     allowMeteredNetwork = prefs.allowMeteredNetwork,
                     openNotOnPhone = prefs.openNotOnPhone,
                     showEmptyCloudFolders = prefs.showEmptyCloudFolders,
@@ -635,10 +635,10 @@ class BackupViewModel @Inject constructor(
                     cameraSpecialEnabled = prefs.cameraSpecialEnabled,
                     cameraFolderPicked = prefs.cameraFolder,
                     cameraFolder = CameraAlbum.chosen(prefs.cameraSpecialEnabled, prefs.cameraFolder),
-                    cameraDefaults = CameraOptimiseChoice(
+                    cameraDefaults = CameraOptimizeChoice(
                         age = prefs.cameraDefaultAge,
-                        photos = prefs.cameraOptimisePhotos,
-                        videos = prefs.cameraOptimiseVideo
+                        photos = prefs.cameraOptimizePhotos,
+                        videos = prefs.cameraOptimizeVideo
                     ),
                     cameraVideoQuality = prefs.cameraVideoQuality,
                     isPaused = prefs.isPaused,
@@ -648,12 +648,12 @@ class BackupViewModel @Inject constructor(
                     destinationRoot = prefs.destinationRoot,
                     cloudFolders = BackupLocation.entries.filter { RemoteRoots.hasFolders(it) }
                         .associateWith { prefs.folderFor(it) },
-                    isOptimiseEnabled = prefs.isOptimiseEnabled,
-                    optimisePhotos = prefs.optimisePhotos,
-                    photoOptimiseMode = prefs.photoOptimiseMode,
-                    optimiseVideo = prefs.optimiseVideo,
-                    videoOptimiseMode = prefs.videoOptimiseMode,
-                    videoOptimiseAge = prefs.videoOptimiseAge,
+                    isOptimizeEnabled = prefs.isOptimizeEnabled,
+                    optimizePhotos = prefs.optimizePhotos,
+                    photoOptimizeMode = prefs.photoOptimizeMode,
+                    optimizeVideo = prefs.optimizeVideo,
+                    videoOptimizeMode = prefs.videoOptimizeMode,
+                    videoOptimizeAge = prefs.videoOptimizeAge,
                     videoQuality = prefs.videoQuality,
                     hasCompletedFirstBackup = prefs.hasCompletedFirstBackup,
                     hasCompletedSetup = prefs.hasCompletedSetup
@@ -661,9 +661,9 @@ class BackupViewModel @Inject constructor(
             }
         }
         observeBackgroundWork()
-        observeVideoOptimise()
-        observeWhatOptimisingWaits()
-        observeCameraOptimise()
+        observeVideoOptimize()
+        observeWhatOptimizingWaits()
+        observeCameraOptimize()
         observeCloudStatus()
         viewModelScope.launch {
             settings.albumMergeWarnings.collect { warnings ->
@@ -717,34 +717,34 @@ class BackupViewModel @Inject constructor(
      * The counts are re-read whenever the chain changes state: each batch that finishes has just made
      * clips smaller, and the number on the button should fall as it happens.
      */
-    private fun observeVideoOptimise() {
+    private fun observeVideoOptimize() {
         viewModelScope.launch {
-            BackupScheduling.videoOptimiseWork(WorkManager.getInstance(context)).collectLatest {
+            BackupScheduling.videoOptimizeWork(WorkManager.getInstance(context)).collectLatest {
                 refreshVideoReadiness()
             }
         }
     }
 
     /**
-     * Keeps "Sync now has optimising to run" honest while the app is open.
+     * Keeps "Sync now has optimizing to run" honest while the app is open.
      *
      * The state that enables the button is worked out from the ledger, and until now it was only
      * re-read when a run reported through a chain this screen watches. A file taken with the app
      * open is uploaded by the content-triggered run, which is replaced by its own successor the moment
      * it finishes, so no "finished" is ever seen: the button stayed grey with a Manual photo waiting
-     * (found on the Moto G, 20 Sept 2026), and stayed enabled after Sync now had optimised it.
+     * (found on the Moto G, 20 Sept 2026), and stayed enabled after Sync now had optimized it.
      *
      * Re-reads whenever the number of uploaded files changes, which is how a file becomes a candidate,
-     * or the optimise chain changes state, which is how it stops being one. Debounced, because an
+     * or the optimize chain changes state, which is how it stops being one. Debounced, because an
      * upload run changes the first many times a minute and the read is not free.
      */
     @OptIn(FlowPreview::class)
-    private fun observeWhatOptimisingWaits() {
+    private fun observeWhatOptimizingWaits() {
         val workManager = WorkManager.getInstance(context)
         viewModelScope.launch {
             merge(
                 entryDao.observeCount(BackupState.UPLOADED).map { },
-                workManager.getWorkInfosForUniqueWorkFlow(BackupScheduling.OPTIMISE_WORK)
+                workManager.getWorkInfosForUniqueWorkFlow(BackupScheduling.OPTIMIZE_WORK)
                     .map { infos -> infos.map { it.state } }
                     .distinctUntilChanged()
                     .map { }
@@ -752,17 +752,17 @@ class BackupViewModel @Inject constructor(
         }
     }
 
-    /** Keeps [BackupUiState.cameraOptimising] true from the tap until the last batch has finished. */
-    private fun observeCameraOptimise() {
+    /** Keeps [BackupUiState.cameraOptimizing] true from the tap until the last batch has finished. */
+    private fun observeCameraOptimize() {
         viewModelScope.launch {
-            BackupScheduling.cameraOptimiseWork(WorkManager.getInstance(context))
+            BackupScheduling.cameraOptimizeWork(WorkManager.getInstance(context))
                 .map { infos ->
-                    infos.any { !it.state.isFinished && BackupScheduling.optimiseTag(BackupScheduling.PHASE_CAMERA) in it.tags }
+                    infos.any { !it.state.isFinished && BackupScheduling.optimizeTag(BackupScheduling.PHASE_CAMERA) in it.tags }
                 }
                 .distinctUntilChanged()
                 .collect { live ->
-                    val wasLive = _state.value.cameraOptimising
-                    _state.update { it.copy(cameraOptimising = live) }
+                    val wasLive = _state.value.cameraOptimizing
+                    _state.update { it.copy(cameraOptimizing = live) }
                     // The run has just ended: the album cards still show the counts from before it.
                     if (wasLive && !live) refresh()
                 }
@@ -1169,13 +1169,13 @@ class BackupViewModel @Inject constructor(
     private var pendingCamera: String? = null
 
     /**
-     * *Sync now* on the camera folder's header. Ian, 27 Sept 2026: it uploads **and** optimises. Anything waiting
+     * *Sync now* on the camera folder's header. Ian, 27 Sept 2026: it uploads **and** optimizes. Anything waiting
      * to upload is sent by the same run the Albums tab's Sync now starts; the files selected on the screen are
-     * optimised, and nothing else.
+     * optimized, and nothing else.
      *
      * The selection is stored for the worker (`cameraRunSelection`), and a selected file kept at full size has its
      * pin cleared first: selecting it was the person undoing the pin, and leaving the pin set would have the file
-     * both kept and optimised. Files inside a folder the app was granted at setup are rewritten with no dialog; any
+     * both kept and optimized. Files inside a folder the app was granted at setup are rewritten with no dialog; any
      * outside one need Android's confirmation first, raised by the screen from [CameraStart.NeedsConsent]. Nothing
      * is removed by either route.
      */
@@ -1184,7 +1184,7 @@ class BackupViewModel @Inject constructor(
         if (entries.any { it.state == BackupState.PENDING }) runBackupNow()
         if (!CameraAlbum.isCamera(album, _state.value.cameraFolder)) return CameraStart.NothingToDo
 
-        val chosen = CameraSelection.toOptimise(entries, selectedIds)
+        val chosen = CameraSelection.toOptimize(entries, selectedIds)
         val ready = proxyApplier.onDevice(chosen)
         if (ready.isEmpty()) {
             refreshCounts()
@@ -1203,7 +1203,7 @@ class BackupViewModel @Inject constructor(
             }
             // No dialog could be built. The files inside a granted folder can still be done, so go on.
         }
-        return startCameraOptimise(album)
+        return startCameraOptimize(album)
     }
 
     /** What pressing *Sync now* on the camera folder led to. */
@@ -1214,7 +1214,7 @@ class BackupViewModel @Inject constructor(
         /** Some files sit outside a granted folder: Android's own dialog comes first, then [onCameraConsentGranted]. */
         data class NeedsConsent(val sender: IntentSender) : CameraStart
 
-        /** Nothing selected is still there to optimise. */
+        /** Nothing selected is still there to optimize. */
         data object NothingToDo : CameraStart
     }
 
@@ -1222,7 +1222,7 @@ class BackupViewModel @Inject constructor(
     fun onCameraConsentGranted() {
         val album = pendingCamera ?: return
         pendingCamera = null
-        viewModelScope.launch { startCameraOptimise(album) }
+        viewModelScope.launch { startCameraOptimize(album) }
     }
 
     /** The dialog was dismissed. Nothing was consented to, so nothing is done. */
@@ -1230,8 +1230,8 @@ class BackupViewModel @Inject constructor(
         pendingCamera = null
     }
 
-    private suspend fun startCameraOptimise(album: String): CameraStart {
-        BackupScheduling.enqueueCameraOptimise(WorkManager.getInstance(context), album)
+    private suspend fun startCameraOptimize(album: String): CameraStart {
+        BackupScheduling.enqueueCameraOptimize(WorkManager.getInstance(context), album)
         return CameraStart.Started
     }
 
@@ -1250,12 +1250,12 @@ class BackupViewModel @Inject constructor(
         viewModelScope.launch { settings.setCameraDefaultAge(age) }
     }
 
-    fun setCameraOptimisePhotos(enabled: Boolean) {
-        viewModelScope.launch { settings.setCameraOptimisePhotos(enabled) }
+    fun setCameraOptimizePhotos(enabled: Boolean) {
+        viewModelScope.launch { settings.setCameraOptimizePhotos(enabled) }
     }
 
-    fun setCameraOptimiseVideo(enabled: Boolean) {
-        viewModelScope.launch { settings.setCameraOptimiseVideo(enabled) }
+    fun setCameraOptimizeVideo(enabled: Boolean) {
+        viewModelScope.launch { settings.setCameraOptimizeVideo(enabled) }
     }
 
     fun setCameraVideoQuality(quality: VideoQuality) {
@@ -1263,13 +1263,13 @@ class BackupViewModel @Inject constructor(
     }
 
     /** Yes to *make these your default settings* on leaving the Camera screen. The only way the screen writes back. */
-    fun saveCameraDefaults(choice: CameraOptimiseChoice) {
+    fun saveCameraDefaults(choice: CameraOptimizeChoice) {
         _state.update { it.copy(cameraUnsaved = null) }
         viewModelScope.launch { settings.setCameraDefaults(choice.age, choice.photos, choice.videos) }
     }
 
     /** What the open Camera screen's header holds that is not yet the default, or null. See [BackupUiState.cameraUnsaved]. */
-    fun setCameraUnsaved(choice: CameraOptimiseChoice?) {
+    fun setCameraUnsaved(choice: CameraOptimizeChoice?) {
         _state.update { it.copy(cameraUnsaved = choice) }
     }
 
@@ -1304,26 +1304,26 @@ class BackupViewModel @Inject constructor(
                 )
             }
 
-            // Ian, 19 Sept 2026: Automatic optimising runs *"as soon as ... an Album mode is switched to
+            // Ian, 19 Sept 2026: Automatic optimizing runs *"as soon as ... an Album mode is switched to
             // SYNC"*. The run queued above will ask again when it finishes, but files already verified
             // in OneDrive need no run, and waiting for one that has nothing to send would leave them
             // at full size.
-            if (mode == AlbumMode.SYNC) startOptimisingIfDue()
+            if (mode == AlbumMode.SYNC) startOptimizingIfDue()
         }
     }
 
     /** Asks both kinds to start if their Settings say they should run on their own. Never fails the caller. */
-    private suspend fun startOptimisingIfDue() {
-        runCatching { photoOptimise.requestAutomatic() }
-        runCatching { videoOptimise.requestAutomatic() }
+    private suspend fun startOptimizingIfDue() {
+        runCatching { photoOptimize.requestAutomatic() }
+        runCatching { videoOptimize.requestAutomatic() }
     }
 
     /**
-     * Turns automatic optimising on or off.
+     * Turns automatic optimizing on or off.
      *
-     * Cannot make optimising unattended — Android raises a confirmation dialog for every batch and
+     * Cannot make optimizing unattended — Android raises a confirmation dialog for every batch and
      * only an Activity can show it. What this changes is that the app offers when there is
-     * something to optimise, instead of waiting to be found in Settings.
+     * something to optimize, instead of waiting to be found in Settings.
      */
     fun setShowEmptyCloudFolders(show: Boolean) {
         viewModelScope.launch { settings.setShowEmptyCloudFolders(show) }
@@ -1345,69 +1345,69 @@ class BackupViewModel @Inject constructor(
         viewModelScope.launch { settings.setArchiveNotifyEnabled(enabled) }
     }
 
-    fun setOptimiseEnabled(enabled: Boolean) {
+    fun setOptimizeEnabled(enabled: Boolean) {
         viewModelScope.launch {
-            settings.setOptimiseEnabled(enabled)
+            settings.setOptimizeEnabled(enabled)
             startPhotosIfDue()
             startVideoIfDue()
         }
     }
 
-    fun setOptimisePhotos(enabled: Boolean) {
+    fun setOptimizePhotos(enabled: Boolean) {
         viewModelScope.launch {
-            settings.setOptimisePhotos(enabled)
+            settings.setOptimizePhotos(enabled)
             startPhotosIfDue()
             refreshCounts()
         }
     }
 
-    fun setPhotoOptimiseMode(mode: OptimiseMode) {
+    fun setPhotoOptimizeMode(mode: OptimizeMode) {
         viewModelScope.launch {
-            settings.setPhotoOptimiseMode(mode)
+            settings.setPhotoOptimizeMode(mode)
             startPhotosIfDue()
             refreshCounts()
         }
     }
 
     /**
-     * A photo switch just changed. If photos are now due to optimise on their own, start the pass
+     * A photo switch just changed. If photos are now due to optimize on their own, start the pass
      * rather than waiting for the next backup run to notice, which could be six hours away. Quiet on
      * failure: the next backup run asks again.
      */
     private suspend fun startPhotosIfDue() {
-        runCatching { photoOptimise.requestAutomatic() }
+        runCatching { photoOptimize.requestAutomatic() }
     }
 
-    fun setOptimiseVideo(enabled: Boolean) {
+    fun setOptimizeVideo(enabled: Boolean) {
         viewModelScope.launch {
-            settings.setOptimiseVideo(enabled)
+            settings.setOptimizeVideo(enabled)
             startVideoIfDue()
         }
     }
 
-    fun setVideoOptimiseMode(mode: OptimiseMode) {
+    fun setVideoOptimizeMode(mode: OptimizeMode) {
         viewModelScope.launch {
-            settings.setVideoOptimiseMode(mode)
+            settings.setVideoOptimizeMode(mode)
             startVideoIfDue()
         }
     }
 
-    fun setVideoOptimiseAge(age: ArchiveAge) {
+    fun setVideoOptimizeAge(age: ArchiveAge) {
         viewModelScope.launch {
-            settings.setVideoOptimiseAge(age)
+            settings.setVideoOptimizeAge(age)
             startVideoIfDue()
             refreshVideoReadiness()
         }
     }
 
     /**
-     * A switch just changed. If video is now due to optimise on its own, start the chain rather than
+     * A switch just changed. If video is now due to optimize on its own, start the chain rather than
      * waiting for the next backup run to notice, which could be six hours away.
      *
      * Failure is quiet: this is a convenience, and the next backup run asks again.
      */
     private suspend fun startVideoIfDue() {
-        runCatching { videoOptimise.requestAutomatic() }
+        runCatching { videoOptimize.requestAutomatic() }
         refreshVideoReadiness()
     }
 
@@ -1416,16 +1416,16 @@ class BackupViewModel @Inject constructor(
     }
 
     /**
-     * Yes to *Re-optimise existing videos?*, asked when the compression is made stronger. Clips skipped at the
+     * Yes to *Re-optimize existing videos?*, asked when the compression is made stronger. Clips skipped at the
      * weaker setting are tried again, by the same pass and the same rules as any other: Automatic picks them up
-     * on its next run (on the charger), Manual on Sync now. Nothing is optimised that the Sync settings would not
-     * optimise anyway.
+     * on its next run (on the charger), Manual on Sync now. Nothing is optimized that the Sync settings would not
+     * optimize anyway.
      */
-    fun reoptimiseExistingVideos() {
+    fun reoptimizeExistingVideos() {
         viewModelScope.launch {
             val reopened = entryDao.reopenSkippedVideos()
-            Logger.i("BackupViewModel", "re-optimise: $reopened skipped clips reopened at the new compression")
-            videoOptimise.requestAutomatic()
+            Logger.i("BackupViewModel", "re-optimize: $reopened skipped clips reopened at the new compression")
+            videoOptimize.requestAutomatic()
             refresh()
         }
     }
@@ -1493,7 +1493,7 @@ class BackupViewModel @Inject constructor(
      * Selecting uses the user's **default mode for new albums**, not a hardcoded Backup. Those are
      * the same intent — "what I want an album to do unless I say otherwise" — and having them
      * disagree meant someone who chose Sync to reclaim space could tap Select all, get Backup on
-     * every album, and never have a single photo optimised. Nothing said so; the two settings just
+     * every album, and never have a single photo optimized. Nothing said so; the two settings just
      * differed.
      *
      * Backup is the fallback when the default is Off, because a Select all that selects nothing is
@@ -1559,28 +1559,28 @@ class BackupViewModel @Inject constructor(
     }
 
     /**
-     * What the video optimiser could act on, read only while the switches say it may be wanted.
+     * What the video optimizer could act on, read only while the switches say it may be wanted.
      *
      * Asked separately from the rest of the counts because it does a MediaStore lookup per candidate
-     * clip, which is wasted on someone who has video optimising off.
+     * clip, which is wasted on someone who has video optimizing off.
      */
     private suspend fun refreshVideoReadiness() {
         val prefs = settings.current()
-        val ready = if (prefs.isOptimiseEnabled && prefs.optimiseVideo) {
-            videoOptimiser.readiness()
+        val ready = if (prefs.isOptimizeEnabled && prefs.optimizeVideo) {
+            videoOptimizer.readiness()
         } else {
             VideoReadiness()
         }
         _state.update {
             it.copy(
                 videoCandidateCount = ready.count,
-                manualOptimiseWaiting = OptimiseOnSyncNow.isWaiting(
+                manualOptimizeWaiting = OptimizeOnSyncNow.isWaiting(
                     setupComplete = prefs.hasCompletedSetup,
-                    optimiseEnabled = prefs.isOptimiseEnabled,
-                    optimisePhotos = prefs.optimisePhotos,
-                    photoMode = prefs.photoOptimiseMode,
-                    optimiseVideo = prefs.optimiseVideo,
-                    videoMode = prefs.videoOptimiseMode,
+                    optimizeEnabled = prefs.isOptimizeEnabled,
+                    optimizePhotos = prefs.optimizePhotos,
+                    photoMode = prefs.photoOptimizeMode,
+                    optimizeVideo = prefs.optimizeVideo,
+                    videoMode = prefs.videoOptimizeMode,
                     photosReady = it.proxyCandidateCount,
                     videoReady = ready.count
                 )
@@ -1589,7 +1589,7 @@ class BackupViewModel @Inject constructor(
     }
 
     /**
-     * Asks Android for permission to rewrite the photos that would be optimised.
+     * Asks Android for permission to rewrite the photos that would be optimized.
      *
      * The candidates are captured here and reused by [onProxyConsentGranted], so the set that was
      * consented to is exactly the set that gets rewritten — re-querying afterwards could act on
@@ -1597,7 +1597,7 @@ class BackupViewModel @Inject constructor(
      */
     suspend fun buildProxyWriteRequest(): IntentSender? {
         // Only what the background pass cannot do. Photos inside a granted folder are rewritten by
-        // `OptimiseWorker` with no dialog, so they are neither asked about nor rewritten here. Ian,
+        // `OptimizeWorker` with no dialog, so they are neither asked about nor rewritten here. Ian,
         // 19 Sept 2026: Automatic means as soon as a file arrives, which a dialog can never be.
         val outside = proxyApplier.splitByConsent(proxyApplier.candidates()).outside
         pendingProxyCandidates = outside
@@ -1632,10 +1632,10 @@ class BackupViewModel @Inject constructor(
         viewModelScope.launch {
             when (val outcome = proxyApplier.apply(candidates)) {
                 is ProxyOutcome.Completed ->
-                    Logger.i("BackupViewModel", "optimised ${outcome.proxiedCount} photos, freed ${outcome.bytesReclaimed} bytes")
+                    Logger.i("BackupViewModel", "optimized ${outcome.proxiedCount} photos, freed ${outcome.bytesReclaimed} bytes")
 
                 is ProxyOutcome.Stopped ->
-                    Logger.w("BackupViewModel", "optimising stopped at ${outcome.failedFile}: ${outcome.reason}")
+                    Logger.w("BackupViewModel", "optimizing stopped at ${outcome.failedFile}: ${outcome.reason}")
 
                 ProxyOutcome.NothingToDo, ProxyOutcome.NotSupported -> Unit
             }
@@ -1682,8 +1682,8 @@ class BackupViewModel @Inject constructor(
         if (_state.value.isRunning) return
         viewModelScope.launch {
             val prefs = settings.current()
-            offerProxyDialogAfterRun = PhotoOptimisePolicy.runsOnSyncNow(
-                prefs.hasCompletedSetup, prefs.isOptimiseEnabled, prefs.optimisePhotos, prefs.photoOptimiseMode
+            offerProxyDialogAfterRun = PhotoOptimizePolicy.runsOnSyncNow(
+                prefs.hasCompletedSetup, prefs.isOptimizeEnabled, prefs.optimizePhotos, prefs.photoOptimizeMode
             )
             BackupScheduling.enqueueManualRun(
                 WorkManager.getInstance(context),

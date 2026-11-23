@@ -21,7 +21,7 @@ TRANSLATIONS = {
 • Das erste Backup kann Stunden dauern. Es läuft weiter, wenn du die App verlässt.
 • Die App öffnet sich auf dem Fortschrittsbildschirm, bis das erste Backup abgeschlossen ist.
 • Antworten aus der Einrichtung gelten nur für das erste Backup. Siehe [[setup-and-settings]].""",
-        "en_hash": "a398aa1dfcdb2e54",
+        "en_hash": "567365c5913c13ff",
     },
     "setup-welcome-tour": {
         "title": "Willkommen, die Tour und was eingerichtet wird",
@@ -130,16 +130,16 @@ Nichts außerhalb deiner gewählten Ordner wird durchsucht oder verändert.""",
 
 ## Gut zu wissen
 Dieses erste Backup ist einmalig und läuft unabhängig vom Modus. Danach steht jedes Album auf **Off**, und das ist richtig: Ab jetzt wählst du den Modus jedes Albums selbst im Albums-Tab.{{full: Siehe [[faq-albums-off-after-backup]].}}""",
-        "en_hash": "80f55e21398db3f8",
+        "en_hash": "f8d3c929c65d3751",
     },
-    "setup-optimise": {
+    "setup-optimize": {
         "title": "Optimierungseinstellungen bei der Einrichtung",
         "body": """Nur für Plan 2 und 3.
 
 • **Fotos optimieren** und **Videos optimieren:** an oder aus.
 • **Videokompression:** **Hoch** (480p, am kleinsten), **Mittel** (720p) oder **Niedrig** (1080p).
 • Jede zeigt eine geschätzte Ersparnis, mit einer Zeile **Geschätzte Gesamtersparnis**. Die tatsächlichen Ergebnisse variieren.""",
-        "en_hash": "d3ff8b60c0328479",
+        "en_hash": "6b0ae75a40de322e",
     },
     "setup-ready": {
         "title": "Bereit für das Backup",
@@ -151,7 +151,7 @@ Dieses erste Backup ist einmalig und läuft unabhängig vom Modus. Danach steht 
 ## Gut zu wissen
 • Ein verzögertes Backup startet nur, während das Telefon am Ladegerät ist, und kann etwas verspätet beginnen.
 • Die App bleibt auf dem Fortschrittsbildschirm, bis das erste Backup abgeschlossen ist.""",
-        "en_hash": "90436741649f85c6",
+        "en_hash": "3f75384b016ca5b6",
     },
     "setup-progress": {
         "title": "Backup-Fortschritt",
@@ -171,7 +171,7 @@ Der Ring zeigt den Gesamtfortschritt. Darunter: die Cloud, an die gerade gesende
 • **Schließen:** schließt die App; das Backup läuft weiter.
 • **Fertig:** erscheint, wenn alles erledigt ist, mit einer Zusammenfassung dessen, was geprüft wurde, schon in der Cloud war und gesendet wurde.
 • **Abbrechen:** fragt **Backup stoppen?** Bereits gesendete Dateien bleiben gesendet; nichts wird gelöscht.""",
-        "en_hash": "625986b0864a86c8",
+        "en_hash": "ce535ae7a9b7c3bd",
     },
     "setup-and-settings": {
         "title": "Einrichtung und Settings sind getrennt",

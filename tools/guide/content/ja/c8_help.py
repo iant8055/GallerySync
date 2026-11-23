@@ -7,7 +7,7 @@ TRANSLATIONS = {
     "faq-sync-now-greyed": {
         "title": "Sync now がグレーアウトしている",
         "body": """送信または最適化するものがありません。すべて送信済みか、Backup、Sync、Archive に設定されたアルバムがありません。ヘッダーのモード合計を確認してください。""",
-        "en_hash": "d76ec512e56c7203",
+        "en_hash": "7b543eca08835984",
     },
     "faq-albums-off-after-backup": {
         "title": "最初のバックアップの後、アルバムが Off になっている",
@@ -39,12 +39,12 @@ Google Photos には問い合わせできないため、そのアルバムは常
     "faq-photo-looks-small": {
         "title": "写真が以前より小さい、または画質が低い",
         "body": """最適化されています（小さなクラウドバッジを探してください）。元のファイルは Cloud にあります：**Restore** タブを使ってください。""",
-        "en_hash": "4e1a6a3f710360db",
+        "en_hash": "009dd053a72c34e0",
     },
     "faq-restore-empty": {
         "title": "Restore タブに、戻すものがないと表示される",
         "body": """最適化もアーカイブもされたものがなく、（OneDrive では）バックアップフォルダ内のすべての写真がすでにスマートフォンにあります。これは正常です。""",
-        "en_hash": "e0720600e98ca0e2",
+        "en_hash": "e91f44f270b19e04",
     },
     "faq-backup-stops-when-closed": {
         "title": "アプリを閉じると、バックアップが止まるようだ",

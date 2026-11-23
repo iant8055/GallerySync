@@ -41,7 +41,7 @@ preview, no thumbnail of the file in a new place.** If the build starts to need 
 |---|---|---|
 | 1 | Gesture | **Long-press opens**, the same on the Albums (album file list), Restore and Archive tabs. Tap and swipe keep exactly what they do today: on Restore a tap still selects (Ian, 20 Sept 2026). |
 | 2 | File on the phone | Opens in the **phone's default** photo/video app. Android's chooser appears only if no default is set. No forced chooser. |
-| 3 | Optimised (Sync) file | It is on the phone, so it opens the **optimised copy on the phone**. The setting below does not apply to it. |
+| 3 | Optimized (Sync) file | It is on the phone, so it opens the **optimized copy on the phone**. The setting below does not apply to it. |
 | 4 | File not on the phone | A new setting, **Settings → General, below *Use mobile data***, two values: **Open in the Cloud** (default) / **Download temporarily**. |
 | 5 | Open in the Cloud, but the Cloud has no link | Fall back to the temporary download. Backblaze B2 and IDrive e2, which have no link at all. A Cloud that has links but could not give one this time is row 8, not this. |
 | 6 | Temporary download and mobile data | **Obeys the existing mobile-data switch** (`allowMeteredNetwork`). Off and on mobile data: no download; say why (Wi-Fi needed, and where the switch is). |
@@ -146,16 +146,16 @@ New topics for the long-press on each tab and for the setting, in all seven lang
 
 ## Tests
 
-- Unit: the decision of what a long-press does, as a pure function — (on phone?, optimised?, setting, Cloud has a link?,
+- Unit: the decision of what a long-press does, as a pure function — (on phone?, optimized?, setting, Cloud has a link?,
   network, mobile-data switch, size) → open local / open link / download / ask / refuse with reason. Every row of the
-  decisions table above is a case. Include: B2 with *Open in the Cloud* downloads; optimised opens local whatever the
+  decisions table above is a case. Include: B2 with *Open in the Cloud* downloads; optimized opens local whatever the
   setting; mobile data with the switch off refuses; 750 MB exactly does not ask, one byte more does.
 - Unit: a failed link request asks Cancel/Download and never downloads unanswered; Cancel does nothing.
 - Unit: the cache path never leaves `cacheDir/open/`.
 
 ## On the Moto G (`ZT422CTZQV`), test account, so uploads and downloads cost nothing
 
-- Long-press on each tab: photo, video, optimised photo, Restore `Here` row. Opens in Google Photos (the Moto's gallery).
+- Long-press on each tab: photo, video, optimized photo, Restore `Here` row. Opens in Google Photos (the Moto's gallery).
 - A swipe on every swipeable list still works and never opens a file; a long-press never selects.
 - *Open in the Cloud* for each Cloud connected: **record where each link lands** (app or browser) in MILESTONES.
 - *Download temporarily*: a photo, a video over 750 MB on Wi-Fi (no question) and on mobile data (question; and refused

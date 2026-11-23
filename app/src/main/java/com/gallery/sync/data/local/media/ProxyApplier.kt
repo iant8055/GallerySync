@@ -93,7 +93,7 @@ class ProxyApplier @Inject constructor(
      * phone, so a photo since deleted from the gallery leaves a row pointing at nothing. Those rows
      * have to be dropped before the list is used anywhere: they inflate the megabytes offered, and
      * a URI that no longer resolves makes [MediaStore.createWriteRequest] reject the entire batch
-     * rather than just that item — one dead row silently disables optimising altogether.
+     * rather than just that item — one dead row silently disables optimizing altogether.
      *
      * The rows are left in place rather than deleted. A file that is gone locally but present in
      * OneDrive is still genuinely backed up, and forgetting it would understate what is verified.
@@ -105,9 +105,9 @@ class ProxyApplier @Inject constructor(
     }
 
     /**
-     * Photos for the install wizard's one-time bulk optimise (Area 1).
+     * Photos for the install wizard's one-time bulk optimize (Area 1).
      *
-     * Not governed by album modes or by the age threshold — but **is** governed by the optimise
+     * Not governed by album modes or by the age threshold — but **is** governed by the optimize
      * cutoff, which is the whole of the difference between Gate 2's #2 and #3. Ian, 6 Sept 2026,
      * on what each must do: #2 *"optimizes ALL files on phone"*, #3 *"ONLY optimizes files that
      * were actually backed up in the previous step"*.
@@ -117,7 +117,7 @@ class ProxyApplier @Inject constructor(
      * failure this whole area has already had twice.
      */
     suspend fun candidatesAll(): List<BackupEntryEntity> =
-        candidatesFrom(entryDao.proxyCandidatesAll(settings.current().optimiseCutoffEpochMillis))
+        candidatesFrom(entryDao.proxyCandidatesAll(settings.current().optimizeCutoffEpochMillis))
 
     /**
      * How many photos [candidatesAll] has left in total, not capped at one write request. The wizard card's
@@ -125,7 +125,7 @@ class ProxyApplier @Inject constructor(
      * file done for as long as more than 2,000 remained (Moto G, 10 Oct 2026).
      */
     suspend fun remainingAll(): Int =
-        liveFrom(entryDao.proxyCandidatesAll(settings.current().optimiseCutoffEpochMillis)).size
+        liveFrom(entryDao.proxyCandidatesAll(settings.current().optimizeCutoffEpochMillis)).size
 
     private suspend fun candidatesFrom(
         recorded: List<BackupEntryEntity>
@@ -174,7 +174,7 @@ class ProxyApplier @Inject constructor(
      * Whether these files still need Android's write dialog.
      *
      * False when every one of them sits inside a granted SAF tree, which is the ordinary case once
-     * the user has answered Gate 1 — and it is what lets optimising happen without a tap. Asked
+     * the user has answered Gate 1 — and it is what lets optimizing happen without a tap. Asked
      * rather than assumed: a file outside the granted trees genuinely does need the dialog, and
      * skipping it silently would be worse than showing one.
      */
@@ -188,7 +188,7 @@ class ProxyApplier @Inject constructor(
     /**
      * Sorts [entries] into the ones a granted folder covers and the ones that need a dialog.
      *
-     * Asked per file, unlike [needsWriteRequest], which answers for a whole batch. Background optimising
+     * Asked per file, unlike [needsWriteRequest], which answers for a whole batch. Background optimizing
      * has to act on the covered ones and leave the rest alone, and one file outside a folder must not
      * keep the other nine hundred from being done. A file whose location cannot be read counts as
      * outside: doing less is the safe direction.
@@ -362,7 +362,7 @@ class ProxyApplier @Inject constructor(
                 return FileResult.NotWorthwhile
             }
 
-            // The tree grant first: it writes with no dialog, which is the whole reason optimising
+            // The tree grant first: it writes with no dialog, which is the whole reason optimizing
             // can run unattended. Falls back to the MediaStore path for anything outside a granted
             // tree, where Android still requires the per-batch confirmation.
             val wroteViaTree = safWriter.writeTruncating(uri) { out ->
@@ -420,7 +420,7 @@ class ProxyApplier @Inject constructor(
         /**
          * MediaStore's own limit on a single write request, above which it throws.
          *
-         * A full library easily exceeds this — the point at which optimising matters most is
+         * A full library easily exceeds this — the point at which optimizing matters most is
          * exactly the point at which an uncapped request would fail.
          */
         const val MAX_URIS_PER_REQUEST = 2000

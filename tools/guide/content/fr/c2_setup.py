@@ -21,7 +21,7 @@ TRANSLATIONS = {
 • La première sauvegarde peut prendre des heures. Elle continue si vous quittez l'application.
 • L'application s'ouvre sur l'écran de progression tant que la première sauvegarde n'est pas terminée.
 • Les réponses de la configuration ne valent que pour la première sauvegarde. Voir [[setup-and-settings]].""",
-        "en_hash": "a398aa1dfcdb2e54",
+        "en_hash": "567365c5913c13ff",
     },
     "setup-welcome-tour": {
         "title": "Bienvenue, la visite, et ce que nous allons configurer",
@@ -130,16 +130,16 @@ Rien en dehors de vos dossiers choisis n'est analysé ni modifié.""",
 
 ## Bon à savoir
 Cette première sauvegarde est unique et s'exécute quel que soit le mode. Ensuite, chaque album est sur **Off**, ce qui est normal : à partir de là, vous choisissez vous-même le mode de chaque album dans l'onglet Albums.{{full: Voir [[faq-albums-off-after-backup]].}}""",
-        "en_hash": "80f55e21398db3f8",
+        "en_hash": "f8d3c929c65d3751",
     },
-    "setup-optimise": {
+    "setup-optimize": {
         "title": "Réglages d'optimisation pendant la configuration",
         "body": """Uniquement pour les plans 2 et 3.
 
 • **Optimiser les photos** et **Optimiser les vidéos :** activé ou désactivé.
 • **Niveau de compression vidéo :** **Élevée** (480p, la plus petite), **Moyenne** (720p) ou **Faible** (1080p).
 • Chacun affiche un gain estimé, avec une ligne **Gain total estimé**. Les résultats réels varient.""",
-        "en_hash": "d3ff8b60c0328479",
+        "en_hash": "6b0ae75a40de322e",
     },
     "setup-ready": {
         "title": "Prêt pour la sauvegarde",
@@ -151,7 +151,7 @@ Cette première sauvegarde est unique et s'exécute quel que soit le mode. Ensui
 ## Bon à savoir
 • Une sauvegarde différée ne démarre que si le téléphone est branché, et peut démarrer un peu en retard.
 • L'application reste sur l'écran de progression jusqu'à la fin de la première sauvegarde.""",
-        "en_hash": "90436741649f85c6",
+        "en_hash": "3f75384b016ca5b6",
     },
     "setup-progress": {
         "title": "Progression de la sauvegarde",
@@ -171,7 +171,7 @@ L'anneau montre la progression globale. En dessous : le Cloud vers lequel on en
 • **Fermer :** ferme l'application ; la sauvegarde continue.
 • **Terminer :** apparaît quand tout est fini, avec un résumé de ce qui a été vérifié, déjà dans le Cloud, et envoyé.
 • **Annuler :** demande **Arrêter la sauvegarde ?** Les fichiers déjà envoyés restent envoyés ; rien n'est supprimé.""",
-        "en_hash": "625986b0864a86c8",
+        "en_hash": "ce535ae7a9b7c3bd",
     },
     "setup-and-settings": {
         "title": "La configuration et Settings sont séparés",

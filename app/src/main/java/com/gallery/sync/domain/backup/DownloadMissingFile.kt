@@ -227,7 +227,7 @@ class DownloadMissingFile @Inject constructor(
             mediaStoreId = mediaStoreId,
             contentUri = uri.toString(),
             // A downloaded file is pinned out of Sync for the same reason a restored one is: the
-            // user asked for it at full size, and optimising it again the same evening would be the
+            // user asked for it at full size, and optimizing it again the same evening would be the
             // app undoing what it was just told to do.
             modeOverride = AlbumMode.BACKUP
         )

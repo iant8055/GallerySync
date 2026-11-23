@@ -120,7 +120,7 @@ more than one stored spelling, or a stored spelling different from the canonical
 
 ### 3. Nothing acts on modes before the merge
 
-`filesInArchiveAlbums`, `redundantLocalCopies`, the optimise candidate queries and the upload gate all
+`filesInArchiveAlbums`, `redundantLocalCopies`, the optimize candidate queries and the upload gate all
 read modes. Each must run **after** the reconciler in the same flow.
 
 The failure this prevents: canonicalisation renames `Camera` items to `camera`, whose preference still
@@ -210,7 +210,7 @@ As specced, with two changes found while building:
   `replaceAll`.
 - `BackupSettings.albumMergeWarnings` (DataStore string set).
 - Guards in `refreshLedger`, `uploadPending` (mode-gated path), `archiveAlbumNames`,
-  `filesInArchiveAlbums`, `redundantLocalCopies`, `ProxyApplier.candidates`, `VideoOptimiser.run`.
+  `filesInArchiveAlbums`, `redundantLocalCopies`, `ProxyApplier.candidates`, `VideoOptimizer.run`.
 - The card in `BackupScreen`; `setAlbumMode` clears the warning.
 
 **Tests:** 18 in `AlbumIdentityRulesTest` and 6 new in `MediaScanRulesTest`. The full unit suite is

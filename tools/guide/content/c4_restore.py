@@ -6,10 +6,10 @@ CHAPTER = Chapter(
     intro="Brings photos and videos back from your Cloud. It only reads from the Cloud; nothing there is changed.",
     topics=[
         topic("restore-overview", "What Restore brings back", """
-            • **To restore:** an optimised file on the phone. Restoring puts the full-size original back in its place.
+            • **To restore:** an optimized file on the phone. Restoring puts the full-size original back in its place.
             • **To download:** a file no longer on the phone. Downloading puts it back in its album.
 
-            Restored files get **Keep at full size**, so they are not optimised or archived again straight away. See [[album-file-pin]].
+            Restored files get **Keep at full size**, so they are not optimized or archived again straight away. See [[album-file-pin]].
 
             ## Which Clouds
             • **OneDrive:** every photo and video in your backup folders, whoever put them there.
@@ -65,7 +65,7 @@ CHAPTER = Chapter(
 
         topic("restore-files-list", "The file list inside an album", """
             Swipe right (or tap) to select, left to deselect. **Long-press** a file to open it in your phone's app, or in its Cloud when it is not on the phone. See [[settings-open-not-on-phone]]. Each file shows one of:
-            • **now · full size:** an optimised copy, showing its smaller file size on the phone and the full file size in the Cloud.
+            • **now · full size:** an optimized copy, showing its smaller file size on the phone and the full file size in the Cloud.
             • **Available for download:** not on the phone.
             • **Already on this phone:** greyed; nothing to do.
 
@@ -86,7 +86,7 @@ CHAPTER = Chapter(
         """),
 
         topic("restore-edited", "A photo or video you edited", """
-            If you edited an optimised copy and saved over it, restoring would replace your edit, so the app asks: **This photo has been edited since it was backed up. Overwrite it with the original?**
+            If you edited an optimized copy and saved over it, restoring would replace your edit, so the app asks: **This photo has been edited since it was backed up. Overwrite it with the original?**
 
             • **Keep my edits:** leaves the file as it is.
             • **Overwrite:** puts the original back; your edit is replaced.

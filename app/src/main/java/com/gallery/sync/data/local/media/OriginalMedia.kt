@@ -17,11 +17,11 @@ import java.io.InputStream
  * From Android 10, MediaStore hands an app a copy of a file with its location blanked out (the GPS tags
  * zeroed in place, same length) unless the app holds `ACCESS_MEDIA_LOCATION` *and* asks for the original
  * with [MediaStore.setRequireOriginal]. GallerySync did neither, so every file it backed up reached the
- * Cloud without its location, and every optimised copy was made from the blanked read. Found on the
+ * Cloud without its location, and every optimized copy was made from the blanked read. Found on the
  * Moto G, 8 Oct 2026: a photo taken at 45°03′N 93°18′W came back from OneDrive with 43 bytes of its
  * GPS block zeroed, at exactly its original size, so no size check could ever have caught it.
  *
- * Every read that can end up in the Cloud or in an optimised copy goes through here. Without the
+ * Every read that can end up in the Cloud or in an optimized copy goes through here. Without the
  * permission (Android 9 and below have nothing to redact; a user can refuse it) the plain read is used
  * and the fact is logged, because failing the backup would protect nothing.
  */

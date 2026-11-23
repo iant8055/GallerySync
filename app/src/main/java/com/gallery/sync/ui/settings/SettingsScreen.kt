@@ -63,7 +63,7 @@ import com.gallery.sync.domain.backup.BackupLocation
 import com.gallery.sync.domain.backup.RemoteRoots
 import com.gallery.sync.domain.backup.CameraAlbum
 import com.gallery.sync.domain.backup.MediaAge
-import com.gallery.sync.domain.backup.OptimiseMode
+import com.gallery.sync.domain.backup.OptimizeMode
 import com.gallery.sync.domain.backup.VideoQuality
 import com.gallery.sync.ui.backup.BackupViewModel
 import com.gallery.sync.ui.help.HelpButton
@@ -312,20 +312,20 @@ fun SettingsScreen(
         )
 
         SettingSwitch(
-            label = stringResource(R.string.settings_optimise_photos),
-            help = HelpTopic.SETTINGS_OPTIMISE_PHOTOS,
-            detail = if (state.optimisePhotos) stringResource(R.string.settings_optimise_photos_on)
+            label = stringResource(R.string.settings_optimize_photos),
+            help = HelpTopic.SETTINGS_OPTIMIZE_PHOTOS,
+            detail = if (state.optimizePhotos) stringResource(R.string.settings_optimize_photos_on)
                 else null,
-            checked = state.optimisePhotos,
+            checked = state.optimizePhotos,
             onCheckedChange = { enabled ->
-                viewModel.setOptimisePhotos(enabled)
-                if (enabled) viewModel.setOptimiseEnabled(true)
-                else if (!state.optimiseVideo) viewModel.setOptimiseEnabled(false)
+                viewModel.setOptimizePhotos(enabled)
+                if (enabled) viewModel.setOptimizeEnabled(true)
+                else if (!state.optimizeVideo) viewModel.setOptimizeEnabled(false)
             }
         )
 
         AnimatedVisibility(
-            visible = state.optimisePhotos,
+            visible = state.optimizePhotos,
             enter = expandVertically(),
             exit = shrinkVertically()
         ) {
@@ -334,16 +334,16 @@ fun SettingsScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 SettingDropdown(
-                    label = stringResource(R.string.settings_optimise_mode),
-                    help = HelpTopic.SETTINGS_OPTIMISE_MODE,
-                    options = OptimiseMode.entries,
-                    selected = state.photoOptimiseMode,
-                    onSelected = viewModel::setPhotoOptimiseMode,
+                    label = stringResource(R.string.settings_optimize_mode),
+                    help = HelpTopic.SETTINGS_OPTIMIZE_MODE,
+                    options = OptimizeMode.entries,
+                    selected = state.photoOptimizeMode,
+                    onSelected = viewModel::setPhotoOptimizeMode,
                     optionLabel = { mode ->
                         stringResource(
                             when (mode) {
-                                OptimiseMode.Auto -> R.string.settings_optimise_mode_auto
-                                OptimiseMode.Manual -> R.string.settings_optimise_mode_manual
+                                OptimizeMode.Auto -> R.string.settings_optimize_mode_auto
+                                OptimizeMode.Manual -> R.string.settings_optimize_mode_manual
                             }
                         )
                     }
@@ -354,18 +354,18 @@ fun SettingsScreen(
         SettingDivider()
 
         SettingSwitch(
-            label = stringResource(R.string.settings_optimise_videos),
-            help = HelpTopic.SETTINGS_OPTIMISE_VIDEO,
-            checked = state.optimiseVideo,
+            label = stringResource(R.string.settings_optimize_videos),
+            help = HelpTopic.SETTINGS_OPTIMIZE_VIDEO,
+            checked = state.optimizeVideo,
             onCheckedChange = { enabled ->
-                viewModel.setOptimiseVideo(enabled)
-                if (enabled) viewModel.setOptimiseEnabled(true)
-                else if (!state.optimisePhotos) viewModel.setOptimiseEnabled(false)
+                viewModel.setOptimizeVideo(enabled)
+                if (enabled) viewModel.setOptimizeEnabled(true)
+                else if (!state.optimizePhotos) viewModel.setOptimizeEnabled(false)
             }
         )
 
         AnimatedVisibility(
-            visible = state.optimiseVideo,
+            visible = state.optimizeVideo,
             enter = expandVertically(),
             exit = shrinkVertically()
         ) {
@@ -374,16 +374,16 @@ fun SettingsScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 SettingDropdown(
-                    label = stringResource(R.string.settings_optimise_mode),
-                    help = HelpTopic.SETTINGS_OPTIMISE_MODE,
-                    options = OptimiseMode.entries,
-                    selected = state.videoOptimiseMode,
-                    onSelected = viewModel::setVideoOptimiseMode,
+                    label = stringResource(R.string.settings_optimize_mode),
+                    help = HelpTopic.SETTINGS_OPTIMIZE_MODE,
+                    options = OptimizeMode.entries,
+                    selected = state.videoOptimizeMode,
+                    onSelected = viewModel::setVideoOptimizeMode,
                     optionLabel = { mode ->
                         stringResource(
                             when (mode) {
-                                OptimiseMode.Auto -> R.string.settings_optimise_mode_auto
-                                OptimiseMode.Manual -> R.string.settings_optimise_mode_manual
+                                OptimizeMode.Auto -> R.string.settings_optimize_mode_auto
+                                OptimizeMode.Manual -> R.string.settings_optimize_mode_manual
                             }
                         )
                     }
@@ -392,15 +392,15 @@ fun SettingsScreen(
                 SettingAge(
                     label = stringResource(R.string.settings_older_than),
                     help = HelpTopic.SETTINGS_VIDEO_AGE,
-                    age = state.videoOptimiseAge,
-                    onSetAge = viewModel::setVideoOptimiseAge,
+                    age = state.videoOptimizeAge,
+                    onSetAge = viewModel::setVideoOptimizeAge,
                     zeroLabel = { stringResource(R.string.media_age_immediately) }
                 )
 
-                // Said where the choice is made. Until video optimising ran on its own this option
+                // Said where the choice is made. Until video optimizing ran on its own this option
                 // reached nothing, so the cost was theoretical; now it reaches a clip shot this
                 // morning, and the one place that can say so is beside the setting.
-                if (state.videoOptimiseAge == MediaAge.Immediately) {
+                if (state.videoOptimizeAge == MediaAge.Immediately) {
                     Text(
                         text = stringResource(R.string.media_age_immediately_warning),
                         style = MaterialTheme.typography.bodySmall
@@ -408,8 +408,8 @@ fun SettingsScreen(
                 }
 
                 // A stronger compression asks whether clips skipped at the weaker one should be tried again
-                // (Ian, 9 Oct 2026: "add a card for user choice re-optimise existing files, yes/no").
-                var askReoptimise by remember { mutableStateOf(false) }
+                // (Ian, 9 Oct 2026: "add a card for user choice re-optimize existing files, yes/no").
+                var askReoptimize by remember { mutableStateOf(false) }
                 SettingDropdown(
                     label = stringResource(R.string.settings_quality),
                     help = HelpTopic.SETTINGS_VIDEO_QUALITY,
@@ -418,7 +418,7 @@ fun SettingsScreen(
                     onSelected = { chosen ->
                         val stronger = chosen.targetShortSide < state.videoQuality.targetShortSide
                         viewModel.setVideoQuality(chosen)
-                        if (stronger) askReoptimise = true
+                        if (stronger) askReoptimize = true
                     },
                     optionLabel = { quality ->
                         when (quality) {
@@ -428,20 +428,20 @@ fun SettingsScreen(
                         }
                     }
                 )
-                if (askReoptimise) {
+                if (askReoptimize) {
                     androidx.compose.material3.AlertDialog(
-                        onDismissRequest = { askReoptimise = false },
-                        title = { Text(stringResource(R.string.reoptimise_title)) },
-                        text = { Text(stringResource(R.string.reoptimise_body)) },
+                        onDismissRequest = { askReoptimize = false },
+                        title = { Text(stringResource(R.string.reoptimize_title)) },
+                        text = { Text(stringResource(R.string.reoptimize_body)) },
                         confirmButton = {
                             androidx.compose.material3.TextButton(onClick = {
-                                askReoptimise = false
-                                viewModel.reoptimiseExistingVideos()
-                            }) { Text(stringResource(R.string.reoptimise_yes)) }
+                                askReoptimize = false
+                                viewModel.reoptimizeExistingVideos()
+                            }) { Text(stringResource(R.string.reoptimize_yes)) }
                         },
                         dismissButton = {
-                            androidx.compose.material3.TextButton(onClick = { askReoptimise = false }) {
-                                Text(stringResource(R.string.reoptimise_no))
+                            androidx.compose.material3.TextButton(onClick = { askReoptimize = false }) {
+                                Text(stringResource(R.string.reoptimize_no))
                             }
                         }
                     )
@@ -449,11 +449,11 @@ fun SettingsScreen(
             }
         }
 
-        // Nothing else follows the switches. Optimising runs from the modes above (Ian, 19 Sept 2026):
+        // Nothing else follows the switches. Optimizing runs from the modes above (Ian, 19 Sept 2026):
         // Automatic as soon as a file reaches a Sync album or an album is switched to Sync, Manual when
         // Sync now is pressed on the Albums tab. The status line and the button that used to sit here
         // were the old way of asking, and are gone with the guide topics that explained them.
-        if (state.optimisePhotos && !state.canProxy) {
+        if (state.optimizePhotos && !state.canProxy) {
             Text(
                 text = stringResource(R.string.proxy_unsupported),
                 style = MaterialTheme.typography.bodySmall
@@ -461,8 +461,8 @@ fun SettingsScreen(
         }
 
         // ── Camera Sync ──────────────────────────────────────────────────────
-        // The camera folder's own optimise. Off out of the box, and no folder is assumed (Ian, 27 Sept 2026):
-        // until it is on and a folder is picked, every album is ordinary. Its own values, never the Optimise
+        // The camera folder's own optimize. Off out of the box, and no folder is assumed (Ian, 27 Sept 2026):
+        // until it is on and a folder is picked, every album is ordinary. Its own values, never the Optimize
         // switches above, which are for Sync albums only. Not in the wizard, which never writes Settings.
         SectionHeader(
             stringResource(R.string.settings_camera),
@@ -529,13 +529,13 @@ fun SettingsScreen(
                 SettingSwitch(
                     label = stringResource(R.string.settings_camera_photos),
                     checked = state.cameraDefaults.photos,
-                    onCheckedChange = viewModel::setCameraOptimisePhotos
+                    onCheckedChange = viewModel::setCameraOptimizePhotos
                 )
 
                 SettingSwitch(
                     label = stringResource(R.string.settings_camera_videos),
                     checked = state.cameraDefaults.videos,
-                    onCheckedChange = viewModel::setCameraOptimiseVideo
+                    onCheckedChange = viewModel::setCameraOptimizeVideo
                 )
 
                 // Only once Videos is on: with it off there is no clip for it to act on (Ian, 27 Sept 2026).
@@ -1045,15 +1045,15 @@ fun SettingsTabPreview(onGuideCardPositioned: ((androidx.compose.ui.geometry.Rec
 
         SectionHeader(stringResource(R.string.settings_sync), help = HelpTopic.SETTINGS_SECTION_SYNC)
         SettingSwitch(
-            label = stringResource(R.string.settings_optimise_photos),
-            help = HelpTopic.SETTINGS_OPTIMISE_PHOTOS,
+            label = stringResource(R.string.settings_optimize_photos),
+            help = HelpTopic.SETTINGS_OPTIMIZE_PHOTOS,
             checked = false,
             onCheckedChange = {}
         )
         SettingDivider()
         SettingSwitch(
-            label = stringResource(R.string.settings_optimise_videos),
-            help = HelpTopic.SETTINGS_OPTIMISE_VIDEO,
+            label = stringResource(R.string.settings_optimize_videos),
+            help = HelpTopic.SETTINGS_OPTIMIZE_VIDEO,
             checked = false,
             onCheckedChange = {}
         )

@@ -39,7 +39,7 @@ data class GrantedDirectory(
  *
  * `takePersistableUriPermission` survives reboots, which is what lets a background worker proxy a
  * photo without an Activity. Losing the grant would not merely be inconvenient — it would make
- * unattended optimising impossible, which is the mechanism v0.3 rests on.
+ * unattended optimizing impossible, which is the mechanism v0.3 rests on.
  *
  * ### Removing a folder does not remove anything else
  *

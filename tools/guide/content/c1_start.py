@@ -12,7 +12,7 @@ CHAPTER = Chapter(
 
             ## What it does
             • **Backup:** copies your photos and videos to your Cloud.
-            • **Optimise:** once a file is safely in the Cloud, swaps the phone's copy for a smaller one. It stays in your gallery.
+            • **Optimize:** once a file is safely in the Cloud, swaps the phone's copy for a smaller one. It stays in your gallery.
             • **Archive:** once an album is safely in the Cloud, moves the phone's copies to the phone's trash to free space.
             • **Restore:** brings full-size files back from the Cloud.
 
@@ -24,7 +24,7 @@ CHAPTER = Chapter(
             • **Nothing is permanently deleted.** Anything removed goes to a trash or recycle bin you can recover from.
             • **The app never empties a bin.** Only you do that.
             • **Nothing leaves your phone unless you chose Archive for that album**, and you confirm that choice.
-            • **"Safe" means verified.** The Cloud must confirm it holds the file at the same file size before anything is optimised or removed.
+            • **"Safe" means verified.** The Cloud must confirm it holds the file at the same file size before anything is optimized or removed.
             • **Out of the box, nothing happens.** No folders are chosen and every album is Off until you decide.
             • **Your Cloud copies are left alone.** By default, deleting a photo on your phone does not touch its Cloud copy. Choose **Ask me about the Cloud copy** in Settings to be offered the choice; nothing is removed unless you select it and confirm.
 
@@ -38,7 +38,7 @@ CHAPTER = Chapter(
             • **Albums** (folder): set each album's mode and run backups.
             • **Restore** (cloud with arrow): bring files back from your Cloud.
             • **Archive** (cloud with check mark): check Archive albums and remove them from the phone.
-            • **Settings** (cog): Clouds, folders, optimising and other preferences.
+            • **Settings** (cog): Clouds, folders, optimizing and other preferences.
 
             Tap any **(?)** for a short explanation. The full guide is the first card in **Settings**.
         """),
@@ -48,7 +48,7 @@ CHAPTER = Chapter(
             2. On the **Albums** tab, tap an album's mode button and choose **Backup**.
             3. New photos are backed up automatically. Press **Sync now** to back up straight away.
             4. Check each album's last line: it shows how many files your Cloud has confirmed.
-            5. Need space? Choose **Sync** to optimise an album, or **Archive** to move it off the phone.
+            5. Need space? Choose **Sync** to optimize an album, or **Archive** to move it off the phone.
             6. Need a file back at full size? Use the **Restore** tab.
         """),
 
@@ -57,7 +57,7 @@ CHAPTER = Chapter(
             • **Mode:** what happens to an album: **Off**, **Backup**, **Sync** or **Archive**. See [[modes-in-depth]].
             • **Cloud:** OneDrive, Google Photos, Google Drive, Dropbox, pCloud, IDrive e2 or Backblaze B2. See [[setup-cloud]].
             • **Pairing:** which Cloud each top-level folder on your phone sends to. **DCIM**, **Pictures** and the other folders your phone keeps photos in are what the Guide calls top-level folders. See [[settings-destination]].
-            • **Optimise:** replace the phone's copy with a smaller one; the original stays in the Cloud. See [[how-optimising-works]].
+            • **Optimize:** replace the phone's copy with a smaller one; the original stays in the Cloud. See [[how-optimizing-works]].
             • **Verified:** the Cloud confirmed it holds the file at the same size. See [[how-verification-works]].
             • **Trash / Recycle Bin:** where removed files wait. See [[where-deleted-files-go]].
             • **Rescan:** look at the phone and the Cloud again for fresh numbers.

@@ -24,7 +24,7 @@ data (a few thousand files at most, on a test OneDrive account). So:
   drive, not just the backup folder, so the care rules below matter more here than they ever did on the test account.
 - Backup is the only mode that is safe to run here, because it only ever *adds* files to OneDrive and never changes
   or removes anything on the phone.
-- **Sync (optimise) and Archive stay off on every real album until the backup is complete and checked.** Optimise
+- **Sync (optimize) and Archive stay off on every real album until the backup is complete and checked.** Optimize
   rewrites the phone's copy (the original then lives only in OneDrive); Archive moves the phone's copy to the
   trash. Both are for later, and both are exercised first on throwaway copies (Phase 5).
 - The app is not trusted with the only copy of anything yet. Phase 0 makes a second copy of the recent, unbacked
@@ -37,7 +37,7 @@ data (a few thousand files at most, on a test OneDrive account). So:
 | Known | Backup, resume after a kill, skip-existing, restore, the deleted-files window and Archive were all verified on the Moto G (Android 16). A 1.9 GB video, 2,079-file wizard run and 6 hard kills were among them. |
 | Not known | Anything on **API 37 / One UI 9**, the only place targetSdk 37 behaviour can be seen. Samsung Gallery's Recycle Bin on this build (confirmed on the Fold 4, API 36, twice). The scale: tens of thousands of files, ~90 albums, 100+ GB. How the phone behaves folded and unfolded mid-run. |
 | Not known either | **Whether the app recognises a Samsung-made backup.** Skip-existing was verified on the Moto G against the app's own uploads and against files put there by hand, not against Samsung's sync. Samsung may lay folders out or name files differently, and it is the thing Phase 2 measures. |
-| Known gaps | **Retry failed items** is not built: a file that fails 5 times is never picked again and there is no button (`resetFailures()` has no caller). **An edit saved over an optimised photo is never uploaded** (TASK-024). Neither matters for a Backup-only first run *except the first*, see step 1.1. |
+| Known gaps | **Retry failed items** is not built: a file that fails 5 times is never picked again and there is no button (`resetFailures()` has no caller). **An edit saved over an optimized photo is never uploaded** (TASK-024). Neither matters for a Backup-only first run *except the first*, see step 1.1. |
 
 ## Phase 0 — before the app goes near the phone (Ian, about 30 minutes)
 
@@ -96,7 +96,7 @@ data (a few thousand files at most, on a test OneDrive account). So:
    first thing to find out, before anything else in this phase. The app holds one account at a time
    (`account_mode: SINGLE`), so the Fold 8 and the Moto G do not interfere.
 3. In the wizard choose **#4 — check cloud storage but do not back up any new files.** No uploads, no
-   optimising, all albums Off. It only asks OneDrive what is there and counts what is on the phone.
+   optimizing, all albums Off. It only asks OneDrive what is there and counts what is on the phone.
 4. Pick the folders (this is also the write grant): `DCIM` first, then the others deliberately.
 5. Read the numbers it reports against what Ian expects: files on the phone per album, files "already in
    OneDrive". **This is the real test of the old backup:** nearly all of the old library should read as already
@@ -152,16 +152,16 @@ Only after Phase 4 is done and checked. **Create a new folder, `DCIM/GS_Test`, a
 photos and videos in it.** Every risky feature is exercised there, never on a real album. The copies land in
 OneDrive too; delete them there by hand afterwards (the app never deletes).
 
-1. **Sync (optimise):** set `GS_Test` to Sync with the Settings switches on. Open an optimised photo in
+1. **Sync (optimize):** set `GS_Test` to Sync with the Settings switches on. Open an optimized photo in
    **Samsung Gallery**: does it show, does it carry the cloud badge, does the size read right?
-2. **Edit an optimised copy in Samsung Gallery and save.** This is the TASK-024 question, on the phone it
+2. **Edit an optimized copy in Samsung Gallery and save.** This is the TASK-024 question, on the phone it
    applies to. Find out what Samsung's Save does (overwrite or save a copy) before it matters. Ian to decide
    the fix (upload an edit as a new file) once the answer is known.
-3. **Restore** an optimised copy back to full size; the deleted-files window (Ask policy) with a deleted copy.
+3. **Restore** an optimized copy back to full size; the deleted-files window (Ask policy) with a deleted copy.
 4. **Archive** `GS_Test`: confirm Samsung Gallery's **Recycle Bin** holds the trashed files on API 37, and that
    the files are recoverable from it. This is the one check that has only ever been made on API 36.
-5. **Camera album's manual optimise** (age list, swipe to keep): the only part never seen on a Samsung.
-6. The Android write dialog for a file outside a granted folder (the Camera album's optimise), untested anywhere.
+5. **Camera album's manual optimize** (age list, swipe to keep): the only part never seen on a Samsung.
+6. The Android write dialog for a file outside a granted folder (the Camera album's optimize), untested anywhere.
 
 Only if all of that is clean does Ian consider setting a real album to Sync or Archive, one album at a time.
 

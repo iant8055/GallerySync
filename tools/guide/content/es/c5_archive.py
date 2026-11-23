@@ -24,7 +24,7 @@ OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 y Backblaze B2. Google Photos
 • Archive necesita que estés presente: Android exige una pulsación. Consulta [[dialog-exit-warning]].
 • Los archivos que se añadan más tarde a un álbum Archive también quedan cubiertos.
 • Cuando sale el último archivo, el álbum desaparece de la lista y se olvida su modo. Si vuelve, empieza en Off.""",
-        "en_hash": "767ff53f0ad97065",
+        "en_hash": "8608b1f31cca18a3",
     },
 
     "archive-hero": {

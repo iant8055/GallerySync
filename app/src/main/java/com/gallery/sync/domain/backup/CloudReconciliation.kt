@@ -30,9 +30,9 @@ data class RemoteFileRef(
      *
      * The skip-existing path records this as the file's `uploadedAtEpochMillis`. It used to record
      * *now*, which made every file found already in OneDrive look freshly uploaded — and Gate 2 #3,
-     * "optimise only what this run backed up", tells new from old by exactly that field. Moto G,
+     * "optimize only what this run backed up", tells new from old by exactly that field. Moto G,
      * 15 Sept 2026: 20 files deleted from OneDrive, #3 chosen, and all 176 photos and 59 videos
-     * were optimised.
+     * were optimized.
      */
     val createdAtEpochMillis: Long = 0L
 )
@@ -161,7 +161,7 @@ internal object ReconciliationRules {
          * A proxy is deliberately smaller than what OneDrive holds, so comparing the shrunken local
          * file against the full-size original fails the size test and the file drops out of the
          * verified count — reported on the Albums tab as "2 of 5 verified in OneDrive" for an album
-         * where all five were uploaded and verified, and falling further with every clip optimised.
+         * where all five were uploaded and verified, and falling further with every clip optimized.
          * Ian, 4 Sept 2026. Matching against the recorded original restores the comparison the size
          * test was written to make.
          */

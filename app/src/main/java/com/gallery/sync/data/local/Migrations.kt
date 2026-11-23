@@ -85,7 +85,7 @@ object Migrations {
      * mapping is the whole risk, not the SQL:
      *
      *  - `isEnabled = 1` → `BACKUP`, **not** `SYNC`. An enabled album today is uploaded and nothing
-     *    local is touched; optimising has always needed a deliberate tap. Mapping to `SYNC` would
+     *    local is touched; optimizing has always needed a deliberate tap. Mapping to `SYNC` would
      *    switch on space management nobody chose, and the first the user would know is their photos
      *    being rewritten.
      *  - `isEnabled = 0` → `OFF`.
@@ -171,7 +171,7 @@ object Migrations {
      * upgrade, so every file keeps following its album exactly as it does today. Backfilling a value
      * would be worse than useless — it would claim the user had made a choice they have not made.
      *
-     * Set to `BACKUP` when a file is restored to full size, so the optimiser does not shrink back
+     * Set to `BACKUP` when a file is restored to full size, so the optimizer does not shrink back
      * what the user just pulled down. See TASK-018.
      */
     val MIGRATION_7_8 = object : Migration(7, 8) {

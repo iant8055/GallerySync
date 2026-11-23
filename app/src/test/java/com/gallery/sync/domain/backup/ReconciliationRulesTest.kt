@@ -58,14 +58,14 @@ class ReconciliationRulesTest {
     }
 
     /**
-     * The number Ian asked about on 15 Sept 2026: an album whose files were optimised must not read
+     * The number Ian asked about on 15 Sept 2026: an album whose files were optimized must not read
      * as unprotected. A proxy is smaller than the original OneDrive holds, so the plain size test
-     * fails and every optimised file drops out of "verified in OneDrive" — the Albums tab said
+     * fails and every optimized file drops out of "verified in OneDrive" — the Albums tab said
      * "2 of 5 verified" for an album whose five were all uploaded (4 Sept 2026). Fixed then with the
      * recorded original size, and untested until now.
      */
     @Test
-    fun anOptimisedFileCountsAsBackedUpAgainstItsOriginalSize() {
+    fun anOptimizedFileCountsAsBackedUpAgainstItsOriginalSize() {
         val local = listOf(item("a.jpg", 180_000), item("b.mp4", 2_000_000, isVideo = true))
         val remote = mapOf(
             "a.jpg" to RemoteFileRef("R1", 4_000_000L),
@@ -80,7 +80,7 @@ class ReconciliationRulesTest {
 
         assertEquals(MediaTally(1, 180_000), result.photosBackedUp)
         assertEquals(MediaTally(1, 2_000_000), result.videosBackedUp)
-        assertEquals("nothing optimised may read as outstanding", MediaTally.EMPTY, result.outstanding)
+        assertEquals("nothing optimized may read as outstanding", MediaTally.EMPTY, result.outstanding)
     }
 
     /**
@@ -90,7 +90,7 @@ class ReconciliationRulesTest {
      * that showed up as "of 33" for 25 files on 15 Sept 2026.
      */
     @Test
-    fun withoutTheRecordedOriginalAnOptimisedFileReadsAsOutstanding() {
+    fun withoutTheRecordedOriginalAnOptimizedFileReadsAsOutstanding() {
         val local = listOf(item("a.jpg", 180_000))
         val remote = mapOf("a.jpg" to RemoteFileRef("R1", 4_000_000L))
 

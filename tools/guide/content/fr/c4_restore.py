@@ -21,7 +21,7 @@ Dans le dossier d'où ils viennent. Les fichiers placés à la racine de **DCIM*
 
 ## Sans risque
 Un fichier n'est remplacé qu'après l'arrivée complète du téléchargement et la vérification de sa taille. Si quoi que ce soit échoue, le fichier du téléphone reste tel quel.""",
-        "en_hash": "1bc7e998be6fc106",
+        "en_hash": "e0e4777a168b1a80",
     },
     "restore-hero": {
         "title": "Albums to Restore et Files in this album",
@@ -76,7 +76,7 @@ Grisés pendant qu'une restauration est en cours.""",
 • **Already on this phone :** grisé ; rien à faire.
 
 Pendant le travail : **Working...** avec un pourcentage. Puis **Restored to full size**, **Back on this phone**, ou **Could not restore, your file is unchanged** avec la raison.""",
-        "en_hash": "995fafe0c00691e4",
+        "en_hash": "149d33e155d89326",
     },
     "restore-greyed-files": {
         "title": "Pourquoi certains fichiers sont-ils grisés ?",
@@ -102,6 +102,6 @@ Une barre de progression montre combien sont restaurés. Nécessite une connexio
 
 ## Bon à savoir
 La plupart des éditeurs enregistrent un nouveau fichier, qui n'est jamais touché. Un fichier modifié est sauvegardé comme un nouveau fichier avec **edited** et la date dans son nom ; l'original dans votre Cloud n'est jamais remplacé.""",
-        "en_hash": "6292714bbfa760d3",
+        "en_hash": "b09bfcaa2e57bdf3",
     },
 }

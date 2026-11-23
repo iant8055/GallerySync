@@ -13,7 +13,7 @@ import com.gallery.sync.data.local.entity.AlbumMode
  * something, so the screen reads as a single decision with a scale rather than four unrelated
  * buttons.
  *
- * Every option except the last does the same backup. **Optimising is the only variable**, which is
+ * Every option except the last does the same backup. **Optimizing is the only variable**, which is
  * why the heading states the backup once and the options carry only the part that differs — an
  * earlier draft repeated "Back up everything" in three of four labels and buried the actual choice.
  *
@@ -44,13 +44,13 @@ enum class LibraryChoice(val mode: AlbumMode?) {
      *
      * Ian's #3 — moderate space saved, and his phrasing for it was *"we back them up first and leave
      * an opt file behind."* The albums all go to Sync so new files are handled from here on, and
-     * [OptimiseCutoff] keeps what was already in OneDrive at full size on the phone.
+     * [OptimizeCutoff] keeps what was already in OneDrive at full size on the phone.
      *
      * The cautious choice, for somebody unwilling to have a library they already own rewritten in a
      * single overnight pass. **It frees little on a typical install**, because most of a real library
      * is already in the cloud — which is why the screen shows both counts rather than a promise.
      */
-    BACK_UP_AND_OPTIMISE_NEW(mode = AlbumMode.SYNC),
+    BACK_UP_AND_OPTIMIZE_NEW(mode = AlbumMode.SYNC),
 
     /**
      * Reconcile, and stop. The default.
@@ -65,15 +65,15 @@ enum class LibraryChoice(val mode: AlbumMode?) {
     val uploads: Boolean get() = mode?.uploads == true
 
     /**
-     * Whether choosing this runs the wizard's one-time bulk optimise — Gate 2's #2 and #3.
+     * Whether choosing this runs the wizard's one-time bulk optimize — Gate 2's #2 and #3.
      *
      * Named here rather than spelled `mode?.proxiesPhotos == true` at each call site, because the
      * screen that *estimates* the saving and the worker that *performs* it must not be able to
-     * disagree about which choices optimise. They did until 6 Sept 2026: Step 7 quoted the
+     * disagree about which choices optimize. They did until 6 Sept 2026: Step 7 quoted the
      * outstanding tallies — the population only #3 was ever described against — while the worker
-     * optimised everything eligible, so a #2 install promised 60 MB and reclaimed 2.26 GB.
+     * optimized everything eligible, so a #2 install promised 60 MB and reclaimed 2.26 GB.
      */
-    val optimisesAtInstall: Boolean get() = mode?.proxiesPhotos == true
+    val optimizesAtInstall: Boolean get() = mode?.proxiesPhotos == true
 
     /**
      * Whether the install pass acts on the **whole** library rather than only what it just uploaded.
@@ -86,16 +86,16 @@ enum class LibraryChoice(val mode: AlbumMode?) {
      * picks the same population the worker will act on — the whole library for #2, and only what is
      * outstanding for #3.
      */
-    val optimisesWholeLibrary: Boolean get() = this == BACK_UP_AND_FREE_SPACE
+    val optimizesWholeLibrary: Boolean get() = this == BACK_UP_AND_FREE_SPACE
 
     /**
      * The moment before which already-uploaded files are left alone.
      *
-     * Only [BACK_UP_AND_OPTIMISE_NEW] sets one; every other choice either optimises everything
-     * eligible or optimises nothing, and neither needs a cutoff.
+     * Only [BACK_UP_AND_OPTIMIZE_NEW] sets one; every other choice either optimizes everything
+     * eligible or optimizes nothing, and neither needs a cutoff.
      */
     fun cutoffFor(now: Long): Long =
-        if (this == BACK_UP_AND_OPTIMISE_NEW) now else OptimiseCutoff.EVERYTHING
+        if (this == BACK_UP_AND_OPTIMIZE_NEW) now else OptimizeCutoff.EVERYTHING
 
     companion object {
 

@@ -6,7 +6,7 @@ CHAPTER = Chapter(
     intro="Common questions and what is usually going on.",
     topics=[
         topic("faq-sync-now-greyed", "Sync now is greyed out", """
-            There is nothing to send or optimise: everything is already sent, or no album is set to Backup, Sync or Archive. Check the mode totals in the header.
+            There is nothing to send or optimize: everything is already sent, or no album is set to Backup, Sync or Archive. Check the mode totals in the header.
         """),
 
         topic("faq-albums-off-after-backup", "My albums say Off after the first backup", """
@@ -32,11 +32,11 @@ CHAPTER = Chapter(
         """),
 
         topic("faq-photo-looks-small", "A photo looks smaller or lower quality than before", """
-            It has been optimised (look for the small cloud badge). The original is in your Cloud: use the **Restore** tab.
+            It has been optimized (look for the small cloud badge). The original is in your Cloud: use the **Restore** tab.
         """),
 
         topic("faq-restore-empty", "The Restore tab says there is nothing to bring back", """
-            Nothing has been optimised or archived, and (for OneDrive) every photo in your backup folders is already on the phone. That is correct.
+            Nothing has been optimized or archived, and (for OneDrive) every photo in your backup folders is already on the phone. That is correct.
         """),
 
         topic("faq-backup-stops-when-closed", "Backups seem to stop when I close the app", """

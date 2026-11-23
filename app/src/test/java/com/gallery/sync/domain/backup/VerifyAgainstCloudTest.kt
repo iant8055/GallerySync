@@ -33,7 +33,7 @@ import org.mockito.kotlin.whenever
 
 /**
  * Step one of the three the backup has: **verification**. Ian, 5 Oct 2026 — *verification, then backup, then
- * optimise* — which the Backup Plans have promised in their own wording since they were written.
+ * optimize* — which the Backup Plans have promised in their own wording since they were written.
  *
  * Verification asks the Cloud what it already holds and writes the answer to the ledger. Before it existed the
  * check ran, told the wizard the truth (*8,620 already in OneDrive, 22 outstanding* on the Fold 8) and threw it

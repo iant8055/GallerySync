@@ -41,18 +41,18 @@ object BackupScheduling {
      * what keeps them out of the first-backup window.
      */
     const val MANUAL_WORK = "gallery-sync-backup-manual"
-    const val OPTIMISE_WORK = "gallery-sync-optimise"
+    const val OPTIMIZE_WORK = "gallery-sync-optimize"
 
     /**
-     * The ongoing video optimiser: Settings' Optimise video, after setup.
+     * The ongoing video optimizer: Settings' Optimize video, after setup.
      *
-     * **Its own unique name, apart from [OPTIMISE_WORK]**, which is the wizard's one-time chain. Two
+     * **Its own unique name, apart from [OPTIMIZE_WORK]**, which is the wizard's one-time chain. Two
      * reasons. `APPEND_OR_REPLACE` on the shared name would queue a button press *behind* an
-     * automatic run that is waiting for the charger, so pressing Optimise now would do nothing until
+     * automatic run that is waiting for the charger, so pressing Optimize now would do nothing until
      * the phone was plugged in. And the wizard's chain and this one obey different settings (Area 1
      * and Area 2 in CLAUDE.md), so they should not be one queue.
      */
-    const val VIDEO_OPTIMISE_WORK = "gallery-sync-video-optimise"
+    const val VIDEO_OPTIMIZE_WORK = "gallery-sync-video-optimize"
 
     /** Clips this chain has already failed on, so it steps over them instead of retrying for ever. */
     const val KEY_EXCLUDED_CLIPS = "excluded_clips"
@@ -61,11 +61,11 @@ object BackupScheduling {
     const val KEY_REQUIRES_CHARGING = "requires_charging"
 
     /** On a queued run that is held back by the charger, so the screen can say what it is waiting for. */
-    const val TAG_WAITING_FOR_CHARGER = "gallery-sync-video-optimise-charging"
+    const val TAG_WAITING_FOR_CHARGER = "gallery-sync-video-optimize-charging"
 
     /** Marks a run as user-initiated. Carried into every continuation of that chain. */
     const val KEY_MANUAL = "manual"
-    const val KEY_OPTIMISE_PHASE = "optimise_phase"
+    const val KEY_OPTIMIZE_PHASE = "optimize_phase"
     const val PHASE_PHOTOS = "photos"
     const val PHASE_VIDEO = "video"
 
@@ -76,18 +76,18 @@ object BackupScheduling {
     const val PHASE_SYNC_PHOTOS = "sync-photos"
 
     /**
-     * The camera folder's manual optimise (Ian, 20 Sept 2026; a selection since 27 Sept 2026): exactly the files
+     * The camera folder's manual optimize (Ian, 20 Sept 2026; a selection since 27 Sept 2026): exactly the files
      * selected on its screen when Sync now was pressed, which are stored as `cameraRunSelection` because a large
-     * folder's ids would not fit in the work's input. One folder, one tap, no mode. Carries [KEY_OPTIMISE_ALBUM]
-     * and, as it goes, [KEY_OPTIMISE_EXCLUDED].
+     * folder's ids would not fit in the work's input. One folder, one tap, no mode. Carries [KEY_OPTIMIZE_ALBUM]
+     * and, as it goes, [KEY_OPTIMIZE_EXCLUDED].
      */
     const val PHASE_CAMERA = "camera"
 
     /** The album a [PHASE_CAMERA] pass works on. */
-    const val KEY_OPTIMISE_ALBUM = "optimise_album"
+    const val KEY_OPTIMIZE_ALBUM = "optimize_album"
 
     /** Ids the pass already failed on this time round, so its continuations step over them. */
-    const val KEY_OPTIMISE_EXCLUDED = "optimise_excluded"
+    const val KEY_OPTIMIZE_EXCLUDED = "optimize_excluded"
 
     /** Upload all albums regardless of album modes. Used by the wizard on fresh installs. */
     const val KEY_ALL_ALBUMS = "all_albums"
@@ -262,7 +262,7 @@ object BackupScheduling {
     }
 
     /**
-     * Runs one optimise phase in the background.
+     * Runs one optimize phase in the background.
      *
      * Its own unique chain, kept apart from the backup one: an abort should stop uploading without
      * abandoning proxies half-written, and the two run at different times over different files.
@@ -271,43 +271,43 @@ object BackupScheduling {
      * instead of cancelling it — the wizard enqueues them as each consent is granted, and the second
      * must not discard the first.
      */
-    fun enqueueOptimise(workManager: WorkManager, phase: String, extras: Data = Data.EMPTY) {
-        val request = OneTimeWorkRequestBuilder<OptimiseWorker>()
+    fun enqueueOptimize(workManager: WorkManager, phase: String, extras: Data = Data.EMPTY) {
+        val request = OneTimeWorkRequestBuilder<OptimizeWorker>()
             .setConstraints(
                 Constraints.Builder()
                     .setRequiresBatteryNotLow(true)
                     .setRequiresStorageNotLow(true)
                     .build()
             )
-            .addTag(optimiseTag(phase))
-            .setInputData(Data.Builder().putAll(extras).putString(KEY_OPTIMISE_PHASE, phase).build())
+            .addTag(optimizeTag(phase))
+            .setInputData(Data.Builder().putAll(extras).putString(KEY_OPTIMIZE_PHASE, phase).build())
             .build()
 
         workManager.enqueueUniqueWork(
-            OPTIMISE_WORK,
+            OPTIMIZE_WORK,
             ExistingWorkPolicy.APPEND_OR_REPLACE,
             request
         )
     }
 
     /**
-     * Queues one batch of ongoing video optimising.
+     * Queues one batch of ongoing video optimizing.
      *
      * [requiresCharging] is TASK-013's rule 5, *on charge*: a transcode is the most expensive thing
      * this app ever does, and a job that ambushes someone at 20% is worse than one that waits. It is
-     * off only when a person pressed Optimise now, because someone who asked has already decided.
+     * off only when a person pressed Optimize now, because someone who asked has already decided.
      *
      * [policy] is the caller's to choose. An automatic trigger keeps whatever is already there. A
      * button press replaces one that is only *waiting*, and never one that is running, which would
      * throw away the clip in flight. A continuation appends behind the batch that queued it.
      */
-    fun enqueueVideoOptimise(
+    fun enqueueVideoOptimize(
         workManager: WorkManager,
         requiresCharging: Boolean,
         excludedClips: Set<String>,
         policy: ExistingWorkPolicy
     ) {
-        val request = OneTimeWorkRequestBuilder<VideoOptimiseWorker>()
+        val request = OneTimeWorkRequestBuilder<VideoOptimizeWorker>()
             .setConstraints(
                 Constraints.Builder()
                     .setRequiresBatteryNotLow(true)
@@ -324,105 +324,105 @@ object BackupScheduling {
             )
             .build()
 
-        workManager.enqueueUniqueWork(VIDEO_OPTIMISE_WORK, policy, request)
+        workManager.enqueueUniqueWork(VIDEO_OPTIMIZE_WORK, policy, request)
     }
 
     /** The video chain's work, for a screen to watch. Empty when nothing has ever been queued. */
-    fun videoOptimiseWork(workManager: WorkManager) =
-        workManager.getWorkInfosForUniqueWorkFlow(VIDEO_OPTIMISE_WORK)
+    fun videoOptimizeWork(workManager: WorkManager) =
+        workManager.getWorkInfosForUniqueWorkFlow(VIDEO_OPTIMIZE_WORK)
 
-    /** Whether a batch of video optimising is executing right now, as opposed to queued. */
-    suspend fun videoOptimiseRunning(workManager: WorkManager): Boolean =
-        videoOptimiseWork(workManager).first().any { it.state == WorkInfo.State.RUNNING }
+    /** Whether a batch of video optimizing is executing right now, as opposed to queued. */
+    suspend fun videoOptimizeRunning(workManager: WorkManager): Boolean =
+        videoOptimizeWork(workManager).first().any { it.state == WorkInfo.State.RUNNING }
 
     /**
-     * Identifies a queued pass by which phase it is, since both share [OPTIMISE_WORK].
+     * Identifies a queued pass by which phase it is, since both share [OPTIMIZE_WORK].
      *
      * The unique name alone cannot answer "is a photo pass already pending", because
      * `APPEND_OR_REPLACE` deliberately lets the video pass queue behind the photo one.
      */
-    fun optimiseTag(phase: String) = "$OPTIMISE_WORK-$phase"
+    fun optimizeTag(phase: String) = "$OPTIMIZE_WORK-$phase"
 
     /**
      * Starts a phase unless one is already queued or running.
      *
-     * Two things now start the optimise passes — the worker chain when an unattended first backup
+     * Two things now start the optimize passes — the worker chain when an unattended first backup
      * drains, and the wizard card when someone is watching — and both are correct. Without this
-     * check, opening the app during an optimise the worker already began would append a second pass
+     * check, opening the app during an optimize the worker already began would append a second pass
      * of the same phase: harmless in outcome, since the second finds the files already proxied, but
      * it doubles the video transcodes and makes the progress the card reads meaningless.
      *
-     * Deliberately not used by [OptimiseWorker]'s own continuation: that runs while its phase is
+     * Deliberately not used by [OptimizeWorker]'s own continuation: that runs while its phase is
      * still `RUNNING` and carries the same tag, so it must append rather than ask.
      *
      * @return true when a pass was enqueued, false when one was already live.
      */
-    suspend fun enqueueOptimiseIfAbsent(workManager: WorkManager, phase: String): Boolean {
-        val alreadyLive = workManager.getWorkInfosForUniqueWorkFlow(OPTIMISE_WORK)
+    suspend fun enqueueOptimizeIfAbsent(workManager: WorkManager, phase: String): Boolean {
+        val alreadyLive = workManager.getWorkInfosForUniqueWorkFlow(OPTIMIZE_WORK)
             .first()
-            .any { !it.state.isFinished && optimiseTag(phase) in it.tags }
+            .any { !it.state.isFinished && optimizeTag(phase) in it.tags }
 
         if (alreadyLive) return false
 
-        enqueueOptimise(workManager, phase)
+        enqueueOptimize(workManager, phase)
         return true
     }
 
     /**
-     * Starts the Camera album's manual optimise unless one is already queued or running.
+     * Starts the Camera album's manual optimize unless one is already queued or running.
      *
      * @return true when it was queued, false when a pass of the same kind was already live.
      */
-    suspend fun enqueueCameraOptimise(
+    suspend fun enqueueCameraOptimize(
         workManager: WorkManager,
         album: String
     ): Boolean {
-        if (cameraOptimiseLive(workManager)) return false
-        enqueueOptimise(
+        if (cameraOptimizeLive(workManager)) return false
+        enqueueOptimize(
             workManager,
             PHASE_CAMERA,
             Data.Builder()
-                .putString(KEY_OPTIMISE_ALBUM, album)
+                .putString(KEY_OPTIMIZE_ALBUM, album)
                 .build()
         )
         return true
     }
 
-    /** Whether a Camera optimise pass is queued or running. */
-    fun cameraOptimiseWork(workManager: WorkManager) =
-        workManager.getWorkInfosForUniqueWorkFlow(OPTIMISE_WORK)
+    /** Whether a Camera optimize pass is queued or running. */
+    fun cameraOptimizeWork(workManager: WorkManager) =
+        workManager.getWorkInfosForUniqueWorkFlow(OPTIMIZE_WORK)
 
-    suspend fun cameraOptimiseLive(workManager: WorkManager): Boolean =
-        cameraOptimiseWork(workManager).first()
-            .any { !it.state.isFinished && optimiseTag(PHASE_CAMERA) in it.tags }
+    suspend fun cameraOptimizeLive(workManager: WorkManager): Boolean =
+        cameraOptimizeWork(workManager).first()
+            .any { !it.state.isFinished && optimizeTag(PHASE_CAMERA) in it.tags }
 
     /**
-     * Whether the optimise chain is queued or running, in any phase.
+     * Whether the optimize chain is queued or running, in any phase.
      *
-     * Read by [BackupWorker] to tell a content trigger it raised itself from a real one: optimising
+     * Read by [BackupWorker] to tell a content trigger it raised itself from a real one: optimizing
      * rewrites files, MediaStore reports the rewrites, and the trigger fires on the app's own work.
-     * Unlike [enqueueOptimiseIfAbsent] this asks about the whole chain rather than one phase, since
+     * Unlike [enqueueOptimizeIfAbsent] this asks about the whole chain rather than one phase, since
      * the caller does not care which pass is running - only that one is.
      */
-    suspend fun optimiseChainLive(workManager: WorkManager): Boolean =
-        workManager.getWorkInfosForUniqueWorkFlow(OPTIMISE_WORK)
+    suspend fun optimizeChainLive(workManager: WorkManager): Boolean =
+        workManager.getWorkInfosForUniqueWorkFlow(OPTIMIZE_WORK)
             .first()
             // The ongoing photo pass counts only while it is *executing*, for the reason the video
             // chain does below: a batch queued and waiting on the battery writes nothing, and counting
             // it would make the app ignore every real new photo for as long as it waited.
             .any {
                 !it.state.isFinished &&
-                    (it.state == WorkInfo.State.RUNNING || optimiseTag(PHASE_SYNC_PHOTOS) !in it.tags)
+                    (it.state == WorkInfo.State.RUNNING || optimizeTag(PHASE_SYNC_PHOTOS) !in it.tags)
             } ||
             // The ongoing video chain counts only while it is *executing*. This answer is used to
-            // decline a backup run as "our own optimise writes woke it", and to hold back a
+            // decline a backup run as "our own optimize writes woke it", and to hold back a
             // cold-start scan. A video batch waiting hours for the charger writes nothing, so
             // counting it would make the app ignore every real new photo for as long as it waited.
-            videoOptimiseRunning(workManager)
+            videoOptimizeRunning(workManager)
 
-    /** Stops the optimise chain. Files already proxied stay proxied; nothing is undone. */
-    fun cancelOptimise(workManager: WorkManager) {
-        workManager.cancelUniqueWork(OPTIMISE_WORK)
+    /** Stops the optimize chain. Files already proxied stay proxied; nothing is undone. */
+    fun cancelOptimize(workManager: WorkManager) {
+        workManager.cancelUniqueWork(OPTIMIZE_WORK)
     }
 
     /**

@@ -44,7 +44,7 @@ own language and must be translated.
 - Backup *(noun and verb)*
 - Restore
 - Archive *(as the action)*
-- Optimise / Optimised  *(UK spelling, deliberately — never "Optimize")*
+- Optimize / Optimized  *(UK spelling, deliberately — never "Optimize")*
 - Rescan
 - Verified / Verified in the Cloud
 - Pairing  *(which Cloud a folder sends to)*
@@ -126,7 +126,7 @@ language, so the Guide should match. Translate them normally.
 
 ## 8. Spelling notes
 
-- British English throughout: **Optimise**, **Optimised**, **Optimisation**,
+- British English throughout: **Optimize**, **Optimized**, **Optimization**,
   not the American spellings. The code, the UI and the Guide all use `-ise`.
 - "Check mark" (two words) for the drawn mark; never "tick".
 - "Select" and "Deselect", not "tick"/"untick".
@@ -172,7 +172,7 @@ holds both the wizard and the Settings translations now (88 new keys per languag
 - the four album modes (Off, Backup, Sync, Archive);
 - section headers in Settings that are named after a tab or a mode (same list);
 - the Archive tab's age filter (`archive_age_*`, "Only show files older than", "All", ...);
-- the camera folder's controls (`camera_age_*`, `camera_kind_*`, `camera_optimise_heading`).
+- the camera folder's controls (`camera_age_*`, `camera_kind_*`, `camera_optimize_heading`).
 
 Everywhere else in the Guide (Albums, Restore, Archive and the rest), the labels in this section stay in English
 because the rest of the app's screens stay English. The entries below remain the English references and are what
@@ -247,7 +247,7 @@ permanently deleted.") is translated.
 - Folders to back up [+2026-10-11 02:40 CDT]
 - Leave the Cloud copy [+2026-10-11 02:40 CDT]
 - Ask me about the Cloud copy [+2026-10-11 02:40 CDT]
-- Optimise photos, Optimise video [+2026-10-11 02:40 CDT]
+- Optimize photos, Optimize video [+2026-10-11 02:40 CDT]
 - Older than [+2026-10-11 02:40 CDT]
 - Straight away, 1 hour, 12 hours, 1 day, 1 week, 1 month, 1 year [+2026-10-11 02:40 CDT]  *(as on-screen choices)*
 - Compression, Video compression, Video compression level [+2026-10-11 02:40 CDT]
@@ -291,7 +291,7 @@ permanently deleted.") is translated.
 - Total estimated savings [+2026-10-11 02:40 CDT]
 - Nothing selected [+2026-10-11 02:40 CDT]
 - Nothing left to archive [+2026-10-11 02:40 CDT]
-- Optimising photos, Optimising video [+2026-10-11 02:40 CDT]
+- Optimizing photos, Optimizing video [+2026-10-11 02:40 CDT]
 
 ### Messages (quoted from the screen)
 - GallerySync needs access to your photos [+2026-10-11 02:40 CDT]
@@ -307,7 +307,7 @@ permanently deleted.") is translated.
 - Checking with your Cloud... [+2026-10-11 02:40 CDT]
 - Nothing was removed. [+2026-10-11 02:40 CDT]
 - Stop the backup? [+2026-10-11 02:40 CDT]
-- Re-optimise existing videos? [+2026-10-11 02:40 CDT]
+- Re-optimize existing videos? [+2026-10-11 02:40 CDT]
 - This photo has been edited since it was backed up. Overwrite it with the original? [+2026-10-11 02:40 CDT]
 - Please select your language to continue [+2026-10-14]  *(Welcome-screen prompt for the language picker added in sibling commit aaa11cc; the language names below it are shown in their own language and are not translated at all)*
 

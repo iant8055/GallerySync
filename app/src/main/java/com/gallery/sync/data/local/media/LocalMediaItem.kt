@@ -31,7 +31,7 @@ data class LocalMediaItem(
     val relativePath: String?,
     /**
      * When the photo or video was taken, or null when MediaStore does not say. Sorting and age go by this and not
-     * by [dateModifiedEpochSeconds], because optimising a file rewrites its modified date (Ian, 1 Nov 2026). Never
+     * by [dateModifiedEpochSeconds], because optimizing a file rewrites its modified date (Ian, 1 Nov 2026). Never
      * part of a file's identity: see [com.gallery.sync.data.local.entity.backupKeyOf].
      */
     val dateTakenEpochSeconds: Long? = null
@@ -47,7 +47,7 @@ data class MediaAlbum(
     val totalBytes: Long,
     /**
      * Split out because the two behave differently and the user knows it: videos are never
-     * optimised, and they are what makes an album large. "17 files" hides whether an album is a
+     * optimized, and they are what makes an album large. "17 files" hides whether an album is a
      * handful of clips or a hundred photos; "2 videos, 15 images" does not.
      */
     val imageCount: Int = 0,

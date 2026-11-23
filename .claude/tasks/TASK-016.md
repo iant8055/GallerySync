@@ -102,13 +102,13 @@ the local copy will be backed up."* So validation is not a read-only inspection 
 album true", and the missing category becomes work rather than an error. Only after that upload
 completes and verifies does the file get its tick.
 
-**Validating an optimised photo means checking the full version is in OneDrive.** Ian, 26 Aug:
+**Validating an optimized photo means checking the full version is in OneDrive.** Ian, 26 Aug:
 *"part of the validation is if the file is Optimized that a full version is sitting in OneDrive."*
 Not any copy — the original. The local file is a 2048px rewrite, so the remote must be compared
 against the size the ledger remembers, never against the file on disk.
 
 **This was broken and is now fixed.** `confirmStillInCloud` compared the remote size against the
-*local* size, so every optimised photo would have been reported "no longer in OneDrive" — false, and
+*local* size, so every optimized photo would have been reported "no longer in OneDrive" — false, and
 the most alarming thing the screen can say. It could not fire before 26 Aug because Archive could not
 see proxied files at all; the fix that let it see them exposed this. Corrected the same day: the
 expected remote size now comes from the ledger for proxied rows.
@@ -149,9 +149,9 @@ succeed.
 than that needs several system dialogs, and the screen has to make that read as one operation
 progressing rather than as the app asking again because something went wrong.
 
-## The optimise question — answered 26 Aug
+## The optimize question — answered 26 Aug
 
-Already-optimised photos are archivable, and the proxy is what gets removed. An album set straight to
+Already-optimized photos are archivable, and the proxy is what gets removed. An album set straight to
 Archive never needs proxies made, because the photos are leaving; the point of the check is that the
 *full* version is safe in OneDrive before the local 2048px copy goes.
 
@@ -164,7 +164,7 @@ it could not, which is why an album taken Sync then Archive offered 2 of 13 file
 - Every file is listed by name, never only counted
 - Validation state is a per-row tick, honest about what work is actually per file
 - A file missing from OneDrive is uploaded and then ticked, never merely reported
-- An optimised photo is validated against the **original's** size, never the proxy's
+- An optimized photo is validated against the **original's** size, never the proxy's
 - Nothing is written or removed during validation
 - The prompt states the freed size and offers Yes, No and Delay
 - Partial validation is presented as itself, never as "All files VALIDATED"

@@ -17,7 +17,7 @@ TRANSLATIONS = {
 Backup は、すべての Cloud で使えます。Sync と Archive には、OneDrive、Google Drive、Dropbox、pCloud、IDrive e2、Backblaze B2 のいずれかが必要で、Google Photos では使えません。
 
 ## カメラのフォルダ
-Settings でカメラのフォルダを設定すると、Off、Backup、Archive が選べ、Sync の代わりに独自の最適化コントロールがあります。[[album-camera-optimise]]を参照してください。
+Settings でカメラのフォルダを設定すると、Off、Backup、Archive が選べ、Sync の代わりに独自の最適化コントロールがあります。[[album-camera-optimize]]を参照してください。
 
 ## どれを選ぶか
 • そのままにして、保護したい：**Backup**。
@@ -28,7 +28,7 @@ Settings でカメラのフォルダを設定すると、Off、Backup、Archive 
 ## 知っておくと便利なこと
 • モードを設定できるのは、あなただけです。唯一の例外は重複したアルバムの統合で、このとき **Off** が設定されます。[[album-merge-warning]]を参照してください。
 • Archive に切り替えると、確認を求められます。別のモードに切り替えると、それ以降の削除は止まります。""",
-        "en_hash": "43d293213ae2b8f7",
+        "en_hash": "4817ca4e1d16f44e",
     },
     "how-verification-works": {
         "title": "検証のしくみ",
@@ -51,9 +51,9 @@ Settings でカメラのフォルダを設定すると、Off、Backup、Archive 
 
 ## 知っておくと便利なこと
 サイズの確認では、あらゆる種類の破損を見つけられるわけではありません。ときどき Cloud を開いて、数枚の写真を確認してください。""",
-        "en_hash": "3a19869102cce663",
+        "en_hash": "988cc8c55e5dcf2e",
     },
-    "how-optimising-works": {
+    "how-optimizing-works": {
         "title": "最適化のしくみ",
         "body": """最適化は、スマートフォン上のコピーを小さなものに置き換えます。すべてがギャラリーに残ったまま、スマートフォンの容量がいっぱいになるのを防ぎます。
 
@@ -70,7 +70,7 @@ Settings でカメラのフォルダを設定すると、Off、Backup、Archive 
 
 ## 元のファイルを戻す
 **Restore** タブを使います。細部をフルに残したい場合は、編集する前に Restore してください。""",
-        "en_hash": "1c7d13215d15f27e",
+        "en_hash": "58e50d866f3c6a61",
     },
     "where-deleted-files-go": {
         "title": "削除されたファイルの行き先",
@@ -90,15 +90,15 @@ Archive は、ファイルを約 30 日間、Android のゴミ箱に移します
     "background-work": {
         "title": "いつ何が起きるか",
         "body": """• **バックアップ**：新しい写真が現れた少し後と、6 時間ごと。モバイルデータがオンでない限り Wi-Fi のみで、バッテリーやストレージが少ないときは実行されません。**Sync now** はすぐに実行されます。
-• **Optimising photos**：自動は、Sync アルバムのファイルを Cloud が確認した時点で。手動は、**Sync now** で。
-• **Optimising video**：自動は、バックアップの後、充電中に。手動は、**Sync now** で。
+• **Optimizing photos**：自動は、Sync アルバムのファイルを Cloud が確認した時点で。手動は、**Sync now** で。
+• **Optimizing video**：自動は、バックアップの後、充電中に。手動は、**Sync now** で。
 • **削除されたファイル**：**クラウドのコピーについて確認する** の場合、Cloud にコピーがあるファイルを削除した少し後に通知されます（バックアップが一時停止中は除く）。
 • **Archive**：Archive タブで Yes と答えたときだけ。
 • **Restore**：Restore を押したときだけ。
 
 ## アプリを閉じるとき
 Back やホームなら問題ありません。作業は続きます。最近使ったアプリからアプリをスワイプして消すと、もう一度開くまでバックグラウンド処理が止まることがあります。""",
-        "en_hash": "b52b93819f999605",
+        "en_hash": "d386bc34cb7fa40b",
     },
     "where-your-data-lives": {
         "title": "データの保管場所",

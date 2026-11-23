@@ -2,7 +2,7 @@
  {
   "key": "abort_backup_body",
   "type": "string",
-  "en": "Uploading stops so you can change your settings. Files already in your Cloud stay there, and starting again picks up where this left off rather than sending them twice. Nothing is deleted. Photos already optimised stay optimised, with their full-size originals in your Cloud."
+  "en": "Uploading stops so you can change your settings. Files already in your Cloud stay there, and starting again picks up where this left off rather than sending them twice. Nothing is deleted. Photos already optimized stay optimized, with their full-size originals in your Cloud."
  },
  {
   "key": "abort_backup_confirm",
@@ -418,12 +418,12 @@
  {
   "key": "library_free_space",
   "type": "string",
-  "en": "All #1 - plus Optimise All files on phone for maximum storage saving"
+  "en": "All #1 - plus Optimize All files on phone for maximum storage saving"
  },
  {
-  "key": "library_optimise_new",
+  "key": "library_optimize_new",
   "type": "string",
-  "en": "All #1 - but only Optimise newly backed up files - for moderate storage saving"
+  "en": "All #1 - but only Optimize newly backed up files - for moderate storage saving"
  },
  {
   "key": "library_per_album",
@@ -568,25 +568,25 @@
  {
   "key": "proxy_unsupported",
   "type": "string",
-  "en": "Optimising photos needs Android 11 or newer."
+  "en": "Optimizing photos needs Android 11 or newer."
  },
  {
-  "key": "reoptimise_body",
+  "key": "reoptimize_body",
   "type": "string",
-  "en": "Videos in Sync albums that were too small to shrink at the old compression can be optimised again at this one. Videos already optimised stay as they are. The full-size originals stay in your Cloud."
+  "en": "Videos in Sync albums that were too small to shrink at the old compression can be optimized again at this one. Videos already optimized stay as they are. The full-size originals stay in your Cloud."
  },
  {
-  "key": "reoptimise_no",
+  "key": "reoptimize_no",
   "type": "string",
   "en": "No"
  },
  {
-  "key": "reoptimise_title",
+  "key": "reoptimize_title",
   "type": "string",
-  "en": "Re-optimise existing videos?"
+  "en": "Re-optimize existing videos?"
  },
  {
-  "key": "reoptimise_yes",
+  "key": "reoptimize_yes",
   "type": "string",
   "en": "Yes"
  },
@@ -741,34 +741,34 @@
   "en": "Older than"
  },
  {
-  "key": "settings_optimise_mode",
+  "key": "settings_optimize_mode",
   "type": "string",
   "en": "Mode"
  },
  {
-  "key": "settings_optimise_mode_auto",
+  "key": "settings_optimize_mode_auto",
   "type": "string",
   "en": "Automatic"
  },
  {
-  "key": "settings_optimise_mode_manual",
+  "key": "settings_optimize_mode_manual",
   "type": "string",
   "en": "Manual"
  },
  {
-  "key": "settings_optimise_photos",
+  "key": "settings_optimize_photos",
   "type": "string",
-  "en": "Optimise photos"
+  "en": "Optimize photos"
  },
  {
-  "key": "settings_optimise_photos_on",
+  "key": "settings_optimize_photos_on",
   "type": "string",
-  "en": "Photos in Sync albums are optimised for storage."
+  "en": "Photos in Sync albums are optimized for storage."
  },
  {
-  "key": "settings_optimise_videos",
+  "key": "settings_optimize_videos",
   "type": "string",
-  "en": "Optimise video"
+  "en": "Optimize video"
  },
  {
   "key": "settings_page_close",
@@ -1042,7 +1042,7 @@
  {
   "key": "tour_description_settings",
   "type": "string",
-  "en": "Backup destination, optimisation, and preferences"
+  "en": "Backup destination, optimization, and preferences"
  },
  {
   "key": "tour_description_tabs",
@@ -1111,7 +1111,7 @@
  {
   "key": "tour_grant_cancelled",
   "type": "string",
-  "en": "No access was given to %1$s. GallerySync needs it to back up and optimise the files in %1$s. Skipping leaves %1$s out of the backup."
+  "en": "No access was given to %1$s. GallerySync needs it to back up and optimize the files in %1$s. Skipping leaves %1$s out of the backup."
  },
  {
   "key": "tour_grant_choose_whole",
@@ -1184,57 +1184,57 @@
   "en": "OK"
  },
  {
-  "key": "tour_optimise_body",
+  "key": "tour_optimize_body",
   "type": "string",
-  "en": "Optimisation allows you to free up storage space on your phone while still being able to see all your photos and videos on your Gallery."
+  "en": "Optimization allows you to free up storage space on your phone while still being able to see all your photos and videos on your Gallery."
  },
  {
-  "key": "tour_optimise_checking",
+  "key": "tour_optimize_checking",
   "type": "string",
   "en": "Checking your Cloud to work out what this would save…"
  },
  {
-  "key": "tour_optimise_incomplete",
+  "key": "tour_optimize_incomplete",
   "type": "string",
   "en": "Could not check %1$d of your albums, so the real saving is likely to be larger than this."
  },
  {
-  "key": "tour_optimise_later_only",
+  "key": "tour_optimize_later_only",
   "type": "string",
-  "en": "These settings apply to any album you later set to Sync. This install will not optimise anything on its own."
+  "en": "These settings apply to any album you later set to Sync. This install will not optimize anything on its own."
  },
  {
-  "key": "tour_optimise_nothing",
+  "key": "tour_optimize_nothing",
   "type": "string",
-  "en": "No photos or videos were found in the folders you chose, so there is nothing to optimise."
+  "en": "No photos or videos were found in the folders you chose, so there is nothing to optimize."
  },
  {
-  "key": "tour_optimise_photos_saving",
+  "key": "tour_optimize_photos_saving",
   "type": "string",
   "en": "Estimated photo savings: %1$s"
  },
  {
-  "key": "tour_optimise_title",
+  "key": "tour_optimize_title",
   "type": "string",
-  "en": "Optimisation Settings"
+  "en": "Optimization Settings"
  },
  {
-  "key": "tour_optimise_total_saving",
+  "key": "tour_optimize_total_saving",
   "type": "string",
   "en": "Total estimated savings: %1$s"
  },
  {
-  "key": "tour_optimise_unchecked",
+  "key": "tour_optimize_unchecked",
   "type": "string",
   "en": "Your Cloud could not be checked just now, so there is no saving to estimate yet. These settings still apply — they act on whatever the first backup sends."
  },
  {
-  "key": "tour_optimise_video_quality",
+  "key": "tour_optimize_video_quality",
   "type": "string",
   "en": "Video compression level"
  },
  {
-  "key": "tour_optimise_video_saving",
+  "key": "tour_optimize_video_saving",
   "type": "string",
   "en": "Estimated video savings: %1$s"
  },
@@ -1264,24 +1264,24 @@
   "en": "You can check progress any time by opening the app."
  },
  {
-  "key": "tour_progress_optimising_photos",
+  "key": "tour_progress_optimizing_photos",
   "type": "string",
-  "en": "Upload finished and verified. Now optimising your photos: they stay in your gallery and stay usable, and the full-size originals stay in your Cloud."
+  "en": "Upload finished and verified. Now optimizing your photos: they stay in your gallery and stay usable, and the full-size originals stay in your Cloud."
  },
  {
-  "key": "tour_progress_optimising_photos_label",
+  "key": "tour_progress_optimizing_photos_label",
   "type": "string",
-  "en": "Optimising photos"
+  "en": "Optimizing photos"
  },
  {
-  "key": "tour_progress_optimising_video",
+  "key": "tour_progress_optimizing_video",
   "type": "string",
-  "en": "Upload finished and verified. Now optimising your videos: nothing is cut, they stay in your gallery, and the full-size originals stay in your Cloud."
+  "en": "Upload finished and verified. Now optimizing your videos: nothing is cut, they stay in your gallery, and the full-size originals stay in your Cloud."
  },
  {
-  "key": "tour_progress_optimising_video_label",
+  "key": "tour_progress_optimizing_video_label",
   "type": "string",
-  "en": "Optimising video"
+  "en": "Optimizing video"
  },
  {
   "key": "tour_progress_pending_cloud",

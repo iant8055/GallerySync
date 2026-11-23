@@ -57,7 +57,7 @@ TRANSLATIONS = {
 • **一時的にダウンロード：** アプリのキャッシュにファイルをコピーして開きます。コピーはキャッシュにのみ保持され、ギャラリーには追加されず、後で削除されます。
 
 一時ダウンロードは **モバイルデータを使用** に従います。モバイルデータでは 750 MB を超えるファイルで事前に確認します。Wi-Fi では確認しません。Google Photos のファイルはダウンロードできません。常に Google Photos またはブラウザで開きます。""",
-        "en_hash": "ea4a196fdc3cb392",
+        "en_hash": "81688ea868ba640e",
     },
     "settings-section-backup": {
         "title": "バックアップ",
@@ -88,7 +88,7 @@ Cloud の名前と **接続** または **キーを入力** が同じ行に表�
 • **キャンセル**：ログインしたままにします。
 
 フォルダはその Cloud との組み合わせのまま、再びログインするまで待機します。別の送信先にしたい場合は、**各フォルダの保存先** を変更してください。""",
-        "en_hash": "37be6bd6eea0ccf2",
+        "en_hash": "c7ea077b91c59b6e",
     },
     "settings-destination": {
         "title": "各フォルダの保存先",
@@ -195,16 +195,16 @@ Settings 専用です。アシスタント（ウィザード）は、独自の�
     "settings-section-sync": {
         "title": "同期",
         "body": """**Sync** アルバムの写真と動画を、どのように最適化するか。ファイルが変更されるのは、Cloud が確認した後だけです。OneDrive、Google Drive、Dropbox、pCloud、IDrive e2、Backblaze B2 で使えます。""",
-        "en_hash": "1147f4e959ac06bc",
+        "en_hash": "4fa2ef3f02a17596",
     },
-    "settings-optimise-photos": {
+    "settings-optimize-photos": {
         "title": "写真を最適化",
         "body": """既定では **Off** です。オンにすると、Sync アルバム内の写真が小さなコピーに置き換えられます：長辺が約 2048 ピクセル、サイズは約 10 分の 1 です。小さなクラウドバッジが付いたまま、ギャラリーに残ります。元のファイルは Cloud に残ります。
 
-すでに十分小さい写真と、**Keep at full size** に設定されたファイルには、手を付けません。**モード** で、実行するタイミングを設定します。[[settings-optimise-mode]]を参照してください。""",
-        "en_hash": "dee027d401742ca5",
+すでに十分小さい写真と、**Keep at full size** に設定されたファイルには、手を付けません。**モード** で、実行するタイミングを設定します。[[settings-optimize-mode]]を参照してください。""",
+        "en_hash": "d06a13dffade42bc",
     },
-    "settings-optimise-video": {
+    "settings-optimize-video": {
         "title": "動画を最適化",
         "body": """既定では **Off** です。オンにすると、**モード**、**経過期間**、**圧縮** が表示されます。
 
@@ -216,22 +216,22 @@ Sync アルバム内にあり、verified in the Cloud で、設定より古く�
 ## 実行するタイミング
 • **自動**：バックアップの後、充電中のみ。
 • **手動**：**Sync now** を押したとき。""",
-        "en_hash": "09cf14026b288ef6",
+        "en_hash": "6e9896836e47e62e",
     },
-    "settings-optimise-mode": {
+    "settings-optimize-mode": {
         "title": "モード：自動または手動",
         "body": """• **自動**（既定）：Sync アルバムのファイルは、Cloud が確認した時点で最適化されます。動画は、充電器につなぐまで待ちます。
 • **手動**：Albums タブで **Sync now** を押すまで、何も起きません。
 
 アクセスを許可したフォルダの外にある写真は、Android の確認が必要なため、アプリを開くか **Sync now** を押すまで待機します。""",
-        "en_hash": "2d55959b2e538398",
+        "en_hash": "741f924a42b5494f",
     },
     "settings-video-age": {
         "title": "経過期間（動画）",
         "body": """動画を最適化するまでに必要な経過時間。**½** から **9** までの数字と、**hour**、**day**、**week**、**month**、**year**、または **すぐに** のいずれかの単位を選びます。Backup の実行は遅れません。
 
 **すぐに** には、今日撮影したクリップも含まれます。編集すると、復元するまでは小さい方のコピーが元になります。""",
-        "en_hash": "e807e16faa3aadc9",
+        "en_hash": "f395d661a1b8ceb7",
     },
     "settings-video-quality": {
         "title": "圧縮（動画）",
@@ -243,7 +243,7 @@ Sync アルバム内にあり、verified in the Cloud で、設定より古く�
 
 ## 圧縮を強くした後
 アプリが **既存の動画を再び最適化しますか？** と尋ねます。**はい** にすると、以前は小さすぎて縮小できなかった動画を、もう一度試します。**いいえ** では、そのままです。すでに最適化された動画には、手を付けません。""",
-        "en_hash": "b68338f9be222883",
+        "en_hash": "c4f2cc138e2abac8",
     },
     "settings-section-restore": {
         "title": "復元 (Settings)",
@@ -259,11 +259,11 @@ Sync アルバム内にあり、verified in the Cloud で、設定より古く�
         "title": "カメラの Sync（Settings）",
         "body": """**カメラ専用の設定**。既定ではオフです。オンにすると：
 • **カメラのフォルダ**：カメラが保存先にするフォルダ。一覧から選ぶか、**その他…** を選びます。
-• **Select Photos/Videos older than**、**Photos**、**Videos**：そのフォルダの最適化コントロールの既定値（[[album-camera-optimise]]）。
+• **Select Photos/Videos older than**、**Photos**、**Videos**：そのフォルダの最適化コントロールの既定値（[[album-camera-optimize]]）。
 • **動画の圧縮**：そこで最適化される動画用。
 
 カメラのフォルダには **Sync** モードがなく、その中で **Sync now** を押すまで、何も最適化されません。上の最適化スイッチは影響しません。""",
-        "en_hash": "d596a9c99a8de79d",
+        "en_hash": "37e57d5f3b81a8e9",
     },
     "settings-section-archive": {
         "title": "アーカイブ (Settings)",

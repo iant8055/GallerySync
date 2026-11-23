@@ -118,7 +118,7 @@ class ChunkedUploaderTest {
      * Found 20 Sept 2026, on the phone. [uploads never request replace on conflict] below only ever
      * covered the resumable route, which a file over 5 MiB takes. The single-request route Graph
      * documents as **replacing** by default, and it carried no conflict setting at all, so a small
-     * file overwrote a cloud file of the same name. Every optimised photo and most edited ones are small.
+     * file overwrote a cloud file of the same name. Every optimized photo and most edited ones are small.
      */
     @Test
     fun `a small file asks to fail on a name clash, never replace`() = runTest {

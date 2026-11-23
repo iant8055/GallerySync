@@ -1,12 +1,12 @@
 package com.gallery.sync.domain.backup
 
 /**
- * The cutoff that makes "optimise only what is not backed up yet" expressible.
+ * The cutoff that makes "optimize only what is not backed up yet" expressible.
  *
  * ### Why a timestamp rather than an album mode
  *
  * Ian's middle option at Gate 2, 28 Aug 2026: *"we back them up first and leave an opt file
- * behind"* — optimise the files still to be uploaded, and leave alone the thousands already safe in
+ * behind"* — optimize the files still to be uploaded, and leave alone the thousands already safe in
  * OneDrive.
  *
  * Album modes cannot say that. They are per album, and this is per file: two photos in one folder,
@@ -30,7 +30,7 @@ package com.gallery.sync.domain.backup
  * option can touch about 2% of a library while sounding like it does something substantial, and the
  * screen offering it **must show both counts**. Without them the honest option looks broken.
  */
-object OptimiseCutoff {
+object OptimizeCutoff {
 
     /** No cutoff: everything already backed up is eligible. */
     const val EVERYTHING = 0L
