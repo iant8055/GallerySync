@@ -22,6 +22,7 @@ import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.data.local.settings.folderFor
 import com.gallery.sync.domain.backup.AlbumMergeWarning
 import com.gallery.sync.domain.backup.UploadStalls
+import com.gallery.sync.domain.backup.FileSkip
 import com.gallery.sync.worker.BackupScheduling
 import com.gallery.sync.worker.BackupWorker
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -1159,6 +1160,16 @@ class BackupViewModel @Inject constructor(
      * applied at once with no confirmation; see `FilePin`. The counts are refreshed so the album card
      * and the Archive figures agree with the tick by the time the user goes back.
      */
+    /**
+     * Keeps one file out of every backup, or lets it back in (Ian, 23 Nov 2026). Letting it back in clears only the skip:
+     * a file that was not skipped keeps whatever it had, a pin included. See `FileSkip`.
+     */
+    suspend fun setSkipped(entry: BackupEntryEntity, skipped: Boolean) {
+        if (skipped) entryDao.setModeOverride(entry.id, FileSkip.overrideFor(true))
+        else if (FileSkip.isSkipped(entry.modeOverride)) entryDao.setModeOverride(entry.id, null)
+        refresh()
+    }
+
     suspend fun setPinned(entry: BackupEntryEntity, pinned: Boolean) {
         entryDao.setModeOverride(entry.id, FilePin.overrideFor(pinned))
         refresh()

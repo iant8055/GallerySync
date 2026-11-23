@@ -13,6 +13,7 @@ import com.gallery.sync.data.local.media.VideoOptimizer
 import com.gallery.sync.data.local.settings.BackupSettings
 import com.gallery.sync.domain.backup.CameraSelection
 import com.gallery.sync.domain.backup.FilePin
+import com.gallery.sync.domain.backup.FileSkip
 import com.gallery.sync.domain.backup.PhotoOptimizePolicy
 import com.gallery.sync.domain.backup.WizardBulkOptimize
 import com.gallery.sync.util.Logger
@@ -119,7 +120,7 @@ class OptimizeWorker @AssistedInject constructor(
 
         val prefs = settings.current()
         val selected = CameraSelection.toOptimize(entryDao.entriesForAlbum(album), prefs.cameraRunSelection)
-            .filterNot { FilePin.isPinned(it.modeOverride) }
+            .filterNot { FilePin.isPinned(it.modeOverride) || FileSkip.isSkipped(it.modeOverride) }
         val ready = proxyApplier.onDevice(selected.filter { it.id !in excluded })
         if (ready.isEmpty()) {
             Logger.d(TAG, "camera: nothing left to optimize")

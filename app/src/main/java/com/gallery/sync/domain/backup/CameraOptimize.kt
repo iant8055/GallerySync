@@ -85,6 +85,7 @@ object CameraSelection {
             entry.remoteSizeBytes == entry.sizeBytes &&
             !entry.isProxied &&
             !entry.isProxySkipped &&
+            !FileSkip.isSkipped(entry.modeOverride) &&
             entry.localMissingSinceEpochMillis == null
 
     /** Whether the header's [choice], with its age turned into [takenBeforeEpochSeconds], selects [entry]. */

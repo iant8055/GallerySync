@@ -78,6 +78,7 @@ import com.gallery.sync.ui.common.label
 import com.gallery.sync.domain.backup.CameraOptimizeChoice
 import com.gallery.sync.domain.backup.CameraSelection
 import com.gallery.sync.domain.backup.FilePin
+import com.gallery.sync.domain.backup.FileSkip
 import com.gallery.sync.domain.backup.FileSort
 import com.gallery.sync.domain.backup.RetryFailed
 import com.gallery.sync.ui.common.detailsShown
@@ -162,6 +163,8 @@ fun AlbumDetailScreen(
     onResend: (Set<String>) -> Unit = {},
     /** Files whose upload keeps being interrupted without getting anywhere: said on their card. See `UploadStalls`. */
     stalledUploads: Set<String> = emptySet(),
+    /** Swipe left: do not back up this file; swipe right: back it up again (Ian, 23 Nov 2026). See `FileSkip`. */
+    onSetSkipped: (BackupEntryEntity, Boolean) -> Unit = { _, _ -> },
     /** Only the Camera album passes this. See [CameraOptimizeControls]. */
     camera: CameraOptimizeControls? = null,
     opener: OpenFileViewModel = hiltViewModel()
@@ -392,15 +395,30 @@ fun AlbumDetailScreen(
                                                 )
                                             }
                                         } else {
-                                            FileCard(
-                                                entry = entry,
-                                                context = context,
-                                                showKeepBox = entry.id in restoredIds,
-                                                onSetPinned = { pinned -> onSetPinned(entry, pinned) },
-                                                modifier = Modifier.longPressToOpen { opener.open(entry) },
-                                                goneFromCloud = entry.id in missingFromCloud,
-                                                stalled = entry.id in stalledUploads
-                                            )
+                                            // Every other file: left keeps it out of the backup, right puts it back
+                                            // (Ian, 23 Nov 2026). Greyed while kept out, as on the Archive tab.
+                                            val skipped = FileSkip.isSkipped(entry.modeOverride)
+                                            SwipeChoiceBox(
+                                                enabled = true,
+                                                stateKey = skipped,
+                                                onSwipeRight = { if (skipped) onSetSkipped(entry, false) },
+                                                onSwipeLeft = { if (!skipped) onSetSkipped(entry, true) },
+                                                accessibilityLabel = stringResource(
+                                                    if (skipped) R.string.album_action_back_up else R.string.album_action_skip
+                                                ),
+                                                onAccessibilityAction = { onSetSkipped(entry, !skipped) }
+                                            ) { drawn ->
+                                                FileCard(
+                                                    entry = entry,
+                                                    context = context,
+                                                    showKeepBox = entry.id in restoredIds && !skipped,
+                                                    onSetPinned = { pinned -> onSetPinned(entry, pinned) },
+                                                    modifier = drawn.longPressToOpen { opener.open(entry) },
+                                                    cameraSelected = if (skipped) false else null,
+                                                    goneFromCloud = entry.id in missingFromCloud,
+                                                    stalled = entry.id in stalledUploads
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -537,13 +555,15 @@ private fun DetailHeader(
                             val backed = entries.count { it.state == BackupState.UPLOADED } - resend.missing
                             val proxied = entries.count { it.isProxied }
                             val kept = entries.count { FilePin.isPinned(it.modeOverride) }
-                            val pending = entries.count { it.state == BackupState.PENDING }
+                            val skipped = entries.count { FileSkip.isSkipped(it.modeOverride) }
+                            val pending = entries.count { it.state == BackupState.PENDING && !FileSkip.isSkipped(it.modeOverride) }
                             val failed = entries.count { it.state == BackupState.FAILED }
                             if (backed > 0) add("$backed backed up")
                             if (resend.missing > 0) add(notInCloudText)
                             if (proxied > 0) add("$proxied optimized")
                             if (kept > 0) add(keptText)
                             if (pending > 0) add("$pending pending")
+                            if (skipped > 0) add("$skipped not backed up by choice")
                             if (failed > 0) add("$failed failed")
                         }
                         WithHelp(HelpTopic.ALBUM_FILE_STATUS) {
@@ -967,6 +987,10 @@ private fun BackupEntryEntity.statusLines(stalled: Boolean = false): List<Pair<S
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     val error = MaterialTheme.colorScheme.error
     return when {
+        // Kept out of the backup by the user (FileSkip). A copy sent before stays; nothing new goes.
+        FileSkip.isSkipped(modeOverride) && state == BackupState.UPLOADED ->
+            listOf("✓ backed up" to primary, "not backing up changes" to muted)
+        FileSkip.isSkipped(modeOverride) -> listOf("not backed up · your choice" to muted)
         isProxied && state == BackupState.UPLOADED -> listOf("✓ backed up" to primary, "optimized" to optimized)
         isProxied -> listOf("✓ optimized" to optimized)
         state == BackupState.UPLOADED -> listOf("✓ backed up" to primary)

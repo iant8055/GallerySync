@@ -226,7 +226,7 @@ interface BackupEntryDao {
           AND album IN (
               SELECT albumName FROM album_preferences WHERE mode != 'OFF'
           )
-          AND attemptCount < :maxAttempts
+          AND attemptCount < :maxAttempts AND (modeOverride IS NULL OR modeOverride != 'OFF')
         ORDER BY dateModifiedEpochSeconds DESC
         LIMIT :limit
         """
@@ -383,7 +383,7 @@ interface BackupEntryDao {
     /** What is still waiting, split by cloud, counted the way [countPendingAll] counts. */
     @Query(
         "SELECT location AS location, COUNT(*) AS n FROM backup_entries " +
-            "WHERE state != :uploaded AND attemptCount < :maxAttempts GROUP BY location"
+            "WHERE state != :uploaded AND attemptCount < :maxAttempts AND (modeOverride IS NULL OR modeOverride != 'OFF') GROUP BY location"
     )
     suspend fun pendingByLocation(
         maxAttempts: Int,
@@ -662,7 +662,7 @@ interface BackupEntryDao {
         """
         SELECT * FROM backup_entries
         WHERE state != :uploaded
-          AND attemptCount < :maxAttempts
+          AND attemptCount < :maxAttempts AND (modeOverride IS NULL OR modeOverride != 'OFF')
         ORDER BY dateModifiedEpochSeconds DESC
         LIMIT :limit
         """
@@ -684,7 +684,7 @@ interface BackupEntryDao {
      * *Retry failed*, with a file OneDrive refused the name of. Such a file is now the user's to retry, from
      * the album (`RetryFailed`), not the queue's to spin on.
      */
-    @Query("SELECT COUNT(*) FROM backup_entries WHERE state != :uploaded AND attemptCount < :maxAttempts")
+    @Query("SELECT COUNT(*) FROM backup_entries WHERE state != :uploaded AND attemptCount < :maxAttempts AND (modeOverride IS NULL OR modeOverride != 'OFF')")
     suspend fun countPendingAll(maxAttempts: Int, uploaded: BackupState = BackupState.UPLOADED): Int
 
     /**
@@ -692,7 +692,7 @@ interface BackupEntryDao {
      * knows what OneDrive already holds, so it cannot discount these: they are sent in full.
      */
     @Query(
-        "SELECT COUNT(*) FROM backup_entries WHERE state != :uploaded AND attemptCount < :maxAttempts AND location != :oneDrive"
+        "SELECT COUNT(*) FROM backup_entries WHERE state != :uploaded AND attemptCount < :maxAttempts AND (modeOverride IS NULL OR modeOverride != 'OFF') AND location != :oneDrive"
     )
     suspend fun countPendingAllElsewhere(
         maxAttempts: Int,
@@ -720,7 +720,7 @@ interface BackupEntryDao {
         """
         SELECT COUNT(*) FROM backup_entries
         WHERE state != :uploaded
-          AND attemptCount < :maxAttempts
+          AND attemptCount < :maxAttempts AND (modeOverride IS NULL OR modeOverride != 'OFF')
           AND album IN (
               SELECT albumName FROM album_preferences WHERE mode != 'OFF'
           )
@@ -753,6 +753,7 @@ interface BackupEntryDao {
         """
         SELECT COALESCE(SUM(sizeBytes), 0) FROM backup_entries
         WHERE state != :uploaded
+          AND (modeOverride IS NULL OR modeOverride != 'OFF')
           AND album IN (
               SELECT albumName FROM album_preferences WHERE mode != 'OFF'
           )
@@ -1494,8 +1495,9 @@ interface BackupEntryDao {
     suspend fun findByLocalFile(mediaStoreId: Long, album: String, displayName: String): List<BackupEntryEntity>
 
     /** Every file the user has kept at full size, for the paths that would otherwise remove one. */
-    @Query("SELECT id, mediaStoreId FROM backup_entries WHERE modeOverride = :pin")
-    suspend fun pinnedKeys(pin: AlbumMode = AlbumMode.BACKUP): List<PinnedKey>
+    /** Also every file the user said not to back up (`FileSkip`): it is never removed or shrunk either. */
+    @Query("SELECT id, mediaStoreId FROM backup_entries WHERE modeOverride = :pin OR modeOverride = :skip")
+    suspend fun pinnedKeys(pin: AlbumMode = AlbumMode.BACKUP, skip: AlbumMode = AlbumMode.OFF): List<PinnedKey>
 
     @Query(
         """

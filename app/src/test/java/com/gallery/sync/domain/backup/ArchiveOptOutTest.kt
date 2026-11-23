@@ -101,7 +101,7 @@ class ArchiveOptOutTest {
         whenever(scanner.access()).thenReturn(MediaAccess.FULL)
         whenever(scanner.scanAll()).thenReturn(files.toList())
         whenever(albumDao.albumsInMode(AlbumMode.ARCHIVE)).thenReturn(listOf("Temp 9"))
-        whenever(entryDao.pinnedKeys(any())).thenReturn(pinned)
+        whenever(entryDao.pinnedKeys(any(), any())).thenReturn(pinned)
     }
 
     @Test
@@ -193,7 +193,7 @@ class ArchiveOptOutTest {
     fun `putting a file back clears its pin, including a row pinned under an older key`() = runTest {
         val item = file("Temp 9", "a.jpg", 1L)
         val olderKey = "Temp 9/a.jpg|1000|1"
-        whenever(entryDao.pinnedKeys(any())).thenReturn(listOf(PinnedKey(olderKey, 1L), PinnedKey("other", 99L)))
+        whenever(entryDao.pinnedKeys(any(), any())).thenReturn(listOf(PinnedKey(olderKey, 1L), PinnedKey("other", 99L)))
 
         assertTrue(engine.setArchiveOptOut(item, optedOut = false))
 
