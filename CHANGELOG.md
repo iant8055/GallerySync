@@ -3,7 +3,13 @@
 Every change since version 26 (0.3.25), the last build the Closed Testing group had. The short notes Play shows to users
 (500 characters per language) are in `release-notes/`; this file is the full record.
 
-## Version 40 (0.3.39) — 23 Nov 2026, built, not uploaded
+## Version 40 (0.3.39) — 23 Nov 2026, rebuilt with the Restore tab changes, not uploaded
+
+**Restore tab**
+- Lists only what a Cloud still holds. Files deleted from OneDrive, Dropbox, pCloud or any other Cloud that can be asked are no longer offered for download; a Cloud that cannot be reached removes nothing.
+- Folders backed up to every Cloud appear, with their files that are still on the phone shown greyed as *already on this phone*, as OneDrive's always were.
+- Each folder's card names its Cloud: *Pictures · Dropbox*, or several joined (*Pictures · Dropbox, pCloud*).
+
 
 **Wording**
 - The Sync mode is now called **Optimize**, and *Sync now* is **Back Up Now**. Every on-screen "optimize" is spelt "optimize". In Settings the *Sync* section is **Optimization** and *Camera Sync* is **Camera Folder**, whose rows now read **Select Camera Folder**, **Only Optimize Photos/Videos older than**, **Optimize Photos** and **Optimize Videos**. Nothing behaves differently.

@@ -1,49 +1,49 @@
 <en-US>
-• The Sync mode is now called Optimize, and Sync now is Back Up Now.
+• Sync is now called Optimize, and Sync now is Back Up Now.
 • Albums show in red how many files their Cloud no longer has. Select them on the album's page and press Resend.
 • A folder inside DCIM can go to its own Cloud.
-• The album's page updates as uploads finish.
+• Restore lists every Cloud's folders, named with their Cloud, and only files the Cloud still holds.
 • After updating, choose Optimize photos and Optimize video in Settings again.
 </en-US>
 <es-ES>
-• El modo Sync ahora se llama Optimize, y Sync now es Back Up Now.
+• Sync ahora se llama Optimize, y Sync now es Back Up Now.
 • Los álbumes muestran en rojo cuántos archivos ya no tiene su nube. Selecciónalos en la página del álbum y pulsa Resend.
 • Una carpeta dentro de DCIM puede ir a su propia nube.
-• La página del álbum se actualiza al terminar cada subida.
+• Restore muestra las carpetas de cada nube, con su nombre, y solo lo que la nube aún guarda.
 • Tras actualizar, vuelve a elegir Optimize photos y Optimize video en Settings.
 </es-ES>
 <pt-BR>
-• O modo Sync agora se chama Optimize, e Sync now virou Back Up Now.
+• Sync agora se chama Optimize, e Sync now virou Back Up Now.
 • Os álbuns mostram em vermelho quantos arquivos a nuvem deles não tem mais. Selecione-os na página do álbum e toque em Resend.
 • Uma pasta dentro de DCIM pode ir para a própria nuvem.
-• A página do álbum se atualiza quando cada envio termina.
+• Restore mostra as pastas de cada nuvem, com o nome dela, e só o que a nuvem ainda guarda.
 • Depois de atualizar, escolha de novo Optimize photos e Optimize video em Settings.
 </pt-BR>
 <fr-FR>
-• Le mode Sync s'appelle désormais Optimize, et Sync now devient Back Up Now.
+• Sync s'appelle désormais Optimize, et Sync now devient Back Up Now.
 • Les albums indiquent en rouge combien de fichiers leur cloud n'a plus. Sélectionnez-les sur la page de l'album et appuyez sur Resend.
 • Un dossier dans DCIM peut aller vers son propre cloud.
-• La page de l'album se met à jour à la fin de chaque envoi.
+• Restore liste les dossiers de chaque cloud, avec son nom, et seulement ce qu'il garde encore.
 • Après la mise à jour, choisissez de nouveau Optimize photos et Optimize video dans Settings.
 </fr-FR>
 <de-DE>
-• Der Modus Sync heißt jetzt Optimize, und Sync now heißt Back Up Now.
+• Sync heißt jetzt Optimize, und Sync now heißt Back Up Now.
 • Alben zeigen in Rot, wie viele Dateien ihre Cloud nicht mehr hat. Wählen Sie sie auf der Albumseite aus und tippen Sie auf Resend.
 • Ein Ordner in DCIM kann in eine eigene Cloud gehen.
-• Die Albumseite aktualisiert sich, sobald ein Upload fertig ist.
+• Restore listet die Ordner jeder Cloud mit ihrem Namen auf, und nur, was die Cloud noch hat.
 • Wählen Sie nach dem Update Optimize photos und Optimize video in Settings erneut.
 </de-DE>
 <ja-JP>
-• Sync モードの名前が Optimize に、Sync now が Back Up Now に変わりました。
+• Sync の名前が Optimize に、Sync now が Back Up Now に変わりました。
 • クラウドからなくなったファイルの数が、アルバムに赤字で表示されます。アルバムのページで選んで Resend を押すと再送信できます。
 • DCIM 内のフォルダごとに送信先のクラウドを選べます。
-• アップロードが終わると、アルバムのページがすぐに更新されます。
+• Restore に、すべてのクラウドのフォルダがクラウド名付きで表示され、クラウドにまだあるファイルだけが出ます。
 • 更新後、Settings で Optimize photos と Optimize video をもう一度選んでください。
 </ja-JP>
 <hi-IN>
-• Sync मोड का नाम अब Optimize है, और Sync now अब Back Up Now है।
+• Sync का नाम अब Optimize है, और Sync now अब Back Up Now है।
 • एल्बम लाल रंग में दिखाते हैं कि उनके क्लाउड में कितनी फ़ाइलें अब नहीं हैं। एल्बम के पेज पर उन्हें चुनें और Resend दबाएँ।
 • DCIM के अंदर का फ़ोल्डर अपने अलग क्लाउड में जा सकता है।
-• अपलोड पूरा होते ही एल्बम का पेज अपडेट हो जाता है।
+• Restore हर क्लाउड के फ़ोल्डर उसके नाम के साथ दिखाता है, और सिर्फ़ वही जो क्लाउड में अब भी है।
 • अपडेट के बाद Settings में Optimize photos और Optimize video फिर से चुनें।
 </hi-IN>
