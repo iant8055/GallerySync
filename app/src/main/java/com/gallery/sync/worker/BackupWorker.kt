@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.Data
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.gallery.sync.data.local.settings.BackupPreferences
@@ -14,7 +15,10 @@ import com.gallery.sync.domain.backup.StopReason
 import com.gallery.sync.domain.backup.WizardBulkOptimize
 import java.time.LocalTime
 import java.util.concurrent.atomic.AtomicInteger
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -44,7 +48,44 @@ class BackupWorker @AssistedInject constructor(
     private val trialEndingNotifier: TrialEndingNotifier
 ) : CoroutineWorker(appContext, params) {
 
-    override suspend fun doWork(): Result {
+    override suspend fun doWork(): Result = try {
+        runBackup()
+    } catch (e: CancellationException) {
+        carryOnAfterSystemStop()
+        throw e
+    }
+
+    /**
+     * Android ended this run part way: on the ten-minute limit, as it does to every run, or for some other reason of
+     * its own. WorkManager then queues **this same request** again, with its own constraints, which is right for a run
+     * that [BackupScheduling.enqueueContinuation] queued: it starts again at once and the upload resumes. But a run the
+     * media trigger started keeps its trigger, so it waits for the next new photo, and the periodic run waits six
+     * hours. Moto G, 23 Nov 2026: an 8.4 GB upload stopped at 3.0 GB at 16:38:05 and nothing ran after it; WorkManager's
+     * record held the trigger run ENQUEUED with stop reason 3 (timeout). The Fold 8's 14:44 stop looked the same.
+     *
+     * So those two queue a continuation themselves, which waits for nothing but its network and battery. Not when the
+     * app cancelled the run (Stop, Pause, re-arming the trigger), and never for a run the user started: that chain
+     * already continues. Written outside the cancellation, because the run is being cancelled as this happens.
+     */
+    private suspend fun carryOnAfterSystemStop() = withContext(NonCancellable) {
+        val reason = stopReason
+        val manual = inputData.getBoolean(BackupScheduling.KEY_MANUAL, false)
+        val continuation = inputData.getBoolean(BackupScheduling.KEY_CONTINUATION, false)
+        if (reason == WorkInfo.STOP_REASON_CANCELLED_BY_APP || reason == WorkInfo.STOP_REASON_NOT_STOPPED) return@withContext
+        if (manual || continuation) return@withContext
+        runCatching {
+            val prefs = settings.current()
+            if (prefs.isPaused) return@runCatching
+            BackupScheduling.enqueueContinuation(
+                WorkManager.getInstance(applicationContext),
+                prefs.allowMeteredNetwork,
+                allAlbums = inputData.getBoolean(BackupScheduling.KEY_ALL_ALBUMS, false)
+            )
+            Logger.i(TAG, "run stopped by Android (reason $reason); continuing in a follow-on run")
+        }
+    }
+
+    private suspend fun runBackup(): Result {
         // A run the user asked for. Carried in the input data and passed to every continuation, so
         // the whole chain stays user-initiated rather than only its first batch.
         val manual = inputData.getBoolean(BackupScheduling.KEY_MANUAL, false)

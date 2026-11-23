@@ -544,7 +544,10 @@ private fun DetailHeader(
                         val notInCloudText = stringResource(R.string.album_status_not_in_cloud, resend.missing)
                         val counts = buildList {
                             // A file gone from the Cloud since is not counted as backed up (Ian, 22 Nov 2026).
-                            val backed = entries.count { it.state == BackupState.UPLOADED } - resend.missing
+                            // Nor is a file kept out by choice: it has its own count, and both made 65 of 64 (Moto G).
+                            val backed = entries.count {
+                                it.state == BackupState.UPLOADED && !FileSkip.isSkipped(it.modeOverride)
+                            } - resend.missing
                             val proxied = entries.count { it.isProxied }
                             val kept = entries.count { FilePin.isPinned(it.modeOverride) }
                             val skipped = entries.count { FileSkip.isSkipped(it.modeOverride) }

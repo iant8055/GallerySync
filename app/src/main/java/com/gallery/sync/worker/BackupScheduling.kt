@@ -100,6 +100,14 @@ object BackupScheduling {
      */
     const val KEY_VERIFY_FIRST = "verify_first"
 
+    /**
+     * On every run [enqueueContinuation] queues, the user's included: WorkManager restarts such a run by itself when
+     * Android stops it. Absent on the content-triggered and periodic runs, which it would restart only on the next
+     * media change or six hours later, so [BackupWorker] queues a continuation for those itself. See
+     * [BackupWorker.carryOnAfterSystemStop].
+     */
+    const val KEY_CONTINUATION = "continuation"
+
     /** Turns automatic backup on. Safe to call repeatedly. */
     fun enable(workManager: WorkManager, allowMeteredNetwork: Boolean) {
         enqueueContentTriggered(workManager, allowMeteredNetwork)
@@ -184,6 +192,7 @@ object BackupScheduling {
                     .putBoolean(KEY_MANUAL, manual)
                     .putBoolean(KEY_ALL_ALBUMS, allAlbums)
                     .putBoolean(KEY_VERIFY_FIRST, verifyFirst)
+                    .putBoolean(KEY_CONTINUATION, true)
                     .build()
             )
             .build()

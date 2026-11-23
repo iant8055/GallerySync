@@ -404,11 +404,15 @@ class ChunkedUploader @Inject constructor(
         const val CHUNK_ALIGNMENT_BYTES = 327_680
 
         /**
-         * 25 MiB: 80 alignment units. Was 5 MiB, and each chunk waits for Graph's answer before the next is sent, so
-         * the round trips set the speed: the Fold 8 sent 2.2 MB/s on a 160 Mbps line (23 Nov 2026), and an 8.3 GB
-         * video needed an hour. Graph allows up to 60 MiB; 25 keeps a retried chunk and the one buffer modest.
+         * 5 MiB: 16 alignment units. Large enough to be efficient, small enough to retry cheaply.
+         *
+         * Tried at 25 MiB on 23 Nov 2026, on the theory that waiting for Graph's answer between chunks set the speed
+         * (the Fold 8 sent 2.2 MB/s on a 160 Mbps line). Measured on the Moto G it did not: 157 MB in 94 s, about
+         * 15 s per 25 MiB chunk against about 2.3 s per 5 MiB on the Fold, so the time grows with the bytes and the
+         * limit is the connection's throughput to Graph, not the round trips. Graph takes chunks strictly in order,
+         * so they cannot be sent side by side. Back to 5 MiB: a bigger chunk only costs memory and a bigger resend.
          */
-        const val CHUNK_SIZE_BYTES = CHUNK_ALIGNMENT_BYTES * 80
+        const val CHUNK_SIZE_BYTES = CHUNK_ALIGNMENT_BYTES * 16
 
         /** Graph's ceiling for a single-request upload. */
         const val SMALL_FILE_THRESHOLD_BYTES = 4L * 1024 * 1024
