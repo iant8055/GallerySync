@@ -11,6 +11,7 @@ Every change since version 26 (0.3.25), the last build the Closed Testing group 
 - *Back up all* leaves locked files out; swiping right on a locked file gone from its Cloud unlocks it and sends it.
 - Header and Albums-tab card count *N locked* separately from *N not backed up by choice*.
 - *Keep at full size* is now **Do not optimize** (the tick box, its column heading and the album counts). It stays a separate flag from the lock: locking a file that is marked *Do not optimize* and unlocking it gives the mark back.
+- In an **Optimize** album every file not yet optimized now has the *Do not optimize* box, so a file can be kept at full size before Automatic optimizes it (about a minute after it arrives). Other albums still show the box only beside files Restore brought back.
 
 ## Version 41 (0.3.40) — 23 Nov 2026, uploaded
 

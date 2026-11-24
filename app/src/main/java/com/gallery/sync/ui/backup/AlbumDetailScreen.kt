@@ -262,6 +262,9 @@ fun AlbumDetailScreen(
     val restoredIds = remember(albumName) {
         entries.filter { FilePin.isPinned(it.modeOverride) }.mapTo(HashSet()) { it.id }
     }
+    // And in an Optimize album, every file not yet optimized (Ian, 24 Nov 2026): Automatic optimizes a new file about a
+    // minute after it arrives, so *Do not optimize* has to be settable before then. Elsewhere the box would do nothing.
+    val optimizeAlbum = mode == AlbumMode.SYNC && camera == null
 
     Column(modifier = modifier.fillMaxSize()) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -271,7 +274,7 @@ fun AlbumDetailScreen(
                 entries = entries,
                 sort = sort,
                 onSort = { sort = it },
-                showKeepColumn = restoredIds.isNotEmpty() && camera == null,
+                showKeepColumn = (restoredIds.isNotEmpty() || optimizeAlbum) && camera == null,
                 camera = camera?.let {
                     CameraHeader(
                         controls = it,
@@ -416,7 +419,8 @@ fun AlbumDetailScreen(
                                                 FileCard(
                                                     entry = entry,
                                                     context = context,
-                                                    showKeepBox = entry.id in restoredIds && !skipped,
+                                                    showKeepBox = !skipped &&
+                                                        (entry.id in restoredIds || (optimizeAlbum && !entry.isProxied)),
                                                     onSetPinned = { pinned -> onSetPinned(entry, pinned) },
                                                     modifier = drawn.longPressToOpen { opener.open(entry) },
                                                     cameraSelected = if (skipped) false else null,

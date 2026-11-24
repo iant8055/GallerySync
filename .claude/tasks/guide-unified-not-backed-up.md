@@ -48,3 +48,5 @@ of the queue and its card says *couldn't finish uploading · trying after the re
 - *Back up all* leaves locked files out. Header and Albums card add *N locked* (*N files locked*).
 - **Rename everywhere in the Guide: *Keep at full size* is now *Do not optimize*** (tick box, column heading *Do not
   optimize*, album count *N marked do not optimize*). It stays a separate flag from *locked*.
+- The *Do not optimize* box now appears beside every file not yet optimized in an **Optimize** album (and, as before,
+  beside files Restore brought back in any album).
