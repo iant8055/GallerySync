@@ -39,3 +39,12 @@ of the queue and its card says *couldn't finish uploading · trying after the re
   longer in the breakdown.
 - Bump `LAST_UPDATED` and all 7 `LAST_UPDATED_BY_LOCALE`, run `build_guide.py`, run `./gradlew test`, push, and
   delete this file.
+
+## Update, 24 Nov 2026 (Ian): locked, and Do not optimize
+
+- Swipe left on a **backed-up** file now reads *✓ backed up · locked*: never sent again, optimized or archived, but still
+  checked, and flagged if its Cloud copy disappears. Swipe right unlocks. Swipe left on a file **not** backed up reads
+  *do not back up*; on a file gone from its Cloud it marks it *do not back up* and clears the flag.
+- *Back up all* leaves locked files out. Header and Albums card add *N locked* (*N files locked*).
+- **Rename everywhere in the Guide: *Keep at full size* is now *Do not optimize*** (tick box, column heading *Do not
+  optimize*, album count *N marked do not optimize*). It stays a separate flag from *locked*.

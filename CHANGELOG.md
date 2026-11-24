@@ -3,6 +3,15 @@
 Every change since version 26 (0.3.25), the last build the Closed Testing group had. The short notes Play shows to users
 (500 characters per language) are in `release-notes/`; this file is the full record.
 
+## Next version — not built yet
+
+**Album page: locked and do not back up** (Ian, 24 Nov 2026)
+- Swipe left on a file that is backed up now **locks** it: *✓ backed up · locked*. It is never sent again, optimized or archived, and it is still checked: if its Cloud copy disappears it is flagged like any other file. Swipe right unlocks it.
+- Swipe left on a file not backed up reads *do not back up*. On a file gone from its Cloud the same swipe marks it *do not back up* and clears the flag.
+- *Back up all* leaves locked files out; swiping right on a locked file gone from its Cloud unlocks it and sends it.
+- Header and Albums-tab card count *N locked* separately from *N not backed up by choice*.
+- *Keep at full size* is now **Do not optimize** (the tick box, its column heading and the album counts). It stays a separate flag from the lock: locking a file that is marked *Do not optimize* and unlocking it gives the mark back.
+
 ## Version 41 (0.3.40) — 23 Nov 2026, uploaded
 
 **Large uploads**

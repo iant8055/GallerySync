@@ -257,7 +257,9 @@ data class AlbumRow(
     /** Files here whose upload keeps being interrupted without getting anywhere. See `UploadStalls`. */
     val stalledCount: Int = 0,
     /** Files here the user chose not to back up. See `FileSkip`. */
-    val skippedCount: Int = 0
+    val skippedCount: Int = 0,
+    /** Backed-up files locked by a swipe: never sent again, optimized or archived, still checked. */
+    val lockedCount: Int = 0
 ) {
     val isEnabled: Boolean get() = mode.uploads
 
@@ -919,6 +921,9 @@ class BackupViewModel @Inject constructor(
      * The user's choice, never automatic: they may have deleted those files in the Cloud on purpose.
      */
     suspend fun resendMissing(album: String, selected: Set<String>): Int {
+        // A locked file the user swiped right on is unlocked first: sending it is the user's choice, made now. *Back up
+        // all* never passes a locked one.
+        unlock(selected)
         val n = requeueMissing.resend(album, selected)
         // What was chosen leaves the flag: sent again, or found to be in the Cloud after all.
         _state.update { current ->
@@ -1073,7 +1078,8 @@ class BackupViewModel @Inject constructor(
                     folderPath = album.mainPath(),
                     missingFromCloud = _state.value.missingFromCloud[album.name]?.size ?: 0,
                     stalledCount = stalledByAlbum[album.name] ?: 0,
-                    skippedCount = counts?.skipped ?: 0
+                    skippedCount = counts?.skipped ?: 0,
+                    lockedCount = counts?.locked ?: 0
                 )
             }
 
@@ -1185,19 +1191,36 @@ class BackupViewModel @Inject constructor(
      */
     suspend fun setSkipped(entry: BackupEntryEntity, skipped: Boolean) {
         if (skipped) {
-            entryDao.setModeOverride(entry.id, FileSkip.overrideFor(true))
-            // A file gone from its Cloud that the user has now decided about leaves the red count.
-            _state.update { current ->
-                val left = current.missingFromCloud[entry.album].orEmpty() - entry.id
-                current.copy(
-                    missingFromCloud = if (left.isEmpty()) current.missingFromCloud - entry.album
-                        else current.missingFromCloud + (entry.album to left)
-                )
+            // Locking shares the pin's column; keep the pin so unlocking gives it back (Ian, 24 Nov 2026).
+            if (FilePin.isPinned(entry.modeOverride)) settings.updatePinnedBeforeLock { it + entry.id }
+            val gone = entry.id in _state.value.missingFromCloud[entry.album].orEmpty()
+            // Gone from its Cloud: *do not back up*, and the record stops claiming the copy. Otherwise a plain skip,
+            // which reads *locked* on a backed-up file and *do not back up* on one that is not.
+            if (!gone || entryDao.markNotInCloudAndSkip(entry.id) == 0) {
+                entryDao.setModeOverride(entry.id, FileSkip.overrideFor(true))
+            }
+            if (gone) {
+                // The user has decided about it, so it leaves the red count.
+                _state.update { current ->
+                    val left = current.missingFromCloud[entry.album].orEmpty() - entry.id
+                    current.copy(
+                        missingFromCloud = if (left.isEmpty()) current.missingFromCloud - entry.album
+                            else current.missingFromCloud + (entry.album to left)
+                    )
+                }
             }
         } else if (FileSkip.isSkipped(entry.modeOverride)) {
-            entryDao.setModeOverride(entry.id, null)
+            unlock(listOf(entry.id))
         }
         refresh()
+    }
+
+    /** Clears the skip or lock on [ids], giving back any *Do not optimize* the lock replaced. */
+    private suspend fun unlock(ids: Collection<String>) {
+        if (ids.isEmpty()) return
+        val pinned = settings.current().pinnedBeforeLock
+        ids.forEach { id -> entryDao.clearSkip(id, if (id in pinned) FilePin.MODE else null) }
+        if (ids.any { it in pinned }) settings.updatePinnedBeforeLock { it - ids.toSet() }
     }
 
     /** Swipe right on a failed file: just that one goes back in the queue, and a backup starts. Adds work only. */

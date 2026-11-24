@@ -103,7 +103,7 @@ This is absolute and applies to every file, in every location, without exception
 
   The standing-instruction property above therefore holds **while the album still holds files**. Treat
   a change that lets files enter an Archive album by some new route while it holds files as touching
-  this rule. A file the user has ticked *Keep at full size* (`FilePin`, Restore's flag) is never
+  this rule. A file the user has ticked *Do not optimize* (`FilePin`, Restore's flag; called *Keep at full size* until 24 Nov 2026) is never
   offered for archiving, whatever its album's mode.
 
   **The user can also opt any file out of Archive, on the Archive tab. Ian, 19 Sept 2026.** Swiping a

@@ -205,6 +205,10 @@ fun AlbumDetailScreen(
     // Files gone from the Cloud. One gesture for every file not backed up (Ian, 23 Nov 2026): right sends it again,
     // left keeps it out. Nothing is sent on its own: they may have been deleted there on purpose (Ian, 22 Nov 2026).
     val resendable = missingFromCloud
+    // Locked files gone from the Cloud are flagged like any other (Ian, 24 Nov 2026), but *Back up all* leaves them:
+    // locked stops the outbound side. A swipe right on one unlocks it and sends it.
+    val lockedIds = entries.filter { FileSkip.isSkipped(it.modeOverride) }.map { it.id }.toSet()
+    val sendable = missingFromCloud - lockedIds
     val toOptimize = remember(entries, selected) { CameraSelection.toOptimize(entries, selected) }
 
     // Every file, in the camera folder as everywhere else. Nothing on the header hides one.
@@ -297,8 +301,9 @@ fun AlbumDetailScreen(
                 onRetryFailed = onRetryFailed,
                 resend = ResendHeader(
                     missing = missingFromCloud.size,
+                    sendable = sendable.size,
                     canResend = mode.uploads,
-                    onBackUpAll = { onResend(missingFromCloud) }
+                    onBackUpAll = { onResend(sendable) }
                 ),
                 onBack = leave,
                 backsUpTo = backsUpTo,
@@ -361,7 +366,8 @@ fun AlbumDetailScreen(
                                             }
                                         } else if (entry.id in resendable) {
                                             // Gone from the Cloud since it was sent, greyed until decided. Right sends it
-                                            // again (checked against the Cloud first), left keeps it out of the backup.
+                                            // again (checked against the Cloud first; a locked one is unlocked), left
+                                            // marks it *do not back up*.
                                             SwipeChoiceBox(
                                                 enabled = true,
                                                 stateKey = entry.id,
@@ -382,8 +388,10 @@ fun AlbumDetailScreen(
                                             }
                                         } else {
                                             // Every other file: left keeps it out of the backup, right puts it back
-                                            // (Ian, 23 Nov 2026). Greyed while kept out, as on the Archive tab.
+                                            // (Ian, 23 Nov 2026). Greyed while kept out, as on the Archive tab. On a
+                                            // backed-up file the same swipe *locks* it (Ian, 24 Nov 2026).
                                             val skipped = FileSkip.isSkipped(entry.modeOverride)
+                                            val backedUp = entry.state == BackupState.UPLOADED
                                             SwipeChoiceBox(
                                                 enabled = true,
                                                 stateKey = skipped,
@@ -396,7 +404,12 @@ fun AlbumDetailScreen(
                                                 },
                                                 onSwipeLeft = { if (!skipped) onSetSkipped(entry, true) },
                                                 accessibilityLabel = stringResource(
-                                                    if (skipped) R.string.album_action_back_up else R.string.album_action_skip
+                                                    when {
+                                                        skipped && backedUp -> R.string.album_action_unlock
+                                                        skipped -> R.string.album_action_back_up
+                                                        backedUp -> R.string.album_action_lock
+                                                        else -> R.string.album_action_skip
+                                                    }
                                                 ),
                                                 onAccessibilityAction = { onSetSkipped(entry, !skipped) }
                                             ) { drawn ->
@@ -545,12 +558,16 @@ private fun DetailHeader(
                         val counts = buildList {
                             // A file gone from the Cloud since is not counted as backed up (Ian, 22 Nov 2026).
                             // Nor is a file kept out by choice: it has its own count, and both made 65 of 64 (Moto G).
-                            val backed = entries.count {
-                                it.state == BackupState.UPLOADED && !FileSkip.isSkipped(it.modeOverride)
-                            } - resend.missing
+                            // A locked file is still backed up, and is counted so (Ian, 24 Nov 2026).
+                            val backed = entries.count { it.state == BackupState.UPLOADED } - resend.missing
                             val proxied = entries.count { it.isProxied }
                             val kept = entries.count { FilePin.isPinned(it.modeOverride) }
-                            val skipped = entries.count { FileSkip.isSkipped(it.modeOverride) }
+                            val locked = entries.count {
+                                FileSkip.isSkipped(it.modeOverride) && it.state == BackupState.UPLOADED
+                            }
+                            val skipped = entries.count {
+                                FileSkip.isSkipped(it.modeOverride) && it.state != BackupState.UPLOADED
+                            }
                             val pending = entries.count { it.state == BackupState.PENDING && !FileSkip.isSkipped(it.modeOverride) }
                             val failed = entries.count { it.state == BackupState.FAILED }
                             if (backed > 0) add("$backed backed up")
@@ -558,6 +575,7 @@ private fun DetailHeader(
                             if (proxied > 0) add("$proxied optimized")
                             if (kept > 0) add(keptText)
                             if (pending > 0) add("$pending pending")
+                            if (locked > 0) add("$locked locked")
                             if (skipped > 0) add("$skipped not backed up by choice")
                             if (failed > 0) add("$failed failed")
                         }
@@ -585,11 +603,11 @@ private fun DetailHeader(
                         // Offered only where the album uploads, as Retry failed is; an Off album says so instead.
                         // No words here (Ian, 22 Nov 2026): the counts line says how many, and the (?) says the rest.
                         // An Off album gets no buttons; its count stays on the counts line.
-                        if (resend.missing > 0 && resend.canResend) {
+                        if (resend.sendable > 0 && resend.canResend) {
                             WithHelp(HelpTopic.ALBUM_RESEND) {
                                 HeroOutlinedButton(
                                     onClick = resend.onBackUpAll,
-                                    label = stringResource(R.string.album_back_up_all, resend.missing),
+                                    label = stringResource(R.string.album_back_up_all, resend.sendable),
                                     modifier = Modifier.fillMaxWidth()
                                 )
                             }
@@ -783,6 +801,8 @@ private fun FileCard(
 /** What the header needs for files gone from the Cloud: how many, whether the album sends, and **Back up all**. */
 private class ResendHeader(
     val missing: Int,
+    /** Of [missing], the ones *Back up all* sends: every one not locked. */
+    val sendable: Int,
     val canResend: Boolean,
     val onBackUpAll: () -> Unit
 )
@@ -967,10 +987,11 @@ private fun BackupEntryEntity.statusLines(stalled: Boolean = false): List<Pair<S
     val optimized = MaterialTheme.colorScheme.tertiary
     val muted = MaterialTheme.colorScheme.onSurfaceVariant
     val error = MaterialTheme.colorScheme.error
-    return when {
-        // Kept out of the backup by the user (FileSkip). Said the same way whether or not a copy was sent before: that
-        // copy may since have gone from the Cloud, and "backed up" would then be untrue.
-        FileSkip.isSkipped(modeOverride) -> listOf("do not back up" to muted)
+    // Kept out by the user (FileSkip). Not backed up: *do not back up*. Backed up: *locked* (Ian, 24 Nov 2026), after
+    // its usual marks. A locked file is still checked, so a copy gone from the Cloud is flagged as on any file.
+    val skipped = FileSkip.isSkipped(modeOverride)
+    if (skipped && state != BackupState.UPLOADED) return listOf("do not back up" to muted)
+    val lines = when {
         isProxied && state == BackupState.UPLOADED -> listOf("✓ backed up" to primary, "optimized" to optimized)
         isProxied -> listOf("✓ optimized" to optimized)
         state == BackupState.UPLOADED -> listOf("✓ backed up" to primary)
@@ -980,6 +1001,7 @@ private fun BackupEntryEntity.statusLines(stalled: Boolean = false): List<Pair<S
         state == BackupState.FAILED -> listOf("✗ failed" to error)
         else -> listOf("?" to muted)
     }
+    return if (skipped) lines + ("locked" to muted) else lines
 }
 
 @Composable

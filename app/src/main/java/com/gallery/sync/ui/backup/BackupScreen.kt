@@ -840,6 +840,13 @@ private fun AlbumModeRow(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+                if (album.lockedCount > 0) {
+                    Text(
+                        text = pluralStringResource(R.plurals.album_locked, album.lockedCount, album.lockedCount),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
                 // A mode chosen earlier that this album's cloud cannot do — the folder was moved to
                 // another cloud afterwards. The user's choice is never rewritten, so say plainly that it is
                 // doing nothing rather than let the pill look active.

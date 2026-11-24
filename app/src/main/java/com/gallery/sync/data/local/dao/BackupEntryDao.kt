@@ -144,8 +144,10 @@ data class AlbumBackupCount(
     val goneFromPhone: Int = 0,
     val goneFromPhoneBytes: Long = 0L,
 
-    /** Files here the user chose not to back up (`FileSkip`), while on the phone. */
-    val skipped: Int = 0
+    /** Files here the user chose not to back up (`FileSkip`) and not backed up, while on the phone. */
+    val skipped: Int = 0,
+    /** Backed-up files the user locked (`FileSkip` on an uploaded file), while on the phone. */
+    val locked: Int = 0
 )
 
 /** How many of one album's files went to one non-OneDrive location. Counted only while on the phone. */
@@ -599,12 +601,16 @@ interface BackupEntryDao {
         failed: BackupState = BackupState.FAILED
     )
 
-    /** This album's sent files that are still on the phone at full size. Rescan's candidates; see `RequeueMissingFromCloud`. */
+    /**
+     * This album's sent files that are still on the phone at full size. Rescan's candidates; see `RequeueMissingFromCloud`.
+     * Locked files are included (Ian, 24 Nov 2026: *"even a locked file should be checked and flagged if it is deleted
+     * from the Cloud just like any other file"*). [requeueMissingFromCloud] still never sends one: locked stops only the
+     * outbound side.
+     */
     @Query(
         """
         SELECT id, displayName, sizeBytes, location, remoteItemId, relativePath FROM backup_entries
         WHERE album = :album AND state = :uploaded AND localMissingSinceEpochMillis IS NULL AND isProxied = 0
-            AND (modeOverride IS NULL OR modeOverride != 'OFF')
         """
     )
     suspend fun uploadedOnPhone(album: String, uploaded: BackupState = BackupState.UPLOADED): List<ReverifyRow>
@@ -1411,8 +1417,10 @@ interface BackupEntryDao {
                SUM(CASE WHEN state = :failedState AND localMissingSinceEpochMillis IS NULL
                         AND (modeOverride IS NULL OR modeOverride != :skip)
                         THEN 1 ELSE 0 END) AS failed,
-               SUM(CASE WHEN modeOverride = :skip AND localMissingSinceEpochMillis IS NULL
+               SUM(CASE WHEN modeOverride = :skip AND state != :uploaded AND localMissingSinceEpochMillis IS NULL
                         THEN 1 ELSE 0 END) AS skipped,
+               SUM(CASE WHEN modeOverride = :skip AND state = :uploaded AND localMissingSinceEpochMillis IS NULL
+                        THEN 1 ELSE 0 END) AS locked,
                SUM(CASE WHEN state = :uploaded AND location != :oneDrive
                         AND localMissingSinceEpochMillis IS NULL
                         THEN 1 ELSE 0 END) AS sentElsewhere,
@@ -1473,6 +1481,31 @@ interface BackupEntryDao {
      */
     @Query("UPDATE backup_entries SET modeOverride = :mode WHERE id = :id")
     suspend fun setModeOverride(id: String, mode: AlbumMode?)
+
+    /** Unlocks or un-skips one file: only a row that is skipped moves, to [mode] (its earlier pin, or nothing). */
+    @Query("UPDATE backup_entries SET modeOverride = :mode WHERE id = :id AND modeOverride = :skip")
+    suspend fun clearSkip(id: String, mode: AlbumMode?, skip: AlbumMode = AlbumMode.OFF): Int
+
+    /**
+     * Swipe left on a file gone from its Cloud: *do not back up* (Ian, 24 Nov 2026). The record stops claiming a copy
+     * the Cloud no longer holds, and the skip keeps the file out of every queue, so nothing is sent. Bookkeeping only:
+     * no file is touched anywhere. Swiping right later puts it back in the queue like any file not backed up.
+     */
+    @Query(
+        """
+        UPDATE backup_entries
+        SET state = :pending, remoteItemId = NULL, remoteSizeBytes = NULL, uploadedAtEpochMillis = NULL,
+            attemptCount = 0, lastError = NULL, uploadSessionUrl = NULL, uploadSessionExpiresAtEpochMillis = NULL,
+            modeOverride = :skip
+        WHERE id = :id AND state = :uploaded AND isProxied = 0
+        """
+    )
+    suspend fun markNotInCloudAndSkip(
+        id: String,
+        pending: BackupState = BackupState.PENDING,
+        uploaded: BackupState = BackupState.UPLOADED,
+        skip: AlbumMode = AlbumMode.OFF
+    ): Int
 
     /**
      * Gives one uploaded row the OneDrive id it never recorded, addressed by its own key.

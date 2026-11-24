@@ -391,20 +391,24 @@
     <string name="album_cloud_elsewhere_unreachable">Could not reach %1$s when this was last checked</string>
     <string name="album_status_optimized">%1$d optimized</string>
     <!-- Files kept at full size (FilePin): ticked by the user, or put back by Restore. -->
-    <string name="album_status_kept">%1$d kept at full size</string>
+    <string name="album_status_kept">%1$d marked do not optimize</string>
     <string name="album_sort_label">Sort by</string>
     <string name="album_sort_name">Name</string>
     <string name="album_sort_date">Date</string>
     <string name="album_sort_status">Status</string>
     <!-- Two lines on purpose: it heads a 56dp column of tick boxes. -->
-    <string name="album_keep_column">Keep at
-full size</string>
-    <string name="album_file_keep_description">Keep %1$s at full size</string>
+    <string name="album_keep_column">Do not
+optimize</string>
+    <string name="album_file_keep_description">Do not optimize %1$s</string>
     <string name="album_status_pending">%1$d pending</string>
     <string name="album_status_failed">%1$d failed</string>
     <string name="album_retry_failed">Retry %1$d failed</string>
     <string name="album_retry_failed_hint">These files could not be sent after several tries. Retry puts them back in the queue and starts a backup.</string>
     <!-- Albums tab: files this album sent that a Cloud no longer holds (Ian, 22 Nov 2026). Flag only; resent from the album's page. -->
+    <plurals name="album_locked">
+        <item quantity="one">%1$d file locked</item>
+        <item quantity="other">%1$d files locked</item>
+    </plurals>
     <plurals name="album_skipped_by_choice">
         <item quantity="one">%1$d file not backed up by choice</item>
         <item quantity="other">%1$d files not backed up by choice</item>
@@ -415,6 +419,8 @@ full size</string>
     </plurals>
     <string name="album_resend">Resend %1$d</string>
     <string name="album_back_up_all">Back up all %1$d</string>
+    <string name="album_action_lock">Lock this file</string>
+    <string name="album_action_unlock">Unlock this file</string>
     <string name="album_status_not_in_cloud">%1$d not in your Cloud</string>
     <!-- A file's line on the album page when the Cloud it was sent to no longer holds it. -->
     <string name="album_file_not_in_cloud">not in %1$s</string>
@@ -1209,7 +1215,7 @@ full size</string>
     <string name="camera_optimize_working">Optimizing… %1$d left</string>
     <string name="camera_optimize_none_selected">Nothing selected</string>
     <string name="camera_optimize_none_old_enough">Nothing older than %1$s</string>
-    <string name="camera_action_keep">Deselect (keep at full size)</string>
+    <string name="camera_action_keep">Deselect (do not optimize)</string>
     <string name="camera_action_optimize">Select (optimize this file)</string>
 
     <!-- Long-press to open a file (TASK-028, Ian, 11 Nov 2026). The Albums, Restore and Archive tabs stay English. -->

@@ -381,7 +381,12 @@ data class BackupPreferences(
      */
     val cameraRunSelection: Set<String> = emptySet(),
     /** Uploads interrupted without gaining ground, by row id. Bookkeeping; see `UploadStalls`. */
-    val uploadStalls: Set<String> = emptySet()
+    val uploadStalls: Set<String> = emptySet(),
+    /**
+     * Files that were *Do not optimize* when they were locked, by row id (Ian, 24 Nov 2026: the two flags stay
+     * separate). Locking shares the pin's column, so this is where the pin waits, and unlocking puts it back.
+     */
+    val pinnedBeforeLock: Set<String> = emptySet()
 )
 
 /**
@@ -473,7 +478,8 @@ class BackupSettings @Inject constructor(
             cameraOptimizeVideo = stored[KEY_CAMERA_OPTIMIZE_VIDEO] ?: false,
             cameraVideoQuality = VideoQuality.fromNameOrDefault(stored[KEY_CAMERA_VIDEO_QUALITY]),
             cameraRunSelection = stored[KEY_CAMERA_RUN_SELECTION] ?: emptySet(),
-            uploadStalls = stored[KEY_UPLOAD_STALLS] ?: emptySet()
+            uploadStalls = stored[KEY_UPLOAD_STALLS] ?: emptySet(),
+            pinnedBeforeLock = stored[KEY_PINNED_BEFORE_LOCK] ?: emptySet()
         )
     }
 
@@ -722,6 +728,11 @@ class BackupSettings @Inject constructor(
         context.dataStore.edit { it[KEY_UPLOAD_STALLS] = change(it[KEY_UPLOAD_STALLS] ?: emptySet()) }
     }
 
+    /** See [BackupPreferences.pinnedBeforeLock]. */
+    suspend fun updatePinnedBeforeLock(change: (Set<String>) -> Set<String>) {
+        context.dataStore.edit { it[KEY_PINNED_BEFORE_LOCK] = change(it[KEY_PINNED_BEFORE_LOCK] ?: emptySet()) }
+    }
+
     suspend fun setCameraRunSelection(ids: Set<String>) {
         context.dataStore.edit { it[KEY_CAMERA_RUN_SELECTION] = ids }
     }
@@ -954,6 +965,7 @@ class BackupSettings @Inject constructor(
         val KEY_CAMERA_FOLDER = stringPreferencesKey("camera_folder")
         val KEY_CAMERA_RUN_SELECTION = stringSetPreferencesKey("camera_run_selection")
         val KEY_UPLOAD_STALLS = stringSetPreferencesKey("upload_stalls")
+        val KEY_PINNED_BEFORE_LOCK = stringSetPreferencesKey("pinned_before_lock")
         val KEY_CAMERA_DEFAULT_AGE = stringPreferencesKey("camera_default_age")
         val KEY_CAMERA_OPTIMIZE_PHOTOS = booleanPreferencesKey("camera_optimize_photos")
         val KEY_CAMERA_OPTIMIZE_VIDEO = booleanPreferencesKey("camera_optimize_video")
