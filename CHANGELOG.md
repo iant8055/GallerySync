@@ -3,7 +3,7 @@
 Every change since version 26 (0.3.25), the last build the Closed Testing group had. The short notes Play shows to users
 (500 characters per language) are in `release-notes/`; this file is the full record.
 
-## Version 41 (0.3.40) — 23 Nov 2026, built, not uploaded
+## Version 41 (0.3.40) — 23 Nov 2026, uploaded
 
 **Large uploads**
 - A big video no longer starts again from zero. Android stops every backup after about ten minutes; the next one now always continues the OneDrive upload from where it stopped. Before, about twenty minutes in, a still-good upload was treated as expired and begun again, so a file over about 2.5 GB could never finish. Seen on the Moto G: an 8.4 GB video resumed at 3.0 GB and finished whole.
