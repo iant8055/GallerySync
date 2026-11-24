@@ -7,7 +7,8 @@ that haven't been backed up?"*, then *"yes - build it that way"*. App side commi
 
 **Album page (every album except the camera folder's optimize list):** one gesture for every file.
 
-- **Swipe left: keep this file out of the backup.** Greyed, marked *kept out of the backup · your choice*. Never
+(Label changed 24 Nov 2026 by Ian from *kept out of the backup · your choice* to *do not back up*.)
+- **Swipe left: keep this file out of the backup.** Greyed, marked *do not back up*. Never
   uploaded to any Cloud, never optimized, never offered for Archive. A copy already in a Cloud stays there.
 - **Swipe right: back it up.**
   - On a file kept out: puts it back in the backup.
@@ -32,7 +33,7 @@ of the queue and its card says *couldn't finish uploading · trying after the re
 
 - `album-resend` (title *Files not backed up*): rewrite for the swipe (left keeps out, right backs up / sends again /
   retries), **Back up all**, and no Select all / Clear / Resend. All seven languages, `en_hash` recomputed.
-- The album file-status topic (`album-file-status` or its current id): add *kept out of the backup · your choice* and
+- The album file-status topic (`album-file-status` or its current id): add *do not back up* and
   *couldn't finish uploading · trying after the rest*; the header's *N not backed up by choice*.
 - The Albums-tab card topic: the red line's new meaning and the grey *not backed up by choice* line; *failed* no
   longer in the breakdown.

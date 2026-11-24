@@ -970,7 +970,7 @@ private fun BackupEntryEntity.statusLines(stalled: Boolean = false): List<Pair<S
     return when {
         // Kept out of the backup by the user (FileSkip). Said the same way whether or not a copy was sent before: that
         // copy may since have gone from the Cloud, and "backed up" would then be untrue.
-        FileSkip.isSkipped(modeOverride) -> listOf("kept out of the backup · your choice" to muted)
+        FileSkip.isSkipped(modeOverride) -> listOf("do not back up" to muted)
         isProxied && state == BackupState.UPLOADED -> listOf("✓ backed up" to primary, "optimized" to optimized)
         isProxied -> listOf("✓ optimized" to optimized)
         state == BackupState.UPLOADED -> listOf("✓ backed up" to primary)
