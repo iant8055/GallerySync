@@ -1,0 +1,28 @@
+<en-US>
+• Swipe a backed-up file left to lock it: never sent again, optimized or archived, and still checked if its Cloud copy disappears. On a file not backed up, the same swipe reads "do not back up".
+• "Keep at full size" is now "Do not optimize", and Optimize albums show the box beside every file not yet optimized.
+</en-US>
+<es-ES>
+• Desliza a la izquierda un archivo ya copiado para bloquearlo: no se vuelve a enviar, optimizar ni archivar, y se sigue comprobando si su copia en la nube desaparece. En un archivo sin copia, el mismo gesto indica "do not back up".
+• "Keep at full size" ahora es "Do not optimize", y los álbumes Optimize muestran la casilla junto a cada archivo aún sin optimizar.
+</es-ES>
+<pt-BR>
+• Deslize para a esquerda um arquivo com backup para bloqueá-lo: nunca é reenviado, otimizado nem arquivado, e continua sendo verificado se a cópia na nuvem sumir. Num arquivo sem backup, o mesmo gesto indica "do not back up".
+• "Keep at full size" agora é "Do not optimize", e os álbuns Optimize mostram a caixa ao lado de cada arquivo ainda não otimizado.
+</pt-BR>
+<fr-FR>
+• Balayez vers la gauche un fichier sauvegardé pour le verrouiller : il n'est plus renvoyé, optimisé ni archivé, et reste vérifié si sa copie dans le cloud disparaît. Sur un fichier non sauvegardé, le même geste indique "do not back up".
+• "Keep at full size" devient "Do not optimize", et les albums Optimize affichent la case à côté de chaque fichier pas encore optimisé.
+</fr-FR>
+<de-DE>
+• Eine gesicherte Datei nach links wischen, um sie zu sperren: Sie wird nie erneut gesendet, optimiert oder archiviert und weiter geprüft, falls ihre Cloud-Kopie verschwindet. Bei einer ungesicherten Datei zeigt dieselbe Geste "do not back up".
+• "Keep at full size" heißt jetzt "Do not optimize", und Optimize-Alben zeigen das Kästchen neben jeder noch nicht optimierten Datei.
+</de-DE>
+<ja-JP>
+• バックアップ済みのファイルを左にスワイプするとロックされます。再送信・最適化・アーカイブはされず、クラウドのコピーが消えた場合は引き続き検出されます。未バックアップのファイルでは同じ操作で "do not back up" と表示されます。
+• "Keep at full size" は "Do not optimize" になり、Optimize アルバムではまだ最適化されていない各ファイルの横にチェックボックスが表示されます。
+</ja-JP>
+<hi-IN>
+• बैकअप हो चुकी फ़ाइल को बाईं ओर स्वाइप करें तो वह लॉक हो जाती है: दोबारा नहीं भेजी जाती, ऑप्टिमाइज़ या आर्काइव नहीं होती, और क्लाउड कॉपी गायब होने पर पता चलता रहता है। बिना बैकअप वाली फ़ाइल पर यही स्वाइप "do not back up" दिखाता है।
+• "Keep at full size" अब "Do not optimize" है, और Optimize एल्बम में हर अभी तक ऑप्टिमाइज़ न हुई फ़ाइल के पास बॉक्स दिखता है।
+</hi-IN>

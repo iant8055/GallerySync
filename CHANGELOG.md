@@ -3,7 +3,7 @@
 Every change since version 26 (0.3.25), the last build the Closed Testing group had. The short notes Play shows to users
 (500 characters per language) are in `release-notes/`; this file is the full record.
 
-## Next version — not built yet
+## Version 42 (0.3.41) — 24 Nov 2026, built, not uploaded
 
 **Album page: locked and do not back up** (Ian, 24 Nov 2026)
 - Swipe left on a file that is backed up now **locks** it: *✓ backed up · locked*. It is never sent again, optimized or archived, and it is still checked: if its Cloud copy disappears it is flagged like any other file. Swipe right unlocks it.
