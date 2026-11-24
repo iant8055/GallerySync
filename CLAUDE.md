@@ -40,7 +40,11 @@ Billing library: com.android.billingclient:billing-ktx (latest stable)
 
 Rules:
 - Gate every second cloud behind `MultiCloudEntitlement` (purchased or trial running), which asks
-  BillingRepository.isPurchased() for the purchase half. Every non-OneDrive cloud is backup-only
+  BillingRepository.isPurchased() for the purchase half. What each cloud can do (Restore, Archive, Optimize) is
+  `CloudCapabilities` and nowhere else: since 24 Sept 2026 OneDrive, Dropbox, Google Drive, Backblaze B2, IDrive e2
+  and pCloud have all three, checked live by size when acting; only Google Photos is backup-only (no size, no
+  reliable original back). This line said "every non-OneDrive cloud is backup-only" until 24 Nov 2026, which was
+  stale and led to a wrong report that Optimize should not be offered on a B2 album.
 - Never gate OneDrive or the ContentProvider — those are always free
 - BillingRepository is the single source of truth for purchase state
 - Never hardcode purchase state — always query BillingRepository
