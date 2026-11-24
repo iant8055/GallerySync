@@ -467,6 +467,11 @@ foreground service does not fix that either, because a pending delay has no run 
 If that case must be solved, the routes worth investigating are `setExpedited` on the continuations
 (quota-limited) or a battery-optimization exemption — not this.
 
+**That case is work already in flight, not new photos.** Measured on the Moto G, 24 Nov 2026: swiped out of
+Recents (`Killing … remove task`), process confirmed dead, a photo taken — it was backed up **17 seconds** later
+with the app never opened, because the content trigger survives the swipe. Do not tell Ian the app only backs up
+when it is opened.
+
 ### Other hard rules
 - All file operations on device are cache management, never source-of-truth writes
 - Never store OAuth tokens in SharedPreferences — use EncryptedSharedPreferences
