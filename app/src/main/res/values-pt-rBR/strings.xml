@@ -177,7 +177,6 @@
     <string name="settings_rate_detail">Abre a página do GallerySync no Google Play.</string>
     <string name="settings_restore">Restaurar</string>
     <string name="settings_show_empty_folders">Mostrar pastas vazias</string>
-    <string name="settings_show_all_restore_folders">Mostrar todas as pastas de backup</string>
     <string name="settings_sync">Otimização</string>
     <string name="sign_out_action">Sair</string>
     <string name="sources_add">Adicionar uma pasta</string>

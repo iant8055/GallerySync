@@ -103,4 +103,28 @@ class RestoreStillInOneDriveTest {
         val l = listing("Camera" to mapOf("a.jpg" to ref("id-a.jpg", 1_000L)))
         assertEquals(listOf("camera/a.jpg"), kept(rows, l))
     }
+    @Test
+    fun `an earlier folder finds this copy's own file by id or by name, at its size`() {
+        val rows = listOf(
+            row("Camera", "byid.jpg"),
+            row("Camera", "byname.jpg", remoteId = null),
+            row("Camera", "resized.jpg"),
+            row("Camera", "absent.jpg")
+        )
+        val index = mapOf(
+            "renamed.jpg" to ref("id-byid.jpg", 1_000L),
+            "byname.jpg" to ref("other", 1_000L),
+            "resized.jpg" to ref("id-resized.jpg", 999L)
+        )
+        assertEquals(
+            setOf("Camera/byid.jpg", "Camera/byname.jpg"),
+            RestoreStillInOneDrive.foundIn(rows, index)
+        )
+    }
+
+    @Test
+    fun `an earlier folder cannot offer a file this copy has no row for`() {
+        val index = mapOf("main-gallery.jpg" to ref("id-main", 1_000L))
+        assertEquals(emptySet<String>(), RestoreStillInOneDrive.foundIn(emptyList(), index))
+    }
 }

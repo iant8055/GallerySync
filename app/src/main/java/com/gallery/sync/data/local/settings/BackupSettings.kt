@@ -209,13 +209,6 @@ data class BackupPreferences(
      */
     val showEmptyCloudFolders: Boolean = false,
     /**
-     * Settings > Restore > Show all backup folders. Off: Restore lists only the OneDrive backup folder set in
-     * Settings. On: also every earlier backup folder and `Samsung Gallery/DCIM`, the folders the upload check
-     * always searches. Ian, 24 Nov 2026, after a Secure Folder copy backing up to its own folder listed the main
-     * gallery's albums too. The upload check is unchanged either way.
-     */
-    val showAllRestoreFolders: Boolean = false,
-    /**
      * Whether guided setup has been finished or deliberately skipped.
      *
      * Separate from having sources granted, because the two answer different questions. A user who
@@ -457,7 +450,6 @@ class BackupSettings @Inject constructor(
             deletionNotifiedUpToEpochMillis = stored[KEY_DELETION_NOTIFIED] ?: 0L,
             trialNoticeStage = stored[KEY_TRIAL_NOTICE_STAGE] ?: 0,
             showEmptyCloudFolders = stored[KEY_SHOW_EMPTY_FOLDERS] ?: false,
-            showAllRestoreFolders = stored[KEY_SHOW_ALL_RESTORE_FOLDERS] ?: false,
             hasCompletedSetup = stored[KEY_SETUP_COMPLETE] ?: false,
             isPaused = stored[KEY_PAUSED] ?: false,
             uploadInterruptedAtEpochMillis = stored[KEY_INTERRUPTED_AT] ?: 0L,
@@ -720,10 +712,6 @@ class BackupSettings @Inject constructor(
         context.dataStore.edit { it[KEY_SHOW_EMPTY_FOLDERS] = show }
     }
 
-    suspend fun setShowAllRestoreFolders(show: Boolean) {
-        context.dataStore.edit { it[KEY_SHOW_ALL_RESTORE_FOLDERS] = show }
-    }
-
     /** What the Archive tab's age filter starts at. See [ArchiveAge]. */
     suspend fun setArchiveDefaultAge(age: ArchiveAge) {
         context.dataStore.edit { it[KEY_ARCHIVE_DEFAULT_AGE] = age.storedName }
@@ -950,7 +938,6 @@ class BackupSettings @Inject constructor(
         val KEY_DELETION_NOTIFIED = longPreferencesKey("deletion_notified_up_to")
         val KEY_TRIAL_NOTICE_STAGE = intPreferencesKey("trial_notice_stage")
         val KEY_SHOW_EMPTY_FOLDERS = booleanPreferencesKey("show_empty_cloud_folders")
-        val KEY_SHOW_ALL_RESTORE_FOLDERS = booleanPreferencesKey("show_all_restore_folders")
         val KEY_SETUP_COMPLETE = booleanPreferencesKey("setup_complete")
         val KEY_BACKFILL_CHECKED = booleanPreferencesKey("upgrade_backfill_checked")
         val KEY_PAUSED = booleanPreferencesKey("backup_paused")

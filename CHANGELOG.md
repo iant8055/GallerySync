@@ -5,10 +5,11 @@ Every change since version 26 (0.3.25), the last build the Closed Testing group 
 
 ## Next version — not built yet
 
-**Restore: Show all backup folders** (Ian, 24 Nov 2026)
-- Restore now lists only the OneDrive backup folder set in Settings. A second copy of GallerySync (in Samsung's Secure Folder) backing up to its own folder no longer shows the main gallery's albums.
-- New switch Settings → Restore → *Show all backup folders*, off by default: on, Restore also lists earlier backup folders and `Samsung Gallery/DCIM`, for a file that is not in the current one.
-- The check that stops files being uploaded twice still looks in all of them, whatever the switch says.
+**Restore: only your backup folder, and always your own files** (Ian, 24-25 Nov 2026)
+- Restore lists only the OneDrive backup folder set in Settings. A second copy of GallerySync (in Samsung's Secure Folder) backing up to its own folder no longer shows the main gallery's albums.
+- Files this copy backed up or optimized are still offered wherever they are in OneDrive, including a folder it used before the backup folder was changed, so an optimized photo can always get its original back.
+- Anything else in an older folder: open it in the OneDrive app.
+- The check that stops files being uploaded twice still looks in every earlier folder.
 
 ## Version 42 (0.3.41) — 24 Nov 2026, built, not uploaded
 

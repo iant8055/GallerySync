@@ -27,9 +27,23 @@ object RestoreStillInOneDrive {
         return rows.filter { row ->
             if (row.location != BackupLocation.ONEDRIVE) return@filter true
             val index = folders[row.album.lowercase()] ?: return@filter false
-            val size = row.remoteSizeBytes ?: row.sizeBytes
-            val byId = row.remoteItemId?.let { id -> index.values.firstOrNull { it.id == id } }
-            listOfNotNull(byId, index[row.displayName]).any { it.sizeBytes == null || it.sizeBytes == size }
+            isIn(row, index)
         }
     }
+
+    /** Ids of the [rows] that [index] (one folder's files by name) holds: by recorded id or by name, at the recorded size. */
+    fun foundIn(rows: List<BackupEntryEntity>, index: Map<String, RemoteFileRef>): Set<String> =
+        rows.filter { isIn(it, index) }.mapTo(HashSet()) { it.id }
+
+    private fun isIn(row: BackupEntryEntity, index: Map<String, RemoteFileRef>): Boolean {
+        val size = row.remoteSizeBytes ?: row.sizeBytes
+        val byId = row.remoteItemId?.let { id -> index.values.firstOrNull { it.id == id } }
+        return listOfNotNull(byId, index[row.displayName]).any { it.sizeBytes == null || it.sizeBytes == size }
+    }
 }
+
+/**
+ * What [BackupEngine.ownFilesInEarlierFolders] found: the row ids an earlier backup folder holds, and the albums that
+ * could not be listed in one of them (their rows are kept, since that is not an answer).
+ */
+data class EarlierFolders(val found: Set<String>, val unknownAlbums: Set<String>)

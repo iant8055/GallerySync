@@ -1,14 +1,14 @@
-# Guide handoff: Settings → Restore → Show all backup folders (24 Nov 2026)
+# Guide handoff: what Restore lists (Ian, 24-25 Nov 2026)
 
-App change (Ian, 24 Nov 2026). Please add a topic and a (?) for the new switch, all 7 languages.
+**There is no switch.** *Show all backup folders* was built on 24 Nov and removed on 25 Nov before it shipped; no topic for it.
 
-- **Restore lists only the OneDrive backup folder set in Settings** (Settings → Backup → Clouds → Backup folder). Before, it also listed earlier backup folders and `Samsung Gallery/DCIM`, always.
-- **New switch: Settings → Restore → Show all backup folders**, off by default, under *Show empty folders*. On: Restore also lists earlier backup folders and `Samsung Gallery/DCIM`, for a file that is not in the current backup folder.
-- Why: a second copy of GallerySync (in Samsung's Secure Folder) backing up to its own folder was showing the main gallery's albums too.
-- What does **not** change: the check before uploading still looks in every folder, so nothing is sent twice whatever the switch says. Changing the backup folder still moves nothing.
-- The other Clouds already list only their own Settings folder; the switch is about OneDrive.
-- Restore-related topics that say Restore looks in `Samsung Gallery/DCIM` or in every earlier folder need the same correction (check restore-overview and the Change dialog topic, "GallerySync keeps looking in the old folder too": still true for uploads, no longer for Restore unless the switch is on).
+The rule now, for the Restore topics (check restore-overview and dialog-destination, and anything else that says Restore looks in `Samsung Gallery/DCIM` or in every earlier folder):
 
-App string: `settings_show_all_restore_folders` ("Show all backup folders"; translated in values-*/strings.xml). Once the topic exists, tell the app session the HelpTopic id so the row gets its (?).
+- **Restore lists the OneDrive backup folder set in Settings** (Settings → Backup → Clouds → Backup folder), and only that one, for files GallerySync did not send.
+- **Files this copy of GallerySync backed up or optimized are always offered**, wherever they are in OneDrive, including a folder it used before the backup folder was changed. That keeps Restore able to put an original back in place of its optimized copy.
+- **Anything else in an older folder: use the OneDrive app.** (It downloads a copy; it does not replace an optimized one.)
+- Why: a second copy of GallerySync (in Samsung's Secure Folder) backing up to its own folder was showing the main gallery's albums.
+- Unchanged: the check before uploading still looks in every earlier folder, so nothing is sent twice. The Change dialog's "GallerySync keeps looking in the old folder too" stays true for uploads.
+- The other Clouds already listed only their own Settings folder.
 
-Same procedure: en_hash, LAST_UPDATED plus all 7 LAST_UPDATED_BY_LOCALE, build_guide.py, ./gradlew test, stage by name **including the generated help_topics.xml**, delete this file in that commit.
+No new HelpTopic. Same procedure: en_hash, LAST_UPDATED plus all 7 LAST_UPDATED_BY_LOCALE, build_guide.py, ./gradlew test, stage by name including the generated help_topics.xml, delete this file in that commit.

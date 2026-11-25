@@ -1251,8 +1251,8 @@ class BackupEngine @Inject constructor(
      * A folder that cannot be read sets [DriveListing.couldNotList] and is left out, rather than
      * being treated as empty.
      */
-    suspend fun listDriveFolders(allFolders: Boolean = false): DriveListing = withContext(dispatcher) {
-        val roots = restoreRoots(allFolders)
+    suspend fun listDriveFolders(): DriveListing = withContext(dispatcher) {
+        val roots = listOf(destinationRoot())
         val folders = cloudFolders(roots)
             ?: return@withContext DriveListing(emptyMap(), couldNotList = true)
 
@@ -2191,13 +2191,31 @@ class BackupEngine @Inject constructor(
         RemoteRoots.searchOrder(destinationRoot(), settings.current().pastDestinationRoots)
 
     /**
-     * The roots the Restore tab lists: only the backup folder set in Settings, unless Settings > Restore >
-     * Show all backup folders is on, when it is the upload check's whole search set. Ian, 24 Nov 2026: a copy
-     * in Samsung's Secure Folder backing up to its own folder listed the main gallery's albums, because
-     * `Samsung Gallery/DCIM` is always searched. Only what Restore lists changes; the upload check is untouched.
+     * This copy's own Restore rows that the current backup folder does not hold, looked for in the folders it
+     * used before (earlier destinations and `Samsung Gallery/DCIM`). Ian, 25 Nov 2026: Restore lists only the
+     * backup folder set in Settings, but a file this copy backed up or optimized stays restorable wherever it is,
+     * because only Restore can put its original back in place of the optimized copy.
+     *
+     * Listed per album, only for albums with such rows, and matched by [RestoreStillInOneDrive.foundIn]: the id
+     * recorded at upload, or the name, at the recorded size. Nothing here can offer a file this copy has no row
+     * for, so another copy's albums never appear. An album that could not be listed in some folder comes back
+     * in [EarlierFolders.unknownAlbums], and its rows stay offered: failing to ask is not evidence of absence.
      */
-    private suspend fun restoreRoots(all: Boolean): List<String> =
-        if (all) searchRoots() else listOf(destinationRoot())
+    suspend fun ownFilesInEarlierFolders(rows: List<BackupEntryEntity>): EarlierFolders = withContext(dispatcher) {
+        val roots = searchRoots().drop(1)
+        if (rows.isEmpty() || roots.isEmpty()) return@withContext EarlierFolders(emptySet(), emptySet())
+        val found = HashSet<String>()
+        val unknown = HashSet<String>()
+        for ((album, inAlbum) in rows.groupBy { it.album }) {
+            for (root in roots) {
+                val index = indexForPath("$root/$album", album) {}
+                if (index == null) { unknown += album; continue }
+                found += RestoreStillInOneDrive.foundIn(inAlbum, index)
+            }
+        }
+        Logger.d(TAG, "ownFilesInEarlierFolders: ${found.size} of ${rows.size} found, ${unknown.size} albums unknown")
+        EarlierFolders(found, unknown)
+    }
 
     private suspend fun indexAcross(
         roots: List<String>,

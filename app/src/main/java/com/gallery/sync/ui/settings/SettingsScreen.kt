@@ -569,12 +569,6 @@ fun SettingsScreen(
             checked = state.showEmptyCloudFolders,
             onCheckedChange = viewModel::setShowEmptyCloudFolders
         )
-        SettingDivider()
-        SettingSwitch(
-            label = stringResource(R.string.settings_show_all_restore_folders),
-            checked = state.showAllRestoreFolders,
-            onCheckedChange = viewModel::setShowAllRestoreFolders
-        )
 
         // ── Archive ──────────────────────────────────────────────────────────
         SectionHeader(

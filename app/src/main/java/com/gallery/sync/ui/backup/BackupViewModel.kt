@@ -457,8 +457,6 @@ data class BackupUiState(
     val cameraUnsaved: CameraOptimizeChoice? = null,
     /** Whether the restore screen lists cloud folders that hold nothing. */
     val showEmptyCloudFolders: Boolean = false,
-    /** Whether Restore lists every earlier backup folder, not only the one set in Settings. */
-    val showAllRestoreFolders: Boolean = false,
     /** What the Archive tab's age filter starts at. See `ArchiveAge`. */
     val archiveDefaultAge: ArchiveAge = ArchiveAge.DEFAULT,
     /** Whether a notification is sent when files in an Archive album have come of age. */
@@ -650,7 +648,6 @@ class BackupViewModel @Inject constructor(
                     allowMeteredNetwork = prefs.allowMeteredNetwork,
                     openNotOnPhone = prefs.openNotOnPhone,
                     showEmptyCloudFolders = prefs.showEmptyCloudFolders,
-                    showAllRestoreFolders = prefs.showAllRestoreFolders,
                     archiveDefaultAge = prefs.archiveDefaultAge,
                     archiveNotifyEnabled = prefs.archiveNotifyEnabled,
                     cameraSpecialEnabled = prefs.cameraSpecialEnabled,
@@ -1409,10 +1406,6 @@ class BackupViewModel @Inject constructor(
      */
     fun setShowEmptyCloudFolders(show: Boolean) {
         viewModelScope.launch { settings.setShowEmptyCloudFolders(show) }
-    }
-
-    fun setShowAllRestoreFolders(show: Boolean) {
-        viewModelScope.launch { settings.setShowAllRestoreFolders(show) }
     }
 
     /** What the Archive tab's age filter starts at. See [ArchiveAge]. */

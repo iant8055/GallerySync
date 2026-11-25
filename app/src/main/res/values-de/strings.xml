@@ -175,7 +175,6 @@
     <string name="settings_rate_detail">Öffnet die Seite von GallerySync bei Google Play.</string>
     <string name="settings_restore">Wiederherstellen</string>
     <string name="settings_show_empty_folders">Leere Ordner anzeigen</string>
-    <string name="settings_show_all_restore_folders">Alle Sicherungsordner anzeigen</string>
     <string name="settings_sync">Optimierung</string>
     <string name="sign_out_action">Abmelden</string>
     <string name="sources_add">Ordner hinzufügen</string>

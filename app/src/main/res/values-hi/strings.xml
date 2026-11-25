@@ -175,7 +175,6 @@
     <string name="settings_rate_detail">Google Play पर GallerySync का पेज खोलता है।</string>
     <string name="settings_restore">वापस लाएँ</string>
     <string name="settings_show_empty_folders">खाली फ़ोल्डर दिखाएँ</string>
-    <string name="settings_show_all_restore_folders">सभी बैकअप फ़ोल्डर दिखाएँ</string>
     <string name="settings_sync">ऑप्टिमाइज़ेशन</string>
     <string name="sign_out_action">साइन आउट करें</string>
     <string name="sources_add">फ़ोल्डर जोड़ें</string>

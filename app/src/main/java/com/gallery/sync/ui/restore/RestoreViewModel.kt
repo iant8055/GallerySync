@@ -10,6 +10,7 @@ import com.gallery.sync.data.remote.cloud.CloudConnections
 import com.gallery.sync.domain.backup.BackupLocation
 import com.gallery.sync.domain.backup.BackupEngine
 import com.gallery.sync.domain.backup.DriveListing
+import com.gallery.sync.domain.backup.EarlierFolders
 import com.gallery.sync.domain.backup.DownloadMissingFile
 import com.gallery.sync.domain.backup.RestoreInPlaceResult
 import com.gallery.sync.domain.backup.RestoreProxyInPlace
@@ -258,10 +259,13 @@ class RestoreViewModel @Inject constructor(
      */
     private var driveListing: DriveListing? = null
     /**
-     * What [driveListing] was read for ([listingKey]): the backup folder and whether Show all backup folders was on.
-     * Changing either in Settings makes it the wrong answer, so it is dropped and the drive read again.
+     * The backup folder [driveListing] was read from. Changing it in Settings makes the listing the wrong answer, so
+     * it is dropped and the drive read again (before 24 Nov 2026 a held listing outlived the change).
      */
     private var driveListingKey: String? = null
+
+    /** [BackupEngine.ownFilesInEarlierFolders]'s answer for [driveListing], and the row ids it was asked about. */
+    private var earlier: Triple<DriveListing, Set<String>, EarlierFolders>? = null
     private var driveListedAt = 0L
 
     /**
@@ -307,8 +311,7 @@ class RestoreViewModel @Inject constructor(
             // Nothing is blanked while re-reading: the figure shows a dash and the bar runs only the
             // very first time, when there is nothing yet to show.
             val prefs = settings.current()
-            val allFolders = prefs.showAllRestoreFolders
-            val key = listingKey(allFolders)
+            val key = engine.destinationPath()
             if (driveListing != null && driveListingKey != key) driveListing = null
             _state.value = _state.value.copy(
                 loading = _state.value.rows.isEmpty(),
@@ -356,7 +359,7 @@ class RestoreViewModel @Inject constructor(
             // gone stale, or the user pressed Refresh.
             if (!askDrive) return@launch
 
-            val listing = runCatching { engine.listDriveFolders(allFolders) }.getOrNull()
+            val listing = runCatching { engine.listDriveFolders() }.getOrNull()
             if (listing == null) {
                 publishFrom(held, checkingCloud = false)
                 _state.value = _state.value.copy(checkingCloud = false, cloudUnavailable = true)
@@ -374,9 +377,15 @@ class RestoreViewModel @Inject constructor(
         }
     }
 
-    /** What a stored listing is filed under: the folder it was read from, and whether it covered all of them. */
-    private suspend fun listingKey(all: Boolean): String =
-        if (all) "all:" + engine.destinationPath() else engine.destinationPath()
+    /** Asked once per listing and set of rows; publishing again with the same ones reuses the answer. */
+    private suspend fun earlierFor(listing: DriveListing, rows: List<BackupEntryEntity>): EarlierFolders {
+        val ids = rows.mapTo(HashSet()) { it.id }
+        earlier?.let { (held, asked, answer) -> if (held === listing && asked.containsAll(ids)) return answer }
+        val answer = runCatching { engine.ownFilesInEarlierFolders(rows) }
+            .getOrElse { EarlierFolders(emptySet(), rows.mapTo(HashSet()) { it.album }) }
+        earlier = Triple(listing, ids, answer)
+        return answer
+    }
 
     private fun isStale(): Boolean = System.currentTimeMillis() - driveListedAt > DRIVE_LISTING_TTL_MILLIS
 
@@ -397,7 +406,16 @@ class RestoreViewModel @Inject constructor(
         // A row whose OneDrive copy the listing no longer holds is not offered: it could not be brought back.
         val ledger = ledgerRows().let { rows ->
             val kept = RestoreStillInOneDrive.keep(rows.map { it.entry }, listing).mapTo(HashSet()) { it.id }
-            rows.filter { it.id in kept && it.id !in goneElsewhere }
+            // This copy's own OneDrive files that the current backup folder does not hold may be in a folder it used
+            // before (Ian, 25 Nov 2026): still offered, since only Restore can put an original back in place.
+            val notHere = rows.map { it.entry }
+                .filter { it.id !in kept && it.location == BackupLocation.ONEDRIVE }
+                .distinctBy { it.id }
+            val elsewhere = earlierFor(listing, notHere)
+            rows.filter {
+                (it.id in kept || it.id in elsewhere.found || it.album in elsewhere.unknownAlbums) &&
+                    it.id !in goneElsewhere
+            }
         }
         val known = ledger.mapTo(HashSet()) { it.album.lowercase() + "/" + it.displayName }
         val fromDrive = drive.missing.map { RestoreRow(it, RowKind.Download) } +
