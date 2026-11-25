@@ -257,6 +257,11 @@ class RestoreViewModel @Inject constructor(
      * once and is refreshed behind it if it is older than the time-to-live.
      */
     private var driveListing: DriveListing? = null
+    /**
+     * What [driveListing] was read for ([listingKey]): the backup folder and whether Show all backup folders was on.
+     * Changing either in Settings makes it the wrong answer, so it is dropped and the drive read again.
+     */
+    private var driveListingKey: String? = null
     private var driveListedAt = 0L
 
     /**
@@ -301,9 +306,13 @@ class RestoreViewModel @Inject constructor(
         refreshJob = viewModelScope.launch {
             // Nothing is blanked while re-reading: the figure shows a dash and the bar runs only the
             // very first time, when there is nothing yet to show.
+            val prefs = settings.current()
+            val allFolders = prefs.showAllRestoreFolders
+            val key = listingKey(allFolders)
+            if (driveListing != null && driveListingKey != key) driveListing = null
             _state.value = _state.value.copy(
                 loading = _state.value.rows.isEmpty(),
-                showEmptyFolders = settings.current().showEmptyCloudFolders
+                showEmptyFolders = prefs.showEmptyCloudFolders
             )
 
             // Without OneDrive there is no drive to list, and asking anyway ended in a warning about OneDrive
@@ -325,9 +334,10 @@ class RestoreViewModel @Inject constructor(
             // does not shrink to the ledger's rows while the drive is asked again.
             // After a launch there is nothing in memory yet, so take the last listing from disk.
             if (driveListing == null) {
-                listingStore.load(engine.destinationPath())?.let {
+                listingStore.load(key)?.let {
                     driveListing = it.listing
                     driveListedAt = it.listedAtMillis
+                    driveListingKey = key
                 }
             }
 
@@ -346,22 +356,27 @@ class RestoreViewModel @Inject constructor(
             // gone stale, or the user pressed Refresh.
             if (!askDrive) return@launch
 
-            val listing = runCatching { engine.listDriveFolders() }.getOrNull()
+            val listing = runCatching { engine.listDriveFolders(allFolders) }.getOrNull()
             if (listing == null) {
                 publishFrom(held, checkingCloud = false)
                 _state.value = _state.value.copy(checkingCloud = false, cloudUnavailable = true)
                 return@launch
             }
             driveListing = listing
+            driveListingKey = key
             driveListedAt = System.currentTimeMillis()
             // Kept for the next launch, unless the read was partial: a listing with folders missing
             // would greet the next launch with a shorter list than the drive holds.
             if (!listing.couldNotList) {
-                listingStore.save(listing, driveListedAt, engine.destinationPath())
+                listingStore.save(listing, driveListedAt, key)
             }
             publishFrom(listing, checkingCloud = false)
         }
     }
+
+    /** What a stored listing is filed under: the folder it was read from, and whether it covered all of them. */
+    private suspend fun listingKey(all: Boolean): String =
+        if (all) "all:" + engine.destinationPath() else engine.destinationPath()
 
     private fun isStale(): Boolean = System.currentTimeMillis() - driveListedAt > DRIVE_LISTING_TTL_MILLIS
 

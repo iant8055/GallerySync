@@ -1251,15 +1251,16 @@ class BackupEngine @Inject constructor(
      * A folder that cannot be read sets [DriveListing.couldNotList] and is left out, rather than
      * being treated as empty.
      */
-    suspend fun listDriveFolders(): DriveListing = withContext(dispatcher) {
-        val folders = cloudFolders()
+    suspend fun listDriveFolders(allFolders: Boolean = false): DriveListing = withContext(dispatcher) {
+        val roots = restoreRoots(allFolders)
+        val folders = cloudFolders(roots)
             ?: return@withContext DriveListing(emptyMap(), couldNotList = true)
 
         val byFolder = LinkedHashMap<String, Map<String, RemoteFileRef>>()
         var couldNotList = false
         for (folder in folders) {
             if (folder.isEmpty) continue
-            val index = remoteIndexFor(folder.name)
+            val index = indexAcross(roots, folder.name)
             if (index == null) couldNotList = true else byFolder[folder.name] = index
         }
         DriveListing(byFolder, couldNotList)
@@ -1803,10 +1804,10 @@ class BackupEngine @Inject constructor(
      * `null` when a root could not be listed, which the caller must not render as "you have no
      * backups". Failing to ask is not evidence of absence.
      */
-    suspend fun cloudFolders(): List<RestorableFolder>? = withContext(dispatcher) {
+    suspend fun cloudFolders(roots: List<String>? = null): List<RestorableFolder>? = withContext(dispatcher) {
         val found = mutableMapOf<String, RemoteMediaNode.Folder>()
 
-        for (root in RemoteRoots.searchOrder(destinationRoot(), settings.current().pastDestinationRoots)) {
+        for (root in roots ?: searchRoots()) {
             var page = when (val result = repository.listFolderByPath(root)) {
                 is DataResult.Success -> result.value
                 is DataResult.Failure -> {
@@ -2183,10 +2184,29 @@ class BackupEngine @Inject constructor(
     internal suspend fun remoteIndexFor(
         album: String,
         onPartial: () -> Unit = {}
+    ): Map<String, RemoteFileRef>? = indexAcross(searchRoots(), album, onPartial)
+
+    /** Every root the upload check searches: the destination, earlier destinations, `Samsung Gallery/DCIM`. */
+    private suspend fun searchRoots(): List<String> =
+        RemoteRoots.searchOrder(destinationRoot(), settings.current().pastDestinationRoots)
+
+    /**
+     * The roots the Restore tab lists: only the backup folder set in Settings, unless Settings > Restore >
+     * Show all backup folders is on, when it is the upload check's whole search set. Ian, 24 Nov 2026: a copy
+     * in Samsung's Secure Folder backing up to its own folder listed the main gallery's albums, because
+     * `Samsung Gallery/DCIM` is always searched. Only what Restore lists changes; the upload check is untouched.
+     */
+    private suspend fun restoreRoots(all: Boolean): List<String> =
+        if (all) searchRoots() else listOf(destinationRoot())
+
+    private suspend fun indexAcross(
+        roots: List<String>,
+        album: String,
+        onPartial: () -> Unit = {}
     ): Map<String, RemoteFileRef>? {
         val merged = mutableMapOf<String, RemoteFileRef>()
 
-        for (root in RemoteRoots.searchOrder(destinationRoot(), settings.current().pastDestinationRoots)) {
+        for (root in roots) {
             // One unreachable root makes the whole answer unknown. Merging what did list would
             // under-report what is backed up, and under-reporting here means re-uploading files the
             // user already has — the same "failing to ask is not evidence of absence" rule that the

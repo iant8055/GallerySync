@@ -27,6 +27,7 @@
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
     <string name="settings_show_empty_folders">Show empty folders</string>
+    <string name="settings_show_all_restore_folders">Show all backup folders</string>
     <!--
         Video optimizing, added 28 Aug 2026, and both halves of the wording were Ian's.
 

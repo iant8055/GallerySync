@@ -3,6 +3,13 @@
 Every change since version 26 (0.3.25), the last build the Closed Testing group had. The short notes Play shows to users
 (500 characters per language) are in `release-notes/`; this file is the full record.
 
+## Next version — not built yet
+
+**Restore: Show all backup folders** (Ian, 24 Nov 2026)
+- Restore now lists only the OneDrive backup folder set in Settings. A second copy of GallerySync (in Samsung's Secure Folder) backing up to its own folder no longer shows the main gallery's albums.
+- New switch Settings → Restore → *Show all backup folders*, off by default: on, Restore also lists earlier backup folders and `Samsung Gallery/DCIM`, for a file that is not in the current one.
+- The check that stops files being uploaded twice still looks in all of them, whatever the switch says.
+
 ## Version 42 (0.3.41) — 24 Nov 2026, built, not uploaded
 
 **Album page: locked and do not back up** (Ian, 24 Nov 2026)

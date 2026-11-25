@@ -177,6 +177,7 @@
     <string name="settings_rate_detail">Ouvre la fiche de GallerySync sur Google Play.</string>
     <string name="settings_restore">Restauration</string>
     <string name="settings_show_empty_folders">Afficher les dossiers vides</string>
+    <string name="settings_show_all_restore_folders">Afficher tous les dossiers de sauvegarde</string>
     <string name="settings_sync">Optimisation</string>
     <string name="sign_out_action">Se déconnecter</string>
     <string name="sources_add">Ajouter un dossier</string>

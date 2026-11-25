@@ -173,6 +173,7 @@
     <string name="settings_rate_detail">Google Play の GallerySync のページを開きます。</string>
     <string name="settings_restore">復元</string>
     <string name="settings_show_empty_folders">空のフォルダを表示</string>
+    <string name="settings_show_all_restore_folders">すべてのバックアップフォルダを表示</string>
     <string name="settings_sync">最適化</string>
     <string name="sign_out_action">ログアウト</string>
     <string name="sources_add">フォルダを追加</string>
