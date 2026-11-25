@@ -3,15 +3,13 @@
 Every change since version 26 (0.3.25), the last build the Closed Testing group had. The short notes Play shows to users
 (500 characters per language) are in `release-notes/`; this file is the full record.
 
-## Next version — not built yet
+## Version 42 (0.3.41) — 25 Nov 2026, built, not uploaded
 
 **Restore: only your backup folder, and always your own files** (Ian, 24-25 Nov 2026)
 - Restore lists only the OneDrive backup folder set in Settings. A second copy of GallerySync (in Samsung's Secure Folder) backing up to its own folder no longer shows the main gallery's albums.
 - Files this copy backed up or optimized are still offered wherever they are in OneDrive, including a folder it used before the backup folder was changed, so an optimized photo can always get its original back.
 - Anything else in an older folder: open it in the OneDrive app.
 - The check that stops files being uploaded twice still looks in every earlier folder.
-
-## Version 42 (0.3.41) — 24 Nov 2026, built, not uploaded
 
 **Album page: locked and do not back up** (Ian, 24 Nov 2026)
 - Swipe left on a file that is backed up now **locks** it: *✓ backed up · locked*. It is never sent again, optimized or archived, and it is still checked: if its Cloud copy disappears it is flagged like any other file. Swipe right unlocks it.
