@@ -3,7 +3,7 @@
 Every change since version 26 (0.3.25), the last build the Closed Testing group had. The short notes Play shows to users
 (500 characters per language) are in `release-notes/`; this file is the full record.
 
-## Version 42 (0.3.41) — 25 Nov 2026, built, not uploaded
+## Version 42 (0.3.41) — 25 Nov 2026, uploaded
 
 **Restore: only your backup folder, and always your own files** (Ian, 24-25 Nov 2026)
 - Restore lists only the OneDrive backup folder set in Settings. A second copy of GallerySync (in Samsung's Secure Folder) backing up to its own folder no longer shows the main gallery's albums.
