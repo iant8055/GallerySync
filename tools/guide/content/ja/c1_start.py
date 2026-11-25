@@ -49,22 +49,22 @@ GallerySync のサーバーはありません。ファイルは、スマート�
         "title": "クイックスタート",
         "body": """1. セットアップを完了します：Cloud にログインし、写真へのアクセスを許可し、フォルダと Backup Plan を選びます。[[setup-overview]]を参照してください。
 2. **Albums** タブで、アルバムのモードボタンをタップし、**Backup** を選びます。
-3. 新しい写真は自動的にバックアップされます。すぐにバックアップするには **Sync now** を押します。
+3. 新しい写真は自動的にバックアップされます。すぐにバックアップするには **Back Up Now** を押します。
 4. 各アルバムの最後の行を確認します。Cloud が確認したファイル数が表示されます。
-5. 容量が必要なときは、アルバムを最適化するなら **Sync** を、スマートフォンから移すなら **Archive** を選びます。
+5. 容量が必要なときは、アルバムを最適化するなら **Optimize** を、スマートフォンから移すなら **Archive** を選びます。
 6. ファイルをフルサイズで戻したいときは、**Restore** タブを使います。""",
-        "en_hash": "201e473222d36f7f",
+        "en_hash": "0698d8c82156ffa3",
     },
     "words-you-will-see": {
         "title": "よく出てくる用語",
         "body": """• **Album**：スマートフォン上の、写真と動画が入ったフォルダ。
-• **Mode**：アルバムに対して行われる処理：**Off**、**Backup**、**Sync**、**Archive**。[[modes-in-depth]]を参照してください。
+• **Mode**：アルバムに対して行われる処理：**Off**、**Backup**、**Optimize**、**Archive**。[[modes-in-depth]]を参照してください。
 • **Cloud**：OneDrive、Google Photos、Google Drive、Dropbox、pCloud、IDrive e2、Backblaze B2 のいずれか。[[setup-cloud]]を参照してください。
 • **Pairing**：スマートフォン上の最上位の各フォルダが、どの Cloud に送られるか。**DCIM**、**Pictures**、そのほかスマートフォンが写真を保存するフォルダを、このガイドでは最上位フォルダと呼びます。[[settings-destination]]を参照してください。
 • **Optimize**：スマートフォン上のコピーをより小さなものに置き換えること。元のファイルは Cloud に残ります。[[how-optimizing-works]]を参照してください。
 • **Verified**：Cloud が、同じサイズでそのファイルを保持していると確認した状態。[[how-verification-works]]を参照してください。
 • **ゴミ箱**：削除されたファイルが待機する場所。[[where-deleted-files-go]]を参照してください。
 • **Rescan**：スマートフォンと Cloud をもう一度調べて、最新の数字を取得すること。""",
-        "en_hash": "7fb26c96ebb57608",
+        "en_hash": "9f80fff96c2157db",
     },
 }

@@ -26,11 +26,11 @@ TRANSLATIONS = {
     },
     "albums-filter": {
         "title": "All Albums と 4 つのモードボタン",
-        "body": """• **Backup**、**Sync**、**Archive**、**Off** をタップすると、そのモードのアルバムだけが表示されます。
+        "body": """• **Backup**、**Optimize**、**Archive**、**Off** をタップすると、そのモードのアルバムだけが表示されます。
 • **All Albums**（または同じボタンをもう一度）をタップすると、すべて表示されます。
 
 絞り込みで変わるのは、表示だけです。モードを変えるには、アルバムのカードにあるボタンを使います。[[modes-in-depth]]を参照してください。""",
-        "en_hash": "d4865c5cf08d3857",
+        "en_hash": "fce05e6ad448f530",
     },
     "albums-totals": {
         "title": "Album Mode Count",
@@ -44,10 +44,10 @@ TRANSLATIONS = {
     },
     "albums-optimized-line": {
         "title": "Optimized and Saved",
-        "body": """**Sync** を選択しているとき：Sync アルバムで最適化されたファイルの数と、節約された容量が表示されます。
+        "body": """**Optimize** を選択しているとき：Optimize アルバムで最適化されたファイルの数と、節約された容量が表示されます。
 
 元のファイルは Cloud に残ります。**Restore** で戻せます。[[how-optimizing-works]]を参照してください。""",
-        "en_hash": "701f3a7e8e63d389",
+        "en_hash": "280df5abf38d7971",
     },
     "albums-archive-lines": {
         "title": "Files archived and Scheduled to leave this phone",
@@ -59,20 +59,20 @@ TRANSLATIONS = {
         "en_hash": "00b01adb4a7cf037",
     },
     "albums-run-controls": {
-        "title": "Sync now, Rescan, Pause, Resume and Stop",
+        "title": "Back Up Now, Rescan, Pause, Resume and Stop",
         "body": """## 何も実行していないとき
-• **Sync now**：今すぐバックアップします。Settings で最適化のスイッチがオンで、その **モード** が **手動** の場合は、最適化も行います（[[settings-optimize-mode]]を参照）。送るものも最適化するものもないときは、グレーアウトします。
+• **Back Up Now**：今すぐバックアップします。Settings で最適化のスイッチがオンで、その **モード** が **手動** の場合は、最適化も行います（[[settings-optimize-mode]]を参照）。送るものも最適化するものもないときは、グレーアウトします。
 • **Rescan**：スマートフォンを調べ、OneDrive にもう一度問い合わせます。
 
 ## バックアップの実行中
-• 進行状況は **Syncing** とパーセンテージで表示されます（ファイル数ではなく、データ量ベース）。
+• 進行状況は **Backing up now** とパーセンテージで表示されます（ファイル数ではなく、データ量ベース）。
 • **Pause**：**Resume** を押すまで、すべてのバックアップを保留します。
 • **Stop**：今回の実行を終了します。自動バックアップは続きます。
 
 ## 知っておくと便利なこと
-• **Sync now** は充電を待ちませんが、Wi-Fi の設定には従います。[[settings-mobile-data]]を参照してください。
-• **Backup**、**Sync**、**Archive** に設定されたすべてのアルバムをバックアップしますが、最適化するのは **Sync** アルバムのファイルだけです。""",
-        "en_hash": "4c3628a3516a9b52",
+• **Back Up Now** は充電を待ちませんが、Wi-Fi の設定には従います。[[settings-mobile-data]]を参照してください。
+• **Backup**、**Optimize**、**Archive** に設定されたすべてのアルバムをバックアップしますが、最適化するのは **Optimize** アルバムのファイルだけです。""",
+        "en_hash": "7018ccad25f0b316",
     },
     "albums-status-line": {
         "title": "アップロードの進行状況とステータスメッセージ",
@@ -84,9 +84,9 @@ TRANSLATIONS = {
     "albums-list": {
         "title": "Albums タブ",
         "body": """## ヘッダー
-• **Backup**、**Sync**、**Archive**、**Off** をタップすると、そのモードのアルバムだけが表示されます。**All Albums** をタップするとすべて表示に戻ります。
+• **Backup**、**Optimize**、**Archive**、**Off** をタップすると、そのモードのアルバムだけが表示されます。**All Albums** をタップするとすべて表示に戻ります。
 • ボタンの下の行は、モードごとの合計を示します。
-• カード下の **▲ Hide Details ▲** はモード合計の行を隠し、実行中であればアップロードの行とそのバーも隠します。**▼ Show Details ▼** で戻ります。**All Albums**、4 つのモードボタン、**Sync now** / **Rescan** は残り、実行中は **Syncing…**、**Pause**、**Stop** も残ります。タブは選択を覚えます。
+• カード下の **▲ Hide Details ▲** はモード合計の行を隠し、実行中であればアップロードの行とそのバーも隠します。**▼ Show Details ▼** で戻ります。**All Albums**、4 つのモードボタン、**Back Up Now** / **Rescan** は残り、実行中は **Backing up now…**、**Pause**、**Stop** も残ります。タブは選択を覚えます。
 
 ## アルバムカード
 • 電話上のアルバムの**名前、ファイル数、サイズ**。
@@ -96,7 +96,7 @@ TRANSLATIONS = {
 • **グレーの行**（ある場合のみ）：**N files not backed up by choice** — 左にスワイプしたファイルとロックされたファイル。尊重され、何も使いません。
 • **モードボタン**（右側）：タップしてアルバムのモードを変更します。Archive は先に確認を求めます。アルバムの Cloud がそのモードに対応できない場合は、カードに表示されます。
 • アルバムのファイルを見るには、**カードをタップ**します。[[album-detail]] を参照。""",
-        "en_hash": "348d7189c69028ae",
+        "en_hash": "0b9328a4170e83e0",
     },
     "album-detail": {
         "title": "アルバムのファイル一覧",
@@ -175,7 +175,7 @@ TRANSLATIONS = {
     },
     "album-camera-optimize": {
         "title": "カメラのフォルダの古い写真と動画を最適化する",
-        "body": """Settings の **カメラの Sync**（[[settings-section-camera]]）で選んだ **カメラのフォルダ** にだけ、これらのコントロールがあります。
+        "body": """Settings の **カメラフォルダ**（[[settings-section-camera]]）で選んだ **カメラのフォルダ** にだけ、これらのコントロールがあります。
 
 ## ファイルを選択する
 • **Select Photos/Videos older than**：**½** から **9** までの数字と、**hour**、**day**、**week**、**month**、**year**、または **All** のいずれかの単位。
@@ -183,15 +183,15 @@ TRANSLATIONS = {
 • ファイルを右にスワイプすると選択、左にスワイプすると選択解除になります。カードに、選択した数と推定節約量が表示されます。
 
 ## ボタン
-• **Sync now**：フォルダ内で待機中のものをバックアップしてから、選択したファイルだけを最適化します。
+• **Back Up Now**：フォルダ内で待機中のものをバックアップしてから、選択したファイルだけを最適化します。
 • **Rescan**：Cloud をもう一度確認します。
 
 ## 知っておくと便利なこと
 • OneDrive がフルサイズで確認したファイルだけが、選択できます。
-• **Sync now** を押すまで、何も最適化されません。新しい写真はそのままです。
-• カメラのフォルダには **Sync** モードがなく、Settings の最適化スイッチも影響しません。
+• **Back Up Now** を押すまで、何も最適化されません。新しい写真はそのままです。
+• カメラのフォルダには **Optimize** モードがなく、Settings の最適化スイッチも影響しません。
 • 選択を変更したまま離れると、それを既定にするかどうか尋ねられます。""",
-        "en_hash": "19ad4bbf62950ae9",
+        "en_hash": "10e1e3ba1e9982e2",
     },
     "album-camera-select": {
         "title": "カメラのフォルダのファイルを選択する",
@@ -199,10 +199,10 @@ TRANSLATIONS = {
 
 • **Photos**、**Videos**、および期間で、一致するものがすべて選択されます。
 • 右にスワイプで選択、左にスワイプで選択解除。
-• **Sync now** は、選択したファイルだけを最適化します。
+• **Back Up Now** は、選択したファイルだけを最適化します。
 
 グレーのファイルは選択できません。OneDrive でまだ確認されていないか、すでに最適化されています。[[album-camera-optimize]]を参照してください。""",
-        "en_hash": "ec8dfe5b2063e196",
+        "en_hash": "0bfa66dc8a4265bf",
     },
     "album-merge-warning": {
         "title": "重複したアルバム名を検出しました",

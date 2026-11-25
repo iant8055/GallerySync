@@ -49,22 +49,22 @@ Touchez n'importe quel **(?)** pour une courte explication. Le guide complet est
         "title": "Démarrage rapide",
         "body": """1. Terminez la configuration : connectez-vous à votre Cloud, autorisez l'accès à vos photos, choisissez des dossiers et un Plan de sauvegarde. Voir [[setup-overview]].
 2. Dans l'onglet **Albums**, touchez le bouton de mode d'un album et choisissez **Backup**.
-3. Les nouvelles photos sont sauvegardées automatiquement. Appuyez sur **Sync now** pour sauvegarder tout de suite.
+3. Les nouvelles photos sont sauvegardées automatiquement. Appuyez sur **Back Up Now** pour sauvegarder tout de suite.
 4. Regardez la dernière ligne de chaque album : elle indique combien de fichiers votre Cloud a confirmés.
-5. Besoin de place ? Choisissez **Sync** pour optimiser un album, ou **Archive** pour le retirer du téléphone.
+5. Besoin de place ? Choisissez **Optimize** pour optimiser un album, ou **Archive** pour le retirer du téléphone.
 6. Besoin d'un fichier en taille réelle ? Utilisez l'onglet **Restore**.""",
-        "en_hash": "201e473222d36f7f",
+        "en_hash": "0698d8c82156ffa3",
     },
     "words-you-will-see": {
         "title": "Les mots que vous rencontrerez",
         "body": """• **Album :** un dossier de photos et de vidéos sur votre téléphone.
-• **Mode :** ce qui arrive à un album : **Off**, **Backup**, **Sync** ou **Archive**. Voir [[modes-in-depth]].
+• **Mode :** ce qui arrive à un album : **Off**, **Backup**, **Optimize** ou **Archive**. Voir [[modes-in-depth]].
 • **Cloud :** OneDrive, Google Photos, Google Drive, Dropbox, pCloud, IDrive e2 ou Backblaze B2. Voir [[setup-cloud]].
 • **Pairing :** le Cloud vers lequel va chaque dossier de premier niveau de votre téléphone. **DCIM**, **Pictures** et les autres dossiers où votre téléphone range les photos sont ce que le Guide appelle les dossiers de premier niveau. Voir [[settings-destination]].
 • **Optimise :** remplacer la copie du téléphone par une copie plus petite ; l'original reste dans le Cloud. Voir [[how-optimizing-works]].
 • **Verified :** le Cloud a confirmé qu'il détient le fichier à la même taille. Voir [[how-verification-works]].
 • **Corbeille :** l'endroit où les fichiers retirés attendent. Voir [[where-deleted-files-go]].
 • **Rescan :** regarder à nouveau le téléphone et le Cloud pour obtenir des chiffres à jour.""",
-        "en_hash": "7fb26c96ebb57608",
+        "en_hash": "9f80fff96c2157db",
     },
 }

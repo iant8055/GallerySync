@@ -5,9 +5,9 @@ TRANSLATIONS = {
         "en_hash": "01001cde06eb2f03",
     },
     "faq-sync-now-greyed": {
-        "title": "Sync now ist ausgegraut",
-        "body": """Es gibt nichts zu senden oder zu optimieren: Alles ist schon gesendet, oder kein Album steht auf Backup, Sync oder Archive. Prüfe die Modus-Summen in der Kopfzeile.""",
-        "en_hash": "7b543eca08835984",
+        "title": "Back Up Now ist ausgegraut",
+        "body": """Es gibt nichts zu senden oder zu optimieren: Alles ist schon gesendet, oder kein Album steht auf Backup, Optimize oder Archive. Prüfe die Modus-Summen in der Kopfzeile.""",
+        "en_hash": "946c334e3023479a",
     },
     "faq-albums-off-after-backup": {
         "title": "Meine Alben stehen nach dem ersten Backup auf Off",
@@ -23,8 +23,8 @@ Google Photos kann nicht gefragt werden, daher zeigen seine Alben immer **N sent
     },
     "faq-onedrive-full": {
         "title": "Das Backup wurde gestoppt, weil meine Cloud voll ist",
-        "body": """**stopped: your Cloud is full.** Nichts geht verloren. Schaffe etwas Platz oder erweitere den Speicher, dann drücke **Sync now**.""",
-        "en_hash": "70148dcb9cb4986c",
+        "body": """**stopped: your Cloud is full.** Nichts geht verloren. Schaffe etwas Platz oder erweitere den Speicher, dann drücke **Back Up Now**.""",
+        "en_hash": "1a41d4b658e94c8d",
     },
     "faq-space-not-freed": {
         "title": "Ich habe ein Album archiviert, aber mein Telefon hat nicht mehr Platz",

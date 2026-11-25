@@ -49,22 +49,22 @@ Toque em qualquer **(?)** para uma explicação curta. O guia completo é o prim
         "title": 'Início rápido',
         "body": """1. Conclua a configuração: entre na sua Cloud, permita o acesso às suas fotos, escolha as pastas e um Plano de Backup. Veja [[setup-overview]].
 2. Na aba **Albums**, toque no botão de modo de um álbum e escolha **Backup**.
-3. As fotos novas passam por backup automaticamente. Pressione **Sync now** para fazer o backup na hora.
+3. As fotos novas passam por backup automaticamente. Pressione **Back Up Now** para fazer o backup na hora.
 4. Confira a última linha de cada álbum: ela mostra quantos arquivos a sua Cloud confirmou.
-5. Precisa de espaço? Escolha **Sync** para otimizar um álbum, ou **Archive** para tirá-lo do telefone.
+5. Precisa de espaço? Escolha **Optimize** para otimizar um álbum, ou **Archive** para tirá-lo do telefone.
 6. Precisa de um arquivo de volta em tamanho real? Use a aba **Restore**.""",
-        "en_hash": "201e473222d36f7f",
+        "en_hash": "0698d8c82156ffa3",
     },
     'words-you-will-see': {
         "title": 'Palavras que você vai ver',
         "body": """• **Album:** uma pasta de fotos e vídeos no seu telefone.
-• **Mode:** o que acontece com um álbum: **Off**, **Backup**, **Sync** ou **Archive**. Veja [[modes-in-depth]].
+• **Mode:** o que acontece com um álbum: **Off**, **Backup**, **Optimize** ou **Archive**. Veja [[modes-in-depth]].
 • **Cloud:** OneDrive, Google Photos, Google Drive, Dropbox, pCloud, IDrive e2 ou Backblaze B2. Veja [[setup-cloud]].
 • **Pairing:** para qual Cloud vai cada pasta de nível superior do seu telefone. **DCIM**, **Pictures** e as outras pastas em que o seu telefone guarda fotos são o que o Guia chama de pastas de nível superior. Veja [[settings-destination]].
 • **Optimize:** trocar a cópia do telefone por uma menor; o original continua na Cloud. Veja [[how-optimizing-works]].
 • **Verified:** a Cloud confirmou que tem o arquivo com o mesmo tamanho. Veja [[how-verification-works]].
 • **Lixeira:** onde os arquivos removidos esperam. Veja [[where-deleted-files-go]].
 • **Rescan:** olhar o telefone e a Cloud de novo para obter números atualizados.""",
-        "en_hash": "7fb26c96ebb57608",
+        "en_hash": "9f80fff96c2157db",
     },
 }

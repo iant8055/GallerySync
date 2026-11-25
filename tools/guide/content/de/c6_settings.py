@@ -1,8 +1,8 @@
 TRANSLATIONS = {
     "_chapter": {
         "title": "Der Settings-Tab",
-        "intro": "Eine scrollende Seite in grünen Bändern: Allgemein, Backup, Wohin jeder Ordner geht, Alben, Synchronisierung, Kamera-Sync, Wiederherstellen, Archiv und Hilfe und Feedback. Jedes Band hat ein (?).",
-        "en_hash": "0295c3a8f1702248",
+        "intro": "Eine scrollende Seite in grünen Bändern: Allgemein, Backup, Wohin jeder Ordner geht, Alben, Optimierung, Kameraordner, Wiederherstellen, Archiv und Hilfe und Feedback. Jedes Band hat ein (?).",
+        "en_hash": "4be757fce176213f",
     },
     "settings-overview": {
         "title": "So ist der Settings-Tab aufgebaut",
@@ -43,10 +43,10 @@ Die Schriftgröße folgt in beiden Fällen der Einstellung des Telefons.""",
     "settings-mobile-data": {
         "title": "Mobile Daten verwenden",
         "body": """• **Aus** (Standard): **Nur WLAN.**
-• **An:** **Synchronisiert über WLAN und mobile Daten.**
+• **An:** **Sichert über WLAN und mobile Daten.**
 
-Gilt für automatische Backups und **Sync now**. Lass es aus, es sei denn, dein Datentarif ist unbegrenzt.""",
-        "en_hash": "e8860c60b1961fee",
+Gilt für automatische Backups und **Back Up Now**. Lass es aus, es sei denn, dein Datentarif ist unbegrenzt.""",
+        "en_hash": "949fdb1f51a72264",
     },
 
     "settings-open-not-on-phone": {
@@ -193,38 +193,38 @@ Diese Dateien liegen noch im Papierkorb deines Telefons.
         "en_hash": "a5707f1ea8aad403",
     },
     "settings-section-sync": {
-        "title": "Synchronisierung",
-        "body": """Wie Fotos und Videos in **Sync**-Alben optimiert werden. Dateien ändern sich erst, nachdem die Cloud sie überprüft hat. Funktioniert mit OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 und Backblaze B2.""",
-        "en_hash": "4fa2ef3f02a17596",
+        "title": "Optimierung",
+        "body": """Wie Fotos und Videos in **Optimize**-Alben optimiert werden. Dateien ändern sich erst, nachdem die Cloud sie überprüft hat. Funktioniert mit OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 und Backblaze B2.""",
+        "en_hash": "609db2eeadf1b163",
     },
     "settings-optimize-photos": {
         "title": "Fotos optimieren",
-        "body": """Standardmäßig **Aus**. Wenn an, werden Fotos in Sync-Alben durch kleinere Kopien ersetzt: etwa 2048 Pixel an der langen Kante, ungefähr ein Zehntel der Größe. Sie bleiben in deiner Galerie mit einem kleinen Wolkensymbol. Die Originale bleiben in der Cloud.
+        "body": """Standardmäßig **Aus**. Wenn an, werden Fotos in Optimize-Alben durch kleinere Kopien ersetzt: etwa 2048 Pixel an der langen Kante, ungefähr ein Zehntel der Größe. Sie bleiben in deiner Galerie mit einem kleinen Wolkensymbol. Die Originale bleiben in der Cloud.
 
 Fotos, die schon klein genug sind, und Dateien mit **Do not optimize** bleiben unberührt. **Modus** legt fest, wann es läuft. Siehe [[settings-optimize-mode]].""",
-        "en_hash": "947629869504ef56",
+        "en_hash": "5e4d7d2cb20c1df8",
     },
     "settings-optimize-video": {
         "title": "Videos optimieren",
         "body": """Standardmäßig **Aus**. Wenn an, erscheinen **Modus**, **Älter als** und **Kompression**.
 
-Videos in Sync-Alben werden kleiner neu kodiert. Nichts wird je abgeschnitten. Die Originale bleiben in der Cloud.
+Videos in Optimize-Alben werden kleiner neu kodiert. Nichts wird je abgeschnitten. Die Originale bleiben in der Cloud.
 
 ## Welche Videos
-In einem Sync-Album, verified in the Cloud, älter als deine Einstellung, in einem Ordner, auf den du Zugriff gegeben hast, und noch nicht optimiert.
+In einem Optimize-Album, verified in the Cloud, älter als deine Einstellung, in einem Ordner, auf den du Zugriff gegeben hast, und noch nicht optimiert.
 
 ## Wann
 • **Automatisch:** nach Backups, nur beim Laden.
-• **Manuell:** wenn du **Sync now** drückst.""",
-        "en_hash": "6e9896836e47e62e",
+• **Manuell:** wenn du **Back Up Now** drückst.""",
+        "en_hash": "a0609c640e4a6f88",
     },
     "settings-optimize-mode": {
         "title": "Modus: Automatisch oder Manuell",
-        "body": """• **Automatisch** (Standard): Dateien in Sync-Alben werden optimiert, sobald die Cloud sie bestätigt. Videos warten auf das Ladegerät.
-• **Manuell:** nichts geschieht, bis du im Albums-Tab **Sync now** drückst.
+        "body": """• **Automatisch** (Standard): Dateien in Optimize-Alben werden optimiert, sobald die Cloud sie bestätigt. Videos warten auf das Ladegerät.
+• **Manuell:** nichts geschieht, bis du im Albums-Tab **Back Up Now** drückst.
 
-Fotos außerhalb der Ordner, auf die du Zugriff gegeben hast, brauchen die Bestätigung von Android, warten also, bis du die App öffnest oder **Sync now** drückst.""",
-        "en_hash": "741f924a42b5494f",
+Fotos außerhalb der Ordner, auf die du Zugriff gegeben hast, brauchen die Bestätigung von Android, warten also, bis du die App öffnest oder **Back Up Now** drückst.""",
+        "en_hash": "aa5ba16737011b66",
     },
     "settings-video-age": {
         "title": "Älter als (Video)",
@@ -256,14 +256,14 @@ Die App fragt **Vorhandene Videos neu optimieren?** **Ja** lässt Videos, die zu
         "en_hash": "44bada9612e80a0d",
     },
     "settings-section-camera": {
-        "title": "Kamera-Sync (Settings)",
+        "title": "Kameraordner (Settings)",
         "body": """**Spezielle Einstellungen für die Kamera**, standardmäßig aus. Wenn an:
 • **Kameraordner:** der Ordner, in dem deine Kamera speichert. Wähle ihn aus der Liste oder **Anderer…**.
 • **Select Photos/Videos older than**, **Photos**, **Videos:** Standardwerte für die Optimize-Steuerung dieses Ordners ([[album-camera-optimize]]).
 • **Videokompression:** für dort optimierte Videos.
 
-Der Kameraordner hat keinen **Sync**-Modus, und nichts wird optimiert, bis du darin **Sync now** drückst. Die Optimierungsschalter oben wirken sich nicht auf ihn aus.""",
-        "en_hash": "37e57d5f3b81a8e9",
+Der Kameraordner hat keinen **Optimize**-Modus, und nichts wird optimiert, bis du darin **Back Up Now** drückst. Die Optimierungsschalter oben wirken sich nicht auf ihn aus.""",
+        "en_hash": "542270f97e7e8c66",
     },
     "settings-section-archive": {
         "title": "Archiv (Settings)",

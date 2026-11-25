@@ -5,9 +5,9 @@ TRANSLATIONS = {
         "en_hash": "01001cde06eb2f03",
     },
     'faq-sync-now-greyed': {
-        "title": 'Sync now está em cinza',
-        "body": """Não há nada para enviar ou otimizar: tudo já foi enviado, ou nenhum álbum está em Backup, Sync ou Archive. Confira os totais de modo no cabeçalho.""",
-        "en_hash": "7b543eca08835984",
+        "title": 'Back Up Now está em cinza',
+        "body": """Não há nada para enviar ou otimizar: tudo já foi enviado, ou nenhum álbum está em Backup, Optimize ou Archive. Confira os totais de modo no cabeçalho.""",
+        "en_hash": "946c334e3023479a",
     },
     'faq-albums-off-after-backup': {
         "title": 'Meus álbuns dizem Off depois do primeiro backup',
@@ -23,8 +23,8 @@ O Google Photos não pode ser consultado, então seus álbuns sempre mostram **N
     },
     'faq-onedrive-full': {
         "title": 'O backup parou porque a minha Cloud está cheia',
-        "body": """**stopped: your Cloud is full.** Nada se perde. Libere espaço ou adicione armazenamento e depois pressione **Sync now**.""",
-        "en_hash": "70148dcb9cb4986c",
+        "body": """**stopped: your Cloud is full.** Nada se perde. Libere espaço ou adicione armazenamento e depois pressione **Back Up Now**.""",
+        "en_hash": "1a41d4b658e94c8d",
     },
     'faq-space-not-freed': {
         "title": 'Arquivei um álbum, mas meu telefone não ganhou espaço',

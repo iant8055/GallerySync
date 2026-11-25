@@ -25,7 +25,7 @@ CHAPTER = Chapter(
 
 
         topic("albums-filter", "All Albums and the four mode buttons", """
-            • Tap **Backup**, **Sync**, **Archive** or **Off** to show only the albums in that mode.
+            • Tap **Backup**, **Optimize**, **Archive** or **Off** to show only the albums in that mode.
             • Tap **All Albums**, or the same button again, to show them all.
 
             Filtering only changes what you see. To change a mode, use the button on the album's card. See [[modes-in-depth]].
@@ -40,7 +40,7 @@ CHAPTER = Chapter(
         """, ui=True),
 
         topic("albums-optimized-line", "Optimized and Saved", """
-            With **Sync** selected: how many files in Sync albums have been optimized, and the space saved.
+            With **Optimize** selected: how many files in Optimize albums have been optimized, and the space saved.
 
             The originals stay in the Cloud. **Restore** brings them back. See [[how-optimizing-works]].
         """, ui=True),
@@ -53,19 +53,19 @@ CHAPTER = Chapter(
             Nothing is removed here. Removal happens on the Archive tab. See [[archive-overview]].
         """, ui=True),
 
-        topic("albums-run-controls", "Sync now, Rescan, Pause, Resume and Stop", """
+        topic("albums-run-controls", "Back Up Now, Rescan, Pause, Resume and Stop", """
             ## When nothing is running
-            • **Sync now:** backs up now. If an Optimize switch in Settings is on with its **Mode** set to **Manual**, it then optimizes too (see [[settings-optimize-mode]]). Greyed out when there is nothing to send or optimize.
+            • **Back Up Now:** backs up now. If an Optimize switch in Settings is on with its **Mode** set to **Manual**, it then optimizes too (see [[settings-optimize-mode]]). Greyed out when there is nothing to send or optimize.
             • **Rescan:** looks at the phone and asks OneDrive again.
 
             ## While a backup runs
-            • Progress shows as **Syncing** with a percentage (by data, not file count).
+            • Progress shows as **Backing up now** with a percentage (by data, not file count).
             • **Pause:** holds all backups until **Resume**.
             • **Stop:** ends this run. Automatic backups carry on.
 
             ## Good to know
-            • **Sync now** does not wait for the charger, but still follows your Wi-Fi setting. See [[settings-mobile-data]].
-            • It backs up every album set to **Backup**, **Sync** or **Archive**, but only ever optimizes files in **Sync** albums.
+            • **Back Up Now** does not wait for the charger, but still follows your Wi-Fi setting. See [[settings-mobile-data]].
+            • It backs up every album set to **Backup**, **Optimize** or **Archive**, but only ever optimizes files in **Optimize** albums.
         """, ui=True),
 
         topic("albums-status-line", "Upload progress and status messages", """
@@ -76,9 +76,9 @@ CHAPTER = Chapter(
 
         topic("albums-list", "The Albums Tab", """
             ## Header
-            • Tap **Backup**, **Sync**, **Archive** or **Off** to show only the albums in that mode. Tap **All Albums** to show them all again.
+            • Tap **Backup**, **Optimize**, **Archive** or **Off** to show only the albums in that mode. Tap **All Albums** to show them all again.
             • The line under the buttons gives the total for each mode.
-            • **▲ Hide Details ▲** at the bottom of the card hides the mode total line and, while a run is going, the upload line and its bar; **▼ Show Details ▼** brings them back. **All Albums**, the four mode buttons and **Sync now** / **Rescan** stay, and while a run is going **Syncing…**, **Pause** and **Stop** stay too. The tab remembers your choice.
+            • **▲ Hide Details ▲** at the bottom of the card hides the mode total line and, while a run is going, the upload line and its bar; **▼ Show Details ▼** brings them back. **All Albums**, the four mode buttons and **Back Up Now** / **Rescan** stay, and while a run is going **Backing up now…**, **Pause** and **Stop** stay too. The tab remembers your choice.
 
             ## Album cards
             • **Name, file count and size** of the album on your phone.
@@ -160,7 +160,7 @@ CHAPTER = Chapter(
         """, ui=True),
 
         topic("album-camera-optimize", "Optimize older photos and videos in your Camera folder", """
-            Only the **Camera folder** you chose in Settings under **Camera Sync** ([[settings-section-camera]]) has these controls.
+            Only the **Camera folder** you chose in Settings under **Camera Folder** ([[settings-section-camera]]) has these controls.
 
             ## Selecting files
             • **Select Photos/Videos older than:** a number from **½** to **9** and a unit — **hour**, **day**, **week**, **month**, **year** or **All**.
@@ -168,13 +168,13 @@ CHAPTER = Chapter(
             • Swipe a file right to select, left to deselect. The card shows how many are selected and the estimated saving.
 
             ## Buttons
-            • **Sync now:** backs up anything waiting in the folder, then optimizes the selected files only.
+            • **Back Up Now:** backs up anything waiting in the folder, then optimizes the selected files only.
             • **Rescan:** checks the Cloud again.
 
             ## Good to know
             • Only files OneDrive has confirmed at full size can be selected.
-            • Nothing is optimized until you press **Sync now**. New photos stay as they are.
-            • The Camera folder has no **Sync** mode, and the Optimize switches in Settings do not affect it.
+            • Nothing is optimized until you press **Back Up Now**. New photos stay as they are.
+            • The Camera folder has no **Optimize** mode, and the Optimize switches in Settings do not affect it.
             • Leaving with changed choices asks whether to make them your defaults.
         """, ui=True),
 
@@ -183,7 +183,7 @@ CHAPTER = Chapter(
 
             • **Photos**, **Videos** and the age select every match.
             • Swipe right to select, left to deselect.
-            • **Sync now** optimizes only the selected files.
+            • **Back Up Now** optimizes only the selected files.
 
             A greyed file cannot be selected: it is not yet confirmed in OneDrive, or is already optimized. See [[album-camera-optimize]].
         """, ui=True),

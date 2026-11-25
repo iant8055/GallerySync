@@ -46,15 +46,15 @@ CHAPTER = Chapter(
         topic("quick-start", "Quick start", """
             1. Finish setup: sign in to your Cloud, allow access to your photos, choose folders and a Backup Plan. See [[setup-overview]].
             2. On the **Albums** tab, tap an album's mode button and choose **Backup**.
-            3. New photos are backed up automatically. Press **Sync now** to back up straight away.
+            3. New photos are backed up automatically. Press **Back Up Now** to back up straight away.
             4. Check each album's last line: it shows how many files your Cloud has confirmed.
-            5. Need space? Choose **Sync** to optimize an album, or **Archive** to move it off the phone.
+            5. Need space? Choose **Optimize** to optimize an album, or **Archive** to move it off the phone.
             6. Need a file back at full size? Use the **Restore** tab.
         """),
 
         topic("words-you-will-see", "Words you will see", """
             • **Album:** a folder of photos and videos on your phone.
-            • **Mode:** what happens to an album: **Off**, **Backup**, **Sync** or **Archive**. See [[modes-in-depth]].
+            • **Mode:** what happens to an album: **Off**, **Backup**, **Optimize** or **Archive**. See [[modes-in-depth]].
             • **Cloud:** OneDrive, Google Photos, Google Drive, Dropbox, pCloud, IDrive e2 or Backblaze B2. See [[setup-cloud]].
             • **Pairing:** which Cloud each top-level folder on your phone sends to. **DCIM**, **Pictures** and the other folders your phone keeps photos in are what the Guide calls top-level folders. See [[settings-destination]].
             • **Optimize:** replace the phone's copy with a smaller one; the original stays in the Cloud. See [[how-optimizing-works]].

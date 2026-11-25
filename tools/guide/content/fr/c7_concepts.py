@@ -10,25 +10,25 @@ TRANSLATIONS = {
 
 • **Off :** cet album n'est pas pris en charge : rien n'est envoyé ni modifié. Chaque album commence ici.
 • **Backup :** copie vers votre Cloud ; le téléphone n'est jamais touché.
-• **Sync :** sauvegarde, puis optimise si l'optimisation est activée dans Settings.
+• **Optimize :** sauvegarde, puis optimise si l'optimisation est activée dans Settings.
 • **Archive :** sauvegarde, vérifie, puis déplace les fichiers vers la corbeille du téléphone après votre toucher. Le seul mode qui retire des fichiers.
 
 ## Quels Clouds
-Backup fonctionne avec tous les Clouds. Sync et Archive demandent OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 ou Backblaze B2, pas Google Photos.
+Backup fonctionne avec tous les Clouds. Optimize et Archive demandent OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 ou Backblaze B2, pas Google Photos.
 
 ## Dossier de l'appareil photo
-Si vous définissez un dossier de l'appareil photo dans Settings, il propose Off, Backup et Archive, avec ses propres commandes d'optimisation au lieu de Sync. Voir [[album-camera-optimize]].
+Si vous définissez un dossier de l'appareil photo dans Settings, il propose Off, Backup et Archive, avec ses propres commandes d'optimisation au lieu de Optimize. Voir [[album-camera-optimize]].
 
 ## Lequel choisir
 • Garder tel quel, mais protégé : **Backup**.
-• Gagner de la place en continuant à regarder : **Sync**.
+• Gagner de la place en continuant à regarder : **Optimize**.
 • Vieux albums que vous voulez retirer du téléphone : **Archive**.
 • Dans le doute : **Off** ou **Backup**.
 
 ## Bon à savoir
 • Vous seul réglez les modes. La seule exception est la fusion d'albums en double, qui règle **Off**. Voir [[album-merge-warning]].
 • Passer à Archive demande une confirmation. En sortir arrête les retraits suivants.""",
-        "en_hash": "4817ca4e1d16f44e",
+        "en_hash": "a5d086d4dadb5088",
     },
     "how-verification-works": {
         "title": "Comment fonctionne la vérification",
@@ -61,16 +61,16 @@ Une vérification de taille ne peut pas détecter tous les types de dommages. Ou
 Réduites à environ 2048 pixels sur le grand côté, soit environ un dixième de la taille. Même nom, même emplacement, même date et même lieu, avec un petit badge de nuage.
 
 ## Vidéo
-Réencodée en **480p** (Compression élevée), **720p** (Compression moyenne) ou **1080p** (Compression faible). Jamais coupée. Automatique attend le chargeur ; Manuel s'exécute avec **Sync now**.
+Réencodée en **480p** (Compression élevée), **720p** (Compression moyenne) ou **1080p** (Compression faible). Jamais coupée. Automatique attend le chargeur ; Manuel s'exécute avec **Back Up Now**.
 
 ## Règles
-• Seulement dans les albums **Sync**.
+• Seulement dans les albums **Optimize**.
 • Seulement après que le Cloud a confirmé l'original à la même taille.
 • Un fichier qui ne deviendrait pas plus petit est laissé tranquille.
 
 ## Récupérer l'original
 Utilisez l'onglet **Restore**. Restaurez avant de modifier si vous voulez tout le détail.""",
-        "en_hash": "58e50d866f3c6a61",
+        "en_hash": "0fbd39b7259cbde0",
     },
     "where-deleted-files-go": {
         "title": "Où vont les fichiers retirés",
@@ -89,16 +89,16 @@ Sous **Ask**, les copies que vous choisissez de retirer vont dans la **corbeille
     },
     "background-work": {
         "title": "Quand les choses se passent",
-        "body": """• **Sauvegarde :** peu après l'apparition de nouvelles photos, et toutes les six heures. Wi-Fi uniquement sauf si les données mobiles sont activées ; pas quand la batterie ou le stockage est faible. **Sync now** s'exécute immédiatement.
-• **Optimizing photos :** Automatique, dès que le Cloud confirme un fichier d'un album Sync. Manuel, avec **Sync now**.
-• **Optimizing video :** Automatique, après les sauvegardes, pendant la charge. Manuel, avec **Sync now**.
+        "body": """• **Sauvegarde :** peu après l'apparition de nouvelles photos, et toutes les six heures. Wi-Fi uniquement sauf si les données mobiles sont activées ; pas quand la batterie ou le stockage est faible. **Back Up Now** s'exécute immédiatement.
+• **Optimizing photos :** Automatique, dès que le Cloud confirme un fichier d'un album Optimize. Manuel, avec **Back Up Now**.
+• **Optimizing video :** Automatique, après les sauvegardes, pendant la charge. Manuel, avec **Back Up Now**.
 • **Fichiers supprimés :** sous **Ask**, vous êtes notifié peu après la suppression d'un fichier qui a une copie Cloud (pas quand les sauvegardes sont en pause).
 • **Archivage :** seulement quand vous dites Yes dans l'onglet Archive.
 • **Restauration :** seulement quand vous appuyez sur Restore.
 
 ## Fermer l'application
 Retour ou Accueil, ça va : le travail continue. Balayer l'application hors des applications récentes peut arrêter le travail en arrière-plan jusqu'à ce que vous la rouvriez.""",
-        "en_hash": "d386bc34cb7fa40b",
+        "en_hash": "a5eb462b2f9fced2",
     },
     "where-your-data-lives": {
         "title": "Où vivent vos données",

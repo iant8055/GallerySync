@@ -1,8 +1,8 @@
 TRANSLATIONS = {
     "_chapter": {
         "title": "La pestaña Settings",
-        "intro": "Una página con desplazamiento en bandas verdes: General, Copia de seguridad, Adónde va cada carpeta, Álbumes, Sincronización, Sync de la cámara, Restaurar, Archivar y Ayuda y comentarios. Cada banda tiene un (?).",
-        "en_hash": "0295c3a8f1702248",
+        "intro": "Una página con desplazamiento en bandas verdes: General, Copia de seguridad, Adónde va cada carpeta, Álbumes, Optimización, Carpeta de la cámara, Restaurar, Archivar y Ayuda y comentarios. Cada banda tiene un (?).",
+        "en_hash": "4be757fce176213f",
     },
     "settings-overview": {
         "title": "Cómo está organizada la pestaña Settings",
@@ -50,8 +50,8 @@ El tamaño del texto sigue el ajuste del teléfono en ambos casos.""",
         "body": """• **Off** (predeterminado): **Solo wifi.**
 • **On:** **Sincroniza con wifi y con datos móviles.**
 
-Afecta a las copias automáticas y a **Sync now**. Déjalo desactivado salvo que tu plan de datos sea ilimitado.""",
-        "en_hash": "e8860c60b1961fee",
+Afecta a las copias automáticas y a **Back Up Now**. Déjalo desactivado salvo que tu plan de datos sea ilimitado.""",
+        "en_hash": "949fdb1f51a72264",
     },
 
     "settings-open-not-on-phone": {
@@ -210,41 +210,41 @@ Estos archivos siguen en la papelera de tu teléfono.
     },
 
     "settings-section-sync": {
-        "title": "Sincronización",
-        "body": """Cómo se optimizan las fotos y los vídeos de los álbumes **Sync**. Los archivos cambian solo después de que la Cloud los haya verificado. Funciona con OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 y Backblaze B2.""",
-        "en_hash": "4fa2ef3f02a17596",
+        "title": "Optimización",
+        "body": """Cómo se optimizan las fotos y los vídeos de los álbumes **Optimize**. Los archivos cambian solo después de que la Cloud los haya verificado. Funciona con OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 y Backblaze B2.""",
+        "en_hash": "609db2eeadf1b163",
     },
 
     "settings-optimize-photos": {
         "title": "Optimizar fotos",
-        "body": """**Off** de forma predeterminada. Cuando está activado, las fotos de los álbumes Sync se reemplazan por copias más pequeñas: unos 2048 píxeles en el lado largo, aproximadamente una décima parte del tamaño. Siguen en tu galería con una pequeña insignia de nube. Los originales se quedan en la Cloud.
+        "body": """**Off** de forma predeterminada. Cuando está activado, las fotos de los álbumes Optimize se reemplazan por copias más pequeñas: unos 2048 píxeles en el lado largo, aproximadamente una décima parte del tamaño. Siguen en tu galería con una pequeña insignia de nube. Los originales se quedan en la Cloud.
 
 Las fotos que ya son lo bastante pequeñas, y los archivos en **Do not optimize**, se dejan como están. **Modo** define cuándo se ejecuta. Consulta [[settings-optimize-mode]].""",
-        "en_hash": "947629869504ef56",
+        "en_hash": "5e4d7d2cb20c1df8",
     },
 
     "settings-optimize-video": {
         "title": "Optimizar vídeo",
         "body": """**Off** de forma predeterminada. Cuando está activado, muestra **Modo**, **Con más de** y **Compresión**.
 
-Los vídeos de los álbumes Sync se recodifican a un tamaño menor. Nunca se corta nada. Los originales se quedan en la Cloud.
+Los vídeos de los álbumes Optimize se recodifican a un tamaño menor. Nunca se corta nada. Los originales se quedan en la Cloud.
 
 ## Qué vídeos
-En un álbum Sync, verified in the Cloud, más antiguos que tu ajuste, en una carpeta a la que diste acceso y aún no optimizados.
+En un álbum Optimize, verified in the Cloud, más antiguos que tu ajuste, en una carpeta a la que diste acceso y aún no optimizados.
 
 ## Cuándo
 • **Automático:** después de las copias, solo mientras se carga el teléfono.
-• **Manual:** cuando pulsas **Sync now**.""",
-        "en_hash": "6e9896836e47e62e",
+• **Manual:** cuando pulsas **Back Up Now**.""",
+        "en_hash": "a0609c640e4a6f88",
     },
 
     "settings-optimize-mode": {
         "title": "Modo: Automático o Manual",
-        "body": """• **Automático** (predeterminado): los archivos de los álbumes Sync se optimizan en cuanto la Cloud los confirma. El vídeo espera al cargador.
-• **Manual:** no ocurre nada hasta que pulsas **Sync now** en la pestaña Albums.
+        "body": """• **Automático** (predeterminado): los archivos de los álbumes Optimize se optimizan en cuanto la Cloud los confirma. El vídeo espera al cargador.
+• **Manual:** no ocurre nada hasta que pulsas **Back Up Now** en la pestaña Albums.
 
-Las fotos fuera de las carpetas a las que diste acceso necesitan la confirmación de Android, así que esperan hasta que abras la app o pulses **Sync now**.""",
-        "en_hash": "741f924a42b5494f",
+Las fotos fuera de las carpetas a las que diste acceso necesitan la confirmación de Android, así que esperan hasta que abras la app o pulses **Back Up Now**.""",
+        "en_hash": "aa5ba16737011b66",
     },
 
     "settings-video-age": {
@@ -281,14 +281,14 @@ La app pregunta **¿Volver a optimizar los vídeos existentes?** **Sí** permite
     },
 
     "settings-section-camera": {
-        "title": "Sync de la cámara (Settings)",
+        "title": "Carpeta de la cámara (Settings)",
         "body": """**Ajustes especiales para la cámara**, desactivado de forma predeterminada. Cuando está activado:
 • **Carpeta de la cámara:** la carpeta donde guarda tu cámara. Elígela de la lista, o **Otra…**.
 • **Select Photos/Videos older than**, **Photos**, **Videos:** valores predeterminados de los controles de optimización de esa carpeta ([[album-camera-optimize]]).
 • **Compresión de vídeo:** para los vídeos que se optimizan allí.
 
-La carpeta de la cámara no tiene modo **Sync**, y no se optimiza nada hasta que pulsas **Sync now** en ella. Los interruptores de optimización de arriba no la afectan.""",
-        "en_hash": "37e57d5f3b81a8e9",
+La carpeta de la cámara no tiene modo **Optimize**, y no se optimiza nada hasta que pulsas **Back Up Now** en ella. Los interruptores de optimización de arriba no la afectan.""",
+        "en_hash": "542270f97e7e8c66",
     },
 
     "settings-section-archive": {

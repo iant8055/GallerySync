@@ -52,24 +52,24 @@ Pulsa cualquier **(?)** para ver una explicación breve. La guía completa es la
         "title": "Inicio rápido",
         "body": """1. Termina la configuración: inicia sesión en tu Cloud, permite el acceso a tus fotos, elige carpetas y un Plan de copia. Consulta [[setup-overview]].
 2. En la pestaña **Albums**, pulsa el botón de modo de un álbum y elige **Backup**.
-3. Las fotos nuevas se copian automáticamente. Pulsa **Sync now** para hacer la copia al instante.
+3. Las fotos nuevas se copian automáticamente. Pulsa **Back Up Now** para hacer la copia al instante.
 4. Mira la última línea de cada álbum: muestra cuántos archivos ha confirmado tu Cloud.
-5. ¿Necesitas espacio? Elige **Sync** para optimizar un álbum, o **Archive** para sacarlo del teléfono.
+5. ¿Necesitas espacio? Elige **Optimize** para optimizar un álbum, o **Archive** para sacarlo del teléfono.
 6. ¿Necesitas un archivo de vuelta a tamaño completo? Usa la pestaña **Restore**.""",
-        "en_hash": "201e473222d36f7f",
+        "en_hash": "0698d8c82156ffa3",
     },
 
     "words-you-will-see": {
         "title": "Palabras que verás",
         "body": """• **Album:** una carpeta de fotos y vídeos de tu teléfono.
-• **Mode:** lo que ocurre con un álbum: **Off**, **Backup**, **Sync** o **Archive**. Consulta [[modes-in-depth]].
+• **Mode:** lo que ocurre con un álbum: **Off**, **Backup**, **Optimize** o **Archive**. Consulta [[modes-in-depth]].
 • **Cloud:** OneDrive, Google Photos, Google Drive, Dropbox, pCloud, IDrive e2 o Backblaze B2. Consulta [[setup-cloud]].
 • **Pairing:** a qué Cloud envía cada carpeta de primer nivel de tu teléfono. **DCIM**, **Pictures** y las demás carpetas donde tu teléfono guarda fotos son lo que la guía llama carpetas de primer nivel. Consulta [[settings-destination]].
 • **Optimize:** sustituir la copia del teléfono por otra más pequeña; el original se queda en la Cloud. Consulta [[how-optimizing-works]].
 • **Verified:** la Cloud confirmó que tiene el archivo con el mismo tamaño. Consulta [[how-verification-works]].
 • **Papelera / Papelera de reciclaje:** donde esperan los archivos quitados. Consulta [[where-deleted-files-go]].
 • **Rescan:** volver a mirar el teléfono y la Cloud para obtener cifras actualizadas.""",
-        "en_hash": "7fb26c96ebb57608",
+        "en_hash": "9f80fff96c2157db",
     },
 
 }

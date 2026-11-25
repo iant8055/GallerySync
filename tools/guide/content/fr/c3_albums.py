@@ -26,11 +26,11 @@ Les nouveaux albums portent une étiquette **New** et commencent toujours sur **
     },
     "albums-filter": {
         "title": "All Albums et les quatre boutons de mode",
-        "body": """• Touchez **Backup**, **Sync**, **Archive** ou **Off** pour n'afficher que les albums de ce mode.
+        "body": """• Touchez **Backup**, **Optimize**, **Archive** ou **Off** pour n'afficher que les albums de ce mode.
 • Touchez **All Albums**, ou le même bouton à nouveau, pour tous les afficher.
 
 Filtrer ne change que ce que vous voyez. Pour changer un mode, utilisez le bouton de la carte de l'album. Voir [[modes-in-depth]].""",
-        "en_hash": "d4865c5cf08d3857",
+        "en_hash": "fce05e6ad448f530",
     },
     "albums-totals": {
         "title": "Album Mode Count",
@@ -44,10 +44,10 @@ Filtrer ne change que ce que vous voyez. Pour changer un mode, utilisez le bouto
     },
     "albums-optimized-line": {
         "title": "Optimized and Saved",
-        "body": """Avec **Sync** sélectionné : combien de fichiers des albums Sync ont été optimisés, et l'espace économisé.
+        "body": """Avec **Optimize** sélectionné : combien de fichiers des albums Optimize ont été optimisés, et l'espace économisé.
 
 Les originaux restent dans le Cloud. **Restore** les ramène. Voir [[how-optimizing-works]].""",
-        "en_hash": "701f3a7e8e63d389",
+        "en_hash": "280df5abf38d7971",
     },
     "albums-archive-lines": {
         "title": "Files archived et Scheduled to leave this phone",
@@ -59,20 +59,20 @@ Rien n'est retiré ici. Le retrait se fait dans l'onglet Archive. Voir [[archive
         "en_hash": "00b01adb4a7cf037",
     },
     "albums-run-controls": {
-        "title": "Sync now, Rescan, Pause, Resume et Stop",
+        "title": "Back Up Now, Rescan, Pause, Resume et Stop",
         "body": """## Quand rien ne s'exécute
-• **Sync now :** sauvegarde maintenant. Si un des interrupteurs d'optimisation de Settings est activé avec son **Mode** sur **Manuel**, il optimise aussi ensuite (voir [[settings-optimize-mode]]). Grisé quand il n'y a rien à envoyer ni à optimiser.
+• **Back Up Now :** sauvegarde maintenant. Si un des interrupteurs d'optimisation de Settings est activé avec son **Mode** sur **Manuel**, il optimise aussi ensuite (voir [[settings-optimize-mode]]). Grisé quand il n'y a rien à envoyer ni à optimiser.
 • **Rescan :** regarde le téléphone et interroge à nouveau OneDrive.
 
 ## Pendant une sauvegarde
-• La progression s'affiche comme **Syncing** avec un pourcentage (en volume de données, pas en nombre de fichiers).
+• La progression s'affiche comme **Backing up now** avec un pourcentage (en volume de données, pas en nombre de fichiers).
 • **Pause :** suspend toutes les sauvegardes jusqu'à **Resume**.
 • **Stop :** termine cette exécution. Les sauvegardes automatiques continuent.
 
 ## Bon à savoir
-• **Sync now** n'attend pas le chargeur, mais suit toujours votre réglage Wi-Fi. Voir [[settings-mobile-data]].
-• Il sauvegarde chaque album réglé sur **Backup**, **Sync** ou **Archive**, mais n'optimise que les fichiers des albums **Sync**.""",
-        "en_hash": "4c3628a3516a9b52",
+• **Back Up Now** n'attend pas le chargeur, mais suit toujours votre réglage Wi-Fi. Voir [[settings-mobile-data]].
+• Il sauvegarde chaque album réglé sur **Backup**, **Optimize** ou **Archive**, mais n'optimise que les fichiers des albums **Optimize**.""",
+        "en_hash": "7018ccad25f0b316",
     },
     "albums-status-line": {
         "title": "Progression de l'envoi et messages d'état",
@@ -84,9 +84,9 @@ Rien n'est retiré ici. Le retrait se fait dans l'onglet Archive. Voir [[archive
     "albums-list": {
         "title": "L'onglet Albums",
         "body": """## En-tête
-• Touchez **Backup**, **Sync**, **Archive** ou **Off** pour n'afficher que les albums de ce mode. Touchez **All Albums** pour tous les afficher à nouveau.
+• Touchez **Backup**, **Optimize**, **Archive** ou **Off** pour n'afficher que les albums de ce mode. Touchez **All Albums** pour tous les afficher à nouveau.
 • La ligne sous les boutons donne le total par mode.
-• **▲ Hide Details ▲** en bas de la carte masque la ligne des totaux par mode et, pendant qu'une exécution se déroule, aussi la ligne de téléversement et sa barre ; **▼ Show Details ▼** les ramène. **All Albums**, les quatre boutons de mode et **Sync now** / **Rescan** restent, et pendant qu'une exécution se déroule, **Syncing…**, **Pause** et **Stop** restent aussi. L'onglet mémorise votre choix.
+• **▲ Hide Details ▲** en bas de la carte masque la ligne des totaux par mode et, pendant qu'une exécution se déroule, aussi la ligne de téléversement et sa barre ; **▼ Show Details ▼** les ramène. **All Albums**, les quatre boutons de mode et **Back Up Now** / **Rescan** restent, et pendant qu'une exécution se déroule, **Backing up now…**, **Pause** et **Stop** restent aussi. L'onglet mémorise votre choix.
 
 ## Cartes d'album
 • **Nom, nombre de fichiers et taille** de l'album sur votre téléphone.
@@ -96,7 +96,7 @@ Rien n'est retiré ici. Le retrait se fait dans l'onglet Archive. Voir [[archive
 • **Ligne grise** (seulement s'il y en a) : **N files not backed up by choice** — fichiers sur lesquels vous avez balayé vers la gauche, plus les verrouillés. Ils sont respectés ; rien ne les utilise.
 • **Bouton de mode** (côté droit) : touchez pour changer le mode de l'album. Archive demande d'abord confirmation. Si le Cloud de l'album ne peut pas ce mode, la carte le dit.
 • **Touchez la carte** pour voir les fichiers de l'album. Voir [[album-detail]].""",
-        "en_hash": "348d7189c69028ae",
+        "en_hash": "0b9328a4170e83e0",
     },
     "album-detail": {
         "title": "La liste des fichiers d'un album",
@@ -175,7 +175,7 @@ Balayer vers la gauche sur un fichier sauvegardé le marque **locked** (voir [[a
     },
     "album-camera-optimize": {
         "title": "Optimiser les anciennes photos et vidéos de votre Camera folder",
-        "body": """Seul le **Dossier de l'appareil photo** que vous avez choisi dans Settings sous **Sync de l'appareil photo** ([[settings-section-camera]]) a ces commandes.
+        "body": """Seul le **Dossier de l'appareil photo** que vous avez choisi dans Settings sous **Dossier de l'appareil photo** ([[settings-section-camera]]) a ces commandes.
 
 ## Sélectionner des fichiers
 • **Select Photos/Videos older than :** un nombre de **½** à **9** et une unité — **hour**, **day**, **week**, **month**, **year** ou **All**.
@@ -183,15 +183,15 @@ Balayer vers la gauche sur un fichier sauvegardé le marque **locked** (voir [[a
 • Glissez un fichier vers la droite pour le sélectionner, vers la gauche pour le désélectionner. La carte indique combien sont sélectionnés et l'économie estimée.
 
 ## Boutons
-• **Sync now :** sauvegarde tout ce qui attend dans le dossier, puis optimise uniquement les fichiers sélectionnés.
+• **Back Up Now :** sauvegarde tout ce qui attend dans le dossier, puis optimise uniquement les fichiers sélectionnés.
 • **Rescan :** vérifie à nouveau le Cloud.
 
 ## Bon à savoir
 • Seuls les fichiers qu'OneDrive a confirmés en taille réelle peuvent être sélectionnés.
-• Rien n'est optimisé avant que vous appuyiez sur **Sync now**. Les nouvelles photos restent telles quelles.
-• Le Camera folder n'a pas de mode **Sync**, et les interrupteurs d'optimisation de Settings ne l'affectent pas.
+• Rien n'est optimisé avant que vous appuyiez sur **Back Up Now**. Les nouvelles photos restent telles quelles.
+• Le Camera folder n'a pas de mode **Optimize**, et les interrupteurs d'optimisation de Settings ne l'affectent pas.
 • Quitter avec des choix modifiés demande si vous voulez en faire vos valeurs par défaut.""",
-        "en_hash": "19ad4bbf62950ae9",
+        "en_hash": "10e1e3ba1e9982e2",
     },
     "album-camera-select": {
         "title": "Sélectionner des fichiers dans votre Camera folder",
@@ -199,10 +199,10 @@ Balayer vers la gauche sur un fichier sauvegardé le marque **locked** (voir [[a
 
 • **Photos**, **Videos** et l'ancienneté sélectionnent chaque fichier correspondant.
 • Glissez vers la droite pour sélectionner, vers la gauche pour désélectionner.
-• **Sync now** n'optimise que les fichiers sélectionnés.
+• **Back Up Now** n'optimise que les fichiers sélectionnés.
 
 Un fichier grisé ne peut pas être sélectionné : il n'est pas encore confirmé dans OneDrive, ou il est déjà optimisé. Voir [[album-camera-optimize]].""",
-        "en_hash": "ec8dfe5b2063e196",
+        "en_hash": "0bfa66dc8a4265bf",
     },
     "album-merge-warning": {
         "title": "Noms d'album en double détectés",

@@ -42,7 +42,7 @@ Le premier Cloud que vous sélectionnez devient votre Cloud gratuit, affiché co
 Lancez l'essai avec **Commencer l'essai gratuit de 30 jours** dans Settings, sous Backup ; il apparaît dès qu'un deuxième Cloud est connecté. **Débloquer Pro** l'achète.
 
 ## Ce que chaque Cloud peut faire
-• **OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 et Backblaze B2 :** Backup, Sync, Archive et Restore.
+• **OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 et Backblaze B2 :** Backup, Optimize, Archive et Restore.
 • **Google Photos :** Backup uniquement.
 
 ## À propos des doublons
@@ -55,7 +55,7 @@ Chaque Cloud a sa propre carte numérotée, avec un bouton **Connecter**. **Suiv
 
 ## Dossier de sauvegarde
 Une fois un Cloud connecté, sa carte affiche son **Dossier de sauvegarde**, avec **Modifier** pour en choisir un autre (sauf Google Photos, qui n'a pas de dossiers). OneDrive commence à **Samsung Gallery / DCIM**, le dossier qu'utilise la synchronisation OneDrive de Samsung, de sorte que les photos déjà synchronisées là ne sont pas envoyées deux fois. Les autres Clouds commencent à **GallerySync**.{{full: Voir [[dialog-destination]].}}""",
-        "en_hash": "a90bbd0e1eecaa86",
+        "en_hash": "f331f8d37d829180",
     },
     "cloud-key-backblaze": {
         "title": "Connecter Backblaze B2 : les clés et où les trouver",
@@ -171,7 +171,7 @@ L'anneau montre la progression globale. En dessous : le Cloud vers lequel on en
 • **Fermer :** ferme l'application ; la sauvegarde continue.
 • **Terminer :** apparaît quand tout est fini, avec un résumé de ce qui a été vérifié, déjà dans le Cloud, et envoyé.
 • **Annuler :** demande **Arrêter la sauvegarde ?** Les fichiers déjà envoyés restent envoyés ; rien n'est supprimé.""",
-        "en_hash": "ce535ae7a9b7c3bd",
+        "en_hash": "8c231bb697d4aaf0",
     },
     "setup-and-settings": {
         "title": "La configuration et Settings sont séparés",

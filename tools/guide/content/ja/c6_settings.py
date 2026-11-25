@@ -1,8 +1,8 @@
 TRANSLATIONS = {
     "_chapter": {
         "title": "Settings タブ",
-        "intro": "緑の帯で区切られた 1 ページのスクロール画面：全般、バックアップ、各フォルダの保存先、アルバム、同期、カメラの Sync、復元、アーカイブ、ヘルプとフィードバック。各帯に (?) があります。",
-        "en_hash": "0295c3a8f1702248",
+        "intro": "緑の帯で区切られた 1 ページのスクロール画面：全般、バックアップ、各フォルダの保存先、アルバム、最適化、カメラフォルダ、復元、アーカイブ、ヘルプとフィードバック。各帯に (?) があります。",
+        "en_hash": "4be757fce176213f",
     },
     "settings-overview": {
         "title": "Settings タブの構成",
@@ -45,8 +45,8 @@ TRANSLATIONS = {
         "body": """• **Off**（既定）：**Wi-Fi のみ。**
 • **On**：**Wi-Fi とモバイルデータで同期します。**
 
-自動バックアップと **Sync now** に適用されます。データ通信量が無制限でない限り、オフのままにしておいてください。""",
-        "en_hash": "e8860c60b1961fee",
+自動バックアップと **Back Up Now** に適用されます。データ通信量が無制限でない限り、オフのままにしておいてください。""",
+        "en_hash": "949fdb1f51a72264",
     },
 
     "settings-open-not-on-phone": {
@@ -193,38 +193,38 @@ Settings 専用です。アシスタント（ウィザード）は、独自の�
         "en_hash": "a5707f1ea8aad403",
     },
     "settings-section-sync": {
-        "title": "同期",
-        "body": """**Sync** アルバムの写真と動画を、どのように最適化するか。ファイルが変更されるのは、Cloud が確認した後だけです。OneDrive、Google Drive、Dropbox、pCloud、IDrive e2、Backblaze B2 で使えます。""",
-        "en_hash": "4fa2ef3f02a17596",
+        "title": "最適化",
+        "body": """**Optimize** アルバムの写真と動画を、どのように最適化するか。ファイルが変更されるのは、Cloud が確認した後だけです。OneDrive、Google Drive、Dropbox、pCloud、IDrive e2、Backblaze B2 で使えます。""",
+        "en_hash": "609db2eeadf1b163",
     },
     "settings-optimize-photos": {
         "title": "写真を最適化",
-        "body": """既定では **Off** です。オンにすると、Sync アルバム内の写真が小さなコピーに置き換えられます：長辺が約 2048 ピクセル、サイズは約 10 分の 1 です。小さなクラウドバッジが付いたまま、ギャラリーに残ります。元のファイルは Cloud に残ります。
+        "body": """既定では **Off** です。オンにすると、Optimize アルバム内の写真が小さなコピーに置き換えられます：長辺が約 2048 ピクセル、サイズは約 10 分の 1 です。小さなクラウドバッジが付いたまま、ギャラリーに残ります。元のファイルは Cloud に残ります。
 
 すでに十分小さい写真と、**Do not optimize** に設定されたファイルには、手を付けません。**モード** で、実行するタイミングを設定します。[[settings-optimize-mode]]を参照してください。""",
-        "en_hash": "947629869504ef56",
+        "en_hash": "5e4d7d2cb20c1df8",
     },
     "settings-optimize-video": {
         "title": "動画を最適化",
         "body": """既定では **Off** です。オンにすると、**モード**、**経過期間**、**圧縮** が表示されます。
 
-Sync アルバム内の動画が、より小さく再エンコードされます。カットされることはありません。元のファイルは Cloud に残ります。
+Optimize アルバム内の動画が、より小さく再エンコードされます。カットされることはありません。元のファイルは Cloud に残ります。
 
 ## 対象の動画
-Sync アルバム内にあり、verified in the Cloud で、設定より古く、アクセスを許可したフォルダにあり、まだ最適化されていないもの。
+Optimize アルバム内にあり、verified in the Cloud で、設定より古く、アクセスを許可したフォルダにあり、まだ最適化されていないもの。
 
 ## 実行するタイミング
 • **自動**：バックアップの後、充電中のみ。
-• **手動**：**Sync now** を押したとき。""",
-        "en_hash": "6e9896836e47e62e",
+• **手動**：**Back Up Now** を押したとき。""",
+        "en_hash": "a0609c640e4a6f88",
     },
     "settings-optimize-mode": {
         "title": "モード：自動または手動",
-        "body": """• **自動**（既定）：Sync アルバムのファイルは、Cloud が確認した時点で最適化されます。動画は、充電器につなぐまで待ちます。
-• **手動**：Albums タブで **Sync now** を押すまで、何も起きません。
+        "body": """• **自動**（既定）：Optimize アルバムのファイルは、Cloud が確認した時点で最適化されます。動画は、充電器につなぐまで待ちます。
+• **手動**：Albums タブで **Back Up Now** を押すまで、何も起きません。
 
-アクセスを許可したフォルダの外にある写真は、Android の確認が必要なため、アプリを開くか **Sync now** を押すまで待機します。""",
-        "en_hash": "741f924a42b5494f",
+アクセスを許可したフォルダの外にある写真は、Android の確認が必要なため、アプリを開くか **Back Up Now** を押すまで待機します。""",
+        "en_hash": "aa5ba16737011b66",
     },
     "settings-video-age": {
         "title": "経過期間（動画）",
@@ -256,14 +256,14 @@ Sync アルバム内にあり、verified in the Cloud で、設定より古く�
         "en_hash": "44bada9612e80a0d",
     },
     "settings-section-camera": {
-        "title": "カメラの Sync（Settings）",
+        "title": "カメラフォルダ（Settings）",
         "body": """**カメラ専用の設定**。既定ではオフです。オンにすると：
 • **カメラのフォルダ**：カメラが保存先にするフォルダ。一覧から選ぶか、**その他…** を選びます。
 • **Select Photos/Videos older than**、**Photos**、**Videos**：そのフォルダの最適化コントロールの既定値（[[album-camera-optimize]]）。
 • **動画の圧縮**：そこで最適化される動画用。
 
-カメラのフォルダには **Sync** モードがなく、その中で **Sync now** を押すまで、何も最適化されません。上の最適化スイッチは影響しません。""",
-        "en_hash": "37e57d5f3b81a8e9",
+カメラのフォルダには **Optimize** モードがなく、その中で **Back Up Now** を押すまで、何も最適化されません。上の最適化スイッチは影響しません。""",
+        "en_hash": "542270f97e7e8c66",
     },
     "settings-section-archive": {
         "title": "アーカイブ (Settings)",

@@ -42,7 +42,7 @@ A primeira Nuvem que você seleciona vira a sua Nuvem grátis, mostrada como **m
 Comece o teste com **Start 30-day free trial** em Settings, em Backup; ele aparece quando uma segunda Nuvem está conectada. **Unlock Pro** faz a compra.
 
 ## O que cada Nuvem pode fazer
-• **OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 e Backblaze B2:** Backup, Sync, Archive e Restore.
+• **OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 e Backblaze B2:** Backup, Optimize, Archive e Restore.
 • **Google Photos:** somente backup.
 
 ## Uma observação sobre duplicatas
@@ -55,7 +55,7 @@ Cada Nuvem tem o seu próprio cartão **Conectar**, numerado. O **Próximo** esp
 
 ## Pasta de backup
 Depois que uma Nuvem é conectada, o cartão dela mostra a **Pasta de backup**, com **Alterar** para escolher outra (menos no Google Photos, que não tem pastas). O OneDrive começa em **Samsung Gallery / DCIM**, a pasta que a sincronização do OneDrive da própria Samsung usa, então as fotos que já foram sincronizadas lá não são enviadas duas vezes. As outras Nuvens começam em **GallerySync**.{{full: Veja [[dialog-destination]].}}""",
-        "en_hash": "a90bbd0e1eecaa86",
+        "en_hash": "f331f8d37d829180",
     },
     'cloud-key-backblaze': {
         "title": 'Conectar o Backblaze B2: as chaves e onde encontrá-las',
@@ -171,7 +171,7 @@ O anel mostra o andamento geral. Abaixo dele: a Nuvem que está recebendo e a co
 • **Fechar:** fecha o app; o backup continua.
 • **Concluir:** aparece quando tudo termina, com um resumo do que foi verificado, do que já estava na Nuvem e do que foi enviado.
 • **Cancelar:** pergunta **Parar o backup?** Os arquivos já enviados continuam enviados; nada é apagado.""",
-        "en_hash": "ce535ae7a9b7c3bd",
+        "en_hash": "8c231bb697d4aaf0",
     },
     'setup-and-settings': {
         "title": 'A configuração e Settings são separadas',

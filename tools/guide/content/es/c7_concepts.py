@@ -10,25 +10,25 @@ TRANSLATIONS = {
 
 • **Off:** este álbum no se atiende: no se envía ni se cambia nada. Todos los álbumes empiezan aquí.
 • **Backup:** copia en tu Cloud; el teléfono nunca se toca.
-• **Sync:** hace la copia y luego optimiza, si la optimización está activada en Settings.
+• **Optimize:** hace la copia y luego optimiza, si la optimización está activada en Settings.
 • **Archive:** hace la copia, verifica y luego mueve los archivos a la papelera del teléfono después de que pulses. Es el único modo que quita archivos.
 
 ## Qué Clouds
-Backup funciona con todas las Clouds. Sync y Archive necesitan OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 o Backblaze B2, no Google Photos.
+Backup funciona con todas las Clouds. Optimize y Archive necesitan OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 o Backblaze B2, no Google Photos.
 
 ## Carpeta de la cámara
-Si estableces una carpeta de la cámara en Settings, ofrece Off, Backup y Archive, con sus propios controles de optimización en lugar de Sync. Consulta [[album-camera-optimize]].
+Si estableces una carpeta de la cámara en Settings, ofrece Off, Backup y Archive, con sus propios controles de optimización en lugar de Optimize. Consulta [[album-camera-optimize]].
 
 ## Cuál elegir
 • Dejarlo como está, pero protegido: **Backup**.
-• Ahorrar espacio y seguir viéndolo: **Sync**.
+• Ahorrar espacio y seguir viéndolo: **Optimize**.
 • Álbumes antiguos que quieres sacar del teléfono: **Archive**.
 • Si dudas: **Off** o **Backup**.
 
 ## Conviene saber
 • Solo tú eliges los modos. La única excepción es la fusión de álbumes duplicados, que establece **Off**. Consulta [[album-merge-warning]].
 • Cambiar a Archive te pide confirmar. Cambiar a otro modo detiene nuevas eliminaciones.""",
-        "en_hash": "4817ca4e1d16f44e",
+        "en_hash": "a5d086d4dadb5088",
     },
 
     "how-verification-works": {
@@ -63,16 +63,16 @@ Una comprobación de tamaño no puede detectar todos los tipos de daño. Abre tu
 Se reducen a unos 2048 píxeles en el lado largo, aproximadamente una décima parte del tamaño. Mismo nombre, lugar, fecha y ubicación, con una pequeña insignia de nube.
 
 ## Vídeo
-Se recodifica a **480p** (Compresión alta), **720p** (Compresión media) o **1080p** (Compresión baja). Nunca se corta. Automático espera al cargador; Manual se ejecuta con **Sync now**.
+Se recodifica a **480p** (Compresión alta), **720p** (Compresión media) o **1080p** (Compresión baja). Nunca se corta. Automático espera al cargador; Manual se ejecuta con **Back Up Now**.
 
 ## Reglas
-• Solo en álbumes **Sync**.
+• Solo en álbumes **Optimize**.
 • Solo después de que la Cloud confirme el original con el mismo tamaño.
 • Un archivo que no se haría más pequeño se deja como está.
 
 ## Recuperar el original
 Usa la pestaña **Restore**. Restaura antes de editar si quieres todo el detalle.""",
-        "en_hash": "58e50d866f3c6a61",
+        "en_hash": "0fbd39b7259cbde0",
     },
 
     "where-deleted-files-go": {
@@ -93,16 +93,16 @@ Con **Ask**, las copias que eliges quitar van a la **papelera de reciclaje de On
 
     "background-work": {
         "title": "Cuándo ocurre cada cosa",
-        "body": """• **Copia:** poco después de que aparezcan fotos nuevas, y cada seis horas. Solo con Wi-Fi, a menos que los datos móviles estén activados; no con batería o almacenamiento bajos. **Sync now** se ejecuta al instante.
-• **Optimizing photos:** Automático, en cuanto la Cloud confirma un archivo en un álbum Sync. Manual, con **Sync now**.
-• **Optimizing video:** Automático, después de las copias, mientras se carga el teléfono. Manual, con **Sync now**.
+        "body": """• **Copia:** poco después de que aparezcan fotos nuevas, y cada seis horas. Solo con Wi-Fi, a menos que los datos móviles estén activados; no con batería o almacenamiento bajos. **Back Up Now** se ejecuta al instante.
+• **Optimizing photos:** Automático, en cuanto la Cloud confirma un archivo en un álbum Optimize. Manual, con **Back Up Now**.
+• **Optimizing video:** Automático, después de las copias, mientras se carga el teléfono. Manual, con **Back Up Now**.
 • **Archivos borrados:** con **Ask**, se te avisa poco después de borrar un archivo que tiene copia en la Cloud (no mientras las copias están en pausa).
 • **Archivar:** solo cuando respondes Yes en la pestaña Archive.
 • **Restaurar:** solo cuando pulsas Restore.
 
 ## Cerrar la app
 Salir con Atrás o Inicio no pasa nada: el trabajo continúa. Cerrar la app deslizándola desde las apps recientes puede detener el trabajo en segundo plano hasta que la abras de nuevo.""",
-        "en_hash": "d386bc34cb7fa40b",
+        "en_hash": "a5eb462b2f9fced2",
     },
 
     "where-your-data-lives": {

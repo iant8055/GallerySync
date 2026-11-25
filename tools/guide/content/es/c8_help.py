@@ -5,9 +5,9 @@ TRANSLATIONS = {
         "en_hash": "01001cde06eb2f03",
     },
     "faq-sync-now-greyed": {
-        "title": "Sync now está en gris",
-        "body": """No hay nada que enviar ni optimizar: todo está ya enviado, o ningún álbum está en Backup, Sync o Archive. Mira los totales de modo en la cabecera.""",
-        "en_hash": "7b543eca08835984",
+        "title": "Back Up Now está en gris",
+        "body": """No hay nada que enviar ni optimizar: todo está ya enviado, o ningún álbum está en Backup, Optimize o Archive. Mira los totales de modo en la cabecera.""",
+        "en_hash": "946c334e3023479a",
     },
 
     "faq-albums-off-after-backup": {
@@ -26,8 +26,8 @@ A Google Photos no se le puede preguntar, así que sus álbumes siempre ponen **
 
     "faq-onedrive-full": {
         "title": "La copia se detuvo porque mi Cloud está llena",
-        "body": """**stopped: your Cloud is full.** No se pierde nada. Libera algo de espacio o amplía el almacenamiento, y pulsa **Sync now**.""",
-        "en_hash": "70148dcb9cb4986c",
+        "body": """**stopped: your Cloud is full.** No se pierde nada. Libera algo de espacio o amplía el almacenamiento, y pulsa **Back Up Now**.""",
+        "en_hash": "1a41d4b658e94c8d",
     },
 
     "faq-space-not-freed": {

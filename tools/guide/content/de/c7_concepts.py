@@ -10,25 +10,25 @@ TRANSLATIONS = {
 
 • **Off:** dieses Album wird nicht betreut: Nichts wird gesendet oder geändert. Jedes Album beginnt hier.
 • **Backup:** kopiert in deine Cloud; das Telefon wird nie angefasst.
-• **Sync:** sichert, dann wird optimiert, wenn das Optimieren in Settings an ist.
+• **Optimize:** sichert, dann wird optimiert, wenn das Optimieren in Settings an ist.
 • **Archive:** sichert, überprüft und verschiebt die Dateien dann nach deinem Tippen in den Papierkorb des Telefons. Der einzige Modus, der Dateien entfernt.
 
 ## Welche Clouds
-Backup funktioniert mit jeder Cloud. Sync und Archive brauchen OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 oder Backblaze B2, nicht Google Photos.
+Backup funktioniert mit jeder Cloud. Optimize und Archive brauchen OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 oder Backblaze B2, nicht Google Photos.
 
 ## Kameraordner
-Wenn du in Settings einen Kameraordner festlegst, bietet er Off, Backup und Archive, mit eigener Optimize-Steuerung statt Sync. Siehe [[album-camera-optimize]].
+Wenn du in Settings einen Kameraordner festlegst, bietet er Off, Backup und Archive, mit eigener Optimize-Steuerung statt Optimize. Siehe [[album-camera-optimize]].
 
 ## Was du wählen solltest
 • So lassen, aber geschützt: **Backup**.
-• Platz sparen, aber weiter ansehen: **Sync**.
+• Platz sparen, aber weiter ansehen: **Optimize**.
 • Alte Alben, die vom Telefon runter sollen: **Archive**.
 • Unsicher: **Off** oder **Backup**.
 
 ## Gut zu wissen
 • Nur du legst Modi fest. Die einzige Ausnahme ist das Zusammenführen doppelter Alben, das **Off** setzt. Siehe [[album-merge-warning]].
 • Der Wechsel zu Archive fragt nach Bestätigung. Der Wechsel weg davon stoppt weitere Entfernungen.""",
-        "en_hash": "4817ca4e1d16f44e",
+        "en_hash": "a5d086d4dadb5088",
     },
     "how-verification-works": {
         "title": "So funktioniert die Überprüfung",
@@ -61,16 +61,16 @@ Eine Größenprüfung kann nicht jede Art von Schaden erkennen. Öffne ab und zu
 Auf etwa 2048 Pixel an der langen Kante verkleinert, ungefähr ein Zehntel der Größe. Gleicher Name, Ort, Datum und Standort, mit einem kleinen Wolkensymbol.
 
 ## Video
-Neu kodiert mit **480p** (Hohe Kompression), **720p** (Mittlere) oder **1080p** (Niedrige). Nie abgeschnitten. Automatisch wartet auf das Ladegerät; Manuell läuft bei **Sync now**.
+Neu kodiert mit **480p** (Hohe Kompression), **720p** (Mittlere) oder **1080p** (Niedrige). Nie abgeschnitten. Automatisch wartet auf das Ladegerät; Manuell läuft bei **Back Up Now**.
 
 ## Regeln
-• Nur in **Sync**-Alben.
+• Nur in **Optimize**-Alben.
 • Nur nachdem die Cloud das Original in derselben Größe bestätigt hat.
 • Eine Datei, die nicht kleiner würde, bleibt unberührt.
 
 ## Das Original zurückholen
 Nutze den Tab **Restore**. Stelle vor dem Bearbeiten wieder her, wenn du alle Details willst.""",
-        "en_hash": "58e50d866f3c6a61",
+        "en_hash": "0fbd39b7259cbde0",
     },
     "where-deleted-files-go": {
         "title": "Wohin entfernte Dateien gehen",
@@ -89,16 +89,16 @@ Bei **Mich zur Kopie in der Cloud fragen** gehen Kopien, deren Entfernung du wä
     },
     "background-work": {
         "title": "Wann was passiert",
-        "body": """• **Sichern:** kurz nachdem neue Fotos erscheinen, und alle sechs Stunden. Nur über WLAN, außer „Mobile Daten verwenden“ ist an; nicht bei niedrigem Akkustand oder wenig Speicher. **Sync now** läuft sofort.
-• **Optimizing photos:** Automatisch, sobald die Cloud eine Datei in einem Sync-Album bestätigt. Manuell, bei **Sync now**.
-• **Optimizing video:** Automatisch, nach Backups, beim Laden. Manuell, bei **Sync now**.
+        "body": """• **Sichern:** kurz nachdem neue Fotos erscheinen, und alle sechs Stunden. Nur über WLAN, außer „Mobile Daten verwenden“ ist an; nicht bei niedrigem Akkustand oder wenig Speicher. **Back Up Now** läuft sofort.
+• **Optimizing photos:** Automatisch, sobald die Cloud eine Datei in einem Optimize-Album bestätigt. Manuell, bei **Back Up Now**.
+• **Optimizing video:** Automatisch, nach Backups, beim Laden. Manuell, bei **Back Up Now**.
 • **Gelöschte Dateien:** bei **Mich zur Kopie in der Cloud fragen** wirst du kurz nach dem Löschen einer Datei mit Cloud-Kopie benachrichtigt (nicht, solange Backups pausiert sind).
 • **Archivieren:** nur, wenn du im Archive-Tab Yes sagst.
 • **Wiederherstellen:** nur, wenn du Restore drückst.
 
 ## Die App schließen
 Zurück oder Home ist in Ordnung: Die Arbeit läuft weiter. Wenn du die App aus den zuletzt verwendeten Apps wegwischst, kann die Hintergrundarbeit stoppen, bis du sie wieder öffnest.""",
-        "en_hash": "d386bc34cb7fa40b",
+        "en_hash": "a5eb462b2f9fced2",
     },
     "where-your-data-lives": {
         "title": "Wo deine Daten liegen",

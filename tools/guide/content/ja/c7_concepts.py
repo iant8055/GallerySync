@@ -10,25 +10,25 @@ TRANSLATIONS = {
 
 • **Off**：このアルバムは管理対象外で、送信も変更も行われません。すべてのアルバムは、ここから始まります。
 • **Backup**：Cloud にコピーします。スマートフォンには手を付けません。
-• **Sync**：バックアップしてから、Settings で最適化がオンなら最適化します。
+• **Optimize**：バックアップしてから、Settings で最適化がオンなら最適化します。
 • **Archive**：バックアップし、検証し、あなたのタップの後で、ファイルをスマートフォンのゴミ箱に移します。ファイルを削除する、唯一のモードです。
 
 ## 対応する Cloud
-Backup は、すべての Cloud で使えます。Sync と Archive には、OneDrive、Google Drive、Dropbox、pCloud、IDrive e2、Backblaze B2 のいずれかが必要で、Google Photos では使えません。
+Backup は、すべての Cloud で使えます。Optimize と Archive には、OneDrive、Google Drive、Dropbox、pCloud、IDrive e2、Backblaze B2 のいずれかが必要で、Google Photos では使えません。
 
 ## カメラのフォルダ
-Settings でカメラのフォルダを設定すると、Off、Backup、Archive が選べ、Sync の代わりに独自の最適化コントロールがあります。[[album-camera-optimize]]を参照してください。
+Settings でカメラのフォルダを設定すると、Off、Backup、Archive が選べ、Optimize の代わりに独自の最適化コントロールがあります。[[album-camera-optimize]]を参照してください。
 
 ## どれを選ぶか
 • そのままにして、保護したい：**Backup**。
-• 容量を節約しつつ、閲覧は続けたい：**Sync**。
+• 容量を節約しつつ、閲覧は続けたい：**Optimize**。
 • スマートフォンから外したい古いアルバム：**Archive**。
 • 迷ったら：**Off** または **Backup**。
 
 ## 知っておくと便利なこと
 • モードを設定できるのは、あなただけです。唯一の例外は重複したアルバムの統合で、このとき **Off** が設定されます。[[album-merge-warning]]を参照してください。
 • Archive に切り替えると、確認を求められます。別のモードに切り替えると、それ以降の削除は止まります。""",
-        "en_hash": "4817ca4e1d16f44e",
+        "en_hash": "a5d086d4dadb5088",
     },
     "how-verification-works": {
         "title": "検証のしくみ",
@@ -61,16 +61,16 @@ Settings でカメラのフォルダを設定すると、Off、Backup、Archive 
 長辺が約 2048 ピクセルまで縮小され、サイズは約 10 分の 1 になります。名前、場所、日付、位置情報は同じで、小さなクラウドバッジが付きます。
 
 ## 動画
-**480p**（High compression）、**720p**（Medium）、または **1080p**（Low）で再エンコードされます。カットされることはありません。自動は充電器につなぐまで待ち、手動は **Sync now** で実行されます。
+**480p**（High compression）、**720p**（Medium）、または **1080p**（Low）で再エンコードされます。カットされることはありません。自動は充電器につなぐまで待ち、手動は **Back Up Now** で実行されます。
 
 ## ルール
-• **Sync** アルバムのみ。
+• **Optimize** アルバムのみ。
 • Cloud が元のファイルを同じサイズで確認した後のみ。
 • 小さくならないファイルには、手を付けません。
 
 ## 元のファイルを戻す
 **Restore** タブを使います。細部をフルに残したい場合は、編集する前に Restore してください。""",
-        "en_hash": "58e50d866f3c6a61",
+        "en_hash": "0fbd39b7259cbde0",
     },
     "where-deleted-files-go": {
         "title": "削除されたファイルの行き先",
@@ -89,16 +89,16 @@ Archive は、ファイルを約 30 日間、Android のゴミ箱に移します
     },
     "background-work": {
         "title": "いつ何が起きるか",
-        "body": """• **バックアップ**：新しい写真が現れた少し後と、6 時間ごと。モバイルデータがオンでない限り Wi-Fi のみで、バッテリーやストレージが少ないときは実行されません。**Sync now** はすぐに実行されます。
-• **Optimizing photos**：自動は、Sync アルバムのファイルを Cloud が確認した時点で。手動は、**Sync now** で。
-• **Optimizing video**：自動は、バックアップの後、充電中に。手動は、**Sync now** で。
+        "body": """• **バックアップ**：新しい写真が現れた少し後と、6 時間ごと。モバイルデータがオンでない限り Wi-Fi のみで、バッテリーやストレージが少ないときは実行されません。**Back Up Now** はすぐに実行されます。
+• **Optimizing photos**：自動は、Optimize アルバムのファイルを Cloud が確認した時点で。手動は、**Back Up Now** で。
+• **Optimizing video**：自動は、バックアップの後、充電中に。手動は、**Back Up Now** で。
 • **削除されたファイル**：**クラウドのコピーについて確認する** の場合、Cloud にコピーがあるファイルを削除した少し後に通知されます（バックアップが一時停止中は除く）。
 • **Archive**：Archive タブで Yes と答えたときだけ。
 • **Restore**：Restore を押したときだけ。
 
 ## アプリを閉じるとき
 Back やホームなら問題ありません。作業は続きます。最近使ったアプリからアプリをスワイプして消すと、もう一度開くまでバックグラウンド処理が止まることがあります。""",
-        "en_hash": "d386bc34cb7fa40b",
+        "en_hash": "a5eb462b2f9fced2",
     },
     "where-your-data-lives": {
         "title": "データの保管場所",

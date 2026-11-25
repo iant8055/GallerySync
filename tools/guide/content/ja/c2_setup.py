@@ -42,7 +42,7 @@ TRANSLATIONS = {
 試用は、Settings の Backup にある **30 日間の無料試用を開始** から始めます。2 つ目のクラウドを接続すると表示されます。**Pro のロックを解除** で購入します。
 
 ## 各クラウドでできること
-• **OneDrive、Google Drive、Dropbox、pCloud、IDrive e2、Backblaze B2**：Backup、Sync、Archive、Restore。
+• **OneDrive、Google Drive、Dropbox、pCloud、IDrive e2、Backblaze B2**：Backup、Optimize、Archive、Restore。
 • **Google Photos**：バックアップのみ。
 
 ## 重複についての注意
@@ -55,7 +55,7 @@ TRANSLATIONS = {
 
 ## バックアップフォルダ
 クラウドを接続すると、そのカードに **バックアップフォルダ** が表示され、**変更** で別のフォルダを選べます（フォルダのない Google Photos を除く）。OneDrive は **Samsung Gallery / DCIM** から始まります。これは Samsung 自身の OneDrive 同期が使うフォルダで、そこにすでに同期された写真が二重に送られることはありません。ほかのクラウドは **GallerySync** から始まります。{{full:[[dialog-destination]]を参照してください。}}""",
-        "en_hash": "a90bbd0e1eecaa86",
+        "en_hash": "f331f8d37d829180",
     },
     "cloud-key-backblaze": {
         "title": "Backblaze B2 への接続：キーと、その確認場所",
@@ -171,7 +171,7 @@ Android が、独自のフォルダ権限画面を表示します。うまくい
 • **閉じる**：アプリを閉じます。バックアップは続行されます。
 • **完了**：すべて終わると表示され、確認した件数、すでにクラウドにあった件数、送信した件数の概要が表示されます。
 • **キャンセル**：**バックアップを停止しますか？** と尋ねます。送信済みのファイルは送信済みのままで、何も削除されません。""",
-        "en_hash": "ce535ae7a9b7c3bd",
+        "en_hash": "8c231bb697d4aaf0",
     },
     "setup-and-settings": {
         "title": "セットアップと Settings は別々です",

@@ -40,7 +40,7 @@ CHAPTER = Chapter(
             Start the trial with **Start 30-day free trial** in Settings, under Backup; it appears once a second Cloud is connected. **Unlock Pro** buys it.
 
             ## What each Cloud can do
-            • **OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 and Backblaze B2:** Backup, Sync, Archive and Restore.
+            • **OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 and Backblaze B2:** Backup, Optimize, Archive and Restore.
             • **Google Photos:** backup only.
 
             ## A note about duplicates
@@ -146,7 +146,7 @@ CHAPTER = Chapter(
 
         topic("setup-progress", "Backup progress", """
             ## Waiting to start
-            A countdown runs until the backup starts, even with the app closed, as long as the phone is plugged in. **SYNC NOW** starts it straight away.
+            A countdown runs until the backup starts, even with the app closed, as long as the phone is plugged in. **BACK UP NOW** starts it straight away.
 
             ## Step 1: Checking your Cloud
             Every file is compared with what your Cloud already holds, by name and size, with a running count. Nothing is sent. Usually a minute or two.

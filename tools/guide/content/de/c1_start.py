@@ -49,22 +49,22 @@ Tippe auf ein beliebiges **(?)** für eine kurze Erklärung. Die vollständige A
         "title": "Schnellstart",
         "body": """1. Schließe die Einrichtung ab: bei deiner Cloud anmelden, den Zugriff auf deine Fotos erlauben, Ordner und einen Backup-Plan wählen. Siehe [[setup-overview]].
 2. Tippe im Tab **Albums** auf die Modus-Schaltfläche eines Albums und wähle **Backup**.
-3. Neue Fotos werden automatisch gesichert. Drücke **Sync now**, um sofort zu sichern.
+3. Neue Fotos werden automatisch gesichert. Drücke **Back Up Now**, um sofort zu sichern.
 4. Sieh dir die letzte Zeile jedes Albums an: Sie zeigt, wie viele Dateien deine Cloud bestätigt hat.
-5. Platz nötig? Wähle **Sync**, um ein Album zu optimieren, oder **Archive**, um es vom Telefon zu verschieben.
+5. Platz nötig? Wähle **Optimize**, um ein Album zu optimieren, oder **Archive**, um es vom Telefon zu verschieben.
 6. Du brauchst eine Datei wieder in voller Größe? Nutze den Tab **Restore**.""",
-        "en_hash": "201e473222d36f7f",
+        "en_hash": "0698d8c82156ffa3",
     },
     "words-you-will-see": {
         "title": "Begriffe, die dir begegnen",
         "body": """• **Album:** ein Ordner mit Fotos und Videos auf deinem Telefon.
-• **Mode:** der Modus eines Albums, also was mit ihm geschieht: **Off**, **Backup**, **Sync** oder **Archive**. Siehe [[modes-in-depth]].
+• **Mode:** der Modus eines Albums, also was mit ihm geschieht: **Off**, **Backup**, **Optimize** oder **Archive**. Siehe [[modes-in-depth]].
 • **Cloud:** OneDrive, Google Photos, Google Drive, Dropbox, pCloud, IDrive e2 oder Backblaze B2. Siehe [[setup-cloud]].
 • **Pairing:** welche Cloud jeder Hauptordner auf deinem Telefon als Ziel hat. **DCIM**, **Pictures** und die anderen Ordner, in denen dein Telefon Fotos ablegt, nennt die Anleitung Hauptordner. Siehe [[settings-destination]].
 • **Optimize:** die Kopie auf dem Telefon durch eine kleinere ersetzen; das Original bleibt in der Cloud. Siehe [[how-optimizing-works]].
 • **Verified:** die Cloud hat bestätigt, dass sie die Datei in derselben Größe hat. Siehe [[how-verification-works]].
 • **Papierkorb:** wo entfernte Dateien warten. Siehe [[where-deleted-files-go]].
 • **Rescan:** Telefon und Cloud erneut ansehen, um aktuelle Zahlen zu bekommen.""",
-        "en_hash": "7fb26c96ebb57608",
+        "en_hash": "9f80fff96c2157db",
     },
 }

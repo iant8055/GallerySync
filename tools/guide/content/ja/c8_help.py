@@ -5,9 +5,9 @@ TRANSLATIONS = {
         "en_hash": "01001cde06eb2f03",
     },
     "faq-sync-now-greyed": {
-        "title": "Sync now がグレーアウトしている",
-        "body": """送信または最適化するものがありません。すべて送信済みか、Backup、Sync、Archive に設定されたアルバムがありません。ヘッダーのモード合計を確認してください。""",
-        "en_hash": "7b543eca08835984",
+        "title": "Back Up Now がグレーアウトしている",
+        "body": """送信または最適化するものがありません。すべて送信済みか、Backup、Optimize、Archive に設定されたアルバムがありません。ヘッダーのモード合計を確認してください。""",
+        "en_hash": "946c334e3023479a",
     },
     "faq-albums-off-after-backup": {
         "title": "最初のバックアップの後、アルバムが Off になっている",
@@ -23,8 +23,8 @@ Google Photos には問い合わせできないため、そのアルバムは常
     },
     "faq-onedrive-full": {
         "title": "Cloud がいっぱいで、バックアップが止まった",
-        "body": """**stopped: your Cloud is full.** 何も失われていません。空きを作るかストレージを追加してから、**Sync now** を押してください。""",
-        "en_hash": "70148dcb9cb4986c",
+        "body": """**stopped: your Cloud is full.** 何も失われていません。空きを作るかストレージを追加してから、**Back Up Now** を押してください。""",
+        "en_hash": "1a41d4b658e94c8d",
     },
     "faq-space-not-freed": {
         "title": "アルバムを Archive したのに、スマートフォンの空きが増えない",

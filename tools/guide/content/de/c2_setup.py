@@ -42,7 +42,7 @@ Die erste Cloud, die du auswählst, wird deine kostenlose Cloud, in Settings als
 Starte den Test mit **30 Tage kostenlos testen** in Settings unter Backup; die Schaltfläche erscheint, sobald eine zweite Cloud verbunden ist. **Pro freischalten** kauft Pro.
 
 ## Was jede Cloud kann
-• **OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 und Backblaze B2:** Backup, Sync, Archive und Restore.
+• **OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 und Backblaze B2:** Backup, Optimize, Archive und Restore.
 • **Google Photos:** nur Backup.
 
 ## Ein Hinweis zu Duplikaten
@@ -54,8 +54,8 @@ Jede Cloud bekommt ihre eigene nummerierte Karte **Verbinden**. **Weiter** warte
 • **IDrive e2, Backblaze B2:** gib die Schlüssel aus deren Konsole ein. Siehe [[cloud-key-backblaze]] und [[cloud-key-idrive]].
 
 ## Backup-Ordner
-Sobald eine Cloud verbunden ist, zeigt ihre Karte den **Backup-Ordner**, mit **Ändern**, um einen anderen zu wählen (nicht bei Google Photos, das keine Ordner hat). OneDrive beginnt bei **Samsung Gallery / DCIM**, dem Ordner, den die eigene OneDrive-Synchronisierung von Samsung nutzt, sodass dort bereits synchronisierte Fotos nicht doppelt gesendet werden. Andere Clouds beginnen bei **GallerySync**.{{full: Siehe [[dialog-destination]].}}""",
-        "en_hash": "a90bbd0e1eecaa86",
+Sobald eine Cloud verbunden ist, zeigt ihre Karte den **Backup-Ordner**, mit **Ändern**, um einen anderen zu wählen (nicht bei Google Photos, das keine Ordner hat). OneDrive beginnt bei **Samsung Gallery / DCIM**, dem Ordner, den die eigene OneDrive-Optimierung von Samsung nutzt, sodass dort bereits synchronisierte Fotos nicht doppelt gesendet werden. Andere Clouds beginnen bei **GallerySync**.{{full: Siehe [[dialog-destination]].}}""",
+        "en_hash": "f331f8d37d829180",
     },
     "cloud-key-backblaze": {
         "title": "Backblaze B2 verbinden: die Schlüssel und wo du sie findest",
@@ -171,7 +171,7 @@ Der Ring zeigt den Gesamtfortschritt. Darunter: die Cloud, an die gerade gesende
 • **Schließen:** schließt die App; das Backup läuft weiter.
 • **Fertig:** erscheint, wenn alles erledigt ist, mit einer Zusammenfassung dessen, was geprüft wurde, schon in der Cloud war und gesendet wurde.
 • **Abbrechen:** fragt **Backup stoppen?** Bereits gesendete Dateien bleiben gesendet; nichts wird gelöscht.""",
-        "en_hash": "ce535ae7a9b7c3bd",
+        "en_hash": "8c231bb697d4aaf0",
     },
     "setup-and-settings": {
         "title": "Einrichtung und Settings sind getrennt",

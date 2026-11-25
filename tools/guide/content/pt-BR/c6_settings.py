@@ -1,8 +1,8 @@
 TRANSLATIONS = {
     "_chapter": {
         "title": 'A aba Settings',
-        "intro": 'Uma página rolável em faixas verdes: Geral, Backup, Para onde vai cada pasta, Álbuns, Sincronização, Sync da câmera, Restaurar, Arquivar e Ajuda e feedback. Cada faixa tem um (?).',
-        "en_hash": "0295c3a8f1702248",
+        "intro": 'Uma página rolável em faixas verdes: Geral, Backup, Para onde vai cada pasta, Álbuns, Otimização, Pasta da câmera, Restaurar, Arquivar e Ajuda e feedback. Cada faixa tem um (?).',
+        "en_hash": "4be757fce176213f",
     },
     'settings-overview': {
         "title": 'Como a aba Settings está organizada',
@@ -45,8 +45,8 @@ O tamanho do texto segue a configuração do telefone nos dois casos.""",
         "body": """• **Off** (padrão): **Só Wi-Fi.**
 • **On:** **Sincroniza no Wi-Fi e nos dados móveis.**
 
-Vale para os backups automáticos e para o **Sync now**. Deixe desligado, a menos que seu plano de dados seja ilimitado.""",
-        "en_hash": "e8860c60b1961fee",
+Vale para os backups automáticos e para o **Back Up Now**. Deixe desligado, a menos que seu plano de dados seja ilimitado.""",
+        "en_hash": "949fdb1f51a72264",
     },
 
     'settings-open-not-on-phone': {
@@ -193,38 +193,38 @@ Esses arquivos ainda estão na lixeira do seu telefone.
         "en_hash": "a5707f1ea8aad403",
     },
     'settings-section-sync': {
-        "title": 'Sincronização',
-        "body": """Como as fotos e os vídeos em álbuns **Sync** são otimizados. Os arquivos só mudam depois que a Cloud os verificou. Funciona com OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 e Backblaze B2.""",
-        "en_hash": "4fa2ef3f02a17596",
+        "title": 'Otimização',
+        "body": """Como as fotos e os vídeos em álbuns **Optimize** são otimizados. Os arquivos só mudam depois que a Cloud os verificou. Funciona com OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 e Backblaze B2.""",
+        "en_hash": "609db2eeadf1b163",
     },
     'settings-optimize-photos': {
         "title": 'Otimizar fotos',
-        "body": """**Off** por padrão. Quando ligado, as fotos em álbuns Sync são substituídas por cópias menores: cerca de 2048 pixels no lado maior, aproximadamente um décimo do tamanho. Elas continuam na sua galeria com um pequeno selo de nuvem. Os originais ficam na Cloud.
+        "body": """**Off** por padrão. Quando ligado, as fotos em álbuns Optimize são substituídas por cópias menores: cerca de 2048 pixels no lado maior, aproximadamente um décimo do tamanho. Elas continuam na sua galeria com um pequeno selo de nuvem. Os originais ficam na Cloud.
 
 Fotos que já são pequenas o bastante e arquivos em **Do not optimize** são deixados em paz. **Modo** define quando roda. Veja [[settings-optimize-mode]].""",
-        "en_hash": "947629869504ef56",
+        "en_hash": "5e4d7d2cb20c1df8",
     },
     'settings-optimize-video': {
         "title": 'Otimizar vídeos',
         "body": """**Off** por padrão. Quando ligado, mostra **Modo**, **Com mais de** e **Compressão**.
 
-Os vídeos em álbuns Sync são recodificados em um tamanho menor. Nada é cortado. Os originais ficam na Cloud.
+Os vídeos em álbuns Optimize são recodificados em um tamanho menor. Nada é cortado. Os originais ficam na Cloud.
 
 ## Quais vídeos
-Em um álbum Sync, verified in the Cloud, mais antigo que a sua configuração, em uma pasta à qual você deu acesso e ainda não otimizado.
+Em um álbum Optimize, verified in the Cloud, mais antigo que a sua configuração, em uma pasta à qual você deu acesso e ainda não otimizado.
 
 ## Quando
 • **Automático:** depois dos backups, somente com o aparelho carregando.
-• **Manual:** quando você pressiona **Sync now**.""",
-        "en_hash": "6e9896836e47e62e",
+• **Manual:** quando você pressiona **Back Up Now**.""",
+        "en_hash": "a0609c640e4a6f88",
     },
     'settings-optimize-mode': {
         "title": 'Modo: Automático ou Manual',
-        "body": """• **Automático** (padrão): os arquivos em álbuns Sync são otimizados assim que a Cloud os confirma. O vídeo espera o carregador.
-• **Manual:** nada acontece até você pressionar **Sync now** na aba Albums.
+        "body": """• **Automático** (padrão): os arquivos em álbuns Optimize são otimizados assim que a Cloud os confirma. O vídeo espera o carregador.
+• **Manual:** nada acontece até você pressionar **Back Up Now** na aba Albums.
 
-Fotos fora das pastas às quais você deu acesso precisam da confirmação do Android, então esperam até você abrir o app ou pressionar **Sync now**.""",
-        "en_hash": "741f924a42b5494f",
+Fotos fora das pastas às quais você deu acesso precisam da confirmação do Android, então esperam até você abrir o app ou pressionar **Back Up Now**.""",
+        "en_hash": "aa5ba16737011b66",
     },
     'settings-video-age': {
         "title": 'Com mais de (vídeo)',
@@ -256,14 +256,14 @@ O app pergunta **Otimizar de novo os vídeos existentes?** **Sim** permite que v
         "en_hash": "44bada9612e80a0d",
     },
     'settings-section-camera': {
-        "title": 'Sync da câmera (Settings)',
+        "title": 'Pasta da câmera (Settings)',
         "body": """**Configurações especiais para a câmera**, desligado por padrão. Quando ligado:
 • **Pasta da câmera:** a pasta em que a sua câmera salva. Escolha na lista, ou **Outra…**.
 • **Select Photos/Videos older than**, **Photos**, **Videos:** padrões para os controles de otimização dessa pasta ([[album-camera-optimize]]).
 • **Compressão de vídeo:** para os vídeos otimizados ali.
 
-A Pasta da câmera não tem o modo **Sync**, e nada é otimizado até você pressionar **Sync now** nela. Os botões Optimize acima não afetam essa pasta.""",
-        "en_hash": "37e57d5f3b81a8e9",
+A Pasta da câmera não tem o modo **Optimize**, e nada é otimizado até você pressionar **Back Up Now** nela. Os botões Optimize acima não afetam essa pasta.""",
+        "en_hash": "542270f97e7e8c66",
     },
     'settings-section-archive': {
         "title": 'Arquivar (Settings)',

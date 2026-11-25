@@ -5,8 +5,8 @@ CHAPTER = Chapter(
     title="Questions and problems",
     intro="Common questions and what is usually going on.",
     topics=[
-        topic("faq-sync-now-greyed", "Sync now is greyed out", """
-            There is nothing to send or optimize: everything is already sent, or no album is set to Backup, Sync or Archive. Check the mode totals in the header.
+        topic("faq-sync-now-greyed", "Back Up Now is greyed out", """
+            There is nothing to send or optimize: everything is already sent, or no album is set to Backup, Optimize or Archive. Check the mode totals in the header.
         """),
 
         topic("faq-albums-off-after-backup", "My albums say Off after the first backup", """
@@ -20,7 +20,7 @@ CHAPTER = Chapter(
         """),
 
         topic("faq-onedrive-full", "The backup stopped because my Cloud is full", """
-            **stopped: your Cloud is full.** Nothing is lost. Free some room or add storage, then press **Sync now**.
+            **stopped: your Cloud is full.** Nothing is lost. Free some room or add storage, then press **Back Up Now**.
         """),
 
         topic("faq-space-not-freed", "I archived an album but my phone has no more space", """

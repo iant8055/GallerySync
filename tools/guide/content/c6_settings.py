@@ -3,7 +3,7 @@ from model import Chapter, topic
 CHAPTER = Chapter(
     id="settings",
     title="The Settings tab",
-    intro="One scrolling page in green bands: General, Backup, Where each folder goes, Albums, Sync, Camera Sync, Restore, "
+    intro="One scrolling page in green bands: General, Backup, Where each folder goes, Albums, Optimization, Camera Folder, Restore, "
           "Archive and Help & Feedback. Each band has a (?).",
     topics=[
         topic("settings-overview", "How the Settings tab is laid out", """
@@ -41,7 +41,7 @@ CHAPTER = Chapter(
             • **Off** (default): **Wi-Fi only.**
             • **On:** **Syncs on Wi-Fi and mobile data.**
 
-            Covers automatic backups and **Sync now**. Leave it off unless your data plan is unlimited.
+            Covers automatic backups and **Back Up Now**. Leave it off unless your data plan is unlimited.
         """, ui=True),
 
         topic("settings-open-not-on-phone", "Files not on the phone", """
@@ -174,12 +174,12 @@ CHAPTER = Chapter(
             **Remove from OneDrive** goes ahead; **Cancel** decides nothing. Any file that has come back to the phone is left alone.
         """, ui=True),
 
-        topic("settings-section-sync", "Sync", """
-            How photos and videos in **Sync** albums are optimized. Files change only after the Cloud has verified them. Works with OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 and Backblaze B2.
+        topic("settings-section-sync", "Optimization", """
+            How photos and videos in **Optimize** albums are optimized. Files change only after the Cloud has verified them. Works with OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 and Backblaze B2.
         """, ui=True),
 
         topic("settings-optimize-photos", "Optimize photos", """
-            **Off** by default. When on, photos in Sync albums are replaced with smaller copies: about 2048 pixels on the long edge, roughly a tenth of the size. They stay in your gallery with a small cloud badge. Originals stay in the Cloud.
+            **Off** by default. When on, photos in Optimize albums are replaced with smaller copies: about 2048 pixels on the long edge, roughly a tenth of the size. They stay in your gallery with a small cloud badge. Originals stay in the Cloud.
 
             Photos already small enough, and files set to **Do not optimize**, are left alone. **Mode** sets when it runs. See [[settings-optimize-mode]].
         """, ui=True),
@@ -187,21 +187,21 @@ CHAPTER = Chapter(
         topic("settings-optimize-video", "Optimize video", """
             **Off** by default. When on, shows **Mode**, **Older than** and **Compression**.
 
-            Videos in Sync albums are re-encoded smaller. Nothing is ever cut. Originals stay in the Cloud.
+            Videos in Optimize albums are re-encoded smaller. Nothing is ever cut. Originals stay in the Cloud.
 
             ## Which videos
-            In a Sync album, verified in the Cloud, older than your setting, in a folder you gave access to, and not already optimized.
+            In a Optimize album, verified in the Cloud, older than your setting, in a folder you gave access to, and not already optimized.
 
             ## When
             • **Automatic:** after backups, only while charging.
-            • **Manual:** when you press **Sync now**.
+            • **Manual:** when you press **Back Up Now**.
         """, ui=True),
 
         topic("settings-optimize-mode", "Mode: Automatic or Manual", """
-            • **Automatic** (default): files in Sync albums are optimized once the Cloud confirms them. Video waits for the charger.
-            • **Manual:** nothing happens until you press **Sync now** on the Albums tab.
+            • **Automatic** (default): files in Optimize albums are optimized once the Cloud confirms them. Video waits for the charger.
+            • **Manual:** nothing happens until you press **Back Up Now** on the Albums tab.
 
-            Photos outside the folders you gave access to need Android's confirmation, so they wait until you open the app or press **Sync now**.
+            Photos outside the folders you gave access to need Android's confirmation, so they wait until you open the app or press **Back Up Now**.
         """, ui=True),
 
         topic("settings-video-age", "Older than (video)", """
@@ -229,13 +229,13 @@ CHAPTER = Chapter(
             **Off** by default. When on, the Restore tab lists every OneDrive folder, including ones with nothing to bring back.
         """, ui=True),
 
-        topic("settings-section-camera", "Camera Sync (Settings)", """
+        topic("settings-section-camera", "Camera Folder (Settings)", """
             **Special settings for Camera**, off by default. When on:
             • **Camera folder:** the folder your camera saves to. Choose it from the list, or **Other…**.
             • **Select Photos/Videos older than**, **Photos**, **Videos:** defaults for that folder's optimize controls ([[album-camera-optimize]]).
             • **Video compression:** for videos optimized there.
 
-            The Camera folder has no **Sync** mode, and nothing is optimized until you press **Sync now** in it. The Optimize switches above do not affect it.
+            The Camera folder has no **Optimize** mode, and nothing is optimized until you press **Back Up Now** in it. The Optimize switches above do not affect it.
         """, ui=True),
 
         topic("settings-section-archive", "Archive (Settings)", """

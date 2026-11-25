@@ -10,18 +10,18 @@ CHAPTER = Chapter(
 
             • **Off:** this album is not looked after: nothing is sent or changed. Every album starts here.
             • **Backup:** copies to your Cloud; the phone is never touched.
-            • **Sync:** backs up, then optimizes if optimizing is on in Settings.
+            • **Optimize:** backs up, then optimizes if optimizing is on in Settings.
             • **Archive:** backs up, verifies, then moves the files to the phone's trash after your tap. The only mode that removes files.
 
             ## Which Clouds
-            Backup works with every Cloud. Sync and Archive need OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 or Backblaze B2, not Google Photos.
+            Backup works with every Cloud. Optimize and Archive need OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 or Backblaze B2, not Google Photos.
 
             ## Camera folder
-            If you set a Camera folder in Settings, it offers Off, Backup and Archive, with its own optimize controls instead of Sync. See [[album-camera-optimize]].
+            If you set a Camera folder in Settings, it offers Off, Backup and Archive, with its own optimize controls instead of Optimize. See [[album-camera-optimize]].
 
             ## Which to pick
             • Keep as is, but protected: **Backup**.
-            • Save space but keep viewing: **Sync**.
+            • Save space but keep viewing: **Optimize**.
             • Old albums you want off the phone: **Archive**.
             • Unsure: **Off** or **Backup**.
 
@@ -59,10 +59,10 @@ CHAPTER = Chapter(
             Reduced to about 2048 pixels on the long edge, roughly a tenth of the size. Same name, place, date and location, with a small cloud badge.
 
             ## Video
-            Re-encoded at **480p** (High compression), **720p** (Medium) or **1080p** (Low). Never cut. Automatic waits for the charger; Manual runs on **Sync now**.
+            Re-encoded at **480p** (High compression), **720p** (Medium) or **1080p** (Low). Never cut. Automatic waits for the charger; Manual runs on **Back Up Now**.
 
             ## Rules
-            • Only in **Sync** albums.
+            • Only in **Optimize** albums.
             • Only after the Cloud confirms the original at the same size.
             • A file that would not get smaller is left alone.
 
@@ -85,9 +85,9 @@ CHAPTER = Chapter(
         """),
 
         topic("background-work", "When things happen", """
-            • **Backing up:** shortly after new photos appear, and every six hours. Wi-Fi only unless mobile data is on; not when battery or storage is low. **Sync now** runs straight away.
-            • **Optimizing photos:** Automatic, once the Cloud confirms a file in a Sync album. Manual, on **Sync now**.
-            • **Optimizing video:** Automatic, after backups, while charging. Manual, on **Sync now**.
+            • **Backing up:** shortly after new photos appear, and every six hours. Wi-Fi only unless mobile data is on; not when battery or storage is low. **Back Up Now** runs straight away.
+            • **Optimizing photos:** Automatic, once the Cloud confirms a file in a Optimize album. Manual, on **Back Up Now**.
+            • **Optimizing video:** Automatic, after backups, while charging. Manual, on **Back Up Now**.
             • **Deleted files:** under **Ask**, you are notified shortly after deleting a file that has a Cloud copy (not while backups are paused).
             • **Archiving:** only when you say Yes on the Archive tab.
             • **Restoring:** only when you press Restore.

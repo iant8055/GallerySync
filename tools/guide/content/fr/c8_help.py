@@ -5,9 +5,9 @@ TRANSLATIONS = {
         "en_hash": "01001cde06eb2f03",
     },
     "faq-sync-now-greyed": {
-        "title": "Sync now est grisé",
-        "body": """Il n'y a rien à envoyer ni à optimiser : tout est déjà envoyé, ou aucun album n'est réglé sur Backup, Sync ou Archive. Vérifiez les totaux de mode dans l'en-tête.""",
-        "en_hash": "7b543eca08835984",
+        "title": "Back Up Now est grisé",
+        "body": """Il n'y a rien à envoyer ni à optimiser : tout est déjà envoyé, ou aucun album n'est réglé sur Backup, Optimize ou Archive. Vérifiez les totaux de mode dans l'en-tête.""",
+        "en_hash": "946c334e3023479a",
     },
     "faq-albums-off-after-backup": {
         "title": "Mes albums indiquent Off après la première sauvegarde",
@@ -23,8 +23,8 @@ Google Photos ne peut pas être interrogé, donc ses albums affichent toujours *
     },
     "faq-onedrive-full": {
         "title": "La sauvegarde s'est arrêtée parce que mon Cloud est plein",
-        "body": """**stopped: your Cloud is full.** Rien n'est perdu. Libérez de la place ou ajoutez du stockage, puis appuyez sur **Sync now**.""",
-        "en_hash": "70148dcb9cb4986c",
+        "body": """**stopped: your Cloud is full.** Rien n'est perdu. Libérez de la place ou ajoutez du stockage, puis appuyez sur **Back Up Now**.""",
+        "en_hash": "1a41d4b658e94c8d",
     },
     "faq-space-not-freed": {
         "title": "J'ai archivé un album mais mon téléphone n'a pas plus de place",

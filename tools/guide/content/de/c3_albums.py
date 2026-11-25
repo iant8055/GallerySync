@@ -26,11 +26,11 @@ Neue Alben tragen die Markierung **New** und beginnen immer bei **Off**. Ein neu
     },
     "albums-filter": {
         "title": "All Albums und die vier Modus-Schaltflächen",
-        "body": """• Tippe auf **Backup**, **Sync**, **Archive** oder **Off**, um nur die Alben in diesem Modus zu zeigen.
+        "body": """• Tippe auf **Backup**, **Optimize**, **Archive** oder **Off**, um nur die Alben in diesem Modus zu zeigen.
 • Tippe auf **All Albums** oder noch einmal auf dieselbe Schaltfläche, um alle zu zeigen.
 
 Filtern ändert nur, was du siehst. Um einen Modus zu ändern, nutze die Schaltfläche auf der Karte des Albums. Siehe [[modes-in-depth]].""",
-        "en_hash": "d4865c5cf08d3857",
+        "en_hash": "fce05e6ad448f530",
     },
     "albums-totals": {
         "title": "Album Mode Count",
@@ -44,10 +44,10 @@ Filtern ändert nur, was du siehst. Um einen Modus zu ändern, nutze die Schaltf
     },
     "albums-optimized-line": {
         "title": "Optimized and Saved",
-        "body": """Bei ausgewähltem **Sync**: wie viele Dateien in Sync-Alben optimiert wurden und wie viel Platz gespart wurde.
+        "body": """Bei ausgewähltem **Optimize**: wie viele Dateien in Optimize-Alben optimiert wurden und wie viel Platz gespart wurde.
 
 Die Originale bleiben in der Cloud. **Restore** bringt sie zurück. Siehe [[how-optimizing-works]].""",
-        "en_hash": "701f3a7e8e63d389",
+        "en_hash": "280df5abf38d7971",
     },
     "albums-archive-lines": {
         "title": "Files archived and Scheduled to leave this phone",
@@ -59,20 +59,20 @@ Hier wird nichts entfernt. Das Entfernen geschieht im Archive-Tab. Siehe [[archi
         "en_hash": "00b01adb4a7cf037",
     },
     "albums-run-controls": {
-        "title": "Sync now, Rescan, Pause, Resume and Stop",
+        "title": "Back Up Now, Rescan, Pause, Resume and Stop",
         "body": """## Wenn nichts läuft
-• **Sync now:** sichert jetzt. Ist in Settings ein Optimierungsschalter an und sein **Modus** auf **Manuell** gestellt, wird danach auch optimiert (siehe [[settings-optimize-mode]]). Ausgegraut, wenn nichts zu senden oder zu optimieren ist.
+• **Back Up Now:** sichert jetzt. Ist in Settings ein Optimierungsschalter an und sein **Modus** auf **Manuell** gestellt, wird danach auch optimiert (siehe [[settings-optimize-mode]]). Ausgegraut, wenn nichts zu senden oder zu optimieren ist.
 • **Rescan:** sieht sich das Telefon an und fragt OneDrive erneut.
 
 ## Während ein Backup läuft
-• Der Fortschritt erscheint als **Syncing** mit einem Prozentwert (nach Datenmenge, nicht nach Dateizahl).
+• Der Fortschritt erscheint als **Backing up now** mit einem Prozentwert (nach Datenmenge, nicht nach Dateizahl).
 • **Pause:** hält alle Backups an, bis du **Resume** drückst.
 • **Stop:** beendet diesen Durchlauf. Automatische Backups laufen weiter.
 
 ## Gut zu wissen
-• **Sync now** wartet nicht auf das Ladegerät, beachtet aber weiterhin deine Einstellung „Mobile Daten verwenden“. Siehe [[settings-mobile-data]].
-• Es sichert jedes Album, das auf **Backup**, **Sync** oder **Archive** steht, optimiert aber nur Dateien in **Sync**-Alben.""",
-        "en_hash": "4c3628a3516a9b52",
+• **Back Up Now** wartet nicht auf das Ladegerät, beachtet aber weiterhin deine Einstellung „Mobile Daten verwenden“. Siehe [[settings-mobile-data]].
+• Es sichert jedes Album, das auf **Backup**, **Optimize** oder **Archive** steht, optimiert aber nur Dateien in **Optimize**-Alben.""",
+        "en_hash": "7018ccad25f0b316",
     },
     "albums-status-line": {
         "title": "Fortschritt und Statusmeldungen",
@@ -84,9 +84,9 @@ Hier wird nichts entfernt. Das Entfernen geschieht im Archive-Tab. Siehe [[archi
     "albums-list": {
         "title": "Der Albums-Tab",
         "body": """## Kopfzeile
-• Tippe auf **Backup**, **Sync**, **Archive** oder **Off**, um nur die Alben in diesem Modus zu zeigen. Tippe auf **All Albums**, um wieder alle zu zeigen.
+• Tippe auf **Backup**, **Optimize**, **Archive** oder **Off**, um nur die Alben in diesem Modus zu zeigen. Tippe auf **All Albums**, um wieder alle zu zeigen.
 • Die Zeile unter den Schaltflächen nennt die Summe für jeden Modus.
-• **▲ Hide Details ▲** am unteren Rand der Karte blendet die Zeile mit der Modus-Summe aus und, während ein Durchlauf läuft, auch die Upload-Zeile mit ihrem Balken; **▼ Show Details ▼** holt sie zurück. **All Albums**, die vier Modus-Schaltflächen sowie **Sync now** / **Rescan** bleiben, und während ein Durchlauf läuft bleiben auch **Syncing…**, **Pause** und **Stop**. Der Tab merkt sich deine Wahl.
+• **▲ Hide Details ▲** am unteren Rand der Karte blendet die Zeile mit der Modus-Summe aus und, während ein Durchlauf läuft, auch die Upload-Zeile mit ihrem Balken; **▼ Show Details ▼** holt sie zurück. **All Albums**, die vier Modus-Schaltflächen sowie **Back Up Now** / **Rescan** bleiben, und während ein Durchlauf läuft bleiben auch **Backing up now…**, **Pause** und **Stop**. Der Tab merkt sich deine Wahl.
 
 ## Albumkarten
 • **Name, Dateizahl und Größe** des Albums auf deinem Telefon.
@@ -96,7 +96,7 @@ Hier wird nichts entfernt. Das Entfernen geschieht im Archive-Tab. Siehe [[archi
 • **Graue Zeile** (nur wenn vorhanden): **N files not backed up by choice** — Dateien, auf die du nach links gewischt hast, plus gesperrte. Sie werden geachtet; nichts verwendet sie.
 • **Modus-Schaltfläche** (rechte Seite): tippen, um den Modus des Albums zu ändern. Archive fragt zuerst nach Bestätigung. Wenn die Cloud des Albums diesen Modus nicht kann, sagt die Karte das.
 • **Tippe auf die Karte**, um die Dateien des Albums zu sehen. Siehe [[album-detail]].""",
-        "en_hash": "348d7189c69028ae",
+        "en_hash": "0b9328a4170e83e0",
     },
     "album-detail": {
         "title": "Die Dateiliste eines Albums",
@@ -175,7 +175,7 @@ Wenn du eine gesicherte Datei nach links wischst, wird sie **locked** markiert (
     },
     "album-camera-optimize": {
         "title": "Ältere Fotos und Videos in deinem Kameraordner optimieren",
-        "body": """Nur der **Kameraordner**, den du in Settings unter **Kamera-Sync** gewählt hast ([[settings-section-camera]]), hat diese Steuerung.
+        "body": """Nur der **Kameraordner**, den du in Settings unter **Kameraordner** gewählt hast ([[settings-section-camera]]), hat diese Steuerung.
 
 ## Dateien auswählen
 • **Select Photos/Videos older than:** eine Zahl von **½** bis **9** und eine Einheit — **hour**, **day**, **week**, **month**, **year** oder **All**.
@@ -183,15 +183,15 @@ Wenn du eine gesicherte Datei nach links wischst, wird sie **locked** markiert (
 • Wische eine Datei nach rechts, um sie auszuwählen, nach links, um die Auswahl aufzuheben. Die Karte zeigt, wie viele ausgewählt sind und die geschätzte Ersparnis.
 
 ## Schaltflächen
-• **Sync now:** sichert alles, was im Ordner wartet, und optimiert dann nur die ausgewählten Dateien.
+• **Back Up Now:** sichert alles, was im Ordner wartet, und optimiert dann nur die ausgewählten Dateien.
 • **Rescan:** prüft die Cloud erneut.
 
 ## Gut zu wissen
 • Nur Dateien, die OneDrive in voller Größe bestätigt hat, können ausgewählt werden.
-• Nichts wird optimiert, bis du **Sync now** drückst. Neue Fotos bleiben, wie sie sind.
-• Der Kameraordner hat keinen **Sync**-Modus, und die Optimierungsschalter in Settings wirken sich nicht auf ihn aus.
+• Nichts wird optimiert, bis du **Back Up Now** drückst. Neue Fotos bleiben, wie sie sind.
+• Der Kameraordner hat keinen **Optimize**-Modus, und die Optimierungsschalter in Settings wirken sich nicht auf ihn aus.
 • Wenn du mit geänderten Auswahlen gehst, wirst du gefragt, ob sie deine Standardeinstellungen werden sollen.""",
-        "en_hash": "19ad4bbf62950ae9",
+        "en_hash": "10e1e3ba1e9982e2",
     },
     "album-camera-select": {
         "title": "Dateien in deinem Kameraordner auswählen",
@@ -199,10 +199,10 @@ Wenn du eine gesicherte Datei nach links wischst, wird sie **locked** markiert (
 
 • **Photos**, **Videos** und das Alter wählen jeden Treffer aus.
 • Nach rechts wischen zum Auswählen, nach links zum Abwählen.
-• **Sync now** optimiert nur die ausgewählten Dateien.
+• **Back Up Now** optimiert nur die ausgewählten Dateien.
 
 Eine ausgegraute Datei kann nicht ausgewählt werden: Sie ist noch nicht in OneDrive bestätigt oder schon optimiert. Siehe [[album-camera-optimize]].""",
-        "en_hash": "ec8dfe5b2063e196",
+        "en_hash": "0bfa66dc8a4265bf",
     },
     "album-merge-warning": {
         "title": "Doppelte Albumnamen erkannt",

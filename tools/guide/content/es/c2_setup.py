@@ -44,7 +44,7 @@ La primera Nube que seleccionas se convierte en tu Nube gratuita, que aparece co
 Inicia la prueba con **Start 30-day free trial** en Settings, en Backup; aparece cuando hay una segunda Nube conectada. **Unlock Pro** la compra.
 
 ## Qué puede hacer cada Nube
-• **OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 y Backblaze B2:** Backup, Sync, Archive y Restore.
+• **OneDrive, Google Drive, Dropbox, pCloud, IDrive e2 y Backblaze B2:** Backup, Optimize, Archive y Restore.
 • **Google Photos:** solo Backup.
 
 ## Una nota sobre duplicados
@@ -57,7 +57,7 @@ Cada Nube tiene su propia tarjeta numerada **Conectar**. **Siguiente** espera ha
 
 ## Carpeta de copia
 Cuando una Nube está conectada, su tarjeta muestra su **Carpeta de copia**, con **Cambiar** para elegir otra (no en Google Photos, que no tiene carpetas). OneDrive empieza en **Samsung Gallery / DCIM**, la carpeta que usa la propia sincronización de OneDrive de Samsung, así que las fotos ya sincronizadas allí no se envían dos veces. Las demás Nubes empiezan en **GallerySync**.{{full: Consulta [[dialog-destination]].}}""",
-        "en_hash": "a90bbd0e1eecaa86",
+        "en_hash": "f331f8d37d829180",
     },
 
     "cloud-key-backblaze": {
@@ -181,7 +181,7 @@ El anillo muestra el progreso total. Debajo: la Nube a la que se envía y su rec
 • **Cerrar:** cierra la app; la copia continúa.
 • **Finalizar:** aparece cuando todo está hecho, con un resumen de lo que se revisó, lo que ya estaba en la Nube y lo que se envió.
 • **Cancelar:** pregunta **¿Detener la copia de seguridad?** Los archivos ya enviados se quedan enviados; no se elimina nada.""",
-        "en_hash": "ce535ae7a9b7c3bd",
+        "en_hash": "8c231bb697d4aaf0",
     },
 
     "setup-and-settings": {
