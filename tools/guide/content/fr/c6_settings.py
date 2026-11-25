@@ -111,8 +111,8 @@ Une ligne dit seulement où les fichiers iraient. Rien n'est envoyé tant que l'
 • **Rétablir par défaut :** retour à **Samsung Gallery/DCIM** (OneDrive) ou **GallerySync** (autres Clouds).
 • **Utiliser ce dossier** enregistre ; **Annuler** ne change rien.
 
-Seuls les nouveaux fichiers vont dans le nouveau dossier. Les fichiers déjà sauvegardés restent où ils sont. OneDrive continue de vérifier les dossiers précédents, donc rien n'est envoyé deux fois.""",
-        "en_hash": "910e0378a5a8b208",
+Seuls les nouveaux fichiers vont dans le nouveau dossier. Les fichiers déjà sauvegardés restent où ils sont. Les envois continuent de vérifier les dossiers précédents, donc rien n'est envoyé deux fois. Restore ne liste que le dossier actuel, mais tout fichier que cette copie a déjà sauvegardé ou optimisé est toujours proposé, où qu'il se trouve dans OneDrive.""",
+        "en_hash": "aebe3c2261046e24",
     },
     "dialog-folder-picker": {
         "title": "Choisir un dossier (le sélecteur OneDrive)",

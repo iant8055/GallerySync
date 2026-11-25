@@ -12,7 +12,7 @@ TRANSLATIONS = {
 Les fichiers restaurés reçoivent **Do not optimize**, afin de ne pas être optimisés ou archivés de nouveau tout de suite. Voir [[album-file-pin]].
 
 ## Quels Clouds
-• **OneDrive :** chaque photo et vidéo de vos dossiers de sauvegarde, quelle que soit la personne qui les y a mises.
+• **OneDrive :** chaque photo et vidéo du dossier de sauvegarde défini dans Settings, quelle que soit la personne qui les y a mises, ainsi que tout fichier que cette copie de GallerySync a sauvegardé ou optimisé, où qu'il se trouve dans OneDrive. Pour tout le reste dans un ancien dossier, utilisez l'application OneDrive.
 • **Dropbox, Google Drive, pCloud, Backblaze B2, IDrive e2 :** les fichiers que GallerySync a envoyés depuis ce téléphone.
 • **Google Photos :** on ne peut pas restaurer depuis ce Cloud.
 
@@ -21,7 +21,7 @@ Dans le dossier d'où ils viennent. Les fichiers placés à la racine de **DCIM*
 
 ## Sans risque
 Un fichier n'est remplacé qu'après l'arrivée complète du téléchargement et la vérification de sa taille. Si quoi que ce soit échoue, le fichier du téléphone reste tel quel.""",
-        "en_hash": "1ef149357e546696",
+        "en_hash": "c7a1c07e0aed042f",
     },
     "restore-hero": {
         "title": "Albums to Restore et Files in this album",

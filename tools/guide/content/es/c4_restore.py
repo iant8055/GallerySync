@@ -12,7 +12,7 @@ TRANSLATIONS = {
 Los archivos restaurados reciben **Do not optimize**, así que no se vuelven a optimizar ni a archivar de inmediato. Consulta [[album-file-pin]].
 
 ## Qué Clouds
-• **OneDrive:** todas las fotos y vídeos de tus carpetas de copia, los haya puesto quien los haya puesto.
+• **OneDrive:** todas las fotos y vídeos de la carpeta de copia fijada en Settings, los haya puesto quien los haya puesto, más cualquier archivo que esta copia de GallerySync haya subido u optimizado, esté donde esté en OneDrive. Para cualquier otra cosa en una carpeta anterior, usa la app de OneDrive.
 • **Dropbox, Google Drive, pCloud, Backblaze B2, IDrive e2:** los archivos que GallerySync envió desde este teléfono.
 • **Google Photos:** no se puede restaurar desde ella.
 
@@ -21,7 +21,7 @@ De vuelta a la carpeta de la que vinieron. Los archivos sueltos en el nivel supe
 
 ## Se puede probar sin riesgo
 Un archivo se sustituye solo después de que la descarga llegue completa y su tamaño coincida. Si algo falla, el archivo del teléfono se queda como estaba.""",
-        "en_hash": "1ef149357e546696",
+        "en_hash": "c7a1c07e0aed042f",
     },
 
     "restore-hero": {

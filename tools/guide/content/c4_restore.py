@@ -12,7 +12,7 @@ CHAPTER = Chapter(
             Restored files get **Do not optimize**, so they are not optimized or archived again straight away. See [[album-file-pin]].
 
             ## Which Clouds
-            • **OneDrive:** every photo and video in your backup folders, whoever put them there.
+            • **OneDrive:** every photo and video in the backup folder set in Settings, whoever put them there, plus any file this copy of GallerySync backed up or optimized, wherever it is in OneDrive. For anything else in an older folder, use the OneDrive app.
             • **Dropbox, Google Drive, pCloud, Backblaze B2, IDrive e2:** files GallerySync sent from this phone.
             • **Google Photos:** cannot be restored from.
 

@@ -12,7 +12,7 @@ TRANSLATIONS = {
 復元されたファイルには **Do not optimize** が付くため、すぐにまた最適化やアーカイブされることはありません。[[album-file-pin]]を参照してください。
 
 ## 対応する Cloud
-• **OneDrive**：バックアップフォルダ内のすべての写真と動画（誰が入れたかは問いません）。
+• **OneDrive**：Settings で設定したバックアップフォルダ内のすべての写真と動画（誰が入れたかは問いません）に加えて、この GallerySync のコピーがバックアップまたは最適化したファイルは、OneDrive のどこにあっても対象になります。古いフォルダにあるそれ以外のものは、OneDrive アプリを使ってください。
 • **Dropbox、Google Drive、pCloud、Backblaze B2、IDrive e2**：GallerySync がこのスマートフォンから送ったファイル。
 • **Google Photos**：復元元にはできません。
 
@@ -21,7 +21,7 @@ TRANSLATIONS = {
 
 ## 試しても安全です
 ファイルが置き換えられるのは、ダウンロードが完全に届き、サイズが一致した後だけです。何かが失敗した場合、スマートフォンのファイルはそのままです。""",
-        "en_hash": "1ef149357e546696",
+        "en_hash": "c7a1c07e0aed042f",
     },
     "restore-hero": {
         "title": "Albums to Restore and Files in this album",

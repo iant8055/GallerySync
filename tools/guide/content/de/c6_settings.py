@@ -111,8 +111,8 @@ Eine Zeile sagt nur, wohin Dateien gehen würden. Es wird nichts hochgeladen, be
 • **Auf Standard zurücksetzen:** zurück zu **Samsung Gallery/DCIM** (OneDrive) oder **GallerySync** (andere Clouds).
 • **Diesen Ordner verwenden** speichert; **Abbrechen** ändert nichts.
 
-Nur neue Dateien gehen in den neuen Ordner. Bereits gesicherte Dateien bleiben, wo sie sind. OneDrive prüft weiterhin frühere Ordner, daher wird nichts doppelt gesendet.""",
-        "en_hash": "910e0378a5a8b208",
+Nur neue Dateien gehen in den neuen Ordner. Bereits gesicherte Dateien bleiben, wo sie sind. Uploads prüfen weiterhin frühere Ordner, daher wird nichts doppelt gesendet. Restore zeigt nur den aktuellen Ordner an, aber jede Datei, die diese Kopie bereits gesichert oder optimiert hat, wird immer angeboten, wo auch immer sie in OneDrive liegt.""",
+        "en_hash": "aebe3c2261046e24",
     },
     "dialog-folder-picker": {
         "title": "Ordner wählen (die OneDrive-Auswahl)",

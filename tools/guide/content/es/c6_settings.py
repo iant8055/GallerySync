@@ -120,8 +120,8 @@ Una fila solo indica adónde irían los archivos. No se sube nada hasta que el �
 • **Volver al predeterminado:** vuelve a **Samsung Gallery/DCIM** (OneDrive) o a **GallerySync** (otras Clouds).
 • **Usar esta carpeta** guarda; **Cancelar** no cambia nada.
 
-Solo los archivos nuevos van a la carpeta nueva. Los archivos que ya tienen copia se quedan donde están. OneDrive sigue comprobando las carpetas anteriores, así que no se envía nada dos veces.""",
-        "en_hash": "910e0378a5a8b208",
+Solo los archivos nuevos van a la carpeta nueva. Los archivos que ya tienen copia se quedan donde están. Las subidas siguen comprobando las carpetas anteriores, así que no se envía nada dos veces. Restore solo lista la carpeta actual, pero cualquier archivo que esta copia ya haya subido u optimizado se ofrece siempre, esté donde esté en OneDrive.""",
+        "en_hash": "aebe3c2261046e24",
     },
 
     "dialog-folder-picker": {

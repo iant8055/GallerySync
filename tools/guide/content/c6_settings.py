@@ -101,7 +101,7 @@ CHAPTER = Chapter(
             • **Reset to default:** back to **Samsung Gallery/DCIM** (OneDrive) or **GallerySync** (other Clouds).
             • **Use this folder** saves; **Cancel** changes nothing.
 
-            Only new files go to the new folder. Files already backed up stay where they are. OneDrive keeps checking earlier folders, so nothing is sent twice.
+            Only new files go to the new folder. Files already backed up stay where they are. Uploads keep checking earlier folders, so nothing is sent twice. Restore lists only the current folder, but any file this copy already backed up or optimized is always offered wherever it is in OneDrive.
         """, ui=True),
 
         topic("dialog-folder-picker", "Choose a folder (the OneDrive picker)", """

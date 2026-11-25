@@ -111,8 +111,8 @@ A linha só diz para onde os arquivos iriam. Nada sobe até o álbum ter um modo
 • **Voltar ao padrão:** volta para **Samsung Gallery/DCIM** (OneDrive) ou **GallerySync** (outras Clouds).
 • **Usar esta pasta** salva; **Cancelar** não muda nada.
 
-Só os arquivos novos vão para a pasta nova. Os arquivos que já têm backup ficam onde estão. O OneDrive continua olhando as pastas anteriores, então nada é enviado duas vezes.""",
-        "en_hash": "910e0378a5a8b208",
+Só os arquivos novos vão para a pasta nova. Os arquivos que já têm backup ficam onde estão. Os uploads continuam olhando as pastas anteriores, então nada é enviado duas vezes. O Restore lista só a pasta atual, mas qualquer arquivo que esta cópia já tenha enviado ou otimizado é sempre oferecido, onde quer que esteja no OneDrive.""",
+        "en_hash": "aebe3c2261046e24",
     },
     'dialog-folder-picker': {
         "title": 'Escolha uma pasta (o seletor do OneDrive)',

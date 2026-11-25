@@ -12,7 +12,7 @@ TRANSLATIONS = {
 Wiederhergestellte Dateien erhalten **Do not optimize**, damit sie nicht gleich wieder optimiert oder archiviert werden. Siehe [[album-file-pin]].
 
 ## Welche Clouds
-• **OneDrive:** jedes Foto und Video in deinen Backup-Ordnern, egal wer es dort abgelegt hat.
+• **OneDrive:** jedes Foto und Video in dem in Settings festgelegten Backup-Ordner, egal wer es dort abgelegt hat, dazu jede Datei, die diese Kopie von GallerySync gesichert oder optimiert hat, wo auch immer sie in OneDrive liegt. Für alles andere in einem älteren Ordner nutze die OneDrive-App.
 • **Dropbox, Google Drive, pCloud, Backblaze B2, IDrive e2:** Dateien, die GallerySync von diesem Telefon gesendet hat.
 • **Google Photos:** kann nicht wiederhergestellt werden.
 
@@ -21,7 +21,7 @@ Zurück in den Ordner, aus dem sie kamen. Dateien direkt oben in **DCIM**, **Pic
 
 ## Gefahrlos ausprobieren
 Eine Datei wird erst ersetzt, nachdem der vollständige Download angekommen ist und seine Größe stimmt. Wenn etwas fehlschlägt, bleibt die Datei auf dem Telefon, wie sie war.""",
-        "en_hash": "1ef149357e546696",
+        "en_hash": "c7a1c07e0aed042f",
     },
     "restore-hero": {
         "title": "Albums to Restore and Files in this album",
