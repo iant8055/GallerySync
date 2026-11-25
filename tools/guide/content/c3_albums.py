@@ -82,8 +82,10 @@ CHAPTER = Chapter(
 
             ## Album cards
             • **Name, file count and size** of the album on your phone.
-            • **Second line** (only when needed): how many files are optimized, kept at full size, pending or failed.
+            • **Second line** (only when needed): how many files are optimized, marked *do not optimize*, pending, or locked.
             • **Cloud line:** **N verified in <Cloud>**, or **N of M verified in <Cloud>**, means the Cloud confirmed the files at the right size. OneDrive, Dropbox, Google Drive, pCloud, Backblaze B2 and IDrive e2 are each checked when you open the tab and on **Rescan**. **Could not reach <Cloud>** means the last check failed. Before the first check — and always for Google Photos, which cannot be asked — the line reads **N sent to <Cloud>**. The line is green when every Cloud on it has verified everything.
+            • **Red line** (only when there are any): **N files not backed up** — files gone from their Cloud, failed, or whose upload couldn't finish. Each needs a decision; open the album and swipe. See [[album-resend]].
+            • **Grey line** (only when there are any): **N files not backed up by choice** — files you swiped left on, plus any locked ones. These are honoured; nothing uses them.
             • **Mode button** (right side): tap to change the album's mode. Archive asks you to confirm first. If the album's Cloud cannot do that mode, the card says so.
             • **Tap the card** to see the album's files. See [[album-detail]].
         """, ui=True),
@@ -91,7 +93,7 @@ CHAPTER = Chapter(
         topic("album-detail", "An album's file list", """
             Opens when you tap an album card.
 
-            • **Header:** back arrow, album name, mode and file count, **Backs up to** (the Cloud and folder new files go to, plus any other Cloud already holding some), the counts ([[album-file-status]]), **Sort by** ([[album-file-sort]]) and **Keep at full size** ([[album-file-pin]]).
+            • **Header:** back arrow, album name, mode and file count, **Backs up to** (the Cloud and folder new files go to, plus any other Cloud already holding some), the counts ([[album-file-status]]), **Sort by** ([[album-file-sort]]) and **Do not optimize** ([[album-file-pin]]).
             • **▲ Hide Details ▲** at the bottom of the header folds it to the album's name, mode and file count; **▼ Show Details ▼** brings the rest back. The page remembers your choice.
             • **Files:** one card per file with its size, date and marks. An optimized file shows its smaller size on the phone.
             • **Camera folder** (if chosen in Settings): extra optimize controls. See [[album-camera-optimize]].
@@ -102,21 +104,40 @@ CHAPTER = Chapter(
         topic("album-file-status", "File marks and counts in an album", """
             • **✓ backed up:** in the Cloud, full size on the phone.
             • **✓ backed up · optimized:** in the Cloud; the phone has a smaller copy.
-            • **⟳ pending:** waiting to be sent.
-            • **✗ failed:** could not be sent after several tries.
+            • **✓ backed up · locked:** in the Cloud, and you swiped left: never sent again, never optimized, never archived. Still checked: if its Cloud copy disappears, the album flags it.
+            • **⟳ pending:** waiting to be sent in the next run.
+            • **do not back up:** you swiped left on a file that was not backed up. Never uploaded, never optimized, never offered for Archive. A copy already in a Cloud stays there.
+            • **couldn't finish uploading · trying after the rest:** an upload that was cut short twice without getting further. Sent after everything else, so one stuck file does not hold the queue.
+            • **not in <Cloud>:** sent before, and the Cloud no longer holds it.
 
-            ## Retry failed
-            **Retry** puts failed files back in the queue and starts a backup. It removes nothing.
+            Files in the last three states are counted in red on the album's card as **N files not backed up**. Each needs a decision — see [[album-resend]].
+
+            ## Do not optimize
+            A tick box beside every file that could still be optimized: files **Restore** brought back in any album, and every full-size file in an **Optimize** album. While ticked, GallerySync never optimizes that file. The album's header shows **N marked do not optimize**. Restore ticks the files it brings back.
+
+            ## Header counts
+            Add **N not backed up by choice** when any file in the album is marked *do not back up* or locked.
         """, ui=True),
 
         topic("album-resend", "Files not backed up", """
-            Files this album sent that are no longer in their Cloud. **Rescan** on the Albums tab finds them, and the album's card counts them in red as **N files not backed up**.
+            Files this album sent that are no longer in their Cloud, files whose upload couldn't finish, and failed files all show here. The album's card counts them in red as **N files not backed up** — each needs a decision. **Rescan** on the Albums tab asks the Clouds again.
 
-            • Each is greyed and marked **not in <Cloud>**.
-            • Nothing is sent again on its own. They may have been deleted in the Cloud on purpose.
-            • Swipe right to select, left to deselect. **Select all** and **Clear** do every one.
-            • **Resend** sends the selected files again, to the Cloud their folder goes to now. It removes nothing.
-            • Optimized files are not listed: the full-size original was only in the Cloud.
+            Each is greyed. One swipe decides it:
+
+            • **Swipe right:** back it up.
+              • On a file gone from its Cloud: sends it straight away (the Cloud is asked first).
+              • On a file that failed five times: tries that one again.
+              • On a file whose upload was cut short: puts it back in the main queue.
+              • On a file you kept out of the backup: puts it back in.
+            • **Swipe left:** mark **do not back up**. Never uploaded, never optimized, never offered for Archive. Any copy already in a Cloud stays there.
+
+            Nothing is sent again on its own. They may have been deleted in the Cloud on purpose.
+
+            ## Back up all N
+            In the header, when any file is waiting on a decision. Backs up every file flagged for one, except those marked *do not back up* and those locked at *✓ backed up · locked*. Greyed when there is nothing to do.
+
+            ## Good to know
+            • Optimized files are not listed here: the full-size original was only in the Cloud.
             • In an **Off** album, set a mode first.
             • For Clouds other than OneDrive, each Rescan looks up at most 25 files per album that are not in the album's folder. Rescan again for the rest.
         """, ui=True),
@@ -129,13 +150,13 @@ CHAPTER = Chapter(
             The list opens in name order each time. Sorting changes nothing about the files.
         """),
 
-        topic("album-file-pin", "Keep at full size", """
-            A checkbox beside files that **Restore** brought back. While selected, GallerySync leaves that file alone:
-            • In a **Sync** album, it is not optimized.
-            • In an **Archive** album, it is not removed.
-            • In **Backup** or **Off**, nothing changes, but the choice is remembered.
+        topic("album-file-pin", "Do not optimize", """
+            A tick box beside every file in an **Optimize** album that could still be shrunk, and beside files **Restore** brought back in any album. While ticked, GallerySync never optimizes that file — it stays at full size on your phone.
 
-            Restore selects it automatically. Deselect it to let the file follow its album's mode again.
+            The album header shows **N marked do not optimize**. Restore ticks every file it brings back. Untick to let the file follow its album's mode again.
+
+            ## This is not the same as locking
+            Swiping a backed-up file left marks it **locked** (see [[album-file-status]]): never sent again, never optimized **and** never archived, but still checked. *Do not optimize* only stops optimization.
         """, ui=True),
 
         topic("album-camera-optimize", "Optimize older photos and videos in your Camera folder", """

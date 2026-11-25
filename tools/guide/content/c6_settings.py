@@ -181,7 +181,7 @@ CHAPTER = Chapter(
         topic("settings-optimize-photos", "Optimize photos", """
             **Off** by default. When on, photos in Sync albums are replaced with smaller copies: about 2048 pixels on the long edge, roughly a tenth of the size. They stay in your gallery with a small cloud badge. Originals stay in the Cloud.
 
-            Photos already small enough, and files set to **Keep at full size**, are left alone. **Mode** sets when it runs. See [[settings-optimize-mode]].
+            Photos already small enough, and files set to **Do not optimize**, are left alone. **Mode** sets when it runs. See [[settings-optimize-mode]].
         """, ui=True),
 
         topic("settings-optimize-video", "Optimize video", """

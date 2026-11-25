@@ -201,8 +201,8 @@ Esses arquivos ainda estão na lixeira do seu telefone.
         "title": 'Otimizar fotos',
         "body": """**Off** por padrão. Quando ligado, as fotos em álbuns Sync são substituídas por cópias menores: cerca de 2048 pixels no lado maior, aproximadamente um décimo do tamanho. Elas continuam na sua galeria com um pequeno selo de nuvem. Os originais ficam na Cloud.
 
-Fotos que já são pequenas o bastante e arquivos em **Keep at full size** são deixados em paz. **Modo** define quando roda. Veja [[settings-optimize-mode]].""",
-        "en_hash": "d06a13dffade42bc",
+Fotos que já são pequenas o bastante e arquivos em **Do not optimize** são deixados em paz. **Modo** define quando roda. Veja [[settings-optimize-mode]].""",
+        "en_hash": "947629869504ef56",
     },
     'settings-optimize-video': {
         "title": 'Otimizar vídeos',

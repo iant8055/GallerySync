@@ -201,8 +201,8 @@ Diese Dateien liegen noch im Papierkorb deines Telefons.
         "title": "Fotos optimieren",
         "body": """Standardmäßig **Aus**. Wenn an, werden Fotos in Sync-Alben durch kleinere Kopien ersetzt: etwa 2048 Pixel an der langen Kante, ungefähr ein Zehntel der Größe. Sie bleiben in deiner Galerie mit einem kleinen Wolkensymbol. Die Originale bleiben in der Cloud.
 
-Fotos, die schon klein genug sind, und Dateien mit **Keep at full size** bleiben unberührt. **Modus** legt fest, wann es läuft. Siehe [[settings-optimize-mode]].""",
-        "en_hash": "d06a13dffade42bc",
+Fotos, die schon klein genug sind, und Dateien mit **Do not optimize** bleiben unberührt. **Modus** legt fest, wann es läuft. Siehe [[settings-optimize-mode]].""",
+        "en_hash": "947629869504ef56",
     },
     "settings-optimize-video": {
         "title": "Videos optimieren",

@@ -90,7 +90,7 @@
 <main>
 
   <h1>使い方ガイド</h1>
-  <p class="sub">GallerySync — 最終更新日 2026年11月22日</p>
+  <p class="sub">GallerySync — 最終更新日 2026年11月24日</p>
 
   <div class="note">
     <p><strong>すべての画面、すべての行。</strong> このガイドでは、GallerySync の各部分を、わかりやすい言葉で説明します。何が表示されているのか、その情報がどこから来るのかです。アプリ内の <strong>(?)</strong> ボタンを押すと、同じ説明がポップアップで開きます。</p>
@@ -288,37 +288,47 @@
   <details class="topic"><summary>Albums タブ</summary>
   <div class="topic-body" id="albums-list">
 <h4>ヘッダー</h4>
-<ul><li><strong>Backup</strong>、<strong>Sync</strong>、<strong>Archive</strong>、<strong>Off</strong> をタップすると、そのモードのアルバムだけが表示されます。<strong>All Albums</strong> をタップすると、再びすべて表示されます。</li><li>ボタンの下の行に、各モードの合計が表示されます。</li><li>カード下部の <strong>▲ Hide Details ▲</strong> でモード合計の行が隠れ、実行中はアップロード行とその進行状況バーも一緒に隠れます。<strong>▼ Show Details ▼</strong> で戻ります。<strong>All Albums</strong>、4 つのモードボタン、<strong>Sync now</strong> / <strong>Rescan</strong> はそのまま残り、実行中は <strong>Syncing…</strong>、<strong>Pause</strong>、<strong>Stop</strong> も残ります。タブはこの選択を記憶します。</li></ul>
+<ul><li><strong>Backup</strong>、<strong>Sync</strong>、<strong>Archive</strong>、<strong>Off</strong> をタップすると、そのモードのアルバムだけが表示されます。<strong>All Albums</strong> をタップするとすべて表示に戻ります。</li><li>ボタンの下の行は、モードごとの合計を示します。</li><li>カード下の <strong>▲ Hide Details ▲</strong> はモード合計の行を隠し、実行中であればアップロードの行とそのバーも隠します。<strong>▼ Show Details ▼</strong> で戻ります。<strong>All Albums</strong>、4 つのモードボタン、<strong>Sync now</strong> / <strong>Rescan</strong> は残り、実行中は <strong>Syncing…</strong>、<strong>Pause</strong>、<strong>Stop</strong> も残ります。タブは選択を覚えます。</li></ul>
 <h4>アルバムカード</h4>
-<ul><li><strong>名前、ファイル数、サイズ</strong>：スマートフォン上のアルバムのもの。</li><li><strong>2 行目</strong>（必要な場合のみ）：最適化済み、フルサイズで保持、保留中、失敗したファイルの数。</li><li><strong>Cloud 行</strong>：<strong>N verified in &lt;Cloud&gt;</strong> または <strong>N of M verified in &lt;Cloud&gt;</strong> は、その Cloud が正しいサイズでファイルを確認したことを意味します。OneDrive、Dropbox、Google Drive、pCloud、Backblaze B2、IDrive e2 はそれぞれ、タブを開くたびと <strong>Rescan</strong> のときに確認されます。<strong>Could not reach &lt;Cloud&gt;</strong> は、前回の確認が失敗したことを意味します。最初の確認の前、および問い合わせできない Google Photos では、常に <strong>N sent to &lt;Cloud&gt;</strong> と表示されます。表示上のすべての Cloud がすべてを確認済みのとき、この行は緑色になります。</li><li><strong>モードボタン</strong>（右側）：タップするとアルバムのモードを変更できます。Archive では、先に確認を求められます。アルバムの Cloud がそのモードに対応していない場合は、カードにその旨が表示されます。</li><li><strong>カードをタップ</strong>すると、アルバムのファイルが表示されます。<a class="xref" href="#album-detail">“アルバムのファイル一覧”</a>を参照してください。</li></ul>
+<ul><li>電話上のアルバムの<strong>名前、ファイル数、サイズ</strong>。</li><li><strong>2 行目</strong>（必要なときだけ）：最適化されたファイル、*do not optimize* の付いたファイル、保留中のファイル、ロックされたファイルの数。</li><li><strong>Cloud の行</strong>：<strong>N verified in &lt;Cloud&gt;</strong> または <strong>N of M verified in &lt;Cloud&gt;</strong> は、Cloud がファイルを正しいサイズで確認したという意味です。OneDrive、Dropbox、Google Drive、pCloud、Backblaze B2、IDrive e2 は、タブを開くたびと <strong>Rescan</strong> で確認します。<strong>Could not reach &lt;Cloud&gt;</strong> は、前回の確認が失敗したという意味です。最初の確認の前 — および問い合わせできない Google Photos は常に — 行は <strong>N sent to &lt;Cloud&gt;</strong> と表示されます。各 Cloud がすべてを確認した場合に行は緑になります。</li><li><strong>赤い行</strong>（ある場合のみ）：<strong>N files not backed up</strong> — Cloud から消えたファイル、失敗したファイル、アップロードを完了できなかったファイル。それぞれに判断が必要です。アルバムを開いてスワイプしてください。<a class="xref" href="#album-resend">“バックアップされていないファイル”</a> を参照。</li><li><strong>グレーの行</strong>（ある場合のみ）：<strong>N files not backed up by choice</strong> — 左にスワイプしたファイルとロックされたファイル。尊重され、何も使いません。</li><li><strong>モードボタン</strong>（右側）：タップしてアルバムのモードを変更します。Archive は先に確認を求めます。アルバムの Cloud がそのモードに対応できない場合は、カードに表示されます。</li><li>アルバムのファイルを見るには、<strong>カードをタップ</strong>します。<a class="xref" href="#album-detail">“アルバムのファイル一覧”</a> を参照。</li></ul>
   </div></details>
   <details class="topic"><summary>アルバムのファイル一覧</summary>
   <div class="topic-body" id="album-detail">
 <p>アルバムカードをタップすると開きます。</p>
-<ul><li><strong>ヘッダー</strong>：戻る矢印、アルバム名、モードとファイル数、<strong>Backs up to</strong>（新しいファイルの送信先の Cloud とフォルダ、およびすでにファイルを保持しているほかの Cloud）、件数（<a class="xref" href="#album-file-status">“アルバム内のファイルのマークと件数”</a>）、<strong>Sort by</strong>（<a class="xref" href="#album-file-sort">“アルバムのファイルを並べ替える”</a>）、<strong>Keep at full size</strong>（<a class="xref" href="#album-file-pin">“Keep at full size”</a>）。</li><li>ヘッダー下部の <strong>▲ Hide Details ▲</strong> をタップすると、ヘッダーはアルバム名、モード、ファイル数だけに折りたたまれます。<strong>▼ Show Details ▼</strong> で残りが戻ります。ページはこの選択を記憶します。</li><li><strong>ファイル</strong>：ファイルごとに 1 枚のカードで、サイズ、日付、マークが表示されます。最適化されたファイルには、スマートフォン上の小さいサイズが表示されます。</li><li><strong>カメラのフォルダ</strong>（Settings で選んだ場合）：追加の最適化コントロール。<a class="xref" href="#album-camera-optimize">“カメラのフォルダの古い写真と動画を最適化する”</a>を参照してください。</li></ul>
+<ul><li><strong>ヘッダー</strong>：戻る矢印、アルバム名、モードとファイル数、<strong>Backs up to</strong>（新しいファイルの送信先の Cloud とフォルダ、およびすでにファイルを保持しているほかの Cloud）、件数（<a class="xref" href="#album-file-status">“アルバム内のファイルの印と件数”</a>）、<strong>Sort by</strong>（<a class="xref" href="#album-file-sort">“アルバムのファイルを並べ替える”</a>）、<strong>Do not optimize</strong>（<a class="xref" href="#album-file-pin">“Do not optimize”</a>）。</li><li>ヘッダー下部の <strong>▲ Hide Details ▲</strong> をタップすると、ヘッダーはアルバム名、モード、ファイル数だけに折りたたまれます。<strong>▼ Show Details ▼</strong> で残りが戻ります。ページはこの選択を記憶します。</li><li><strong>ファイル</strong>：ファイルごとに 1 枚のカードで、サイズ、日付、マークが表示されます。最適化されたファイルには、スマートフォン上の小さいサイズが表示されます。</li><li><strong>カメラのフォルダ</strong>（Settings で選んだ場合）：追加の最適化コントロール。<a class="xref" href="#album-camera-optimize">“カメラのフォルダの古い写真と動画を最適化する”</a>を参照してください。</li></ul>
 <p>サムネイルやプレビューはありません。ファイルを<strong>長押し</strong>すると、スマートフォンの写真・動画アプリで開きます。スマートフォンにない場合は、その Cloud で開きます。<a class="xref" href="#settings-open-not-on-phone">“スマホにないファイル”</a>を参照してください。</p>
   </div></details>
-  <details class="topic"><summary>アルバム内のファイルのマークと件数</summary>
+  <details class="topic"><summary>アルバム内のファイルの印と件数</summary>
   <div class="topic-body" id="album-file-status">
-<ul><li><strong>✓ backed up</strong>：Cloud にあり、スマートフォンではフルサイズ。</li><li><strong>✓ backed up · optimized</strong>：Cloud にあり、スマートフォンには小さいコピーがあります。</li><li><strong>⟳ pending</strong>：送信待ち。</li><li><strong>✗ failed</strong>：何度か試しても送信できませんでした。</li></ul>
-<h4>失敗したものを再試行する</h4>
-<p><strong>Retry</strong> は、失敗したファイルをキューに戻して、バックアップを開始します。何も削除しません。</p>
+<ul><li><strong>✓ backed up</strong>：Cloud にあり、電話ではフルサイズ。</li><li><strong>✓ backed up · optimized</strong>：Cloud にあり、電話には小さいコピーがあります。</li><li><strong>✓ backed up · locked</strong>：Cloud にあり、左にスワイプしました。二度と送信されず、最適化もアーカイブもされません。チェックは続きます。Cloud 上のコピーが消えると、アルバムがフラグします。</li><li><strong>⟳ pending</strong>：次の実行を待っています。</li><li><strong>do not back up</strong>：バックアップされていないファイルを左にスワイプしました。アップロードされず、最適化されず、Archive に出されません。すでに Cloud にあるコピーはそこに残ります。</li><li><strong>couldn't finish uploading · trying after the rest</strong>：先に進まないまま 2 回切れたアップロード。詰まったファイルがキューを塞がないよう、他のすべての後に送信されます。</li><li><strong>not in &lt;Cloud&gt;</strong>：以前に送信済みですが、Cloud にもうありません。</li></ul>
+<p>最後の 3 つの状態のファイルは、アルバムのカードに赤字で <strong>N files not backed up</strong> として件数が出ます。それぞれに判断が必要です — <a class="xref" href="#album-resend">“バックアップされていないファイル”</a> を参照。</p>
+<h4>Do not optimize</h4>
+<p>まだ最適化できる各ファイルの横にあるチェックボックス。<strong>Restore</strong> がどのアルバムに戻したファイルも、<strong>Optimize</strong> アルバム内のフルサイズの各ファイルも対象です。チェックが入っている間、GallerySync はそのファイルを最適化しません。アルバムのヘッダーに <strong>N marked do not optimize</strong> と出ます。Restore は戻したファイルにチェックを入れます。</p>
+<h4>ヘッダーの件数</h4>
+<p>アルバム内のいずれかのファイルが *do not back up* または *locked* の場合、<strong>N not backed up by choice</strong> を加えます。</p>
   </div></details>
   <details class="topic"><summary>バックアップされていないファイル</summary>
   <div class="topic-body" id="album-resend">
-<p>このアルバムが送信したものの、送信先の Cloud にもうないファイルです。Albums タブの <strong>Rescan</strong> で見つかり、アルバムのカードに <strong>N files not backed up</strong> として赤字で件数が出ます。</p>
-<ul><li>それぞれ淡色で表示され、<strong>not in &lt;Cloud&gt;</strong> と表示されます。</li><li>自動で再送信されることはありません。Cloud で意図して削除した可能性があるためです。</li><li>右にスワイプで選択、左にスワイプで選択解除。<strong>Select all</strong> と <strong>Clear</strong> はすべてに適用されます。</li><li><strong>Resend</strong> は選択したファイルを、そのフォルダの現在の送信先の Cloud に再送信します。何も削除しません。</li><li>最適化したファイルは表示されません。フルサイズの元のファイルは Cloud にしかなかったためです。</li><li><strong>Off</strong> のアルバムでは、先にモードを選んでください。</li><li>OneDrive 以外の Cloud では、1 回の Rescan で、アルバムのフォルダにないファイルをアルバムごとに最大 25 件まで確認します。残りはもう一度 Rescan してください。</li></ul>
+<p>このアルバムが送信したものの送信先の Cloud にもうないファイル、アップロードを完了できなかったファイル、失敗したファイルがここに表示されます。アルバムのカードに赤字で <strong>N files not backed up</strong> として件数が出ます。それぞれに判断が必要です。Albums タブの <strong>Rescan</strong> で Cloud に再度問い合わせます。</p>
+<p>それぞれ淡色で表示されます。1 回のスワイプで決まります：</p>
+<ul><li><strong>右にスワイプ</strong>：バックアップします。</li><li>Cloud から消えたファイル：すぐに送信します（最初に Cloud に問い合わせます）。</li><li>5 回失敗したファイル：そのファイルだけ再試行します。</li><li>アップロードが切れたファイル：メインのキューに戻します。</li><li>バックアップから外していたファイル：バックアップに戻します。</li><li><strong>左にスワイプ</strong>：<strong>do not back up</strong> に印をつけます。アップロードされず、最適化されず、Archive に出されません。すでに Cloud にあるコピーはそこに残ります。</li></ul>
+<p>自動で再送信されることはありません。Cloud で意図して削除した可能性があります。</p>
+<h4>Back up all N</h4>
+<p>いずれかのファイルが判断を待っているとき、ヘッダーに出ます。判断を待っているファイルをすべてバックアップします。ただし *do not back up* および *✓ backed up · locked* のファイルは除きます。何もすることがなければ淡色になります。</p>
+<h4>役に立つこと</h4>
+<ul><li>最適化されたファイルはここには表示されません。フルサイズの元のファイルは Cloud にしかなかったためです。</li><li><strong>Off</strong> のアルバムでは、先にモードを選んでください。</li><li>OneDrive 以外の Cloud では、1 回の Rescan で、アルバムのフォルダにないファイルをアルバムごとに最大 25 件まで確認します。残りはもう一度 Rescan してください。</li></ul>
   </div></details>
   <details class="topic"><summary>アルバムのファイルを並べ替える</summary>
   <div class="topic-body" id="album-file-sort">
 <ul><li><strong>Name</strong>：A から Z の順。</li><li><strong>Date</strong>：新しい順。</li><li><strong>Status</strong>：failed、pending、optimized、backed up の順。</li></ul>
 <p>一覧は、開くたびに名前順になります。並べ替えてもファイルは変わりません。</p>
   </div></details>
-  <details class="topic"><summary>Keep at full size</summary>
+  <details class="topic"><summary>Do not optimize</summary>
   <div class="topic-body" id="album-file-pin">
-<p><strong>Restore</strong> で戻したファイルの横にあるチェックボックスです。選択している間、GallerySync はそのファイルに手を付けません：</p>
-<ul><li><strong>Sync</strong> アルバムでは、最適化されません。</li><li><strong>Archive</strong> アルバムでは、削除されません。</li><li><strong>Backup</strong> または <strong>Off</strong> では何も変わりませんが、選択は記憶されます。</li></ul>
-<p>Restore は自動的に選択します。選択を外すと、ファイルはアルバムのモードに再び従います。</p>
+<p><strong>Optimize</strong> アルバムの中でまだ縮小できる各ファイルの横、そしてどのアルバムでも <strong>Restore</strong> が戻したファイルの横にあるチェックボックス。チェックが入っている間、GallerySync はそのファイルを最適化せず、電話上でフルサイズのままにします。</p>
+<p>アルバムのヘッダーに <strong>N marked do not optimize</strong> と出ます。Restore は戻した各ファイルにチェックを入れます。チェックを外すと、ファイルは再びアルバムのモードに従います。</p>
+<h4>ロックとは違います</h4>
+<p>バックアップ済みのファイルを左にスワイプすると <strong>locked</strong> になります（<a class="xref" href="#album-file-status">“アルバム内のファイルの印と件数”</a> を参照）。二度と送信されず、最適化もされず、<strong>かつ</strong>アーカイブもされませんが、チェックは続きます。*Do not optimize* は最適化のみを止めます。</p>
   </div></details>
   <details class="topic"><summary>カメラのフォルダの古い写真と動画を最適化する</summary>
   <div class="topic-body" id="album-camera-optimize">
@@ -354,7 +364,7 @@
   <details class="topic"><summary>Restore で戻せるもの</summary>
   <div class="topic-body" id="restore-overview">
 <ul><li><strong>To restore</strong>：スマートフォン上の、最適化されたファイル。復元すると、フルサイズの元のファイルが元の場所に戻ります。</li><li><strong>To download</strong>：スマートフォンにもうないファイル。ダウンロードすると、そのアルバムに戻ります。</li></ul>
-<p>復元されたファイルには <strong>Keep at full size</strong> が付くため、すぐにまた最適化やアーカイブされることはありません。<a class="xref" href="#album-file-pin">“Keep at full size”</a>を参照してください。</p>
+<p>復元されたファイルには <strong>Do not optimize</strong> が付くため、すぐにまた最適化やアーカイブされることはありません。<a class="xref" href="#album-file-pin">“Do not optimize”</a>を参照してください。</p>
 <h4>対応する Cloud</h4>
 <ul><li><strong>OneDrive</strong>：バックアップフォルダ内のすべての写真と動画（誰が入れたかは問いません）。</li><li><strong>Dropbox、Google Drive、pCloud、Backblaze B2、IDrive e2</strong>：GallerySync がこのスマートフォンから送ったファイル。</li><li><strong>Google Photos</strong>：復元元にはできません。</li></ul>
 <h4>ファイルの戻り先</h4>
@@ -601,7 +611,7 @@
   <details class="topic"><summary>写真を最適化</summary>
   <div class="topic-body" id="settings-optimize-photos">
 <p>既定では <strong>Off</strong> です。オンにすると、Sync アルバム内の写真が小さなコピーに置き換えられます：長辺が約 2048 ピクセル、サイズは約 10 分の 1 です。小さなクラウドバッジが付いたまま、ギャラリーに残ります。元のファイルは Cloud に残ります。</p>
-<p>すでに十分小さい写真と、<strong>Keep at full size</strong> に設定されたファイルには、手を付けません。<strong>モード</strong> で、実行するタイミングを設定します。<a class="xref" href="#settings-optimize-mode">“モード：自動または手動”</a>を参照してください。</p>
+<p>すでに十分小さい写真と、<strong>Do not optimize</strong> に設定されたファイルには、手を付けません。<strong>モード</strong> で、実行するタイミングを設定します。<a class="xref" href="#settings-optimize-mode">“モード：自動または手動”</a>を参照してください。</p>
   </div></details>
   <details class="topic"><summary>動画を最適化</summary>
   <div class="topic-body" id="settings-optimize-video">
@@ -807,7 +817,7 @@
   </div></details>
 
   <footer>
-    GallerySync — 使い方ガイド。最終更新日 2026年11月22日。
+    GallerySync — 使い方ガイド。最終更新日 2026年11月24日。
   </footer>
 
 </main>

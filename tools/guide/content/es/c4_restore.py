@@ -9,7 +9,7 @@ TRANSLATIONS = {
         "body": """• **To restore:** un archivo optimizado en el teléfono. Restaurarlo pone en su lugar el original a tamaño completo.
 • **To download:** un archivo que ya no está en el teléfono. Descargarlo lo devuelve a su álbum.
 
-Los archivos restaurados reciben **Keep at full size**, así que no se vuelven a optimizar ni a archivar de inmediato. Consulta [[album-file-pin]].
+Los archivos restaurados reciben **Do not optimize**, así que no se vuelven a optimizar ni a archivar de inmediato. Consulta [[album-file-pin]].
 
 ## Qué Clouds
 • **OneDrive:** todas las fotos y vídeos de tus carpetas de copia, los haya puesto quien los haya puesto.
@@ -21,7 +21,7 @@ De vuelta a la carpeta de la que vinieron. Los archivos sueltos en el nivel supe
 
 ## Se puede probar sin riesgo
 Un archivo se sustituye solo después de que la descarga llegue completa y su tamaño coincida. Si algo falla, el archivo del teléfono se queda como estaba.""",
-        "en_hash": "e0e4777a168b1a80",
+        "en_hash": "1ef149357e546696",
     },
 
     "restore-hero": {

@@ -219,8 +219,8 @@ Estos archivos siguen en la papelera de tu teléfono.
         "title": "Optimizar fotos",
         "body": """**Off** de forma predeterminada. Cuando está activado, las fotos de los álbumes Sync se reemplazan por copias más pequeñas: unos 2048 píxeles en el lado largo, aproximadamente una décima parte del tamaño. Siguen en tu galería con una pequeña insignia de nube. Los originales se quedan en la Cloud.
 
-Las fotos que ya son lo bastante pequeñas, y los archivos en **Keep at full size**, se dejan como están. **Modo** define cuándo se ejecuta. Consulta [[settings-optimize-mode]].""",
-        "en_hash": "d06a13dffade42bc",
+Las fotos que ya son lo bastante pequeñas, y los archivos en **Do not optimize**, se dejan como están. **Modo** define cuándo se ejecuta. Consulta [[settings-optimize-mode]].""",
+        "en_hash": "947629869504ef56",
     },
 
     "settings-optimize-video": {

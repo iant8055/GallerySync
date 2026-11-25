@@ -90,7 +90,7 @@
 <main>
 
   <h1>Anleitung</h1>
-  <p class="sub">GallerySync — zuletzt aktualisiert: 22. November 2026</p>
+  <p class="sub">GallerySync — zuletzt aktualisiert: 24. November 2026</p>
 
   <div class="note">
     <p><strong>Jeder Bildschirm, jede Zeile.</strong> Diese Anleitung erklärt jeden Teil von GallerySync in einfacher
@@ -292,35 +292,45 @@
 <h4>Kopfzeile</h4>
 <ul><li>Tippe auf <strong>Backup</strong>, <strong>Sync</strong>, <strong>Archive</strong> oder <strong>Off</strong>, um nur die Alben in diesem Modus zu zeigen. Tippe auf <strong>All Albums</strong>, um wieder alle zu zeigen.</li><li>Die Zeile unter den Schaltflächen nennt die Summe für jeden Modus.</li><li><strong>▲ Hide Details ▲</strong> am unteren Rand der Karte blendet die Zeile mit der Modus-Summe aus und, während ein Durchlauf läuft, auch die Upload-Zeile mit ihrem Balken; <strong>▼ Show Details ▼</strong> holt sie zurück. <strong>All Albums</strong>, die vier Modus-Schaltflächen sowie <strong>Sync now</strong> / <strong>Rescan</strong> bleiben, und während ein Durchlauf läuft bleiben auch <strong>Syncing…</strong>, <strong>Pause</strong> und <strong>Stop</strong>. Der Tab merkt sich deine Wahl.</li></ul>
 <h4>Albumkarten</h4>
-<ul><li><strong>Name, Dateizahl und Größe</strong> des Albums auf deinem Telefon.</li><li><strong>Zweite Zeile</strong> (nur bei Bedarf): wie viele Dateien optimiert, in voller Größe behalten, ausstehend oder fehlgeschlagen sind.</li><li><strong>Cloud-Zeile:</strong> <strong>N verified in &lt;Cloud&gt;</strong> oder <strong>N of M verified in &lt;Cloud&gt;</strong> bedeutet, dass die Cloud die Dateien in der richtigen Größe bestätigt hat. OneDrive, Dropbox, Google Drive, pCloud, Backblaze B2 und IDrive e2 werden jeweils bei jedem Öffnen des Tabs und bei <strong>Rescan</strong> geprüft. <strong>Could not reach &lt;Cloud&gt;</strong> bedeutet, dass die letzte Prüfung fehlgeschlagen ist. Vor der ersten Prüfung — und bei Google Photos immer, weil es nicht gefragt werden kann — steht dort <strong>N sent to &lt;Cloud&gt;</strong>. Die Zeile ist grün, wenn jede Cloud darauf alles bestätigt hat.</li><li><strong>Modus-Schaltfläche</strong> (rechte Seite): tippen, um den Modus des Albums zu ändern. Archive fragt zuerst nach Bestätigung. Wenn die Cloud des Albums diesen Modus nicht kann, sagt die Karte das.</li><li><strong>Tippe auf die Karte</strong>, um die Dateien des Albums zu sehen. Siehe <a class="xref" href="#album-detail">“Die Dateiliste eines Albums”</a>.</li></ul>
+<ul><li><strong>Name, Dateizahl und Größe</strong> des Albums auf deinem Telefon.</li><li><strong>Zweite Zeile</strong> (nur bei Bedarf): wie viele Dateien optimiert, als *do not optimize* markiert, ausstehend oder gesperrt sind.</li><li><strong>Cloud-Zeile:</strong> <strong>N verified in &lt;Cloud&gt;</strong> oder <strong>N of M verified in &lt;Cloud&gt;</strong> bedeutet, dass die Cloud die Dateien in der richtigen Größe bestätigt hat. OneDrive, Dropbox, Google Drive, pCloud, Backblaze B2 und IDrive e2 werden jeweils bei jedem Öffnen des Tabs und bei <strong>Rescan</strong> geprüft. <strong>Could not reach &lt;Cloud&gt;</strong> bedeutet, dass die letzte Prüfung fehlgeschlagen ist. Vor der ersten Prüfung — und bei Google Photos immer, weil es nicht gefragt werden kann — steht dort <strong>N sent to &lt;Cloud&gt;</strong>. Die Zeile ist grün, wenn jede Cloud darauf alles bestätigt hat.</li><li><strong>Rote Zeile</strong> (nur wenn vorhanden): <strong>N files not backed up</strong> — Dateien, die aus ihrer Cloud verschwunden sind, fehlgeschlagen sind oder deren Upload nicht abgeschlossen werden konnte. Jede braucht eine Entscheidung; öffne das Album und wische. Siehe <a class="xref" href="#album-resend">“Nicht gesicherte Dateien”</a>.</li><li><strong>Graue Zeile</strong> (nur wenn vorhanden): <strong>N files not backed up by choice</strong> — Dateien, auf die du nach links gewischt hast, plus gesperrte. Sie werden geachtet; nichts verwendet sie.</li><li><strong>Modus-Schaltfläche</strong> (rechte Seite): tippen, um den Modus des Albums zu ändern. Archive fragt zuerst nach Bestätigung. Wenn die Cloud des Albums diesen Modus nicht kann, sagt die Karte das.</li><li><strong>Tippe auf die Karte</strong>, um die Dateien des Albums zu sehen. Siehe <a class="xref" href="#album-detail">“Die Dateiliste eines Albums”</a>.</li></ul>
   </div></details>
   <details class="topic"><summary>Die Dateiliste eines Albums</summary>
   <div class="topic-body" id="album-detail">
 <p>Öffnet sich, wenn du auf eine Albumkarte tippst.</p>
-<ul><li><strong>Kopfzeile:</strong> Zurück-Pfeil, Albumname, Modus und Dateizahl, <strong>Backs up to</strong> (die Cloud und der Ordner, in die neue Dateien gehen, plus jede andere Cloud, die schon einige hält), die Zahlen (<a class="xref" href="#album-file-status">“Dateimarkierungen und Zahlen in einem Album”</a>), <strong>Sort by</strong> (<a class="xref" href="#album-file-sort">“Die Dateien eines Albums sortieren”</a>) und <strong>Keep at full size</strong> (<a class="xref" href="#album-file-pin">“Keep at full size”</a>).</li><li><strong>▲ Hide Details ▲</strong> am unteren Rand der Kopfzeile klappt sie auf Albumname, Modus und Dateizahl zusammen; <strong>▼ Show Details ▼</strong> holt den Rest zurück. Die Seite merkt sich deine Wahl.</li><li><strong>Dateien:</strong> eine Karte pro Datei mit Größe, Datum und Markierungen. Eine optimierte Datei zeigt ihre kleinere Größe auf dem Telefon.</li><li><strong>Kameraordner</strong> (falls in Settings gewählt): zusätzliche Optimize-Steuerung. Siehe <a class="xref" href="#album-camera-optimize">“Ältere Fotos und Videos in deinem Kameraordner optimieren”</a>.</li></ul>
+<ul><li><strong>Kopfzeile:</strong> Zurück-Pfeil, Albumname, Modus und Dateizahl, <strong>Backs up to</strong> (die Cloud und der Ordner, in die neue Dateien gehen, plus jede andere Cloud, die schon einige hält), die Zahlen (<a class="xref" href="#album-file-status">“Dateimarkierungen und Zahlen in einem Album”</a>), <strong>Sort by</strong> (<a class="xref" href="#album-file-sort">“Die Dateien eines Albums sortieren”</a>) und <strong>Do not optimize</strong> (<a class="xref" href="#album-file-pin">“Do not optimize”</a>).</li><li><strong>▲ Hide Details ▲</strong> am unteren Rand der Kopfzeile klappt sie auf Albumname, Modus und Dateizahl zusammen; <strong>▼ Show Details ▼</strong> holt den Rest zurück. Die Seite merkt sich deine Wahl.</li><li><strong>Dateien:</strong> eine Karte pro Datei mit Größe, Datum und Markierungen. Eine optimierte Datei zeigt ihre kleinere Größe auf dem Telefon.</li><li><strong>Kameraordner</strong> (falls in Settings gewählt): zusätzliche Optimize-Steuerung. Siehe <a class="xref" href="#album-camera-optimize">“Ältere Fotos und Videos in deinem Kameraordner optimieren”</a>.</li></ul>
 <p>Keine Miniaturansichten oder Vorschauen. <strong>Drücke lange auf eine Datei</strong>, um sie in der Foto- oder Video-App deines Telefons zu öffnen, oder in ihrer Cloud, wenn sie nicht mehr auf dem Telefon ist. Siehe <a class="xref" href="#settings-open-not-on-phone">“Dateien nicht auf dem Telefon”</a>.</p>
   </div></details>
   <details class="topic"><summary>Dateimarkierungen und Zahlen in einem Album</summary>
   <div class="topic-body" id="album-file-status">
-<ul><li><strong>✓ backed up:</strong> in der Cloud, auf dem Telefon in voller Größe.</li><li><strong>✓ backed up · optimized:</strong> in der Cloud; das Telefon hat eine kleinere Kopie.</li><li><strong>⟳ pending:</strong> wartet auf das Senden.</li><li><strong>✗ failed:</strong> konnte nach mehreren Versuchen nicht gesendet werden.</li></ul>
-<h4>Fehlgeschlagene erneut versuchen</h4>
-<p><strong>Retry</strong> stellt fehlgeschlagene Dateien wieder in die Warteschlange und startet ein Backup. Es entfernt nichts.</p>
+<ul><li><strong>✓ backed up:</strong> in der Cloud, auf dem Telefon in voller Größe.</li><li><strong>✓ backed up · optimized:</strong> in der Cloud; das Telefon hat eine kleinere Kopie.</li><li><strong>✓ backed up · locked:</strong> in der Cloud, und du hast nach links gewischt: wird nie wieder gesendet, nie optimiert, nie archiviert. Wird weiter geprüft: Verschwindet die Kopie in der Cloud, flaggt das Album sie.</li><li><strong>⟳ pending:</strong> wartet auf den nächsten Durchlauf.</li><li><strong>do not back up:</strong> du hast auf eine nicht gesicherte Datei nach links gewischt. Wird nie hochgeladen, nie optimiert, nie für Archive angeboten. Eine Kopie, die bereits in einer Cloud liegt, bleibt dort.</li><li><strong>couldn't finish uploading · trying after the rest:</strong> ein Upload, der zweimal abgebrochen wurde, ohne weiterzukommen. Wird nach allem anderen gesendet, damit eine hängende Datei die Warteschlange nicht blockiert.</li><li><strong>not in &lt;Cloud&gt;:</strong> schon einmal gesendet, und die Cloud hat sie nicht mehr.</li></ul>
+<p>Dateien in den letzten drei Zuständen werden auf der Karte des Albums rot als <strong>N files not backed up</strong> gezählt. Jede braucht eine Entscheidung — siehe <a class="xref" href="#album-resend">“Nicht gesicherte Dateien”</a>.</p>
+<h4>Do not optimize</h4>
+<p>Ein Kontrollkästchen neben jeder Datei, die noch optimiert werden könnte: Dateien, die <strong>Restore</strong> in einem beliebigen Album zurückgebracht hat, und jede Datei in voller Größe in einem <strong>Optimize</strong>-Album. Solange angekreuzt, optimiert GallerySync diese Datei nie. Die Kopfzeile des Albums zeigt <strong>N marked do not optimize</strong>. Restore kreuzt die Dateien an, die es zurückbringt.</p>
+<h4>Kopfzeilen-Zahlen</h4>
+<p>Ergänzt <strong>N not backed up by choice</strong>, wenn eine Datei im Album als *do not back up* oder *locked* markiert ist.</p>
   </div></details>
   <details class="topic"><summary>Nicht gesicherte Dateien</summary>
   <div class="topic-body" id="album-resend">
-<p>Dateien, die dieses Album gesendet hat und die nicht mehr in ihrer Cloud sind. <strong>Rescan</strong> im Tab Albums findet sie, und die Karte des Albums zählt sie in Rot als <strong>N files not backed up</strong>.</p>
-<ul><li>Jede ist ausgegraut und mit <strong>not in &lt;Cloud&gt;</strong> markiert.</li><li>Nichts wird von selbst erneut gesendet. Sie wurden vielleicht absichtlich in der Cloud gelöscht.</li><li>Nach rechts wischen wählt aus, nach links hebt die Auswahl auf. <strong>Select all</strong> und <strong>Clear</strong> gelten für alle.</li><li><strong>Resend</strong> sendet die ausgewählten Dateien erneut, an die Cloud, in die ihr Ordner jetzt geht. Es entfernt nichts.</li><li>Optimierte Dateien erscheinen nicht: Das Original in voller Größe war nur in der Cloud.</li><li>In einem Album auf <strong>Off</strong> zuerst einen Modus wählen.</li><li>Bei anderen Clouds als OneDrive prüft jedes Rescan höchstens 25 Dateien pro Album, die nicht im Ordner des Albums sind. Für den Rest erneut Rescan.</li></ul>
+<p>Dateien, die dieses Album gesendet hat und nicht mehr in ihrer Cloud sind, Dateien, deren Upload nicht abgeschlossen werden konnte, und fehlgeschlagene Dateien erscheinen hier. Die Karte des Albums zählt sie rot als <strong>N files not backed up</strong> — jede braucht eine Entscheidung. <strong>Rescan</strong> auf dem Albums-Tab fragt die Clouds erneut.</p>
+<p>Jede ist ausgegraut. Ein Wischen entscheidet:</p>
+<ul><li><strong>Nach rechts wischen:</strong> sichern.</li><li>Bei einer aus ihrer Cloud verschwundenen Datei: wird sofort gesendet (die Cloud wird zuerst gefragt).</li><li>Bei einer nach fünf Versuchen fehlgeschlagenen Datei: diese eine wird erneut versucht.</li><li>Bei einer Datei, deren Upload abgebrochen wurde: zurück in die Hauptwarteschlange.</li><li>Bei einer Datei, die du aus dem Backup gehalten hast: zurück ins Backup.</li><li><strong>Nach links wischen:</strong> als <strong>do not back up</strong> markieren. Wird nie hochgeladen, nie optimiert, nie für Archive angeboten. Eine Kopie, die bereits in einer Cloud liegt, bleibt dort.</li></ul>
+<p>Nichts wird von selbst erneut gesendet. Sie wurden vielleicht absichtlich in der Cloud gelöscht.</p>
+<h4>Back up all N</h4>
+<p>In der Kopfzeile, wenn eine Datei auf eine Entscheidung wartet. Sichert jede Datei, die eine Entscheidung braucht, außer denen, die als *do not back up* oder *✓ backed up · locked* markiert sind. Grau, wenn nichts zu tun ist.</p>
+<h4>Gut zu wissen</h4>
+<ul><li>Optimierte Dateien erscheinen hier nicht: Das Original in voller Größe war nur in der Cloud.</li><li>In einem Album auf <strong>Off</strong> zuerst einen Modus wählen.</li><li>Bei anderen Clouds als OneDrive prüft jedes Rescan höchstens 25 Dateien pro Album, die nicht im Ordner des Albums sind. Für den Rest erneut Rescan.</li></ul>
   </div></details>
   <details class="topic"><summary>Die Dateien eines Albums sortieren</summary>
   <div class="topic-body" id="album-file-sort">
 <ul><li><strong>Name:</strong> A bis Z.</li><li><strong>Date:</strong> neueste zuerst.</li><li><strong>Status:</strong> fehlgeschlagen, dann ausstehend, dann optimiert, dann gesichert.</li></ul>
 <p>Die Liste öffnet sich jedes Mal in Namensreihenfolge. Sortieren ändert nichts an den Dateien.</p>
   </div></details>
-  <details class="topic"><summary>Keep at full size</summary>
+  <details class="topic"><summary>Do not optimize</summary>
   <div class="topic-body" id="album-file-pin">
-<p>Ein Kontrollkästchen neben Dateien, die <strong>Restore</strong> zurückgebracht hat. Solange es ausgewählt ist, lässt GallerySync diese Datei in Ruhe:</p>
-<ul><li>In einem <strong>Sync</strong>-Album wird sie nicht optimiert.</li><li>In einem <strong>Archive</strong>-Album wird sie nicht entfernt.</li><li>Bei <strong>Backup</strong> oder <strong>Off</strong> ändert sich nichts, aber die Wahl wird gemerkt.</li></ul>
-<p>Restore wählt es automatisch aus. Hebe die Auswahl auf, damit die Datei wieder dem Modus ihres Albums folgt.</p>
+<p>Ein Kontrollkästchen neben jeder Datei in einem <strong>Optimize</strong>-Album, die noch verkleinert werden könnte, und neben Dateien, die <strong>Restore</strong> in einem beliebigen Album zurückgebracht hat. Solange angekreuzt, optimiert GallerySync diese Datei nie — sie bleibt auf dem Telefon in voller Größe.</p>
+<p>Die Kopfzeile des Albums zeigt <strong>N marked do not optimize</strong>. Restore kreuzt jede zurückgebrachte Datei an. Entferne das Häkchen, damit die Datei wieder dem Modus ihres Albums folgt.</p>
+<h4>Das ist nicht dasselbe wie Sperren</h4>
+<p>Wenn du eine gesicherte Datei nach links wischst, wird sie <strong>locked</strong> markiert (siehe <a class="xref" href="#album-file-status">“Dateimarkierungen und Zahlen in einem Album”</a>): wird nie wieder gesendet, nie optimiert <strong>und</strong> nie archiviert, aber weiter geprüft. *Do not optimize* stoppt nur die Optimierung.</p>
   </div></details>
   <details class="topic"><summary>Ältere Fotos und Videos in deinem Kameraordner optimieren</summary>
   <div class="topic-body" id="album-camera-optimize">
@@ -356,7 +366,7 @@
   <details class="topic"><summary>Was Restore zurückbringt</summary>
   <div class="topic-body" id="restore-overview">
 <ul><li><strong>To restore:</strong> eine optimierte Datei auf dem Telefon. Das Wiederherstellen setzt das Original in voller Größe an ihre Stelle.</li><li><strong>To download:</strong> eine Datei, die nicht mehr auf dem Telefon ist. Das Herunterladen legt sie zurück in ihr Album.</li></ul>
-<p>Wiederhergestellte Dateien erhalten <strong>Keep at full size</strong>, damit sie nicht gleich wieder optimiert oder archiviert werden. Siehe <a class="xref" href="#album-file-pin">“Keep at full size”</a>.</p>
+<p>Wiederhergestellte Dateien erhalten <strong>Do not optimize</strong>, damit sie nicht gleich wieder optimiert oder archiviert werden. Siehe <a class="xref" href="#album-file-pin">“Do not optimize”</a>.</p>
 <h4>Welche Clouds</h4>
 <ul><li><strong>OneDrive:</strong> jedes Foto und Video in deinen Backup-Ordnern, egal wer es dort abgelegt hat.</li><li><strong>Dropbox, Google Drive, pCloud, Backblaze B2, IDrive e2:</strong> Dateien, die GallerySync von diesem Telefon gesendet hat.</li><li><strong>Google Photos:</strong> kann nicht wiederhergestellt werden.</li></ul>
 <h4>Wohin die Dateien gehen</h4>
@@ -603,7 +613,7 @@
   <details class="topic"><summary>Fotos optimieren</summary>
   <div class="topic-body" id="settings-optimize-photos">
 <p>Standardmäßig <strong>Aus</strong>. Wenn an, werden Fotos in Sync-Alben durch kleinere Kopien ersetzt: etwa 2048 Pixel an der langen Kante, ungefähr ein Zehntel der Größe. Sie bleiben in deiner Galerie mit einem kleinen Wolkensymbol. Die Originale bleiben in der Cloud.</p>
-<p>Fotos, die schon klein genug sind, und Dateien mit <strong>Keep at full size</strong> bleiben unberührt. <strong>Modus</strong> legt fest, wann es läuft. Siehe <a class="xref" href="#settings-optimize-mode">“Modus: Automatisch oder Manuell”</a>.</p>
+<p>Fotos, die schon klein genug sind, und Dateien mit <strong>Do not optimize</strong> bleiben unberührt. <strong>Modus</strong> legt fest, wann es läuft. Siehe <a class="xref" href="#settings-optimize-mode">“Modus: Automatisch oder Manuell”</a>.</p>
   </div></details>
   <details class="topic"><summary>Videos optimieren</summary>
   <div class="topic-body" id="settings-optimize-video">
@@ -809,7 +819,7 @@
   </div></details>
 
   <footer>
-    GallerySync — Anleitung. Zuletzt aktualisiert: 22. November 2026.
+    GallerySync — Anleitung. Zuletzt aktualisiert: 24. November 2026.
   </footer>
 
 </main>

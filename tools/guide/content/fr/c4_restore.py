@@ -9,7 +9,7 @@ TRANSLATIONS = {
         "body": """• **To restore :** un fichier optimisé sur le téléphone. Restaurer remet l'original en taille réelle à sa place.
 • **To download :** un fichier qui n'est plus sur le téléphone. Le télécharger le remet dans son album.
 
-Les fichiers restaurés reçoivent **Keep at full size**, afin de ne pas être optimisés ou archivés de nouveau tout de suite. Voir [[album-file-pin]].
+Les fichiers restaurés reçoivent **Do not optimize**, afin de ne pas être optimisés ou archivés de nouveau tout de suite. Voir [[album-file-pin]].
 
 ## Quels Clouds
 • **OneDrive :** chaque photo et vidéo de vos dossiers de sauvegarde, quelle que soit la personne qui les y a mises.
@@ -21,7 +21,7 @@ Dans le dossier d'où ils viennent. Les fichiers placés à la racine de **DCIM*
 
 ## Sans risque
 Un fichier n'est remplacé qu'après l'arrivée complète du téléchargement et la vérification de sa taille. Si quoi que ce soit échoue, le fichier du téléphone reste tel quel.""",
-        "en_hash": "e0e4777a168b1a80",
+        "en_hash": "1ef149357e546696",
     },
     "restore-hero": {
         "title": "Albums to Restore et Files in this album",

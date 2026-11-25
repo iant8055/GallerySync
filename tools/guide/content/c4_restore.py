@@ -9,7 +9,7 @@ CHAPTER = Chapter(
             • **To restore:** an optimized file on the phone. Restoring puts the full-size original back in its place.
             • **To download:** a file no longer on the phone. Downloading puts it back in its album.
 
-            Restored files get **Keep at full size**, so they are not optimized or archived again straight away. See [[album-file-pin]].
+            Restored files get **Do not optimize**, so they are not optimized or archived again straight away. See [[album-file-pin]].
 
             ## Which Clouds
             • **OneDrive:** every photo and video in your backup folders, whoever put them there.

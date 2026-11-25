@@ -9,7 +9,7 @@ TRANSLATIONS = {
         "body": """• **To restore:** eine optimierte Datei auf dem Telefon. Das Wiederherstellen setzt das Original in voller Größe an ihre Stelle.
 • **To download:** eine Datei, die nicht mehr auf dem Telefon ist. Das Herunterladen legt sie zurück in ihr Album.
 
-Wiederhergestellte Dateien erhalten **Keep at full size**, damit sie nicht gleich wieder optimiert oder archiviert werden. Siehe [[album-file-pin]].
+Wiederhergestellte Dateien erhalten **Do not optimize**, damit sie nicht gleich wieder optimiert oder archiviert werden. Siehe [[album-file-pin]].
 
 ## Welche Clouds
 • **OneDrive:** jedes Foto und Video in deinen Backup-Ordnern, egal wer es dort abgelegt hat.
@@ -21,7 +21,7 @@ Zurück in den Ordner, aus dem sie kamen. Dateien direkt oben in **DCIM**, **Pic
 
 ## Gefahrlos ausprobieren
 Eine Datei wird erst ersetzt, nachdem der vollständige Download angekommen ist und seine Größe stimmt. Wenn etwas fehlschlägt, bleibt die Datei auf dem Telefon, wie sie war.""",
-        "en_hash": "e0e4777a168b1a80",
+        "en_hash": "1ef149357e546696",
     },
     "restore-hero": {
         "title": "Albums to Restore and Files in this album",
