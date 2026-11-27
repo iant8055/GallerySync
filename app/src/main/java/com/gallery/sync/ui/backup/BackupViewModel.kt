@@ -636,6 +636,18 @@ class BackupViewModel @Inject constructor(
     private val _state = MutableStateFlow(BackupUiState())
     val state: StateFlow<BackupUiState> = _state.asStateFlow()
 
+    /**
+     * The Albums tab's mode filter (null is All Albums). Held here rather than in the screen so it survives leaving
+     * the tab and coming back (Ian, 27 Nov 2026); this view model lives as long as the activity. Not stored: a fresh
+     * launch opens on All Albums.
+     */
+    private val _modeFilter = MutableStateFlow<AlbumMode?>(null)
+    val modeFilter: StateFlow<AlbumMode?> = _modeFilter.asStateFlow()
+
+    fun setModeFilter(mode: AlbumMode?) {
+        _modeFilter.value = mode
+    }
+
     init {
         refresh()
         observeManualRun()

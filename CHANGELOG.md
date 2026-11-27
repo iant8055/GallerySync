@@ -10,6 +10,9 @@ Every change since version 26 (0.3.25), the last build the Closed Testing group 
 - A piece refused part-way through a file now asks OneDrive how much it holds and carries on from there (up to three times in a row). If OneDrive cannot say, the upload stops for this run and the next run resumes it; it never starts again from 0 because of a refused piece.
 - The error code of any refused piece is now logged.
 
+**Albums tab keeps its mode filter** (Ian, 27 Nov 2026)
+- Backup, Optimize, Archive or Off stays selected after visiting another tab, instead of going back to All Albums. A fresh launch still opens on All Albums.
+
 ## Version 42 (0.3.41) — 25 Nov 2026, uploaded
 
 **Restore: only your backup folder, and always your own files** (Ian, 24-25 Nov 2026)

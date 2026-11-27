@@ -314,8 +314,9 @@ private fun AlbumList(
 ) {
     val context = LocalContext.current
 
-    // Hoisted to the screen, because the hero sets it and the list below obeys it.
-    var modeFilter by rememberSaveable { mutableStateOf<AlbumMode?>(null) }
+    // Hoisted to the screen, because the hero sets it and the list below obeys it. Held in the view model so leaving
+    // the tab does not put it back to All Albums (Ian, 27 Nov 2026).
+    val modeFilter by viewModel.modeFilter.collectAsStateWithLifecycle()
     // Show new Albums is its own view, not the Off filter (Ian, 26 Sept 2026). It used to set the mode filter to
     // Off, which re-sorted the whole tab, rewrote the summary at the top, and showed every Off album rather than
     // the new ones. This leaves the mode filter and the summary alone.
@@ -343,7 +344,7 @@ private fun AlbumList(
                     onSelect = { tapped ->
                         // Tapping the active mode again clears it, so every button is its own way
                         // out; All Albums passes null and clears it outright.
-                        modeFilter = if (tapped != null && modeFilter == tapped) null else tapped
+                        viewModel.setModeFilter(if (tapped != null && modeFilter == tapped) null else tapped)
                         showNewOnly = false
                     }
                 )
