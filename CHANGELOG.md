@@ -3,6 +3,13 @@
 Every change since version 26 (0.3.25), the last build the Closed Testing group had. The short notes Play shows to users
 (500 characters per language) are in `release-notes/`; this file is the full record.
 
+## Next version — not built yet
+
+**A big upload no longer goes back to 0 after a restart** (Fold 8, 26 Nov 2026)
+- An 8.3 GB video resumed at 79% after Android's ten-minute stop, OneDrive refused the next piece (409), and the app read that as "a file with this name is already there": it replaced its own placeholder and started again from 0, throwing away 6.6 GB.
+- A piece refused part-way through a file now asks OneDrive how much it holds and carries on from there (up to three times in a row). If OneDrive cannot say, the upload stops for this run and the next run resumes it; it never starts again from 0 because of a refused piece.
+- The error code of any refused piece is now logged.
+
 ## Version 42 (0.3.41) — 25 Nov 2026, uploaded
 
 **Restore: only your backup folder, and always your own files** (Ian, 24-25 Nov 2026)

@@ -22,7 +22,12 @@ sealed interface UploadOutcome {
 
     data class Success(val item: UploadedItemDto) : UploadOutcome
 
-    data class HttpFailure(val code: Int, val body: String?) : UploadOutcome
+    /**
+     * [midUpload]: the failure came from a chunk before the last, so it cannot be a name clash (with `fail`, Graph only
+     * refuses a taken name when the session is created or the last chunk commits). Such a 409 must never reach the
+     * name-clash handling, which would replace the upload's own placeholder and start again from byte zero.
+     */
+    data class HttpFailure(val code: Int, val body: String?, val midUpload: Boolean = false) : UploadOutcome
 
     /**
      * The local file read as zero bytes, so nothing was sent.
@@ -102,7 +107,7 @@ class ChunkedUploader @Inject constructor(
         val first = attempt(
             source, remotePath, total, onProgress, existingSession, onSessionCreated, NameClash.FAIL
         )
-        if (first !is UploadOutcome.HttpFailure || first.code != HTTP_CONFLICT) return first
+        if (first !is UploadOutcome.HttpFailure || first.code != HTTP_CONFLICT || first.midUpload) return first
 
         return whenTheNameIsTaken(source, remotePath, total, onProgress, onSessionCreated)
     }
@@ -295,6 +300,7 @@ class ChunkedUploader @Inject constructor(
         // Uploads run one at a time, so this is the only one. The request body is written before uploadChunk
         // returns, so the next read cannot overwrite bytes still being sent.
         val buffer = ByteArray(minOf(CHUNK_SIZE_BYTES.toLong(), total).toInt())
+        var realigned = 0
         source.open().use { reader ->
             while (offset < total) {
                 // Cooperative cancellation: a stopped worker must not keep pushing bytes.
@@ -317,6 +323,7 @@ class ChunkedUploader @Inject constructor(
                         // a hole in the file that Graph would happily assemble anyway.
                         val accepted = decode<ChunkAcceptedDto>(response)
                         offset = nextOffsetFrom(accepted?.nextExpectedRanges) ?: (offset + size)
+                        realigned = 0
                         onProgress(offset, total)
                     }
 
@@ -325,10 +332,36 @@ class ChunkedUploader @Inject constructor(
                         return UploadOutcome.Success(decode<UploadedItemDto>(response) ?: UploadedItemDto())
                     }
 
-                    else -> return UploadOutcome.HttpFailure(
-                        response.code(),
-                        response.errorBody()?.string()
-                    )
+                    // A refused chunk before the last one. Fold 8, 26 Nov 2026: an 8.3 GB video resumed at 79% right
+                    // after Android's ten-minute stop, the next chunk was answered 409 within two seconds, and that
+                    // 409 was read as "the name is taken": the placeholder was refilled from byte zero and 6.6 GB
+                    // thrown away. Mid-file a 409 or 416 means Graph's idea of the next byte differs from ours (most
+                    // likely the stopped run's last chunk landing late), so ask the session where it is and carry on.
+                    offset + size < total -> {
+                        val code = response.code()
+                        val body = response.errorBody()?.string()
+                        Logger.w(TAG, "${source.displayName}: chunk at $offset refused (HTTP $code)")
+                        val at = if ((code == HTTP_CONFLICT || code == HTTP_RANGE_NOT_SATISFIABLE) &&
+                            realigned < MAX_REALIGNS
+                        ) {
+                            resumeOffsetOf(ResumableSession(uploadUrl, null), total)
+                        } else {
+                            null
+                        }
+                        if (at == null) {
+                            // The session is kept by the caller, so the next run resumes it rather than starting over.
+                            return UploadOutcome.HttpFailure(code, body, midUpload = true)
+                        }
+                        realigned++
+                        Logger.i(TAG, "${source.displayName}: the session expects byte $at; continuing from there")
+                        offset = at
+                        onProgress(offset, total)
+                    }
+
+                    else -> {
+                        Logger.w(TAG, "${source.displayName}: last chunk refused (HTTP ${response.code()})")
+                        return UploadOutcome.HttpFailure(response.code(), response.errorBody()?.string())
+                    }
                 }
             }
         }
@@ -396,6 +429,10 @@ class ChunkedUploader @Inject constructor(
         private const val HTTP_ACCEPTED = 202
         private const val HTTP_CONFLICT = 409
         private const val HTTP_NOT_FOUND = 404
+        private const val HTTP_RANGE_NOT_SATISFIABLE = 416
+
+        /** Refused chunks in a row that are answered by asking the session where it is, before giving up the run. */
+        private const val MAX_REALIGNS = 3
 
         /**
          * Graph requires every chunk except the last to be a multiple of 320 KiB and rejects

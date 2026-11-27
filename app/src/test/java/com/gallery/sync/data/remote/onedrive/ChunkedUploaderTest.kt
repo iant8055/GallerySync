@@ -502,6 +502,69 @@ class ChunkedUploaderTest {
         )
     }
 
+    // ---------- a chunk refused part-way through ----------
+    //
+    // Fold 8, 26 Nov 2026: an 8.3 GB video resumed at 79% after Android's ten-minute stop, the next chunk came back
+    // 409, and that was read as a name clash: the upload's own placeholder was refilled from byte zero.
+
+    @Test
+    fun `a 409 on a chunk before the last asks the session where it is and carries on`() = runTest {
+        val chunk = ChunkedUploader.CHUNK_SIZE_BYTES.toLong()
+        val size = chunk * 3
+        val sessionUrl = server.url("/session/live").toString()
+        server.enqueue(jsonResponse(200, """{"nextExpectedRanges":["$chunk-"]}"""))   // resume status
+        server.enqueue(conflict())                                                     // chunk 2 refused
+        server.enqueue(jsonResponse(200, """{"nextExpectedRanges":["${chunk * 2}-"]}"""))  // status again
+        server.enqueue(jsonResponse(201, """{"id":"V1","name":"big.mp4","size":$size}"""))  // chunk 3 commits
+
+        val outcome = uploader.upload(
+            FileUploadSource(fileOfSize("big.mp4", size)),
+            "DCIM/Camera",
+            existingSession = ResumableSession(sessionUrl, null)
+        )
+
+        assertEquals("V1", (outcome as UploadOutcome.Success).item.id)
+        val requests = allRequests()
+        assertEquals(listOf("GET", "PUT", "GET", "PUT"), requests.map { it.method })
+        assertTrue("never asks what holds the name", requests.all { it.path!!.startsWith("/session/live") })
+        assertEquals("bytes ${chunk * 2}-${size - 1}/$size", requests[3].getHeader("Content-Range"))
+    }
+
+    @Test
+    fun `a mid-file 409 on a dead session is a plain failure, never a name clash`() = runTest {
+        val chunk = ChunkedUploader.CHUNK_SIZE_BYTES.toLong()
+        val size = chunk * 3
+        server.enqueue(jsonResponse(200, """{"uploadUrl":"${server.url("/session")}"}"""))
+        server.enqueue(conflict())                       // first chunk refused
+        server.enqueue(MockResponse().setResponseCode(404))  // the session is gone
+
+        val outcome = uploader.upload(fileOfSize("big.mp4", size), "DCIM/Camera")
+
+        val failure = outcome as UploadOutcome.HttpFailure
+        assertEquals(409, failure.code)
+        assertTrue(failure.midUpload)
+        val requests = allRequests()
+        assertEquals("no lookup of the name and no second session", 3, requests.size)
+        assertTrue(requests.map { it.body.readUtf8() }.none { it.contains("replace") })
+    }
+
+    @Test
+    fun `refused chunks in a row give up after a few tries rather than looping`() = runTest {
+        val chunk = ChunkedUploader.CHUNK_SIZE_BYTES.toLong()
+        val size = chunk * 3
+        server.enqueue(jsonResponse(200, """{"uploadUrl":"${server.url("/session")}"}"""))
+        repeat(4) {
+            server.enqueue(conflict())
+            server.enqueue(jsonResponse(200, """{"nextExpectedRanges":["0-"]}"""))
+        }
+
+        val outcome = uploader.upload(fileOfSize("big.mp4", size), "DCIM/Camera")
+
+        assertTrue((outcome as UploadOutcome.HttpFailure).midUpload)
+        // session + (chunk + status) x 3 + the fourth refused chunk
+        assertEquals(8, server.requestCount)
+    }
+
     private fun jsonResponse(code: Int, body: String) = MockResponse()
         .setResponseCode(code)
         .setHeader("Content-Type", "application/json")
