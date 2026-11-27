@@ -1,0 +1,28 @@
+<en-US>
+• A very large upload no longer starts again from zero when OneDrive refuses a piece part-way through; it carries on from where OneDrive got to.
+• The Albums tab keeps the mode you picked (Backup, Optimize, Archive or Off) when you visit another tab.
+</en-US>
+<es-ES>
+• Una subida muy grande ya no vuelve a empezar desde cero si OneDrive rechaza una parte a mitad de camino; continúa desde donde llegó OneDrive.
+• La pestaña Álbumes conserva el modo elegido (Backup, Optimize, Archive u Off) al visitar otra pestaña.
+</es-ES>
+<pt-BR>
+• Um envio muito grande não recomeça mais do zero quando o OneDrive recusa uma parte no meio do caminho; ele continua de onde o OneDrive parou.
+• A aba Álbuns mantém o modo escolhido (Backup, Optimize, Archive ou Off) ao visitar outra aba.
+</pt-BR>
+<fr-FR>
+• Un très gros envoi ne recommence plus à zéro quand OneDrive refuse un morceau en cours de route ; il reprend là où OneDrive en était.
+• L'onglet Albums garde le mode choisi (Backup, Optimize, Archive ou Off) quand vous passez à un autre onglet.
+</fr-FR>
+<de-DE>
+• Ein sehr großer Upload beginnt nicht mehr von vorn, wenn OneDrive mittendrin ein Teilstück ablehnt; er macht dort weiter, wo OneDrive steht.
+• Der Tab Alben behält den gewählten Modus (Backup, Optimize, Archive oder Off), wenn Sie einen anderen Tab besuchen.
+</de-DE>
+<ja-JP>
+• 非常に大きなアップロードの途中で OneDrive が一部を拒否しても、最初からやり直さず、OneDrive が受け取った位置から続けます。
+• アルバムタブは、別のタブに移動しても選んだモード（Backup、Optimize、Archive、Off）を保持します。
+</ja-JP>
+<hi-IN>
+• बहुत बड़ा अपलोड अब बीच में OneDrive के किसी हिस्से को अस्वीकार करने पर शून्य से दोबारा शुरू नहीं होता; वह वहीं से जारी रहता है जहाँ तक OneDrive पहुँचा था।
+• Albums टैब दूसरे टैब पर जाने के बाद भी चुना हुआ मोड (Backup, Optimize, Archive या Off) बनाए रखता है।
+</hi-IN>
